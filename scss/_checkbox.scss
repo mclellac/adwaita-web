@@ -1,0 +1,56 @@
+// scss/_checkbox.scss
+@use 'variables';
+
+.adw-checkbox {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none; // Prevent text selection
+
+  input[type="checkbox"] {
+    position: absolute; // Hide the default checkbox
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .adw-checkbox-indicator {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+
+      // Custom checkmark (using a pseudo-element)
+      &:before {
+        content: "";
+        display: block;
+        width: 4px;
+        height: 8px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg) translate(-50%, -50%); // Position and rotate
+          position: absolute;
+        top: 45%;
+        left: 50%;
+      }
+    }
+      &:disabled + .adw-checkbox-indicator{
+          opacity: 0.5;
+          pointer-events: none;
+            background-color: var(--view-bg-color);
+            border-color: var(--button-border-color);
+      }
+  }
+
+  .adw-checkbox-indicator {
+    width: 18px;
+    height: 18px;
+    border: var(--adw-border-width) solid var(--button-border-color);
+    border-radius: var(--adw-border-radius);
+    background-color: var(--view-bg-color);
+    margin-right: var(--adw-padding-medium);
+    position: relative; // For positioning the checkmark
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .adw-checkbox-label {
+    color: var(--view-fg-color);
+  }
+}

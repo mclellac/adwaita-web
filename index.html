@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adwaita Web</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app"></div>
+
+    <script src="js/components.js"></script>
+    <script>
+        // --- Header Bar ---
+        const themeButton = Adw.createButton("Toggle Theme", {
+            onClick: Adw.toggleTheme,
+        });
+
+        const headerBar = Adw.createHeaderBar({
+            title: "Adwaita Widgets",
+            subtitle: "Demonstration",
+            start: [Adw.createButton("<", { href: "#" })],
+            end: [themeButton, Adw.createButton("☰", { onClick: () => alert("Menu clicked") })],
+        });
+
+        // --- Buttons ---
+        const button = Adw.createButton('Click Me!', {
+            onClick: () => Adw.createToast("Button Clicked", {timeout: 3000}),
+        });
+        const suggestedButton = Adw.createButton('Suggested', {
+            onClick: () => Adw.createToast("Suggested Button Clicked"),
+            suggested: true
+        });
+        const destructiveButton = Adw.createButton('Delete', {
+            onClick: () => Adw.createToast("Destructive Button Clicked"),
+            destructive: true,
+        });
+        const disabledButton = Adw.createButton('Disabled', {
+            disabled: true
+        });
+        const flatButton = Adw.createButton('Flat Button', {
+            onClick: () => alert('Flat Button clicked!'),
+            flat: true
+        });
+
+        // --- Entry ---
+        const entry = Adw.createEntry({
+            placeholder: 'Enter text...',
+            onInput: (e) => console.log('Input:', e.target.value),
+        });
+        const disabledEntry = Adw.createEntry({
+          placeholder: "Disabled entry...",
+          disabled: true
+        });
+
+        // --- Switch ---
+        const switchEl = Adw.createSwitch({
+          onChanged: (e) => console.log("Switch is:", e.target.checked),
+          checked: true
+        });
+        const disabledSwitchEl = Adw.createSwitch({
+            onChanged: (e) => console.log("Switch is:", e.target.checked),
+            disabled: true
+          });
+
+        // --- Labels ---
+        const label = Adw.createLabel("This is a label", {isBody: true});
+        const labelTitle1 = Adw.createLabel("Title 1", {title: 1});
+        const labelTitle2 = Adw.createLabel("Title 2", {title: 2});
+        const labelTitle3 = Adw.createLabel("Title 3", {title: 3});
+        const labelTitle4 = Adw.createLabel("Title 4", {title: 4});
+        const labelCaption = Adw.createLabel("Caption", {isCaption: true});
+
+        // --- Dialog (Example Usage) ---
+        const openDialogButton = Adw.createButton('Open Dialog', {
+          onClick: () => {
+            const dialogContent = Adw.createBox({
+              orientation: 'vertical',
+              children: [
+                Adw.createLabel("This is the dialog content."),
+                Adw.createEntry({ placeholder: "Dialog Entry" }),
+              ]
+            });
+
+            const dialog = Adw.createDialog({
+              title: "Example Dialog",
+              content: dialogContent,
+              buttons: [
+                Adw.createButton("Cancel", { onClick: () => dialog.close() }),
+                Adw.createButton("OK", { suggested: true, onClick: () => {
+                  Adw.createToast("OK clicked");
+                  dialog.close();
+                } }),
+              ]
+            });
+          }
+        });
+
+        // --- Progress Bar ---
+          const progressBar = Adw.createProgressBar({value: 50});
+          const disabledProgressBar = Adw.createProgressBar({value: 75, disabled: true});
+
+
+        // Checkbox
+        const checkbox = Adw.createCheckbox({
+            label: "Enable Feature",
+            onChanged: (e) => console.log("Checkbox:", e.target.checked),
+        });
+         const disabledCheckbox = Adw.createCheckbox({
+            label: "Disabled Checkbox",
+             disabled: true,
+            onChanged: (e) => console.log("Checkbox:", e.target.checked),
+        });
+
+        // Radio Button
+        const radio1 = Adw.createRadioButton({
+            label: "Option 1",
+            name: "radioGroup", // Same name for grouping
+            onChanged: (e) => console.log("Radio 1:", e.target.checked),
+            checked: true, // One should be checked by default
+        });
+
+        const radio2 = Adw.createRadioButton({
+            label: "Option 2",
+            name: "radioGroup",
+            onChanged: (e) => console.log("Radio 2:", e.target.checked),
+        });
+        const disabledRadio = Adw.createRadioButton({
+          label: 'Disabled Radio',
+          name: 'radioGroup2',
+          disabled: true
+        })
+
+        // List Box (Example with a few rows)
+        const listBox = Adw.createListBox({
+            children: [
+                Adw.createRow({ children: [Adw.createLabel("List Item 1")] }),
+                Adw.createRow({ children: [Adw.createLabel("List Item 2")] , activated: true}),
+                Adw.createRow({ children: [Adw.createLabel("List Item 3")] }),
+            ]
+        });
+        // --- Content Layout ---
+        const content = Adw.createBox({
+            orientation: 'vertical',
+            children: [
+              Adw.createRow({children:[labelTitle1]}),
+              Adw.createRow({children:[labelTitle2]}),
+              Adw.createRow({children:[labelTitle3]}),
+              Adw.createRow({children:[labelTitle4]}),
+              Adw.createRow({ children: [label] }),
+                Adw.createRow({children: [labelCaption]}),
+              Adw.createRow({ children: [Adw.createLabel("Entry:"), entry] }),
+              Adw.createRow({ children: [Adw.createLabel("Disabled Entry: "), disabledEntry]}),
+              Adw.createRow({ children: [Adw.createLabel("Switch: "), switchEl] }),
+              Adw.createRow({ children: [Adw.createLabel("Disabled Switch: "), disabledSwitchEl] }),
+                Adw.createRow({ children: [Adw.createLabel("Progress Bar: "), progressBar]}),
+                Adw.createRow({ children: [Adw.createLabel("Disabled Progress Bar: "), disabledProgressBar]}),
+              Adw.createRow({ children: [button] }),
+                Adw.createRow({children: [suggestedButton]}),
+              Adw.createRow({ children: [destructiveButton]}),
+              Adw.createRow({ children: [disabledButton]}),
+                Adw.createRow({children: [flatButton]}),
+                Adw.createRow({ children: [checkbox]}),
+                Adw.createRow({children: [disabledCheckbox]}),
+                Adw.createRow({ children: [Adw.createLabel("Radio Buttons:")]}), //Label Row
+              Adw.createRow({ children: [radio1, radio2, disabledRadio] }),
+                Adw.createRow({children: [listBox]}),
+                Adw.createRow({children: [openDialogButton]})
+            ],
+        });
+
+          const windowEl = Adw.createWindow({header: headerBar, content: content});
+          document.getElementById('app').appendChild(windowEl);
+    </script>
+</body>
+</html>

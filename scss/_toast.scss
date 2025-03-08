@@ -1,0 +1,29 @@
+// scss/_toast.scss
+@use 'variables';
+
+.adw-toast {
+  background-color: var(--toast-bg-color, rgba(50, 50, 50, 0.9)); // Default, with fallback
+  color: var(--toast-fg-color, white);
+  border-radius: var(--adw-border-radius);
+  padding: var(--adw-padding-medium);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); // Subtle shadow
+  min-width: 288px; // Adwaita minimum width
+  max-width: 568px; // Adwaita maximum width
+  position: fixed;  // Important for positioning
+  bottom: 24px;    // Standard bottom spacing
+  left: 50%;      // Center horizontally
+  transform: translateX(-50%); // Center horizontally
+  z-index: 1000; // Make sure it's on top
+  opacity: 0;       // Start hidden
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+  &.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0); // Show at the final position
+  }
+
+    &.fade-out{
+        opacity: 0;
+        transform: translateX(-50%) translateY(100%);
+    }
+}

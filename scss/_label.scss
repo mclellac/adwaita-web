@@ -1,0 +1,28 @@
+// scss/_label.scss
+@use 'variables';
+.adw-label{
+    color: var(--view-fg-color);
+    &.title-1{
+        font-size: 2em;
+        font-weight: bold;
+    }
+    &.title-2{
+        font-size: 1.6em;
+        font-weight: bold;
+    }
+    &.title-3{
+        font-size: 1.3em;
+        font-weight: bold;
+    }
+    &.title-4{
+        font-size: 1.1em;
+        font-weight: bold;
+    }
+    &.body{
+        font-size: 1em;
+    }
+    &.caption{
+       font-size: 0.8em;
+        color: var(--secondary-sidebar-fg-color);
+    }
+}

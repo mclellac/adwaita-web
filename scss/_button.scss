@@ -1,0 +1,71 @@
+// scss/_button.scss
+@use "variables";
+
+.adw-button {
+  display: inline-block;
+  padding: var(--adw-padding-medium) var(--adw-padding-large);
+  border: var(--adw-border-width) solid var(--button-border-color);
+  border-radius: var(--adw-border-radius);
+  background-color: var(--button-bg-color);
+  color: var(--button-fg-color);
+  cursor: pointer;
+  text-decoration: none;
+  font-size: var(--adw-font-size);
+  text-align: center;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background-color: var(--button-hover-bg-color);
+  }
+
+  &:active,
+  &.active {
+    background-color: var(--button-active-bg-color);
+  }
+
+  &.suggested-action {
+    background-color: var(--suggested-action-bg-color);
+    color: var(--suggested-action-fg-color);
+        border-color: transparent;
+    &:hover {
+      background-color: var(--suggested-action-hover-bg-color);
+    }
+     &:active {
+        background-color: var(--suggested-action-active-bg-color);
+    }
+  }
+
+    &.flat{
+        background-color: var(--button-flat-bg-color);
+        border-color: transparent;
+        &:hover{
+            background-color: var(--button-flat-hover-bg-color);
+        }
+        &:active{
+            background-color: var(--button-flat-active-bg-color);
+        }
+    }
+
+  &.destructive {
+    background-color: var(--destructive-action-bg-color);
+    color: var(--destructive-action-fg-color);
+    border-color: transparent;
+
+    &:hover {
+      background-color: var(--destructive-action-hover-bg-color);
+    }
+
+    &:active {
+      background-color: var(--destructive-action-active-bg-color);
+    }
+  }
+
+
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+      background-color: var(--button-bg-color);
+      border-color: var(--button-border-color);
+  }
+}

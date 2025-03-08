@@ -1,0 +1,56 @@
+// scss/_radio.scss
+@use 'variables';
+
+.adw-radio {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+
+  input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .adw-radio-indicator {
+      background-color: var(--view-bg-color); // Consistent with unchecked
+      border-color: var(--accent-color);
+
+      &:before {
+        content: "";
+        display: block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%; // Circular
+        background-color: var(--accent-color);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+      &:disabled + .adw-radio-indicator{
+            opacity: 0.5;
+            pointer-events: none;
+          background-color: var(--view-bg-color);
+          border-color: var(--button-border-color);
+      }
+  }
+
+  .adw-radio-indicator {
+    width: 18px;
+    height: 18px;
+    border: var(--adw-border-width) solid var(--button-border-color);
+    border-radius: 50%; // Circular
+    background-color: var(--view-bg-color);
+    margin-right: var(--adw-padding-medium);
+    position: relative;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .adw-radio-label {
+    color: var(--view-fg-color);
+  }
+}

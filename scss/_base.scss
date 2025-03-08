@@ -1,0 +1,14 @@
+// scss/_base.scss
+@use "variables";
+
+body {
+    font-family: var(--adw-font-family);
+    font-size: var(--adw-font-size);
+    color: var(--window-fg-color);       
+    background-color: var(--window-bg-color); 
+    margin: 0;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}

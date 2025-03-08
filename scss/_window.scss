@@ -1,0 +1,12 @@
+// scss/_window.scss
+@use "variables";
+
+.adw-window{
+  background-color: var(--window-bg-color);
+  border: var(--adw-border-width) solid var(--adw-border-color);
+  border-radius: var(--adw-border-radius);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  .adw-window-content{
+    padding: var(--adw-padding-large);
+  }
+}

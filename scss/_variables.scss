@@ -1,0 +1,310 @@
+// scss/_variables.scss
+
+@function RGB($r, $g, $b, $a: 1) {
+  @return rgba($r, $g, $b, $a);
+}
+
+$red_1: #f8d5d5;
+$red_2: #f3aaaa;
+$red_3: #ee8282;
+$red_4: #e85959;
+$red_5: #e33131;
+$green_1: #c5e8b0;
+$green_2: #9ed979;
+$green_3: #78ca41;
+$green_4: #52ba0a;
+$green_5: #2ba100;
+$yellow_1: #f8e5ad;
+$yellow_2: #f4d275;
+$yellow_3: #f0bf3c;
+$yellow_4: #ecb007;
+$yellow_5: #c48e05;
+$blue_1: #add8f8;
+$blue_2: #7ac4f3;
+$blue_3: #47b0ef;
+$blue_4: #3584e4;
+$blue_5: #0080e1;
+$purple_1: #e4d1f3;
+$purple_2: #d1aaf0;
+$purple_3: #be82ed;
+$purple_4: #aa59e8;
+$purple_5: #9130e3;
+$brown_1: #d8c8c1;
+$brown_2: #c4a89f;
+$brown_3: #b0887d;
+$brown_4: #9d695b;
+$brown_5: #814d3f;
+$gray_1: #f5f5f5;
+$gray_2: #eeeeee;
+$gray_3: #dddddd;
+$gray_4: #cccccc;
+$gray_5: #888888;
+$gray_6: #444444;
+$gray_7: #1e1e1e;
+
+@mixin light-theme {
+  --destructive-bg-color: #{$red_4};
+  --destructive-fg-color: white;
+  --success-bg-color: #{$green_4};
+  --success-fg-color: white;
+  --warning-bg-color: #{$yellow_5};
+  --warning-fg-color: #{RGB(0, 0, 0, 0.8)};
+  --error-bg-color: #{$red_4};
+  --error-fg-color: white;
+  --accent-bg-color: #{$blue_4};
+  --accent-fg-color: white;
+  --window-bg-color: #{$gray_1};
+  --window-fg-color: #{RGB(0, 0, 6, 0.8)};
+  --view-bg-color: white;
+  --view-fg-color: #{RGB(0, 0, 6, 0.8)};
+  --headerbar-bg-color: white;
+  --headerbar-fg-color: #{$gray_6};
+  --headerbar-border-color: rgba(0, 0, 0, 0.1);
+  --headerbar-shade-color: rgba(0, 0, 0, 0.05);
+  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.1);
+  --sidebar-bg-color: #{$gray_2};
+  --sidebar-fg-color: #{$gray_6};
+  --sidebar-backdrop-color: #f2f2f4;
+  --sidebar-shade-color: rgba(0, 0, 0, 0.07);
+  --sidebar-border-color: rgba(0, 0, 0, 0.07);
+  --secondary-sidebar-bg-color: #{$gray_1};
+  --secondary-sidebar-fg-color: #{$gray_6};
+  --secondary-sidebar-backdrop-color: #f6f6fa;
+  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.07);
+  --secondary-sidebar-border-color: rgba(0, 0, 6, 0.07);
+  --card-bg-color: white;
+  --card-fg-color: #{RGB(0, 0, 6, 0.8)};
+  --card-shade-color: rgba(0, 0, 0, 0.07);
+  --dialog-bg-color: #fafafb;
+  --dialog-fg-color: #{RGB(0, 0, 6, 0.8)};
+  --popover-bg-color: #ffffff;
+  --popover-fg-color: #{RGB(0, 0, 6, 0.8)};
+  --popover-shade-color: rgba(0, 0, 0, 0.07);
+  --thumbnail-bg-color: #ffffff;
+  --thumbnail-fg-color: #{RGB(0, 0, 6, 0.8)};
+  --shade-color: rgba(0, 0, 0, 0.07);
+  --scrollbar-outline-color: white;
+  --headerbar-backdrop-color: var(--window-bg-color);
+  --standalone-color-oklab: "min(l, 0.6) a b";
+  --active-toggle-bg-color: #{$gray_3};
+  --active-toggle-fg-color: white;
+  --overview-bg-color: #f3f3f5;
+  --overview-fg-color: #{RGB(0, 0, 6, 0.8)};
+  --accent-color: oklab(from var(--accent-bg-color) #{var(--standalone-color-oklab)});
+  --destructive-color: oklab(from var(--destructive-bg-color) #{var(--standalone-color-oklab)});
+  --success-color: oklab(from var(--success-bg-color) #{var(--standalone-color-oklab)});
+  --warning-color: oklab(from var(--warning-bg-color) #{var(--standalone-color-oklab)});
+  --error-color: oklab(from var(--error-bg-color) #{var(--standalone-color-oklab)});
+
+  --button-border-color: rgba(0, 0, 0, 0.2);
+  --button-bg-color: rgba(0, 0, 0, 0.05);
+  --button-fg-color: var(--view-fg-color);
+  --button-hover-bg-color: rgba(0,0,0, 0.1);
+  --button-active-bg-color: rgba(0,0,0, 0.15);
+  --button-flat-bg-color: transparent;
+  --button-flat-hover-bg-color: rgba(0, 0, 0, 0.05);
+  --button-flat-active-bg-color: rgba(0, 0, 0, 0.1);
+    --suggested-action-bg-color: var(--accent-bg-color);
+  --suggested-action-fg-color: var(--accent-fg-color);
+  --suggested-action-hover-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.9);
+ --suggested-action-active-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.8);
+  --destructive-action-bg-color: var(--destructive-bg-color);
+  --destructive-action-fg-color: var(--destructive-fg-color);
+  --destructive-action-hover-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.9);
+  --destructive-action-active-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.8);
+
+  @define-color destructive_bg_color var(--destructive-bg-color);
+  @define-color destructive_fg_color var(--destructive-fg-color);
+  @define-color success_bg_color var(--success-bg-color);
+  @define-color success_fg_color var(--success-fg-color);
+  @define-color warning_bg_color var(--warning-bg-color);
+  @define-color warning_fg_color var(--warning-fg-color);
+  @define-color error_bg_color var(--error-bg-color);
+  @define-color error_fg_color var(--error-fg-color);
+  @define-color accent_bg_color var(--accent-bg-color);
+  @define-color accent_fg_color var(--accent-fg-color);
+  @define-color window_bg_color var(--window-bg-color);
+  @define-color window_fg_color var(--window-fg-color);
+  @define-color view_bg_color var(--view-bg-color);
+  @define-color view_fg_color var(--view-fg-color);
+  @define-color headerbar_bg_color var(--headerbar-bg-color);
+  @define-color headerbar_fg_color var(--headerbar-fg-color);
+  @define-color headerbar_border_color var(--headerbar-border-color);
+  @define-color headerbar_backdrop_color var(--headerbar-backdrop-color);
+  @define-color headerbar_shade_color var(--headerbar-shade-color);
+  @define-color headerbar_darker_shade_color var(--headerbar-darker-shade-color);
+  @define-color sidebar_bg_color var(--sidebar-bg-color);
+  @define-color sidebar_fg_color var(--sidebar-fg-color);
+  @define-color sidebar_backdrop_color var(--sidebar-backdrop-color);
+  @define-color sidebar_shade_color var(--sidebar-shade-color);
+  @define-color sidebar_border_color var(--sidebar-border-color);
+  @define-color secondary_sidebar_bg_color var(--secondary-sidebar-bg-color);
+  @define-color secondary_sidebar_fg_color var(--secondary-sidebar-fg-color);
+  @define-color secondary_sidebar_backdrop_color var(--secondary-sidebar-backdrop-color);
+  @define-color secondary_sidebar_shade_color var(--secondary-sidebar-shade-color);
+  @define-color secondary_sidebar_border_color var(--secondary-sidebar-border-color);
+  @define-color card_bg_color var(--card-bg-color);
+  @define-color card_fg_color var(--card-fg-color);
+  @define-color card_shade_color var(--card-shade-color);
+  @define-color dialog_bg_color var(--dialog-bg-color);
+  @define-color dialog_fg_color var(--dialog-fg-color);
+  @define-color popover_bg_color var(--popover-bg-color);
+  @define-color popover_fg_color var(--popover-fg-color);
+  @define-color popover_shade_color var(--popover-shade-color);
+  @define-color thumbnail_bg_color var(--thumbnail-bg-color);
+  @define-color thumbnail_fg_color var(--thumbnail-fg-color);
+  @define-color shade_color var(--shade-color);
+  @define-color scrollbar_outline_color var(--scrollbar-outline-color);
+}
+
+@mixin dark-theme {
+  --destructive-bg-color: #{$red_4};
+  --destructive-fg-color: white;
+  --success-bg-color: #{$green_5};
+  --success-fg-color: white;
+  --warning-bg-color: #cd9309;
+  --warning-fg-color: #{RGB(0, 0, 0, 0.8)};
+  --error-bg-color: #{$red_4};
+  --error-fg-color: white;
+  --accent-bg-color: #458ee6; // Adjusted Blue
+  --accent-fg-color: white;
+  --window-bg-color: #242424; // Darker background
+  --window-fg-color: white;
+  --view-bg-color: #1e1e1e; // Darker view background
+  --view-fg-color: white;
+  --headerbar-bg-color: #2f2f2f; // Darker headerbar
+  --headerbar-fg-color: white;
+  --headerbar-border-color: rgba(255, 255, 255, 0.1);
+  --headerbar-shade-color: rgba(0, 0, 0, 0.36); // Consistent with Adwaita
+  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.72); // Darker, consistent
+  --sidebar-bg-color: #292929; // Darker sidebar
+  --sidebar-fg-color: white;
+  --sidebar-backdrop-color: #28282c;
+  --sidebar-shade-color: rgba(0, 0, 0, 0.25);
+  --sidebar-border-color: rgba(0, 0, 0, 0.36);
+  --secondary-sidebar-bg-color: #28282c;
+  --secondary-sidebar-fg-color: white;
+  --secondary-sidebar-backdrop-color: #252529;
+  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.25);
+  --secondary-sidebar-border-color: rgba(0, 0, 0, 0.36);
+  --card-bg-color: rgba(255, 255, 255, 0.08);
+  --card-fg-color: white;
+  --card-shade-color: rgba(0, 0, 0, 0.36);
+  --dialog-bg-color: #383838; // Darker dialog
+  --dialog-fg-color: white;
+  --popover-bg-color: #383838;
+  --popover-fg-color: white;
+  --popover-shade-color: rgba(0, 0, 0, 0.25);
+  --thumbnail-bg-color: #39393d;
+  --thumbnail-fg-color: white;
+  --shade-color: rgba(0, 0, 0, 0.25);
+  --scrollbar-outline-color: rgba(0, 0, 0, 0.5);  // Darker outline
+  --headerbar-backdrop-color: var(--window-bg-color);
+  --standalone-color-oklab: "max(l, 0.85) a b";
+  --active-toggle-bg-color: rgba(255, 255, 255, 0.2);
+  --active-toggle-fg-color: #ffffff;
+  --overview-bg-color: #28282c;
+  --overview-fg-color: #ffffff;
+  --accent-color: oklab(from var(--accent-bg-color) #{var(--standalone-color-oklab)});
+  --destructive-color: oklab(from var(--destructive-bg-color) #{var(--standalone-color-oklab)});
+  --success-color: oklab(from var(--success-bg-color) #{var(--standalone-color-oklab)});
+  --warning-color: oklab(from var(--warning-bg-color) #{var(--standalone-color-oklab)});
+  --error-color: oklab(from var(--error-bg-color) #{var(--standalone-color-oklab)});
+
+    --button-border-color: rgba(255,255,255, 0.2);
+  --button-bg-color: rgba(255,255,255, 0.1);
+    --button-fg-color: var(--view-fg-color);
+  --button-hover-bg-color: rgba(255,255,255, 0.2);
+    --button-active-bg-color: rgba(255,255,255, 0.3);
+    --button-flat-bg-color: transparent;
+  --button-flat-hover-bg-color: rgba(255, 255, 255, 0.1);
+  --button-flat-active-bg-color: rgba(255, 255, 255, 0.2);
+    --suggested-action-bg-color: var(--accent-bg-color);
+  --suggested-action-fg-color: var(--accent-fg-color);
+  --suggested-action-hover-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.9);
+ --suggested-action-active-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.8);
+  --destructive-action-bg-color: var(--destructive-bg-color);
+  --destructive-action-fg-color: var(--destructive-fg-color);
+  --destructive-action-hover-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.9);
+  --destructive-action-active-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.8);
+
+  @define-color destructive_bg_color var(--destructive-bg-color);
+  @define-color destructive_fg_color var(--destructive-fg-color);
+  @define-color success_bg_color var(--success-bg-color);
+  @define-color success_fg_color var(--success-fg-color);
+  @define-color warning_bg_color var(--warning-bg-color);
+  @define-color warning_fg_color var(--warning-fg-color);
+  @define-color error_bg_color var(--error-bg-color);
+  @define-color error_fg_color var(--error-fg-color);
+  @define-color accent_bg_color var(--accent-bg-color);
+  @define-color accent_fg_color var(--accent-fg-color);
+  @define-color window_bg_color var(--window-bg-color);
+  @define-color window_fg_color var(--window-fg-color);
+  @define-color view_bg_color var(--view-bg-color);
+  @define-color view_fg_color var(--view-fg-color);
+  @define-color headerbar_bg_color var(--headerbar-bg-color);
+  @define-color headerbar_fg_color var(--headerbar-fg-color);
+  @define-color headerbar_border_color var(--headerbar-border-color);
+  @define-color headerbar_backdrop_color var(--headerbar-backdrop-color);
+  @define-color headerbar_shade_color var(--headerbar-shade-color);
+  @define-color headerbar_darker_shade_color var(--headerbar-darker-shade-color);
+  @define-color sidebar_bg_color var(--sidebar-bg-color);
+  @define-color sidebar_fg_color var(--sidebar-fg-color);
+  @define-color sidebar_backdrop_color var(--sidebar-backdrop-color);
+  @define-color sidebar_shade_color var(--sidebar-shade-color);
+  @define-color sidebar_border_color var(--sidebar-border-color);
+  @define-color secondary_sidebar_bg_color var(--secondary-sidebar-bg-color);
+  @define-color secondary_sidebar_fg_color var(--secondary-sidebar-fg-color);
+  @define-color secondary_sidebar_backdrop_color var(--secondary-sidebar-backdrop-color);
+  @define-color secondary_sidebar_shade_color var(--secondary-sidebar-shade-color);
+  @define-color secondary_sidebar_border_color var(--secondary-sidebar-border-color);
+  @define-color card_bg_color var(--card-bg-color);
+  @define-color card_fg_color var(--card-fg-color);
+  @define-color card_shade_color var(--card-shade-color);
+  @define-color dialog_bg_color var(--dialog-bg-color);
+  @define-color dialog_fg_color var(--dialog-fg-color);
+  @define-color popover_bg_color var(--popover-bg-color);
+  @define-color popover_fg_color var(--popover-fg-color);
+  @define-color popover_shade_color var(--popover-shade-color);
+  @define-color thumbnail_bg_color var(--thumbnail-bg-color);
+  @define-color thumbnail_fg_color var(--thumbnail-fg-color);
+  @define-color shade_color var(--shade-color);
+  @define-color scrollbar_outline_color var(--scrollbar-outline-color);
+}
+
+:root {
+  @include dark-theme;
+}
+
+body.light-theme {
+  @include light-theme;
+}
+
+:root{
+  --adw-font-family: 'Cantarell', sans-serif;
+  --adw-font-size: 14px;
+  --adw-border-radius: 5px;
+  --adw-border-width: 1px;
+  --adw-padding-small: 5px;
+  --adw-padding-medium: 10px;
+  --adw-padding-large: 20px;
+}
+
+@mixin define-oklab-colors() {
+  :root{
+    --accent-color: #{oklab(from var(--accent-bg-color) max(l, 0.85) a b)};
+    --destructive-color: #{oklab(from var(--destructive-bg-color) max(l, 0.85) a b)};
+    --success-color: #{oklab(from var(--success-bg-color) max(l, 0.85) a b)};
+    --warning-color: #{oklab(from var(--warning-bg-color) max(l, 0.85) a b)};
+    --error-color: #{oklab(from var(--error-bg-color) max(l, 0.85) a b)};
+  }
+  body.light-theme{
+    --accent-color: #{oklab(from var(--accent-bg-color) min(l, 0.5) a b)};
+    --destructive-color: #{oklab(from var(--destructive-bg-color) min(l, 0.5) a b)};
+    --success-color: #{oklab(from var(--success-bg-color) min(l, 0.5) a b)};
+    --warning-color: #{oklab(from var(--warning-bg-color) min(l, 0.5) a b)};
+    --error-color: #{oklab(from var(--error-bg-color) min(l, 0.5) a b)};
+  }
+}
+
+@include define-oklab-colors();

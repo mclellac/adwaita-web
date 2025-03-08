@@ -1,0 +1,20 @@
+// scss/_list-box.scss
+
+@use 'variables';
+
+.adw-list-box{
+    background-color: var(--view-bg-color);
+    border: var(--adw-border-width) solid var(--button-border-color);
+    border-radius: var(--adw-border-radius);
+    .adw-list-row{
+        padding: var(--adw-padding-medium);
+        border-bottom: var(--adw-border-width) solid var(--button-border-color);
+        &:last-child{
+            border-bottom: none;
+        }
+        &.activated{
+            background-color: var(--accent-color);
+            color: var(--accent-fg-color);
+        }
+    }
+}

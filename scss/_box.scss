@@ -1,0 +1,27 @@
+// scss/_box.scss
+@use "variables";
+
+.adw-box {
+    display: flex;
+
+    &.adw-box-vertical {
+        flex-direction: column;
+    }
+}
+
+.adw-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--adw-padding-medium);
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+     > * {
+      margin-right: var(--adw-padding-small);
+      &:last-child{
+        margin-right: 0;
+      }
+    }
+}

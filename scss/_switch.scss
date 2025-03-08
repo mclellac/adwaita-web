@@ -1,0 +1,56 @@
+// scss/_switch.scss
+@use 'variables';
+
+.adw-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .adw-switch-slider {
+      background-color: var(--accent-color);
+    }
+
+    &:checked + .adw-switch-slider:before {
+      transform: translateX(20px);
+    }
+
+    &:disabled + .adw-switch-slider {
+      opacity: 0.5;
+      pointer-events: none;
+        background-color: var(--view-bg-color); // Use consistent disabled color
+        &:before{
+           background-color: var(--active-toggle-fg-color); // Consistent slider
+        }
+    }
+  }
+
+  .adw-switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--active-toggle-bg-color); // Use the variable
+    border-radius: 12px; // Half of height for pill shape
+    transition: 0.2s;
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: var(--active-toggle-fg-color); // Use the variable
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+  }
+}

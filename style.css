@@ -1,0 +1,499 @@
+:root {
+  --destructive-bg-color: #e85959;
+  --destructive-fg-color: white;
+  --success-bg-color: #2ba100;
+  --success-fg-color: white;
+  --warning-bg-color: #cd9309;
+  --warning-fg-color: rgba(0, 0, 0, 0.8);
+  --error-bg-color: #e85959;
+  --error-fg-color: white;
+  --accent-bg-color: #458ee6;
+  --accent-fg-color: white;
+  --window-bg-color: #242424;
+  --window-fg-color: white;
+  --view-bg-color: #1e1e1e;
+  --view-fg-color: white;
+  --headerbar-bg-color: #2f2f2f;
+  --headerbar-fg-color: white;
+  --headerbar-border-color: rgba(255, 255, 255, 0.1);
+  --headerbar-shade-color: rgba(0, 0, 0, 0.36);
+  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.72);
+  --sidebar-bg-color: #292929;
+  --sidebar-fg-color: white;
+  --sidebar-backdrop-color: #28282c;
+  --sidebar-shade-color: rgba(0, 0, 0, 0.25);
+  --sidebar-border-color: rgba(0, 0, 0, 0.36);
+  --secondary-sidebar-bg-color: #28282c;
+  --secondary-sidebar-fg-color: white;
+  --secondary-sidebar-backdrop-color: #252529;
+  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.25);
+  --secondary-sidebar-border-color: rgba(0, 0, 0, 0.36);
+  --card-bg-color: rgba(255, 255, 255, 0.08);
+  --card-fg-color: white;
+  --card-shade-color: rgba(0, 0, 0, 0.36);
+  --dialog-bg-color: #383838;
+  --dialog-fg-color: white;
+  --popover-bg-color: #383838;
+  --popover-fg-color: white;
+  --popover-shade-color: rgba(0, 0, 0, 0.25);
+  --thumbnail-bg-color: #39393d;
+  --thumbnail-fg-color: white;
+  --shade-color: rgba(0, 0, 0, 0.25);
+  --scrollbar-outline-color: rgba(0, 0, 0, 0.5);
+  --headerbar-backdrop-color: var(--window-bg-color);
+  --standalone-color-oklab: "max(l, 0.85) a b";
+  --active-toggle-bg-color: rgba(255, 255, 255, 0.2);
+  --active-toggle-fg-color: #ffffff;
+  --overview-bg-color: #28282c;
+  --overview-fg-color: #ffffff;
+  --accent-color: oklab(from var(--accent-bg-color) var(--standalone-color-oklab));
+  --destructive-color: oklab(from var(--destructive-bg-color) var(--standalone-color-oklab));
+  --success-color: oklab(from var(--success-bg-color) var(--standalone-color-oklab));
+  --warning-color: oklab(from var(--warning-bg-color) var(--standalone-color-oklab));
+  --error-color: oklab(from var(--error-bg-color) var(--standalone-color-oklab));
+  --button-border-color: rgba(255,255,255, 0.2);
+  --button-bg-color: rgba(255,255,255, 0.1);
+  --button-fg-color: var(--view-fg-color);
+  --button-hover-bg-color: rgba(255,255,255, 0.2);
+  --button-active-bg-color: rgba(255,255,255, 0.3);
+  --button-flat-bg-color: transparent;
+  --button-flat-hover-bg-color: rgba(255, 255, 255, 0.1);
+  --button-flat-active-bg-color: rgba(255, 255, 255, 0.2);
+  --suggested-action-bg-color: var(--accent-bg-color);
+  --suggested-action-fg-color: var(--accent-fg-color);
+  --suggested-action-hover-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.9);
+  --suggested-action-active-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.8);
+  --destructive-action-bg-color: var(--destructive-bg-color);
+  --destructive-action-fg-color: var(--destructive-fg-color);
+  --destructive-action-hover-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.9);
+  --destructive-action-active-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.8);
+  @define-color destructive_bg_color var(--destructive-bg-color);
+  @define-color destructive_fg_color var(--destructive-fg-color);
+  @define-color success_bg_color var(--success-bg-color);
+  @define-color success_fg_color var(--success-fg-color);
+  @define-color warning_bg_color var(--warning-bg-color);
+  @define-color warning_fg_color var(--warning-fg-color);
+  @define-color error_bg_color var(--error-bg-color);
+  @define-color error_fg_color var(--error-fg-color);
+  @define-color accent_bg_color var(--accent-bg-color);
+  @define-color accent_fg_color var(--accent-fg-color);
+  @define-color window_bg_color var(--window-bg-color);
+  @define-color window_fg_color var(--window-fg-color);
+  @define-color view_bg_color var(--view-bg-color);
+  @define-color view_fg_color var(--view-fg-color);
+  @define-color headerbar_bg_color var(--headerbar-bg-color);
+  @define-color headerbar_fg_color var(--headerbar-fg-color);
+  @define-color headerbar_border_color var(--headerbar-border-color);
+  @define-color headerbar_backdrop_color var(--headerbar-backdrop-color);
+  @define-color headerbar_shade_color var(--headerbar-shade-color);
+  @define-color headerbar_darker_shade_color var(--headerbar-darker-shade-color);
+  @define-color sidebar_bg_color var(--sidebar-bg-color);
+  @define-color sidebar_fg_color var(--sidebar-fg-color);
+  @define-color sidebar_backdrop_color var(--sidebar-backdrop-color);
+  @define-color sidebar_shade_color var(--sidebar-shade-color);
+  @define-color sidebar_border_color var(--sidebar-border-color);
+  @define-color secondary_sidebar_bg_color var(--secondary-sidebar-bg-color);
+  @define-color secondary_sidebar_fg_color var(--secondary-sidebar-fg-color);
+  @define-color secondary_sidebar_backdrop_color var(--secondary-sidebar-backdrop-color);
+  @define-color secondary_sidebar_shade_color var(--secondary-sidebar-shade-color);
+  @define-color secondary_sidebar_border_color var(--secondary-sidebar-border-color);
+  @define-color card_bg_color var(--card-bg-color);
+  @define-color card_fg_color var(--card-fg-color);
+  @define-color card_shade_color var(--card-shade-color);
+  @define-color dialog_bg_color var(--dialog-bg-color);
+  @define-color dialog_fg_color var(--dialog-fg-color);
+  @define-color popover_bg_color var(--popover-bg-color);
+  @define-color popover_fg_color var(--popover-fg-color);
+  @define-color popover_shade_color var(--popover-shade-color);
+  @define-color thumbnail_bg_color var(--thumbnail-bg-color);
+  @define-color thumbnail_fg_color var(--thumbnail-fg-color);
+  @define-color shade_color var(--shade-color);
+  @define-color scrollbar_outline_color var(--scrollbar-outline-color);
+}
+
+body.light-theme {
+  --destructive-bg-color: #e85959;
+  --destructive-fg-color: white;
+  --success-bg-color: #52ba0a;
+  --success-fg-color: white;
+  --warning-bg-color: #c48e05;
+  --warning-fg-color: rgba(0, 0, 0, 0.8);
+  --error-bg-color: #e85959;
+  --error-fg-color: white;
+  --accent-bg-color: #3584e4;
+  --accent-fg-color: white;
+  --window-bg-color: #f5f5f5;
+  --window-fg-color: rgba(0, 0, 6, 0.8);
+  --view-bg-color: white;
+  --view-fg-color: rgba(0, 0, 6, 0.8);
+  --headerbar-bg-color: white;
+  --headerbar-fg-color: #444444;
+  --headerbar-border-color: rgba(0, 0, 0, 0.1);
+  --headerbar-shade-color: rgba(0, 0, 0, 0.05);
+  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.1);
+  --sidebar-bg-color: #eeeeee;
+  --sidebar-fg-color: #444444;
+  --sidebar-backdrop-color: #f2f2f4;
+  --sidebar-shade-color: rgba(0, 0, 0, 0.07);
+  --sidebar-border-color: rgba(0, 0, 0, 0.07);
+  --secondary-sidebar-bg-color: #f5f5f5;
+  --secondary-sidebar-fg-color: #444444;
+  --secondary-sidebar-backdrop-color: #f6f6fa;
+  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.07);
+  --secondary-sidebar-border-color: rgba(0, 0, 6, 0.07);
+  --card-bg-color: white;
+  --card-fg-color: rgba(0, 0, 6, 0.8);
+  --card-shade-color: rgba(0, 0, 0, 0.07);
+  --dialog-bg-color: #fafafb;
+  --dialog-fg-color: rgba(0, 0, 6, 0.8);
+  --popover-bg-color: #ffffff;
+  --popover-fg-color: rgba(0, 0, 6, 0.8);
+  --popover-shade-color: rgba(0, 0, 0, 0.07);
+  --thumbnail-bg-color: #ffffff;
+  --thumbnail-fg-color: rgba(0, 0, 6, 0.8);
+  --shade-color: rgba(0, 0, 0, 0.07);
+  --scrollbar-outline-color: white;
+  --headerbar-backdrop-color: var(--window-bg-color);
+  --standalone-color-oklab: "min(l, 0.6) a b";
+  --active-toggle-bg-color: #dddddd;
+  --active-toggle-fg-color: white;
+  --overview-bg-color: #f3f3f5;
+  --overview-fg-color: rgba(0, 0, 6, 0.8);
+  --accent-color: oklab(from var(--accent-bg-color) var(--standalone-color-oklab));
+  --destructive-color: oklab(from var(--destructive-bg-color) var(--standalone-color-oklab));
+  --success-color: oklab(from var(--success-bg-color) var(--standalone-color-oklab));
+  --warning-color: oklab(from var(--warning-bg-color) var(--standalone-color-oklab));
+  --error-color: oklab(from var(--error-bg-color) var(--standalone-color-oklab));
+  --button-border-color: rgba(0, 0, 0, 0.2);
+  --button-bg-color: rgba(0, 0, 0, 0.05);
+  --button-fg-color: var(--view-fg-color);
+  --button-hover-bg-color: rgba(0,0,0, 0.1);
+  --button-active-bg-color: rgba(0,0,0, 0.15);
+  --button-flat-bg-color: transparent;
+  --button-flat-hover-bg-color: rgba(0, 0, 0, 0.05);
+  --button-flat-active-bg-color: rgba(0, 0, 0, 0.1);
+  --suggested-action-bg-color: var(--accent-bg-color);
+  --suggested-action-fg-color: var(--accent-fg-color);
+  --suggested-action-hover-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.9);
+  --suggested-action-active-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.8);
+  --destructive-action-bg-color: var(--destructive-bg-color);
+  --destructive-action-fg-color: var(--destructive-fg-color);
+  --destructive-action-hover-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.9);
+  --destructive-action-active-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.8);
+  @define-color destructive_bg_color var(--destructive-bg-color);
+  @define-color destructive_fg_color var(--destructive-fg-color);
+  @define-color success_bg_color var(--success-bg-color);
+  @define-color success_fg_color var(--success-fg-color);
+  @define-color warning_bg_color var(--warning-bg-color);
+  @define-color warning_fg_color var(--warning-fg-color);
+  @define-color error_bg_color var(--error-bg-color);
+  @define-color error_fg_color var(--error-fg-color);
+  @define-color accent_bg_color var(--accent-bg-color);
+  @define-color accent_fg_color var(--accent-fg-color);
+  @define-color window_bg_color var(--window-bg-color);
+  @define-color window_fg_color var(--window-fg-color);
+  @define-color view_bg_color var(--view-bg-color);
+  @define-color view_fg_color var(--view-fg-color);
+  @define-color headerbar_bg_color var(--headerbar-bg-color);
+  @define-color headerbar_fg_color var(--headerbar-fg-color);
+  @define-color headerbar_border_color var(--headerbar-border-color);
+  @define-color headerbar_backdrop_color var(--headerbar-backdrop-color);
+  @define-color headerbar_shade_color var(--headerbar-shade-color);
+  @define-color headerbar_darker_shade_color var(--headerbar-darker-shade-color);
+  @define-color sidebar_bg_color var(--sidebar-bg-color);
+  @define-color sidebar_fg_color var(--sidebar-fg-color);
+  @define-color sidebar_backdrop_color var(--sidebar-backdrop-color);
+  @define-color sidebar_shade_color var(--sidebar-shade-color);
+  @define-color sidebar_border_color var(--sidebar-border-color);
+  @define-color secondary_sidebar_bg_color var(--secondary-sidebar-bg-color);
+  @define-color secondary_sidebar_fg_color var(--secondary-sidebar-fg-color);
+  @define-color secondary_sidebar_backdrop_color var(--secondary-sidebar-backdrop-color);
+  @define-color secondary_sidebar_shade_color var(--secondary-sidebar-shade-color);
+  @define-color secondary_sidebar_border_color var(--secondary-sidebar-border-color);
+  @define-color card_bg_color var(--card-bg-color);
+  @define-color card_fg_color var(--card-fg-color);
+  @define-color card_shade_color var(--card-shade-color);
+  @define-color dialog_bg_color var(--dialog-bg-color);
+  @define-color dialog_fg_color var(--dialog-fg-color);
+  @define-color popover_bg_color var(--popover-bg-color);
+  @define-color popover_fg_color var(--popover-fg-color);
+  @define-color popover_shade_color var(--popover-shade-color);
+  @define-color thumbnail_bg_color var(--thumbnail-bg-color);
+  @define-color thumbnail_fg_color var(--thumbnail-fg-color);
+  @define-color shade_color var(--shade-color);
+  @define-color scrollbar_outline_color var(--scrollbar-outline-color);
+}
+
+:root {
+  --adw-font-family: "Cantarell", sans-serif;
+  --adw-font-size: 14px;
+  --adw-border-radius: 5px;
+  --adw-border-width: 1px;
+  --adw-padding-small: 5px;
+  --adw-padding-medium: 10px;
+  --adw-padding-large: 20px;
+}
+
+:root {
+  --accent-color: oklab(from var(--accent-bg-color) max(l, 0.85) a b);
+  --destructive-color: oklab(from var(--destructive-bg-color) max(l, 0.85) a b);
+  --success-color: oklab(from var(--success-bg-color) max(l, 0.85) a b);
+  --warning-color: oklab(from var(--warning-bg-color) max(l, 0.85) a b);
+  --error-color: oklab(from var(--error-bg-color) max(l, 0.85) a b);
+}
+
+body.light-theme {
+  --accent-color: oklab(from var(--accent-bg-color) min(l, 0.5) a b);
+  --destructive-color: oklab(from var(--destructive-bg-color) min(l, 0.5) a b);
+  --success-color: oklab(from var(--success-bg-color) min(l, 0.5) a b);
+  --warning-color: oklab(from var(--warning-bg-color) min(l, 0.5) a b);
+  --error-color: oklab(from var(--error-bg-color) min(l, 0.5) a b);
+}
+
+body {
+  font-family: var(--adw-font-family);
+  font-size: var(--adw-font-size);
+  color: var(--window-fg-color);
+  background-color: var(--window-bg-color);
+  margin: 0;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+.adw-button {
+  display: inline-block;
+  padding: var(--adw-padding-medium) var(--adw-padding-large);
+  border: var(--adw-border-width) solid var(--button-border-color);
+  border-radius: var(--adw-border-radius);
+  background-color: var(--button-bg-color);
+  color: var(--button-fg-color);
+  cursor: pointer;
+  text-decoration: none;
+  font-size: var(--adw-font-size);
+  text-align: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.adw-button:hover {
+  background-color: var(--button-hover-bg-color);
+}
+.adw-button:active, .adw-button.active {
+  background-color: var(--button-active-bg-color);
+}
+.adw-button.suggested-action {
+  background-color: var(--suggested-action-bg-color);
+  color: var(--suggested-action-fg-color);
+  border-color: transparent;
+}
+.adw-button.suggested-action:hover {
+  background-color: var(--suggested-action-hover-bg-color);
+}
+.adw-button.suggested-action:active {
+  background-color: var(--suggested-action-active-bg-color);
+}
+.adw-button.flat {
+  background-color: var(--button-flat-bg-color);
+  border-color: transparent;
+}
+.adw-button.flat:hover {
+  background-color: var(--button-flat-hover-bg-color);
+}
+.adw-button.flat:active {
+  background-color: var(--button-flat-active-bg-color);
+}
+.adw-button.destructive {
+  background-color: var(--destructive-action-bg-color);
+  color: var(--destructive-action-fg-color);
+  border-color: transparent;
+}
+.adw-button.destructive:hover {
+  background-color: var(--destructive-action-hover-bg-color);
+}
+.adw-button.destructive:active {
+  background-color: var(--destructive-action-active-bg-color);
+}
+.adw-button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  background-color: var(--button-bg-color);
+  border-color: var(--button-border-color);
+}
+
+.adw-entry {
+  padding: var(--adw-padding-medium);
+  border: var(--adw-border-width) solid var(--button-border-color);
+  border-radius: var(--adw-border-radius);
+  background-color: var(--view-bg-color);
+  color: var(--view-fg-color);
+  font-size: var(--adw-font-size);
+  transition: border-color 0.15s ease;
+}
+.adw-entry:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+.adw-entry[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+  background-color: var(--view-bg-color);
+  border-color: var(--button-border-color);
+}
+
+.adw-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+.adw-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.adw-switch input:checked + .adw-switch-slider {
+  background-color: var(--accent-color);
+}
+.adw-switch input:checked + .adw-switch-slider:before {
+  transform: translateX(20px);
+}
+.adw-switch input:disabled + .adw-switch-slider {
+  opacity: 0.5;
+  pointer-events: none;
+  background-color: var(--view-bg-color);
+}
+.adw-switch input:disabled + .adw-switch-slider:before {
+  background-color: var(--active-toggle-fg-color);
+}
+.adw-switch .adw-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--active-toggle-bg-color);
+  border-radius: 12px;
+  transition: 0.2s;
+}
+.adw-switch .adw-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: var(--active-toggle-fg-color);
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.adw-label {
+  color: var(--view-fg-color);
+}
+.adw-label.title-1 {
+  font-size: 2em;
+  font-weight: bold;
+}
+.adw-label.title-2 {
+  font-size: 1.6em;
+  font-weight: bold;
+}
+.adw-label.title-3 {
+  font-size: 1.3em;
+  font-weight: bold;
+}
+.adw-label.title-4 {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+.adw-label.body {
+  font-size: 1em;
+}
+.adw-label.caption {
+  font-size: 0.8em;
+  color: var(--secondary-sidebar-fg-color);
+}
+
+.adw-header-bar {
+  background-color: var(--headerbar-bg-color);
+  color: var(--headerbar-fg-color);
+  border-bottom: var(--adw-border-width) solid var(--headerbar-border-color);
+  padding: var(--adw-padding-small) var(--adw-padding-medium);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.adw-header-bar .adw-header-bar-start,
+.adw-header-bar .adw-header-bar-end {
+  display: flex;
+  align-items: center;
+}
+.adw-header-bar .adw-header-bar-start > *,
+.adw-header-bar .adw-header-bar-end > * {
+  margin-right: var(--adw-padding-small);
+}
+.adw-header-bar .adw-header-bar-start > *:last-child,
+.adw-header-bar .adw-header-bar-end > *:last-child {
+  margin-right: 0;
+}
+.adw-header-bar .adw-header-bar-end {
+  margin-left: auto;
+}
+.adw-header-bar .adw-header-bar-center-box {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+.adw-header-bar .adw-header-bar-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adw-header-bar .adw-header-bar-subtitle {
+  font-size: 0.9em;
+  color: var(--secondary-sidebar-fg-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adw-window {
+  background-color: var(--window-bg-color);
+  border: var(--adw-border-width) solid var(--adw-border-color);
+  border-radius: var(--adw-border-radius);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.adw-window .adw-window-content {
+  padding: var(--adw-padding-large);
+}
+
+.adw-box {
+  display: flex;
+}
+.adw-box.adw-box-vertical {
+  flex-direction: column;
+}
+
+.adw-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--adw-padding-medium);
+}
+.adw-row:last-child {
+  margin-bottom: 0;
+}
+.adw-row > * {
+  margin-right: var(--adw-padding-small);
+}
+.adw-row > *:last-child {
+  margin-right: 0;
+}
+
+/*# sourceMappingURL=style.css.map */

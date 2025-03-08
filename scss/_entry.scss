@@ -1,0 +1,25 @@
+// scss/_entry.scss
+@use "variables";
+
+.adw-entry {
+  padding: var(--adw-padding-medium);
+  border: var(--adw-border-width) solid var(--button-border-color);
+  border-radius: var(--adw-border-radius);
+  background-color: var(--view-bg-color);
+  color: var(--view-fg-color);
+  font-size: var(--adw-font-size);
+    transition: border-color 0.15s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent-color);
+  }
+
+  &[disabled] {
+    opacity: 0.5;
+    pointer-events: none;
+    background-color: var(--view-bg-color);
+      border-color: var(--button-border-color);
+
+  }
+}
