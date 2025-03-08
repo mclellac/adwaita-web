@@ -5,19 +5,21 @@
   background-color: var(--dialog-bg-color);
   color: var(--dialog-fg-color);
   border-radius: var(--adw-border-radius);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); // More pronounced shadow
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);w
   padding: var(--adw-padding-large);
   width: 90%;       // Responsive width
-  max-width: 500px; // Maximum width
-  position: fixed;   // For modal behavior
+  max-width: 500px; 
+  position: fixed; 
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 500;    // Ensure it's above other content
-  display: none; // Hidden by default
+  opacity: 0;       // Start hidden for transition
+  transition: opacity 0.2s ease, transform 0.2s ease; // Smooth transition
 
   &.open {
-    display: block; // Show when open
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1); // Scale up for animation
   }
 
   .adw-dialog-title {
@@ -31,14 +33,14 @@
   }
 
   .adw-dialog-buttons {
-    text-align: right; // Buttons on the right
+    text-align: right;
     .adw-button {
-      margin-left: var(--adw-padding-medium); // Space between buttons
+      margin-left: var(--adw-padding-medium);
     }
   }
 }
 
-// Backdrop (overlay) for the modal
+// Backdrop
 .adw-dialog-backdrop {
   position: fixed;
   top: 0;
@@ -47,9 +49,10 @@
   height: 100%;
   background-color: rgba(0, 0, 0, 0.4); // Semi-transparent black
   z-index: 499; // Just below the dialog
-  display: none; // Hidden by default
+  opacity: 0;     // Start hidden
+  transition: opacity 0.2s ease;
 
-   &.open {
-      display: block;
+    &.open{
+        opacity: 1;
     }
 }

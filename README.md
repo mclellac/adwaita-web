@@ -2,6 +2,8 @@
 
 Vanilla JavaScript UI framework that mimics the look and feel of GNOME's GTK4 and libdwaita, making it easy to create web applications with a consistent Adwaita/GTK4 style. It uses HTML, CSS (via SCSS), and JavaScript, with no external dependencies.
 
+![Light Theme](images/light.png)
+
 ## Features
 
 - **Adwaita Styling:** Closely follows the visual style of libadwaita for a consistent GNOME look.
@@ -96,4 +98,3 @@ document.getElementById("app").appendChild(myButton);
 ```
 
 TODO:Document components
-
