@@ -97,8 +97,11 @@ def inject_user():
 
 @app.route('/')
 def index():
-    posts = Post.query.all()
-    return render_template('index.html', posts=posts)
+    page = request.args.get('page', 1, type=int)
+    per_page = 5  # Or any number of items per page you prefer
+    pagination = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    posts = pagination.items
+    return render_template('index.html', posts=posts, pagination=pagination)
 
 @app.route('/posts/<int:post_id>')
 def view_post(post_id):

@@ -788,7 +788,7 @@ function loadSavedAccentColor() {
     if (!accentColorName || !AVAILABLE_ACCENT_COLORS.includes(accentColorName)) {
         accentColorName = DEFAULT_ACCENT_COLOR;
     }
-    setAccentColor(colorName);
+    setAccentColor(accentColorName);
 }
 
 /** Toggles the theme between light and dark AND updates accent colors. */
