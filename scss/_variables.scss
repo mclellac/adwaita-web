@@ -1,5 +1,3 @@
-// scss/_variables.scss
-
 // Adwaita-like color palette
 // Light Theme
 @mixin light-theme {
@@ -45,13 +43,13 @@
 
   --suggested-action-bg-color: var(--accent-bg-color);
   --suggested-action-fg-color: var(--accent-fg-color);
-  --suggested-action-hover-bg-color: #2a73cc; // Darken accent
-  --suggested-action-active-bg-color: #2062b5; // Further darken accent
+  --suggested-action-hover-bg-color: mix(black, var(--accent-bg-color), 10%); // Darken accent
+  --suggested-action-active-bg-color: mix(black, var(--accent-bg-color), 20%); // Further darken accent
 
   --destructive-action-bg-color: var(--destructive-bg-color);
   --destructive-action-fg-color: var(--destructive-fg-color);
-  --destructive-action-hover-bg-color: #c91820; // Darken destructive
-  --destructive-action-active-bg-color: #b2151c; // Further darken destructive
+  --destructive-action-hover-bg-color: mix(black, var(--destructive-bg-color), 10%); // Darken destructive
+  --destructive-action-active-bg-color: mix(black, var(--destructive-bg-color), 20%); // Further darken destructive
 
   --sidebar-bg-color: #f0efee;
   --sidebar-fg-color: rgba(0,0,0,0.8);
@@ -123,13 +121,13 @@
 
   --suggested-action-bg-color: var(--accent-bg-color);
   --suggested-action-fg-color: var(--accent-fg-color);
-  --suggested-action-hover-bg-color: #4ba2ff; // Lighten accent
-  --suggested-action-active-bg-color: #3b93f7; // Further lighten accent
+  --suggested-action-hover-bg-color: mix(white, var(--accent-bg-color), 10%); // Lighten accent
+  --suggested-action-active-bg-color: mix(white, var(--accent-bg-color), 20%); // Further lighten accent
 
   --destructive-action-bg-color: var(--destructive-bg-color);
   --destructive-action-fg-color: var(--destructive-fg-color);
-  --destructive-action-hover-bg-color: #ff706a; // Lighten destructive
-  --destructive-action-active-bg-color: #ff857f; // Further lighten destructive
+  --destructive-action-hover-bg-color: mix(white, var(--destructive-bg-color), 10%); // Lighten destructive
+  --destructive-action-active-bg-color: mix(white, var(--destructive-bg-color), 20%); // Further lighten destructive
 
   --sidebar-bg-color: #333333;
   --sidebar-fg-color: #ffffff;
@@ -331,8 +329,6 @@ body.light-theme {
   @define-color headerbar_border_color var(--headerbar-border-color);
   @define-color headerbar_backdrop_color var(--headerbar-backdrop-color);
   @define-color headerbar_shade_color var(--headerbar-shade-color);
-  // headerbar_darker_shade_color is not a standard libadwaita concept, removing for now
-  // If needed for specific effects, it can be added locally or derived.
 
   @define-color card_bg_color var(--card-bg-color);
   @define-color card_fg_color var(--card-fg-color);
@@ -352,13 +348,11 @@ body.light-theme {
   @define-color sidebar_fg_color var(--sidebar-fg-color);
   @define-color sidebar_border_color var(--sidebar-border-color);
   @define-color sidebar_shade_color var(--sidebar-shade-color);
-  // sidebar_backdrop_color is not standard, removing.
 
   @define-color secondary_sidebar_bg_color var(--secondary-sidebar-bg-color);
   @define-color secondary_sidebar_fg_color var(--secondary-sidebar-fg-color);
   @define-color secondary_sidebar_border_color var(--secondary-sidebar-border-color);
   @define-color secondary_sidebar_shade_color var(--secondary-sidebar-shade-color);
-  // secondary_sidebar_backdrop_color is not standard, removing.
 
   @define-color shade_color var(--shade-color);
   @define-color scrollbar_outline_color var(--scrollbar-outline-color);
@@ -378,41 +372,6 @@ body.light-theme {
   // to standard CSS usage. If an application needs oklab, it can define it.
 }
 
-// Apply GTK color definitions to both light and dark themes by default.
 :root {
   @include define-gtk-colors();
 }
-// No need to re-declare for body.light-theme as :root covers it.
-// The actual theme switching is handled by the @media query and body classes.
-
-// Remove old oklab mixin and font variables that are now defined in :root
-/*
-:root{
-  --adw-font-family: 'Cantarell', sans-serif;
-  --adw-font-size: 14px;
-  --adw-border-radius: 5px;
-  --adw-border-width: 1px;
-  --adw-padding-small: 5px;
-  --adw-padding-medium: 10px;
-  --adw-padding-large: 20px;
-}
-
-@mixin define-oklab-colors() {
-  :root{
-    --accent-color: #{oklab(from var(--accent-bg-color) max(l, 0.85) a b)};
-    --destructive-color: #{oklab(from var(--destructive-bg-color) max(l, 0.85) a b)};
-    --success-color: #{oklab(from var(--success-bg-color) max(l, 0.85) a b)};
-    --warning-color: #{oklab(from var(--warning-bg-color) max(l, 0.85) a b)};
-    --error-color: #{oklab(from var(--error-bg-color) max(l, 0.85) a b)};
-  }
-  body.light-theme{
-    --accent-color: #{oklab(from var(--accent-bg-color) min(l, 0.5) a b)};
-    --destructive-color: #{oklab(from var(--destructive-bg-color) min(l, 0.5) a b)};
-    --success-color: #{oklab(from var(--success-bg-color) min(l, 0.5) a b)};
-    --warning-color: #{oklab(from var(--warning-bg-color) min(l, 0.5) a b)};
-    --error-color: #{oklab(from var(--error-bg-color) min(l, 0.5) a b)};
-  }
-}
-
-@include define-oklab-colors();
-*/

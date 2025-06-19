@@ -1,5 +1,4 @@
-// scss/_button.scss
-@use "variables"; // Keep if it's used for mixins or functions not available in pure CSS
+@use "variables";
 
 .adw-button {
   display: inline-flex; // Use flex for better content alignment
@@ -24,9 +23,8 @@
   }
 
   &:active,
-  &.active { // The .active class can be used to programmatically set active state
+  &.active {
     background-color: var(--button-active-bg-color);
-    // Libadwaita often adds an inner shadow or subtle change on active
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
   }
 
@@ -38,29 +36,29 @@
   &.suggested-action {
     background-color: var(--suggested-action-bg-color);
     color: var(--suggested-action-fg-color);
-    border-color: transparent; // Suggested actions usually don't have a visible border unless needed for contrast
+    border-color: transparent;
 
     &:hover {
       background-color: var(--suggested-action-hover-bg-color);
     }
     &:active, &.active {
       background-color: var(--suggested-action-active-bg-color);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); // Consistent active style
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
     }
   }
 
   &.flat {
     background-color: var(--button-flat-bg-color);
-    color: var(--button-fg-color); // Ensure text color is appropriate for flat buttons
+    color: var(--button-fg-color);
     border-color: transparent;
-    box-shadow: none; // No shadow for flat buttons
+    box-shadow: none;
 
     &:hover {
       background-color: var(--button-flat-hover-bg-color);
     }
     &:active, &.active {
       background-color: var(--button-flat-active-bg-color);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); // Very subtle active effect for flat
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
     }
   }
 
@@ -68,40 +66,38 @@
   &.destructive-action {
     background-color: var(--destructive-action-bg-color);
     color: var(--destructive-action-fg-color);
-    border-color: transparent; // Destructive actions also usually don't have a visible border
+    border-color: transparent;
 
     &:hover {
       background-color: var(--destructive-action-hover-bg-color);
     }
     &:active, &.active {
       background-color: var(--destructive-action-active-bg-color);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); // Consistent active style
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
     }
   }
 
   &[disabled],
-  &:disabled { // Ensure both attribute and class are covered if used
+  &:disabled {
     background-color: var(--button-bg-color); // Use base bg
     color: var(--button-fg-color); // Use base fg
     border-color: var(--button-border-color); // Use base border
     opacity: var(--opacity-disabled, 0.5); // Use opacity variable, provide fallback
     cursor: not-allowed;
-    pointer-events: none; // Already there, good.
-    box-shadow: none; // No shadow when disabled
+    pointer-events: none;
+    box-shadow: none;
   }
 
   // Icon support within buttons (common in libadwaita)
   .icon {
     margin-right: var(--spacing-xs); // Space between icon and text
-    // Add styles for icon sizing, color, etc. if needed
-    // e.g., width: 16px; height: 16px; fill: currentColor;
   }
 
   &.circular { // For icon-only circular buttons
     padding: var(--spacing-s);
     border-radius: 50%;
     .icon {
-      margin-right: 0; // No margin if only icon
+      margin-right: 0;
     }
   }
 }
