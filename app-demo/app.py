@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from flask import Flask, render_template, url_for, abort, request, redirect # Added request, redirect
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
@@ -55,6 +56,8 @@ class Post(db.Model):
     title = db.Column(db.String(120), nullable=False)
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     # 'author' relationship is defined by backref in User.posts
 
 @login_manager.user_loader
@@ -91,6 +94,45 @@ def create_post():
             return redirect(url_for('index'))
         # Else, if form data is missing, re-render form (or add error messages)
     return render_template('create_post.html')
+
+@app.route('/posts/<int:post_id>/delete', methods=['POST'])
+@login_required
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        # Forbidden, or redirect with an error message
+        abort(403) # Or flash a message and redirect
+
+    db.session.delete(post)
+    db.session.commit()
+    # Flash a success message (optional)
+    # flash('Post deleted successfully.', 'success')
+    return redirect(url_for('index'))
+
+@app.route('/posts/<int:post_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)  # Forbidden
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+
+        if title and content:
+            post.title = title
+            post.content = content
+            # post.updated_at will be updated by onupdate
+            db.session.commit()
+            # flash('Post updated successfully!', 'success')
+            return redirect(url_for('view_post', post_id=post.id))
+        else:
+            # flash('Title and content are required.', 'danger')
+            # Re-render form with an error or rely on HTML5 validation
+            pass # Fall through to render template
+
+    return render_template('edit_post.html', post=post)
 
 @app.route('/test-widget')
 def test_widget_page():
