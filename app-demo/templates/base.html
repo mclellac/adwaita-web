@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Libadwaita Blog{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='libadwaita-web/style.css') }}">
+    <script src="{{ url_for('static', filename='libadwaita-web/js/components.js') }}" type="module"></script>
+</head>
+<body class="adw-colorscheme-light"> {# Or adw-colorscheme-dark #}
+    <adw-application-window>
+        <adw-header-bar>
+            <adw-window-title slot="title">Blog CMS</adw-window-title>
+            <adw-button slot="start" href="{{ url_for('index') }}">Home</adw-button>
+            <adw-button slot="end" appearance="suggested" href="{{ url_for('create_post') }}">New Post</adw-button>
+        </adw-header-bar>
+        <main class="adw-page">
+            {% block content %}{% endblock %}
+        </main>
+    </adw-application-window>
+</body>
+</html>
