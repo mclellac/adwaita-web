@@ -37,6 +37,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False) # Increased length for hash
     profile_info = db.Column(db.Text, nullable=True)
+    profile_photo_url = db.Column(db.String(512), nullable=True)
     posts = db.relationship('Post', backref='author', lazy=True)
 
     def set_password(self, password):
@@ -130,9 +131,11 @@ def profile(username):
 def edit_profile():
     if request.method == 'POST':
         new_profile_info = request.form.get('profile_info')
+        new_photo_url = request.form.get('profile_photo_url')
         # Basic validation: check if new_profile_info is not None, or add more checks
         # For simplicity, directly updating. Consider adding validation/sanitization.
         current_user.profile_info = new_profile_info
+        current_user.profile_photo_url = new_photo_url
         db.session.add(current_user) # Add current_user to session if it's not already persistent or modified
         db.session.commit()
         return redirect(url_for('profile', username=current_user.username))
@@ -145,14 +148,12 @@ def edit_profile():
 def init_extensions(flask_app):
     db.init_app(flask_app)
     login_manager.init_app(flask_app)
+    with flask_app.app_context():
+        db.create_all() # Ensure tables are created
 
 if __name__ == '__main__':
     init_extensions(app) # Initialize extensions for direct run
-    # Create database tables if they don't exist - only when running app directly
-    with app.app_context():
-        db.create_all()
-
-    # Example of how to create a user:
+    # Create example users if needed (code for this is already commented out but can be used for testing)
     # with app.app_context():
     #     if not User.query.filter_by(username="testuser").first():
     #         user = User(username="testuser", profile_info="Just a test user.")

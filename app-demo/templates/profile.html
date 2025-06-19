@@ -3,22 +3,42 @@
 {% block title %}Profile: {{ user_profile.username }} - My Libadwaita Blog{% endblock %}
 
 {% block content %}
-<adw-preferences-page>
-    <adw-preferences-group title="User Profile">
-        <div class="adw-list-box" style="padding: 20px;">
-            <div class="adw-row">
-                <strong class="adw-label">Username:</strong> <span class="adw-label">{{ user_profile.username }}</span>
-            </div>
-            <div class="adw-row">
-                <strong class="adw-label">Profile Info:</strong> <span class="adw-label">{{ user_profile.profile_info if user_profile.profile_info else 'No profile information provided.' }}</span>
-            </div>
-            {# Add more profile details here if needed #}
-            {% if current_user and current_user.username == user_profile.username %}
-            <div class="adw-row" style="margin-top: 15px;">
-                <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>
-            </div>
-            {% endif %}
+<div class="adw-page" style="padding: var(--spacing-l);">
+    <div class="adw-box adw-box-vertical align-center" style="max-width: 600px; margin: 0 auto; gap: var(--spacing-m);">
+
+        {# Avatar Display - Copied from previous version, centering via inline style is fine here #}
+        {% if user_profile.profile_photo_url %}
+            <span class="adw-avatar size-large" style="margin-bottom: var(--spacing-m); display: block; margin-left: auto; margin-right: auto;">
+                <img src="{{ user_profile.profile_photo_url }}" alt="{{ user_profile.username }}'s avatar" style="width: 72px; height: 72px;">
+            </span>
+        {% else %}
+            <span class="adw-avatar size-large" style="margin-bottom: var(--spacing-m); display: block; margin-left: auto; margin-right: auto;">
+                <span class="adw-avatar-text" style="font-size: 24px; line-height: 72px;">
+                    {% set name_parts = user_profile.username.split() %}
+                    {% if name_parts|length >= 2 %}
+                        {{ name_parts[0][0]|upper }}{{ name_parts[1][0]|upper }}
+                    {% elif user_profile.username %}
+                        {{ user_profile.username[0:2]|upper }}
+                    {% else %}
+                        ??
+                    {% endif %}
+                </span>
+            </span>
+        {% endif %}
+
+        <div class="adw-row" style="width: 100%;">
+            <strong class="adw-label" style="margin-right: var(--spacing-s);">Username:</strong> <span class="adw-label">{{ user_profile.username }}</span>
         </div>
-    </adw-preferences-group>
-</adw-preferences-page>
+        <div class="adw-row" style="width: 100%;">
+            <strong class="adw-label" style="margin-right: var(--spacing-s);">Profile Info:</strong> <span class="adw-label">{{ user_profile.profile_info if user_profile.profile_info else 'No profile information provided.' }}</span>
+        </div>
+
+        {% if current_user and current_user.username == user_profile.username %}
+        <div style="margin-top: var(--spacing-m);"> {# Added a div for spacing for the button #}
+            <adw-button appearance="suggested" href="{{ url_for('edit_profile') }}">Edit Profile</adw-button>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
 {% endblock %}
