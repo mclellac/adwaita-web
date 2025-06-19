@@ -281,8 +281,39 @@
 
                 Adw.createLabel("Flap", {title:1}),
                 flapExampleBox,
+
+                Adw.createLabel("Accent Color Picker", {title:1}),
+                // This will be populated by JavaScript below
             ],
         });
+
+        // --- Accent Color Picker Example ---
+        const accentPickerBox = Adw.createBox({ orientation: 'horizontal', spacing: 's', align: 'center'});
+        const accentColors = Adw.getAccentColors();
+        accentColors.forEach(colorName => {
+            const colorButton = Adw.createButton(colorName.charAt(0).toUpperCase() + colorName.slice(1), {
+                onClick: () => Adw.setAccentColor(colorName)
+            });
+            // Optionally, give the button a visual hint of its color
+            // This is a simple way, could also use custom classes or direct CSS var access if button supported it
+            try {
+                // Attempt to use the SCSS variable directly for preview.
+                // This requires the button to be in the DOM to resolve the var.
+                // A more robust way might be to have predefined hex values for display.
+                const tempAccentBgVar = `var(--accent-${colorName}-light-bg)`; // Use light version for preview consistency
+                colorButton.style.setProperty('background-color', tempAccentBgVar);
+                const tempAccentFgVar = `var(--accent-${colorName}-light-fg)`;
+                colorButton.style.setProperty('color', tempAccentFgVar);
+                 colorButton.style.setProperty('border-color', tempAccentBgVar);
+
+
+            } catch (e) { console.warn("Could not apply style for accent button preview", e); }
+
+            accentPickerBox.appendChild(colorButton);
+        });
+        // Find where to insert the accent picker. For now, append to the main content.
+        content.appendChild(Adw.createRow({children: [accentPickerBox]}));
+
 
         // Create the window and append it to the body.
         const windowEl = Adw.createWindow({header: headerBar, content: content});

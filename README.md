@@ -10,6 +10,7 @@ Vanilla JavaScript UI framework that mimics the look and feel of GNOME's GTK4 an
 - **Light and Dark Themes:** Built-in support for both light and dark themes. Includes automatic detection of system preference via `prefers-color-scheme`, manual toggling, and remembers the user's choice via `localStorage`.
 - **Component-Based:** Provides a suite of reusable UI components as JavaScript functions (e.g., Buttons, Entries, Switches, ViewSwitcher, Flap).
 - **CSS Variables:** Extensively uses CSS custom properties (variables) for theming, making customization of colors, fonts, and spacing straightforward, inspired by libadwaita's own variable system.
+- **Accent Colors:** Supports dynamic accent color switching, allowing users to choose from a predefined palette, with preferences saved.
 - **Responsive Design:** Components are designed to be reasonably responsive where applicable.
 - **Accessibility (ARIA):** Incorporates ARIA roles and attributes to improve accessibility for users of assistive technologies.
 - **No External Dependencies:** Written in pure JavaScript, HTML, and SCSS.
@@ -110,7 +111,7 @@ Creates a button.
 - **`text`**: `string` - Text displayed on the button.
 - **`options`**: `object`
     - `onClick`: `function` - Callback for click events.
-    - `suggested`: `boolean` - Styles as a suggested action (e.g., primary button).
+    - `suggested`: `boolean` - Styles as a suggested action (e.g., primary button). Uses the current accent color.
     - `destructive`: `boolean` - Styles as a destructive action (e.g., for delete).
     - `flat`: `boolean` - Styles as a flat button (no border/background).
     - `disabled`: `boolean` - Disables the button.
@@ -296,7 +297,7 @@ Creates a view switcher with a button bar and content area.
         - `content`: DOM element or HTML string for the view.
     - `activeViewName`: `string` - Name of the initially active view.
     - `onViewChanged`: `function(viewName)` - Callback when view changes.
-- **Returns**: `HTMLElement` with a `setActiveView(viewName)` method.
+- **Returns**: `HTMLElement` with a `setActiveView(viewName)` method. Active button uses accent color.
 - **Example:**
   ```javascript
   const viewSwitcher = Adw.createViewSwitcher({
@@ -337,6 +338,27 @@ The theme switching is handled by:
 1. Checking `localStorage` for a user-saved theme (`"light"` or `"dark"`).
 2. If not found, respecting the system preference via `prefers-color-scheme`.
 3. A `Adw.toggleTheme()` function is provided to manually switch themes and save the preference.
+
+### Accent Colors
+The framework also supports user-selectable accent colors. The currently selected accent color is used for elements like suggested action buttons, active states in lists or view switchers, progress bars, etc.
+
+- **Available Colors:** A predefined palette of accent colors is available. You can retrieve the list of names using:
+  ```javascript
+  const availableAccents = Adw.getAccentColors();
+  // Returns an array like ['blue', 'green', 'red', ...]
+  ```
+- **Setting Accent Color:** To change the accent color dynamically:
+  ```javascript
+  Adw.setAccentColor("green");
+  // UI elements will now use the 'green' accent.
+  // This preference is saved to localStorage and applied on future loads.
+  ```
+- **JavaScript Functions:**
+    - `Adw.getAccentColors()`: Returns an array of available accent color name strings.
+    - `Adw.setAccentColor(colorName)`: Sets the application-wide accent color. `colorName` should be one of the strings returned by `getAccentColors()`. The chosen color is persisted in `localStorage`.
+    - `Adw.loadSavedAccentColor()`: Called automatically on page load (as part of `loadSavedTheme`) to apply any previously selected accent color.
+
+The SCSS defines a palette for both light and dark themes (e.g., `--accent-blue-light-bg`, `--accent-blue-dark-bg`, and their corresponding foregrounds `--accent-blue-light-fg`, etc.). The `setAccentColor` JavaScript function dynamically updates the main `--accent-bg-color` and `--accent-fg-color` CSS variables based on the selected color name and current theme (light/dark).
 
 ## Contributing
 Contributions are welcome! Please feel free to submit issues or pull requests.
