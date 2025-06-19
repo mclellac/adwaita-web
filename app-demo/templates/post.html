@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+    <adw-preferences-page>
+        <adw-preferences-group>
+            <adw-expander-row title="{{ post.title }}">
+                <p>{{ post.content }}</p>
+            </adw-expander-row>
+        </adw-preferences-group>
+        <adw-button-row>
+             <adw-button appearance="destructive" href="{{ url_for('index') }}">Back to Posts</adw-button>
+        </adw-button-row>
+    </adw-preferences-page>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Blog Posts{% endblock %}
+
+{% block content %}
+    <adw-preferences-page>
+        <adw-preferences-group title="All Blog Posts">
+            {% if posts %}
+                <adw-list-box>
+                    {% for post in posts %}
+                        <adw-action-row title="{{ post.title }}" subtitle="Post ID: {{ post.id }}" href="{{ url_for('view_post', post_id=post.id) }}"></adw-action-row>
+                    {% endfor %}
+                </adw-list-box>
+            {% else %}
+                <p>No posts yet. <a href="{{ url_for('create_post') }}">Create one!</a></p>
+            {% endif %}
+        </adw-preferences-group>
+    </adw-preferences-page>
+{% endblock %}
