@@ -184,12 +184,8 @@ body.light-theme {
   --button-flat-active-bg-color: rgba(0, 0, 0, 0.1);
   --suggested-action-bg-color: var(--accent-bg-color);
   --suggested-action-fg-color: var(--accent-fg-color);
-  --suggested-action-hover-bg-color: mix(black, var(--accent-bg-color), 10%);
-  --suggested-action-active-bg-color: mix(black, var(--accent-bg-color), 20%);
   --destructive-action-bg-color: var(--destructive-bg-color);
   --destructive-action-fg-color: var(--destructive-fg-color);
-  --destructive-action-hover-bg-color: mix(black, var(--destructive-bg-color), 10%);
-  --destructive-action-active-bg-color: mix(black, var(--destructive-bg-color), 20%);
   --sidebar-bg-color: #f0efee;
   --sidebar-fg-color: rgba(0,0,0,0.8);
   --sidebar-border-color: rgba(0,0,0,0.12);
@@ -449,10 +445,10 @@ body.dark-theme .adw-card {
   border-color: transparent;
 }
 .adw-button.suggested-action:hover {
-  background-color: var(--suggested-action-hover-bg-color);
+  filter: brightness(95%);
 }
 .adw-button.suggested-action:active, .adw-button.suggested-action.active {
-  background-color: var(--suggested-action-active-bg-color);
+  filter: brightness(90%);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .adw-button.flat {
@@ -474,10 +470,10 @@ body.dark-theme .adw-card {
   border-color: transparent;
 }
 .adw-button.destructive-action:hover {
-  background-color: var(--destructive-action-hover-bg-color);
+  filter: brightness(95%);
 }
 .adw-button.destructive-action:active, .adw-button.destructive-action.active {
-  background-color: var(--destructive-action-active-bg-color);
+  filter: brightness(90%);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .adw-button[disabled], .adw-button:disabled {

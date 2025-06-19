@@ -8,14 +8,31 @@
         <script src="{{ url_for('static', filename='libadwaita-web/js/components.js') }}"></script>
     <script src="{{ url_for('static', filename='js/adw-initializer.js') }}" defer></script>
 </head>
-<body class="adw-colorscheme-light"> {# Or adw-colorscheme-dark #}
+<body class="light-theme"> {# Or adw-colorscheme-dark #}
     <adw-application-window>
         <adw-header-bar>
             <adw-window-title slot="title">Blog CMS</adw-window-title>
             <adw-button slot="start" href="{{ url_for('index') }}">Home</adw-button>
 
         {% if current_user.is_authenticated %}
-            <adw-button slot="start" href="{{ url_for('profile', username=current_user.username) }}">Profile</adw-button>
+            <a href="{{ url_for('profile', username=current_user.username) }}" slot="start" class="adw-button flat circular" title="View Profile" style="padding: var(--spacing-xxs); margin-right: var(--spacing-xs);">
+                {% if current_user.profile_photo_url %}
+                    <span class="adw-avatar size-small"> <!-- 24px -->
+                        <img src="{{ current_user.profile_photo_url }}" alt="Avatar">
+                    </span>
+                {% else %}
+                    <span class="adw-avatar size-small">
+                        <span class="adw-avatar-text" style="font-size: 0.7rem;"> <!-- Adjust font size for small avatar -->
+                            {% set name_parts = current_user.username.split() %}
+                            {% if name_parts|length >= 1 and name_parts[0] %}
+                                {{ name_parts[0][0]|upper }}
+                            {% else %}
+                                U
+                            {% endif %}
+                        </span>
+                    </span>
+                {% endif %}
+            </a>
             <adw-button slot="end" href="{{ url_for('logout') }}">Logout</adw-button>
             <adw-button slot="end" appearance="suggested" href="{{ url_for('create_post') }}">New Post</adw-button>
         {% else %}
