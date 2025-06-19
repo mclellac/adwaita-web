@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Login - My Libadwaita Blog{% endblock %}
+
+{% block content %}
+<adw-preferences-page>
+    <adw-preferences-group title="Login">
+        <form method="POST" action="{{ url_for('login') }}" class="adw-list-box" style="width: 300px; margin: 20px auto;">
+            {% if error %}
+            <div class="adw-banner error" style="margin-bottom: 10px; padding: 10px; background-color: #ffdddd; color: #d8000c; border: 1px solid #d8000c;">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <div class="adw-row" style="margin-bottom: 10px;">
+                <label for="username" class="adw-label" style="margin-right:10px; min-width: 80px;">Username:</label>
+                <input type="text" name="username" id="username" class="adw-entry" required>
+            </div>
+
+            <div class="adw-row" style="margin-bottom: 20px;">
+                <label for="password" class="adw-label" style="margin-right:10px; min-width: 80px;">Password:</label>
+                <input type="password" name="password" id="password" class="adw-entry" required>
+            </div>
+
+            <adw-button appearance="suggested" type="submit">Login</adw-button>
+        </form>
+    </adw-preferences-group>
+</adw-preferences-page>
+{% endblock %}
