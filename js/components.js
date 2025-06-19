@@ -671,26 +671,87 @@ function createAdwListBox(options = {}) {
 }
 
 // --- Theme Toggle Function  ---
-/** Toggles the theme between light and dark. */
-function toggleTheme() {
+// Note: This function is renamed to _originalToggleTheme and wrapped later
+function _originalToggleTheme() {
   const body = document.body;
   body.classList.toggle("light-theme");
   const isLight = body.classList.contains("light-theme");
   localStorage.setItem("theme", isLight ? "light" : "dark");
 }
 
+// --- Accent Color Management ---
+const AVAILABLE_ACCENT_COLORS = ['blue', 'green', 'red', 'yellow', 'purple', 'orange', 'pink', 'slate'];
+const DEFAULT_ACCENT_COLOR = 'blue';
+
+/**
+ * Returns the list of available accent color names.
+ * @returns {string[]}
+ */
+function getAccentColors() {
+    return [...AVAILABLE_ACCENT_COLORS];
+}
+
+/**
+ * Sets the accent color for the application.
+ * Updates CSS variables on the root element and saves the choice to localStorage.
+ * @param {string} colorName - The name of the accent color (e.g., 'blue', 'green').
+ */
+function setAccentColor(colorName) {
+    if (!AVAILABLE_ACCENT_COLORS.includes(colorName)) {
+        console.warn(`Adw: Accent color "${colorName}" is not available. Defaulting to ${DEFAULT_ACCENT_COLOR}.`);
+        colorName = DEFAULT_ACCENT_COLOR;
+    }
+
+    const rootStyle = document.documentElement.style;
+    const isLightTheme = document.body.classList.contains('light-theme');
+    const themeSuffix = isLightTheme ? '-light' : '-dark';
+
+    rootStyle.setProperty('--accent-bg-color', `var(--accent-${colorName}${themeSuffix}-bg)`);
+    rootStyle.setProperty('--accent-fg-color', `var(--accent-${colorName}${themeSuffix}-fg)`);
+
+    const standaloneSuffix = isLightTheme ? '' : '-dark';
+    rootStyle.setProperty('--accent-color', `var(--accent-${colorName}${standaloneSuffix}-standalone, var(--accent-${colorName}-standalone))`);
+
+    localStorage.setItem('accentColor', colorName);
+}
+
+/**
+ * Loads the saved accent color from localStorage or defaults.
+ * This should be called after the main theme (light/dark) is established.
+ */
+function loadSavedAccentColor() {
+    let accentColorName = localStorage.getItem('accentColor');
+    if (!accentColorName || !AVAILABLE_ACCENT_COLORS.includes(accentColorName)) {
+        accentColorName = DEFAULT_ACCENT_COLOR;
+    }
+    setAccentColor(accentColorName);
+}
+
+/** Toggles the theme between light and dark AND updates accent colors. */
+function toggleTheme() {
+    _originalToggleTheme(); // Call original theme toggle logic
+    loadSavedAccentColor(); // Re-apply accent color based on the new theme
+}
+// End Accent Color Management
+
+
 // --- Load Saved Theme ---
-/** Loads the saved theme from localStorage or detects system preference. */
+/** Loads the saved theme from localStorage or detects system preference. Also loads accent color. */
 function loadSavedTheme() {
+  const body = document.body;
   const savedTheme = localStorage.getItem("theme");
+
   if (savedTheme === "light") {
-    document.body.classList.add("light-theme");
+    body.classList.add("light-theme");
   } else if (savedTheme === "dark") {
-    document.body.classList.remove("light-theme");
+    body.classList.remove("light-theme");
   } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    // If no theme saved, and system prefers light, use light. Default is dark (no class).
-    document.body.classList.add("light-theme");
+    body.classList.add("light-theme");
+    // localStorage.setItem("theme", "light"); // Optionally save detected preference
+  } else {
+    body.classList.remove("light-theme");
   }
+  loadSavedAccentColor(); // Load accent color after theme class is set
 }
 
 // Export the functions.
@@ -709,8 +770,11 @@ window.Adw = {
   createCheckbox: createAdwCheckbox,
   createRadioButton: createAdwRadioButton,
   createListBox: createAdwListBox,
-  toggleTheme: toggleTheme,
-  // loadSavedTheme: loadSavedTheme, // Expose if manual trigger is needed
+  toggleTheme: toggleTheme, // This is now the wrapped version
+  getAccentColors: getAccentColors,
+  setAccentColor: setAccentColor,
+  // loadSavedAccentColor, // Not typically exposed, called by loadSavedTheme/toggleTheme
+  // loadSavedTheme, // Not typically exposed, called on DOMContentLoaded
 };
 
 // AdwViewSwitcher
@@ -851,5 +915,5 @@ function createAdwFlap(options = {}) {
 
 window.Adw.createFlap = createAdwFlap; // Add to exports
 
-
+// Ensure loadSavedTheme is called, which now also handles accent color loading.
 window.addEventListener("DOMContentLoaded", loadSavedTheme);
