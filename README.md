@@ -310,6 +310,20 @@ Creates a view switcher with a button bar and content area.
   // viewSwitcher.setActiveView("Settings");
   ```
 
+### `Adw.createAvatar(options = {})`
+Displays an image, text initials, or custom content as a circular avatar.
+- **`options`**: `object`
+    - `size` (number, default: 48): Diameter of the avatar in pixels.
+    - `imageSrc` (string): URL for the avatar image.
+    - `text` (string): Fallback text used to generate initials if no image or if image fails to load. Also used for default alt text.
+    - `customFallback` (HTMLElement): A custom DOM element to display as fallback.
+    - `alt` (string): Alt text for the image.
+- **Example:**
+  ```javascript
+  const avatar1 = Adw.createAvatar({ text: "Jules Verne", size: 64 });
+  const avatar2 = Adw.createAvatar({ imageSrc: "path/to/image.png", text: "User Name", size: 48 });
+  ```
+
 ### `Adw.createFlap(options = {})`
 Creates a two-pane layout with a collapsible "flap".
 - **`options`**: `object`
@@ -329,6 +343,80 @@ Creates a two-pane layout with a collapsible "flap".
   // const toggleFlapButton = Adw.createButton("Toggle Flap", { onClick: () => flap.toggleFlap() });
   // document.body.appendChild(toggleFlapButton);
   // document.body.appendChild(flap.element);
+  ```
+
+### Specialized ListBox Rows
+These components are designed to be used as children of `Adw.createListBox()`. They provide pre-defined structures for common list item patterns.
+
+#### `Adw.createActionRow(options = {})`
+A row for `AdwListBox` that can be activated, often used to trigger an action or navigate.
+- **`options`**: `object`
+    - `title` (string): Main text.
+    - `subtitle` (string, optional): Secondary text displayed below the title.
+    - `iconHTML` (string, optional): SVG string or icon font class for an icon displayed at the start of the row.
+    - `onClick` (function, optional): Makes the row activatable and triggers this callback.
+    - `showChevron` (boolean, default: `true`): If `onClick` is provided, displays a chevron arrow at the end of the row.
+- **Example:**
+  ```javascript
+  const settingsAction = Adw.createActionRow({
+      title: "Open Settings",
+      subtitle: "Configure application preferences",
+      onClick: () => console.log("Settings clicked")
+  });
+  ```
+
+#### `Adw.createEntryRow(options = {})`
+A row for `AdwListBox` that embeds a label and an `AdwEntry` (text input field).
+- **`options`**: `object`
+    - `title` (string): Label for the entry.
+    - `entryOptions` (object, optional): Options passed directly to `Adw.createEntry()`.
+    - `labelForEntry` (boolean, default: `true`): If true, links the title label to the entry using `for`/`id` attributes for accessibility.
+- **Example:**
+  ```javascript
+  const usernameRow = Adw.createEntryRow({
+      title: "Username:",
+      entryOptions: { placeholder: "Enter your username" }
+  });
+  ```
+
+#### `Adw.createExpanderRow(options = {})`
+A row for `AdwListBox` that can expand to show or hide additional content.
+- **`options`**: `object`
+    - `title` (string): Text displayed on the clickable part of the row.
+    - `subtitle` (string, optional): Secondary text on the clickable part.
+    - `expanded` (boolean, default: `false`): Initial expanded state.
+    - `content` (HTMLElement): The DOM element to show or hide when expanded.
+- **Example:**
+  ```javascript
+  const detailsContent = Adw.createLabel("Some detailed information here.");
+  const advancedOptions = Adw.createExpanderRow({
+      title: "Advanced Options",
+      subtitle: "Click to see more",
+      content: detailsContent
+  });
+  ```
+
+#### `Adw.createComboRow(options = {})`
+A row for `AdwListBox` that includes a label and a dropdown/select menu.
+- **`options`**: `object`
+    - `title` (string): Label for the combo row.
+    - `subtitle` (string, optional): Secondary text.
+    - `selectOptions` (Array<string|{label: string, value: string}>): Options for the `<select>` element.
+    - `selectedValue` (string|number, optional): The value of the initially selected option.
+    - `onChanged` (function, optional): Callback when the selected value changes. Receives the new value.
+    - `disabled` (boolean, default: `false`): Disables the select element.
+- **Example:**
+  ```javascript
+  const qualityCombo = Adw.createComboRow({
+      title: "Video Quality",
+      selectOptions: [
+          {label: "Low (480p)", value: "480p"},
+          {label: "Medium (720p)", value: "720p"},
+          {label: "High (1080p)", value: "1080p"}
+      ],
+      selectedValue: "720p",
+      onChanged: (value) => console.log("Quality set to:", value)
+  });
   ```
 
 ## Theming

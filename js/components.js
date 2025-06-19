@@ -773,12 +773,30 @@ window.Adw = {
   toggleTheme: toggleTheme, // This is now the wrapped version
   getAccentColors: getAccentColors,
   setAccentColor: setAccentColor,
-  // loadSavedAccentColor, // Not typically exposed, called by loadSavedTheme/toggleTheme
-  // loadSavedTheme, // Not typically exposed, called on DOMContentLoaded
+  // loadSavedAccentColor, // Not typically exposed
+  // loadSavedTheme, // Not typically exposed
+
+  // New Row Types
+  createActionRow: createAdwActionRow,
+  createEntryRow: createAdwEntryRow,
+  createExpanderRow: createAdwExpanderRow,
+  createComboRow: createAdwComboRow,
+  createAvatar: createAdwAvatar,
 };
 
 // AdwViewSwitcher
+/**
+ * Creates an Adwaita-style ViewSwitcher.
+ * @param {object} [options={}] - Configuration options.
+ * @param {Array<{name: string, content: HTMLElement|string}>} [options.views=[]] - Array of view objects.
+ *        Each object: { name: "View Name", content: HTMLElement or HTML string for the view's content }
+ *        SECURITY: If content is an HTML string, ensure it's trusted/sanitized by the caller.
+ * @param {string} [options.activeViewName] - The name of the initially active view. Defaults to the first view.
+ * @param {function} [options.onViewChanged] - Callback function when the active view changes, receives view name.
+ * @returns {HTMLDivElement & {setActiveView: function(string): void}} The ViewSwitcher element with a method to set view.
+ */
 function createAdwViewSwitcher(options = {}) {
+  const opts = options || {};
   const switcherElement = document.createElement("div");
   switcherElement.classList.add("adw-view-switcher");
 
@@ -788,20 +806,27 @@ function createAdwViewSwitcher(options = {}) {
   const contentContainer = document.createElement("div");
   contentContainer.classList.add("adw-view-switcher-content");
 
-  const views = options.views || [];
+  const views = Array.isArray(opts.views) ? opts.views : [];
+  if (views.length === 0) {
+    console.warn("AdwViewSwitcher: No views provided.");
+  }
   let currentActiveButton = null;
   let currentActiveViewElement = null;
 
   views.forEach((view, index) => {
-    // Create content element for the view
+    if (!view || typeof view.name !== 'string' || !view.content) {
+        console.warn("AdwViewSwitcher: Invalid view object at index", index, view);
+        return; // Skip invalid view object
+    }
+
     const viewContentElement = view.content instanceof Node ? view.content : document.createElement('div');
-    if (!(view.content instanceof Node)) { // If raw content, set it (e.g. string)
+    if (!(view.content instanceof Node)) {
+        // SECURITY: Caller is responsible for sanitizing HTML strings passed as view.content
         viewContentElement.innerHTML = view.content;
     }
-    viewContentElement.dataset.viewName = view.name; // Store name for identification
+    viewContentElement.dataset.viewName = view.name;
     contentContainer.appendChild(viewContentElement);
 
-    // Create button for the view
     const button = Adw.createButton(view.name, {
       onClick: () => {
         if (currentActiveButton) {
@@ -817,18 +842,15 @@ function createAdwViewSwitcher(options = {}) {
         currentActiveButton = button;
         currentActiveViewElement = viewContentElement;
 
-        if (options.onViewChanged) {
-          options.onViewChanged(view.name);
+        if (typeof opts.onViewChanged === 'function') {
+          opts.onViewChanged(view.name);
         }
       },
-      // Use flat buttons for a more typical view switcher look, if desired
-      // flat: true
     });
-    button.dataset.viewName = view.name; // Store name for identification
+    button.dataset.viewName = view.name;
     bar.appendChild(button);
 
-    // Set initial active view
-    if ((options.activeViewName && view.name === options.activeViewName) || (!options.activeViewName && index === 0)) {
+    if ((opts.activeViewName && view.name === opts.activeViewName) || (!opts.activeViewName && index === 0)) {
       button.classList.add("active");
       viewContentElement.classList.add("active-view");
       currentActiveButton = button;
@@ -839,81 +861,440 @@ function createAdwViewSwitcher(options = {}) {
   switcherElement.appendChild(bar);
   switcherElement.appendChild(contentContainer);
 
-  // Method to programmatically switch view
   switcherElement.setActiveView = (viewName) => {
     const buttonToActivate = Array.from(bar.children).find(btn => btn.dataset.viewName === viewName);
-    if (buttonToActivate) {
-      buttonToActivate.click(); // Simulate click to trigger the view change logic
+    if (buttonToActivate && typeof buttonToActivate.click === 'function') {
+      buttonToActivate.click();
+    } else {
+        console.warn(`AdwViewSwitcher: View with name "${viewName}" not found or button not clickable.`);
     }
   };
 
   return switcherElement;
 }
-
-
-window.Adw.createViewSwitcher = createAdwViewSwitcher; // Add to exports
+window.Adw.createViewSwitcher = createAdwViewSwitcher;
 
 // AdwFlap
+/**
+ * Creates an Adwaita-style Flap component.
+ * @param {object} [options={}] - Configuration options.
+ * @param {HTMLElement} [options.flapContent] - The content for the flap area.
+ *                                              SECURITY: Ensure this content is trusted/sanitized.
+ * @param {HTMLElement} [options.mainContent] - The content for the main area.
+ *                                              SECURITY: Ensure this content is trusted/sanitized.
+ * @param {boolean} [options.isFolded=false] - Initial folded state.
+ * @param {string} [options.flapWidth] - Custom width for the flap (e.g., "250px"). Sets CSS variable.
+ * @param {string} [options.transitionSpeed] - Custom transition speed (e.g., "0.3s"). Sets CSS variable.
+ * @returns {{element: HTMLDivElement, toggleFlap: function(boolean?): void, isFolded: function(): boolean, setFolded: function(boolean): void}}
+ */
 function createAdwFlap(options = {}) {
+  const opts = options || {};
   const flapElement = document.createElement("div");
   flapElement.classList.add("adw-flap");
 
   const flapContentElement = document.createElement("div");
   flapContentElement.classList.add("adw-flap-flap-content");
-  if (options.flapContent) {
-    flapContentElement.appendChild(options.flapContent);
+  if (opts.flapContent instanceof Node) {
+    flapContentElement.appendChild(opts.flapContent);
+  } else if (opts.flapContent) {
+    console.warn("AdwFlap: options.flapContent should be a DOM element.");
   }
 
   const mainContentElement = document.createElement("div");
   mainContentElement.classList.add("adw-flap-main-content");
-  if (options.mainContent) {
-    mainContentElement.appendChild(options.mainContent);
+  if (opts.mainContent instanceof Node) {
+    mainContentElement.appendChild(opts.mainContent);
+  } else if (opts.mainContent) {
+     console.warn("AdwFlap: options.mainContent should be a DOM element.");
   }
 
   flapElement.appendChild(flapContentElement);
   flapElement.appendChild(mainContentElement);
 
-  let isFolded = options.isFolded || false;
-  if (isFolded) {
+  let currentIsFolded = !!opts.isFolded; // Ensure boolean
+  if (currentIsFolded) {
     flapElement.classList.add("folded");
   }
 
-  function toggleFlap(explicitState) {
-    if (typeof explicitState === 'boolean') {
-        isFolded = explicitState;
-    } else {
-        isFolded = !isFolded;
-    }
-
-    if (isFolded) {
+  function setFoldState(newState) {
+    currentIsFolded = newState;
+    if (currentIsFolded) {
       flapElement.classList.add("folded");
     } else {
       flapElement.classList.remove("folded");
     }
-    // Dispatch an event when the fold state changes
-    const event = new CustomEvent('foldchanged', { detail: { folded: isFolded } });
+    const event = new CustomEvent('foldchanged', { detail: { folded: currentIsFolded } });
     flapElement.dispatchEvent(event);
   }
 
-  // Optional: Add a CSS variable for flap width if provided in options
-  if (options.flapWidth) {
-    flapElement.style.setProperty('--adw-flap-width', options.flapWidth);
-  }
-   if (options.transitionSpeed) {
-    flapElement.style.setProperty('--adw-flap-transition-speed', options.transitionSpeed);
+  function toggleFlap(explicitState) {
+    if (typeof explicitState === 'boolean') {
+        setFoldState(explicitState);
+    } else {
+        setFoldState(!currentIsFolded);
+    }
   }
 
+  if (opts.flapWidth) {
+    flapElement.style.setProperty('--adw-flap-width', opts.flapWidth);
+  }
+  if (opts.transitionSpeed) {
+    flapElement.style.setProperty('--adw-flap-transition-speed', opts.transitionSpeed);
+  }
 
-  // Return the main element and the toggle function
   return {
     element: flapElement,
     toggleFlap: toggleFlap,
-    isFolded: () => isFolded, // Method to get current state
-    setFolded: (state) => toggleFlap(state) // Method to set state
+    isFolded: () => currentIsFolded,
+    setFolded: setFoldState
   };
 }
+window.Adw.createFlap = createAdwFlap;
 
-window.Adw.createFlap = createAdwFlap; // Add to exports
+// AdwAvatar
+/**
+ * Creates an Adwaita-style Avatar.
+ * @param {object} [options={}] - Configuration options for the avatar.
+ * @param {number} [options.size=48] - Diameter of the avatar in pixels.
+ * @param {string} [options.imageSrc] - URL for an image.
+ * @param {string} [options.text] - Fallback text (e.g., initials), used if imageSrc is missing or fails to load.
+ * @param {HTMLElement} [options.customFallback] - Custom DOM element for fallback if image fails and text is not desired.
+ * @param {string} [options.alt] - Alt text for the image. Defaults to `options.text` or "User avatar" if not provided.
+ * @returns {HTMLSpanElement} The created avatar element.
+ */
+function createAdwAvatar(options = {}) {
+  const opts = options || {};
+  const avatarElement = document.createElement("span");
+  avatarElement.classList.add("adw-avatar");
+
+  const size = typeof opts.size === 'number' && opts.size > 0 ? opts.size : 48;
+  avatarElement.style.width = `${size}px`;
+  avatarElement.style.height = `${size}px`;
+
+  function showFallback() {
+    while (avatarElement.firstChild) {
+        avatarElement.removeChild(avatarElement.firstChild);
+    }
+
+    if (opts.customFallback instanceof Node) {
+      avatarElement.appendChild(opts.customFallback);
+    } else if (opts.text && typeof opts.text === 'string' && opts.text.trim() !== "") {
+      const textSpan = document.createElement("span");
+      textSpan.classList.add("adw-avatar-text");
+
+      let initials = "";
+      const words = opts.text.trim().split(/\s+/);
+      if (words.length >= 2) {
+        initials = (words[0][0] || "") + (words[1][0] || "");
+      } else if (words.length === 1 && words[0].length > 0) {
+        initials = words[0].substring(0, 2);
+      } else {
+        initials = opts.text.substring(0,2);
+      }
+      initials = initials.toUpperCase();
+
+      textSpan.textContent = initials;
+
+      const fontSize = Math.max(8, Math.floor(size / 2.5));
+      textSpan.style.fontSize = `${fontSize}px`;
+
+      avatarElement.appendChild(textSpan);
+    }
+  }
+
+  if (opts.imageSrc && typeof opts.imageSrc === 'string') {
+    const img = document.createElement("img");
+    img.src = opts.imageSrc;
+    img.alt = opts.alt || opts.text || "User avatar";
+
+    img.onload = () => {
+      while (avatarElement.firstChild) {
+          avatarElement.removeChild(avatarElement.firstChild);
+      }
+      avatarElement.appendChild(img);
+    };
+    img.onerror = () => {
+      console.warn(`AdwAvatar: Image failed to load from ${opts.imageSrc}. Using fallback.`);
+      showFallback();
+    };
+  } else {
+    showFallback();
+  }
+
+  return avatarElement;
+}
+window.Adw.createAvatar = createAdwAvatar;
+
+/**
+ * Creates an Adwaita-style Action Row.
+ * Typically used within a ListBox for navigation or actions.
+ * @param {object} [options={}] - Configuration options.
+ * @param {string} options.title - The main title text for the row.
+ * @param {string} [options.subtitle] - Optional subtitle text displayed below the title.
+ * @param {string} [options.iconHTML] - Optional HTML string for an SVG icon.
+ *                                      SECURITY: Ensure this HTML is trusted/sanitized by the caller.
+ * @param {function} [options.onClick] - Optional click handler. If provided, row becomes interactive.
+ * @param {boolean} [options.showChevron=true] - If true and onClick is present, shows a chevron icon.
+ * @returns {HTMLDivElement} The created ActionRow element (which is an AdwRow).
+ */
+function createAdwActionRow(options = {}) {
+    const opts = options || {};
+    const rowChildren = [];
+
+    if (opts.iconHTML && typeof opts.iconHTML === 'string') {
+        const iconSpan = document.createElement("span");
+        iconSpan.classList.add("adw-action-row-icon");
+        // SECURITY: User of the framework is responsible for sanitizing HTML if opts.iconHTML can be user-supplied.
+        iconSpan.innerHTML = opts.iconHTML;
+        rowChildren.push(iconSpan);
+    }
+
+    const textContentDiv = document.createElement("div");
+    textContentDiv.classList.add("adw-action-row-text-content");
+
+    const titleLabel = Adw.createLabel(opts.title || "", { htmlTag: "span" }); // Use span for title
+    titleLabel.classList.add("adw-action-row-title");
+    textContentDiv.appendChild(titleLabel);
+
+    if (opts.subtitle && typeof opts.subtitle === 'string') {
+        const subtitleLabel = Adw.createLabel(opts.subtitle, { htmlTag: "span" }); // Use span for subtitle
+        subtitleLabel.classList.add("adw-action-row-subtitle");
+        textContentDiv.appendChild(subtitleLabel);
+    }
+    rowChildren.push(textContentDiv);
+
+    const showChevron = opts.showChevron !== false; // Default to true if onClick is present
+    if (typeof opts.onClick === 'function' && showChevron) {
+        const chevronSpan = document.createElement("span");
+        chevronSpan.classList.add("adw-action-row-chevron");
+        // Chevron content is typically handled by CSS ::after pseudo-element in SCSS
+        rowChildren.push(chevronSpan);
+    }
+
+    const rowOptions = {
+        children: rowChildren,
+        interactive: typeof opts.onClick === 'function',
+        onClick: opts.onClick // Pass onClick to AdwRow for interactive styling and ARIA
+    };
+
+    const actionRow = Adw.createRow(rowOptions);
+    actionRow.classList.add("adw-action-row");
+    // AdwRow's interactive option already handles tabindex and role="button"
+
+    return actionRow;
+}
+window.Adw.createActionRow = createAdwActionRow;
+
+/**
+ * Creates an Adwaita-style Entry Row.
+ * Displays a title label alongside an AdwEntry.
+ * @param {object} [options={}] - Configuration options.
+ * @param {string} options.title - The title label for the entry.
+ * @param {object} [options.entryOptions={}] - Options object to pass to `Adw.createEntry`.
+ * @param {boolean} [options.labelForEntry=true] - If true, associates the title label with the entry using `for` attribute.
+ * @returns {HTMLDivElement} The created EntryRow element (which is an AdwRow).
+ */
+function createAdwEntryRow(options = {}) {
+    const opts = options || {};
+    const rowChildren = [];
+    const entryOptions = opts.entryOptions || {};
+
+    let entryId;
+    if (opts.labelForEntry !== false) { // Default to true
+        entryId = entryOptions.id || `adw-entry-${Date.now()}-${Math.random().toString(36).substring(2,7)}`;
+        if (!entryOptions.id) {
+            entryOptions.id = entryId; // Ensure entry gets the ID
+        }
+    }
+
+    const titleLabel = Adw.createLabel(opts.title || "", {
+        htmlTag: "label", // Ensure it's a label if labelForEntry is true
+        for: entryId // Will be undefined if labelForEntry is false or entryId not set
+    });
+    titleLabel.classList.add("adw-entry-row-title");
+    rowChildren.push(titleLabel);
+
+    const entryElement = Adw.createEntry(entryOptions);
+    entryElement.classList.add("adw-entry-row-entry");
+    rowChildren.push(entryElement);
+
+    const entryRow = Adw.createRow({ children: rowChildren });
+    entryRow.classList.add("adw-entry-row");
+
+    return entryRow;
+}
+window.Adw.createEntryRow = createAdwEntryRow;
+
+/**
+ * Creates an Adwaita-style Expander Row.
+ * A row that can be clicked to expand/collapse and show more content.
+ * @param {object} [options={}] - Configuration options.
+ * @param {string} options.title - The main title text for the row.
+ * @param {string} [options.subtitle] - Optional subtitle text.
+ * @param {boolean} [options.expanded=false] - Initial expanded state.
+ * @param {HTMLElement} options.content - The DOM element to show/hide.
+ *                                        SECURITY: Ensure this content is trusted/sanitized by the caller.
+ * @returns {HTMLDivElement} The created ExpanderRow wrapper element.
+ */
+function createAdwExpanderRow(options = {}) {
+    const opts = options || {};
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("adw-expander-row-wrapper");
+
+    const rowChildren = [];
+
+    const textContentDiv = document.createElement("div");
+    textContentDiv.classList.add("adw-expander-row-text-content");
+
+    const titleLabel = Adw.createLabel(opts.title || "", { htmlTag: "span" });
+    titleLabel.classList.add("adw-expander-row-title");
+    textContentDiv.appendChild(titleLabel);
+
+    if (opts.subtitle && typeof opts.subtitle === 'string') {
+        const subtitleLabel = Adw.createLabel(opts.subtitle, { htmlTag: "span" });
+        subtitleLabel.classList.add("adw-expander-row-subtitle");
+        textContentDiv.appendChild(subtitleLabel);
+    }
+    rowChildren.push(textContentDiv);
+
+    const expanderIcon = document.createElement("span");
+    expanderIcon.classList.add("adw-expander-row-icon");
+    expanderIcon.setAttribute("aria-hidden", "true");
+    rowChildren.push(expanderIcon);
+
+    const contentId = `adw-expander-content-${Date.now()}-${Math.random().toString(36).substring(2,7)}`;
+
+    const clickableRow = Adw.createRow({
+        children: rowChildren,
+        interactive: true,
+        onClick: () => toggleExpansion()
+    });
+    clickableRow.classList.add("adw-expander-row");
+    clickableRow.setAttribute("aria-expanded", opts.expanded ? "true" : "false");
+    clickableRow.setAttribute("aria-controls", contentId);
+
+    const contentDiv = document.createElement("div");
+    contentDiv.classList.add("adw-expander-row-content");
+    contentDiv.id = contentId;
+    if (opts.content instanceof Node) {
+        contentDiv.appendChild(opts.content);
+    } else if (opts.content) {
+        // SECURITY: User responsible for sanitizing HTML string if passed
+        console.warn("AdwExpanderRow: content should be an HTMLElement. String content might be insecure if not sanitized.");
+        const tempContent = document.createElement('div');
+        tempContent.innerHTML = opts.content;
+        contentDiv.appendChild(tempContent);
+    }
+
+    let isExpanded = !!opts.expanded;
+
+    function toggleExpansion() {
+        isExpanded = !isExpanded;
+        clickableRow.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+        if (isExpanded) {
+            clickableRow.classList.add("expanded");
+            contentDiv.classList.add("expanded");
+            // For max-height animation, set it to scrollHeight after a brief delay to allow rendering
+            // requestAnimationFrame(() => {
+            //    requestAnimationFrame(() => { // Double RAF for some rendering engines
+            //      contentDiv.style.maxHeight = contentDiv.scrollHeight + "px";
+            //    });
+            // });
+        } else {
+            clickableRow.classList.remove("expanded");
+            contentDiv.classList.remove("expanded");
+            // contentDiv.style.maxHeight = "0"; // If using max-height animation
+        }
+    }
+
+    if (isExpanded) {
+        clickableRow.classList.add("expanded");
+        contentDiv.classList.add("expanded");
+        // For initial state if using max-height animation, this is tricky without JS layout calculation
+        // For simplicity with pure CSS transition on max-height, it might jump open initially.
+        // Or, set a very large max-height in CSS for .expanded.
+    }
+
+    wrapper.appendChild(clickableRow);
+    wrapper.appendChild(contentDiv);
+
+    return wrapper;
+}
+window.Adw.createExpanderRow = createAdwExpanderRow;
+
+/**
+ * Creates an Adwaita-style Combo Row.
+ * Displays a title label alongside an HTML <select> element.
+ * @param {object} [options={}] - Configuration options.
+ * @param {string} options.title - The title label for the combo row.
+ * @param {string} [options.subtitle] - Optional subtitle text.
+ * @param {Array<string|{label: string, value: string}>} [options.selectOptions=[]] -
+ *        Array of options for the select element. Can be strings or objects {label, value}.
+ * @param {string} [options.selectedValue] - The initially selected value.
+ * @param {function} [options.onChanged] - Callback function when the select value changes.
+ * @param {boolean} [options.disabled=false] - If true, disables the select element.
+ * @returns {HTMLDivElement} The created ComboRow element (which is an AdwRow).
+ */
+function createAdwComboRow(options = {}) {
+    const opts = options || {};
+    const rowChildren = [];
+
+    const textContentDiv = document.createElement("div");
+    textContentDiv.classList.add("adw-combo-row-text-content");
+
+    const titleLabel = Adw.createLabel(opts.title || "", { htmlTag: "span" });
+    titleLabel.classList.add("adw-combo-row-title");
+    textContentDiv.appendChild(titleLabel);
+
+    if (opts.subtitle && typeof opts.subtitle === 'string') {
+        const subtitleLabel = Adw.createLabel(opts.subtitle, { htmlTag: "span" });
+        subtitleLabel.classList.add("adw-combo-row-subtitle");
+        textContentDiv.appendChild(subtitleLabel);
+    }
+    rowChildren.push(textContentDiv);
+
+    const selectElement = document.createElement("select");
+    selectElement.classList.add("adw-combo-row-select");
+
+    if (Array.isArray(opts.selectOptions)) {
+        opts.selectOptions.forEach(opt => {
+            const optionElement = document.createElement("option");
+            if (typeof opt === 'string') {
+                optionElement.value = opt;
+                optionElement.textContent = opt;
+            } else if (typeof opt === 'object' && opt !== null && opt.hasOwnProperty('value') && opt.hasOwnProperty('label')) {
+                optionElement.value = opt.value;
+                optionElement.textContent = opt.label;
+            }
+            if (opts.selectedValue === optionElement.value) {
+                optionElement.selected = true;
+            }
+            selectElement.appendChild(optionElement);
+        });
+    }
+
+    if (typeof opts.onChanged === 'function') {
+        selectElement.addEventListener("change", (event) => {
+            opts.onChanged(event.target.value, event);
+        });
+    }
+
+    if (opts.disabled) {
+        selectElement.setAttribute("disabled", "");
+        selectElement.setAttribute("aria-disabled", "true");
+    }
+
+    rowChildren.push(selectElement);
+
+    const comboRow = Adw.createRow({ children: rowChildren });
+    comboRow.classList.add("adw-combo-row");
+    // Typically, the row itself isn't interactive like an ActionRow, interaction is with the <select>
+    // So, no 'interactive' class or onClick on the row itself by default.
+
+    return comboRow;
+}
+window.Adw.createComboRow = createAdwComboRow;
+
 
 // Ensure loadSavedTheme is called, which now also handles accent color loading.
 window.addEventListener("DOMContentLoaded", loadSavedTheme);
