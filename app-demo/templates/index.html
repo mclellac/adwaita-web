@@ -9,7 +9,7 @@
                 <adw-list-box>
                     {% for post in posts %}
                         <adw-action-row title="{{ post.title }}"
-                                        subtitle="By: {{ post.author.username if post.author else 'Unknown Author' }} (ID: {{ post.id }})"
+                                        subtitle="By: {{ post.author.username if post.author else 'Unknown Author' }} on {{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }} (ID: {{ post.id }})"
                                         href="{{ url_for('view_post', post_id=post.id) }}"></adw-action-row>
                     {% endfor %}
                 </adw-list-box>
