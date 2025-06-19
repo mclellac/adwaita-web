@@ -1,12 +1,14 @@
+#!/usr/bin/env python
 # app-demo/setup_db.py
 # This script handles the initial setup of the database,
 # including table creation and initial user setup.
 
-import getpass # For hidden password input
+import getpass  # For hidden password input
 
 # Assuming this script is run from the 'app-demo' directory or that 'app-demo' is in PYTHONPATH
 # so that 'app' (app-demo/app.py) can be imported directly.
 from app import app, db, init_extensions, User
+
 
 def create_tables(flask_app):
     """
@@ -19,6 +21,7 @@ def create_tables(flask_app):
         db.create_all()
         print("Database tables checked/created.")
 
+
 def create_initial_user(flask_app):
     """
     Handles the creation or password update of an initial (admin) user.
@@ -28,9 +31,11 @@ def create_initial_user(flask_app):
 
     default_username = "admin"
     try:
-        username_input = input(f"Enter username for the initial user (default: {default_username}): ")
+        username_input = input(
+            f"Enter username for the initial user (default: {default_username}): "
+        )
         username = username_input if username_input else default_username
-    except EOFError: # Handle non-interactive environment
+    except EOFError:  # Handle non-interactive environment
         print(f"No input provided, using default username: {default_username}")
         username = default_username
 
@@ -40,8 +45,10 @@ def create_initial_user(flask_app):
         if existing_user:
             print(f"User '{username}' already exists.")
             try:
-                update_choice = input("Do you want to update the password for this user? (y/n): ").lower()
-                if update_choice == 'y':
+                update_choice = input(
+                    "Do you want to update the password for this user? (y/n): "
+                ).lower()
+                if update_choice == "y":
                     print(f"Updating password for user '{username}'.")
                     new_password = getpass.getpass("Enter new password: ")
                     if not new_password:
@@ -56,8 +63,8 @@ def create_initial_user(flask_app):
                     print(f"Password for user '{username}' updated successfully.")
                 else:
                     print(f"Password for user '{username}' not updated.")
-            except EOFError: # Handle non-interactive environment
-                 print("Skipping password update for existing user in non-interactive mode.")
+            except EOFError:  # Handle non-interactive environment
+                print("Skipping password update for existing user in non-interactive mode.")
             return
 
         # Create new user
@@ -72,11 +79,15 @@ def create_initial_user(flask_app):
                 print("Passwords do not match. Aborting user creation.")
                 return
 
-            profile_info_input = input(f"Enter profile information for '{username}' (optional, press Enter to skip): ")
+            profile_info_input = input(
+                f"Enter profile information for '{username}' (optional, press Enter to skip): "
+            )
             profile_info = profile_info_input if profile_info_input else None
 
-        except EOFError: # Handle non-interactive environment
-            print("Cannot create user in non-interactive mode without password. Please run interactively.")
+        except EOFError:  # Handle non-interactive environment
+            print(
+                "Cannot create user in non-interactive mode without password. Please run interactively."
+            )
             return
 
         new_user = User(username=username, profile_info=profile_info)
