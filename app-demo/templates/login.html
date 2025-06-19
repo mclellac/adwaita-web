@@ -1,30 +1,25 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
 {% block content %}
-<adw-preferences-page class="clamped">
-    <adw-preferences-group title="Login">
-        {% if error %}
-            <div class="adw-toast adw-toast-danger" role="alert" style="margin-bottom: var(--spacing-m);">
-                <p class="adw-toast-title">{{ error }}</p>
-            </div>
-        {% endif %}
-        <form method="post" action="{{ url_for('login') }}">
-            <adw-list-box style="margin-bottom: var(--spacing-m);">
-                <adw-entry-row title="Username">
-                    {# The adw-initializer.js does not seem to have a direct converter for adw-entry to input.
-                       Instead, create_post.html uses <adw-entry name="title"...> which might be custom.
-                       For now, let's assume adw-entry-row expects a standard input with adw-entry class.
-                       If adw-entry custom tag is expected, this will need adjustment.
-                       The CSS provides styles for .adw-entry directly on input/textarea.
-                    #}
-                    <input type="text" name="username" class="adw-entry" required value="{{ request.form.username if request and request.form else '' }}">
-                </adw-entry-row>
-                <adw-entry-row title="Password">
-                    <input type="password" name="password" class="adw-entry" required>
-                </adw-entry-row>
-            </adw-list-box>
+<div class="main-content-clamped">
+    <h2>Login</h2>
+    {% if error %}
+        <div class="adw-banner error visible" role="alert" style="margin-bottom: var(--spacing-m);">
+            {{ error }}
+        </div>
+    {% endif %}
+    <form method="post" action="{{ url_for('login') }}">
+        <div class="form-group">
+            <label for="username_field">Username</label>
+            <input type="text" name="username" id="username_field" class="adw-entry" required value="{{ request.form.username if request and request.form else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="password_field">Password</label>
+            <input type="password" name="password" id="password_field" class="adw-entry" required>
+        </div>
+        <div class="form-button-container">
             <adw-button type="submit" appearance="suggested">Login</adw-button>
-        </form>
-    </adw-preferences-group>
-</adw-preferences-page>
+        </div>
+    </form>
+</div>
 {% endblock %}

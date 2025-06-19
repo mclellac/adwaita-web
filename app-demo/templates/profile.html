@@ -3,7 +3,7 @@
 {% block title %}Profile: {{ user_profile.username }} - My Libadwaita Blog{% endblock %}
 
 {% block content %}
-<div class="adw-page"> <div class="adw-box adw-box-vertical align-center content-clamp" style="max-width: 600px; gap: var(--spacing-m);">
+<div class="adw-box adw-box-vertical align-center content-clamp" style="max-width: 600px; gap: var(--spacing-m); margin-left: auto; margin-right: auto;"> {# Added auto margins for clamping #}
 
         {# Avatar Display - Copied from previous version, centering via inline style is fine here #}
         {% if user_profile.profile_photo_url %}
@@ -39,9 +39,9 @@
         </div>
         {% endif %}
 
-        <adw-preferences-group title="Posts by {{ user_profile.username }}" style="margin-top: var(--spacing-l); width: 100%;">
-            {% if user_profile.posts %}
-                <adw-list-box>
+        <h2 style="margin-top: var(--spacing-l); width: 100%; text-align: center;">Posts by {{ user_profile.username }}</h2>
+            {% if user_profile.posts and user_profile.posts|length > 0 %}
+                <adw-list-box style="width: 100%;">
                     {% for post in user_profile.posts %}
                         <adw-action-row
                             title="{{ post.title }}"
@@ -53,8 +53,6 @@
             {% else %}
                 <p style="padding: var(--spacing-m); text-align: center;">This user has not made any posts yet.</p>
             {% endif %}
-        </adw-preferences-group>
 
     </div>
-</div>
 {% endblock %}

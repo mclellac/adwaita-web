@@ -26,9 +26,22 @@ adw-list-box {
 
 .form-group input[type="text"],
 .form-group input[type="password"],
-.form-group textarea {
+.form-group textarea,
+.form-group .adw-entry { /* Ensure .adw-entry class is also covered */
     width: 100%; /* Make form fields take full width of their container */
-    /* Additional styling using Adwaita variables can be added if needed */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.form-group textarea.adw-entry {
+    min-height: 150px; /* Provide a decent default minimum height */
+    /* The rows attribute will provide initial height, but min-height is a good fallback */
+}
+
+.form-button-container {
+    margin-top: var(--spacing-l, 24px);
+    display: flex;
+    gap: var(--spacing-s, 8px);
+    justify-content: flex-start; /* Align buttons to the start */
 }
 
 /* Profile page specific styles */
@@ -134,3 +147,116 @@ adw-list-box {
 .adw-avatar.size-small .adw-avatar-text {
     font-size: 0.7rem; /* Consistent with previously inline style */
 }
+
+/* Page Structure & Typography */
+.page-title { /* Used in index.html */
+    text-align: center;
+    margin-bottom: var(--spacing-l, 24px);
+    font-size: var(--font-size-xxl, 1.5rem); /* Match Adwaita H2 or use a larger title size */
+    font-weight: bold;
+}
+
+/* Standard h1/h2 styling for content pages, if not already distinct */
+.main-content-clamped h1,
+.post-view-container h1 { /* For post.html title */
+    font-size: var(--font-size-h1, 2rem); /* Adwaita H1 size */
+    margin-bottom: var(--spacing-m, 16px);
+    margin-top: var(--spacing-s, 8px); /* Adjust top margin if needed */
+}
+
+.main-content-clamped h2 { /* For create_post.html, edit_profile.html, login.html titles */
+    font-size: var(--font-size-h2, 1.5rem); /* Adwaita H2 size */
+    margin-top: var(--spacing-s, 8px);
+    margin-bottom: var(--spacing-l, 24px); /* More space before form groups */
+}
+
+
+/* Post Display Styling (post.html) */
+.post-meta-detail {
+    margin-bottom: var(--spacing-l, 24px);
+    color: var(--adw-secondary-text-color, #555); /* As per previous inline style */
+}
+
+.post-meta-detail p {
+    margin-bottom: var(--spacing-xxs, 2px); /* Fine-tune spacing for meta items */
+    font-size: 0.9em;
+}
+
+.post-meta-detail small {
+    font-size: 1em; /* Inherit from parent p's 0.9em */
+}
+
+.post-content-display { /* Changed from .post-content to avoid generic conflicts */
+    margin-bottom: var(--spacing-xl, 32px);
+    line-height: 1.7; /* Slightly more line height for long text */
+}
+
+.post-content-display p {
+    margin-bottom: var(--spacing-m, 16px);
+}
+
+.post-content-display h1,
+.post-content-display h2,
+.post-content-display h3,
+.post-content-display h4,
+.post-content-display h5,
+.post-content-display h6 {
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-m);
+}
+
+
+/* Form Styling Adjustments */
+.form-group label {
+    /* font-weight: bold; -- already set */
+    /* display: block; -- already set */
+    /* margin-bottom: var(--spacing-xs); -- already set */
+    color: var(--adw-text-color); /* Ensure label color matches body text */
+}
+
+/* Ensure .adw-entry has appropriate vertical margins if needed, though form-group provides bottom margin */
+.form-group .adw-entry {
+    margin-top: var(--spacing-xxs, 2px); /* Small gap between label and input field */
+}
+
+/* File input basic styling - very limited what we can do safely cross-browser */
+.form-group input[type="file"] {
+    margin-top: var(--spacing-xxs, 2px);
+    padding: var(--spacing-s, 8px);
+    border: 1px solid var(--button-border-color, #ccc); /* Match adw-entry border if possible */
+    border-radius: var(--border-radius-default, 6px);
+    width: 100%; /* Take full width */
+    background-color: var(--view-bg-color); /* Match background of inputs */
+    color: var(--text-color);
+}
+/* Note: Styling file inputs consistently is complex. This provides basic boxing.
+   For advanced styling, JS solutions or opacity tricks are often used. */
+
+
+/* Profile Page Specifics */
+.profile-section-title { /* Used for "Posts by..." heading on profile.html */
+    text-align: center;
+    font-size: var(--font-size-h2, 1.5rem); /* Adwaita H2 size */
+    margin-top: var(--spacing-xl, 32px); /* More top margin */
+    margin-bottom: var(--spacing-m, 16px);
+    font-weight: bold;
+}
+
+/* Ensure the list box after the profile section title has enough top margin if needed */
+.profile-section-title + adw-list-box {
+    margin-top: var(--spacing-s);
+}
+
+/* Ensure form button container has enough space from last form group, already has margin-top */
+/* .form-button-container { ... } */
+
+/* Error banner in login.html is using .adw-banner.error.visible
+   These styles should come from the main Adwaita SCSS (_banner.scss).
+   Ensure variables like --error-bg-color, --error-border-color, --error-fg-color are defined
+   in _variables.scss for this to look correct.
+   If a more specific override is needed for login page only, it can be added here.
+   Example:
+   .login-error-banner { // If you add this class to the banner in login.html
+       background-color: var(--my-custom-error-bg, pink);
+   }
+*/

@@ -314,6 +314,75 @@ document.addEventListener('DOMContentLoaded', () => {
     expanderRowElement.replaceWith(newExpanderRow.element);
   });
 
+  // Handle <adw-password-entry-row>
+  document.querySelectorAll('adw-password-entry-row').forEach(passwordEntryRowElement => {
+    const options = {
+      title: passwordEntryRowElement.getAttribute('title') || 'Password',
+      entryOptions: {}
+    };
+    const originalAttrs = getAttributes(passwordEntryRowElement);
+
+    // Collect common input attributes from the <adw-password-entry-row> tag itself
+    // These will be passed to the Adw.createEntry within createAdwPasswordEntryRow
+    const commonInputAttrs = ['name', 'placeholder', 'value', 'id', 'required', 'disabled'];
+    commonInputAttrs.forEach(attr => {
+      if (passwordEntryRowElement.hasAttribute(attr)) {
+        options.entryOptions[attr] = passwordEntryRowElement.getAttribute(attr);
+      }
+    });
+     if (passwordEntryRowElement.hasAttribute('required')) {
+        options.entryOptions.required = true;
+    }
+    if (passwordEntryRowElement.hasAttribute('disabled')) {
+        options.entryOptions.disabled = true;
+    }
+
+
+    options.labelForEntry = passwordEntryRowElement.getAttribute('label-for-entry') !== "false";
+
+    const newPasswordEntryRow = window.Adw.createAdwPasswordEntryRow(options);
+    // Apply any remaining attributes from the original custom tag to the new row element
+    for (const attrName in originalAttrs) {
+      if (!['title', 'class', ...commonInputAttrs, 'label-for-entry'].includes(attrName) && !newPasswordEntryRow.hasAttribute(attrName)) {
+        newPasswordEntryRow.setAttribute(attrName, originalAttrs[attrName]);
+      } else if (attrName === 'class') {
+        newPasswordEntryRow.className += ' ' + originalAttrs[attrName];
+      }
+    }
+    passwordEntryRowElement.replaceWith(newPasswordEntryRow);
+  });
+
+  // Handle <adw-view-switcher>
+  document.querySelectorAll('adw-view-switcher').forEach(viewSwitcherElement => {
+    const options = {
+      views: [],
+      activeViewName: viewSwitcherElement.getAttribute('active-view-name') || null
+    };
+    const originalAttrs = getAttributes(viewSwitcherElement);
+
+    Array.from(viewSwitcherElement.children).forEach(childElement => {
+      if (childElement.hasAttribute('data-view-name')) {
+        options.views.push({
+          name: childElement.getAttribute('data-view-name'),
+          content: childElement // Pass the element itself as content
+        });
+      } else {
+        console.warn("Child element in adw-view-switcher is missing 'data-view-name' attribute:", childElement);
+      }
+    });
+    // Children are moved by createAdwViewSwitcher, so no need to remove them from original element explicitly before replaceWith
+
+    const newViewSwitcher = window.Adw.createViewSwitcher(options);
+    for (const attrName in originalAttrs) {
+      if (!['active-view-name', 'class'].includes(attrName) && !newViewSwitcher.hasAttribute(attrName)) {
+        newViewSwitcher.setAttribute(attrName, originalAttrs[attrName]);
+      } else if (attrName === 'class') {
+        newViewSwitcher.className += ' ' + originalAttrs[attrName];
+      }
+    }
+    viewSwitcherElement.replaceWith(newViewSwitcher);
+  });
+
 
   // --- GENERIC HANDLERS (SHOULD BE LAST OR CAREFUL WITH SPECIFICITY) ---
   const simpleReplaceTags = ['adw-application-window', 'adw-page'];
