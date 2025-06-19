@@ -130,6 +130,26 @@ def test_login_failed_nonexistent_user(client):
     assert b"Invalid username or password." in response.data
     assert b"Logout" not in response.data
 
+# --- Settings Page Tests ---
+def test_settings_page_loads_authenticated(client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    response = client.get(url_for('settings_page'))
+    assert response.status_code == 200
+    assert b"Settings" in response.data # Page Title
+    assert b"Appearance" in response.data # Preferences Group
+    assert b"Accent Color" in response.data # Action Row for Accent Color
+    assert b"Dark Mode" in response.data # Action Row for Theme
+
+def test_settings_page_redirects_unauthenticated(client):
+    response = client.get(url_for('settings_page')) # No login
+    assert response.status_code == 302 # Should redirect
+    with app.app_context(): # url_for needs app context for redirect check
+        expected_redirect_url = url_for('login', _external=False)
+    assert response.location == expected_redirect_url
+
+
 # --- Blog Post Creation Tests ---
 
 # Renamed from test_create_post_post_and_verify and enhanced

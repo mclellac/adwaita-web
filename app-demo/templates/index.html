@@ -3,21 +3,33 @@
 {% block title %}Blog Posts{% endblock %}
 
 {% block content %}
-    <div class="content-clamp">
-        <adw-preferences-page>
-            <adw-preferences-group title="All Blog Posts">
-                {% if posts %}
-                <adw-list-box>
-                    {% for post in posts %}
-                        <adw-action-row title="{{ post.title }}"
-                                        subtitle="By: {{ post.author.username if post.author else 'Unknown Author' }} on {{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }} (ID: {{ post.id }})"
-                                        href="{{ url_for('view_post', post_id=post.id) }}"></adw-action-row>
-                    {% endfor %}
-                </adw-list-box>
-            {% else %}
-                <p>No posts yet. <a href="{{ url_for('create_post') }}">Create one!</a></p>
-            {% endif %}
-        </adw-preferences-group>
-    </adw-preferences-page>
+<div style="margin-bottom: var(--spacing-xl, 32px);"> {# Replaces adw-preferences-page, provides some top/bottom margin if needed #}
+    {# We can use adw-preferences-group for its title styling, or a simple h1/h2 #}
+    <div class="adw-preferences-group-title" style="text-align: center; font-size: var(--font-size-xxl, 1.5rem); margin-bottom: var(--spacing-l, 24px);">All Blog Posts</div>
+
+    {% if posts %}
+        <div> {# This div will effectively be the container for cards, replacing adw-list-box functionality #}
+            {% for post in posts %}
+            <div class="blog-post-card">
+                <h3><a href="{{ url_for('view_post', post_id=post.id) }}" class="post-title">{{ post.title }}</a></h3>
+                <p class="post-meta">
+                    By: {{ post.author.username if post.author else 'Unknown Author' }}
+                    on {{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}
+                </p>
+                {% if post.content %}
+                <p class="post-excerpt">
+                    {{ post.content | truncate(100, True) }} {# Show first 100 characters as excerpt #}
+                </p>
+                {% endif %}
+                {# Optionally, a "Read More" link could be explicit if excerpt is used,
+                   but title is already a link to the full post. #}
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center;">
+             <p>No posts yet. <a href="{{ url_for('create_post') }}">Be the first to create one!</a></p>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
