@@ -4,8 +4,9 @@
 .adw-switch {
   position: relative;
   display: inline-block;
-  width: 44px;
-  height: 24px;
+  width: 44px; // Standard width
+  height: 24px; // Standard height
+  flex-shrink: 0; // Prevent shrinking in flex layouts
 
   input {
     opacity: 0;
@@ -13,20 +14,36 @@
     height: 0;
 
     &:checked + .adw-switch-slider {
-      background-color: var(--accent-color);
+      background-color: var(--accent-bg-color); // Use accent background for ON state
     }
 
     &:checked + .adw-switch-slider:before {
-      transform: translateX(20px);
+      transform: translateX(20px); // Moves the knob to the right
     }
 
     &:disabled + .adw-switch-slider {
-      opacity: 0.5;
-      pointer-events: none;
-        background-color: var(--view-bg-color); // Use consistent disabled color
-        &:before{
-           background-color: var(--active-toggle-fg-color); // Consistent slider
-        }
+      background-color: var(--shade-color); // Muted background when disabled
+      opacity: var(--opacity-disabled, 0.5); // Apply standard disabled opacity
+      cursor: not-allowed;
+
+      &:before {
+        background-color: var(--window-bg-color); // Knob color for disabled
+        opacity: 0.7; // Make knob slightly more transparent or match parent opacity
+      }
+    }
+
+    &:disabled:checked + .adw-switch-slider {
+      background-color: var(--accent-bg-color); // Keep accent color for checked disabled
+      opacity: var(--opacity-disabled, 0.5);
+       &:before {
+        // Knob color for disabled but checked state can be same as normal checked, opacity handles the rest
+        background-color: #ffffff; // Or var(--accent-fg-color) if it's always white
+      }
+    }
+
+    &:focus-visible + .adw-switch-slider {
+      outline: 2px solid var(--accent-bg-color);
+      outline-offset: 3px; // Slightly more offset for switches
     }
   }
 
@@ -37,20 +54,48 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--active-toggle-bg-color); // Use the variable
-    border-radius: 12px; // Half of height for pill shape
-    transition: 0.2s;
+    // Default background for OFF state (usually a gray)
+    background-color: var(--shade-color); // Using shade-color for OFF state background
+    border-radius: 12px; // Pill shape (height / 2)
+    transition: background-color 0.15s ease-out, transform 0.15s ease-out;
 
-    &:before {
+    &:before { // This is the knob
       position: absolute;
       content: "";
-      height: 20px;
-      width: 20px;
-      left: 2px;
-      bottom: 2px;
-      background-color: var(--active-toggle-fg-color); // Use the variable
-      border-radius: 50%;
-      transition: 0.2s;
+      height: 20px; // Knob height
+      width: 20px;  // Knob width
+      left: 2px;    // Padding from left
+      bottom: 2px;  // Padding from bottom
+      background-color: #ffffff; // Knob color (typically white)
+      border-radius: 50%; // Circular knob
+      transition: transform 0.15s ease-out;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2); // Subtle shadow on the knob
+    }
+  }
+}
+
+.dark-theme .adw-switch,
+body.dark-theme .adw-switch {
+  input {
+    &:disabled + .adw-switch-slider {
+      // Ensure shade-color is appropriate for dark theme disabled state
+      // background-color: var(--shade-color);
+       &:before {
+        // Knob for disabled switch in dark theme could be a darker shade of white
+        // background-color: rgba(255,255,255,0.8);
+      }
+    }
+     &:disabled:checked + .adw-switch-slider {
+       &:before {
+         background-color: #ffffff; // Keep knob white for checked disabled
+      }
+    }
+  }
+  .adw-switch-slider {
+    // OFF state background for dark theme, usually a darker gray
+    background-color: var(--shade-color); // Ensure this is a good dark theme off-state color
+    &:before {
+      background-color: #ffffff; // Knob remains white
     }
   }
 }

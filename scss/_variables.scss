@@ -1,285 +1,300 @@
 // scss/_variables.scss
 
-@function RGB($r, $g, $b, $a: 1) {
-  @return rgba($r, $g, $b, $a);
-}
-
-$red_1: #f8d5d5;
-$red_2: #f3aaaa;
-$red_3: #ee8282;
-$red_4: #e85959;
-$red_5: #e33131;
-$green_1: #c5e8b0;
-$green_2: #9ed979;
-$green_3: #78ca41;
-$green_4: #52ba0a;
-$green_5: #2ba100;
-$yellow_1: #f8e5ad;
-$yellow_2: #f4d275;
-$yellow_3: #f0bf3c;
-$yellow_4: #ecb007;
-$yellow_5: #c48e05;
-$blue_1: #add8f8;
-$blue_2: #7ac4f3;
-$blue_3: #47b0ef;
-$blue_4: #3584e4;
-$blue_5: #0080e1;
-$purple_1: #e4d1f3;
-$purple_2: #d1aaf0;
-$purple_3: #be82ed;
-$purple_4: #aa59e8;
-$purple_5: #9130e3;
-$brown_1: #d8c8c1;
-$brown_2: #c4a89f;
-$brown_3: #b0887d;
-$brown_4: #9d695b;
-$brown_5: #814d3f;
-$gray_1: #f5f5f5;
-$gray_2: #eeeeee;
-$gray_3: #dddddd;
-$gray_4: #cccccc;
-$gray_5: #888888;
-$gray_6: #444444;
-$gray_7: #1e1e1e;
-
+// Adwaita-like color palette
+// Light Theme
 @mixin light-theme {
-  --destructive-bg-color: #{$red_4};
-  --destructive-fg-color: white;
-  --success-bg-color: #{$green_4};
-  --success-fg-color: white;
-  --warning-bg-color: #{$yellow_5};
-  --warning-fg-color: #{RGB(0, 0, 0, 0.8)};
-  --error-bg-color: #{$red_4};
-  --error-fg-color: white;
-  --accent-bg-color: #{$blue_4};
-  --accent-fg-color: white;
-  --window-bg-color: #{$gray_1};
-  --window-fg-color: #{RGB(0, 0, 6, 0.8)};
-  --view-bg-color: white;
-  --view-fg-color: #{RGB(0, 0, 6, 0.8)};
-  --headerbar-bg-color: white;
-  --headerbar-fg-color: #{$gray_6};
-  --headerbar-border-color: rgba(0, 0, 0, 0.1);
-  --headerbar-shade-color: rgba(0, 0, 0, 0.05);
-  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.1);
-  --sidebar-bg-color: #{$gray_2};
-  --sidebar-fg-color: #{$gray_6};
-  --sidebar-backdrop-color: #f2f2f4;
-  --sidebar-shade-color: rgba(0, 0, 0, 0.07);
-  --sidebar-border-color: rgba(0, 0, 0, 0.07);
-  --secondary-sidebar-bg-color: #{$gray_1};
-  --secondary-sidebar-fg-color: #{$gray_6};
-  --secondary-sidebar-backdrop-color: #f6f6fa;
-  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.07);
-  --secondary-sidebar-border-color: rgba(0, 0, 6, 0.07);
-  --card-bg-color: white;
-  --card-fg-color: #{RGB(0, 0, 6, 0.8)};
-  --card-shade-color: rgba(0, 0, 0, 0.07);
-  --dialog-bg-color: #fafafb;
-  --dialog-fg-color: #{RGB(0, 0, 6, 0.8)};
-  --popover-bg-color: #ffffff;
-  --popover-fg-color: #{RGB(0, 0, 6, 0.8)};
-  --popover-shade-color: rgba(0, 0, 0, 0.07);
-  --thumbnail-bg-color: #ffffff;
-  --thumbnail-fg-color: #{RGB(0, 0, 6, 0.8)};
-  --shade-color: rgba(0, 0, 0, 0.07);
-  --scrollbar-outline-color: white;
-  --headerbar-backdrop-color: var(--window-bg-color);
-  --standalone-color-oklab: "min(l, 0.6) a b";
-  --active-toggle-bg-color: #{$gray_3};
-  --active-toggle-fg-color: white;
-  --overview-bg-color: #f3f3f5;
-  --overview-fg-color: #{RGB(0, 0, 6, 0.8)};
-  --accent-color: oklab(from var(--accent-bg-color) #{var(--standalone-color-oklab)});
-  --destructive-color: oklab(from var(--destructive-bg-color) #{var(--standalone-color-oklab)});
-  --success-color: oklab(from var(--success-bg-color) #{var(--standalone-color-oklab)});
-  --warning-color: oklab(from var(--warning-bg-color) #{var(--standalone-color-oklab)});
-  --error-color: oklab(from var(--error-bg-color) #{var(--standalone-color-oklab)});
+  --accent-bg-color: #3584e4; // Blue
+  --accent-fg-color: #ffffff;
+  --destructive-bg-color: #e01b24; // Red
+  --destructive-fg-color: #ffffff;
+  --success-bg-color: #26a269; // Green
+  --success-fg-color: #ffffff;
+  --warning-bg-color: #f8c443; // Yellow
+  --warning-fg-color: rgba(0, 0, 0, 0.8);
+  --error-bg-color: #e01b24; // Red (same as destructive)
+  --error-fg-color: #ffffff;
 
-  --button-border-color: rgba(0, 0, 0, 0.2);
-  --button-bg-color: rgba(0, 0, 0, 0.05);
-  --button-fg-color: var(--view-fg-color);
-  --button-hover-bg-color: rgba(0,0,0, 0.1);
-  --button-active-bg-color: rgba(0,0,0, 0.15);
+  --window-bg-color: #f6f5f4;
+  --window-fg-color: rgba(0, 0, 0, 0.8);
+  --view-bg-color: #ffffff;
+  --view-fg-color: rgba(0, 0, 0, 0.8);
+
+  --headerbar-bg-color: #ebeae9;
+  --headerbar-fg-color: rgba(0, 0, 0, 0.8);
+  --headerbar-border-color: rgba(0, 0, 0, 0.12);
+  --headerbar-backdrop-color: var(--window-bg-color);
+  --headerbar-shade-color: rgba(0, 0, 0, 0.07); // For box-shadow
+
+  --card-bg-color: #ffffff;
+  --card-fg-color: rgba(0, 0, 0, 0.8);
+  --card-shade-color: rgba(0, 0, 0, 0.07); // For box-shadow
+
+  --popover-bg-color: #ffffff;
+  --popover-fg-color: rgba(0, 0, 0, 0.8);
+  --popover-shade-color: rgba(0, 0, 0, 0.07); // For box-shadow
+
+  --button-bg-color: #ebeae9;
+  --button-fg-color: rgba(0, 0, 0, 0.8);
+  --button-border-color: rgba(0, 0, 0, 0.12);
+  --button-hover-bg-color: #deddda;
+  --button-active-bg-color: #d1cfce;
+
   --button-flat-bg-color: transparent;
   --button-flat-hover-bg-color: rgba(0, 0, 0, 0.05);
   --button-flat-active-bg-color: rgba(0, 0, 0, 0.1);
-    --suggested-action-bg-color: var(--accent-bg-color);
+
+  --suggested-action-bg-color: var(--accent-bg-color);
   --suggested-action-fg-color: var(--accent-fg-color);
-  --suggested-action-hover-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.9);
- --suggested-action-active-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.8);
+  --suggested-action-hover-bg-color: #2a73cc; // Darken accent
+  --suggested-action-active-bg-color: #2062b5; // Further darken accent
+
   --destructive-action-bg-color: var(--destructive-bg-color);
   --destructive-action-fg-color: var(--destructive-fg-color);
-  --destructive-action-hover-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.9);
-  --destructive-action-active-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.8);
+  --destructive-action-hover-bg-color: #c91820; // Darken destructive
+  --destructive-action-active-bg-color: #b2151c; // Further darken destructive
 
-  @define-color destructive_bg_color var(--destructive-bg-color);
-  @define-color destructive_fg_color var(--destructive-fg-color);
-  @define-color success_bg_color var(--success-bg-color);
-  @define-color success_fg_color var(--success-fg-color);
-  @define-color warning_bg_color var(--warning-bg-color);
-  @define-color warning_fg_color var(--warning-fg-color);
-  @define-color error_bg_color var(--error-bg-color);
-  @define-color error_fg_color var(--error-fg-color);
-  @define-color accent_bg_color var(--accent-bg-color);
-  @define-color accent_fg_color var(--accent-fg-color);
-  @define-color window_bg_color var(--window-bg-color);
-  @define-color window_fg_color var(--window-fg-color);
-  @define-color view_bg_color var(--view-bg-color);
-  @define-color view_fg_color var(--view-fg-color);
-  @define-color headerbar_bg_color var(--headerbar-bg-color);
-  @define-color headerbar_fg_color var(--headerbar-fg-color);
-  @define-color headerbar_border_color var(--headerbar-border-color);
-  @define-color headerbar_backdrop_color var(--headerbar-backdrop-color);
-  @define-color headerbar_shade_color var(--headerbar-shade-color);
-  @define-color headerbar_darker_shade_color var(--headerbar-darker-shade-color);
-  @define-color sidebar_bg_color var(--sidebar-bg-color);
-  @define-color sidebar_fg_color var(--sidebar-fg-color);
-  @define-color sidebar_backdrop_color var(--sidebar-backdrop-color);
-  @define-color sidebar_shade_color var(--sidebar-shade-color);
-  @define-color sidebar_border_color var(--sidebar-border-color);
-  @define-color secondary_sidebar_bg_color var(--secondary-sidebar-bg-color);
-  @define-color secondary_sidebar_fg_color var(--secondary-sidebar-fg-color);
-  @define-color secondary_sidebar_backdrop_color var(--secondary-sidebar-backdrop-color);
-  @define-color secondary_sidebar_shade_color var(--secondary-sidebar-shade-color);
-  @define-color secondary_sidebar_border_color var(--secondary-sidebar-border-color);
-  @define-color card_bg_color var(--card-bg-color);
-  @define-color card_fg_color var(--card-fg-color);
-  @define-color card_shade_color var(--card-shade-color);
-  @define-color dialog_bg_color var(--dialog-bg-color);
-  @define-color dialog_fg_color var(--dialog-fg-color);
-  @define-color popover_bg_color var(--popover-bg-color);
-  @define-color popover_fg_color var(--popover-fg-color);
-  @define-color popover_shade_color var(--popover-shade-color);
-  @define-color thumbnail_bg_color var(--thumbnail-bg-color);
-  @define-color thumbnail_fg_color var(--thumbnail-fg-color);
-  @define-color shade_color var(--shade-color);
-  @define-color scrollbar_outline_color var(--scrollbar-outline-color);
+  --sidebar-bg-color: #f0efee;
+  --sidebar-fg-color: rgba(0,0,0,0.8);
+  --sidebar-border-color: rgba(0,0,0,0.12);
+  --sidebar-shade-color: rgba(0, 0, 0, 0.07);
+
+  --secondary-sidebar-bg-color: #e4e3e2; // Slightly darker than sidebar
+  --secondary-sidebar-fg-color: rgba(0,0,0,0.8);
+  --secondary-sidebar-border-color: rgba(0,0,0,0.12);
+  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.07);
+
+  --dialog-bg-color: #fdfcfb; // Slightly lighter than window
+  --dialog-fg-color: rgba(0, 0, 0, 0.8);
+
+  --thumbnail-bg-color: #ffffff; // Usually white
+  --thumbnail-fg-color: rgba(0, 0, 0, 0.8);
+
+  --shade-color: rgba(0, 0, 0, 0.07); // General purpose shade/shadow
+  --scrollbar-outline-color: #ffffff;
+  --link-color: var(--accent-bg-color);
+  --link-visited-color: #5a5a5a; // Standard visited link color
+
+  // Progress Bar
+  --progress-bar-track-color: var(--shade-color);
+  --progress-bar-fill-color: var(--accent-bg-color);
 }
 
+// Dark Theme
 @mixin dark-theme {
-  --destructive-bg-color: #{$red_4};
-  --destructive-fg-color: white;
-  --success-bg-color: #{$green_5};
-  --success-fg-color: white;
-  --warning-bg-color: #cd9309;
-  --warning-fg-color: #{RGB(0, 0, 0, 0.8)};
-  --error-bg-color: #{$red_4};
-  --error-fg-color: white;
-  --accent-bg-color: #458ee6; // Adjusted Blue
-  --accent-fg-color: white;
-  --window-bg-color: #242424; // Darker background
-  --window-fg-color: white;
-  --view-bg-color: #1e1e1e; // Darker view background
-  --view-fg-color: white;
-  --headerbar-bg-color: #2f2f2f; // Darker headerbar
-  --headerbar-fg-color: white;
-  --headerbar-border-color: rgba(255, 255, 255, 0.1);
-  --headerbar-shade-color: rgba(0, 0, 0, 0.36); // Consistent with Adwaita
-  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.72); // Darker, consistent
-  --sidebar-bg-color: #292929; // Darker sidebar
-  --sidebar-fg-color: white;
-  --sidebar-backdrop-color: #28282c;
-  --sidebar-shade-color: rgba(0, 0, 0, 0.25);
-  --sidebar-border-color: rgba(0, 0, 0, 0.36);
-  --secondary-sidebar-bg-color: #28282c;
-  --secondary-sidebar-fg-color: white;
-  --secondary-sidebar-backdrop-color: #252529;
-  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.25);
-  --secondary-sidebar-border-color: rgba(0, 0, 0, 0.36);
-  --card-bg-color: rgba(255, 255, 255, 0.08);
-  --card-fg-color: white;
-  --card-shade-color: rgba(0, 0, 0, 0.36);
-  --dialog-bg-color: #383838; // Darker dialog
-  --dialog-fg-color: white;
-  --popover-bg-color: #383838;
-  --popover-fg-color: white;
-  --popover-shade-color: rgba(0, 0, 0, 0.25);
-  --thumbnail-bg-color: #39393d;
-  --thumbnail-fg-color: white;
-  --shade-color: rgba(0, 0, 0, 0.25);
-  --scrollbar-outline-color: rgba(0, 0, 0, 0.5);  // Darker outline
-  --headerbar-backdrop-color: var(--window-bg-color);
-  --standalone-color-oklab: "max(l, 0.85) a b";
-  --active-toggle-bg-color: rgba(255, 255, 255, 0.2);
-  --active-toggle-fg-color: #ffffff;
-  --overview-bg-color: #28282c;
-  --overview-fg-color: #ffffff;
-  --accent-color: oklab(from var(--accent-bg-color) #{var(--standalone-color-oklab)});
-  --destructive-color: oklab(from var(--destructive-bg-color) #{var(--standalone-color-oklab)});
-  --success-color: oklab(from var(--success-bg-color) #{var(--standalone-color-oklab)});
-  --warning-color: oklab(from var(--warning-bg-color) #{var(--standalone-color-oklab)});
-  --error-color: oklab(from var(--error-bg-color) #{var(--standalone-color-oklab)});
+  --accent-bg-color: #5daeff; // Lighter Blue for dark theme
+  --accent-fg-color: rgba(0,0,0,0.87); // High contrast text
+  --destructive-bg-color: #ff5b57; // Lighter Red
+  --destructive-fg-color: rgba(0,0,0,0.87);
+  --success-bg-color: #57e389; // Lighter Green
+  --success-fg-color: rgba(0,0,0,0.87);
+  --warning-bg-color: #f9d423; // Lighter Yellow
+  --warning-fg-color: rgba(0, 0, 0, 0.87);
+  --error-bg-color: #ff5b57; // Lighter Red
+  --error-fg-color: rgba(0,0,0,0.87);
 
-    --button-border-color: rgba(255,255,255, 0.2);
-  --button-bg-color: rgba(255,255,255, 0.1);
-    --button-fg-color: var(--view-fg-color);
-  --button-hover-bg-color: rgba(255,255,255, 0.2);
-    --button-active-bg-color: rgba(255,255,255, 0.3);
-    --button-flat-bg-color: transparent;
-  --button-flat-hover-bg-color: rgba(255, 255, 255, 0.1);
-  --button-flat-active-bg-color: rgba(255, 255, 255, 0.2);
-    --suggested-action-bg-color: var(--accent-bg-color);
+  --window-bg-color: #2d2d2d;
+  --window-fg-color: #ffffff;
+  --view-bg-color: #242424;
+  --view-fg-color: #ffffff;
+
+  --headerbar-bg-color: #3c3c3c;
+  --headerbar-fg-color: #ffffff;
+  --headerbar-border-color: rgba(255, 255, 255, 0.07);
+  --headerbar-backdrop-color: var(--window-bg-color);
+  --headerbar-shade-color: rgba(0, 0, 0, 0.36);
+
+  --card-bg-color: #383838;
+  --card-fg-color: #ffffff;
+  --card-shade-color: rgba(0, 0, 0, 0.36);
+
+  --popover-bg-color: #4a4a4a; // Darker than card for popovers
+  --popover-fg-color: #ffffff;
+  --popover-shade-color: rgba(0, 0, 0, 0.36);
+
+  --button-bg-color: #4d4d4d;
+  --button-fg-color: #ffffff;
+  --button-border-color: rgba(255, 255, 255, 0.07);
+  --button-hover-bg-color: #5a5a5a;
+  --button-active-bg-color: #676767;
+
+  --button-flat-bg-color: transparent;
+  --button-flat-hover-bg-color: rgba(255, 255, 255, 0.08);
+  --button-flat-active-bg-color: rgba(255, 255, 255, 0.12);
+
+  --suggested-action-bg-color: var(--accent-bg-color);
   --suggested-action-fg-color: var(--accent-fg-color);
-  --suggested-action-hover-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.9);
- --suggested-action-active-bg-color: oklab(from var(--suggested-action-bg-color) l a b / 0.8);
+  --suggested-action-hover-bg-color: #4ba2ff; // Lighten accent
+  --suggested-action-active-bg-color: #3b93f7; // Further lighten accent
+
   --destructive-action-bg-color: var(--destructive-bg-color);
   --destructive-action-fg-color: var(--destructive-fg-color);
-  --destructive-action-hover-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.9);
-  --destructive-action-active-bg-color: oklab(from var(--destructive-action-bg-color) l a b / 0.8);
+  --destructive-action-hover-bg-color: #ff706a; // Lighten destructive
+  --destructive-action-active-bg-color: #ff857f; // Further lighten destructive
 
-  @define-color destructive_bg_color var(--destructive-bg-color);
-  @define-color destructive_fg_color var(--destructive-fg-color);
-  @define-color success_bg_color var(--success-bg-color);
-  @define-color success_fg_color var(--success-fg-color);
-  @define-color warning_bg_color var(--warning-bg-color);
-  @define-color warning_fg_color var(--warning-fg-color);
-  @define-color error_bg_color var(--error-bg-color);
-  @define-color error_fg_color var(--error-fg-color);
-  @define-color accent_bg_color var(--accent-bg-color);
-  @define-color accent_fg_color var(--accent-fg-color);
-  @define-color window_bg_color var(--window-bg-color);
-  @define-color window_fg_color var(--window-fg-color);
-  @define-color view_bg_color var(--view-bg-color);
-  @define-color view_fg_color var(--view-fg-color);
-  @define-color headerbar_bg_color var(--headerbar-bg-color);
-  @define-color headerbar_fg_color var(--headerbar-fg-color);
-  @define-color headerbar_border_color var(--headerbar-border-color);
-  @define-color headerbar_backdrop_color var(--headerbar-backdrop-color);
-  @define-color headerbar_shade_color var(--headerbar-shade-color);
-  @define-color headerbar_darker_shade_color var(--headerbar-darker-shade-color);
-  @define-color sidebar_bg_color var(--sidebar-bg-color);
-  @define-color sidebar_fg_color var(--sidebar-fg-color);
-  @define-color sidebar_backdrop_color var(--sidebar-backdrop-color);
-  @define-color sidebar_shade_color var(--sidebar-shade-color);
-  @define-color sidebar_border_color var(--sidebar-border-color);
-  @define-color secondary_sidebar_bg_color var(--secondary-sidebar-bg-color);
-  @define-color secondary_sidebar_fg_color var(--secondary-sidebar-fg-color);
-  @define-color secondary_sidebar_backdrop_color var(--secondary-sidebar-backdrop-color);
-  @define-color secondary_sidebar_shade_color var(--secondary-sidebar-shade-color);
-  @define-color secondary_sidebar_border_color var(--secondary-sidebar-border-color);
-  @define-color card_bg_color var(--card-bg-color);
-  @define-color card_fg_color var(--card-fg-color);
-  @define-color card_shade_color var(--card-shade-color);
-  @define-color dialog_bg_color var(--dialog-bg-color);
-  @define-color dialog_fg_color var(--dialog-fg-color);
-  @define-color popover_bg_color var(--popover-bg-color);
-  @define-color popover_fg_color var(--popover-fg-color);
-  @define-color popover_shade_color var(--popover-shade-color);
-  @define-color thumbnail_bg_color var(--thumbnail-bg-color);
-  @define-color thumbnail_fg_color var(--thumbnail-fg-color);
-  @define-color shade_color var(--shade-color);
-  @define-color scrollbar_outline_color var(--scrollbar-outline-color);
+  --sidebar-bg-color: #333333;
+  --sidebar-fg-color: #ffffff;
+  --sidebar-border-color: rgba(255,255,255,0.07);
+  --sidebar-shade-color: rgba(0,0,0,0.36);
+
+  --secondary-sidebar-bg-color: #3a3a3a; // Slightly lighter than sidebar
+  --secondary-sidebar-fg-color: #ffffff;
+  --secondary-sidebar-border-color: rgba(255,255,255,0.07);
+  --secondary-sidebar-shade-color: rgba(0,0,0,0.36);
+
+  --dialog-bg-color: #2f2f2f; // Slightly darker than window
+  --dialog-fg-color: #ffffff;
+
+  --thumbnail-bg-color: #242424; // Same as view
+  --thumbnail-fg-color: #ffffff;
+
+  --shade-color: rgba(0, 0, 0, 0.36); // General purpose shade/shadow
+  --scrollbar-outline-color: rgba(0, 0, 0, 0.5);
+  --link-color: var(--accent-bg-color);
+  --link-visited-color: #c0c0c0; // Lighter visited link for dark theme
+
+  // Progress Bar
+  --progress-bar-track-color: var(--shade-color);
+  --progress-bar-fill-color: var(--accent-bg-color);
 }
 
+// Helper Variables (inspired by libadwaita, but not direct libadwaita variables)
 :root {
-  @include dark-theme;
+  // Font Variables (use libadwaita standard system fonts)
+  --document-font-family: 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --monospace-font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  --font-size-base: 10pt; // Base font size (libadwaita uses relative units, this is an equivalent)
+  --font-size-small: 8pt;
+  --font-size-large: 12pt;
+  --font-size-h1: 18pt;
+  --font-size-h2: 16pt;
+  --font-size-h3: 14pt;
+  --font-size-h4: 12pt;
+
+  // Border Radius
+  --border-radius-small: 3px;
+  --border-radius-default: 6px; // Common border radius
+  --border-radius-large: 12px; // For larger elements like cards or windows
+  --window-radius: var(--border-radius-large); // Specific for main window corners
+
+  // Spacing (libadwaita uses multiples of 6px and 12px often)
+  --spacing-xxs: 3px;
+  --spacing-xs: 6px;
+  --spacing-s: 9px;
+  --spacing-m: 12px;
+  --spacing-l: 18px;
+  --spacing-xl: 24px;
+  --spacing-xxl: 36px;
+
+  // Opacity
+  --opacity-disabled: 0.5; // For disabled elements
+  --opacity-hover: 0.8; // General hover opacity if not changing color
+  --opacity-active: 0.6; // General active opacity if not changing color
+
+  // Border Color (general fallback if not specified by component)
+  --border-color-light: rgba(0, 0, 0, 0.12); // For light theme
+  --border-color-dark: rgba(255, 255, 255, 0.07); // For dark theme
+}
+
+// Apply themes
+:root {
+  @include light-theme; // Default to light theme
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    @include dark-theme;
+  }
 }
 
 body.light-theme {
   @include light-theme;
 }
 
+body.dark-theme {
+  @include dark-theme;
+}
+
+
+// The following @define-color rules are often used by GTK themes
+// to make colors available to the GTK C API.
+// We'll keep them and map them to our CSS variables.
+@mixin define-gtk-colors() {
+  @define-color accent_bg_color var(--accent-bg-color);
+  @define-color accent_fg_color var(--accent-fg-color);
+  @define-color destructive_bg_color var(--destructive-bg-color);
+  @define-color destructive_fg_color var(--destructive-fg-color);
+  @define-color success_bg_color var(--success-bg-color);
+  @define-color success_fg_color var(--success-fg-color);
+  @define-color warning_bg_color var(--warning-bg-color);
+  @define-color warning_fg_color var(--warning-fg-color);
+  @define-color error_bg_color var(--error-bg-color);
+  @define-color error_fg_color var(--error-fg-color);
+
+  @define-color window_bg_color var(--window-bg-color);
+  @define-color window_fg_color var(--window-fg-color);
+  @define-color view_bg_color var(--view-bg-color);
+  @define-color view_fg_color var(--view-fg-color);
+
+  @define-color headerbar_bg_color var(--headerbar-bg-color);
+  @define-color headerbar_fg_color var(--headerbar-fg-color);
+  @define-color headerbar_border_color var(--headerbar-border-color);
+  @define-color headerbar_backdrop_color var(--headerbar-backdrop-color);
+  @define-color headerbar_shade_color var(--headerbar-shade-color);
+  // headerbar_darker_shade_color is not a standard libadwaita concept, removing for now
+  // If needed for specific effects, it can be added locally or derived.
+
+  @define-color card_bg_color var(--card-bg-color);
+  @define-color card_fg_color var(--card-fg-color);
+  @define-color card_shade_color var(--card-shade-color);
+
+  @define-color popover_bg_color var(--popover-bg-color);
+  @define-color popover_fg_color var(--popover-fg-color);
+  @define-color popover_shade_color var(--popover-shade-color);
+
+  @define-color dialog_bg_color var(--dialog-bg-color);
+  @define-color dialog_fg_color var(--dialog-fg-color);
+
+  @define-color thumbnail_bg_color var(--thumbnail-bg-color);
+  @define-color thumbnail_fg_color var(--thumbnail-fg-color);
+
+  @define-color sidebar_bg_color var(--sidebar-bg-color);
+  @define-color sidebar_fg_color var(--sidebar-fg-color);
+  @define-color sidebar_border_color var(--sidebar-border-color);
+  @define-color sidebar_shade_color var(--sidebar-shade-color);
+  // sidebar_backdrop_color is not standard, removing.
+
+  @define-color secondary_sidebar_bg_color var(--secondary-sidebar-bg-color);
+  @define-color secondary_sidebar_fg_color var(--secondary-sidebar-fg-color);
+  @define-color secondary_sidebar_border_color var(--secondary-sidebar-border-color);
+  @define-color secondary_sidebar_shade_color var(--secondary-sidebar-shade-color);
+  // secondary_sidebar_backdrop_color is not standard, removing.
+
+  @define-color shade_color var(--shade-color);
+  @define-color scrollbar_outline_color var(--scrollbar-outline-color);
+  @define-color progress_bar_track_color var(--progress-bar-track-color); // For GTK mapping
+  @define-color progress_bar_fill_color var(--progress-bar-fill-color);   // For GTK mapping
+
+  // These are not direct libadwaita CSS variables but often derived or context-specific.
+  // We'll keep the ones that are broadly applicable.
+  // --active-toggle-bg-color & --active-toggle-fg-color are very specific, handle in component SCSS.
+  // --overview-bg-color & --overview-fg-color are specific, handle in component/view SCSS.
+
+  // Oklab derived colors are a more advanced GTK feature for color manipulation.
+  // Libadwaita itself doesn't expose --accent-color directly in its public CSS variables,
+  // it's usually derived by applications if needed.
+  // For now, we will remove the oklab definitions here to keep it simpler and closer
+  // to standard CSS usage. If an application needs oklab, it can define it.
+}
+
+// Apply GTK color definitions to both light and dark themes by default.
+:root {
+  @include define-gtk-colors();
+}
+// No need to re-declare for body.light-theme as :root covers it.
+// The actual theme switching is handled by the @media query and body classes.
+
+// Remove old oklab mixin and font variables that are now defined in :root
+/*
 :root{
   --adw-font-family: 'Cantarell', sans-serif;
   --adw-font-size: 14px;
@@ -308,3 +323,4 @@ body.light-theme {
 }
 
 @include define-oklab-colors();
+*/

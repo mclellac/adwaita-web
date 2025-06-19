@@ -5,52 +5,90 @@
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-  user-select: none; // Prevent text selection
+  user-select: none;
+  gap: var(--spacing-s); // Use gap for spacing between indicator and label
 
   input[type="checkbox"] {
-    position: absolute; // Hide the default checkbox
+    position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
 
     &:checked + .adw-checkbox-indicator {
-      background-color: var(--accent-color);
-      border-color: var(--accent-color);
+      background-color: var(--accent-bg-color);
+      border-color: var(--accent-bg-color);
 
-      // Custom checkmark (using a pseudo-element)
       &:before {
         content: "";
         display: block;
-        width: 4px;
-        height: 8px;
-        border: solid white;
+        width: 5px; // Slightly adjusted for visual balance
+        height: 9px; // Slightly adjusted for visual balance
+        border-style: solid;
+        border-color: var(--accent-fg-color);
         border-width: 0 2px 2px 0;
-        transform: rotate(45deg) translate(-50%, -50%); // Position and rotate
-          position: absolute;
-        top: 45%;
+        position: absolute;
+        top: 50%;
         left: 50%;
+        // Adjusted transform for better centering of a typical checkmark
+        transform: translate(-50%, -60%) rotate(45deg);
       }
     }
-      &:disabled + .adw-checkbox-indicator{
-          opacity: 0.5;
-          pointer-events: none;
-            background-color: var(--view-bg-color);
-            border-color: var(--button-border-color);
-      }
+
+    &:disabled + .adw-checkbox-indicator {
+      background-color: var(--shade-color); // Use shade for disabled background
+      border-color: var(--border-color-light); // Muted border
+      opacity: var(--opacity-disabled, 0.5); // Use variable
+      cursor: not-allowed;
+    }
+
+    &:disabled:checked + .adw-checkbox-indicator {
+        // Ensure disabled but checked state is also styled appropriately
+        background-color: var(--accent-bg-color); // Keep accent bg
+        border-color: var(--accent-bg-color); // Keep accent border
+        opacity: var(--opacity-disabled, 0.5);
+         &:before {
+            border-color: var(--accent-fg-color); // Keep checkmark color
+         }
+    }
+
+    &:focus-visible + .adw-checkbox-indicator {
+      outline: 2px solid var(--accent-bg-color);
+      outline-offset: 2px;
+    }
   }
 
   .adw-checkbox-indicator {
-    width: 18px;
+    width: 18px; // Common size
     height: 18px;
-    border: var(--adw-border-width) solid var(--button-border-color);
-    border-radius: var(--adw-border-radius);
+    border-width: var(--border-width, 1px);
+    border-style: solid;
+    border-color: var(--border-color-light);
+    border-radius: var(--border-radius-small); // Checkboxes are usually less rounded than buttons
     background-color: var(--view-bg-color);
-    margin-right: var(--adw-padding-medium);
-    position: relative; // For positioning the checkmark
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    // margin-right: var(--spacing-s); // Replaced by gap on parent
+    position: relative;
+    transition: background-color 0.1s ease-out, border-color 0.1s ease-out;
+    flex-shrink: 0; // Prevent indicator from shrinking
   }
 
   .adw-checkbox-label {
     color: var(--view-fg-color);
+    line-height: 1.2; // Ensure label text aligns well if it wraps
+  }
+}
+
+.dark-theme .adw-checkbox,
+body.dark-theme .adw-checkbox {
+  input[type="checkbox"] {
+    &:disabled + .adw-checkbox-indicator {
+      border-color: var(--border-color-dark);
+    }
+  }
+  .adw-checkbox-indicator {
+    border-color: var(--border-color-dark);
+    background-color: var(--view-bg-color); // Ensure this is dark theme's view bg
+  }
+  .adw-checkbox-label {
+    color: var(--view-fg-color); // Ensure this is dark theme's view fg
   }
 }

@@ -1,56 +1,83 @@
 // scss/_headerbar.scss
-@use 'variables';
+@use 'variables'; // Keep for potential mixins/functions
 
 .adw-header-bar {
   background-color: var(--headerbar-bg-color);
   color: var(--headerbar-fg-color);
-  border-bottom: var(--adw-border-width) solid var(--headerbar-border-color);
-  padding: var(--adw-padding-small) var(--adw-padding-medium);
-  display: flex; // Use flexbox for layout
-  align-items: center; // Vertically center content
-  justify-content: space-between; // Space out start, title, and end
+  border-bottom: var(--border-width, 1px) solid var(--headerbar-border-color);
+  padding: var(--spacing-xs) var(--spacing-m); // Adjusted padding
+  display: flex;
+  align-items: center;
+  // justify-content: space-between; // This can be tricky with a centered title
+  min-height: 48px; // A common minimum height for headerbars
 
   .adw-header-bar-start,
   .adw-header-bar-end {
     display: flex;
     align-items: center;
+    flex-shrink: 0; // Prevent start/end items from shrinking too much
 
-    > * { // Direct children
-      margin-right: var(--adw-padding-small); // Spacing between elements
-
+    > * { // Direct children, usually buttons
+      margin-right: var(--spacing-xs);
       &:last-child {
-        margin-right: 0; // No margin on the last element
+        margin-right: 0;
       }
     }
   }
-    .adw-header-bar-end{
-        margin-left: auto;
+
+  .adw-header-bar-start {
+    // No specific styles needed here if using flex correctly on parent
+  }
+
+  .adw-header-bar-end {
+    margin-left: auto; // Pushes end content to the right
+    > * { // Direct children, usually buttons
+      margin-left: var(--spacing-xs); // Use margin-left for spacing in the end group
+      margin-right: 0;
+      &:first-child {
+        margin-left: 0;
+      }
     }
+  }
 
   .adw-header-bar-center-box {
-    text-align: center;
-      display: flex;
-      flex-direction: column;
-    // Allow the center box to grow and shrink, pushing start/end to edges
+    display: flex;
+    flex-direction: column;
+    align-items: center; // Center title/subtitle if they are stacked
+    justify-content: center; // Center them vertically if headerbar has extra height
     flex-grow: 1;
     flex-shrink: 1;
-    min-width: 0; // Needed for text-overflow to work in flexbox
+    min-width: 0; // Essential for text-overflow ellipsis
+    text-align: center; // Fallback for non-flex content
+    margin: 0 var(--spacing-m); // Provide some space from start/end sections
   }
 
   .adw-header-bar-title {
-    font-size: 1.2em;
-    font-weight: bold;
-      white-space: nowrap;
+    font-size: var(--font-size-large); // Use defined font size
+    font-weight: bold; // Libadwaita titles are usually bold
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
+    line-height: 1.2; // Adjust line height for better visual
   }
 
   .adw-header-bar-subtitle {
-    font-size: 0.9em;
-    color: var(--secondary-sidebar-fg-color);
-      white-space: nowrap;
+    font-size: var(--font-size-small); // Use defined font size
+    color: var(--headerbar-fg-color); // Use headerbar fg color
+    opacity: 0.7; // Muted appearance for subtitle
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.2; // Adjust line height
+    margin-top: 2px; // Small space between title and subtitle
+  }
+
+  // Style for when content is scrolled underneath the headerbar
+  &.scrolled {
+    // Use the pre-defined headerbar-shade-color for the shadow
+    // The shadow is typically subtle and only on the bottom
+    box-shadow: 0 2px 4px -2px var(--headerbar-shade-color);
+    // Some themes might make the border slightly more opaque or change bg
+    // border-bottom-color: var(--headerbar-darker-shade-color); // If you have such a variable
   }
 }

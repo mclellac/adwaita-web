@@ -1,22 +1,94 @@
-// scss/_progress-bar.scss
+// scss/_progressbar.scss
 @use "variables";
 
 .adw-progress-bar {
-    width: 100%;
-    height: 8px; // Adjust as needed
-    background-color: var(--progress-bar-bg-color, #ddd); // Default, with fallback
-    border-radius: 4px; // Half of height for rounded ends
-    overflow: hidden; // Important for clipping the progress
+  width: 100%;
+  height: 6px; // Libadwaita progress bars are often more slender
+  // Use a variable for background, shade-color is a good candidate for the track
+  background-color: var(--progress-bar-track-color, var(--shade-color));
+  border-radius: 3px; // Half of height
+  overflow: hidden;
+  position: relative; // For indeterminate state animation
+
+  .adw-progress-bar-value {
+    height: 100%;
+    // Use accent color for the progress value.
+    // Define --progress-bar-fill-color if it needs to be different from accent.
+    background-color: var(--progress-bar-fill-color, var(--accent-bg-color));
+    width: 0%; // Default to 0%, can be set by JS or inline style
+    transition: width 0.15s ease-out; // Faster, smoother animation
+    border-radius: 3px; // Match parent border-radius
+  }
+
+  &[disabled] {
+    opacity: var(--opacity-disabled, 0.5); // Use variable
+    cursor: not-allowed;
+    // Colors should remain to indicate progress, opacity handles the disabled look
+  }
+
+  // Indeterminate state styling (basic, can be enhanced with animations)
+  &.indeterminate {
+    .adw-progress-bar-value {
+      width: 100% !important; // Value takes full width for some indeterminate styles
+      background-color: transparent; // Hide the normal value bar background
+      // Animation for indeterminate state (example: a moving bar)
+      // This requires defining @keyframes animation elsewhere
+      // animation: progress-indeterminate 2s infinite linear;
+    }
+    // Example of an animated sub-element for indeterminate
+    // This is a common pattern in libadwaita
+    &:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 30%; // Width of the moving indicator
+        background-color: var(--accent-bg-color);
+        border-radius: 3px;
+        animation: adw-progress-indeterminate 1.5s infinite ease-in-out;
+    }
+  }
+}
+
+// Define the indeterminate animation
+@keyframes adw-progress-indeterminate {
+  0% {
+    left: -35%; // Start off-screen to the left
+    width: 30%;
+  }
+  50% {
+    left: 50%;
+    width: 40%; // Pulse width slightly in the middle
+  }
+  100% {
+    left: 105%; // End off-screen to the right
+    width: 30%;
+  }
+}
+
+// Variables to be added to _variables.scss if not already present:
+// :root {
+//   --progress-bar-track-color: var(--shade-color); // Or a specific color
+//   --progress-bar-fill-color: var(--accent-bg-color);
+// }
+// body.light-theme {
+//   --progress-bar-track-color: var(--shade-color); // e.g. rgba(0,0,0,0.1)
+// }
+// body.dark-theme {
+//   --progress-bar-track-color: var(--shade-color); // e.g. rgba(255,255,255,0.1)
+// }
+
+// Ensure dark theme variables are respected if they differ significantly
+.dark-theme .adw-progress-bar,
+body.dark-theme .adw-progress-bar {
+    background-color: var(--progress-bar-track-color, var(--shade-color));
 
     .adw-progress-bar-value {
-      height: 100%;
-      background-color: var(--progress-bar-value-color, var(--accent-color)); // Use accent color
-      width: 0; // Start at 0 width
-      transition: width 0.4s ease; // Smooth progress animation
-      border-radius: 4px;
+        background-color: var(--progress-bar-fill-color, var(--accent-bg-color));
     }
-     &[disabled] {
-        opacity: 0.5;
-        pointer-events: none;
-      }
+
+    &.indeterminate:before {
+        background-color: var(--accent-bg-color);
+    }
 }

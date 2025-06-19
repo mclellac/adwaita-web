@@ -1,10 +1,28 @@
 // scss/style.scss
+
+// 1. Variables - Must be first
 @use "variables";
+
+// 2. Base styles - Global resets, body, typography defaults
 @use "base";
+
+// 3. Components - Order amongst these is usually flexible
+@use "box";        // Layout utilities
 @use "button";
+@use "checkbox";
+@use "dialog";
 @use "entry";
-@use "switch";
-@use "label";
 @use "headerbar";
+@use "label";
+@use "listbox";    // Assuming _listbox.scss from ls output
+@use "progressbar"; // Assuming _progressbar.scss from ls output
+@use "radio";
+@use "switch";
+@use "viewswitcher";
+@use "flap"; // Added import
 @use "window";
-@use "box";
+
+// Potentially other components if they exist and were modified:
+// @use "toast";
+// @use "sidebar";
+// ...etc.
