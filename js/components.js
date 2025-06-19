@@ -754,36 +754,6 @@ function loadSavedTheme() {
   loadSavedAccentColor(); // Load accent color after theme class is set
 }
 
-// Export the functions.
-window.Adw = {
-  createButton: createAdwButton,
-  createEntry: createAdwEntry,
-  createSwitch: createAdwSwitch,
-  createLabel: createAdwLabel,
-  createHeaderBar: createAdwHeaderBar,
-  createWindow: createAdwWindow,
-  createBox: createAdwBox,
-  createRow: createAdwRow,
-  createToast: createAdwToast,
-  createDialog: createAdwDialog,
-  createProgressBar: createAdwProgressBar,
-  createCheckbox: createAdwCheckbox,
-  createRadioButton: createAdwRadioButton,
-  createListBox: createAdwListBox,
-  toggleTheme: toggleTheme, // This is now the wrapped version
-  getAccentColors: getAccentColors,
-  setAccentColor: setAccentColor,
-  // loadSavedAccentColor, // Not typically exposed
-  // loadSavedTheme, // Not typically exposed
-
-  // New Row Types
-  createActionRow: createAdwActionRow,
-  createEntryRow: createAdwEntryRow,
-  createExpanderRow: createAdwExpanderRow,
-  createComboRow: createAdwComboRow,
-  createAvatar: createAdwAvatar,
-};
-
 // AdwViewSwitcher
 /**
  * Creates an Adwaita-style ViewSwitcher.
@@ -872,7 +842,8 @@ function createAdwViewSwitcher(options = {}) {
 
   return switcherElement;
 }
-window.Adw.createViewSwitcher = createAdwViewSwitcher;
+// Note: createAdwViewSwitcher was already being exported via window.Adw.createViewSwitcher = createAdwViewSwitcher;
+// No, it was added separately. Let's ensure it's in the main Adw object.
 
 // AdwFlap
 /**
@@ -949,7 +920,7 @@ function createAdwFlap(options = {}) {
     setFolded: setFoldState
   };
 }
-window.Adw.createFlap = createAdwFlap;
+// Note: createAdwFlap was already being exported via window.Adw.createFlap = createAdwFlap;
 
 // AdwAvatar
 /**
@@ -1023,7 +994,7 @@ function createAdwAvatar(options = {}) {
 
   return avatarElement;
 }
-window.Adw.createAvatar = createAdwAvatar;
+// Note: createAdwAvatar was already being exported via window.Adw.createAvatar = createAdwAvatar;
 
 /**
  * Creates an Adwaita-style Action Row.
@@ -1083,7 +1054,7 @@ function createAdwActionRow(options = {}) {
 
     return actionRow;
 }
-window.Adw.createActionRow = createAdwActionRow;
+// Note: createAdwActionRow was already being exported via window.Adw.createActionRow = createAdwActionRow;
 
 /**
  * Creates an Adwaita-style Entry Row.
@@ -1123,7 +1094,7 @@ function createAdwEntryRow(options = {}) {
 
     return entryRow;
 }
-window.Adw.createEntryRow = createAdwEntryRow;
+// Note: createAdwEntryRow was already being exported via window.Adw.createEntryRow = createAdwEntryRow;
 
 /**
  * Creates an Adwaita-style Expander Row.
@@ -1220,7 +1191,7 @@ function createAdwExpanderRow(options = {}) {
 
     return wrapper;
 }
-window.Adw.createExpanderRow = createAdwExpanderRow;
+// Note: createAdwExpanderRow was already being exported via window.Adw.createExpanderRow = createAdwExpanderRow;
 
 /**
  * Creates an Adwaita-style Combo Row.
@@ -1293,8 +1264,38 @@ function createAdwComboRow(options = {}) {
 
     return comboRow;
 }
-window.Adw.createComboRow = createAdwComboRow;
+// Note: createAdwComboRow was already being exported via window.Adw.createComboRow = createAdwComboRow;
 
+
+// Export the functions.
+window.Adw = {
+  createButton: createAdwButton,
+  createEntry: createAdwEntry,
+  createSwitch: createAdwSwitch,
+  createLabel: createAdwLabel,
+  createHeaderBar: createAdwHeaderBar,
+  createWindow: createAdwWindow,
+  createBox: createAdwBox,
+  createRow: createAdwRow,
+  createToast: createAdwToast,
+  createDialog: createAdwDialog,
+  createProgressBar: createAdwProgressBar,
+  createCheckbox: createAdwCheckbox,
+  createRadioButton: createAdwRadioButton,
+  createListBox: createAdwListBox,
+  toggleTheme: toggleTheme, // This is now the wrapped version
+  getAccentColors: getAccentColors,
+  setAccentColor: setAccentColor,
+
+  // New Row Types & Avatar
+  createActionRow: createAdwActionRow,
+  createEntryRow: createAdwEntryRow,
+  createExpanderRow: createAdwExpanderRow,
+  createComboRow: createAdwComboRow,
+  createAvatar: createAdwAvatar,
+  createViewSwitcher: createAdwViewSwitcher, // Ensure these are also included
+  createFlap: createAdwFlap
+};
 
 // Ensure loadSavedTheme is called, which now also handles accent color loading.
 window.addEventListener("DOMContentLoaded", loadSavedTheme);
