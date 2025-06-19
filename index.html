@@ -33,7 +33,7 @@
         });
         const destructiveButton = Adw.createButton('Delete', {
             onClick: () => Adw.createToast("Destructive Button Clicked"),
-            destructive: true,
+            destructive: true, // Will now use .destructive-action
         });
         const disabledButton = Adw.createButton('Disabled', {
             onClick: () => alert("This shouldnt be clickable!"),
@@ -43,10 +43,22 @@
             onClick: () => alert('Flat Button clicked!'),
             flat: true
         });
+        // New button examples
+        const iconButton = Adw.createButton('With Icon', {
+            icon: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM7 11.5a1 1 0 1 1 2 0a1 1 0 0 1-2 0Zm.5-7a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5Z"/></svg>', // Simple placeholder SVG
+            onClick: () => Adw.createToast("Icon Button Clicked")
+        });
+        const circularButton = Adw.createButton('', {
+            icon: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385C2.49 8.673 3.25 9.776 4.138 10.737MB8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/></svg>', // Placeholder heart SVG
+            isCircular: true,
+            onClick: () => Adw.createToast("Circular Button Clicked")
+        });
+
 
         const buttonsBox = Adw.createBox({
             orientation: 'horizontal',
-            children: [button, suggestedButton, destructiveButton, disabledButton, flatButton]
+            spacing: "s", // Demonstrate spacing on box
+            children: [button, suggestedButton, destructiveButton, disabledButton, flatButton, iconButton, circularButton]
         });
 
         // --- Entry ---
@@ -120,12 +132,15 @@
         // --- Progress Bar ---
           const progressBar = Adw.createProgressBar({value: 50});
           const disabledProgressBar = Adw.createProgressBar({value: 75, disabled: true});
+          const indeterminateProgressBar = Adw.createProgressBar({isIndeterminate: true});
 
         const progressBarBox = Adw.createBox({
-            orientation: 'horizontal',
+            orientation: 'vertical', // Changed to vertical for better layout of multiple bars
+            spacing: "s",
             children: [
-                Adw.createRow({ children: [Adw.createLabel("Progress Bar: "), progressBar]}),
-                Adw.createRow({ children: [Adw.createLabel("Disabled Progress Bar: "), disabledProgressBar]})
+                Adw.createRow({ children: [Adw.createLabel("Progress (50%): "), progressBar]}),
+                Adw.createRow({ children: [Adw.createLabel("Disabled (75%): "), disabledProgressBar]}),
+                Adw.createRow({ children: [Adw.createLabel("Indeterminate: "), indeterminateProgressBar]})
             ]
         })
 
@@ -178,9 +193,57 @@
         // --- List Box ---
         const listBox = Adw.createListBox({
             children: [
-                Adw.createRow({ children: [Adw.createLabel("List Item 1")] }),
+                Adw.createRow({ interactive: true, onClick: () => Adw.createToast("Row 1 Clicked"), children: [Adw.createLabel("List Item 1 (Interactive)")] }),
                 Adw.createRow({ children: [Adw.createLabel("List Item 2")] , activated: true}),
                 Adw.createRow({ children: [Adw.createLabel("List Item 3")] }),
+            ]
+        });
+        const flatListBox = Adw.createListBox({
+            isFlat: true,
+            children: [
+                Adw.createRow({ children: [Adw.createLabel("Flat Item A")] }),
+                Adw.createRow({ children: [Adw.createLabel("Flat Item B")] }),
+            ]
+        });
+        const listBoxContainer = Adw.createBox({
+            orientation: 'horizontal', spacing: 'm',
+            children: [
+                Adw.createBox({orientation: 'vertical', children: [Adw.createLabel("Default ListBox", {title:4}), listBox]}),
+                Adw.createBox({orientation: 'vertical', children: [Adw.createLabel("Flat ListBox", {title:4}), flatListBox]})
+            ]
+        });
+
+        // --- ViewSwitcher Example ---
+        const viewSwitcher = Adw.createViewSwitcher({
+            views: [
+                { name: "Page 1", content: Adw.createBox({ orientation: 'vertical', spacing: 'm', children: [Adw.createLabel("Content for Page 1"), Adw.createEntry({placeholder: "Entry on Page 1"})]}) },
+                { name: "Page 2", content: Adw.createBox({ orientation: 'vertical', spacing: 'm', children: [Adw.createLabel("Some different content for Page 2"), Adw.createButton("A button")]}) },
+                { name: "Page 3", content: Adw.createLabel("Final page with just a label.") }
+            ],
+            activeViewName: "Page 1",
+            onViewChanged: (viewName) => Adw.createToast(`Switched to ${viewName}`)
+        });
+
+        // --- Flap Example ---
+        const flapWidget = Adw.createFlap({
+            flapContent: Adw.createBox({orientation: 'vertical', spacing:'s', children: [
+                Adw.createLabel("Flap Content", {title: 4}),
+                Adw.createButton("Button in Flap"),
+                Adw.createLabel("More flap text here to show scrolling if needed.", {isCaption: true})
+            ]}),
+            mainContent: Adw.createBox({orientation: 'vertical', spacing: 's', children: [
+                Adw.createLabel("Main Content Area", {title: 4}),
+                Adw.createLabel("This content stays visible. The flap is to the left (or right, depending on LTR/RTL)."),
+                Adw.createEntry({placeholder: "Entry in main content"})
+            ]}),
+            isFolded: false // Start with flap open
+        });
+        const toggleFlapButton = Adw.createButton("Toggle Flap", { onClick: () => flapWidget.toggleFlap() });
+        const flapExampleBox = Adw.createBox({
+            orientation: 'vertical', spacing: 'm',
+            children: [
+                toggleFlapButton,
+                flapWidget.element // Add the flap element to the layout
             ]
         });
 
@@ -188,23 +251,36 @@
         // --- Main Content Layout ---
         const content = Adw.createBox({
             orientation: 'vertical',
+            spacing: "l", // Add overall spacing to content sections
             children: [
-                // Each title in its own row
-                Adw.createRow({ children: [labelTitle1] }),
-                Adw.createRow({ children: [labelTitle2] }),
-                Adw.createRow({ children: [labelTitle3] }),
-                Adw.createRow({ children: [labelTitle4] }),
-                Adw.createRow({ children: [label] }),
-                Adw.createRow({ children: [labelCaption] }),
-                // Other widgets and boxes as before
-                entryBox,
-                switchBox,
-                progressBarBox,
+                Adw.createLabel("Typography", {title:1}),
+                Adw.createRow({ children: [labelTitle1, labelTitle2, labelTitle3, labelTitle4, label, labelCaption] }),
+
+                Adw.createLabel("Buttons", {title:1}),
                 buttonsBox,
+
+                Adw.createLabel("Entries", {title:1}),
+                entryBox,
+
+                Adw.createLabel("Controls", {title:1}),
+                switchBox,
                 checkBox,
                 radioBox,
-                Adw.createRow({ children: [listBox] }),
+
+                Adw.createLabel("Progress Bars", {title:1}),
+                progressBarBox,
+
+                Adw.createLabel("List Boxes", {title:1}),
+                listBoxContainer, // Contains both listboxes
+
+                Adw.createLabel("Dialog", {title:1}),
                 Adw.createRow({ children: [openDialogButton] }),
+
+                Adw.createLabel("ViewSwitcher", {title:1}),
+                viewSwitcher,
+
+                Adw.createLabel("Flap", {title:1}),
+                flapExampleBox,
             ],
         });
 

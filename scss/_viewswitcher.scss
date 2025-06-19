@@ -1,0 +1,84 @@
+// scss/_viewswitcher.scss
+@use "variables";
+
+.adw-view-switcher {
+  display: flex;
+  flex-direction: column;
+  // border: 1px solid var(--border-color-light); // Optional: if view switcher needs a border
+  // border-radius: var(--border-radius-default);
+  // background-color: var(--view-bg-color);
+}
+
+.adw-view-switcher-bar {
+  display: flex;
+  justify-content: center; // Center buttons by default
+  padding: var(--spacing-s);
+  background-color: var(--headerbar-bg-color); // Use headerbar color for the bar
+  border-bottom: var(--border-width, 1px) solid var(--headerbar-border-color); // Match headerbar border
+
+  // Style for linked buttons look (common in libadwaita view switchers)
+  .adw-button {
+    border-radius: 0;
+    border-right-width: 0; // Remove right border for all but last
+    box-shadow: none; // Remove individual button shadows if any
+
+    &:first-child {
+      border-top-left-radius: var(--border-radius-default);
+      border-bottom-left-radius: var(--border-radius-default);
+    }
+
+    &:last-child {
+      border-top-right-radius: var(--border-radius-default);
+      border-bottom-right-radius: var(--border-radius-default);
+      border-right-width: var(--border-width, 1px); // Add back right border for the last button
+    }
+
+    // Active state for view switcher button
+    &.active {
+      background-color: var(--accent-bg-color);
+      color: var(--accent-fg-color);
+      border-color: var(--accent-bg-color); // Ensure border matches active background
+      // z-index: 1; // Ensure active button's border overlaps inactive ones cleanly
+    }
+
+    &:not(.active):hover {
+        background-color: var(--button-hover-bg-color);
+    }
+  }
+}
+
+.adw-view-switcher-content {
+  padding: var(--spacing-m);
+  // background-color: var(--view-bg-color); // Content area background
+  // flex-grow: 1; // If inside a flex container
+
+  > * { // Direct children are the views
+    display: none; // Hide all views by default
+    &.active-view {
+      display: block; // Show only the active view
+    }
+  }
+}
+
+// Dark theme adjustments
+.dark-theme .adw-view-switcher-bar,
+body.dark-theme .adw-view-switcher-bar {
+  background-color: var(--headerbar-bg-color);
+  border-bottom-color: var(--headerbar-border-color);
+
+  .adw-button {
+    &.active {
+      background-color: var(--accent-bg-color);
+      color: var(--accent-fg-color);
+      border-color: var(--accent-bg-color);
+    }
+    &:not(.active):hover {
+        background-color: var(--button-hover-bg-color);
+    }
+  }
+}
+
+// .dark-theme .adw-view-switcher-content,
+// body.dark-theme .adw-view-switcher-content {
+//   background-color: var(--view-bg-color);
+// }
