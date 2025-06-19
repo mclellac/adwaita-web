@@ -3,9 +3,10 @@
 {% block title %}Blog Posts{% endblock %}
 
 {% block content %}
-    <adw-preferences-page>
-        <adw-preferences-group title="All Blog Posts">
-            {% if posts %}
+    <div class="content-clamp">
+        <adw-preferences-page>
+            <adw-preferences-group title="All Blog Posts">
+                {% if posts %}
                 <adw-list-box>
                     {% for post in posts %}
                         <adw-action-row title="{{ post.title }}"
@@ -18,4 +19,5 @@
             {% endif %}
         </adw-preferences-group>
     </adw-preferences-page>
+</div>
 {% endblock %}

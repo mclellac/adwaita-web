@@ -3,8 +3,7 @@
 {% block title %}Profile: {{ user_profile.username }} - My Libadwaita Blog{% endblock %}
 
 {% block content %}
-<div class="adw-page" style="padding: var(--spacing-l);">
-    <div class="adw-box adw-box-vertical align-center" style="max-width: 600px; margin: 0 auto; gap: var(--spacing-m);">
+<div class="adw-page"> <div class="adw-box adw-box-vertical align-center content-clamp" style="max-width: 600px; gap: var(--spacing-m);">
 
         {# Avatar Display - Copied from previous version, centering via inline style is fine here #}
         {% if user_profile.profile_photo_url %}

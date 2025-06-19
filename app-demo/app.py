@@ -1,13 +1,23 @@
 from datetime import datetime, timezone
-from flask import Flask, render_template, url_for, abort, request, redirect # Added request, redirect
+from flask import Flask, render_template, url_for, abort, request, redirect, flash # Added flash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc # Added for ordering
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename # Added for file uploads
 import os # For secret key
+import logging # Added for logging
 
 app = Flask(__name__)
+
+# Basic logging configuration
+if not app.debug: # Only configure basic logging if not in debug mode
+    app.logger.setLevel(logging.INFO)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+    app.logger.addHandler(stream_handler)
+# For debug mode, Flask's default logger should show up in the console.
+# For production, a more robust logging setup would be needed.
 
 # Configure secret key (important for session management)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'a_default_very_secret_key_for_development_only') # In production, use a proper secret key
@@ -100,12 +110,24 @@ def create_post():
     if request.method == 'POST':
         title = request.form.get('title')
         content = request.form.get('content')
+        app.logger.info(f"Attempting to create post. Title: '{title}', Content present: {bool(content)}")
         if title and content:
-            new_post = Post(title=title, content=content, author=current_user)
-            db.session.add(new_post)
-            db.session.commit()
-            return redirect(url_for('index'))
-        # Else, if form data is missing, re-render form (or add error messages)
+            try:
+                app.logger.info(f"Current user for post: {current_user.username} (ID: {current_user.id})")
+                new_post = Post(title=title, content=content, author=current_user)
+                db.session.add(new_post)
+                app.logger.info("Post added to session.")
+                db.session.commit()
+                app.logger.info(f"Post committed to DB. ID: {new_post.id}, Title: {new_post.title}")
+                flash('Post created successfully!', 'success')
+                return redirect(url_for('index'))
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(f"Error creating post: {e}", exc_info=True)
+                flash(f'Error creating post: {e}', 'danger')
+        else:
+            app.logger.warning("Post creation failed: Title or content missing.")
+            flash('Title and content are required.', 'warning')
     return render_template('create_post.html')
 
 @app.route('/posts/<int:post_id>/delete', methods=['POST'])
@@ -186,31 +208,64 @@ def profile(username):
 def edit_profile():
     if request.method == 'POST':
         new_profile_info = request.form.get('profile_info')
-        # new_photo_url = request.form.get('profile_photo_url') # Old way of handling photo URL
-
         current_user.profile_info = new_profile_info
+        app.logger.info(f"User {current_user.username} updated profile_info.")
 
         if 'profile_photo' in request.files:
             file = request.files['profile_photo']
-            if file and file.filename != '' and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                # Create a unique filename to prevent overwrites
-                unique_filename = f"{current_user.username}_{filename}"
-                save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            app.logger.info(f"Found 'profile_photo' in request.files. Filename: '{file.filename}' for user {current_user.username}")
 
-                # Ensure the upload folder exists
-                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+            if file and file.filename != '': # Check if a file was selected and has a name
+                if allowed_file(file.filename):
+                    try:
+                        original_filename = secure_filename(file.filename)
+                        app.logger.info(f"Original secure filename: '{original_filename}' for user {current_user.username}")
 
-                file.save(save_path)
-                current_user.profile_photo_url = f"uploads/profile_pics/{unique_filename}" # Store relative path
-            elif file and file.filename != '':
-                # Handle case where file extension is not allowed
-                flash('Invalid file type. Allowed types are png, jpg, jpeg, gif.', 'danger')
-                return render_template('edit_profile.html', user_profile=current_user)
+                        unique_filename = f"{current_user.username}_{original_filename}"
+                        app.logger.info(f"Generated unique_filename: '{unique_filename}' for user {current_user.username}")
+
+                        upload_folder_path = app.config['UPLOAD_FOLDER']
+                        save_path = os.path.join(upload_folder_path, unique_filename)
+                        app.logger.info(f"Full save_path: '{save_path}' for user {current_user.username}")
+
+                        os.makedirs(upload_folder_path, exist_ok=True)
+                        app.logger.info(f"Ensured upload folder exists: '{upload_folder_path}' for user {current_user.username}")
+
+                        file.save(save_path)
+                        app.logger.info(f"File saved successfully to '{save_path}' for user {current_user.username}")
+
+                        relative_path = os.path.join('uploads/profile_pics', unique_filename)
+                        current_user.profile_photo_url = relative_path
+                        app.logger.info(f"Stored relative path in profile_photo_url: '{relative_path}' for user {current_user.username}")
+
+                        flash('Profile photo updated successfully!', 'success')
+                    except Exception as e:
+                        app.logger.error(f"Error uploading profile photo for user {current_user.username}: {e}", exc_info=True)
+                        flash(f'Error uploading profile photo: {e}', 'danger')
+                else:
+                    app.logger.warning(f"Profile photo upload failed for user {current_user.username}: File type not allowed. Filename: '{file.filename}'")
+                    # flash('Invalid file type for photo. Allowed types are png, jpg, jpeg, gif.', 'warning') # Previous version had 'danger' here
+                    # The instruction mentioned "The flash message for invalid file type was already present in one version of the code, ensure it's correctly placed."
+                    # The previous version from read_files used 'danger', but 'warning' is more appropriate as per the new code block. Let's use 'warning'.
+                    flash('Invalid file type for photo. Allowed types are png, jpg, jpeg, gif.', 'warning')
 
 
-        db.session.add(current_user) # Add current_user to session if it's not already persistent or modified
-        db.session.commit()
+        db.session.add(current_user) # current_user is already in session and tracked by SQLAlchemy
+        try:
+            db.session.commit()
+            app.logger.info(f"Profile changes for {current_user.username} committed to DB.")
+            # Flash success for overall profile update if no specific photo error occurred, or if photo success was already flashed.
+            # Avoid double-flashing success if photo was also successful.
+            # If only profile_info was changed, this is the only success message.
+            if not ('profile_photo' in request.files and request.files['profile_photo'].filename != ''): # only flash general success if no photo was attempted or photo was empty
+                 flash('Profile updated successfully!', 'success') # General success if no photo was processed or if photo succeeded silently earlier
+            elif 'profile_photo' in request.files and request.files['profile_photo'].filename != '' and current_user.profile_photo_url: # if photo was attempted and a url is set
+                pass # Photo success already flashed.
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error committing profile changes for user {current_user.username}: {e}", exc_info=True)
+            flash(f'Error saving profile changes: {e}', 'danger')
+
         return redirect(url_for('profile', username=current_user.username))
 
     # GET request: display the edit profile form with current data
@@ -219,10 +274,22 @@ def edit_profile():
 # Flask-Login and SQLAlchemy must be initialized with the app instance.
 # This can be done here for non-test runs, or deferred for tests.
 def init_extensions(flask_app):
+    print("Attempting to initialize database with Flask app...")
     db.init_app(flask_app)
+    print("Database initialized with Flask app.")
     login_manager.init_app(flask_app)
+    print("Login manager initialized.")
     with flask_app.app_context():
-        db.create_all() # Ensure tables are created
+        print("Entering application context for db.create_all().")
+        try:
+            db.create_all()
+            print("db.create_all() executed successfully.")
+        except Exception as e:
+            print(f"Error during db.create_all(): {e}")
+            # Optionally, re-raise or handle more gracefully
+            # For setup_db.py, printing might be enough, but for app runtime, this could be critical
+            raise
+    print("Exited application context for db.create_all().")
 
 if __name__ == '__main__':
     init_extensions(app) # Initialize extensions for direct run

@@ -1,28 +1,29 @@
 {% extends "base.html" %}
-
-{% block title %}Login - My Libadwaita Blog{% endblock %}
-
+{% block title %}Login{% endblock %}
 {% block content %}
-<adw-preferences-page>
+<adw-preferences-page class="clamped">
     <adw-preferences-group title="Login">
-        <form method="POST" action="{{ url_for('login') }}" class="adw-list-box" style="width: 300px; margin: 20px auto;">
-            {% if error %}
-            <div class="adw-banner error" style="margin-bottom: 10px; padding: 10px; background-color: #ffdddd; color: #d8000c; border: 1px solid #d8000c;">
-                {{ error }}
+        {% if error %}
+            <div class="adw-toast adw-toast-danger" role="alert" style="margin-bottom: var(--spacing-m);">
+                <p class="adw-toast-title">{{ error }}</p>
             </div>
-            {% endif %}
-
-            <div class="adw-row" style="margin-bottom: 10px;">
-                <label for="username" class="adw-label" style="margin-right:10px; min-width: 80px;">Username:</label>
-                <input type="text" name="username" id="username" class="adw-entry" required>
-            </div>
-
-            <div class="adw-row" style="margin-bottom: 20px;">
-                <label for="password" class="adw-label" style="margin-right:10px; min-width: 80px;">Password:</label>
-                <input type="password" name="password" id="password" class="adw-entry" required>
-            </div>
-
-            <adw-button appearance="suggested" type="submit">Login</adw-button>
+        {% endif %}
+        <form method="post" action="{{ url_for('login') }}">
+            <adw-list-box style="margin-bottom: var(--spacing-m);">
+                <adw-entry-row title="Username">
+                    {# The adw-initializer.js does not seem to have a direct converter for adw-entry to input.
+                       Instead, create_post.html uses <adw-entry name="title"...> which might be custom.
+                       For now, let's assume adw-entry-row expects a standard input with adw-entry class.
+                       If adw-entry custom tag is expected, this will need adjustment.
+                       The CSS provides styles for .adw-entry directly on input/textarea.
+                    #}
+                    <input type="text" name="username" class="adw-entry" required value="{{ request.form.username if request and request.form else '' }}">
+                </adw-entry-row>
+                <adw-entry-row title="Password">
+                    <input type="password" name="password" class="adw-entry" required>
+                </adw-entry-row>
+            </adw-list-box>
+            <adw-button type="submit" appearance="suggested">Login</adw-button>
         </form>
     </adw-preferences-group>
 </adw-preferences-page>

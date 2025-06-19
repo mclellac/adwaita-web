@@ -1,6 +1,8 @@
 import pytest
 import os # Moved import os to the top
-from flask import request # Added for request.path
+from flask import request, url_for # Added for request.path and url_for
+from io import BytesIO # Added for file upload simulation
+import time # Added for time.sleep in edit_post test
 # Trying to import 'app' directly, assuming app-demo is in sys.path somehow
 from app import app, db, User, Post
 
@@ -215,5 +217,111 @@ def test_create_post_post_and_verify(client, new_user, new_user_data_factory):
         else:
             pytest.fail("Post was not created, cannot test view_post page.")
 
-# Need to import url_for for checking request.path and generating URLs in tests
-from flask import url_for
+# --- New tests for profile photo, user posts on profile, and editing posts ---
+
+def test_profile_photo_upload(client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    # Simulate file upload
+    data = {
+        'profile_info': 'Updated info during photo upload test.' # Can also update other fields
+    }
+    # Create a dummy file for upload
+    # The name 'profile_photo' must match the name attribute of the file input field in the form
+    data['profile_photo'] = (BytesIO(b"dummyimagebytes"), 'test_photo.jpg')
+
+    response = client.post('/profile/edit', data=data, content_type='multipart/form-data', follow_redirects=True)
+    assert response.status_code == 200
+
+    with app.app_context(): # url_for needs app context
+        expected_path = url_for('profile', username=new_user.username, _external=False)
+    assert response.request.path == expected_path # Check redirect to profile
+
+    # Verify in database
+    updated_user = db.session.get(User, new_user.id)
+    assert updated_user.profile_photo_url is not None
+    assert 'test_photo.jpg' in updated_user.profile_photo_url
+    assert updated_user.username in updated_user.profile_photo_url # As per current naming convention
+    assert updated_user.profile_info == 'Updated info during photo upload test.'
+
+    # Verify the photo URL is used in the response data (e.g., in an <img> tag)
+    # This depends on how the path is constructed; current code uses relative path for static.
+    # For a direct check, you might need to parse HTML or check for a fragment of the URL.
+    assert updated_user.profile_photo_url.encode('utf-8') in response.data
+
+def test_user_posts_on_profile_page(client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    # Create a couple of posts for this user
+    post_titles = ["User's First Post", "User's Second Post"]
+    with app.app_context():
+        db.session.add(Post(title=post_titles[0], content="Content 1", author=new_user))
+        db.session.add(Post(title=post_titles[1], content="Content 2", author=new_user))
+        db.session.commit()
+
+    response = client.get(f'/profile/{new_user.username}')
+    assert response.status_code == 200
+    assert post_titles[0].encode('utf-8') in response.data
+    assert post_titles[1].encode('utf-8') in response.data
+    assert b"Posts by " + new_user.username.encode('utf-8') in response.data
+
+def test_edit_post(client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    # First, create a post
+    original_title = "Original Post Title to Edit"
+    original_content = "Original content."
+    with app.app_context():
+        post_to_edit = Post(title=original_title, content=original_content, author=new_user)
+        db.session.add(post_to_edit)
+        db.session.commit()
+        post_id = post_to_edit.id
+        # Ensure created_at is set for comparison later
+        original_created_at = post_to_edit.created_at
+        original_updated_at = post_to_edit.updated_at
+
+
+    # GET the edit page
+    # edit_url = url_for('edit_post', post_id=post_id) # Need app context for url_for outside request
+    with app.app_context():
+        response_get = client.get(url_for('edit_post', post_id=post_id))
+    assert response_get.status_code == 200
+    assert original_title.encode('utf-8') in response_get.data
+    assert original_content.encode('utf-8') in response_get.data
+
+    # POST the changes
+    edited_title = "Edited Post Title"
+    edited_content = "Edited content."
+
+    # Make a small delay to ensure updated_at will be different if system clock resolution is low
+    time.sleep(0.01)
+
+    with app.app_context():
+        response_post = client.post(
+            url_for('edit_post', post_id=post_id),
+            data={'title': edited_title, 'content': edited_content},
+            follow_redirects=True
+        )
+    assert response_post.status_code == 200
+
+    # Verify redirection to the view_post page
+    with app.app_context():
+        expected_redirect_url = url_for('view_post', post_id=post_id)
+    assert response_post.request.path == expected_redirect_url
+
+    # Verify content on the view_post page
+    assert edited_title.encode('utf-8') in response_post.data
+    assert edited_content.encode('utf-8') in response_post.data
+    assert original_title.encode('utf-8') not in response_post.data # Original title should be gone
+
+    # Verify in database
+    with app.app_context():
+        updated_post = db.session.get(Post, post_id)
+        assert updated_post is not None
+        assert updated_post.title == edited_title
+        assert updated_post.content == edited_content
+        assert updated_post.updated_at > original_updated_at
+        assert updated_post.updated_at > original_created_at # Also ensure it's greater than created_at

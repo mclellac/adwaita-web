@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Libadwaita Blog{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='libadwaita-web/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
         <script src="{{ url_for('static', filename='libadwaita-web/js/components.js') }}"></script>
     <script src="{{ url_for('static', filename='js/adw-initializer.js') }}" defer></script>
 </head>
@@ -40,6 +41,18 @@
         {% endif %}
         </adw-header-bar>
         <main class="adw-page">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="adw-toast-group"> {# Adwaita specific container for toasts/notifications #}
+                  {% for category, message in messages %}
+                    <div class="adw-toast adw-toast-{{ category if category in ['success', 'warning', 'danger', 'info'] else 'info' }}" role="alert">
+                      <p class="adw-toast-title">{{ message }}</p>
+                      {# <button class="adw-toast-button">Dismiss</button> #} {# Optional dismiss button #}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
             {% block content %}{% endblock %}
         </main>
     </adw-application-window>
