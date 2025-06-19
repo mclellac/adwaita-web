@@ -9,7 +9,7 @@
         {# Avatar Display - Copied from previous version, centering via inline style is fine here #}
         {% if user_profile.profile_photo_url %}
             <span class="adw-avatar size-large" style="margin-bottom: var(--spacing-m); display: block; margin-left: auto; margin-right: auto;">
-                <img src="{{ user_profile.profile_photo_url }}" alt="{{ user_profile.username }}'s avatar" style="width: 72px; height: 72px;">
+                <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ user_profile.username }}'s avatar" style="width: 72px; height: 72px;">
             </span>
         {% else %}
             <span class="adw-avatar size-large" style="margin-bottom: var(--spacing-m); display: block; margin-left: auto; margin-right: auto;">
@@ -38,6 +38,22 @@
             <adw-button appearance="suggested" href="{{ url_for('edit_profile') }}">Edit Profile</adw-button>
         </div>
         {% endif %}
+
+        <adw-preferences-group title="Posts by {{ user_profile.username }}" style="margin-top: var(--spacing-l); width: 100%;">
+            {% if user_profile.posts %}
+                <adw-list-box>
+                    {% for post in user_profile.posts %}
+                        <adw-action-row
+                            title="{{ post.title }}"
+                            subtitle="Posted on: {{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else 'N/A' }} UTC"
+                            href="{{ url_for('view_post', post_id=post.id) }}">
+                        </adw-action-row>
+                    {% endfor %}
+                </adw-list-box>
+            {% else %}
+                <p style="padding: var(--spacing-m); text-align: center;">This user has not made any posts yet.</p>
+            {% endif %}
+        </adw-preferences-group>
 
     </div>
 </div>

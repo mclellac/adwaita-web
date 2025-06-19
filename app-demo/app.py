@@ -2,7 +2,9 @@ from datetime import datetime, timezone
 from flask import Flask, render_template, url_for, abort, request, redirect # Added request, redirect
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import desc # Added for ordering
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename # Added for file uploads
 import os # For secret key
 
 app = Flask(__name__)
@@ -26,11 +28,22 @@ else:
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', SQLALCHEMY_DATABASE_URI)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Explicitly set, though setdefault could also be used
+
+# Define upload folder and allowed extensions for profile pictures
+UPLOAD_FOLDER = 'app-demo/static/uploads/profile_pics'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 db = SQLAlchemy() # Initialize SQLAlchemy without app
 
 login_manager = LoginManager()
 # login_manager.init_app(app) # Will be called after db.init_app or if app is fully initialized
-login_manager.login_view = 'login' # Name of the login route
+login_manager.login_view = 'login' # Name of voluntee login route
+
+# Helper function to check allowed file extensions
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Define SQLAlchemy Models
 class User(UserMixin, db.Model):
@@ -39,7 +52,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False) # Increased length for hash
     profile_info = db.Column(db.Text, nullable=True)
     profile_photo_url = db.Column(db.String(512), nullable=True)
-    posts = db.relationship('Post', backref='author', lazy=True)
+    posts = db.relationship('Post', backref='author', lazy=True, order_by=desc("created_at"))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -173,11 +186,29 @@ def profile(username):
 def edit_profile():
     if request.method == 'POST':
         new_profile_info = request.form.get('profile_info')
-        new_photo_url = request.form.get('profile_photo_url')
-        # Basic validation: check if new_profile_info is not None, or add more checks
-        # For simplicity, directly updating. Consider adding validation/sanitization.
+        # new_photo_url = request.form.get('profile_photo_url') # Old way of handling photo URL
+
         current_user.profile_info = new_profile_info
-        current_user.profile_photo_url = new_photo_url
+
+        if 'profile_photo' in request.files:
+            file = request.files['profile_photo']
+            if file and file.filename != '' and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                # Create a unique filename to prevent overwrites
+                unique_filename = f"{current_user.username}_{filename}"
+                save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+
+                # Ensure the upload folder exists
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+                file.save(save_path)
+                current_user.profile_photo_url = f"uploads/profile_pics/{unique_filename}" # Store relative path
+            elif file and file.filename != '':
+                # Handle case where file extension is not allowed
+                flash('Invalid file type. Allowed types are png, jpg, jpeg, gif.', 'danger')
+                return render_template('edit_profile.html', user_profile=current_user)
+
+
         db.session.add(current_user) # Add current_user to session if it's not already persistent or modified
         db.session.commit()
         return redirect(url_for('profile', username=current_user.username))

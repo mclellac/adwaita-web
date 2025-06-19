@@ -5,10 +5,14 @@
 {% block content %}
 <div class="container">
     <h1>Edit Profile</h1>
-    <form method="POST" action="{{ url_for('edit_profile') }}">
+    <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
         <div class="form-group mb-3">
-            <label for="profile_photo_url" class="form-label">Profile Photo URL:</label>
-            <input id="profile_photo_url" class="form-control" type="text" name="profile_photo_url" placeholder="https://example.com/photo.jpg" value="{{ user_profile.profile_photo_url or '' }}">
+            <label for="profile_photo" class="form-label">Upload New Profile Photo (optional):</label>
+            <input id="profile_photo" class="form-control" type="file" name="profile_photo" accept="image/*">
+            {% if user_profile.profile_photo_url %}
+                <p class="mt-2">Current photo:</p>
+                <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="Current profile photo" style="max-width: 150px; max-height: 150px; border-radius: 8px;">
+            {% endif %}
         </div>
         <div class="form-group mb-3">
             <label for="profile_info" class="form-label">Profile Information:</label>
