@@ -42,16 +42,42 @@
         {% endif %}
         </adw-header-bar>
         <main class="adw-page">
+            <div id="flash-banner-container" style="position: sticky; top: 0; z-index: 1050; padding: var(--spacing-s) 0;">
+                {# Banners will be injected here by the script below #}
+            </div>
+
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
-                <div class="adw-toast-group"> {# Adwaita specific container for toasts/notifications #}
-                  {% for category, message in messages %}
-                    <div class="adw-toast adw-toast-{{ category if category in ['success', 'warning', 'danger', 'info'] else 'info' }}" role="alert">
-                      <p class="adw-toast-title">{{ message }}</p>
-                      {# <button class="adw-toast-button">Dismiss</button> #} {# Optional dismiss button #}
-                    </div>
-                  {% endfor %}
-                </div>
+                <script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                    if (!window.Adw || !window.Adw.createAdwBanner) {
+                      console.error('Adw.createAdwBanner function not found.');
+                      return;
+                    }
+                    const flashMessages = {{ messages|tojson|safe }};
+                    const bannerContainer = document.getElementById('flash-banner-container');
+
+                    if (bannerContainer && flashMessages) {
+                      flashMessages.forEach(flashMessage => {
+                        let category = flashMessage[0]; // Flask category
+                        const message = flashMessage[1];  // Message text
+
+                        let bannerType = 'info'; // Default type
+                        if (category === 'success') bannerType = 'success';
+                        else if (category === 'warning') bannerType = 'warning';
+                        else if (category === 'danger') bannerType = 'error';
+                        // 'info' or Flask's default 'message' (which is category[0] if not specified) will map to 'info'
+
+                        Adw.createAdwBanner(message, {
+                          type: bannerType,
+                          dismissible: true,
+                          container: bannerContainer
+                          // Note: createAdwBanner prepends. If container is sticky, this works well.
+                        });
+                      });
+                    }
+                  });
+                </script>
               {% endif %}
             {% endwith %}
             <div class="main-content-clamped">

@@ -7,6 +7,8 @@
 @use "base";
 
 // 3. Components - Order amongst these is usually flexible
+@use "avatar";
+@use "banner";
 @use "box";        // Layout utilities
 @use "button";
 @use "checkbox";
@@ -20,7 +22,6 @@
 @use "switch";
 @use "viewswitcher";
 @use "flap";
-@use "avatar";
 @use "row_types"; // Added import
 @use "window";
 

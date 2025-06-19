@@ -400,6 +400,70 @@ function createAdwToast(text, options = {}) {
 }
 
 /**
+ * Creates and displays an Adwaita-style banner notification.
+ * Banners are typically used for more persistent information than toasts.
+ * @param {string} message - The message to display in the banner.
+ * @param {object} [options={}] - Configuration options for the banner.
+ * @param {'info'|'success'|'warning'|'error'} [options.type='info'] - Type of banner, affects styling.
+ * @param {boolean} [options.dismissible=true] - If true, adds a close button to the banner.
+ * @param {HTMLElement} [options.container=document.body] - Element to prepend the banner to.
+ * @param {string} [options.id] - Optional ID for the banner element.
+ * @returns {HTMLDivElement} The created banner element.
+ */
+function createAdwBanner(message, options = {}) {
+  const opts = options || {};
+  const banner = document.createElement('div');
+  banner.classList.add('adw-banner');
+  banner.setAttribute('role', 'alert'); // Use 'alert' for important messages, could be 'status' for less critical ones.
+  if (opts.id) {
+    banner.id = opts.id;
+  }
+
+  const type = opts.type || 'info'; // Default to 'info'
+  banner.classList.add(type); // e.g., 'info', 'success', 'warning', 'error'
+
+  const messageSpan = document.createElement('span');
+  messageSpan.classList.add('adw-banner-message');
+  messageSpan.textContent = message;
+  banner.appendChild(messageSpan);
+
+  if (opts.dismissible !== false) { // Default to true, so only explicitly false disables it
+    const closeButton = document.createElement('button');
+    closeButton.classList.add('adw-banner-close-button');
+    // Using a multiplication sign (×) for the close icon, common practice.
+    // Ensure SCSS styles this appropriately or allows for an SVG icon.
+    closeButton.innerHTML = '&times;';
+    closeButton.setAttribute('aria-label', 'Close banner'); // Accessibility: label for screen readers
+    closeButton.onclick = () => {
+      banner.classList.remove('visible'); // Trigger fade-out animation
+      // Wait for animation to complete before removing the element
+      setTimeout(() => {
+        if (banner.parentNode) {
+            banner.parentNode.removeChild(banner);
+        }
+      }, 300); // This duration should match the CSS transition time for opacity/transform
+    };
+    banner.appendChild(closeButton);
+  }
+
+  const container = opts.container instanceof HTMLElement ? opts.container : document.body;
+  // Prepend the banner to the container
+  if (container.firstChild) {
+    container.insertBefore(banner, container.firstChild);
+  } else {
+    container.appendChild(banner);
+  }
+
+  // Trigger fade-in animation
+  // A small delay ensures the element is in the DOM and CSS transitions can apply.
+  setTimeout(() => {
+    banner.classList.add('visible');
+  }, 10);
+
+  return banner;
+}
+
+/**
  * Creates an Adwaita-style dialog.
  * @param {object} [options={}] - Configuration options.
  * @param {string} [options.title] - Title of the dialog.
@@ -724,7 +788,7 @@ function loadSavedAccentColor() {
     if (!accentColorName || !AVAILABLE_ACCENT_COLORS.includes(accentColorName)) {
         accentColorName = DEFAULT_ACCENT_COLOR;
     }
-    setAccentColor(accentColorName);
+    setAccentColor(colorName);
 }
 
 /** Toggles the theme between light and dark AND updates accent colors. */
@@ -1278,6 +1342,7 @@ window.Adw = {
   createBox: createAdwBox,
   createRow: createAdwRow,
   createToast: createAdwToast,
+  createAdwBanner: createAdwBanner, // Added new banner function
   createDialog: createAdwDialog,
   createProgressBar: createAdwProgressBar,
   createCheckbox: createAdwCheckbox,
