@@ -29,71 +29,76 @@
   --adw-green-4: #26a269;
   --adw-red-3: #e01b24;
   --adw-yellow-3: #f8c443;
-  --adw-purple-3: #800080;
-  --adw-orange-3: #ffa500;
+  --adw-purple-3: #9141ac;
+  --adw-orange-3: #ff7800;
   --adw-pink-3: #ffc0cb;
   --adw-slate-3: #708090;
   --accent-blue-light-bg: var(--adw-blue-3);
   --accent-blue-light-fg: #ffffff;
-  --accent-green-light-bg: var(--adw-green-4);
+  --accent-green-light-bg: #2ec27e;
   --accent-green-light-fg: #ffffff;
   --accent-red-light-bg: var(--adw-red-3);
   --accent-red-light-fg: #ffffff;
-  --accent-yellow-light-bg: var(--adw-yellow-3);
+  --accent-yellow-light-bg: #e5a50a;
   --accent-yellow-light-fg: rgba(0,0,0,0.87);
   --accent-purple-light-bg: var(--adw-purple-3);
   --accent-purple-light-fg: #ffffff;
   --accent-orange-light-bg: var(--adw-orange-3);
-  --accent-orange-light-fg: rgba(0,0,0,0.87);
+  --accent-orange-light-fg: #ffffff;
   --accent-pink-light-bg: var(--adw-pink-3);
   --accent-pink-light-fg: rgba(0,0,0,0.87);
   --accent-slate-light-bg: var(--adw-slate-3);
   --accent-slate-light-fg: #ffffff;
-  --accent-blue-dark-bg: #5daeff;
-  --accent-blue-dark-fg: rgba(0,0,0,0.87);
-  --accent-green-dark-bg: #57e389;
-  --accent-green-dark-fg: rgba(0,0,0,0.87);
-  --accent-red-dark-bg: #ff5b57;
-  --accent-red-dark-fg: rgba(0,0,0,0.87);
-  --accent-yellow-dark-bg: #f9d423;
+  --accent-blue-dark-bg: var(--adw-blue-3);
+  --accent-blue-dark-fg: #ffffff;
+  --accent-green-dark-bg: #26a269;
+  --accent-green-dark-fg: #ffffff;
+  --accent-red-dark-bg: #c01c28;
+  --accent-red-dark-fg: #ffffff;
+  --accent-yellow-dark-bg: #cd9309;
   --accent-yellow-dark-fg: rgba(0,0,0,0.87);
-  --accent-purple-dark-bg: #c061ff;
-  --accent-purple-dark-fg: rgba(0,0,0,0.87);
-  --accent-orange-dark-bg: #ffae57;
-  --accent-orange-dark-fg: rgba(0,0,0,0.87);
-  --accent-pink-dark-bg: #ff8cc6;
-  --accent-pink-dark-fg: rgba(0,0,0,0.87);
-  --accent-slate-dark-bg: #8a98a5;
-  --accent-slate-dark-fg: rgba(0,0,0,0.87);
-  --accent-blue-standalone: var(--accent-blue-light-bg);
-  --accent-green-standalone: var(--accent-green-light-bg);
-  --accent-red-standalone: var(--accent-red-light-bg);
-  --accent-yellow-standalone: var(--accent-yellow-light-bg);
-  --accent-purple-standalone: var(--accent-purple-light-bg);
-  --accent-orange-standalone: var(--accent-orange-light-bg);
-  --accent-pink-standalone: var(--accent-pink-light-bg);
-  --accent-slate-standalone: var(--accent-slate-light-bg);
-  --accent-blue-dark-standalone: var(--accent-blue-dark-bg);
-  --accent-green-dark-standalone: var(--accent-green-dark-bg);
-  --accent-red-dark-standalone: var(--accent-red-dark-bg);
-  --accent-yellow-dark-standalone: var(--accent-yellow-dark-bg);
-  --accent-purple-dark-standalone: var(--accent-purple-dark-bg);
-  --accent-orange-dark-standalone: var(--accent-orange-dark-bg);
-  --accent-pink-dark-standalone: var(--accent-pink-dark-bg);
-  --accent-slate-dark-standalone: var(--accent-slate-dark-bg);
+  --accent-purple-dark-bg: #613583;
+  --accent-purple-dark-fg: #ffffff;
+  --accent-orange-dark-bg: #c64600;
+  --accent-orange-dark-fg: #ffffff;
+  --accent-pink-dark-bg: #e6a7b4;
+  --accent-pink-dark-fg: #ffffff;
+  --accent-slate-dark-bg: #5a6773;
+  --accent-slate-dark-fg: #ffffff;
+  --accent-blue-standalone: #1c71d8;
+  --accent-green-standalone: #1b8553;
+  --accent-red-standalone: #c01c28;
+  --accent-yellow-standalone: #9c6e03;
+  --accent-purple-standalone: #813d9c;
+  --accent-orange-standalone: #e66100;
+  --accent-pink-standalone: #e6a7b4;
+  --accent-slate-standalone: #5a6773;
+  --accent-blue-dark-standalone: #78aeed;
+  --accent-green-dark-standalone: #8ff0a4;
+  --accent-red-dark-standalone: #ff7b63;
+  --accent-yellow-dark-standalone: #f8e45c;
+  --accent-purple-dark-standalone: #dc8add;
+  --accent-orange-dark-standalone: #ffbe6f;
+  --accent-pink-dark-standalone: #ff8cc6;
+  --accent-slate-dark-standalone: #8a98a5;
 }
 
 :root {
-  --accent-bg-color: #5daeff;
-  --accent-fg-color: rgba(0,0,0,0.87);
-  --destructive-bg-color: #ff5b57;
-  --destructive-fg-color: rgba(0,0,0,0.87);
-  --success-bg-color: #57e389;
-  --success-fg-color: rgba(0,0,0,0.87);
-  --warning-bg-color: #f9d423;
-  --warning-fg-color: rgba(0, 0, 0, 0.87);
-  --error-bg-color: #ff5b57;
-  --error-fg-color: rgba(0,0,0,0.87);
+  --accent-bg-color: var(--accent-blue-dark-bg);
+  --accent-fg-color: var(--accent-blue-dark-fg);
+  --accent-color: var(--accent-blue-dark-standalone);
+  --destructive-bg-color: var(--accent-red-dark-bg);
+  --destructive-fg-color: var(--accent-red-dark-fg);
+  --destructive-color: var(--accent-red-dark-standalone);
+  --success-bg-color: var(--accent-green-dark-bg);
+  --success-fg-color: var(--accent-green-dark-fg);
+  --success-color: var(--accent-green-dark-standalone);
+  --warning-bg-color: var(--accent-yellow-dark-bg);
+  --warning-fg-color: var(--accent-yellow-dark-fg);
+  --warning-color: var(--accent-yellow-dark-standalone);
+  --error-bg-color: var(--accent-red-dark-bg);
+  --error-fg-color: var(--accent-red-dark-fg);
+  --error-color: var(--accent-red-dark-standalone);
   --window-bg-color: #2d2d2d;
   --window-fg-color: #ffffff;
   --view-bg-color: #242424;
@@ -117,14 +122,6 @@
   --button-flat-bg-color: transparent;
   --button-flat-hover-bg-color: rgba(255, 255, 255, 0.08);
   --button-flat-active-bg-color: rgba(255, 255, 255, 0.12);
-  --suggested-action-bg-color: var(--accent-bg-color);
-  --suggested-action-fg-color: var(--accent-fg-color);
-  --suggested-action-hover-bg-color: mix(white, var(--accent-bg-color), 10%);
-  --suggested-action-active-bg-color: mix(white, var(--accent-bg-color), 20%);
-  --destructive-action-bg-color: var(--destructive-bg-color);
-  --destructive-action-fg-color: var(--destructive-fg-color);
-  --destructive-action-hover-bg-color: mix(white, var(--destructive-bg-color), 10%);
-  --destructive-action-active-bg-color: mix(white, var(--destructive-bg-color), 20%);
   --sidebar-bg-color: #333333;
   --sidebar-fg-color: #ffffff;
   --sidebar-border-color: rgba(255,255,255,0.07);
@@ -149,16 +146,21 @@
 }
 
 body.light-theme {
-  --accent-bg-color: #3584e4;
-  --accent-fg-color: #ffffff;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --success-bg-color: #26a269;
-  --success-fg-color: #ffffff;
-  --warning-bg-color: #f8c443;
-  --warning-fg-color: rgba(0, 0, 0, 0.8);
-  --error-bg-color: #e01b24;
-  --error-fg-color: #ffffff;
+  --accent-bg-color: var(--accent-blue-light-bg);
+  --accent-fg-color: var(--accent-blue-light-fg);
+  --accent-color: var(--accent-blue-standalone);
+  --destructive-bg-color: var(--accent-red-light-bg);
+  --destructive-fg-color: var(--accent-red-light-fg);
+  --destructive-color: var(--accent-red-standalone);
+  --success-bg-color: var(--accent-green-light-bg);
+  --success-fg-color: var(--accent-green-light-fg);
+  --success-color: var(--accent-green-standalone);
+  --warning-bg-color: var(--accent-yellow-light-bg);
+  --warning-fg-color: var(--accent-yellow-light-fg);
+  --warning-color: var(--accent-yellow-standalone);
+  --error-bg-color: var(--accent-red-light-bg);
+  --error-fg-color: var(--accent-red-light-fg);
+  --error-color: var(--accent-red-standalone);
   --window-bg-color: #f6f5f4;
   --window-fg-color: rgba(0, 0, 0, 0.8);
   --view-bg-color: #ffffff;
@@ -182,14 +184,6 @@ body.light-theme {
   --button-flat-bg-color: transparent;
   --button-flat-hover-bg-color: rgba(0, 0, 0, 0.05);
   --button-flat-active-bg-color: rgba(0, 0, 0, 0.1);
-  --suggested-action-bg-color: var(--accent-bg-color);
-  --suggested-action-fg-color: var(--accent-fg-color);
-  --suggested-action-hover-bg-color: mix(black, var(--accent-bg-color), 10%);
-  --suggested-action-active-bg-color: mix(black, var(--accent-bg-color), 20%);
-  --destructive-action-bg-color: var(--destructive-bg-color);
-  --destructive-action-fg-color: var(--destructive-fg-color);
-  --destructive-action-hover-bg-color: mix(black, var(--destructive-bg-color), 10%);
-  --destructive-action-active-bg-color: mix(black, var(--destructive-bg-color), 20%);
   --sidebar-bg-color: #f0efee;
   --sidebar-fg-color: rgba(0,0,0,0.8);
   --sidebar-border-color: rgba(0,0,0,0.12);
@@ -429,7 +423,7 @@ body.dark-theme .adw-card {
   text-decoration: none;
   font-size: var(--font-size-base);
   text-align: center;
-  transition: background-color 0.1s ease-out, border-color 0.1s ease-out, box-shadow 0.1s ease-out;
+  transition: background-color 0.1s ease-out, border-color 0.1s ease-out, box-shadow 0.1s ease-out, filter 0.1s ease-out;
   font-weight: 500;
 }
 .adw-button:hover {
@@ -444,15 +438,15 @@ body.dark-theme .adw-card {
   outline-offset: 2px;
 }
 .adw-button.suggested-action {
-  background-color: var(--suggested-action-bg-color);
-  color: var(--suggested-action-fg-color);
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
   border-color: transparent;
 }
 .adw-button.suggested-action:hover {
-  background-color: var(--suggested-action-hover-bg-color);
+  filter: brightness(95%);
 }
 .adw-button.suggested-action:active, .adw-button.suggested-action.active {
-  background-color: var(--suggested-action-active-bg-color);
+  filter: brightness(90%);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .adw-button.flat {
@@ -469,15 +463,15 @@ body.dark-theme .adw-card {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 .adw-button.destructive-action {
-  background-color: var(--destructive-action-bg-color);
-  color: var(--destructive-action-fg-color);
+  background-color: var(--destructive-bg-color);
+  color: var(--destructive-fg-color);
   border-color: transparent;
 }
 .adw-button.destructive-action:hover {
-  background-color: var(--destructive-action-hover-bg-color);
+  filter: brightness(95%);
 }
 .adw-button.destructive-action:active, .adw-button.destructive-action.active {
-  background-color: var(--destructive-action-active-bg-color);
+  filter: brightness(90%);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .adw-button[disabled], .adw-button:disabled {

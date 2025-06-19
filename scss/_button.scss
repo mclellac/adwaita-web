@@ -15,7 +15,7 @@
   text-decoration: none;
   font-size: var(--font-size-base); // Use new variable
   text-align: center;
-  transition: background-color 0.1s ease-out, border-color 0.1s ease-out, box-shadow 0.1s ease-out; // Libadwaita uses subtle transitions
+  transition: background-color 0.1s ease-out, border-color 0.1s ease-out, box-shadow 0.1s ease-out, filter 0.1s ease-out; // Libadwaita uses subtle transitions
   font-weight: 500; // Libadwaita buttons are often slightly bolder
 
   &:hover {
@@ -34,15 +34,15 @@
   }
 
   &.suggested-action {
-    background-color: var(--suggested-action-bg-color);
-    color: var(--suggested-action-fg-color);
+    background-color: var(--accent-bg-color);
+    color: var(--accent-fg-color);
     border-color: transparent;
 
     &:hover {
-      background-color: var(--suggested-action-hover-bg-color);
+      filter: brightness(95%);
     }
     &:active, &.active {
-      background-color: var(--suggested-action-active-bg-color);
+      filter: brightness(90%);
       box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
     }
   }
@@ -64,15 +64,15 @@
 
   // Renamed from .destructive to .destructive-action for consistency
   &.destructive-action {
-    background-color: var(--destructive-action-bg-color);
-    color: var(--destructive-action-fg-color);
+    background-color: var(--destructive-bg-color);
+    color: var(--destructive-fg-color);
     border-color: transparent;
 
     &:hover {
-      background-color: var(--destructive-action-hover-bg-color);
+      filter: brightness(95%);
     }
     &:active, &.active {
-      background-color: var(--destructive-action-active-bg-color);
+      filter: brightness(90%);
       box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
     }
   }
