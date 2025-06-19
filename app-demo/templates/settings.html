@@ -20,6 +20,11 @@
             </div>
         </adw-action-row>
     </adw-preferences-group>
+
+    <adw-preferences-group title="Test Pages">
+        <adw-action-row title="Test Widget Page" clickable href="{{ url_for('test_widget_page') }}"></adw-action-row>
+        <adw-action-row title="Test New Widgets Page" clickable href="{{ url_for('test_new_widgets_page') }}"></adw-action-row>
+    </adw-preferences-group>
 </adw-preferences-page>
 
 <script>
