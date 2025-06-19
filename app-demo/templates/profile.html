@@ -10,9 +10,14 @@
                 <strong class="adw-label">Username:</strong> <span class="adw-label">{{ user_profile.username }}</span>
             </div>
             <div class="adw-row">
-                <strong class="adw-label">Profile Info:</strong> <span class="adw-label">{{ user_profile.get_profile_info() }}</span>
+                <strong class="adw-label">Profile Info:</strong> <span class="adw-label">{{ user_profile.profile_info if user_profile.profile_info else 'No profile information provided.' }}</span>
             </div>
             {# Add more profile details here if needed #}
+            {% if current_user and current_user.username == user_profile.username %}
+            <div class="adw-row" style="margin-top: 15px;">
+                <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>
+            </div>
+            {% endif %}
         </div>
     </adw-preferences-group>
 </adw-preferences-page>
