@@ -35,24 +35,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle <adw-button>
   document.querySelectorAll('adw-button').forEach(buttonElement => {
-    const text = buttonElement.textContent;
+    const text = buttonElement.textContent; // Assuming text is direct content
     const options = {};
-    if (buttonElement.getAttribute('appearance') === 'suggested') {
-      options.suggested = true;
-    }
-    if (buttonElement.getAttribute('appearance') === 'destructive') {
-      options.destructive = true;
-    }
-    if (buttonElement.getAttribute('href')) {
-      options.href = buttonElement.getAttribute('href');
-    }
-    // Add any other attribute mappings here, e.g., for flat, disabled, active, icon
-
-    const newButton = window.Adw.createButton(text, options);
-    // Copy over any other attributes that might be relevant (e.g., id, custom data-*)
     const originalAttrs = getAttributes(buttonElement);
+
+    options.suggested = buttonElement.getAttribute('appearance') === 'suggested';
+    options.destructive = buttonElement.getAttribute('appearance') === 'destructive';
+    options.flat = buttonElement.hasAttribute('flat');
+    options.disabled = buttonElement.hasAttribute('disabled');
+    options.active = buttonElement.hasAttribute('active');
+    options.isCircular = buttonElement.hasAttribute('circular');
+
+    if (originalAttrs.href) {
+      options.href = originalAttrs.href;
+    }
+
+    // Icon handling
+    if (originalAttrs.icon) { // If 'icon' attribute provides a class name or path
+        options.icon = originalAttrs.icon;
+    } else { // Check for slotted icon element
+        const iconSlot = collectSlotElements(buttonElement, 'icon');
+        if (iconSlot.length > 0 && iconSlot[0].innerHTML) {
+            options.icon = iconSlot[0].innerHTML; // Pass SVG string or content of slot
+        }
+    }
+
+    const newButton = window.Adw.createButton(text.trim(), options);
+    // Copy over any other attributes that might be relevant
     for (const attrName in originalAttrs) {
-        if (attrName !== 'appearance' && attrName !== 'href' && !newButton.hasAttribute(attrName)) {
+        if (!['appearance', 'href', 'flat', 'disabled', 'active', 'circular', 'icon', 'slot'].includes(attrName) && !newButton.hasAttribute(attrName)) {
             newButton.setAttribute(attrName, originalAttrs[attrName]);
         }
     }
@@ -66,46 +77,81 @@ document.addEventListener('DOMContentLoaded', () => {
       end: []
     };
     let titleText = '';
+    let subtitleText = '';
 
-    // Collect slotted elements and title
     Array.from(headerBarElement.children).forEach(child => {
-      if (child.matches('adw-window-title') || child.getAttribute('slot') === 'title') {
+      const slot = child.getAttribute('slot');
+      let processedChild = null;
+
+      if (child.matches('adw-window-title') || slot === 'title') {
         titleText = child.textContent;
-      } else if (child.getAttribute('slot') === 'start') {
-        // If the child is an adw-button that hasn't been processed yet, process it now
-        if (child.tagName.toLowerCase() === 'adw-button') {
-          const buttonText = child.textContent;
-          const buttonOpts = {};
-          if (child.getAttribute('appearance') === 'suggested') buttonOpts.suggested = true;
-          if (child.getAttribute('appearance') === 'destructive') buttonOpts.destructive = true;
-          if (child.getAttribute('href')) buttonOpts.href = child.getAttribute('href');
-          options.start.push(window.Adw.createButton(buttonText, buttonOpts));
-        } else {
-          options.start.push(child.cloneNode(true)); // Keep other elements as they are
+        if(child.hasAttribute('subtitle')) {
+            subtitleText = child.getAttribute('subtitle');
         }
-      } else if (child.getAttribute('slot') === 'end') {
-         if (child.tagName.toLowerCase() === 'adw-button') {
-          const buttonText = child.textContent;
-          const buttonOpts = {};
-          if (child.getAttribute('appearance') === 'suggested') buttonOpts.suggested = true;
-          if (child.getAttribute('appearance') === 'destructive') buttonOpts.destructive = true;
-          if (child.getAttribute('href')) buttonOpts.href = child.getAttribute('href');
-          options.end.push(window.Adw.createButton(buttonText, buttonOpts));
+        return; // Don't add title element to start/end slots
+      }
+
+      // Process adw-buttons specifically to ensure they are Adw.Buttons
+      if (child.tagName.toLowerCase() === 'adw-button') {
+        const buttonOriginalAttrs = getAttributes(child);
+        const buttonText = child.textContent;
+        const buttonOpts = {
+            href: child.getAttribute('href'),
+            suggested: child.getAttribute('appearance') === 'suggested',
+            destructive: child.getAttribute('appearance') === 'destructive',
+            flat: child.hasAttribute('flat'),
+            isCircular: child.hasAttribute('circular')
+        };
+        if (buttonOriginalAttrs.icon) {
+            buttonOpts.icon = buttonOriginalAttrs.icon;
         } else {
-          options.end.push(child.cloneNode(true));
+            const iconChild = child.querySelector('[slot="icon"]'); // Check for direct child with slot="icon"
+            if (iconChild) buttonOpts.icon = iconChild.innerHTML;
         }
+        processedChild = window.Adw.createButton(buttonText.trim(), buttonOpts);
+        // Copy remaining attributes from the original adw-button tag
+        for (const attrName in buttonOriginalAttrs) {
+            if (!['appearance', 'href', 'flat', 'circular', 'icon', 'slot'].includes(attrName) && !processedChild.hasAttribute(attrName)) {
+                processedChild.setAttribute(attrName, buttonOriginalAttrs[attrName]);
+            }
+        }
+      } else {
+        processedChild = child.cloneNode(true);
+      }
+
+      if (slot === 'start') {
+        options.start.push(processedChild);
+      } else if (slot === 'end') {
+        options.end.push(processedChild);
+      } else {
+        // If no slot, and not title, default to end or start? Or ignore?
+        // For now, elements without a slot (and not title) are not explicitly added.
+        // console.warn("Child in adw-header-bar without 'start', 'end', or 'title' slot:", child);
       }
     });
+
     if(titleText) options.title = titleText;
+    if(subtitleText) options.subtitle = subtitleText;
 
     const newHeaderBar = window.Adw.createHeaderBar(options);
+    const originalAttrs = getAttributes(headerBarElement);
+    for (const attrName in originalAttrs) {
+        if (!newHeaderBar.hasAttribute(attrName)) { // Avoid overwriting attributes set by createHeaderBar
+            newHeaderBar.setAttribute(attrName, originalAttrs[attrName]);
+        }
+    }
     headerBarElement.replaceWith(newHeaderBar);
   });
 
   // Handle <adw-preferences-page>
   document.querySelectorAll('adw-preferences-page').forEach(prefPageElement => {
     const div = document.createElement('div');
-    div.className = 'adw-preferences-page'; // From SCSS
+    div.className = 'adw-preferences-page';
+    const originalAttrs = getAttributes(prefPageElement);
+    for (const attrName in originalAttrs) {
+        if (attrName !== 'class') div.setAttribute(attrName, originalAttrs[attrName]);
+        else div.className += ' ' + originalAttrs[attrName];
+    }
     moveChildren(prefPageElement, div);
     prefPageElement.replaceWith(div);
   });
@@ -113,10 +159,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle <adw-preferences-group>
   document.querySelectorAll('adw-preferences-group').forEach(prefGroupElement => {
     const div = document.createElement('div');
-    div.className = 'adw-preferences-group'; // From SCSS
+    div.className = 'adw-preferences-group';
+    const originalAttrs = getAttributes(prefGroupElement);
+     for (const attrName in originalAttrs) {
+        if (attrName !== 'class' && attrName !== 'title') div.setAttribute(attrName, originalAttrs[attrName]);
+        else if (attrName === 'class') div.className += ' ' + originalAttrs[attrName];
+    }
+
     if (prefGroupElement.hasAttribute('title')) {
-      const titleElement = document.createElement('div'); // Or h2, h3 based on styling
-      titleElement.className = 'adw-preferences-group-title'; // Assuming a class for styling
+      const titleElement = document.createElement('div');
+      titleElement.className = 'adw-preferences-group-title';
       titleElement.textContent = prefGroupElement.getAttribute('title');
       div.appendChild(titleElement);
     }
@@ -124,19 +176,163 @@ document.addEventListener('DOMContentLoaded', () => {
     prefGroupElement.replaceWith(div);
   });
 
-  // Generic handler for simple tag replacement to div with class
+  // --- NEW HANDLERS START HERE ---
+
+  // Handle <adw-list-box>
+  document.querySelectorAll('adw-list-box').forEach(listBoxElement => {
+    const options = {
+      isFlat: listBoxElement.hasAttribute('flat'),
+      selectable: listBoxElement.hasAttribute('selectable'),
+      children: []
+    };
+
+    // Children of adw-list-box are expected to be adw-action-row, adw-entry-row etc.
+    // These should be processed by their respective handlers *before* this list-box handler
+    // if they are defined as custom tags. If they are already processed into Adw components,
+    // then they can be moved directly.
+    // For robustness, we might need to ensure processing order or re-process here.
+    // For now, assume children are either standard elements or already processed custom elements.
+    while (listBoxElement.firstChild) {
+      options.children.push(listBoxElement.firstChild);
+    }
+
+    const newListBox = window.Adw.createListBox(options);
+    const originalAttrs = getAttributes(listBoxElement);
+    for (const attrName in originalAttrs) {
+      if (!['flat', 'selectable', 'class'].includes(attrName) && !newListBox.hasAttribute(attrName)) {
+        newListBox.setAttribute(attrName, originalAttrs[attrName]);
+      } else if (attrName === 'class') {
+        newListBox.className += ' ' + originalAttrs[attrName];
+      }
+    }
+    listBoxElement.replaceWith(newListBox);
+  });
+
+  // Handle <adw-action-row>
+  document.querySelectorAll('adw-action-row').forEach(actionRowElement => {
+    const options = {
+      title: actionRowElement.getAttribute('title') || '',
+      subtitle: actionRowElement.getAttribute('subtitle'),
+      // iconHTML, onClick, showChevron are handled below
+    };
+    const originalAttrs = getAttributes(actionRowElement);
+
+    const iconSlot = collectSlotElements(actionRowElement, 'icon');
+    if (iconSlot.length > 0 && iconSlot[0].innerHTML) {
+      options.iconHTML = iconSlot[0].innerHTML;
+    }
+
+    const href = actionRowElement.getAttribute('href');
+    if (href) {
+      options.onClick = () => { window.location.href = href; };
+    }
+
+    options.showChevron = actionRowElement.getAttribute('show-chevron') !== "false";
+    // Adw.createActionRow's logic: showChevron is true by default if onClick is present.
+    // If show-chevron="false", it will be false. If show-chevron="true", it's true.
+
+    const newActionRow = window.Adw.createActionRow(options);
+    // Copy common attributes, let createActionRow handle its specific ones.
+    for (const attrName in originalAttrs) {
+      if (!['title', 'subtitle', 'href', 'show-chevron', 'slot', 'class', 'icon'].includes(attrName) && !newActionRow.hasAttribute(attrName)) {
+         newActionRow.setAttribute(attrName, originalAttrs[attrName]);
+      } else if (attrName === 'class') {
+        newActionRow.className += ' ' + originalAttrs[attrName];
+      }
+    }
+    if (originalAttrs.hasOwnProperty('activated')) { // Adw.createActionRow returns a row; apply state classes
+        newActionRow.classList.add('activated');
+    }
+    // 'interactive' is implicitly handled by Adw.createRow if onClick is set.
+
+    actionRowElement.replaceWith(newActionRow);
+  });
+
+  // Handle <adw-entry-row>
+  document.querySelectorAll('adw-entry-row').forEach(entryRowElement => {
+    const options = {
+      title: entryRowElement.getAttribute('title') || '',
+      entryOptions: {}
+    };
+    const originalAttrs = getAttributes(entryRowElement);
+
+    const inputElement = entryRowElement.querySelector('input, textarea');
+    if (inputElement) {
+      const inputAttrs = getAttributes(inputElement);
+      options.entryOptions = { ...inputAttrs }; // Clone all attributes from the input/textarea
+       // id might be important for label 'for' attribute, ensure createEntryRow handles this or pass it.
+      if(inputAttrs.id) options.entryOptions.id = inputAttrs.id;
+      inputElement.remove();
+    } else {
+        // If no input is provided, Adw.createEntry will create a default one.
+        // We can still pass attributes from the adw-entry-row itself if they are meant for the input.
+        for(const key in originalAttrs){
+            if(['placeholder', 'value', 'name', 'type', 'id', 'disabled', 'required'].includes(key)){
+                options.entryOptions[key] = originalAttrs[key];
+            }
+        }
+    }
+
+    options.labelForEntry = entryRowElement.getAttribute('label-for-entry') !== "false";
+
+
+    const newEntryRow = window.Adw.createEntryRow(options);
+    for (const attrName in originalAttrs) {
+      if (!['title', 'class'].includes(attrName) && !options.entryOptions.hasOwnProperty(attrName) && !newEntryRow.hasAttribute(attrName)) {
+        newEntryRow.setAttribute(attrName, originalAttrs[attrName]);
+      } else if (attrName === 'class') {
+        newEntryRow.className += ' ' + originalAttrs[attrName];
+      }
+    }
+    entryRowElement.replaceWith(newEntryRow);
+  });
+
+  // Handle <adw-expander-row>
+  document.querySelectorAll('adw-expander-row').forEach(expanderRowElement => {
+    const options = {
+      title: expanderRowElement.getAttribute('title') || '',
+      subtitle: expanderRowElement.getAttribute('subtitle'),
+      expanded: expanderRowElement.hasAttribute('expanded')
+    };
+    const originalAttrs = getAttributes(expanderRowElement);
+
+    const contentWrapper = document.createElement('div');
+    // Any children not matching specific slots for title/subtitle/icon for the row part itself
+    // are considered content for the expander.
+    // The createExpanderRow component expects a single 'content' element.
+    moveChildren(expanderRowElement, contentWrapper);
+    options.content = contentWrapper;
+
+    const newExpanderRow = window.Adw.createExpanderRow(options); // This returns a wrapper
+    for (const attrName in originalAttrs) {
+      if (!['title', 'subtitle', 'expanded', 'class'].includes(attrName) && !newExpanderRow.hasAttribute(attrName)) {
+        newExpanderRow.setAttribute(attrName, originalAttrs[attrName]);
+      } else if (attrName === 'class') {
+        newExpanderRow.element.className += ' ' + originalAttrs[attrName]; // createExpanderRow returns {element: ...}
+      }
+    }
+    expanderRowElement.replaceWith(newExpanderRow.element);
+  });
+
+
+  // --- GENERIC HANDLERS (SHOULD BE LAST OR CAREFUL WITH SPECIFICITY) ---
   const simpleReplaceTags = ['adw-application-window', 'adw-page'];
   simpleReplaceTags.forEach(tagName => {
     document.querySelectorAll(tagName).forEach(element => {
+      if (element.closest('.adw-expander-row-content')) return;
+
       const div = document.createElement('div');
-      div.className = tagName.toLowerCase(); // e.g., adw-application-window
-      // Copy attributes
-      for(let i = 0; i < element.attributes.length; i++) {
-        const attr = element.attributes[i];
-        if (attr.name !== 'class') { // class is set above
-          div.setAttribute(attr.name, attr.value);
-        } else {
-          div.className += ' ' + attr.value; // Append existing classes
+      const originalAttrs = getAttributes(element);
+
+      let className = tagName.toLowerCase();
+      if(originalAttrs.class){
+        className += ' ' + originalAttrs.class;
+      }
+      div.className = className;
+
+      for(const attrName in originalAttrs) {
+        if (attrName !== 'class') {
+          div.setAttribute(attrName, originalAttrs[attrName]);
         }
       }
       moveChildren(element, div);
@@ -144,5 +340,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  console.log('Adw-initializer finished.');
+  console.log('Adw-initializer finished processing custom tags.');
 });

@@ -29,8 +29,8 @@
             </div>
             {% endif %}
         </adw-preferences-group>
-        <adw-button-row>
-             <adw-button href="{{ url_for('index') }}">Back to Posts</adw-button> {# Changed appearance from destructive #}
-        </adw-button-row>
+        <div class="adw-box justify-center" style="margin-top: var(--spacing-l);">
+             <adw-button href="{{ url_for('index') }}">Back to Posts</adw-button>
+        </div>
     </adw-preferences-page>
 {% endblock %}

@@ -23,7 +23,7 @@
                     </span>
                 {% else %}
                     <span class="adw-avatar size-small">
-                        <span class="adw-avatar-text" style="font-size: 0.7rem;"> <!-- Adjust font size for small avatar -->
+                        <span class="adw-avatar-text"> <!-- Adjust font size for small avatar -->
                             {% set name_parts = current_user.username.split() %}
                             {% if name_parts|length >= 1 and name_parts[0] %}
                                 {{ name_parts[0][0]|upper }}
