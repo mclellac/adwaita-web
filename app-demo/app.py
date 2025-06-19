@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename # Added for file uploads
 import os # For secret key
 import logging # Added for logging
+from PIL import Image # Added for image resizing
 
 app = Flask(__name__)
 
@@ -110,15 +111,15 @@ def create_post():
     if request.method == 'POST':
         title = request.form.get('title')
         content = request.form.get('content')
-        app.logger.info(f"Attempting to create post. Title: '{title}', Content present: {bool(content)}")
+        app.logger.info(f"Create post attempt by user '{current_user.username}' (ID: {current_user.id}). Title: '{title}', Content present: {bool(content)}")
         if title and content:
             try:
-                app.logger.info(f"Current user for post: {current_user.username} (ID: {current_user.id})")
+                # User details already logged above.
                 new_post = Post(title=title, content=content, author=current_user)
                 db.session.add(new_post)
-                app.logger.info("Post added to session.")
+                app.logger.info(f"Post object created and added to session for user '{current_user.username}'.") # Enhanced log
                 db.session.commit()
-                app.logger.info(f"Post committed to DB. ID: {new_post.id}, Title: {new_post.title}")
+                app.logger.info(f"Post committed to DB. ID: {new_post.id}, Title: '{new_post.title}' by user '{current_user.username}'.") # Enhanced log
                 flash('Post created successfully!', 'success')
                 return redirect(url_for('index'))
             except Exception as e:
@@ -231,8 +232,11 @@ def edit_profile():
                         os.makedirs(upload_folder_path, exist_ok=True)
                         app.logger.info(f"Ensured upload folder exists: '{upload_folder_path}' for user {current_user.username}")
 
-                        file.save(save_path)
-                        app.logger.info(f"File saved successfully to '{save_path}' for user {current_user.username}")
+                        # Resize image
+                        img = Image.open(file)
+                        img.thumbnail((200, 200))
+                        img.save(save_path)
+                        app.logger.info(f"Resized and saved image to '{save_path}' for user {current_user.username}")
 
                         relative_path = os.path.join('uploads/profile_pics', unique_filename)
                         current_user.profile_photo_url = relative_path

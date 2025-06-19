@@ -8,7 +8,7 @@
         {# Avatar Display - Copied from previous version, centering via inline style is fine here #}
         {% if user_profile.profile_photo_url %}
             <span class="adw-avatar size-large" style="margin-bottom: var(--spacing-m); display: block; margin-left: auto; margin-right: auto;">
-                <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ user_profile.username }}'s avatar" style="width: 72px; height: 72px;">
+                <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ user_profile.username }}'s avatar" class="avatar-image">
             </span>
         {% else %}
             <span class="adw-avatar size-large" style="margin-bottom: var(--spacing-m); display: block; margin-left: auto; margin-right: auto;">

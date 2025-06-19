@@ -1,17 +1,79 @@
-/* For general content clamping */
+/* Add your custom CSS styles here */
 .content-clamp {
-    max-width: 800px; /* Adjust as needed */
+    max-width: 800px; /* Or your preferred max width */
     margin-left: auto;
     margin-right: auto;
-    padding: var(--spacing-l, 18px); /* Use Adwaita variable with fallback */
+    padding: var(--spacing-l); /* Example padding */
 }
 
-/* To clamp Adwaita preference pages directly */
-.adw-preferences-page.clamped {
-    max-width: 800px; /* Adjust as needed */
-    margin-left: auto;
-    margin-right: auto;
-    /* Preferences pages often have internal padding via groups, check if more is needed */
-    padding-top: var(--spacing-l, 18px);
-    padding-bottom: var(--spacing-l, 18px);
+/* Ensure that the adw-list-box takes available width */
+adw-list-box {
+    width: 100%;
+}
+
+/* Styling for form elements if needed */
+.form-group {
+    margin-bottom: var(--spacing-m); /* Or your preferred spacing */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--spacing-xs); /* Or your preferred spacing */
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group textarea {
+    width: 100%; /* Make form fields take full width of their container */
+    /* Additional styling using Adwaita variables can be added if needed */
+}
+
+/* Profile page specific styles */
+.profile-details {
+    margin-bottom: var(--spacing-l); /* Space below profile details before posts */
+}
+
+/* Post list on profile page */
+.profile-posts-list adw-action-row {
+    /* Customizations for post rows if needed */
+}
+
+/* Style for flash messages to make them more prominent if needed */
+.adw-toast-group {
+    position: fixed;
+    top: var(--spacing-l); /* Adjust as needed */
+    right: var(--spacing-l); /* Adjust as needed */
+    z-index: 1000; /* Ensure it's above other content */
+    width: auto; /* Or a specific max-width */
+    max-width: 350px; /* Example max-width */
+}
+
+.adw-toast {
+    margin-bottom: var(--spacing-s); /* Spacing between toasts */
+}
+
+/* Avatar image styling */
+.avatar-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: var(--adw-shade-color);
+}
+
+/* Specific adjustments for avatars in different contexts */
+.adw-avatar.size-large .avatar-image {
+    width: 72px; /* As originally in profile.html */
+    height: 72px;
+}
+
+.adw-avatar.size-small .avatar-image {
+    width: 24px; /* As originally in base.html for header */
+    height: 24px;
+}
+
+/* Ensure images within adw-avatar spans don't override the span's flex behavior if any */
+.adw-avatar > .avatar-image {
+    display: block; /* Or inline-block depending on desired layout within span */
 }

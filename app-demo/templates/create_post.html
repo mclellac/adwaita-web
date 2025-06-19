@@ -6,15 +6,15 @@
     <adw-preferences-page class="clamped">
         <adw-preferences-group title="New Blog Post">
             <form method="POST" action="{{ url_for('create_post') }}">
-                <adw-action-row title="Title">
-                    <adw-entry name="title" placeholder="Enter post title" required></adw-entry>
-                </adw-action-row>
-                <adw-expander-row title="Content">
-                    <textarea name="content" placeholder="Write your blog post here..." rows="10" style="width: 100%; min-height: 150px; border: 1px solid var(--adw-border-color); border-radius: 6px; padding: 6px; background-color: var(--adw-view-bg-color); color: var(--adw-text-color);" required></textarea>
-                </adw-expander-row>
-                <adw-button-row>
+                <adw-list-box>
+                    <adw-entry-row title="Title" name="title" placeholder="Enter post title" required></adw-entry-row>
+                    <adw-expander-row title="Content" subtitle="Write your blog post here...">
+                        <textarea name="content" placeholder="Write your blog post here..." rows="10" style="width: 100%; min-height: 150px; border: 1px solid var(--adw-border-color); border-radius: 6px; padding: 6px; background-color: var(--adw-view-bg-color); color: var(--adw-text-color);" required></textarea>
+                    </adw-expander-row>
+                </adw-list-box>
+                <div style="margin-top: var(--spacing-m); display: flex; justify-content: flex-end;">
                     <adw-button type="submit" appearance="suggested">Create Post</adw-button>
-                </adw-button-row>
+                </div>
             </form>
         </adw-preferences-group>
     </adw-preferences-page>
