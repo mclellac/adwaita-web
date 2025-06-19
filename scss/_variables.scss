@@ -7,14 +7,22 @@
   --destructive-bg-color: var(--accent-red-light-bg);
   --destructive-fg-color: var(--accent-red-light-fg);
   --destructive-color: var(--accent-red-standalone);
-  --success-bg-color: var(--accent-green-light-bg);
-  --success-fg-color: var(--accent-green-light-fg);
+
+  // Banner colors for light theme
+  --info-bg-color: var(--info-bg-color-light);
+  --info-fg-color: var(--info-fg-color-light);
+  --info-border-color: var(--info-border-color-light);
+  --success-bg-color: var(--success-bg-color-light);
+  --success-fg-color: var(--success-fg-color-light);
+  --success-border-color: var(--success-border-color-light);
   --success-color: var(--accent-green-standalone);
-  --warning-bg-color: var(--accent-yellow-light-bg);
-  --warning-fg-color: var(--accent-yellow-light-fg);
+  --warning-bg-color: var(--warning-bg-color-light);
+  --warning-fg-color: var(--warning-fg-color-light);
+  --warning-border-color: var(--warning-border-color-light);
   --warning-color: var(--accent-yellow-standalone);
-  --error-bg-color: var(--accent-red-light-bg); // Errors use destructive colors
-  --error-fg-color: var(--accent-red-light-fg);
+  --error-bg-color: var(--error-bg-color-light);
+  --error-fg-color: var(--error-fg-color-light);
+  --error-border-color: var(--error-border-color-light);
   --error-color: var(--accent-red-standalone);
 
   --window-bg-color: #f6f5f4;
@@ -80,14 +88,22 @@
   --destructive-bg-color: var(--accent-red-dark-bg);
   --destructive-fg-color: var(--accent-red-dark-fg);
   --destructive-color: var(--accent-red-dark-standalone);
-  --success-bg-color: var(--accent-green-dark-bg);
-  --success-fg-color: var(--accent-green-dark-fg);
+
+  // Banner colors for dark theme
+  --info-bg-color: var(--info-bg-color-dark);
+  --info-fg-color: var(--info-fg-color-dark);
+  --info-border-color: var(--info-border-color-dark);
+  --success-bg-color: var(--success-bg-color-dark);
+  --success-fg-color: var(--success-fg-color-dark);
+  --success-border-color: var(--success-border-color-dark);
   --success-color: var(--accent-green-dark-standalone);
-  --warning-bg-color: var(--accent-yellow-dark-bg);
-  --warning-fg-color: var(--accent-yellow-dark-fg);
+  --warning-bg-color: var(--warning-bg-color-dark);
+  --warning-fg-color: var(--warning-fg-color-dark);
+  --warning-border-color: var(--warning-border-color-dark);
   --warning-color: var(--accent-yellow-dark-standalone);
-  --error-bg-color: var(--accent-red-dark-bg); // Errors use destructive colors
-  --error-fg-color: var(--accent-red-dark-fg);
+  --error-bg-color: var(--error-bg-color-dark);
+  --error-fg-color: var(--error-fg-color-dark);
+  --error-border-color: var(--error-border-color-dark);
   --error-color: var(--accent-red-dark-standalone);
 
   --window-bg-color: #2d2d2d;
@@ -185,10 +201,24 @@
   // Accent Color Palette (Raw colors)
   // Naming: --adw-{colorName}-{shade} (shade 1-5, 3 is often a good base)
   // These are just examples, a full Adwaita palette has many more.
+  --adw-blue-1: #d3e5f7;
   --adw-blue-3: #3584e4;
-  --adw-green-4: #26a269; // Using a slightly darker green for better contrast with white text
-  --adw-red-3: #e01b24;   // A bit bright, consider -4 or -5 if available for general use
+  --adw-blue-5: #1a5fb4;
+  --adw-green-1: #d2f0d4;
+  --adw-green-3: #2ec27e;
+  --adw-green-5: #1b7749;
+  --adw-yellow-1: #fef4d5;
   --adw-yellow-3: #f8c443;
+  --adw-yellow-5: #b07d0d;
+  --adw-red-1: #f7d4d4;
+  --adw-red-3: #e01b24;
+  --adw-red-5: #a50e17;
+  // Darker shades for dark theme backgrounds
+  --adw-blue-4-dark: #2a70c9;
+  --adw-green-4-dark: #218358;
+  --adw-yellow-4-dark: #b07d0d;
+  --adw-red-4-dark: #a50e17;
+
   --adw-purple-3: #9141ac; // Placeholder, replace with actual Adwaita purple
   --adw-orange-3: #ff7800; // Placeholder
   --adw-pink-3: #ffc0cb;   // Placeholder
@@ -201,6 +231,21 @@
   // Light Theme Accent Palette
   --accent-blue-light-bg: var(--adw-blue-3);
   --accent-blue-light-fg: #ffffff;
+
+  // Banner Colors (Light Theme)
+  --info-bg-color-light: var(--adw-blue-1);
+  --info-border-color-light: var(--adw-blue-3);
+  --info-fg-color-light: var(--adw-blue-5);
+  --success-bg-color-light: var(--adw-green-1);
+  --success-border-color-light: var(--adw-green-3);
+  --success-fg-color-light: var(--adw-green-5);
+  --warning-bg-color-light: var(--adw-yellow-1);
+  --warning-border-color-light: var(--adw-yellow-3);
+  --warning-fg-color-light: var(--adw-yellow-5);
+  --error-bg-color-light: var(--adw-red-1);
+  --error-border-color-light: var(--adw-red-3);
+  --error-fg-color-light: var(--adw-red-5);
+
   --accent-green-light-bg: #2ec27e;
   --accent-green-light-fg: #ffffff;
   --accent-red-light-bg: var(--adw-red-3);
@@ -219,6 +264,21 @@
   // Dark Theme Accent Palette (values might need to be lighter/desaturated than light theme)
   --accent-blue-dark-bg: var(--adw-blue-3);
   --accent-blue-dark-fg: #ffffff;
+
+  // Banner Colors (Dark Theme)
+  --info-bg-color-dark: var(--adw-blue-4-dark);
+  --info-border-color-dark: var(--adw-blue-3);
+  --info-fg-color-dark: var(--adw-blue-1);
+  --success-bg-color-dark: var(--adw-green-4-dark);
+  --success-border-color-dark: var(--adw-green-3);
+  --success-fg-color-dark: var(--adw-green-1);
+  --warning-bg-color-dark: var(--adw-yellow-4-dark);
+  --warning-border-color-dark: var(--adw-yellow-3);
+  --warning-fg-color-dark: var(--adw-yellow-1);
+  --error-bg-color-dark: var(--adw-red-4-dark);
+  --error-border-color-dark: var(--adw-red-3);
+  --error-fg-color-dark: var(--adw-red-1);
+
   --accent-green-dark-bg: #26a269;
   --accent-green-dark-fg: #ffffff;
   --accent-red-dark-bg: #c01c28;
