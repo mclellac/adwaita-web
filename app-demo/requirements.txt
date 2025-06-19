@@ -1,5 +1,2 @@
 Flask
-Flask-Login
-psycopg2-binary
-Flask-SQLAlchemy
-pytest
+Pillow

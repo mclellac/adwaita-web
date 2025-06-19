@@ -18,7 +18,7 @@
                     </adw-action-row>
                     {% if user_profile.profile_photo_url %}
                     <adw-action-row subtitle="Current Photo">
-                        <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="Current profile photo" style="max-width: 100px; max-height: 100px; border-radius: var(--border-radius-default);">
+                        <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="Current profile photo" class="avatar-image">
                     </adw-action-row>
                     {% endif %}
 
