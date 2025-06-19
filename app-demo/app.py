@@ -10,9 +10,21 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'a_default_very_secret_key_for_development_only') # In production, use a proper secret key
 
 # Database Configuration
-# Set default URI, but allow override before db.init_app()
-app.config.setdefault('SQLALCHEMY_DATABASE_URI', os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost/dbname'))
-app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', False)
+# Get PostgreSQL connection details from environment variables
+POSTGRES_USER = os.environ.get('POSTGRES_USER', 'postgres')
+POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'postgres') # Changed default password
+POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'localhost')
+POSTGRES_DB = os.environ.get('POSTGRES_DB', 'appdb')
+
+# Construct the database URI
+# If password is empty, it might imply peer authentication or other auth methods
+if POSTGRES_PASSWORD:
+    SQLALCHEMY_DATABASE_URI = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}"
+else:
+    SQLALCHEMY_DATABASE_URI = f"postgresql://{POSTGRES_USER}@{POSTGRES_HOST}/{POSTGRES_DB}"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', SQLALCHEMY_DATABASE_URI)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Explicitly set, though setdefault could also be used
 db = SQLAlchemy() # Initialize SQLAlchemy without app
 
 login_manager = LoginManager()

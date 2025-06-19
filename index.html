@@ -11,6 +11,20 @@
 
     <script src="js/components.js"></script>
     <script>
+        // Helper function to create code sample blocks
+        function createCodeSampleDetails(summaryText, codeText) {
+            const details = document.createElement('details');
+            const summary = document.createElement('summary');
+            summary.textContent = summaryText;
+            details.appendChild(summary);
+            const pre = document.createElement('pre');
+            const code = document.createElement('code');
+            code.textContent = codeText.trim(); // Trim to remove leading/trailing whitespace from template literals
+            pre.appendChild(code);
+            details.appendChild(pre);
+            return details;
+        }
+
         // --- Header Bar ---
         const themeButton = Adw.createButton("Toggle Theme", {
             onClick: Adw.toggleTheme,
@@ -57,9 +71,54 @@
 
         const buttonsBox = Adw.createBox({
             orientation: 'horizontal',
-            spacing: "s", // Demonstrate spacing on box
+            spacing: "m", // Adjusted spacing for better visual separation
             children: [button, suggestedButton, destructiveButton, disabledButton, flatButton, iconButton, circularButton]
         });
+
+        const buttonCodeSample = `
+// Basic Button
+const button = Adw.createButton('Click Me!', {
+    onClick: () => Adw.createToast("Button Clicked"),
+});
+
+// Suggested Button (e.g., for primary confirmation actions)
+const suggestedButton = Adw.createButton('Suggested', {
+    onClick: () => Adw.createToast("Suggested Button Clicked"),
+    suggested: true // Optional: makes it a suggested action
+});
+
+// Destructive Button (e.g., for delete or reset actions)
+const destructiveButton = Adw.createButton('Delete', {
+    onClick: () => Adw.createToast("Destructive Button Clicked"),
+    destructive: true, // Optional: styles for destructive actions
+});
+
+// Disabled Button
+const disabledButton = Adw.createButton('Disabled', {
+    onClick: () => { /* This won't run */ },
+    disabled: true
+});
+
+// Flat Button (borderless)
+const flatButton = Adw.createButton('Flat Button', {
+    onClick: () => Adw.createToast('Flat Button Clicked!'),
+    flat: true
+});
+
+// Button with Icon
+const iconButton = Adw.createButton('With Icon', {
+    icon: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM7 11.5a1 1 0 1 1 2 0a1 1 0 0 1-2 0Zm.5-7a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5Z"/></svg>', // Example SVG
+    onClick: () => Adw.createToast("Icon Button Clicked")
+});
+
+// Circular Button (typically for icons only)
+const circularButton = Adw.createButton('', { // Label is often empty
+    icon: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385C2.49 8.673 3.25 9.776 4.138 10.737MB8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/></svg>', // Example SVG
+    isCircular: true,
+    onClick: () => Adw.createToast("Circular Button Clicked")
+});
+        `;
+        const buttonsCodeDetails = createCodeSampleDetails('Show Button Code Examples', buttonCodeSample);
 
         // --- Entry ---
         const entry = Adw.createEntry({
@@ -76,7 +135,24 @@
                 Adw.createRow({ children: [Adw.createLabel("Entry:"), entry] }),
                 Adw.createRow({ children: [Adw.createLabel("Disabled Entry: "), disabledEntry]})
             ]
-        })
+        });
+
+        const entryCodeSample = `
+// Basic Entry
+const entry = Adw.createEntry({
+    placeholder: 'Enter text...',
+    onInput: (e) => console.log('Input:', e.target.value),
+    // onChanged: (e) => console.log('Changed (focus lost):', e.target.value) // For when focus is lost after editing
+});
+
+// Disabled Entry
+const disabledEntry = Adw.createEntry({
+  placeholder: "Disabled entry...",
+  disabled: true
+});
+        `;
+        const entryCodeDetails = createCodeSampleDetails('Show Entry Code Examples', entryCodeSample);
+        // Will be inserted after entryBox in the main layout section later.
 
         // --- Switch ---
         const switchEl = Adw.createSwitch({
@@ -93,7 +169,24 @@
               Adw.createRow({ children: [Adw.createLabel("Switch: "), switchEl] }),
               Adw.createRow({ children: [Adw.createLabel("Disabled Switch: "), disabledSwitchEl] })
             ]
-        })
+        });
+
+        const switchCodeSample = `
+// Basic Switch
+const switchEl = Adw.createSwitch({
+  onChanged: (e) => console.log("Switch state:", e.target.checked),
+  checked: true // Initial state (true or false)
+});
+
+// Disabled Switch
+const disabledSwitchEl = Adw.createSwitch({
+  onChanged: (e) => { /* This won't trigger if disabled */ },
+  disabled: true,
+  checked: false // Or true, if you want it to appear "on" but disabled
+});
+        `;
+        const switchCodeDetails = createCodeSampleDetails('Show Switch Code Examples', switchCodeSample);
+        // Will be inserted after switchBox in the main layout section later.
 
         // --- Labels ---
         const label = Adw.createLabel("This is a label", {isBody: true});
@@ -102,6 +195,22 @@
         const labelTitle3 = Adw.createLabel("Title 3", {title: 3});
         const labelTitle4 = Adw.createLabel("Title 4", {title: 4});
         const labelCaption = Adw.createLabel("Caption", {isCaption: true});
+        const labelsBox = Adw.createRow({ children: [labelTitle1, labelTitle2, labelTitle3, labelTitle4, label, labelCaption] }); // Grouped for layout
+
+        const labelCodeSample = `
+// Title Labels (levels 1-4)
+const labelTitle1 = Adw.createLabel("Title 1", {title: 1});
+const labelTitle2 = Adw.createLabel("Title 2", {title: 2});
+// ...and so on for title: 3, title: 4
+
+// Body Text Label
+const bodyLabel = Adw.createLabel("This is a standard body text label.", {isBody: true});
+
+// Caption Label (smaller, often secondary text)
+const captionLabel = Adw.createLabel("This is a caption.", {isCaption: true});
+        `;
+        const labelCodeDetails = createCodeSampleDetails('Show Label Code Examples', labelCodeSample);
+        // Will be inserted after labelsBox
 
         // --- Dialog (Example Usage) ---
         const openDialogButton = Adw.createButton('Open Dialog', {
@@ -142,8 +251,27 @@
                 Adw.createRow({ children: [Adw.createLabel("Disabled (75%): "), disabledProgressBar]}),
                 Adw.createRow({ children: [Adw.createLabel("Indeterminate: "), indeterminateProgressBar]})
             ]
-        })
+        });
 
+        const progressBarCodeSample = `
+// Progress Bar with a specific value
+const progressBar = Adw.createProgressBar({
+    value: 50 // Percentage (0-100)
+});
+
+// Disabled Progress Bar
+const disabledProgressBar = Adw.createProgressBar({
+    value: 75,
+    disabled: true
+});
+
+// Indeterminate Progress Bar (for tasks of unknown duration)
+const indeterminateProgressBar = Adw.createProgressBar({
+    isIndeterminate: true
+});
+        `;
+        const progressBarCodeDetails = createCodeSampleDetails('Show Progress Bar Code Examples', progressBarCodeSample);
+        // Will be inserted after progressBarBox
 
         // --- Checkbox ---
         const checkbox = Adw.createCheckbox({
@@ -161,8 +289,25 @@
                 Adw.createRow({ children: [checkbox]}),
                 Adw.createRow({children: [disabledCheckbox]})
             ]
-        })
+        });
 
+        const checkboxCodeSample = `
+// Basic Checkbox
+const checkbox = Adw.createCheckbox({
+    label: "Enable Feature",
+    onChanged: (e) => console.log("Checkbox state:", e.target.checked),
+    // checked: true // Optional: initial state (true or false)
+});
+
+// Disabled Checkbox
+const disabledCheckbox = Adw.createCheckbox({
+    label: "Disabled Checkbox",
+    disabled: true,
+    checked: true // Can be checked but disabled
+});
+        `;
+        const checkboxCodeDetails = createCodeSampleDetails('Show Checkbox Code Examples', checkboxCodeSample);
+        // Will be inserted after checkBox
 
         // --- Radio Button ---
         const radio1 = Adw.createRadioButton({
@@ -188,7 +333,33 @@
             children: [
                 Adw.createRow({ children: [radio1, radio2, disabledRadio] })
             ]
-        })
+        });
+
+        const radioButtonCodeSample = `
+// Radio Buttons (grouped by 'name' attribute)
+const radio1 = Adw.createRadioButton({
+    label: "Option A",
+    name: "myRadioGroup", // Essential for grouping
+    onChanged: (e) => { if(e.target.checked) console.log("Selected Option A"); },
+    checked: true // Set the default selected radio button in a group
+});
+
+const radio2 = Adw.createRadioButton({
+    label: "Option B",
+    name: "myRadioGroup",
+    onChanged: (e) => { if(e.target.checked) console.log("Selected Option B"); }
+});
+
+// Disabled Radio Button
+const disabledRadio = Adw.createRadioButton({
+  label: 'Disabled Option',
+  name: 'anotherGroup', // Can be in a different group or same
+  disabled: true,
+  checked: true // Can be checked but disabled (visual only)
+});
+        `;
+        const radioButtonCodeDetails = createCodeSampleDetails('Show Radio Button Code Examples', radioButtonCodeSample);
+        // Will be inserted after radioBox
 
         // --- List Box ---
         const listBox = Adw.createListBox({
@@ -208,10 +379,40 @@
         const listBoxContainer = Adw.createBox({
             orientation: 'horizontal', spacing: 'm',
             children: [
-                Adw.createBox({orientation: 'vertical', children: [Adw.createLabel("Default ListBox", {title:4}), listBox]}),
-                Adw.createBox({orientation: 'vertical', children: [Adw.createLabel("Flat ListBox", {title:4}), flatListBox]})
+                Adw.createBox({orientation: 'vertical', spacing: 's', children: [Adw.createLabel("Default ListBox", {title:4}), listBox]}), // Added spacing
+                Adw.createBox({orientation: 'vertical', spacing: 's', children: [Adw.createLabel("Flat ListBox", {title:4}), flatListBox]})   // Added spacing
             ]
         });
+
+        const listBoxCodeSample = `
+// Basic ListBox
+const listBox = Adw.createListBox({
+    children: [
+        Adw.createRow({
+            interactive: true, // Make the row clickable
+            onClick: () => Adw.createToast("Row 1 Clicked"),
+            children: [Adw.createLabel("List Item 1 (Interactive)")]
+        }),
+        Adw.createRow({
+            children: [Adw.createLabel("List Item 2")],
+            activated: true // Highlights the row as if selected
+        }),
+        // Add more Adw.createRow or specialized rows (ActionRow, etc.)
+    ]
+    // Properties like isFlat can be set here too.
+});
+
+// Flat ListBox (removes outer border and shadow)
+const flatListBox = Adw.createListBox({
+    isFlat: true,
+    children: [ /* ... rows ... */ ]
+});
+
+// Adding to layout:
+// yourContainer.appendChild(listBox);
+        `;
+        const listBoxCodeDetails = createCodeSampleDetails('Show ListBox Code Examples', listBoxCodeSample);
+        // Will be inserted after listBoxContainer
 
         // --- ViewSwitcher Example ---
         const viewSwitcher = Adw.createViewSwitcher({
@@ -227,16 +428,18 @@
         // --- Flap Example ---
         const flapWidget = Adw.createFlap({
             flapContent: Adw.createBox({orientation: 'vertical', spacing:'s', children: [
-                Adw.createLabel("Flap Content", {title: 4}),
+                Adw.createLabel("Flap Content", {title: 4,isBody:true}), // Added isBody for consistency
                 Adw.createButton("Button in Flap"),
                 Adw.createLabel("More flap text here to show scrolling if needed.", {isCaption: true})
             ]}),
             mainContent: Adw.createBox({orientation: 'vertical', spacing: 's', children: [
-                Adw.createLabel("Main Content Area", {title: 4}),
+                Adw.createLabel("Main Content Area", {title: 4, isBody:true}), // Added isBody for consistency
                 Adw.createLabel("This content stays visible. The flap is to the left (or right, depending on LTR/RTL)."),
                 Adw.createEntry({placeholder: "Entry in main content"})
             ]}),
-            isFolded: false // Start with flap open
+            isFolded: false, // Start with flap open
+            // transitionType: 'slide' // or 'over', default is 'slide'
+            // flapPosition: 'start' // 'start' or 'end'
         });
         const toggleFlapButton = Adw.createButton("Toggle Flap", { onClick: () => flapWidget.toggleFlap() });
         const flapExampleBox = Adw.createBox({
@@ -247,6 +450,30 @@
             ]
         });
 
+        const flapCodeSample = `
+// Flap Widget
+const flap = Adw.createFlap({
+    flapContent: Adw.createBox({ children: [Adw.createLabel("Flap Side Content")] }),
+    mainContent: Adw.createBox({ children: [Adw.createLabel("Main Area Content")] }),
+    isFolded: false,        // Initial state: true (folded) or false (unfolded)
+    transitionType: 'slide',// 'slide' (default) or 'over'
+    flapPosition: 'start',  // 'start' (left in LTR) or 'end' (right in LTR)
+    // width: 250,          // Width of the flap panel in pixels (optional)
+    // height: 300,         // Height if used as a bottom/top panel (less common for side flaps)
+});
+
+// To toggle the flap programmatically:
+// flap.toggleFlap();
+
+// To show/hide explicitly:
+// flap.showFlap();
+// flap.hideFlap();
+
+// Add the flap's main element to your layout:
+// yourContainer.appendChild(flap.element);
+        `;
+        const flapCodeDetails = createCodeSampleDetails('Show Flap Code Examples', flapCodeSample);
+        flapExampleBox.appendChild(flapCodeDetails); // Append to the box containing the flap and toggle
 
         // --- Main Content Layout ---
         const content = Adw.createBox({
@@ -254,16 +481,19 @@
             spacing: "l", // Add overall spacing to content sections
             children: [
                 Adw.createLabel("Typography", {title:1}),
-                Adw.createRow({ children: [labelTitle1, labelTitle2, labelTitle3, labelTitle4, label, labelCaption] }),
+                // Adw.createRow({ children: [labelTitle1, labelTitle2, labelTitle3, labelTitle4, label, labelCaption] }), // Original line
+                labelsBox, // Use the new box for labels
 
                 Adw.createLabel("Buttons", {title:1}),
                 buttonsBox,
+                buttonsCodeDetails, // Inserted code sample details
 
                 Adw.createLabel("Entries", {title:1}),
                 entryBox,
-
+                // entryCodeDetails will be inserted here by DOM manipulation later
                 Adw.createLabel("Controls", {title:1}),
                 switchBox,
+                // switchCodeDetails will be inserted here by DOM manipulation later
                 checkBox,
                 radioBox,
 
@@ -274,14 +504,11 @@
                 listBoxContainer, // Contains both listboxes
 
                 Adw.createLabel("Dialog", {title:1}),
-                Adw.createRow({ children: [openDialogButton] }),
-
+                Adw.createRow({ children: [openDialogButton] }), // dialogCodeDetails will be inserted after this row
                 Adw.createLabel("ViewSwitcher", {title:1}),
-                viewSwitcher,
-
+                viewSwitcher, // viewSwitcherCodeDetails will be inserted after this element
                 Adw.createLabel("Flap", {title:1}),
-                flapExampleBox,
-
+                flapExampleBox, // flapCodeDetails is already a child of this
                 Adw.createLabel("Accent Color Picker", {title:1}),
                 // This will be populated by JavaScript below (accentPickerBox)
 
@@ -318,7 +545,7 @@
         content.appendChild(Adw.createRow({children: [accentPickerBox]}));
 
         // --- Avatar Examples ---
-        const avatarSection = Adw.createBox({orientation: 'vertical', spacing: 'm'});
+        const avatarSection = Adw.createBox({orientation: 'vertical', spacing: 'm'}); // Ensure consistent spacing
 
         const avatarRow1 = Adw.createBox({ orientation: 'horizontal', spacing: 'm', align: 'center' });
         avatarRow1.appendChild(Adw.createAvatar({ text: "John Doe", size: 32 }));
@@ -337,11 +564,50 @@
 
         avatarSection.appendChild(avatarRow1);
         avatarSection.appendChild(avatarRow2);
-        content.appendChild(Adw.createRow({children: [avatarSection]}));
+
+        const avatarCodeSample = `
+// Avatar with text initials (auto-generated or provided)
+const avatarText1 = Adw.createAvatar({ text: "John Doe", size: 48 }); // Generates "JD"
+const avatarText2 = Adw.createAvatar({ text: "Single", size: 64 });   // Uses "S"
+
+// Avatar with image
+const avatarImage = Adw.createAvatar({
+    imageSrc: "path/to/your/image.png", // Replace with actual image path
+    alt: "User Avatar", // Important for accessibility
+    size: 72
+});
+
+// Avatar with fallback to text if image fails to load
+const avatarFallback = Adw.createAvatar({
+    imageSrc: "nonexistent.jpg",
+    text: "Error Fallback", // Fallback text if image fails
+    size: 64
+});
+
+// Avatar with custom HTML element as fallback
+const customFallbackEl = Adw.createLabel("CF"); // Can be any HTMLElement
+const avatarCustomFallback = Adw.createAvatar({
+    imageSrc: "another_error.png",
+    customFallback: customFallbackEl, // Display this if image fails
+    size: 72
+});
+
+// Sizes can be numbers (pixels) or predefined Adw.AvatarSize constants
+// e.g., Adw.AvatarSize.SMALL, Adw.AvatarSize.MEDIUM, etc.
+// Example: Adw.createAvatar({ text: "AB", size: Adw.AvatarSize.LARGE });
+
+// Add to your layout:
+// yourContainer.appendChild(avatarText1);
+        `;
+        const avatarCodeDetails = createCodeSampleDetails('Show Avatar Code Examples', avatarCodeSample);
+        avatarSection.appendChild(avatarCodeDetails); // Add to the avatarSection box itself
+
+        // The avatarSection is already added to the main 'content' within a Row.
+        // This structure keeps the code sample visually tied to the avatar demos.
 
         // --- Specialized Row Types ---
         const specializedRowsTitle = Adw.createLabel("Specialized List Rows", {title:1});
-        content.appendChild(specializedRowsTitle);
+        // content.appendChild(specializedRowsTitle); // This is already part of main content.children
 
         const actionRow1 = Adw.createActionRow({
             title: "Action Row",
@@ -398,6 +664,7 @@
 
 
         const specializedRowsListBox = Adw.createListBox({
+            // ListBox itself doesn't have 'spacing', rows inside it manage their padding.
             children: [
                 actionRow1,
                 actionRowWithIcon,
@@ -409,12 +676,174 @@
                 disabledComboRow
             ]
         });
-        content.appendChild(specializedRowsListBox);
+        // content.appendChild(specializedRowsListBox); // This is already part of main content.children
+
+        const specializedRowsCodeSample = `
+// ActionRow (clickable row, often for navigation or actions)
+const actionRow = Adw.createActionRow({
+    title: "Open Settings",
+    subtitle: "Configure application preferences",
+    iconHTML: "<svg width='16' height='16'><path d='...' fill='currentColor'/></svg>", // Optional: SVG icon string
+    onClick: () => Adw.createToast("Action Row clicked!"),
+    // showChevron: true, // Default is true, set to false to hide arrow
+});
+
+// EntryRow (a row with a title and an entry field)
+const entryRow = Adw.createEntryRow({
+    title: "Username:",
+    entryOptions: { // Options passed to the internal Adw.createEntry call
+        placeholder: "Enter your name",
+        // onInput: (e) => console.log(e.target.value)
+    }
+});
+
+// ExpanderRow (a row that can expand to show more content)
+const expanderChildContent = Adw.createBox({ children: [Adw.createLabel("Details revealed...")] });
+const expanderRow = Adw.createExpanderRow({
+    title: "More Information",
+    subtitle: "Click to see details",
+    content: expanderChildContent, // HTMLElement to show when expanded
+    expanded: false // Initial state (true or false)
+});
+
+// ComboRow (a row with a title and a dropdown/select)
+const comboRow = Adw.createComboRow({
+    title: "Select Type:",
+    subtitle: "Choose one from the list below",
+    selectOptions: [
+        "Option 1 Value", // Simple string option
+        { label: "Option 2 Label", value: "opt2_actual_value" }, // Object for different label and value
+        "Another Option"
+    ],
+    // selectedValue: "opt2_actual_value", // Pre-select a value
+    onChanged: (selectedValue) => Adw.createToast(\`ComboRow changed to: \${selectedValue}\`),
+    // disabled: true // To disable the combo row
+});
+
+// These rows are typically added as children to an Adw.ListBox:
+// const listBox = Adw.createListBox({ children: [actionRow, entryRow, expanderRow, comboRow] });
+        `;
+        const specializedRowsCodeDetails = createCodeSampleDetails('Show Specialized Row Code Examples', specializedRowsCodeSample);
+        // Will be inserted after specializedRowsListBox
 
 
         // Create the window and append it to the body.
         const windowEl = Adw.createWindow({header: headerBar, content: content});
         document.getElementById('app').appendChild(windowEl);
+
+        // --- DOM Manipulations to Insert Code Samples ---
+        // Helper to insert details after a specific element.
+        function insertDetailsAfter(element, detailsElement) {
+            if (element && element.parentElement) {
+                element.parentElement.insertBefore(detailsElement, element.nextSibling);
+            } else {
+                console.warn("Could not insert details for element:", element, "Details:", detailsElement);
+            }
+        }
+
+        insertDetailsAfter(entryBox, entryCodeDetails);
+        insertDetailsAfter(switchBox, switchCodeDetails);
+        insertDetailsAfter(labelsBox, labelCodeDetails);
+        insertDetailsAfter(progressBarBox, progressBarCodeDetails);
+        insertDetailsAfter(checkBox, checkboxCodeDetails);
+        insertDetailsAfter(radioBox, radioButtonCodeDetails);
+        insertDetailsAfter(listBoxContainer, listBoxCodeDetails);
+
+        const dialogRow = openDialogButton.closest('.adw-row'); // Find the row containing the dialog button
+        const dialogCodeSample = `
+// To create and show a Dialog:
+const openDialogButton = Adw.createButton('Open Dialog', {
+  onClick: () => {
+    const dialogContent = Adw.createBox({
+      orientation: 'vertical',
+      spacing: 'm', // Add some spacing to dialog content
+      children: [
+        Adw.createLabel("This is the dialog content."),
+        Adw.createEntry({ placeholder: "You can put any HTML here." }),
+      ]
+    });
+
+    const dialog = Adw.createDialog({
+      title: "Example Dialog",
+      content: dialogContent, // HTMLElement for the dialog's body
+      // size: 'medium', // 'small', 'medium', 'large', or custom {width, height in px}
+      // isModal: true, // Default is true (blocks interaction with rest of page)
+      buttons: [
+        Adw.createButton("Cancel", { onClick: () => dialog.close() }),
+        Adw.createButton("OK", {
+            suggested: true,
+            onClick: () => {
+                Adw.createToast("OK clicked from Dialog");
+                dialog.close();
+            }
+        }),
+      ]
+    });
+    dialog.open(); // Appends to body and shows
+    // dialog.close(); // To close programmatically
+  }
+});
+        `;
+        const dialogCodeDetails = createCodeSampleDetails('Show Dialog Code Example', dialogCodeSample);
+        if (dialogRow) insertDetailsAfter(dialogRow, dialogCodeDetails); else content.appendChild(dialogCodeDetails); // Fallback for dialog
+
+        const viewSwitcherCodeSample = `
+// ViewSwitcher
+const viewSwitcher = Adw.createViewSwitcher({
+    views: [
+        {
+            name: "View 1", // Name displayed on the switcher button
+            content: Adw.createLabel("Content for View 1") // HTMLElement for this view
+        },
+        {
+            name: "View 2",
+            content: Adw.createBox({ children: [Adw.createEntry({placeholder: "Entry in View 2"})]})
+        }
+        // Add more views as needed
+    ],
+    activeViewName: "View 1", // Initial view to display
+    onViewChanged: (viewName) => Adw.createToast(\`Switched to \${viewName}\`),
+    // location: 'top', // 'top' (default) or 'bottom'
+    // policy: 'auto' // 'auto' (default), 'wide', 'narrow' for button behavior
+});
+
+// Add the ViewSwitcher's main element to your layout:
+// yourContainer.appendChild(viewSwitcher.element);
+// The content area is managed internally by the viewSwitcher.
+        `;
+        const viewSwitcherCodeDetails = createCodeSampleDetails('Show ViewSwitcher Code Example', viewSwitcherCodeSample);
+        insertDetailsAfter(viewSwitcher.element, viewSwitcherCodeDetails); // For ViewSwitcher
+
+        const accentPickerCodeSample = `
+// Accent Color Picker (Functionality provided by Adw.js)
+
+// To get available accent color names (array of strings):
+const accentColors = Adw.getAccentColors();
+// e.g., ["default", "red", "orange", "yellow", "green", "teal", "blue", "purple", "pink", "brown"]
+
+// To set an accent color programmatically:
+// Adw.setAccentColor('blue'); // Replace 'blue' with a valid color name from the list
+
+// The demo shows how to build a UI for this:
+const pickerBox = Adw.createBox({ orientation: 'horizontal', spacing: 's' });
+accentColors.forEach(colorName => {
+    const colorButton = Adw.createButton(colorName.charAt(0).toUpperCase() + colorName.slice(1), {
+        onClick: () => Adw.setAccentColor(colorName)
+    });
+    // The demo also applies styles to the button for visual feedback.
+    pickerBox.appendChild(colorButton);
+});
+// yourContainer.appendChild(pickerBox); // Add to your layout
+        `;
+        const accentPickerCodeDetails = createCodeSampleDetails('Show Accent Color Picker Code', accentPickerCodeSample);
+        insertDetailsAfter(accentPickerBox, accentPickerCodeDetails); // For Accent Color Picker
+
+        // Avatars: avatarCodeDetails is already appended to avatarSection.
+        // The avatarSection itself is correctly placed in the main 'content' array.
+
+        // Specialized Rows:
+        insertDetailsAfter(specializedRowsListBox, specializedRowsCodeDetails); // For Specialized List Rows
+
     </script>
 </body>
 </html>
