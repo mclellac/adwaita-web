@@ -6,6 +6,9 @@
     <adw-preferences-page>
         <adw-preferences-group>
             <adw-expander-row title="{{ post.title }}">
+                <p class="text-muted" style="font-size: 0.9em; margin-bottom: 10px;">
+                    By: {{ post.author.username if post.author else 'Unknown Author' }}
+                </p>
                 <p>{{ post.content }}</p>
             </adw-expander-row>
         </adw-preferences-group>

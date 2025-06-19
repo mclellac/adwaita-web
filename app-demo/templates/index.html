@@ -8,7 +8,9 @@
             {% if posts %}
                 <adw-list-box>
                     {% for post in posts %}
-                        <adw-action-row title="{{ post.title }}" subtitle="Post ID: {{ post.id }}" href="{{ url_for('view_post', post_id=post.id) }}"></adw-action-row>
+                        <adw-action-row title="{{ post.title }}"
+                                        subtitle="By: {{ post.author.username if post.author else 'Unknown Author' }} (ID: {{ post.id }})"
+                                        href="{{ url_for('view_post', post_id=post.id) }}"></adw-action-row>
                     {% endfor %}
                 </adw-list-box>
             {% else %}
