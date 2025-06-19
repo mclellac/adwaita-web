@@ -46,5 +46,9 @@ def create_post():
         # For simplicity, just re-rendering for now.
     return render_template('create_post.html')
 
+@app.route('/test-widget')
+def test_widget_page():
+    return render_template('test_widget.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
