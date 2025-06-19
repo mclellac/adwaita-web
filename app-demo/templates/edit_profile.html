@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Edit Profile - {{ super() }}{% endblock %}
 {% block content %}
-<div class="content-clamp">
-    <adw-preferences-page> {# No 'clamped' class here, as content-clamp div handles it #}
+    <adw-preferences-page> {# The main-content-clamped from base.html will handle clamping #}
         <adw-preferences-group title="Edit Profile">
             <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
                 <adw-list-box style="margin-bottom: var(--spacing-m);">
@@ -33,5 +32,4 @@
             </form>
         </adw-preferences-group>
     </adw-preferences-page>
-</div>
 {% endblock %}

@@ -34,6 +34,7 @@
                     </span>
                 {% endif %}
             </a>
+            <adw-button slot="end" href="{{ url_for('settings_page') }}">Settings</adw-button>
             <adw-button slot="end" href="{{ url_for('logout') }}">Logout</adw-button>
             <adw-button slot="end" appearance="suggested" href="{{ url_for('create_post') }}">New Post</adw-button>
         {% else %}
@@ -53,7 +54,9 @@
                 </div>
               {% endif %}
             {% endwith %}
-            {% block content %}{% endblock %}
+            <div class="main-content-clamped">
+                {% block content %}{% endblock %}
+            </div>
         </main>
     </adw-application-window>
 </body>

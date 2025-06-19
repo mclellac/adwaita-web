@@ -275,6 +275,11 @@ def edit_profile():
     # GET request: display the edit profile form with current data
     return render_template('edit_profile.html', user_profile=current_user)
 
+@app.route('/settings')
+@login_required
+def settings_page():
+    return render_template('settings.html')
+
 # Flask-Login and SQLAlchemy must be initialized with the app instance.
 # This can be done here for non-test runs, or deferred for tests.
 def init_extensions(flask_app):

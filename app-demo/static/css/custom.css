@@ -6,6 +6,14 @@
     padding: var(--spacing-l); /* Example padding */
 }
 
+.main-content-clamped {
+    max-width: 900px; /* Or another suitable width like 80ch */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--spacing-l, 24px); /* Add some padding */
+    padding-right: var(--spacing-l, 24px);
+}
+
 /* Ensure that the adw-list-box takes available width */
 adw-list-box {
     width: 100%;
@@ -76,4 +84,43 @@ adw-list-box {
 /* Ensure images within adw-avatar spans don't override the span's flex behavior if any */
 .adw-avatar > .avatar-image {
     display: block; /* Or inline-block depending on desired layout within span */
+}
+
+/* Blog Post Card Styling */
+.blog-post-card {
+    background-color: var(--adw-card-background-color, var(--adw-view-bg-color)); /* Fallback if --adw-card-background-color is not defined */
+    border-radius: var(--border-radius-lg, 12px);
+    padding: var(--spacing-l, 24px);
+    margin-bottom: var(--spacing-l, 24px);
+    box-shadow: var(--box-shadow-sm, 0 1px 2px 0 rgba(0,0,0,0.05));
+    transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.blog-post-card:hover {
+    box-shadow: var(--box-shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06));
+    /* transform: translateY(-2px); */ /* Optional: subtle lift effect */
+}
+
+.blog-post-card .post-title {
+    font-size: var(--font-size-xl, 1.25rem);
+    font-weight: var(--font-weight-bold, 700);
+    color: var(--adw-accent-color, var(--accent-color)); /* Link color */
+    text-decoration: none;
+    margin-bottom: var(--spacing-xs, 4px); /* Added margin bottom */
+    display: block; /* Ensure it takes block level for margin */
+}
+
+.blog-post-card .post-title:hover {
+    text-decoration: underline;
+}
+
+.blog-post-card .post-meta {
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--adw-secondary-text-color, #555);
+    margin-bottom: var(--spacing-s, 8px);
+}
+
+.blog-post-card .post-excerpt { /* If showing excerpts */
+    margin-top: var(--spacing-m, 16px);
+    color: var(--adw-text-color, #333); /* Ensure text color matches body */
 }

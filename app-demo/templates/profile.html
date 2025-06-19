@@ -28,9 +28,10 @@
         <div class="adw-row" style="width: 100%;">
             <strong class="adw-label" style="margin-right: var(--spacing-s);">Username:</strong> <span class="adw-label">{{ user_profile.username }}</span>
         </div>
-        <div class="adw-row" style="width: 100%;">
-            <strong class="adw-label" style="margin-right: var(--spacing-s);">Profile Info:</strong> <span class="adw-label">{{ user_profile.profile_info if user_profile.profile_info else 'No profile information provided.' }}</span>
-        </div>
+        {# Using adw-expander-row for potentially long profile information #}
+        <adw-expander-row title="Profile Information" subtitle="View user's bio" style="width: 100%;">
+            <p style="padding-top: var(--spacing-s);">{{ user_profile.profile_info if user_profile.profile_info else 'No profile information provided.' }}</p>
+        </adw-expander-row>
 
         {% if current_user and current_user.username == user_profile.username %}
         <div style="margin-top: var(--spacing-m);"> {# Added a div for spacing for the button #}
