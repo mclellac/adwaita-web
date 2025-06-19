@@ -3,7 +3,7 @@
 {% block title %}Edit Post: {{ post.title }}{% endblock %}
 
 {% block content %}
-<adw-preferences-page>
+<adw-preferences-page class="clamped">
     <adw-preferences-group title="Edit Post">
         <form method="POST" action="{{ url_for('edit_post', post_id=post.id) }}">
             <adw-list-box>

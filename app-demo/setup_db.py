@@ -130,10 +130,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Starting database setup...")
-
-    # Initialize Flask extensions. This will also call db.create_all()
-    # ensuring tables exist if they didn't.
-    init_extensions(app)
+    try:
+        print("Calling init_extensions(app) from setup_db.py...")
+        init_extensions(app)
+        print("init_extensions(app) called successfully from setup_db.py.")
+    except Exception as e:
+        print(f"An error occurred during init_extensions from setup_db.py: {e}")
+        print("Database tables might not have been created or updated correctly.")
+        # Depending on severity, you might want to exit or prevent further operations
+        # For now, just printing the error.
 
     if args.deletedb:
         delete_tables(app) # Asks for confirmation, then drops tables

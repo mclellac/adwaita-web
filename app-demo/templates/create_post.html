@@ -3,15 +3,13 @@
 {% block title %}Create New Post{% endblock %}
 
 {% block content %}
-    <adw-preferences-page>
+    <adw-preferences-page class="clamped">
         <adw-preferences-group title="New Blog Post">
             <form method="POST" action="{{ url_for('create_post') }}">
                 <adw-action-row title="Title">
                     <adw-entry name="title" placeholder="Enter post title" required></adw-entry>
                 </adw-action-row>
                 <adw-expander-row title="Content">
-                    {# AdwTextView is not a standard component, using a textarea wrapped in a row for now #}
-                    {# For a real AdwTextView look, custom styling or a different approach might be needed #}
                     <textarea name="content" placeholder="Write your blog post here..." rows="10" style="width: 100%; min-height: 150px; border: 1px solid var(--adw-border-color); border-radius: 6px; padding: 6px; background-color: var(--adw-view-bg-color); color: var(--adw-text-color);" required></textarea>
                 </adw-expander-row>
                 <adw-button-row>

@@ -1,0 +1,17 @@
+/* For general content clamping */
+.content-clamp {
+    max-width: 800px; /* Adjust as needed */
+    margin-left: auto;
+    margin-right: auto;
+    padding: var(--spacing-l, 18px); /* Use Adwaita variable with fallback */
+}
+
+/* To clamp Adwaita preference pages directly */
+.adw-preferences-page.clamped {
+    max-width: 800px; /* Adjust as needed */
+    margin-left: auto;
+    margin-right: auto;
+    /* Preferences pages often have internal padding via groups, check if more is needed */
+    padding-top: var(--spacing-l, 18px);
+    padding-bottom: var(--spacing-l, 18px);
+}

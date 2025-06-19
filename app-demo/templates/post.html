@@ -3,9 +3,10 @@
 {% block title %}{{ post.title }}{% endblock %}
 
 {% block content %}
-    <adw-preferences-page>
-        <adw-preferences-group>
-            <adw-expander-row title="{{ post.title }}">
+    <div class="content-clamp">
+        <adw-preferences-page>
+            <adw-preferences-group>
+                <adw-expander-row title="{{ post.title }}">
                 <p class="text-muted" style="font-size: 0.9em; margin-bottom: 10px;">
                     By: {{ post.author.username if post.author else 'Unknown Author' }}
                 </p>
@@ -33,4 +34,5 @@
              <adw-button href="{{ url_for('index') }}">Back to Posts</adw-button> {# Changed appearance from destructive #}
         </adw-button-row>
     </adw-preferences-page>
+</div>
 {% endblock %}
