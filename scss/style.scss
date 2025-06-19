@@ -19,7 +19,9 @@
 @use "radio";
 @use "switch";
 @use "viewswitcher";
-@use "flap"; // Added import
+@use "flap";
+@use "avatar";
+@use "row_types"; // Added import
 @use "window";
 
 // Potentially other components if they exist and were modified:

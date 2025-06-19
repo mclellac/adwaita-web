@@ -1,0 +1,89 @@
+// scss/_avatar.scss
+@use "variables";
+
+// Define default avatar colors if they aren't in _variables.scss already
+// These can be overridden by users.
+:root {
+  --avatar-bg-color: var(--shade-color); // Using shade-color as a neutral default
+  --avatar-text-color: var(--view-fg-color); // Default text on avatar background
+}
+
+body.light-theme {
+  --avatar-bg-color: var(--shade-color); // e.g., a light gray
+  --avatar-text-color: var(--view-fg-color);
+}
+
+body.dark-theme {
+  --avatar-bg-color: var(--shade-color); // e.g., a darker gray
+  --avatar-text-color: var(--view-fg-color);
+}
+
+
+.adw-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--avatar-bg-color);
+  color: var(--avatar-text-color); // Default text color for initials if not overridden by .adw-avatar-text
+  font-weight: bold;
+  vertical-align: middle; // Helps align with adjacent text if needed
+  user-select: none; // Text in avatar usually not selectable
+  box-sizing: border-box; // Ensure padding/border are included in width/height
+
+  // Default size if not set by JS or specific class (optional)
+  // It's better if JS always sets the size for consistency.
+  // width: 48px;
+  // height: 48px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; // Ensures the image covers the area, cropping if necessary
+    display: block; // Remove extra space below image
+  }
+
+  .adw-avatar-text {
+    color: var(--avatar-text-color); // Specific text color for initials
+    text-align: center;
+    line-height: 1; // Keep line height tight for initials
+    // Font size will be set dynamically by JavaScript based on avatar size
+  }
+
+  // Optional: Default placeholder (e.g., an icon) if no image, no text, no custom fallback
+  // &:empty::before {
+  //   content: "👤"; // Placeholder icon or SVG
+  //   font-size: calc(var(--avatar-current-size, 48px) * 0.6); // Adjust icon size based on avatar size
+  //   color: var(--avatar-text-color);
+  // }
+}
+
+// Optional: Predefined size classes (JS primarily controls size via style attribute)
+// These can be useful if you want to use avatars purely from HTML/CSS sometimes.
+// The font-size here is a rough guide; JS will calculate it more precisely.
+.adw-avatar.size-tiny { // Example: 16px
+  width: 16px;
+  height: 16px;
+  // .adw-avatar-text font-size would be ~6-7px
+}
+.adw-avatar.size-small { // Example: 24px
+  width: 24px;
+  height: 24px;
+  // .adw-avatar-text font-size would be ~10px
+}
+.adw-avatar.size-medium { // Example: 48px
+  width: 48px;
+  height: 48px;
+  // .adw-avatar-text font-size would be ~18-20px
+}
+.adw-avatar.size-large { // Example: 72px
+  width: 72px;
+  height: 72px;
+  // .adw-avatar-text font-size would be ~28-30px
+}
+.adw-avatar.size-huge { // Example: 96px
+  width: 96px;
+  height: 96px;
+  // .adw-avatar-text font-size would be ~38-40px
+}

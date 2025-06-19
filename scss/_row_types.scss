@@ -1,0 +1,223 @@
+// scss/_row_types.scss
+@use "variables";
+
+// Common base for specialized rows if needed, but AdwRow already provides some.
+// These rows are typically used within an AdwListBox or a similar container.
+
+// --- AdwActionRow ---
+.adw-action-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--spacing-m); // Gap between icon, text-content, chevron
+
+  .adw-action-row-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    // Styling for icon size, color can be added here or come from .icon class
+    // e.g., width: 24px; height: 24px;
+    svg { // Assuming SVG icons
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+    }
+  }
+
+  .adw-action-row-text-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden; // For text ellipsis on title/subtitle
+  }
+
+  .adw-action-row-title {
+    font-weight: normal; // Libadwaita titles in rows are often normal weight
+    color: var(--view-fg-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .adw-action-row-subtitle {
+    font-size: var(--font-size-small);
+    color: var(--view-fg-color);
+    opacity: 0.7; // Muted subtitle
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .adw-action-row-chevron {
+    flex-shrink: 0;
+    font-size: var(--font-size-large); // Make chevron a bit larger
+    opacity: 0.5;
+    // Example using text chevron, an SVG would be better for consistency
+    &::after {
+      content: "❯";
+    }
+  }
+
+  // When the row itself is interactive (e.g. has an onClick)
+  &.interactive {
+    &:hover {
+        // Standard row hover from AdwRow should apply
+    }
+    &:active {
+        // Standard row active state from AdwRow should apply
+    }
+  }
+}
+
+
+// --- AdwEntryRow ---
+.adw-entry-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--spacing-m);
+
+  .adw-entry-row-title {
+    // No specific styles needed if it's just an AdwLabel, it will inherit.
+    // font-weight: normal; // If needed to override default label boldness
+  }
+
+  .adw-entry-row-entry {
+    flex-grow: 1;
+    // The AdwEntry component itself will have its styles
+  }
+}
+
+
+// --- AdwExpanderRow ---
+.adw-expander-row-wrapper {
+  // This wrapper contains the clickable row and the collapsible content
+  // It might need listbox styling if used outside a listbox (e.g. border-bottom)
+  &:not(:last-child) {
+    border-bottom: var(--border-width, 1px) solid var(--border-color-light);
+  }
+}
+.dark-theme .adw-expander-row-wrapper:not(:last-child),
+body.dark-theme .adw-expander-row-wrapper:not(:last-child) {
+    border-bottom-color: var(--border-color-dark);
+}
+
+
+.adw-expander-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--spacing-m);
+  // padding: var(--spacing-m); // Padding is usually on the AdwRow base class
+
+  .adw-expander-row-text-content { // Similar to ActionRow's text content
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .adw-expander-row-title { /* Use AdwLabel styles */ }
+  .adw-expander-row-subtitle { /* Use AdwLabel styles, but ensure opacity is applied if AdwLabel doesn't do it by default */
+    font-size: var(--font-size-small);
+    opacity: 0.7;
+   }
+
+
+  .adw-expander-row-icon {
+    flex-shrink: 0;
+    transition: transform 0.15s ease-in-out;
+    font-size: var(--font-size-large);
+    opacity: 0.7;
+    &::after {
+      content: "❯"; // Default: collapsed state
+    }
+  }
+
+  // When expanded
+  &.expanded .adw-expander-row-icon {
+    transform: rotate(90deg);
+  }
+}
+
+.adw-expander-row-content {
+  // display: none; // JS will toggle this or use max-height
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out, padding 0.2s ease-out, opacity 0.2s ease-out;
+  padding: 0 var(--spacing-m); // Horizontal padding when closed
+  opacity: 0;
+  visibility: hidden;
+
+  // Styles for the content area when expanded
+  &.expanded {
+    // display: block; // If not using max-height animation
+    max-height: 1000px; // Large enough for most content, for animation
+    padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m); // Full padding when open
+    opacity: 1;
+    visibility: visible;
+    // border-top: 1px solid var(--border-color-light); // Optional separator
+    // margin-left: var(--spacing-xl); // Optional indent for content
+  }
+}
+.dark-theme .adw-expander-row-content.expanded,
+body.dark-theme .adw-expander-row-content.expanded {
+    // border-top-color: var(--border-color-dark);
+}
+
+
+// --- AdwComboRow ---
+.adw-combo-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--spacing-m);
+
+  .adw-combo-row-text-content { // Similar to ActionRow's text content
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .adw-combo-row-title { /* Use AdwLabel styles */ }
+  .adw-combo-row-subtitle { /* Use AdwLabel styles, ensure opacity */
+    font-size: var(--font-size-small);
+    opacity: 0.7;
+  }
+
+  .adw-combo-row-select {
+    // Basic styling, can be enhanced
+    padding: var(--spacing-xs) var(--spacing-s);
+    border: var(--border-width, 1px) solid var(--button-border-color);
+    border-radius: var(--border-radius-default);
+    background-color: var(--button-bg-color);
+    color: var(--button-fg-color);
+    min-width: 150px; // Ensure select has some width
+
+    &:hover {
+      background-color: var(--button-hover-bg-color);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--accent-bg-color);
+      outline-offset: 1px;
+    }
+    &:disabled {
+        opacity: var(--opacity-disabled, 0.5);
+        cursor: not-allowed;
+    }
+  }
+}
+
+// Dark theme for ComboRow select (if not covered by button variables)
+.dark-theme .adw-combo-row .adw-combo-row-select,
+body.dark-theme .adw-combo-row .adw-combo-row-select {
+    border-color: var(--button-border-color);
+    background-color: var(--button-bg-color);
+    color: var(--button-fg-color);
+     &:hover {
+      background-color: var(--button-hover-bg-color);
+    }
+}

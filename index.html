@@ -283,12 +283,15 @@
                 flapExampleBox,
 
                 Adw.createLabel("Accent Color Picker", {title:1}),
-                // This will be populated by JavaScript below
+                // This will be populated by JavaScript below (accentPickerBox)
+
+                Adw.createLabel("Avatars", {title:1}),
+                // Avatar examples will be added here by JS
             ],
         });
 
         // --- Accent Color Picker Example ---
-        const accentPickerBox = Adw.createBox({ orientation: 'horizontal', spacing: 's', align: 'center'});
+        const accentPickerBox = Adw.createBox({ orientation: 'horizontal', spacing: 's', align: 'center', children: [Adw.createLabel("Accents:")]});
         const accentColors = Adw.getAccentColors();
         accentColors.forEach(colorName => {
             const colorButton = Adw.createButton(colorName.charAt(0).toUpperCase() + colorName.slice(1), {
@@ -313,6 +316,100 @@
         });
         // Find where to insert the accent picker. For now, append to the main content.
         content.appendChild(Adw.createRow({children: [accentPickerBox]}));
+
+        // --- Avatar Examples ---
+        const avatarSection = Adw.createBox({orientation: 'vertical', spacing: 'm'});
+
+        const avatarRow1 = Adw.createBox({ orientation: 'horizontal', spacing: 'm', align: 'center' });
+        avatarRow1.appendChild(Adw.createAvatar({ text: "John Doe", size: 32 }));
+        avatarRow1.appendChild(Adw.createAvatar({ text: "Jane Roe", size: 48 }));
+        avatarRow1.appendChild(Adw.createAvatar({ text: "Single", size: 64 }));
+        avatarRow1.appendChild(Adw.createAvatar({ text: "X", size: 72 }));
+
+        const avatarRow2 = Adw.createBox({ orientation: 'horizontal', spacing: 'm', align: 'center' });
+        // Placeholder image - replace with a real one if available for testing
+        const imgSrc = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ddd'/%3E%3Ctext x='50' y='55' font-size='40' text-anchor='middle' fill='%23777'%3EIMG%3C/text%3E%3C/svg%3E";
+        avatarRow2.appendChild(Adw.createAvatar({ imageSrc: imgSrc, alt: "User Image 1", size: 48 }));
+        avatarRow2.appendChild(Adw.createAvatar({ imageSrc: "nonexistent.jpg", text: "Error Fallback", size: 64, alt:"Non Existent" }));
+
+        const customFallbackEl = Adw.createLabel("CF", {isCaption: true}); // Custom fallback example
+        avatarRow2.appendChild(Adw.createAvatar({ imageSrc: "another_error.png", customFallback: customFallbackEl, size: 72, alt: "Custom Fallback Demo"}));
+
+        avatarSection.appendChild(avatarRow1);
+        avatarSection.appendChild(avatarRow2);
+        content.appendChild(Adw.createRow({children: [avatarSection]}));
+
+        // --- Specialized Row Types ---
+        const specializedRowsTitle = Adw.createLabel("Specialized List Rows", {title:1});
+        content.appendChild(specializedRowsTitle);
+
+        const actionRow1 = Adw.createActionRow({
+            title: "Action Row",
+            subtitle: "Click to do something",
+            onClick: () => Adw.createToast("Action Row Clicked!")
+        });
+        const actionRowWithIcon = Adw.createActionRow({
+            title: "Action with Icon",
+            subtitle: "And a subtitle too",
+            iconHTML: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16ZM6.5 4.5a.5.5 0 0 1 1 0V7h2.5a.5.5 0 0 1 0 1H7.5v2.5a.5.5 0 0 1-1 0V8H4a.5.5 0 0 1 0-1h2.5V4.5Z"/></svg>', // Placeholder plus icon
+            onClick: () => Adw.createToast("Action Row with Icon Clicked!")
+        });
+         const actionRowNoChevron = Adw.createActionRow({
+            title: "Action Row (No Chevron)",
+            subtitle: "Still clickable",
+            showChevron: false,
+            onClick: () => Adw.createToast("Action Row (No Chevron) Clicked!")
+        });
+
+
+        const entryRow1 = Adw.createEntryRow({
+            title: "Username:",
+            entryOptions: { placeholder: "Enter username..." }
+        });
+
+        const expanderContent = Adw.createBox({ orientation: 'vertical', spacing: 's', children: [
+            Adw.createLabel("This is the expanded content."),
+            Adw.createButton("A button inside expander")
+        ]});
+        const expanderRow1 = Adw.createExpanderRow({
+            title: "Expander Row",
+            subtitle: "Click to expand/collapse",
+            content: expanderContent
+        });
+        const expanderRow2 = Adw.createExpanderRow({
+            title: "Initially Expanded",
+            subtitle: "This one starts open",
+            content: Adw.createLabel("Some pre-expanded content here."),
+            expanded: true
+        });
+
+        const comboRow1 = Adw.createComboRow({
+            title: "Choose an Option",
+            subtitle: "Select from the list",
+            selectOptions: ["Option A", "Option B", {label: "Option C (Val C)", value: "C"}],
+            selectedValue: "B",
+            onChanged: (value) => Adw.createToast(`Combo changed to: ${value}`)
+        });
+         const disabledComboRow = Adw.createComboRow({
+            title: "Disabled Combo",
+            selectOptions: ["Can't choose"],
+            disabled: true
+        });
+
+
+        const specializedRowsListBox = Adw.createListBox({
+            children: [
+                actionRow1,
+                actionRowWithIcon,
+                actionRowNoChevron,
+                entryRow1,
+                expanderRow1,
+                expanderRow2,
+                comboRow1,
+                disabledComboRow
+            ]
+        });
+        content.appendChild(specializedRowsListBox);
 
 
         // Create the window and append it to the body.
