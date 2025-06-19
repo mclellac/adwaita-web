@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Profile: {{ user_profile.username }} - My Libadwaita Blog{% endblock %}
+
+{% block content %}
+<adw-preferences-page>
+    <adw-preferences-group title="User Profile">
+        <div class="adw-list-box" style="padding: 20px;">
+            <div class="adw-row">
+                <strong class="adw-label">Username:</strong> <span class="adw-label">{{ user_profile.username }}</span>
+            </div>
+            <div class="adw-row">
+                <strong class="adw-label">Profile Info:</strong> <span class="adw-label">{{ user_profile.get_profile_info() }}</span>
+            </div>
+            {# Add more profile details here if needed #}
+        </div>
+    </adw-preferences-group>
+</adw-preferences-page>
+{% endblock %}
