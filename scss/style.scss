@@ -22,7 +22,8 @@
 @use "switch";
 @use "viewswitcher";
 @use "flap";
-@use "row_types"; // Added import
+@use "row_types";
+@use "password_entry_row"; // Added import for the new component
 @use "window";
 
 // Potentially other components if they exist and were modified:

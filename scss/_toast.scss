@@ -26,4 +26,22 @@
         opacity: 0;
         transform: translateX(-50%) translateY(100%);
     }
+
+  // Type-specific styling
+  // Ensure these variables are defined in your _variables.scss or have sensible fallbacks
+  // For example:
+  // --success-color: var(--green-5, #26a269); (assuming a green shade)
+  // --info-color: var(--blue-5, #3584e4);    (assuming a blue shade)
+
+  &.adw-toast-success {
+    border-left: 4px solid var(--success-color, #26a269);
+    // Optionally, a slightly different background or text color if needed,
+    // but keep it subtle and ensure contrast with --toast-fg-color.
+    // background-color: var(--success-bg-color, var(--toast-bg-color));
+  }
+
+  &.adw-toast-info {
+    border-left: 4px solid var(--info-color, #3584e4);
+    // background-color: var(--info-bg-color, var(--toast-bg-color));
+  }
 }

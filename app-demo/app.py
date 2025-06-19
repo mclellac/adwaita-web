@@ -283,6 +283,10 @@ def edit_profile():
 def settings_page():
     return render_template('settings.html')
 
+@app.route('/test-new-widgets')
+def test_new_widgets_page():
+    return render_template('test_new_widgets.html')
+
 # Flask-Login and SQLAlchemy must be initialized with the app instance.
 # This can be done here for non-test runs, or deferred for tests.
 def init_extensions(flask_app):

@@ -3,12 +3,11 @@
 {% block title %}Blog Posts{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: var(--spacing-xl, 32px);"> {# Replaces adw-preferences-page, provides some top/bottom margin if needed #}
-    {# We can use adw-preferences-group for its title styling, or a simple h1/h2 #}
-    <div class="adw-preferences-group-title" style="text-align: center; font-size: var(--font-size-xxl, 1.5rem); margin-bottom: var(--spacing-l, 24px);">All Blog Posts</div>
+<div style="margin-bottom: var(--spacing-xl, 32px);"> {# Provides some top/bottom margin #}
+    <h1 class="page-title" style="text-align: center; margin-bottom: var(--spacing-l, 24px); font-size: var(--font-size-xxl, 1.5rem);">All Blog Posts</h1>
 
     {% if posts %}
-        <div> {# This div will effectively be the container for cards, replacing adw-list-box functionality #}
+        <div class="blog-posts-container"> {# More semantic container name #}
             {% for post in posts %}
             <div class="blog-post-card">
                 <h3><a href="{{ url_for('view_post', post_id=post.id) }}" class="post-title">{{ post.title }}</a></h3>
@@ -27,8 +26,8 @@
             {% endfor %}
         </div>
     {% else %}
-        <div style="text-align: center;">
-             <p>No posts yet. <a href="{{ url_for('create_post') }}">Be the first to create one!</a></p>
+        <div style="text-align: center; margin-top: var(--spacing-xl);">
+             <p>No posts yet. <adw-button href="{{ url_for('create_post') }}" appearance="suggested">Create a Post</adw-button></p>
         </div>
     {% endif %}
 </div>

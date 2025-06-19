@@ -1,35 +1,32 @@
 {% extends "base.html" %}
 {% block title %}Edit Profile - {{ super() }}{% endblock %}
 {% block content %}
-    <adw-preferences-page> {# The main-content-clamped from base.html will handle clamping #}
-        <adw-preferences-group title="Edit Profile">
-            <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
-                <adw-list-box style="margin-bottom: var(--spacing-m);">
-                    {# File input within an adw-action-row or similar #}
-                    <adw-action-row title="Profile Photo">
-                        {# Subtitle can show current photo name or status #}
-                        <input id="profile_photo" type="file" name="profile_photo" accept="image/*" class="adw-entry">
-                        {# Styling might be needed for file inputs to look good.
-                           Alternatively, a button that triggers a hidden file input.
-                           The 'adw-entry' class might not be ideal for file inputs.
-                           For now, let's use it and see.
-                        #}
-                    </adw-action-row>
-                    {% if user_profile.profile_photo_url %}
-                    <adw-action-row subtitle="Current Photo">
-                        <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="Current profile photo" class="avatar-image">
-                    </adw-action-row>
-                    {% endif %}
+<div class="main-content-clamped">
+    <h2>Edit Profile</h2>
+    <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="profile_info_field">Profile Information</label>
+            <textarea name="profile_info" id="profile_info_field" class="adw-entry" rows="8">{{ current_user.profile_info or '' }}</textarea>
+        </div>
 
-                    {# Textarea for profile_info. AdwExpanderRow might be good if content can be long #}
-                    <adw-expander-row title="Profile Information" subtitle="Tell us about yourself">
-                        <textarea name="profile_info" class="adw-entry" rows="5" style="width: 100%;">{{ user_profile.profile_info if user_profile.profile_info else '' }}</textarea>
-                    </adw-expander-row>
-                </adw-list-box>
+        <div class="form-group">
+            <label for="profile_photo_field">Profile Photo</label>
+            <input type="file" name="profile_photo" id="profile_photo_field" accept="image/*">
+            {# Removed class="adw-entry" as it's not suitable for file inputs #}
+            {# Consider adding custom styling for file inputs in custom.css if needed #}
+        </div>
 
-                <adw-button type="submit" appearance="suggested">Save Changes</adw-button>
-                <adw-button href="{{ url_for('profile', username=user_profile.username) }}" style="margin-left: var(--spacing-s);">Cancel</adw-button>
-            </form>
-        </adw-preferences-group>
-    </adw-preferences-page>
+        {% if current_user.profile_photo_url %}
+        <div class="form-group">
+            <label>Current Photo</label>
+            <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Current profile photo" class="avatar-image" style="max-width: 100px; height: auto; border-radius: var(--border-radius-default); margin-top: var(--spacing-xs);">
+        </div>
+        {% endif %}
+
+        <div class="form-button-container">
+            <adw-button type="submit" appearance="suggested">Save Profile</adw-button>
+            <adw-button href="{{ url_for('profile', username=current_user.username) }}">Cancel</adw-button>
+        </div>
+    </form>
+</div>
 {% endblock %}

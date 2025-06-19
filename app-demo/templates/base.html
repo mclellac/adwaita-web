@@ -50,30 +50,46 @@
               {% if messages %}
                 <script>
                   document.addEventListener('DOMContentLoaded', function() {
-                    if (!window.Adw || !window.Adw.createAdwBanner) {
-                      console.error('Adw.createAdwBanner function not found.');
+                    if (!window.Adw || !window.Adw.createAdwBanner || !window.Adw.createAdwToast) {
+                      console.error('Adw.createAdwBanner or Adw.createAdwToast function not found.');
                       return;
                     }
                     const flashMessages = {{ messages|tojson|safe }};
-                    const bannerContainer = document.getElementById('flash-banner-container');
+                    const bannerContainer = document.getElementById('flash-banner-container'); // Still needed for banners
 
-                    if (bannerContainer && flashMessages) {
+                    if (flashMessages) { // bannerContainer check is only relevant for banners
                       flashMessages.forEach(flashMessage => {
-                        let category = flashMessage[0]; // Flask category
+                        let category = flashMessage[0]; // Flask category (e.g., 'success', 'danger', 'warning', 'message')
                         const message = flashMessage[1];  // Message text
 
-                        let bannerType = 'info'; // Default type
-                        if (category === 'success') bannerType = 'success';
-                        else if (category === 'warning') bannerType = 'warning';
-                        else if (category === 'danger') bannerType = 'error';
-                        // 'info' or Flask's default 'message' (which is category[0] if not specified) will map to 'info'
-
-                        Adw.createAdwBanner(message, {
-                          type: bannerType,
-                          dismissible: true,
-                          container: bannerContainer
-                          // Note: createAdwBanner prepends. If container is sticky, this works well.
-                        });
+                        if (category === 'success') {
+                          Adw.createAdwToast(message, { type: 'success', timeout: 5000 });
+                        } else if (category === 'info' || category === 'message') { // Flask's default category is 'message'
+                          Adw.createAdwToast(message, { type: 'info', timeout: 5000 });
+                        } else if (category === 'danger') {
+                          if (bannerContainer) {
+                            Adw.createAdwBanner(message, {
+                              type: 'error', // AdwBanner uses 'error' for danger
+                              dismissible: true,
+                              container: bannerContainer
+                            });
+                          } else {
+                            console.error('bannerContainer not found for danger message:', message);
+                          }
+                        } else if (category === 'warning') {
+                          if (bannerContainer) {
+                            Adw.createAdwBanner(message, {
+                              type: 'warning',
+                              dismissible: true,
+                              container: bannerContainer
+                            });
+                          } else {
+                            console.error('bannerContainer not found for warning message:', message);
+                          }
+                        } else {
+                          // Fallback for any other category, perhaps use a default toast or banner
+                          Adw.createAdwToast(message, { timeout: 5000 }); // Default to a generic toast
+                        }
                       });
                     }
                   });
