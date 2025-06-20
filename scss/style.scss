@@ -1,38 +1,43 @@
-// scss/style.scss
+// SCSS (in scss/style.scss)
+@import "variables";
+@import "theme";
+@import "base";
+@import "action_row";
+@import "avatar";
+@import "banner";
+@import "box";
+@import "button";
+@import "checkbox";
+@import "dialog";
+@import "entry";
+@import "expander_row";
+@import "headerbar";
+@import "label";
+@import "listbox";
+@import "progressbar";
+@import "radio";
+@import "row_types";
+@import "spinner";
+@import "split_button";
+@import "status_page";
+@import "switch";
+@import "viewswitcher";
+@import "flap";
+@import "password_entry_row";
+@import "window";
+@import "toast";
 
-// 1. Variables - Must be first
-@use "variables";
-@use "theme"; // Added to include theme definitions
-
-// 2. Base styles - Global resets, body, typography defaults
-@use "base";
-
-// 3. Components - Order amongst these is usually flexible
-@use "action_row"; // Added new action_row
-@use "avatar";
-@use "banner";
-@use "box";        // Layout utilities
-@use "button";
-@use "checkbox";
-@use "dialog";
-@use "entry";
-@use "expander_row"; // Added new expander_row
-@use "headerbar";
-@use "label";
-@use "listbox";    // Assuming _listbox.scss from ls output
-@use "progressbar"; // Assuming _progressbar.scss from ls output
-@use "radio";
-@use "row_types";
-@use "spinner"; // Added new spinner
-@use "split_button"; // Added new split_button
-@use "status_page"; // Added new status_page
-@use "switch";
-@use "viewswitcher";
-@use "flap";
-@use "password_entry_row"; // Added import for the new component
-@use "window";
-@use "toast";
-
-// Potentially other components if they exist and were modified:
-// @use "sidebar";
-// ...etc.
+// Make the adw-debug-box style the very last thing to ensure it has high precedence
+// if the user still has it from previous debugging.
+// If the user was asked to remove it, this won't hurt.
+adw-debug-box div {
+    background-color: lime !important;
+    color: black !important;
+    padding: 20px !important;
+    border: 5px solid red !important;
+    font-size: 24px !important;
+    display: block !important;
+    width: 90% !important;
+    margin: 10px auto !important;
+    text-align: center !important;
+}
