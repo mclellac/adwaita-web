@@ -1,51 +1,46 @@
-// scss/_headerbar.scss
-@use 'variables'; // Keep for potential mixins/functions
+@use 'variables';
 
 .adw-header-bar {
   background-color: var(--headerbar-bg-color);
   color: var(--headerbar-fg-color);
   border-bottom: var(--border-width, 1px) solid var(--headerbar-border-color);
-  padding: var(--spacing-xs) var(--spacing-m); // Adjusted padding
+  padding: var(--spacing-xs) var(--spacing-m);
   display: flex;
   align-items: center;
-  // justify-content: space-between; // This can be tricky with a centered title
-  min-height: 48px; // A common minimum height for headerbars
+  min-height: 48px;
 
   .adw-header-bar-start,
   .adw-header-bar-end {
     display: flex;
     align-items: center;
-    flex-shrink: 0; // Prevent start/end items from shrinking too much
+    flex-shrink: 0;
 
-    > *, adw-button, a { // Direct children, including adw-button and a
-      margin-right: var(--spacing-xs);
-      color: var(--headerbar-fg-color); // Ensure link/button text color
-      &:last-child {
-        margin-right: 0;
+    > *, // General direct children
+    adw-button, // Custom element
+    a { // Links
+      color: var(--headerbar-fg-color);
+
+      &.adw-button.circular { // Specific styling for circular buttons
+        padding: var(--spacing-xxs);
       }
-      &.adw-button.circular { // Specific styling for circular buttons like the avatar
-        padding: var(--spacing-xxs); // Ensure padding is consistent
-      }
-      .adw-avatar { // Style for avatar within a link
-        // The avatar component itself should handle its internal colors,
-        // but we ensure the container link doesn't mess it up.
-      }
+      // .adw-avatar styling or other specific child component styling here
     }
   }
 
   .adw-header-bar-start {
-    // No specific styles needed here if using flex correctly on parent
-    adw-button, a {
-      color: var(--headerbar-fg-color); // Ensure link/button text color
+    > *, adw-button, a { // Target all relevant children for margin
+      margin-right: var(--spacing-xs);
+      &:last-child {
+        margin-right: 0;
+      }
     }
   }
 
   .adw-header-bar-end {
-    margin-left: auto; // Pushes end content to the right
-    > *, adw-button, a { // Direct children, including adw-button and a
-      margin-left: var(--spacing-xs); // Use margin-left for spacing in the end group
-      margin-right: 0;
-      color: var(--headerbar-fg-color); // Ensure link/button text color
+    margin-left: auto;
+    > *, adw-button, a { // Target all relevant children for margin
+      margin-left: var(--spacing-xs);
+      margin-right: 0; // Reset right margin
       &:first-child {
         margin-left: 0;
       }
@@ -55,65 +50,52 @@
   .adw-header-bar-center-box {
     display: flex;
     flex-direction: column;
-    align-items: center; // Center title/subtitle if they are stacked
-    justify-content: center; // Center them vertically if headerbar has extra height
+    align-items: center;
+    justify-content: center;
     flex-grow: 1;
     flex-shrink: 1;
     min-width: 0; // Essential for text-overflow ellipsis
-    text-align: center; // Fallback for non-flex content
-    margin: 0 var(--spacing-m); // Provide some space from start/end sections
+    text-align: center;
+    margin: 0 var(--spacing-m);
   }
 
   .adw-header-bar-title {
-    font-size: var(--font-size-large); // Use defined font size
-    font-weight: bold; // Libadwaita titles are usually bold
+    font-size: var(--font-size-large);
+    font-weight: bold;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.2; // Adjust line height for better visual
+    line-height: 1.2;
   }
 
   .adw-header-bar-subtitle {
-    font-size: var(--font-size-small); // Use defined font size
-    color: var(--headerbar-fg-color); // Use headerbar fg color
-    opacity: 0.7; // Muted appearance for subtitle
+    font-size: var(--font-size-small);
+    color: var(--headerbar-fg-color);
+    opacity: 0.7;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.2; // Adjust line height
-    margin-top: 2px; // Small space between title and subtitle
+    line-height: 1.2;
+    margin-top: 2px;
   }
 
-  // Style for when content is scrolled underneath the headerbar
   &.scrolled {
-    // Use the pre-defined headerbar-shade-color for the shadow
-    // The shadow is typically subtle and only on the bottom
     box-shadow: 0 2px 4px -2px var(--headerbar-shade-color);
-    // Some themes might make the border slightly more opaque or change bg
-    // border-bottom-color: var(--headerbar-darker-shade-color); // If you have such a variable
   }
 
-  // Ensure links and buttons within headerbar are styled correctly
   a,
   adw-button,
-  .adw-button { // Adding .adw-button for elements that might have this class directly
+  .adw-button {
     // For adw-button, the component's own styling will apply.
     // However, for <a> tags or elements that *become* buttons,
     // ensuring they inherit the foreground color is important.
     color: var(--headerbar-fg-color);
-    text-decoration: none; // Common for header links
+    text-decoration: none;
 
     &:hover {
       // Define a hover state, perhaps a slight change in brightness or background
       // Depending on how adw-button handles hover, this might need adjustment
-      // For now, let's ensure text color remains consistent on hover.
-      color: var(--headerbar-fg-color); // Or a slightly lighter/darker shade if desired
-    }
-
-    // Specifically target avatar text within a link to ensure visibility
-    .adw-avatar-text {
-        color: var(--headerbar-bg-color); // Often avatar text is on a colored circle, so it might need to contrast with that circle's bg
-                                          // This might need adjustment based on actual avatar styles from libadwaita-web
+      color: var(--headerbar-fg-color);
     }
   }
 }

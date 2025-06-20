@@ -1,19 +1,19 @@
 @use "variables";
 
 .adw-button {
-  display: inline-flex; // Use flex for better content alignment
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-s) var(--spacing-m); // Adjusted padding using new variables
-  border-width: var(--border-width, 1px); // Use helper variable, provide fallback
+  padding: var(--spacing-s) var(--spacing-m);
+  border-width: var(--border-width, 1px);
   border-style: solid;
   border-color: var(--button-border-color);
-  border-radius: var(--border-radius-default); // Use new variable
+  border-radius: var(--border-radius-default);
   background-color: var(--button-bg-color);
   color: var(--button-fg-color);
   cursor: pointer;
   text-decoration: none;
-  font-size: var(--font-size-base); // Use new variable
+  font-size: var(--font-size-base);
   text-align: center;
   transition: background-color 0.1s ease-out, border-color 0.1s ease-out, box-shadow 0.1s ease-out, filter 0.1s ease-out; // Libadwaita uses subtle transitions
   font-weight: 500; // Libadwaita buttons are often slightly bolder
@@ -28,7 +28,7 @@
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
   }
 
-  &:focus-visible { // Clearer focus indication
+  &:focus-visible {
     outline: 2px solid var(--accent-bg-color);
     outline-offset: 2px;
   }
@@ -79,10 +79,10 @@
 
   &[disabled],
   &:disabled {
-    background-color: var(--button-bg-color); // Use base bg
-    color: var(--button-fg-color); // Use base fg
-    border-color: var(--button-border-color); // Use base border
-    opacity: var(--opacity-disabled, 0.5); // Use opacity variable, provide fallback
+    background-color: var(--button-bg-color);
+    color: var(--button-fg-color);
+    border-color: var(--button-border-color);
+    opacity: var(--opacity-disabled, 0.5);
     cursor: not-allowed;
     pointer-events: none;
     box-shadow: none;
@@ -90,7 +90,7 @@
 
   // Icon support within buttons (common in libadwaita)
   .icon {
-    margin-right: var(--spacing-xs); // Space between icon and text
+    margin-right: var(--spacing-xs);
   }
 
   &.circular { // For icon-only circular buttons
