@@ -6,19 +6,19 @@
 <adw-preferences-page>
     <adw-preferences-group title="Appearance">
         <adw-action-row title="Accent Color" subtitle="Select your preferred accent color">
-            <div id="accent-color-selector-container" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                <!-- Accent color buttons will be populated here by JavaScript -->
-                <small>Loading accent colors...</small>
-            </div>
         </adw-action-row>
+        <div id="accent-color-selector-container" class="settings-control-container accent-color-selector">
+            <!-- Accent color buttons will be populated here by JavaScript -->
+            <small>Loading accent colors...</small>
+        </div>
     </adw-preferences-group>
 
     <adw-preferences-group title="Theme">
         <adw-action-row title="Dark Mode" subtitle="Toggle between light and dark themes">
-            <div id="theme-switch-container" style="display: flex; align-items: center;">
-                <!-- Adwaita switch will be populated here -->
-            </div>
         </adw-action-row>
+        <div id="theme-switch-container" class="settings-control-container">
+            <!-- Adwaita switch will be populated here -->
+        </div>
     </adw-preferences-group>
 
     <adw-preferences-group title="Test Pages">

@@ -795,6 +795,10 @@ function loadSavedAccentColor() {
 function toggleTheme() {
     _originalToggleTheme(); // Call original theme toggle logic
     loadSavedAccentColor(); // Re-apply accent color based on the new theme
+
+    const isLight = document.body.classList.contains('light-theme');
+    const event = new CustomEvent('adwThemeChanged', { detail: { isLight: isLight } });
+    document.dispatchEvent(event);
 }
 // End Accent Color Management
 
