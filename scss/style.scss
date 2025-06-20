@@ -7,6 +7,7 @@
 @use "base";
 
 // 3. Components - Order amongst these is usually flexible
+@use "action_row"; // Added new action_row
 @use "avatar";
 @use "banner";
 @use "box";        // Layout utilities
@@ -14,15 +15,19 @@
 @use "checkbox";
 @use "dialog";
 @use "entry";
+@use "expander_row"; // Added new expander_row
 @use "headerbar";
 @use "label";
 @use "listbox";    // Assuming _listbox.scss from ls output
 @use "progressbar"; // Assuming _progressbar.scss from ls output
 @use "radio";
+@use "row_types";
+@use "spinner"; // Added new spinner
+@use "split_button"; // Added new split_button
+@use "status_page"; // Added new status_page
 @use "switch";
 @use "viewswitcher";
 @use "flap";
-@use "row_types";
 @use "password_entry_row"; // Added import for the new component
 @use "window";
 

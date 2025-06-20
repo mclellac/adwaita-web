@@ -1,25 +1,24 @@
-// scss/_toast.scss
 @use 'variables';
 
 .adw-toast {
-  background-color: var(--toast-bg-color, rgba(50, 50, 50, 0.9)); // Default, with fallback
-  color: var(--toast-fg-color, white);
-  border-radius: var(--adw-border-radius);
-  padding: var(--adw-padding-medium);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); // Subtle shadow
-  min-width: 288px; // Adwaita minimum width
-  max-width: 568px; // Adwaita maximum width
-  position: fixed;  // Important for positioning
-  bottom: 24px;    // Standard bottom spacing
-  left: 50%;      // Center horizontally
-  transform: translateX(-50%); // Center horizontally
-  z-index: 1000; // Make sure it's on top
-  opacity: 0;       // Start hidden
+  background-color: var(--toast-bg-color);
+  color: var(--toast-fg-color);
+  border-radius: var(--border-radius-default);
+  padding: var(--spacing-m);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  min-width: 288px;
+  max-width: 568px;
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 1000;
+  opacity: 0;
   transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
 
   &.visible {
       opacity: 1;
-      transform: translateX(-50%) translateY(0); // Show at the final position
+      transform: translateX(-50%) translateY(0);
   }
 
     &.fade-out{
@@ -27,21 +26,11 @@
         transform: translateX(-50%) translateY(100%);
     }
 
-  // Type-specific styling
-  // Ensure these variables are defined in your _variables.scss or have sensible fallbacks
-  // For example:
-  // --success-color: var(--green-5, #26a269); (assuming a green shade)
-  // --info-color: var(--blue-5, #3584e4);    (assuming a blue shade)
-
   &.adw-toast-success {
-    border-left: 4px solid var(--success-color, #26a269);
-    // Optionally, a slightly different background or text color if needed,
-    // but keep it subtle and ensure contrast with --toast-fg-color.
-    // background-color: var(--success-bg-color, var(--toast-bg-color));
+    border-left: 4px solid var(--success-color);
   }
 
   &.adw-toast-info {
-    border-left: 4px solid var(--info-color, #3584e4);
-    // background-color: var(--info-bg-color, var(--toast-bg-color));
+    border-left: 4px solid var(--info-color);
   }
 }
