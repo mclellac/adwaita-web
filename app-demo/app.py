@@ -365,6 +365,21 @@ def create_app(config_overrides=None):
     with _app.app_context():
         db.create_all()
 
+        if not User.query.first():  # Check if any user exists
+            _app.logger.info("No users found in the database. Creating default admin user.")
+            default_username = "admin"
+            default_password = "password"  # Hardcoding for demo purposes
+            admin_user = User(username=default_username)
+            admin_user.set_password(default_password)
+            db.session.add(admin_user)
+            try:
+                db.session.commit()
+                _app.logger.info(f"Default admin user '{default_username}' with password '{default_password}' created successfully.")
+                print(f"INFO: Default admin user '{default_username}' (password: '{default_password}') created.") # Also print to console
+            except Exception as e:
+                db.session.rollback()
+                _app.logger.error(f"Error creating default admin user: {e}", exc_info=True)
+
     return _app
 
 if __name__ == '__main__':
