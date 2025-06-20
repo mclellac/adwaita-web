@@ -2,6 +2,7 @@
 
 // 1. Variables - Must be first
 @use "variables";
+@use "theme"; // Added to include theme definitions
 
 // 2. Base styles - Global resets, body, typography defaults
 @use "base";
