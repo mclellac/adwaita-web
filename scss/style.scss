@@ -30,8 +30,8 @@
 @use "flap";
 @use "password_entry_row"; // Added import for the new component
 @use "window";
+@use "toast";
 
 // Potentially other components if they exist and were modified:
-// @use "toast";
 // @use "sidebar";
 // ...etc.

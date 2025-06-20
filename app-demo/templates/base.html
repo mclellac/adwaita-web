@@ -19,7 +19,7 @@
             <a href="{{ url_for('profile', username=current_user.username) }}" slot="start" class="adw-button flat circular" title="View Profile" style="padding: var(--spacing-xxs); margin-right: var(--spacing-xs);">
                 {% if current_user.profile_photo_url %}
                     <span class="adw-avatar size-small"> <!-- 24px -->
-                        <img src="{{ current_user.profile_photo_url }}" alt="Avatar" class="avatar-image">
+                        <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Avatar" class="avatar-image">
                     </span>
                 {% else %}
                     <span class="adw-avatar size-small">

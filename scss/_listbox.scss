@@ -9,7 +9,7 @@
   border-radius: var(--border-radius-default);
   overflow: hidden; // Ensures rows inside respect the border radius
 
-  .adw-list-row {
+  .adw-row { // Target .adw-row directly as children
     display: flex;
     align-items: center;
     // justify-content: space-between; // If you want to push content to ends
@@ -84,7 +84,7 @@
 body.dark-theme .adw-list-box {
   border-color: var(--border-color-dark);
 
-  .adw-list-row {
+  .adw-row { // Target .adw-row
     border-bottom-color: var(--border-color-dark);
 
     &:hover {
@@ -111,14 +111,14 @@ body.dark-theme .adw-list-box {
   border: none;
   border-radius: 0; // Or keep radius if desired, but typically flat means no outer decoration
   // Row separators might need to be stronger if no outer border
-  // .adw-list-row {
+  // .adw-row { // Target .adw-row
   //   border-bottom-color: var(--border-color-light-stronger); // Define if needed
   // }
 }
 // Dark theme for flat listbox
 .dark-theme .adw-list-box.flat,
 body.dark-theme .adw-list-box.flat {
-  // .adw-list-row {
+  // .adw-row { // Target .adw-row
   //   border-bottom-color: var(--border-color-dark-stronger); // Define if needed
   // }
 }

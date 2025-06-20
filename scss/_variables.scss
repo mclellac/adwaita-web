@@ -78,6 +78,11 @@
   // Progress Bar
   --progress-bar-track-color: var(--shade-color);
   --progress-bar-fill-color: var(--accent-bg-color);
+
+  // Toast (often dark for contrast, even in light theme)
+  --toast-bg-color: #303030; // Dark grey
+  --toast-fg-color: #ffffff;
+  --secondary-text-color: rgba(0,0,0,0.7); // For less important text
 }
 
 // Dark Theme
@@ -159,6 +164,11 @@
   // Progress Bar
   --progress-bar-track-color: var(--shade-color);
   --progress-bar-fill-color: var(--accent-bg-color);
+
+  // Toast
+  --toast-bg-color: #424242; // Slightly lighter dark grey for dark theme
+  --toast-fg-color: #ffffff;
+  --secondary-text-color: rgba(255,255,255,0.7); // For less important text
 }
 
 // Helper Variables (inspired by libadwaita, but not direct libadwaita variables)
@@ -198,8 +208,8 @@
   --border-color-light: rgba(0, 0, 0, 0.12); // For light theme
   --border-color-dark: rgba(255, 255, 255, 0.07); // For dark theme
 
-  // RGB versions for use in rgba()
-  --accent-fg-color-rgb: 255,255,255; // For white text on accent backgrounds
+  // Note: --accent-fg-color-rgb was removed as SCSS cannot use CSS variables in rgba() directly.
+  // Direct values (e.g., 255,255,255 for white) should be used in rgba() within component SCSS if needed.
 
   // Accent Color Palette (Raw colors)
   // Naming: --adw-{colorName}-{shade} (shade 1-5, 3 is often a good base)

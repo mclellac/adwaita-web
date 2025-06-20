@@ -2,3 +2,4 @@ Flask
 Pillow
 Flask-Login
 Flask-SQLAlchemy
+Flask-WTF

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Forbidden - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="main-content-clamped text-center" style="padding-top: var(--spacing-xxl); padding-bottom: var(--spacing-xxl);">
+    {# Simplified StatusPage-like structure using basic HTML and Adwaita classes #}
+    <div class="status-page-icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">
+        {# Consider a relevant icon if available, e.g. a shield or stop sign. For now, text. #}
+        🚫
+    </div>
+    <h1 class="adw-label title-1" style="margin-bottom: var(--spacing-s);">403 - Forbidden</h1>
+    <p class="adw-label body" style="margin-bottom: var(--spacing-xl); opacity: 0.7;">
+        Sorry, you don't have permission to access this page.
+    </p>
+    <div class="status-page-actions">
+        <a href="{{ url_for('index') }}" class="adw-button suggested-action">Go to Homepage</a>
+    </div>
+</div>
+{% endblock %}
