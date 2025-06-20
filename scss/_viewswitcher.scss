@@ -1,98 +1,57 @@
-// scss/_viewswitcher.scss
 @use "variables";
 
 .adw-view-switcher {
   display: flex;
   flex-direction: column;
-  // border: 1px solid var(--border-color-light); // Optional: if view switcher needs a border
-  // border-radius: var(--border-radius-default);
-  // background-color: var(--view-bg-color);
 }
 
 .adw-view-switcher-bar {
   display: flex;
-  justify-content: flex-start; // Align tabs to the start (left) typically
-  // padding: var(--spacing-s) 0 0 0; // No padding or padding only at top/bottom if needed
-  background-color: transparent; // Tabs often share background with header or are subtly different
-  border-bottom: var(--border-width, 1px) solid var(--border-color, var(--headerbar-border-color)); // Common separator
+  justify-content: flex-start;
+  background-color: transparent;
+  border-bottom: var(--border-width, 1px) solid var(--border-color, var(--headerbar-border-color));
 
   .adw-button {
-    background-color: transparent; // Make buttons transparent by default for tab style
-    border: var(--border-width, 1px) solid transparent; // Transparent border initially
-    border-bottom: none; // No bottom border for inactive tabs initially
-    border-radius: var(--border-radius-default) var(--border-radius-default) 0 0; // Rounded top corners
-    padding: var(--spacing-s) var(--spacing-m); // Adjust padding for tab feel
-    margin-right: var(--spacing-xs); // Small gap between tabs
-    margin-bottom: calc(-1 * var(--border-width, 1px)); // Overlap bottom border of the bar to connect
+    background-color: transparent;
+    border: var(--border-width, 1px) solid transparent;
+    border-bottom: none;
+    border-radius: var(--border-radius-default) var(--border-radius-default) 0 0;
+    padding: var(--spacing-s) var(--spacing-m);
+    margin-right: var(--spacing-xs);
+    margin-bottom: calc(-1 * var(--border-width, 1px));
     box-shadow: none;
-    color: var(--secondary-text-color, var(--window-fg-color)); // Less prominent color for inactive tabs
+    color: var(--secondary-text-color, var(--window-fg-color));
     opacity: 0.8;
 
     &:hover {
-      background-color: var(--button-hover-bg-color); // Subtle hover
+      background-color: var(--button-hover-bg-color);
       color: var(--window-fg-color);
       opacity: 1;
     }
 
-    // Active state for view switcher button (tab)
     &.active {
-      background-color: var(--window-bg-color); // Active tab matches content background
-      color: var(--accent-color, var(--window-fg-color)); // Use accent or default fg color
+      background-color: var(--window-bg-color);
+      color: var(--accent-color, var(--window-fg-color));
       font-weight: bold;
-      border-color: var(--border-color, var(--headerbar-border-color)); // Border on sides and top
-      border-bottom-color: transparent; // Active tab's bottom border is "invisible", merging with content area
+      border-color: var(--border-color, var(--headerbar-border-color));
+      border-bottom-color: transparent;
       opacity: 1;
-      // z-index: 1; // If needed for complex border overlaps
     }
   }
 }
 
 .adw-view-switcher-content {
   padding: var(--spacing-m);
-  background-color: var(--window-bg-color); // Content area background, ensure it matches active tab bg
-  // Optional: add a top border if tabs don't perfectly hide the bar's bottom border
-  // border-top: 1px solid var(--border-color, var(--headerbar-border-color));
-  // margin-top: calc(-1 * var(--border-width, 1px)); // If the content border should visually replace bar border for active tab
-
-  // The border of the content area can also be styled to appear as if it's part of the overall component
+  background-color: var(--window-bg-color);
   border: var(--border-width, 1px) solid var(--border-color, var(--headerbar-border-color));
-  border-top: none; // Top border is formed by the bar or the active tab's "merged" look
-  border-radius: 0 0 var(--border-radius-default) var(--border-radius-default); // Rounded bottom corners for content
+  border-top: none;
+  border-radius: 0 0 var(--border-radius-default) var(--border-radius-default);
 
 
-  > * { // Direct children are the views
-    display: none; // Hide all views by default
+  > * {
+    display: none;
     &.active-view {
-      display: block; // Show only the active view
+      display: block;
     }
   }
-}
-
-// Dark theme adjustments
-// Variables should handle most dark theme changes automatically.
-// Specific overrides if needed:
-.dark-theme .adw-view-switcher-bar,
-body.dark-theme .adw-view-switcher-bar {
-  border-bottom-color: var(--border-color, var(--headerbar-border-color));
-
-  .adw-button {
-    color: var(--secondary-text-color, var(--window-fg-color));
-    &:hover {
-      background-color: var(--button-hover-bg-color);
-      color: var(--window-fg-color);
-    }
-    &.active {
-      background-color: var(--window-bg-color);
-      color: var(--accent-color, var(--window-fg-color));
-      border-color: var(--border-color, var(--headerbar-border-color));
-      border-bottom-color: transparent;
-    }
-  }
-}
-
-.dark-theme .adw-view-switcher-content,
-body.dark-theme .adw-view-switcher-content {
-   background-color: var(--window-bg-color);
-   border-color: var(--border-color, var(--headerbar-border-color));
-   border-top: none;
 }

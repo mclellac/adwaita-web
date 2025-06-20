@@ -1,11 +1,10 @@
-// scss/_banner.scss
 @use 'variables';
 
 .adw-banner {
-  padding: var(--adw-padding-medium) var(--adw-padding-large);
-  border-radius: var(--adw-border-radius);
+  padding: var(--spacing-m) var(--spacing-l);
+  border-radius: var(--border-radius-default);
   border: 1px solid transparent;
-  margin-bottom: var(--adw-spacing-medium);
+  margin-bottom: var(--spacing-m);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -18,26 +17,25 @@
     transform: translateY(0);
   }
 
-  // Types
   &.info {
-    background-color: var(--info-bg-color, lightblue); // Define these in _variables.scss or use existing
-    border-color: var(--info-border-color, blue);
-    color: var(--info-fg-color, darkblue);
+    background-color: var(--info-bg-color);
+    border-color: var(--info-border-color);
+    color: var(--info-fg-color);
   }
   &.success {
-    background-color: var(--success-bg-color, lightgreen);
-    border-color: var(--success-border-color, green);
-    color: var(--success-fg-color, darkgreen);
+    background-color: var(--success-bg-color);
+    border-color: var(--success-border-color);
+    color: var(--success-fg-color);
   }
   &.warning {
-    background-color: var(--warning-bg-color, lightyellow);
-    border-color: var(--warning-border-color, orange);
-    color: var(--warning-fg-color, darkorange);
+    background-color: var(--warning-bg-color);
+    border-color: var(--warning-border-color);
+    color: var(--warning-fg-color);
   }
   &.error {
-    background-color: var(--error-bg-color, lightcoral);
-    border-color: var(--error-border-color, red);
-    color: var(--error-fg-color, darkred);
+    background-color: var(--error-bg-color);
+    border-color: var(--error-border-color);
+    color: var(--error-fg-color);
   }
 
   .adw-banner-message {
@@ -50,7 +48,7 @@
     color: inherit;
     font-size: 1.2em;
     cursor: pointer;
-    padding: 0 var(--adw-padding-small);
-    margin-left: var(--adw-padding-medium);
+    padding: 0 var(--spacing-xs);
+    margin-left: var(--spacing-m);
   }
 }
