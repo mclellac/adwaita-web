@@ -1548,6 +1548,7 @@ function createAdwSpinner(options = {}) {
  * @returns {HTMLDivElement} The created PasswordEntryRow element (which is an AdwRow).
  */
 function createAdwPasswordEntryRow(options = {}) {
+    console.log('[Debug] createAdwPasswordEntryRow factory function was called with options:', options);
     const opts = options || {};
     const entryOptions = { ...(opts.entryOptions || {}) };
 
