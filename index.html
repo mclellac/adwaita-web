@@ -415,6 +415,152 @@ const flatListBox = Adw.createListBox({
         // Will be inserted after listBoxContainer
 
 
+        // --- ListBox with Custom Row Layouts ---
+        const customRowsListBoxTitle = Adw.createLabel("ListBox with Custom Row Layouts", {title:4}); // Title for this specific demo
+
+        // Row 1: Icon, Title/Subtitle, Switch
+        const customRow1Icon = Adw.createLabel("⚙️"); // Gear icon as text
+        customRow1Icon.style.fontSize = '1.8em';
+        customRow1Icon.style.marginRight = 'var(--spacing-m)';
+
+
+        const customRow1TextContent = Adw.createBox({
+            orientation: 'vertical',
+            children: [
+                Adw.createLabel("Notifications", { title: 5 }),
+                Adw.createLabel("Enable or disable app notifications.", { isCaption: true })
+            ]
+        });
+        customRow1TextContent.style.flexGrow = '1';
+
+        const customRow1Switch = Adw.createSwitch({ onChanged: (e) => Adw.createToast(`Notifications toggled: ${e.target.checked}`) });
+
+        const customRow1LayoutBox = Adw.createBox({
+            orientation: 'horizontal',
+            align: 'center',
+            children: [customRow1Icon, customRow1TextContent, customRow1Switch]
+        });
+        customRow1LayoutBox.style.width = '100%';
+
+        const customRow1 = Adw.createRow({
+            children: [customRow1LayoutBox],
+            interactive: false
+        });
+
+        // Row 2: Icon, Title/Subtitle, Button
+        const customRow2Icon = Adw.createLabel("💾");
+        customRow2Icon.style.fontSize = '1.8em';
+        customRow2Icon.style.marginRight = 'var(--spacing-m)';
+
+        const customRow2TextContent = Adw.createBox({
+            orientation: 'vertical',
+            children: [
+                Adw.createLabel("Backup Settings", { title: 5 }),
+                Adw.createLabel("Configure automatic cloud backups.", { isCaption: true })
+            ]
+        });
+        customRow2TextContent.style.flexGrow = '1';
+
+        const customRow2Button = Adw.createButton("Configure", {
+            onClick: () => Adw.createToast("Configure Backup clicked!")
+        });
+        customRow2Button.style.marginLeft = 'var(--spacing-s)';
+
+
+        const customRow2LayoutBox = Adw.createBox({
+            orientation: 'horizontal',
+            align: 'center',
+            children: [customRow2Icon, customRow2TextContent, customRow2Button]
+        });
+        customRow2LayoutBox.style.width = '100%';
+
+        const customRow2 = Adw.createRow({
+            children: [customRow2LayoutBox],
+            interactive: true,
+            onClick: () => Adw.createToast("Backup row clicked!")
+        });
+
+        const customRow3TextContent = Adw.createLabel("Advanced Options", { title: 5 });
+        customRow3TextContent.style.flexGrow = '1';
+
+        const customRow3Button = Adw.createButton("Details", {
+            flat: true,
+            onClick: () => Adw.createToast("Details for Advanced Options requested!")
+        });
+        customRow3Button.style.marginLeft = 'var(--spacing-s)';
+
+        const customRow3LayoutBox = Adw.createBox({
+            orientation: 'horizontal',
+            align: 'center',
+            children: [customRow3TextContent, customRow3Button]
+        });
+        customRow3LayoutBox.style.width = '100%';
+
+        const customRow3 = Adw.createRow({ children: [customRow3LayoutBox], interactive: true });
+
+
+        const customRowsListBox = Adw.createListBox({
+            children: [
+                customRow1,
+                customRow2,
+                customRow3
+            ]
+        });
+
+        const customListBoxDemoContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 's',
+            children: [
+                customRowsListBoxTitle,
+                customRowsListBox
+            ]
+        });
+
+        const customRowsListBoxCodeSample = `
+// ListBox with Custom Row Layouts
+
+// Example of one custom row (Icon, Title/Subtitle, Switch):
+const rowIcon = Adw.createLabel("⚙️");
+rowIcon.style.fontSize = '1.8em';
+rowIcon.style.marginRight = 'var(--spacing-m)';
+
+const rowTextContent = Adw.createBox({
+    orientation: 'vertical',
+    children: [
+        Adw.createLabel("Feature Name", { title: 5 }),
+        Adw.createLabel("A brief description of the feature.", { isCaption: true })
+    ]
+});
+rowTextContent.style.flexGrow = '1';
+
+const rowSwitch = Adw.createSwitch({ onChanged: (e) => console.log("Switch toggled:", e.target.checked) });
+
+const rowLayoutBox = Adw.createBox({
+    orientation: 'horizontal',
+    align: 'center',
+    children: [rowIcon, rowTextContent, rowSwitch]
+});
+rowLayoutBox.style.width = '100%';
+
+const customRow = Adw.createRow({
+    children: [rowLayoutBox],
+    interactive: false
+});
+
+// Create the ListBox
+const customRowsListBox = Adw.createListBox({
+    children: [
+        customRow,
+        // Add more Adw.Row elements, each potentially with its own Adw.Box for layout
+    ]
+});
+
+// Add to your layout:
+// yourContainer.appendChild(customRowsListBox);
+        `;
+        const customRowsListBoxCodeDetails = createCodeSampleDetails('Show Custom Row ListBox Code', customRowsListBoxCodeSample);
+
+
         // --- Banners ---
         const bannersTitle = Adw.createLabel("Banners", { title: 1 });
         const bannerContainer = Adw.createBox({ orientation: 'vertical', spacing: 's', _meta_id: "banner-container-box" }); // Container for banners to appear
@@ -770,6 +916,7 @@ const flap = Adw.createFlap({
 
                 Adw.createLabel("List Boxes", {title:1}),
                 listBoxContainer, // Contains both listboxes
+                customListBoxDemoContainer, // Added new ListBox demo
 
                 Adw.createLabel("Dialog", {title:1}),
                 Adw.createRow({ children: [openDialogButton] }), // dialogCodeDetails will be inserted after this row
@@ -895,6 +1042,21 @@ const avatarCustomFallback = Adw.createAvatar({
             onClick: () => Adw.createToast("Action Row (No Chevron) Clicked!")
         });
 
+        const activatedActionRow = Adw.createActionRow({
+            title: "Activated Action Row",
+            subtitle: "This row is visually activated",
+            iconHTML: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M14 7.5a6.5 6.5 0 11-13 0a6.5 6.5 0 0113 0zM8 1C4.134 1 1 4.134 1 8s3.134 7 7 7s7-3.134 7-7s-3.134-7-7-7z"/></svg>', // Circle icon
+            onClick: () => Adw.createToast("Activated Action Row clicked!"),
+            activated: true
+        });
+
+        const navigationActionRow = Adw.createActionRow({
+            title: "Open Preferences",
+            subtitle: "Navigate to application settings",
+            iconHTML: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M8.222 2.23a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L11.94 8 8.222 4.31a.75.75 0 010-1.06z"/></svg>', // Chevron Right icon
+            onClick: () => Adw.createToast("Navigate to Preferences (simulation) clicked!")
+        });
+
 
         const entryRow1 = Adw.createEntryRow({
             title: "Username:",
@@ -945,6 +1107,8 @@ const avatarCustomFallback = Adw.createAvatar({
                 actionRow1,
                 actionRowWithIcon,
                 actionRowNoChevron,
+                activatedActionRow, // Added activated action row
+                navigationActionRow, // Added navigation action row
                 entryRow1,
                 passwordEntryRow1, // Added PasswordEntryRow instance
                 expanderRow1,
@@ -963,6 +1127,23 @@ const actionRow = Adw.createActionRow({
     iconHTML: "<svg width='16' height='16'><path d='...' fill='currentColor'/></svg>", // Optional: SVG icon string
     onClick: () => Adw.createToast("Action Row clicked!"),
     // showChevron: true, // Default is true, set to false to hide arrow
+});
+
+// Activated ActionRow
+const activatedActionRowExample = Adw.createActionRow({
+    title: "Activated Row",
+    subtitle: "This row starts with an active state",
+    iconHTML: "<svg width='16' height='16'><path fill='currentColor' d='M14 7.5a6.5 6.5 0 11-13 0a6.5 6.5 0 0113 0zM8 1C4.134 1 1 4.134 1 8s3.134 7 7 7s7-3.134 7-7s-3.134-7-7-7z'/></svg>", // Optional icon (circle)
+    onClick: () => { Adw.createToast("Clicked an activated row"); },
+    activated: true
+});
+
+// ActionRow for Navigation
+const navActionRowExample = Adw.createActionRow({
+    title: "User Profile",
+    subtitle: "View and edit your profile information",
+    iconHTML: "<svg width='16' height='16'><path fill='currentColor' d='M8.222 2.23a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L11.94 8 8.222 4.31a.75.75 0 010-1.06z'/></svg>", // e.g., a chevron-right icon
+    onClick: () => { Adw.createToast("Simulating navigation to User Profile"); /* typically window.location.href = '...' or similar */ }
 });
 
 // EntryRow (a row with a title and an entry field)
@@ -1056,6 +1237,7 @@ const comboRow = Adw.createComboRow({
         insertDetailsAfter(checkBox, checkboxCodeDetails);
         insertDetailsAfter(radioBox, radioButtonCodeDetails);
         insertDetailsAfter(listBoxContainer, listBoxCodeDetails);
+        insertDetailsAfter(customListBoxDemoContainer, customRowsListBoxCodeDetails); // Added for new ListBox demo
 
         const dialogRow = openDialogButton.closest('.adw-row'); // Find the row containing the dialog button
         const dialogCodeSample = `
