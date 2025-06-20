@@ -18,7 +18,7 @@ mkdir -p "${JS_OUTPUT_DIR}"
 
 # Compile SASS to CSS
 echo "Compiling SASS: ${SASS_INPUT} to ${CSS_OUTPUT_FILE}"
-sass "${SASS_INPUT}" "${CSS_OUTPUT_FILE}"
+sass --source-map-urls=relative "${SASS_INPUT}" "${CSS_OUTPUT_FILE}"
 
 # Copy JavaScript files
 echo "Copying JavaScript files from ${JS_INPUT_DIR} to ${JS_OUTPUT_DIR}"
@@ -27,7 +27,7 @@ cp "${JS_INPUT_DIR}/components.js" "${JS_OUTPUT_DIR}/components.js"
 # cp "${JS_INPUT_DIR}/another-script.js" "${JS_OUTPUT_DIR}/another-script.js"
 
 # Copy SCSS files
-echo "Copying SCSS files from scss to ${CSS_OUTPUT_DIR}/scss"
-cp -r "scss" "${CSS_OUTPUT_DIR}/scss"
+echo "Copying SCSS files from scss to app-demo/static/scss"
+cp -r "scss" "app-demo/static/scss"
 
 echo "Build complete. Adwaita-Web assets are updated in app-demo."
