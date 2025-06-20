@@ -1,0 +1,78 @@
+// scss/_box.scss
+@use "variables";
+
+.adw-box {
+  display: flex;
+  // Default gap, can be overridden by utility classes or specific component styles
+  // gap: var(--spacing-m);
+
+  &.adw-box-vertical {
+    flex-direction: column;
+  }
+
+  // Alignment utility classes for .adw-box
+  &.align-start { align-items: flex-start; }
+  &.align-center { align-items: center; }
+  &.align-end { align-items: flex-end; }
+  &.align-stretch { align-items: stretch; } // Default for cross-axis if items have no size
+
+  &.justify-start { justify-content: flex-start; }
+  &.justify-center { justify-content: center; }
+  &.justify-end { justify-content: flex-end; }
+  &.justify-between { justify-content: space-between; }
+  &.justify-around { justify-content: space-around; }
+  &.justify-evenly { justify-content: space-evenly; }
+
+  // Spacing utility using gap (modern approach)
+  // Example: <div class="adw-box adw-box-spacing-s">
+  &.adw-box-spacing-xs { gap: var(--spacing-xs); }
+  &.adw-box-spacing-s { gap: var(--spacing-s); }
+  &.adw-box-spacing-m { gap: var(--spacing-m); }
+  &.adw-box-spacing-l { gap: var(--spacing-l); }
+  &.adw-box-spacing-xl { gap: var(--spacing-xl); }
+
+  // Forcing children to have equal width/height (homogeneous-like)
+  &.adw-box-fill-children > * {
+    flex-grow: 1;
+    flex-basis: 0; // Distribute space equally
+  }
+}
+
+// .adw-row is more specific than a generic box, often for form-like layouts or item rows.
+.adw-row {
+  display: flex;
+  align-items: center; // Default vertical alignment for rows
+  margin-bottom: var(--spacing-m); // Spacing between rows
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  // Spacing between direct children of a row.
+  // Using gap is often cleaner if widely supported and appropriate.
+  // This margin approach is a common fallback.
+  gap: var(--spacing-s); // Using gap for children spacing within a row
+  // If gap is not desired, or for older browser support, revert to margins:
+  // > *:not(:last-child) {
+  //   margin-right: var(--spacing-s);
+  // }
+}
+
+// Example of a more specialized box, like a card
+.adw-card {
+  background-color: var(--card-bg-color);
+  color: var(--card-fg-color);
+  border-radius: var(--border-radius-large); // Cards usually have larger radius
+  padding: var(--spacing-l); // Generous padding for cards
+  box-shadow: 0 0 0 1px var(--border-color-light, rgba(0,0,0,0.08)),
+              0 4px 8px -2px rgba(0,0,0,0.1),
+              0 3px 6px rgba(0,0,0,0.08);
+  // Add dark theme shadow for card if needed, similar to .adw-dialog
+}
+
+.dark-theme .adw-card,
+body.dark-theme .adw-card {
+    box-shadow: 0 0 0 1px var(--border-color-dark, rgba(255,255,255,0.08)),
+              0 4px 8px -2px rgba(0,0,0,0.25),
+              0 3px 6px rgba(0,0,0,0.2);
+}

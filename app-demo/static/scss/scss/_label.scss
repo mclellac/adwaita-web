@@ -1,0 +1,106 @@
+// scss/_label.scss
+@use 'variables';
+
+.adw-label {
+  color: var(--view-fg-color); // Default color, assumes label is on a view background
+  font-family: var(--document-font-family); // Ensure consistent font family
+  line-height: 1.5; // Sensible default line height for readability
+  // user-select: text; // Uncomment if labels should generally be selectable
+
+  // Standard text selection style (libadwaita often uses accent color for this)
+  &::selection {
+    background-color: var(--accent-bg-color);
+    color: var(--accent-fg-color);
+  }
+
+  // Typographic Scale
+  &.h1, &.title-1 { // Allow both .h1 and .title-1 for flexibility
+    font-size: var(--font-size-h1);
+    font-weight: bold;
+    line-height: 1.3; // Tighter line height for large titles
+  }
+
+  &.h2, &.title-2 {
+    font-size: var(--font-size-h2);
+    font-weight: bold;
+    line-height: 1.3;
+  }
+
+  &.h3, &.title-3 {
+    font-size: var(--font-size-h3);
+    font-weight: bold;
+    line-height: 1.4;
+  }
+
+  &.h4, &.title-4 {
+    font-size: var(--font-size-h4);
+    font-weight: bold; // Often bold, but could be normal for subtitles
+    line-height: 1.4;
+  }
+
+  // Default/Body text style (if .adw-label is used without other classes)
+  // or explicitly with .body
+  &.body {
+    font-size: var(--font-size-base);
+    font-weight: normal; // Ensure body text is normal weight
+  }
+
+  // Small text, often used for captions or secondary information
+  &.small, &.caption {
+    font-size: var(--font-size-small);
+    color: var(--view-fg-color); // Start with base color
+    opacity: 0.75; // Muted appearance for captions
+  }
+
+  // Emphasized text (could be italic or bolder depending on style)
+  &.em {
+    font-style: italic;
+  }
+
+  // Strong text
+  &.strong {
+    font-weight: bold;
+  }
+
+  // Disabled label
+  &.disabled {
+    color: var(--view-fg-color); // Start with base color
+    opacity: var(--opacity-disabled, 0.5);
+    user-select: none; // Non-selectable when disabled
+  }
+
+  // Link-like label
+  &.link {
+    color: var(--link-color);
+    cursor: pointer;
+    text-decoration: none; // Libadwaita links usually don't have underlines by default
+    &:hover {
+      text-decoration: underline; // Underline on hover is common
+    }
+  }
+}
+
+// Ensure dark theme variables are picked up if view-fg-color changes
+.dark-theme .adw-label,
+body.dark-theme .adw-label {
+  color: var(--view-fg-color); // Re-affirm for specificity if needed
+
+  &.small, &.caption {
+    color: var(--view-fg-color);
+    opacity: 0.75; // Opacity works fine on dark theme too
+  }
+
+  &.disabled {
+    color: var(--view-fg-color);
+    opacity: var(--opacity-disabled, 0.5);
+  }
+
+  &.link {
+    color: var(--link-color); // This should be the dark theme link color from variables
+  }
+
+   &::selection {
+    background-color: var(--accent-bg-color); // Should use dark theme accent
+    color: var(--accent-fg-color); // Should use dark theme accent fg
+  }
+}

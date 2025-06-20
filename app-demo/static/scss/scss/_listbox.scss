@@ -1,0 +1,124 @@
+// scss/_listbox.scss
+
+@use 'variables';
+
+.adw-list-box {
+  background-color: var(--view-bg-color); // Or --card-bg-color if used as a card
+  // Use theme-aware border color for the outer border
+  border: var(--border-width, 1px) solid var(--border-color-light);
+  border-radius: var(--border-radius-default);
+  overflow: hidden; // Ensures rows inside respect the border radius
+
+  .adw-row { // Target .adw-row directly as children
+    display: flex;
+    align-items: center;
+    // justify-content: space-between; // If you want to push content to ends
+    padding: var(--spacing-m);
+    // Use theme-aware border color for separators
+    border-bottom: var(--border-width, 1px) solid var(--border-color-light);
+    transition: background-color 0.1s ease-out, color 0.1s ease-out;
+    cursor: default; // Default cursor, change if rows are interactive
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      // Use a subtle hover effect, slightly darker than view-bg or lighter than card-bg
+      // This needs careful variable choice. For now, a generic shade.
+      background-color: var(--shade-color);
+    }
+
+    &.interactive { // Add this class if the row itself is clickable
+        cursor: pointer;
+    }
+
+    &.activatable:hover { // For rows that can be "selected" but aren't yet
+        // A slightly more prominent hover, perhaps using button hover colors
+        background-color: var(--button-hover-bg-color);
+    }
+
+    &.activated,
+    &.selected { // Use .selected as well, common terminology
+      background-color: var(--accent-bg-color);
+      color: var(--accent-fg-color);
+
+      // Ensure text and icons within the activated row are readable
+      .adw-label, .icon, // Assuming you might have .adw-label or .icon classes
+      > * { // Or style all direct children
+        color: var(--accent-fg-color);
+      }
+    }
+
+    &[disabled],
+    &:disabled {
+        opacity: var(--opacity-disabled, 0.5);
+        cursor: not-allowed;
+        background-color: transparent; // Or a specific disabled bg for rows
+        &:hover {
+            background-color: transparent; // No hover effect on disabled rows
+        }
+    }
+
+    // Example: styling for a title and subtitle within a row
+    .title {
+      font-weight: 500; // Bolder title
+      color: var(--view-fg-color); // Default text color
+    }
+    .subtitle {
+      font-size: var(--font-size-small);
+      color: var(--view-fg-color); // Default text color
+      opacity: 0.7; // Muted subtitle
+    }
+    // If row is activated, title/subtitle color should be --accent-fg-color
+    &.activated .title,
+    &.activated .subtitle {
+        color: var(--accent-fg-color);
+        opacity: 1; // Ensure full opacity for subtitle
+    }
+  }
+}
+
+// Dark theme adjustments for ListBox borders
+.dark-theme .adw-list-box,
+body.dark-theme .adw-list-box {
+  border-color: var(--border-color-dark);
+
+  .adw-row { // Target .adw-row
+    border-bottom-color: var(--border-color-dark);
+
+    &:hover {
+      // A subtle hover for dark theme, often a slightly lighter shade of the bg
+      background-color: var(--shade-color); // Ensure this shade is suitable for dark
+    }
+
+    &.activatable:hover {
+        background-color: var(--button-hover-bg-color); // Ensure this is dark theme appropriate
+    }
+
+    // Ensure title/subtitle colors are correct for dark theme if not activated
+    .title {
+      color: var(--view-fg-color);
+    }
+    .subtitle {
+      color: var(--view-fg-color);
+    }
+  }
+}
+
+// Flat style: no outer border, often used when listbox fills a container
+.adw-list-box.flat {
+  border: none;
+  border-radius: 0; // Or keep radius if desired, but typically flat means no outer decoration
+  // Row separators might need to be stronger if no outer border
+  // .adw-row { // Target .adw-row
+  //   border-bottom-color: var(--border-color-light-stronger); // Define if needed
+  // }
+}
+// Dark theme for flat listbox
+.dark-theme .adw-list-box.flat,
+body.dark-theme .adw-list-box.flat {
+  // .adw-row { // Target .adw-row
+  //   border-bottom-color: var(--border-color-dark-stronger); // Define if needed
+  // }
+}

@@ -1,0 +1,81 @@
+// scss/_base.scss
+@use "variables"; // Make sure variables are available
+
+// Apply a natural box layout model to all elements
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%; // Ensure HTML takes full height for full-height body layouts
+  // Prevent font size inflation on mobile devices
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--document-font-family); // Use the correct font family variable
+  font-size: var(--font-size-base);       // Use the correct base font size variable
+  color: var(--window-fg-color);          // Default text color from window variables
+  background-color: var(--window-bg-color); // Default background color from window variables
+  margin: 0; // Remove default body margin
+  min-height: 100vh; // Ensure body takes at least full viewport height
+  line-height: 1.5; // Default line height for readability
+
+  // Font smoothing for better text rendering
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility; // More control over text rendering
+}
+
+// Basic default for links (can be overridden by component styles)
+a {
+  color: var(--link-color); // Use link color variable
+  text-decoration: none; // Libadwaita often has no underline by default
+
+  &:hover {
+    text-decoration: underline; // Underline on hover
+  }
+
+  &:focus-visible { // Accessibility for keyboard navigation
+    outline: 2px solid var(--accent-bg-color);
+    outline-offset: 1px;
+    border-radius: var(--border-radius-small); // Slight rounding on focus outline
+  }
+}
+
+// Remove default list styling
+ul, ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+// Default heading styles (can be overridden by .adw-label title classes)
+h1, h2, h3, h4, h5, h6 {
+  margin: var(--spacing-m) 0; // Basic margin for headings
+  font-weight: bold; // Default to bold
+  line-height: 1.3;  // Tighter line height for headings
+}
+
+h1 { font-size: var(--font-size-h1); }
+h2 { font-size: var(--font-size-h2); }
+h3 { font-size: var(--font-size-h3); }
+h4 { font-size: var(--font-size-h4); }
+// h5, h6 can default to --font-size-base or --font-size-large if not defined in scale
+
+// Improve media defaults
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+// Remove built-in form typography styles
+input, button, textarea, select {
+  font: inherit; // Inherit font from body/parent
+}
+
+// Ensure buttons have a pointer cursor by default (can be overridden)
+button, [role="button"] {
+  cursor: pointer;
+}
