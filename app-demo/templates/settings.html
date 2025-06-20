@@ -47,7 +47,7 @@
 
                 accentContainer.innerHTML = ''; // Clear previous buttons
 
-                const isLightTheme = !document.body.classList.contains('dark-theme');
+                const isLightTheme = document.body.classList.contains('light-theme');
                 const themeSuffix = isLightTheme ? '-light' : '-dark';
 
                 colors.forEach(color => {

@@ -414,6 +414,259 @@ const flatListBox = Adw.createListBox({
         const listBoxCodeDetails = createCodeSampleDetails('Show ListBox Code Examples', listBoxCodeSample);
         // Will be inserted after listBoxContainer
 
+
+        // --- Banners ---
+        const bannersTitle = Adw.createLabel("Banners", { title: 1 });
+        const bannerContainer = Adw.createBox({ orientation: 'vertical', spacing: 's', _meta_id: "banner-container-box" }); // Container for banners to appear
+
+        const showInfoBannerButton = Adw.createButton("Show Info Banner", {
+            onClick: () => {
+                Adw.createAdwBanner("This is an informational message.", {
+                    type: 'info',
+                    dismissible: true,
+                    container: bannerContainer
+                });
+            }
+        });
+        const showSuccessBannerButton = Adw.createButton("Show Success Banner", {
+            suggested: true,
+            onClick: () => {
+                Adw.createAdwBanner("Action was completed successfully!", {
+                    type: 'success',
+                    dismissible: true,
+                    container: bannerContainer
+                });
+            }
+        });
+        const showWarningBannerButton = Adw.createButton("Show Warning Banner", {
+            onClick: () => {
+                Adw.createAdwBanner("Warning: Something might be wrong.", {
+                    type: 'warning',
+                    dismissible: true,
+                    container: bannerContainer
+                });
+            }
+        });
+        const showErrorBannerButton = Adw.createButton("Show Error Banner (Non-Dismissible)", {
+            destructive: true,
+            onClick: () => {
+                Adw.createAdwBanner("Error: Something went wrong. This banner is not dismissible.", {
+                    type: 'error',
+                    dismissible: false,
+                    container: bannerContainer
+                });
+            }
+        });
+
+        const bannerButtonsBox = Adw.createBox({
+            orientation: 'horizontal',
+            spacing: 's',
+            children: [showInfoBannerButton, showSuccessBannerButton, showWarningBannerButton, showErrorBannerButton]
+        });
+        // bannerContainer will be added to content's children, then bannerButtonsBox.
+        // Banners themselves are added to bannerContainer dynamically.
+
+        const bannerCodeSample = `
+// Info Banner (dismissible by default)
+// Banners are prepended to their container.
+const bannerDisplayContainer = Adw.createBox({ orientation: 'vertical', spacing: 's' });
+// yourMainContent.appendChild(bannerDisplayContainer); // Add this container where you want banners
+
+Adw.createAdwBanner("This is an informational message.", {
+    type: 'info',
+    container: bannerDisplayContainer
+});
+
+// Success Banner
+Adw.createAdwBanner("Action was completed successfully!", {
+    type: 'success',
+    dismissible: true,
+    container: bannerDisplayContainer
+});
+
+// Warning Banner
+Adw.createAdwBanner("Warning: Something might be wrong.", {
+    type: 'warning',
+    container: bannerDisplayContainer
+});
+
+// Error Banner (not dismissible)
+Adw.createAdwBanner("Error: Something went wrong.", {
+    type: 'error',
+    dismissible: false,
+    container: bannerDisplayContainer
+});
+        `;
+        const bannerCodeDetails = createCodeSampleDetails('Show Banner Code Examples', bannerCodeSample);
+
+        // --- Spinners ---
+        const spinnersTitle = Adw.createLabel("Spinners", { title: 1 });
+        const spinnerSmall = Adw.createSpinner({ size: 'small' });
+        const spinnerMedium = Adw.createSpinner(); // Default size
+        const spinnerLarge = Adw.createSpinner({ size: 'large' });
+
+        const spinnerBox = Adw.createBox({
+            orientation: 'horizontal',
+            spacing: 'm',
+            align: 'center',
+            children: [
+                Adw.createLabel("Small:"), spinnerSmall,
+                Adw.createLabel("Default:"), spinnerMedium,
+                Adw.createLabel("Large:"), spinnerLarge
+            ]
+        });
+
+        const spinnerCodeSample = `
+// Small Spinner
+const spinnerSmall = Adw.createSpinner({ size: 'small' });
+
+// Default Size Spinner (medium)
+const spinnerMedium = Adw.createSpinner();
+
+// Large Spinner
+const spinnerLarge = Adw.createSpinner({ size: 'large' });
+
+// Add to layout:
+// yourContainer.appendChild(spinnerSmall);
+        `;
+        const spinnerCodeDetails = createCodeSampleDetails('Show Spinner Code Examples', spinnerCodeSample);
+
+        // --- Status Pages ---
+        const statusPagesTitle = Adw.createLabel("Status Pages", { title: 1 });
+        // Re-use an existing SVG icon string from components.js for demo purposes if available, or define a simple one.
+        // const ADW_ICON_INFO_EXAMPLE = \`<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>\`;
+        const statusPageIconSVG = ADW_ICON_VISIBILITY_SHOW; // Using a globally available one for simplicity
+
+        const statusPageDemo1 = Adw.createStatusPage({
+            title: "No Items Found",
+            description: "There are no items to display in this section. Try adjusting your filters or creating a new item.",
+            iconHTML: statusPageIconSVG
+        });
+
+        const statusPageDemo2 = Adw.createStatusPage({
+            title: "Action Required",
+            description: "Please complete the setup process to continue.",
+            iconHTML: statusPageIconSVG, // Using a different icon might be better if available
+            actions: [
+                Adw.createButton("Complete Setup", { suggested: true, onClick: () => Adw.createToast("Setup button clicked!") }),
+                Adw.createButton("Later", { onClick: () => Adw.createToast("Later button clicked!") })
+            ]
+        });
+
+        const statusPageContainer = Adw.createBox({ // Renamed from statusPageBox to avoid conflict if any
+            orientation: 'vertical',
+            spacing: 'l',
+            children: [
+                Adw.createLabel("Basic Status Page:", {title: 4}),
+                statusPageDemo1,
+                Adw.createLabel("Status Page with Actions:", {title: 4}),
+                statusPageDemo2
+            ]
+        });
+
+        const statusPageCodeSample = `
+// Basic Status Page with an SVG icon
+const statusPageIconSVG = '<svg>...</svg>'; // Your SVG string for an icon
+const statusPage1 = Adw.createStatusPage({
+    title: "No Items Found",
+    description: "There are no items to display.",
+    iconHTML: statusPageIconSVG
+});
+
+// Status Page with actions
+const statusPage2 = Adw.createStatusPage({
+    title: "Action Required",
+    description: "Please complete the setup process.",
+    // iconHTML: can be another SVG string
+    actions: [
+        Adw.createButton("Complete Setup", {
+            suggested: true,
+            onClick: () => console.log("Setup clicked")
+        }),
+        Adw.createButton("Later")
+    ]
+});
+
+// Add to layout:
+// yourContainer.appendChild(statusPage1);
+        `;
+        const statusPageCodeDetails = createCodeSampleDetails('Show Status Page Code Examples', statusPageCodeSample);
+
+        // --- Split Buttons ---
+        const splitButtonsTitle = Adw.createLabel("Split Buttons", { title: 1 });
+
+        const splitButtonBasic = Adw.createSplitButton({
+            actionText: "Save",
+            onActionClick: () => Adw.createToast("Save action clicked!"),
+            onDropdownClick: () => Adw.createToast("Dropdown for Save clicked!")
+        });
+
+        const splitButtonSuggested = Adw.createSplitButton({
+            actionText: "Submit",
+            suggested: true,
+            onActionClick: () => Adw.createToast("Submit action clicked!"),
+            onDropdownClick: () => Adw.createToast("Dropdown for Submit clicked!")
+        });
+
+        const splitButtonWithLink = Adw.createSplitButton({
+            actionText: "Open Link",
+            actionHref: "https://www.example.com",
+            onDropdownClick: () => Adw.createToast("Dropdown for Link clicked!")
+        });
+
+        const splitButtonDisabled = Adw.createSplitButton({
+            actionText: "Disabled",
+            disabled: true,
+            onActionClick: () => Adw.createToast("This should not fire."),
+            onDropdownClick: () => Adw.createToast("This should not fire.")
+        });
+
+        const splitButtonBox = Adw.createBox({
+            orientation: 'horizontal',
+            spacing: 'm',
+            align: 'center',
+            children: [
+                splitButtonBasic,
+                splitButtonSuggested,
+                splitButtonWithLink,
+                splitButtonDisabled
+            ]
+        });
+
+        const splitButtonCodeSample = `
+// Basic Split Button
+const sb1 = Adw.createSplitButton({
+    actionText: "Save",
+    onActionClick: () => console.log("Save action!"),
+    onDropdownClick: () => console.log("Save dropdown!")
+});
+
+// Suggested Action Split Button
+const sb2 = Adw.createSplitButton({
+    actionText: "Submit",
+    suggested: true,
+    onActionClick: () => console.log("Submit action!"),
+    onDropdownClick: () => console.log("Submit dropdown!")
+});
+
+// Split Button with Link for Action
+const sb3 = Adw.createSplitButton({
+    actionText: "Open Link",
+    actionHref: "https://example.com",
+    onDropdownClick: () => console.log("Link dropdown!")
+});
+
+// Disabled Split Button
+const sb4 = Adw.createSplitButton({
+    actionText: "Disabled",
+    disabled: true
+});
+
+// Add to layout:
+// yourContainer.appendChild(sb1);
+        `;
+        const splitButtonCodeDetails = createCodeSampleDetails('Show Split Button Code Examples', splitButtonCodeSample);
+
         // --- ViewSwitcher Example ---
         const viewSwitcher = Adw.createViewSwitcher({
             views: [
@@ -499,6 +752,21 @@ const flap = Adw.createFlap({
 
                 Adw.createLabel("Progress Bars", {title:1}),
                 progressBarBox,
+
+                // New Widgets Insertion Point
+                bannersTitle,
+                bannerContainer, // Container where banners will appear
+                bannerButtonsBox, // Buttons to trigger banners
+
+                spinnersTitle,
+                spinnerBox,
+
+                statusPagesTitle,
+                statusPageContainer,
+
+                splitButtonsTitle,
+                splitButtonBox,
+                // End New Widgets Insertion Point
 
                 Adw.createLabel("List Boxes", {title:1}),
                 listBoxContainer, // Contains both listboxes
@@ -633,6 +901,14 @@ const avatarCustomFallback = Adw.createAvatar({
             entryOptions: { placeholder: "Enter username..." }
         });
 
+        const passwordEntryRow1 = Adw.createPasswordEntryRow({
+            title: "Password:",
+            entryOptions: {
+                placeholder: "Enter password...",
+                name: "password_example"
+            }
+        });
+
         const expanderContent = Adw.createBox({ orientation: 'vertical', spacing: 's', children: [
             Adw.createLabel("This is the expanded content."),
             Adw.createButton("A button inside expander")
@@ -670,6 +946,7 @@ const avatarCustomFallback = Adw.createAvatar({
                 actionRowWithIcon,
                 actionRowNoChevron,
                 entryRow1,
+                passwordEntryRow1, // Added PasswordEntryRow instance
                 expanderRow1,
                 expanderRow2,
                 comboRow1,
@@ -697,6 +974,17 @@ const entryRow = Adw.createEntryRow({
     }
 });
 
+// PasswordEntryRow (a row with a title, password input, and visibility toggle)
+const passwordEntryRow = Adw.createPasswordEntryRow({
+    title: "New Password:",
+    entryOptions: { // Options passed to the internal Adw.createEntry
+        placeholder: "Enter new password",
+        name: "new_user_password"
+        // Other attributes like 'required' can be added here.
+    }
+    // labelForEntry: true // Default is true
+});
+
 // ExpanderRow (a row that can expand to show more content)
 const expanderChildContent = Adw.createBox({ children: [Adw.createLabel("Details revealed...")] });
 const expanderRow = Adw.createExpanderRow({
@@ -721,7 +1009,7 @@ const comboRow = Adw.createComboRow({
 });
 
 // These rows are typically added as children to an Adw.ListBox:
-// const listBox = Adw.createListBox({ children: [actionRow, entryRow, expanderRow, comboRow] });
+// const listBox = Adw.createListBox({ children: [actionRow, entryRow, passwordEntryRow, expanderRow, comboRow] });
         `;
         const specializedRowsCodeDetails = createCodeSampleDetails('Show Specialized Row Code Examples', specializedRowsCodeSample);
         // Will be inserted after specializedRowsListBox
@@ -734,6 +1022,26 @@ const comboRow = Adw.createComboRow({
         // --- DOM Manipulations to Insert Code Samples ---
         // Helper to insert details after a specific element.
         function insertDetailsAfter(element, detailsElement) {
+            // New widget code sample insertions
+            if (element === bannerButtonsBox) { // Special handling for banner container
+                if (bannerButtonsBox && bannerButtonsBox.parentElement) {
+                    bannerButtonsBox.parentElement.insertBefore(bannerCodeDetails, bannerButtonsBox.nextSibling);
+                }
+                return; // Avoid inserting twice if logic below also matches
+            }
+            if (element === spinnerBox && spinnerBox.parentElement) {
+                 spinnerBox.parentElement.insertBefore(spinnerCodeDetails, spinnerBox.nextSibling);
+                 return;
+            }
+             if (element === statusPageContainer && statusPageContainer.parentElement) {
+                 statusPageContainer.parentElement.insertBefore(statusPageCodeDetails, statusPageContainer.nextSibling);
+                 return;
+            }
+            if (element === splitButtonBox && splitButtonBox.parentElement) {
+                 splitButtonBox.parentElement.insertBefore(splitButtonCodeDetails, splitButtonBox.nextSibling);
+                 return;
+            }
+
             if (element && element.parentElement) {
                 element.parentElement.insertBefore(detailsElement, element.nextSibling);
             } else {
