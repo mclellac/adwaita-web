@@ -1,4 +1,3 @@
-// scss/_status_page.scss
 @use 'variables';
 
 .adw-status-page {
@@ -7,19 +6,19 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: var(--spacing-xxl) var(--spacing-xl); // Ample padding
-  height: 100%; // Try to fill parent container height
+  padding: var(--spacing-xxl) var(--spacing-xl);
+  height: 100%;
   box-sizing: border-box;
   color: var(--window-fg-color);
 
   .adw-status-page-icon {
-    font-size: 4.5rem; // Large icon
+    font-size: 4.5rem;
     margin-bottom: var(--spacing-l);
-    opacity: 0.7; // Icons are often slightly de-emphasized
+    opacity: 0.7;
   }
 
   .adw-status-page-title {
-    font-size: var(--font-size-h2); // Prominent title
+    font-size: var(--font-size-h2);
     font-weight: bold;
     margin-bottom: var(--spacing-s);
     color: var(--window-fg-color);
@@ -28,15 +27,15 @@
   .adw-status-page-description {
     font-size: var(--font-size-large);
     color: var(--window-fg-color);
-    opacity: 0.7; // Description text is de-emphasized
-    max-width: 450px; // Prevent description from becoming too wide
+    opacity: 0.7;
+    max-width: 450px;
     line-height: 1.5;
     margin-bottom: var(--spacing-xl);
   }
 
   .adw-status-page-actions {
     display: flex;
-    flex-direction: column; // Stack buttons vertically by default
+    flex-direction: column;
     gap: var(--spacing-s);
   }
 }

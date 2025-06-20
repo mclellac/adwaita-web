@@ -1,19 +1,18 @@
-// scss/_action_row.scss
 @use 'variables';
 
 .adw-action-row {
   display: flex;
   align-items: center;
-  padding: var(--spacing-m) var(--spacing-l); // Ample padding for touchability and content
-  background-color: var(--card-bg-color); // Rows often appear on card-like or listbox backgrounds
+  padding: var(--spacing-m) var(--spacing-l);
+  background-color: var(--card-bg-color);
   border-bottom: var(--border-width, 1px) solid var(--border-color-light);
-  min-height: 48px; // A good minimum height for rows
+  min-height: 48px;
 
   // If the row itself is clickable/activatable
   &.activatable {
     cursor: pointer;
     &:hover {
-      background-color: var(--button-hover-bg-color); // Use a subtle hover effect
+      background-color: var(--button-hover-bg-color);
     }
     &:active {
       background-color: var(--button-active-bg-color);
@@ -24,22 +23,20 @@
     margin-right: var(--spacing-m);
     display: flex;
     align-items: center;
-    // e.g., for an icon
-    // .icon { font-size: 1.2em; }
   }
 
   .adw-action-row-content {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center; // Align title/subtitle vertically
-    min-width: 0; // For text ellipsis on title/subtitle
+    justify-content: center;
+    min-width: 0;
   }
 
   .adw-action-row-title {
     font-size: var(--font-size-base);
     color: var(--card-fg-color);
-    font-weight: 500; // Slightly bolder than normal text
+    font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -48,20 +45,18 @@
   .adw-action-row-subtitle {
     font-size: var(--font-size-small);
     color: var(--card-fg-color);
-    opacity: 0.7; // Muted appearance
+    opacity: 0.7;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-top: 2px; // Small space below title
+    margin-top: 2px;
   }
 
   .adw-action-row-suffix {
     margin-left: var(--spacing-m);
     display: flex;
     align-items: center;
-    flex-shrink: 0; // Prevent suffix from shrinking
-    // e.g., for a switch, button, or navigation arrow
-    // > .adw-switch { margin-right: 0; } // Ensure no extra margins if suffix is just one element
+    flex-shrink: 0;
   }
 
   // When used within a listbox, the listbox might handle borders
