@@ -198,6 +198,9 @@
   --border-color-light: rgba(0, 0, 0, 0.12); // For light theme
   --border-color-dark: rgba(255, 255, 255, 0.07); // For dark theme
 
+  // RGB versions for use in rgba()
+  --accent-fg-color-rgb: 255,255,255; // For white text on accent backgrounds
+
   // Accent Color Palette (Raw colors)
   // Naming: --adw-{colorName}-{shade} (shade 1-5, 3 is often a good base)
   // These are just examples, a full Adwaita palette has many more.
