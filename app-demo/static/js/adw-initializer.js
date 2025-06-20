@@ -383,6 +383,40 @@ document.addEventListener('DOMContentLoaded', () => {
     viewSwitcherElement.replaceWith(newViewSwitcher);
   });
 
+  // Handle <adw-split-button>
+  document.querySelectorAll('adw-split-button').forEach(splitButtonElement => {
+    const options = {
+      actionText: splitButtonElement.textContent.trim() || splitButtonElement.getAttribute('action-text'),
+      actionHref: splitButtonElement.getAttribute('action-href'), // Added action-href
+      suggested: splitButtonElement.getAttribute('appearance') === 'suggested',
+      disabled: splitButtonElement.hasAttribute('disabled'),
+      id: splitButtonElement.getAttribute('id'),
+      dropdownAriaLabel: splitButtonElement.getAttribute('dropdown-label') || "More options"
+      // onActionClick and onDropdownClick are not set from attributes here
+    };
+    const originalAttrs = getAttributes(splitButtonElement);
+
+    // If there's a specific element for action text via slot="action-text"
+    const actionTextSlot = collectSlotElements(splitButtonElement, 'action-text');
+    if (actionTextSlot.length > 0 && actionTextSlot[0].textContent) {
+      options.actionText = actionTextSlot[0].textContent.trim();
+    }
+
+    const newSplitButton = window.Adw.createSplitButton(options);
+
+    for (const attrName in originalAttrs) {
+      if (!['action-text', 'action-href', 'appearance', 'disabled', 'id', 'dropdown-label', 'class', 'slot'].includes(attrName) && !newSplitButton.hasAttribute(attrName)) {
+        newSplitButton.setAttribute(attrName, originalAttrs[attrName]);
+      } else if (attrName === 'class') {
+           newSplitButton.classList.add(...originalAttrs[attrName].split(' ').filter(Boolean));
+      }
+    }
+    // Clear original content as it's reconstructed or specified via attributes
+    while (splitButtonElement.firstChild) {
+      splitButtonElement.removeChild(splitButtonElement.firstChild);
+    }
+    splitButtonElement.replaceWith(newSplitButton);
+  });
 
   // --- GENERIC HANDLERS (SHOULD BE LAST OR CAREFUL WITH SPECIFICITY) ---
   const simpleReplaceTags = ['adw-application-window', 'adw-page'];

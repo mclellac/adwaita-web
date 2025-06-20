@@ -5,6 +5,9 @@
 {% block content %}
 <div style="margin-bottom: var(--spacing-xl, 32px);"> {# Provides some top/bottom margin #}
     <h1 class="page-title" style="text-align: center; margin-bottom: var(--spacing-l, 24px); font-size: var(--font-size-xxl, 1.5rem);">All Blog Posts</h1>
+    <div style="text-align: center; margin-bottom: var(--spacing-m);">
+        <adw-spinner size="large" id="index-loading-spinner"></adw-spinner>
+    </div>
 
     {% if posts %}
         <div class="blog-posts-container"> {# More semantic container name #}
@@ -26,9 +29,12 @@
             {% endfor %}
         </div>
     {% else %}
-        <div style="text-align: center; margin-top: var(--spacing-xl);">
-             <p>No posts yet. <adw-button href="{{ url_for('create_post') }}" appearance="suggested">Create a Post</adw-button></p>
-        </div>
+        <adw-status-page title="No Posts Yet" description="Be the first to create a post and share your thoughts!">
+            <div slot="icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">📄</div> {# Using an emoji as a placeholder icon #}
+            <div slot="actions">
+                <adw-button href="{{ url_for('create_post') }}" appearance="suggested">Create a Post</adw-button>
+            </div>
+        </adw-status-page>
     {% endif %}
 </div>
 {% endblock %}
