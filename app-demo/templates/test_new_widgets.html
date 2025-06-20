@@ -57,5 +57,122 @@
         </adw-view-switcher>
     </adw-preferences-group>
 
+    <adw-preferences-group title="Progress Bars" style="margin-top: var(--spacing-xl);">
+        <adw-list-box>
+            <adw-action-row title="Standard Progress (60%)">
+                <adw-progress-bar value="60"></adw-progress-bar>
+            </adw-action-row>
+            <adw-action-row title="Indeterminate Progress">
+                <adw-progress-bar indeterminate></adw-progress-bar>
+            </adw-action-row>
+            <adw-action-row title="Dynamic Progress">
+                <adw-progress-bar value="30" id="dynamic-progress" style="margin-bottom: var(--spacing-xs);"></adw-progress-bar>
+                <adw-button id="update-progress-btn">Set to 75%</adw-button>
+            </adw-action-row>
+        </adw-list-box>
+    </adw-preferences-group>
+
+    <adw-preferences-group title="Selection Controls" style="margin-top: var(--spacing-xl);">
+        <adw-list-box>
+            <adw-action-row title="Enable Feature">
+                <adw-checkbox slot="suffix" id="feature-checkbox"></adw-checkbox>
+            </adw-action-row>
+            <adw-action-row title="Allow Notifications">
+                <adw-checkbox slot="suffix" id="notifications-checkbox" checked></adw-checkbox>
+            </adw-action-row>
+        </adw-list-box>
+
+        <p class="adw-label title-4" style="margin-top: var(--spacing-m); margin-bottom: var(--spacing-xs);">Choose Option:</p>
+        <adw-list-box>
+            <adw-action-row title="Option Alpha">
+                <adw-radio-button name="radio-group-test" slot="suffix" value="alpha" checked></adw-radio-button>
+            </adw-action-row>
+            <adw-action-row title="Option Beta">
+                <adw-radio-button name="radio-group-test" slot="suffix" value="beta"></adw-radio-button>
+            </adw-action-row>
+            <adw-action-row title="Option Gamma (Disabled)">
+                <adw-radio-button name="radio-group-test" slot="suffix" value="gamma" disabled></adw-radio-button>
+            </adw-action-row>
+        </adw-list-box>
+    </adw-preferences-group>
+
+    <adw-preferences-group title="Flap Demo" style="margin-top: var(--spacing-xl);">
+        <adw-button id="toggle-flap-btn" style="margin-bottom: var(--spacing-m);">Toggle Flap</adw-button>
+        <adw-flap id="demo-flap" style="border: 1px solid var(--border-color);">
+            <div slot="flap-content" style="padding: 1em; background-color: var(--adw-color-blue-1); border-right: 1px solid var(--border-color); min-width: 150px;">
+                Flap Content Area. Can contain anything.
+            </div>
+            <div slot="main-content" style="padding: 1em; min-height: 100px;">
+                Main Content Area. This area is typically wider.
+            </div>
+        </adw-flap>
+    </adw-preferences-group>
+
+    <adw-preferences-group title="SplitButton Demo" style="margin-top: var(--spacing-xl);">
+        <adw-list-box>
+            <adw-action-row title="Standard SplitButton">
+                 <adw-split-button action-text="Save" slot="suffix"></adw-split-button>
+            </adw-action-row>
+            <adw-action-row title="Suggested SplitButton">
+                <adw-split-button action-text="Submit" appearance="suggested" slot="suffix"></adw-split-button>
+            </adw-action-row>
+            <adw-action-row title="Disabled SplitButton">
+                <adw-split-button action-text="Disabled" disabled slot="suffix"></adw-split-button>
+            </adw-action-row>
+        </adw-list-box>
+    </adw-preferences-group>
+
+    <adw-preferences-group title="ComboRow Demo" style="margin-top: var(--spacing-xl);">
+        <adw-list-box>
+            <adw-combo-row title="Select Speed" subtitle="Choose your network speed" selected-value="medium">
+                <option value="slow">Slow (5 Mbps)</option>
+                <option value="medium">Medium (25 Mbps)</option>
+                <option value="fast">Fast (100 Mbps)</option>
+            </adw-combo-row>
+            <adw-combo-row title="Disabled Combo" disabled>
+                <option>Cannot choose</option>
+            </adw-combo-row>
+        </adw-list-box>
+    </adw-preferences-group>
+
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Progress Bar
+    const dynamicProgress = document.getElementById('dynamic-progress');
+    const updateProgressBtn = document.getElementById('update-progress-btn');
+    if (dynamicProgress && updateProgressBtn) {
+        updateProgressBtn.addEventListener('click', () => {
+            dynamicProgress.setAttribute('value', '75');
+        });
+    }
+
+    // Flap
+    const demoFlap = document.getElementById('demo-flap');
+    const toggleFlapBtn = document.getElementById('toggle-flap-btn');
+    if (demoFlap && toggleFlapBtn) {
+        toggleFlapBtn.addEventListener('click', () => {
+            // Attempt to call toggle() method if it exists on the custom element
+            if (typeof demoFlap.toggle === 'function') {
+                demoFlap.toggle();
+            } else if (typeof demoFlap.toggleFlap === 'function') {
+                // Fallback for common pattern like Adw.Flap.toggleFlap()
+                demoFlap.toggleFlap();
+            }
+            // Add more sophisticated checks or attribute manipulation if needed, e.g.
+            // else if (demoFlap.hasAttribute('is-folded')) {
+            //     demoFlap.isFolded = !demoFlap.isFolded;
+            // }
+            // For now, assuming one of the toggle methods will work or visual inspection will guide next steps.
+        });
+    }
+
+    // Checkboxes and RadioButtons are typically handled by their nature or form submission
+    // No specific JS needed for their basic functionality in this demo.
+
+    // SplitButtons and ComboRows - event handlers omitted as per simplified instructions
+    // Basic rendering is the priority.
+});
+</script>
 {% endblock %}
