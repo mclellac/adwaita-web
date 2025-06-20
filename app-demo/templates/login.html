@@ -10,25 +10,38 @@
     <form method="post" action="{{ url_for('login') }}" novalidate>
         {{ form.hidden_tag() }} {# CSRF token and other hidden fields #}
 
-        <div class="form-group">
-            {{ form.username.label(for=form.username.id or 'username_field') }}
-            {{ form.username(class_='adw-entry', id=form.username.id or 'username_field', **{'aria-describedby': form.username.id ~ '-errors' if form.username.errors else None}) }}
-            {% if form.username.errors %}
-                <div id="{{ form.username.id or 'username_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                    {% for error in form.username.errors %}<span>{{ error }}</span><br>{% endfor %}
-                </div>
-            {% endif %}
-        </div>
+        <adw-entry-row
+            title="{{ form.username.label.text }}"
+            name="{{ form.username.name }}"
+            id="{{ form.username.id or 'username_field' }}"
+            value="{{ form.username.data or '' }}"
+            placeholder="Enter your username"
+            {% if form.username.flags.required %}required{% endif %}
+            style="margin-bottom: var(--spacing-s);">
+        </adw-entry-row>
+        {% if form.username.errors %}
+            <div id="{{ form.username.id or 'username_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); margin-bottom: var(--spacing-m);">
+                {% for error in form.username.errors %}<span>{{ error }}</span><br>{% endfor %}
+            </div>
+        {% else %}
+            <div style="margin-bottom: var(--spacing-m);"></div> {# Maintain spacing even if no error #}
+        {% endif %}
 
-        <div class="form-group">
-            {{ form.password.label(for=form.password.id or 'password_field') }}
-            {{ form.password(class_='adw-entry', id=form.password.id or 'password_field', **{'aria-describedby': form.password.id ~ '-errors' if form.password.errors else None}) }}
-            {% if form.password.errors %}
-                <div id="{{ form.password.id or 'password_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                    {% for error in form.password.errors %}<span>{{ error }}</span><br>{% endfor %}
-                </div>
-            {% endif %}
-        </div>
+        <adw-password-entry-row
+            title="{{ form.password.label.text }}"
+            name="{{ form.password.name }}"
+            id="{{ form.password.id or 'password_field' }}"
+            placeholder="Enter your password"
+            {% if form.password.flags.required %}required{% endif %}
+            style="margin-bottom: var(--spacing-s);">
+        </adw-password-entry-row>
+        {% if form.password.errors %}
+            <div id="{{ form.password.id or 'password_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); margin-bottom: var(--spacing-m);">
+                {% for error in form.password.errors %}<span>{{ error }}</span><br>{% endfor %}
+            </div>
+        {% else %}
+            <div style="margin-bottom: var(--spacing-m);"></div> {# Maintain spacing even if no error #}
+        {% endif %}
 
         <div class="form-button-container">
              {{ form.submit(class_='adw-button suggested-action') }}
