@@ -428,7 +428,7 @@ def create_app(config_overrides=None):
         return render_template('500.html'), 500
 
     with _app.app_context():
-        # db.create_all() # Temporarily commented out to avoid DB connection issues for static asset testing
+        # db.create_all() # Temporarily commented out to avoid DB connection issues
 
         # if not User.query.first():  # Check if any user exists
         #     _app.logger.info("No users found in the database. Creating default admin user.")
