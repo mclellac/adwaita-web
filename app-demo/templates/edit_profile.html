@@ -41,57 +41,36 @@
             {% endif %}
         </adw-action-row>
 
-        <adw-entry-row
-            title="{{ form.full_name.label.text }}"
-            name="{{ form.full_name.name }}"
-            id="{{ form.full_name.id or 'full_name_field' }}"
-            value="{{ form.full_name.data or '' }}"
-            placeholder="Your full name"
-            {% if form.full_name.flags.required %}required{% endif %}
-            style="margin-bottom: var(--spacing-s); margin-top: var(--spacing-m);"> {# Added margin-top here #}
-        </adw-entry-row>
-        {% if form.full_name.errors %}
-            <div id="{{ form.full_name.id or 'full_name_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); margin-bottom: var(--spacing-m);">
-                {% for error in form.full_name.errors %}<span>{{ error }}</span><br>{% endfor %}
-            </div>
-        {% else %}
-            <div style="margin-bottom: var(--spacing-m);"></div> {# Maintain spacing #}
-        {% endif %}
+        {# New Fields #}
+        <div class="form-group" style="margin-top: var(--spacing-m);">
+            {{ form.full_name.label(class="adw-label") }}
+            {{ form.full_name(class="adw-entry", placeholder="Your full name", style="width: 100%;") }}
+            {% if form.full_name.errors %}
+                <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                    {% for error in form.full_name.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% endif %}
+        </div>
 
-        <adw-entry-row
-            title="{{ form.location.label.text }}"
-            name="{{ form.location.name }}"
-            id="{{ form.location.id or 'location_field' }}"
-            value="{{ form.location.data or '' }}"
-            placeholder="City, Country"
-            {% if form.location.flags.required %}required{% endif %}
-            style="margin-bottom: var(--spacing-s);">
-        </adw-entry-row>
-        {% if form.location.errors %}
-            <div id="{{ form.location.id or 'location_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); margin-bottom: var(--spacing-m);">
-                {% for error in form.location.errors %}<span>{{ error }}</span><br>{% endfor %}
-            </div>
-        {% else %}
-            <div style="margin-bottom: var(--spacing-m);"></div> {# Maintain spacing #}
-        {% endif %}
+        <div class="form-group" style="margin-top: var(--spacing-m);">
+            {{ form.location.label(class="adw-label") }}
+            {{ form.location(class="adw-entry", placeholder="City, Country", style="width: 100%;") }}
+            {% if form.location.errors %}
+                <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                    {% for error in form.location.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% endif %}
+        </div>
 
-        <adw-entry-row
-            title="{{ form.website_url.label.text }}"
-            name="{{ form.website_url.name }}"
-            id="{{ form.website_url.id or 'website_url_field' }}"
-            value="{{ form.website_url.data or '' }}"
-            placeholder="https://yourwebsite.com"
-            type="url"
-            {% if form.website_url.flags.required %}required{% endif %}
-            style="margin-bottom: var(--spacing-s);">
-        </adw-entry-row>
-        {% if form.website_url.errors %}
-            <div id="{{ form.website_url.id or 'website_url_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); margin-bottom: var(--spacing-m);">
-                {% for error in form.website_url.errors %}<span>{{ error }}</span><br>{% endfor %}
-            </div>
-        {% else %}
-            <div style="margin-bottom: var(--spacing-m);"></div> {# Maintain spacing #}
-        {% endif %}
+        <div class="form-group" style="margin-top: var(--spacing-m);">
+            {{ form.website_url.label(class="adw-label") }}
+            {{ form.website_url(class="adw-entry", placeholder="https://yourwebsite.com", style="width: 100%;") }}
+            {% if form.website_url.errors %}
+                <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                    {% for error in form.website_url.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% endif %}
+        </div>
 
         <div class="form-button-container">
             {{ form.submit(class_='adw-button suggested-action', value='Save Profile') }}
