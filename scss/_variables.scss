@@ -333,9 +333,8 @@ body.light-theme {
   // Light theme is applied by adding .light-theme to the body.
   // This block will override the dark theme variables set in :root.
   @include light-theme;
-  // Set initial default accent to blue (light theme version)
-  // This ensures that if JS doesn't run or before it runs, the default accent matches the theme.
-  // JS will then override these if a different accent is chosen via localStorage.
+  // The following are for the default blue accent if JS doesn't override,
+  // making them !important as well for this test.
   --accent-bg-color: var(--accent-blue-light-bg);
   --accent-fg-color: var(--accent-blue-light-fg);
   --accent-color: var(--accent-blue-standalone);
