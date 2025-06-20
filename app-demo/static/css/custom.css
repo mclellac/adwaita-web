@@ -189,6 +189,7 @@ adw-list-box {
 .post-content-display { /* Changed from .post-content to avoid generic conflicts */
     margin-bottom: var(--spacing-xl, 32px);
     line-height: 1.7; /* Slightly more line height for long text */
+    white-space: pre-wrap; /* Added to preserve newlines and spaces */
 }
 
 .post-content-display p {

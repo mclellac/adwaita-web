@@ -1501,8 +1501,158 @@ window.Adw = {
   createComboRow: createAdwComboRow,
   createAvatar: createAdwAvatar,
   createViewSwitcher: createAdwViewSwitcher, // Ensure these are also included
-  createFlap: createAdwFlap
+  createFlap: createAdwFlap,
+  createSpinner: createAdwSpinner, // Added new spinner function
+  createStatusPage: createAdwStatusPage, // Added new status page function
+  createSplitButton: createAdwSplitButton, // Added new split button function
 };
+
+/**
+ * Creates an Adwaita-style Split Button.
+ * @param {object} [options={}] - Configuration options.
+ * @param {string} [options.actionText="Action"] - Text for the main action part.
+ * @param {string} [options.actionHref] - URL for the main action part (makes it an <a> tag).
+ * @param {function} [options.onActionClick] - Click handler for the main action part (if not a link).
+ * @param {function} [options.onDropdownClick] - Click handler for the dropdown part.
+ * @param {boolean} [options.suggested=false] - If true, applies 'suggested-action' style.
+ * @param {boolean} [options.disabled=false] - If true, disables the button.
+ * @param {string} [options.id] - Optional ID for the main wrapper.
+ * @param {string} [options.dropdownAriaLabel="More options"] - ARIA label for the dropdown button.
+ * @returns {HTMLDivElement} The created split button element.
+ */
+function createAdwSplitButton(options = {}) {
+  const opts = options || {};
+  const splitButton = document.createElement("div");
+  splitButton.classList.add("adw-split-button");
+  if (opts.id) {
+    splitButton.id = opts.id;
+  }
+
+  if (opts.suggested) {
+    splitButton.classList.add("suggested-action");
+  }
+  if (opts.disabled) {
+    splitButton.setAttribute("disabled", "");
+    splitButton.setAttribute("aria-disabled", "true");
+  }
+
+  const isActionLink = !!opts.actionHref;
+  const actionPart = document.createElement(isActionLink ? "a" : "button");
+  actionPart.classList.add("adw-split-button-action");
+  actionPart.textContent = opts.actionText || "Action";
+
+  if (isActionLink) {
+    actionPart.href = opts.actionHref;
+    if (opts.disabled) { // Links don't have a native disabled attribute
+        actionPart.classList.add("disabled"); // Custom styling for disabled links
+        actionPart.setAttribute("aria-disabled", "true");
+        actionPart.style.pointerEvents = "none"; // Make it non-clickable
+    }
+  } else {
+    if (typeof opts.onActionClick === 'function' && !opts.disabled) {
+      actionPart.addEventListener("click", opts.onActionClick);
+    }
+    if (opts.disabled) {
+      actionPart.setAttribute("disabled", "");
+    }
+  }
+
+  const dropdownPart = document.createElement("button");
+  dropdownPart.classList.add("adw-split-button-dropdown");
+  dropdownPart.setAttribute("aria-haspopup", "true");
+  dropdownPart.setAttribute("aria-label", opts.dropdownAriaLabel || "More options");
+
+  const arrow = document.createElement("span");
+  arrow.classList.add("adw-split-button-arrow");
+  dropdownPart.appendChild(arrow);
+
+  if (typeof opts.onDropdownClick === 'function' && !opts.disabled) {
+    dropdownPart.addEventListener("click", opts.onDropdownClick);
+  }
+  if (opts.disabled) {
+    dropdownPart.setAttribute("disabled", "");
+  }
+
+  splitButton.appendChild(actionPart);
+  splitButton.appendChild(dropdownPart);
+
+  return splitButton;
+}
+
+/**
+ * Creates an Adwaita-style Status Page.
+ * @param {object} [options={}] - Configuration options.
+ * @param {string} [options.title] - The main title for the status page.
+ * @param {string} [options.description] - The descriptive text.
+ * @param {string} [options.iconHTML] - HTML string for an icon (e.g., SVG).
+ *                                      SECURITY: Ensure trusted/sanitized if user-supplied.
+ * @param {HTMLElement[]} [options.actions] - Array of action elements (e.g., buttons).
+ * @returns {HTMLDivElement} The created status page element.
+ */
+function createAdwStatusPage(options = {}) {
+  const opts = options || {};
+  const statusPage = document.createElement("div");
+  statusPage.classList.add("adw-status-page");
+
+  if (opts.iconHTML) {
+    const iconDiv = document.createElement("div");
+    iconDiv.classList.add("adw-status-page-icon");
+    // SECURITY: User of the framework is responsible for sanitizing HTML.
+    iconDiv.innerHTML = opts.iconHTML;
+    statusPage.appendChild(iconDiv);
+  }
+
+  if (opts.title) {
+    const titleDiv = document.createElement("div");
+    titleDiv.classList.add("adw-status-page-title");
+    titleDiv.textContent = opts.title;
+    statusPage.appendChild(titleDiv);
+  }
+
+  if (opts.description) {
+    const descriptionDiv = document.createElement("div");
+    descriptionDiv.classList.add("adw-status-page-description");
+    descriptionDiv.textContent = opts.description; // textContent is safe for descriptions
+    statusPage.appendChild(descriptionDiv);
+  }
+
+  if (opts.actions && Array.isArray(opts.actions) && opts.actions.length > 0) {
+    const actionsDiv = document.createElement("div");
+    actionsDiv.classList.add("adw-status-page-actions");
+    opts.actions.forEach(action => {
+      if (action instanceof Node) actionsDiv.appendChild(action);
+    });
+    statusPage.appendChild(actionsDiv);
+  }
+  return statusPage;
+}
+
+/**
+ * Creates an Adwaita-style spinner.
+ * @param {object} [options={}] - Configuration options for the spinner.
+ * @param {'small'|'large'} [options.size] - Optional size for the spinner. Default is medium.
+ * @param {string} [options.id] - Optional ID for the spinner element.
+ * @returns {HTMLDivElement} The created spinner element.
+ */
+function createAdwSpinner(options = {}) {
+  const opts = options || {};
+  const spinner = document.createElement("div");
+  spinner.classList.add("adw-spinner");
+  spinner.setAttribute("role", "status"); // Indicate it's a live region for updates (though visual)
+  // Consider adding aria-label if it's a standalone spinner without visible text explaining its purpose.
+  // e.g., spinner.setAttribute("aria-label", "Loading...");
+
+  if (opts.size === 'small') {
+    spinner.classList.add("small");
+  } else if (opts.size === 'large') {
+    spinner.classList.add("large");
+  }
+
+  if (opts.id) {
+    spinner.id = opts.id;
+  }
+  return spinner;
+}
 
 // Ensure loadSavedTheme is called, which now also handles accent color loading.
 window.addEventListener("DOMContentLoaded", loadSavedTheme);
