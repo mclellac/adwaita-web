@@ -1,65 +1,65 @@
 {% extends "base.html" %}
 
-{% block title %}Profile: {{ user_profile.username }} - My Libadwaita Blog{% endblock %}
+{% block title %}Profile: {{ user_profile.username }} - {{ super() }}{% endblock %}
 
 {% block content %}
-<div class="adw-box adw-box-vertical align-center content-clamp" style="max-width: 600px; gap: var(--spacing-m); margin-left: auto; margin-right: auto;"> {# Added auto margins for clamping #}
+<adw-clamp class="profile-view" style="max-width: 800px; margin: 20px auto;">
+    <adw-box orientation="vertical" style="padding: var(--spacing-xl); gap: var(--spacing-xl);">
 
-        {# Avatar Display - Copied from previous version, centering via inline style is fine here #}
-        {% if user_profile.profile_photo_url %}
-            <span class="adw-avatar size-large" style="margin-bottom: var(--spacing-m); display: block; margin-left: auto; margin-right: auto;">
-                <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ user_profile.username }}'s avatar" class="avatar-image">
-            </span>
-        {% else %}
-            <span class="adw-avatar size-large" style="margin-bottom: var(--spacing-m); display: block; margin-left: auto; margin-right: auto;">
-                <span class="adw-avatar-text" style="font-size: 24px; line-height: 72px;">
-                    {% set name_parts = user_profile.username.split() %}
-                    {% if name_parts|length >= 2 %}
-                        {{ name_parts[0][0]|upper }}{{ name_parts[1][0]|upper }}
-                    {% elif user_profile.username %}
-                        {{ user_profile.username[0:2]|upper }}
-                    {% else %}
-                        ??
-                    {% endif %}
-                </span>
-            </span>
-        {% endif %}
-
-        <div class="adw-row" style="width: 100%;">
-            <strong class="adw-label" style="margin-right: var(--spacing-s);">Username:</strong> <span class="adw-label">{{ user_profile.username }}</span>
+        {# User Header Info #}
+        <div style="display: flex; align-items: center; gap: var(--spacing-xl); margin-bottom: var(--spacing-lg);">
+            <adw-avatar
+                size="96"
+                image="{{ url_for('static', filename=user_profile.profile_photo_url) if user_profile.profile_photo_url else url_for('static', filename='img/default_avatar.png') }}"
+                alt="{{ user_profile.username }}'s avatar">
+                {# Fallback text avatar if image fails to load or default_avatar.png is missing can be done via adw-avatar's text property if image is null #}
+            </adw-avatar>
+            <div>
+                <h1 style="font-size: var(--font-size-xxxl); margin-bottom: var(--spacing-xxs);">{{ user_profile.full_name or user_profile.username }}</h1>
+                <p style="font-size: var(--font-size-lg); color: var(--secondary-text-color);">@{{ user_profile.username }}</p>
+            </div>
         </div>
 
-        {% if user_profile.full_name %}
-        <div class="adw-row" style="width: 100%;">
-            <strong class="adw-label" style="margin-right: var(--spacing-s);">Full Name:</strong> <span class="adw-label">{{ user_profile.full_name }}</span>
+        {# Profile Details Group #}
+        <adw-preferences-group title="About">
+            {% if user_profile.profile_info %}
+            <adw-expander-row title="Bio" subtitle="View user's biography">
+                <div slot="rows" style="padding: var(--spacing-m) var(--spacing-s); color: var(--text-color);">
+                    {{ user_profile.profile_info | safe }} {# Assuming profile_info is plain text or safe HTML #}
+                </div>
+            </adw-expander-row>
+            {% else %}
+            <adw-action-row title="Bio" subtitle="No bio provided."></adw-action-row>
+            {% endif %}
+
+            <adw-action-row
+                title="Profile Privacy"
+                subtitle="{{ 'Public' if user_profile.is_profile_public else 'Private (Only visible to logged-in users)' }}">
+            </adw-action-row>
+
+            {% if user_profile.location %}
+            <adw-action-row title="Location" subtitle="{{ user_profile.location }}"></adw-action-row>
+            {% endif %}
+
+            {% if user_profile.website_url %}
+            {# Making sure URL is valid before making it a link #}
+            {% if user_profile.website_url.startswith('http://') or user_profile.website_url.startswith('https://') %}
+                <adw-action-row title="Website" subtitle="{{ user_profile.website_url }}" href="{{ user_profile.website_url }}" target="_blank"></adw-action-row>
+            {% else %}
+                <adw-action-row title="Website" subtitle="{{ user_profile.website_url }} (Not a valid link)"></adw-action-row>
+            {% endif %}
+            {% endif %}
+        </adw-preferences-group>
+
+        {# Edit Profile Button #}
+        {% if current_user == user_profile %}
+        <div style="margin-top: var(--spacing-m); display: flex; justify-content: flex-start;">
+            <a href="{{ url_for('edit_profile') }}" class="adw-button suggested-action">Edit Profile</a>
         </div>
         {% endif %}
 
-        {% if user_profile.location %}
-        <div class="adw-row" style="width: 100%;">
-            <strong class="adw-label" style="margin-right: var(--spacing-s);">Location:</strong> <span class="adw-label">{{ user_profile.location }}</span>
-        </div>
-        {% endif %}
-
-        {% if user_profile.website_url %}
-        <div class="adw-row" style="width: 100%;">
-            <strong class="adw-label" style="margin-right: var(--spacing-s);">Website:</strong>
-            <a href="{{ user_profile.website_url }}" target="_blank" rel="noopener noreferrer" class="adw-label link">{{ user_profile.website_url }}</a>
-        </div>
-        {% endif %}
-
-        {# Using adw-expander-row for potentially long profile information #}
-        <adw-expander-row title="Profile Information" subtitle="View user's bio" style="width: 100%;">
-            <p style="padding-top: var(--spacing-s);">{{ user_profile.profile_info if user_profile.profile_info else 'No profile information provided.' }}</p>
-        </adw-expander-row>
-
-        {% if current_user and current_user.username == user_profile.username %}
-        <div style="margin-top: var(--spacing-m);"> {# Added a div for spacing for the button #}
-            <adw-button appearance="suggested" href="{{ url_for('edit_profile') }}">Edit Profile</adw-button>
-        </div>
-        {% endif %}
-
-        <h2 style="margin-top: var(--spacing-l); width: 100%; text-align: center;">Posts by {{ user_profile.username }}</h2>
+        {# User Posts Section #}
+        <adw-preferences-group title="Posts by {{ user_profile.username }}">
             {% if posts_pagination and posts_pagination.items %}
                 <adw-list-box style="width: 100%;">
                     {% for post in posts_pagination.items %}
@@ -72,41 +72,48 @@
                 </adw-list-box>
 
                 {# Pagination Controls #}
+                {% if posts_pagination.pages > 1 %}
                 <div class="pagination-controls adw-box adw-box-horizontal align-center justify-center" style="margin-top: var(--spacing-m); gap: var(--spacing-s);">
                     {% if posts_pagination.has_prev %}
                         <a href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.prev_num) }}" class="adw-button">
                             <span class="adw-button-content">
-                                <span class="adw-button-icon adw-icon-start">arrow_back</span> Previous
+                                <adw-icon name="go-previous-symbolic" style="font-size: 1em; margin-right: var(--spacing-xs);"></adw-icon> Previous
                             </span>
                         </a>
                     {% else %}
                         <adw-button disabled>
                              <span class="adw-button-content">
-                                <span class="adw-button-icon adw-icon-start">arrow_back</span> Previous
+                                <adw-icon name="go-previous-symbolic" style="font-size: 1em; margin-right: var(--spacing-xs);"></adw-icon> Previous
                             </span>
                         </adw-button>
                     {% endif %}
 
-                    <span class="adw-label">Page {{ posts_pagination.page }} of {{ posts_pagination.pages }}.</span>
+                    <span class="adw-label" style="font-size: var(--font-size-small);">Page {{ posts_pagination.page }} of {{ posts_pagination.pages }}.</span>
 
                     {% if posts_pagination.has_next %}
                          <a href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.next_num) }}" class="adw-button">
                             <span class="adw-button-content">
-                                Next <span class="adw-button-icon adw-icon-end">arrow_forward</span>
+                                Next <adw-icon name="go-next-symbolic" style="font-size: 1em; margin-left: var(--spacing-xs);"></adw-icon>
                             </span>
                         </a>
                     {% else %}
                         <adw-button disabled>
                             <span class="adw-button-content">
-                                Next <span class="adw-button-icon adw-icon-end">arrow_forward</span>
+                                Next <adw-icon name="go-next-symbolic" style="font-size: 1em; margin-left: var(--spacing-xs);"></adw-icon>
                             </span>
                         </adw-button>
                     {% endif %}
                 </div>
+                {% endif %}
             {% else %}
-                <adw-status-page title="No Posts Yet" description="{{ user_profile.username }} has not made any posts.">
-                    <div slot="icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">📝</div>
+                <adw-status-page title="No Posts Yet" description="{{ user_profile.username }} has not made any posts." style="padding: var(--spacing-xl) 0;">
+                    {# Using a more standard icon name if available, or keeping text/emoji #}
+                    <div slot="icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">
+                        <adw-icon name="document-new-symbolic" style="font-size: inherit;"></adw-icon>
+                    </div>
                 </adw-status-page>
             {% endif %}
-    </div>
+        </adw-preferences-group>
+    </adw-box>
+</adw-clamp>
 {% endblock %}

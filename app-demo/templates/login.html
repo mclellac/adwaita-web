@@ -1,38 +1,44 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
+
 {% block content %}
-<div class="main-content-clamped">
-    <h2>Login</h2>
-    {% if error %}
-        {# Flash messages will handle general errors like 'Invalid username or password' #}
-        {# Specific field errors will be shown below the fields #}
-    {% endif %}
-    <form method="post" action="{{ url_for('login') }}" novalidate>
-        {{ form.hidden_tag() }} {# CSRF token and other hidden fields #}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding-top: var(--spacing-xxl); padding-bottom: var(--spacing-xxl);"> {# Adjusted min-height and added padding #}
+  <adw-box style="width: 400px; padding: var(--spacing-xl); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-lg);"> {# Used Adwaita vars for styling #}
+    <h2 style="text-align: center; font-size: var(--font-size-xxl); margin-bottom: var(--spacing-lg);">Login</h2>
 
-        <div class="form-group">
-            {{ form.username.label(for=form.username.id or 'username_field') }}
-            {{ form.username(class_='adw-entry', id=form.username.id or 'username_field', **{'aria-describedby': form.username.id ~ '-errors' if form.username.errors else None}) }}
-            {% if form.username.errors %}
-                <div id="{{ form.username.id or 'username_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                    {% for error in form.username.errors %}<span>{{ error }}</span><br>{% endfor %}
-                </div>
-            {% endif %}
-        </div>
+    {# Flashed messages will be handled by base.html's script #}
+    {# The script in base.html looks for this block to generate toasts/banners #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {# This block itself doesn't render anything visible here #}
+      {# It just makes `messages` available to the base.html script #}
+    {% endwith %}
 
-        <div class="form-group">
-            {{ form.password.label(for=form.password.id or 'password_field') }}
-            {{ form.password(class_='adw-entry', id=form.password.id or 'password_field', **{'aria-describedby': form.password.id ~ '-errors' if form.password.errors else None}) }}
-            {% if form.password.errors %}
-                <div id="{{ form.password.id or 'password_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                    {% for error in form.password.errors %}<span>{{ error }}</span><br>{% endfor %}
-                </div>
-            {% endif %}
-        </div>
+    <form method="POST" action=""> {# Action set to "" to post to the current URL #}
+      {{ form.hidden_tag() }} {# CSRF token and other hidden fields #}
 
-        <div class="form-button-container">
-             {{ form.submit(class_='adw-button suggested-action') }}
-        </div>
+      <adw-entry-row
+        title="Username"
+        name="username"
+        required="true"
+        value="{{ form.username.data if form and form.username.data is not none else request.form.username or '' }}"
+        style="margin-bottom: var(--spacing-md);">
+      </adw-entry-row>
+
+      <adw-password-entry-row
+        title="Password"
+        name="password"
+        required="true"
+        style="margin-bottom: var(--spacing-xl);"> {# Increased bottom margin before button #}
+      </adw-password-entry-row>
+
+      <adw-button
+        appearance="suggested-action"
+        type="submit"
+        wide="true"
+        style="width: 100%; padding: var(--spacing-sm) 0; font-size: var(--font-size-lg);"> {# Added padding and font-size #}
+        Login
+      </adw-button>
     </form>
+  </adw-box>
 </div>
 {% endblock %}

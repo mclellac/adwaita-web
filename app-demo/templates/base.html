@@ -8,7 +8,15 @@
         <script src="{{ url_for('static', filename='js/components.js') }}"></script>
     <script src="{{ url_for('static', filename='js/adw-initializer.js') }}" defer></script>
 </head>
-<body class="light-theme"> {# Or adw-colorscheme-dark #}
+<body
+  {% if current_user and current_user.is_authenticated %}
+    data-server-theme="{{ current_user.theme or 'system' }}"
+    data-server-accent-color="{{ current_user.accent_color or 'default' }}"
+  {% else %}
+    data-server-theme="system"
+    data-server-accent-color="default"
+  {% endif %}
+>
     <adw-application-window>
         <adw-header-bar>
             <adw-window-title slot="title">Blog CMS</adw-window-title>
@@ -100,5 +108,6 @@
             </div>
         </main>
     </adw-application-window>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

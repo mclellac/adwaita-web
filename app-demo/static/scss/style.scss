@@ -3,6 +3,9 @@
 // 1. Variables - Must be first
 @use "variables";
 
+// Theme definitions (CSS custom properties for light/dark/accent)
+@use "theme";
+
 // 2. Base styles - Global resets, body, typography defaults
 @use "base";
 
