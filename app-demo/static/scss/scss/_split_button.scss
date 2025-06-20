@@ -1,0 +1,120 @@
+@use 'variables';
+
+.adw-split-button {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: var(--border-radius-default);
+
+  background-color: var(--button-bg-color);
+  border: var(--border-width, 1px) solid var(--button-border-color);
+  font-size: var(--font-size-base);
+  color: var(--button-fg-color);
+  box-shadow: none;
+
+  &:focus-within {
+    outline: 2px solid var(--accent-bg-color);
+    outline-offset: 2px;
+  }
+
+  .adw-split-button-action {
+    padding: var(--spacing-s) var(--spacing-m);
+    cursor: pointer;
+    text-align: center;
+    flex-grow: 1;
+    border-right: var(--border-width, 1px) solid var(--button-border-color);
+    border-radius: var(--border-radius-default) 0 0 var(--border-radius-default);
+    transition: background-color 0.1s ease-out;
+    color: inherit;
+
+    &:hover {
+      background-color: var(--button-hover-bg-color);
+    }
+    &:active {
+      background-color: var(--button-active-bg-color);
+    }
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  .adw-split-button-dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-s) var(--spacing-xs);
+    cursor: pointer;
+    border-radius: 0 var(--border-radius-default) var(--border-radius-default) 0;
+    transition: background-color 0.1s ease-out;
+    color: inherit;
+
+    .adw-split-button-arrow {
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 4px solid currentColor;
+    }
+
+    &:hover {
+      background-color: var(--button-hover-bg-color);
+    }
+    &:active {
+      background-color: var(--button-active-bg-color);
+    }
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  // Suggested action variant - applies to the whole button
+  &.suggested-action {
+    background-color: var(--accent-bg-color);
+    color: var(--accent-fg-color);
+    border-color: transparent;
+
+    .adw-split-button-action {
+      border-right-color: transparent;
+      &:hover {
+        background-color: rgba(255,255,255, 0.1); // Assuming accent-fg-color is white
+      }
+      &:active {
+        background-color: rgba(255,255,255, 0.2); // Assuming accent-fg-color is white
+      }
+    }
+    .adw-split-button-dropdown {
+      &:hover {
+        background-color: rgba(255,255,255, 0.1); // Assuming accent-fg-color is white
+      }
+      &:active {
+        background-color: rgba(255,255,255, 0.2); // Assuming accent-fg-color is white
+      }
+      .adw-split-button-arrow{
+         border-top-color: var(--accent-fg-color); // This should work as it's a color property
+      }
+    }
+  }
+
+  // Disabled state
+  &[disabled],
+  &:disabled {
+    background-color: var(--button-bg-color);
+    color: var(--button-fg-color);
+    border-color: var(--button-border-color);
+    opacity: var(--opacity-disabled, 0.5);
+    cursor: not-allowed;
+    pointer-events: none;
+
+    .adw-split-button-action,
+    .adw-split-button-dropdown {
+      pointer-events: none;
+    }
+    &.suggested-action {
+        background-color: var(--accent-bg-color);
+        color: var(--accent-fg-color);
+        border-color: transparent;
+        .adw-split-button-action {
+            border-right-color: transparent; // Also make this transparent for disabled suggested
+        }
+    }
+  }
+}

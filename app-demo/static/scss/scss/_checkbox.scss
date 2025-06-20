@@ -1,0 +1,91 @@
+@use 'variables';
+
+.adw-checkbox {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  gap: var(--spacing-s);
+
+  input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .adw-checkbox-indicator {
+      background-color: var(--accent-bg-color);
+      border-color: var(--accent-bg-color);
+
+      &:before {
+        content: "";
+        display: block;
+        width: 5px;
+        height: 9px;
+        border-style: solid;
+        border-color: var(--accent-fg-color);
+        border-width: 0 2px 2px 0;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -60%) rotate(45deg);
+      }
+    }
+
+    &:disabled + .adw-checkbox-indicator {
+      background-color: var(--shade-color);
+      border-color: var(--border-color-light);
+      opacity: var(--opacity-disabled, 0.5);
+      cursor: not-allowed;
+    }
+
+    &:disabled:checked + .adw-checkbox-indicator {
+        background-color: var(--accent-bg-color);
+        border-color: var(--accent-bg-color);
+        opacity: var(--opacity-disabled, 0.5);
+         &:before {
+            border-color: var(--accent-fg-color);
+         }
+    }
+
+    &:focus-visible + .adw-checkbox-indicator {
+      outline: 2px solid var(--accent-bg-color);
+      outline-offset: 2px;
+    }
+  }
+
+  .adw-checkbox-indicator {
+    width: 18px;
+    height: 18px;
+    border-width: var(--border-width, 1px);
+    border-style: solid;
+    border-color: var(--border-color-light);
+    border-radius: var(--border-radius-small); // Checkboxes are usually less rounded than buttons
+    background-color: var(--view-bg-color);
+    // margin-right: var(--spacing-s); // Replaced by gap on parent
+    position: relative;
+    transition: background-color 0.1s ease-out, border-color 0.1s ease-out;
+    flex-shrink: 0;
+  }
+
+  .adw-checkbox-label {
+    color: var(--view-fg-color);
+    line-height: 1.2;
+  }
+}
+
+.dark-theme .adw-checkbox,
+body.dark-theme .adw-checkbox {
+  input[type="checkbox"] {
+    &:disabled + .adw-checkbox-indicator {
+      border-color: var(--border-color-dark);
+    }
+  }
+  .adw-checkbox-indicator {
+    border-color: var(--border-color-dark);
+    background-color: var(--view-bg-color);
+  }
+  .adw-checkbox-label {
+    color: var(--view-fg-color);
+  }
+}

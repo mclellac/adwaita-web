@@ -1,0 +1,62 @@
+@use 'variables';
+
+.adw-expander-row {
+  // Uses .adw-action-row as its base for the main row part
+  // So, no need to redefine title, subtitle, prefix, basic layout here.
+  // We only add styles for the expander arrow and the content area.
+
+  // Styling for the header part of the expander row (which is an action row)
+  // to ensure it's clickable and shows the arrow correctly.
+  > .adw-action-row {
+    cursor: pointer;
+    position: relative;
+
+    // Arrow styling (simple CSS triangle)
+    .adw-expander-row-arrow {
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid var(--window-fg-color);
+      transition: transform 0.15s ease-in-out;
+      margin-left: var(--spacing-s);
+      opacity: 0.7;
+    }
+
+    &.expanded .adw-expander-row-arrow {
+      transform: rotate(90deg);
+    }
+  }
+
+  // If the arrow is part of the suffix in the action row:
+  > .adw-action-row .adw-action-row-suffix .adw-expander-row-arrow {
+     margin-left: 0;
+  }
+
+
+  .adw-expander-row-content-area {
+    padding: var(--spacing-m) var(--spacing-l);
+    padding-left: calc(var(--spacing-l) + var(--spacing-m) + 5px); // Indent content (approx icon width + margin)
+                                                              // Adjust if using prefix icons of known width
+    background-color: var(--shade-color);
+    border-bottom: var(--border-width, 1px) solid var(--border-color-light);
+    display: none;
+
+    &.visible {
+      display: block;
+    }
+  }
+
+   &:last-child > .adw-expander-row-content-area {
+        border-bottom-left-radius: var(--border-radius-default);
+        border-bottom-right-radius: var(--border-radius-default);
+   }
+}
+
+// Dark theme adjustments
+.dark-theme .adw-expander-row,
+body.dark-theme .adw-expander-row {
+  .adw-expander-row-content-area {
+    border-bottom-color: var(--border-color-dark);
+  }
+}

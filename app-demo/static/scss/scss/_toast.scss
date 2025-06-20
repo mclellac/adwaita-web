@@ -1,0 +1,36 @@
+@use 'variables';
+
+.adw-toast {
+  background-color: var(--toast-bg-color, #303030); // Fallback if variables not loaded
+  color: var(--toast-fg-color, #ffffff); // Fallback
+  border-radius: var(--border-radius-default);
+  padding: var(--spacing-m);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  min-width: 288px;
+  max-width: 568px;
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+  &.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+  }
+
+    &.fade-out{
+        opacity: 0;
+        transform: translateX(-50%) translateY(100%);
+    }
+
+  &.adw-toast-success {
+    border-left: 4px solid var(--accent-green-standalone);
+  }
+
+  &.adw-toast-info {
+    border-left: 4px solid var(--accent-blue-standalone);
+  }
+}

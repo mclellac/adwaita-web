@@ -1,0 +1,101 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 127.0.0.1:5000...
+* Connected to 127.0.0.1 (127.0.0.1) port 5000
+> GET /settings HTTP/1.1
+> Host: 127.0.0.1:5000
+> User-Agent: curl/8.5.0
+> Accept: */*
+>
+< HTTP/1.1 302 FOUND
+< Server: Werkzeug/3.1.3 Python/3.12.11
+< Date: Fri, 20 Jun 2025 17:01:17 GMT
+< Content-Type: text/html; charset=utf-8
+< Content-Length: 233
+< Location: /login?next=%2Fsettings
+< Vary: Cookie
+< Set-Cookie: session=eyJfZmxhc2hlcyI6W3siIHQiOlsibWVzc2FnZSIsIlBsZWFzZSBsb2cgaW4gdG8gYWNjZXNzIHRoaXMgcGFnZS4iXX1dfQ.aFWT3Q.mJvlJiwJqBkmIb2z8XjwS58MwlA; HttpOnly; Path=/
+< Connection: close
+<
+  0   233    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+* Closing connection
+* Issue another request to this URL: 'http://127.0.0.1:5000/login?next=%2Fsettings'
+* Hostname 127.0.0.1 was found in DNS cache
+*   Trying 127.0.0.1:5000...
+* Connected to 127.0.0.1 (127.0.0.1) port 5000
+> GET /login?next=%2Fsettings HTTP/1.1
+> Host: 127.0.0.1:5000
+> User-Agent: curl/8.5.0
+> Accept: */*
+>
+< HTTP/1.1 200 OK
+< Server: Werkzeug/3.1.3 Python/3.12.11
+< Date: Fri, 20 Jun 2025 17:01:17 GMT
+< Content-Type: text/html; charset=utf-8
+< Content-Length: 2010
+< Vary: Cookie
+< Set-Cookie: session=eyJjc3JmX3Rva2VuIjoiNDYxZDI5MzgwMDc1NGNlNGI3ZWQxNWQ1MjkxNDA2ZGZkNmRkMzA3MCJ9.aFWT3Q.UzE5hLiiaZmFPcN3u4wWv12GbDo; HttpOnly; Path=/
+< Connection: close
+<
+{ [2010 bytes data]
+100  2010  100  2010    0     0  57560      0 --:--:-- --:--:-- --:--:-- 57560
+* Closing connection
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/static/css/adwaita-web.css">
+        <script src="/static/js/components.js"></script>
+    <script src="/static/js/adw-initializer.js" defer></script>
+</head>
+<body class="light-theme">
+    <adw-application-window>
+        <adw-header-bar>
+            <adw-window-title slot="title">Blog CMS</adw-window-title>
+            <a href="/" class="adw-button" slot="start">Home</a>
+
+
+            <a href="/login" class="adw-button" slot="end">Login</a>
+
+        </adw-header-bar>
+        <main class="adw-page">
+            <div id="flash-banner-container" style="position: sticky; top: 0; z-index: 1050; padding: var(--spacing-s) 0;">
+
+            </div>
+
+
+
+
+            <div class="main-content-clamped">
+
+<div class="main-content-clamped">
+    <h2>Login</h2>
+
+    <form method="post" action="/login" novalidate>
+        <input id="csrf_token" name="csrf_token" type="hidden" value="IjQ2MWQyOTM4MDA3NTRjZTRiN2VkMTVkNTI5MTQwNmRmZDZkZDMwNzAi.aFWT3Q.B7Nxej8r9XCmGKxL7gXzA-UACYw">
+
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input aria-describedby="None" class="adw-entry" id="username" name="username" required type="text" value="">
+
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input aria-describedby="None" class="adw-entry" id="password" name="password" required type="password" value="">
+
+        </div>
+
+        <div class="form-button-container">
+             <input class="adw-button suggested-action" id="submit" name="submit" type="submit" value="Login">
+        </div>
+    </form>
+</div>
+
+            </div>
+        </main>
+    </adw-application-window>
+</body>
+</html>
