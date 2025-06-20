@@ -1,95 +1,131 @@
-// Adwaita-like color palette
-// Light Theme
-@mixin light-theme {
-  --accent-bg-color: var(--accent-blue-light-bg);
-  --accent-fg-color: var(--accent-blue-light-fg);
-  --accent-color: var(--accent-blue-standalone);
-  --destructive-bg-color: var(--accent-red-light-bg);
-  --destructive-fg-color: var(--accent-red-light-fg);
-  --destructive-color: var(--accent-red-standalone);
-
-  // Banner colors for light theme
-  --info-bg-color: var(--info-bg-color-light);
-  --info-fg-color: var(--info-fg-color-light);
-  --info-border-color: var(--info-border-color-light);
-  --success-bg-color: var(--success-bg-color-light);
-  --success-fg-color: var(--success-fg-color-light);
-  --success-border-color: var(--success-border-color-light);
-  --success-color: var(--accent-green-standalone);
-  --warning-bg-color: var(--warning-bg-color-light);
-  --warning-fg-color: var(--warning-fg-color-light);
-  --warning-border-color: var(--warning-border-color-light);
-  --warning-color: var(--accent-yellow-standalone);
-  --error-bg-color: var(--error-bg-color-light);
-  --error-fg-color: var(--error-fg-color-light);
-  --error-border-color: var(--error-border-color-light);
-  --error-color: var(--accent-red-standalone);
-
-  --window-bg-color: #f6f5f4;
-  --window-fg-color: rgba(0, 0, 0, 0.8);
-  --view-bg-color: #ffffff;
-  --view-fg-color: rgba(0, 0, 0, 0.8);
-
-  --headerbar-bg-color: #ebeae9;
-  --headerbar-fg-color: rgba(0, 0, 0, 0.8);
-  --headerbar-border-color: rgba(0, 0, 0, 0.12);
-  --headerbar-backdrop-color: var(--window-bg-color);
-  --headerbar-shade-color: rgba(0, 0, 0, 0.07); // For box-shadow
-
-  --card-bg-color: #ffffff;
-  --card-fg-color: rgba(0, 0, 0, 0.8);
-  --card-shade-color: rgba(0, 0, 0, 0.07); // For box-shadow
-
-  --popover-bg-color: #ffffff;
-  --popover-fg-color: rgba(0, 0, 0, 0.8);
-  --popover-shade-color: rgba(0, 0, 0, 0.07); // For box-shadow
-
-  --button-bg-color: #ebeae9;
-  --button-fg-color: rgba(0, 0, 0, 0.8);
-  --button-border-color: rgba(0, 0, 0, 0.12);
-  --button-hover-bg-color: #deddda;
-  --button-active-bg-color: #d1cfce;
-
-  --button-flat-bg-color: transparent;
-  --button-flat-hover-bg-color: rgba(0, 0, 0, 0.05);
-  --button-flat-active-bg-color: rgba(0, 0, 0, 0.1);
-
-  --sidebar-bg-color: #f0efee;
-  --sidebar-fg-color: rgba(0,0,0,0.8);
-  --sidebar-border-color: rgba(0,0,0,0.12);
-  --sidebar-shade-color: rgba(0, 0, 0, 0.07);
-
-  --secondary-sidebar-bg-color: #e4e3e2; // Slightly darker than sidebar
-  --secondary-sidebar-fg-color: rgba(0,0,0,0.8);
-  --secondary-sidebar-border-color: rgba(0,0,0,0.12);
-  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.07);
-
-  --dialog-bg-color: #fdfcfb; // Slightly lighter than window
-  --dialog-fg-color: rgba(0, 0, 0, 0.8);
-
-  --thumbnail-bg-color: #ffffff; // Usually white
-  --thumbnail-fg-color: rgba(0, 0, 0, 0.8);
-
-  --shade-color: rgba(0, 0, 0, 0.07); // General purpose shade/shadow
-  --scrollbar-outline-color: #ffffff;
-  --link-color: var(--accent-bg-color);
-  --link-visited-color: #5a5a5a; // Standard visited link color
-
-  // Progress Bar
-  --progress-bar-track-color: var(--shade-color);
-  --progress-bar-fill-color: var(--accent-bg-color);
+@charset "UTF-8";
+:root {
+  --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
+  --font-size-base: 10pt;
+  --font-size-small: 8pt;
+  --font-size-large: 12pt;
+  --font-size-h1: 18pt;
+  --font-size-h2: 16pt;
+  --font-size-h3: 14pt;
+  --font-size-h4: 12pt;
+  --border-radius-small: 3px;
+  --border-radius-default: 6px;
+  --border-radius-large: 12px;
+  --window-radius: var(--border-radius-large);
+  --spacing-xxs: 3px;
+  --spacing-xs: 6px;
+  --spacing-s: 9px;
+  --spacing-m: 12px;
+  --spacing-l: 18px;
+  --spacing-xl: 24px;
+  --spacing-xxl: 36px;
+  --opacity-disabled: 0.5;
+  --opacity-hover: 0.8;
+  --opacity-active: 0.6;
+  --border-color-light: rgba(0, 0, 0, 0.12);
+  --border-color-dark: rgba(255, 255, 255, 0.07);
+  --adw-blue-1: #d3e5f7;
+  --adw-blue-3: #3584e4;
+  --adw-blue-5: #1a5fb4;
+  --adw-green-1: #d2f0d4;
+  --adw-green-3: #2ec27e;
+  --adw-green-5: #1b7749;
+  --adw-yellow-1: #fef4d5;
+  --adw-yellow-3: #f8c443;
+  --adw-yellow-5: #b07d0d;
+  --adw-red-1: #f7d4d4;
+  --adw-red-3: #e01b24;
+  --adw-red-5: #a50e17;
+  --adw-blue-4-dark: #2a70c9;
+  --adw-green-4-dark: #218358;
+  --adw-yellow-4-dark: #b07d0d;
+  --adw-red-4-dark: #a50e17;
+  --adw-purple-3: #9141ac;
+  --adw-orange-3: #ff7800;
+  --adw-pink-3: #ffc0cb;
+  --adw-slate-3: #708090;
+  --accent-blue-light-bg: var(--adw-blue-3);
+  --accent-blue-light-fg: #ffffff;
+  --info-bg-color-light: var(--adw-blue-1);
+  --info-border-color-light: var(--adw-blue-3);
+  --info-fg-color-light: var(--adw-blue-5);
+  --success-bg-color-light: var(--adw-green-1);
+  --success-border-color-light: var(--adw-green-3);
+  --success-fg-color-light: var(--adw-green-5);
+  --warning-bg-color-light: var(--adw-yellow-1);
+  --warning-border-color-light: var(--adw-yellow-3);
+  --warning-fg-color-light: var(--adw-yellow-5);
+  --error-bg-color-light: var(--adw-red-1);
+  --error-border-color-light: var(--adw-red-3);
+  --error-fg-color-light: var(--adw-red-5);
+  --accent-green-light-bg: #2ec27e;
+  --accent-green-light-fg: #ffffff;
+  --accent-red-light-bg: var(--adw-red-3);
+  --accent-red-light-fg: #ffffff;
+  --accent-yellow-light-bg: #e5a50a;
+  --accent-yellow-light-fg: rgba(0,0,0,0.87);
+  --accent-purple-light-bg: var(--adw-purple-3);
+  --accent-purple-light-fg: #ffffff;
+  --accent-orange-light-bg: var(--adw-orange-3);
+  --accent-orange-light-fg: #ffffff;
+  --accent-pink-light-bg: var(--adw-pink-3);
+  --accent-pink-light-fg: rgba(0,0,0,0.87);
+  --accent-slate-light-bg: var(--adw-slate-3);
+  --accent-slate-light-fg: #ffffff;
+  --accent-blue-dark-bg: var(--adw-blue-3);
+  --accent-blue-dark-fg: #ffffff;
+  --info-bg-color-dark: var(--adw-blue-4-dark);
+  --info-border-color-dark: var(--adw-blue-3);
+  --info-fg-color-dark: var(--adw-blue-1);
+  --success-bg-color-dark: var(--adw-green-4-dark);
+  --success-border-color-dark: var(--adw-green-3);
+  --success-fg-color-dark: var(--adw-green-1);
+  --warning-bg-color-dark: var(--adw-yellow-4-dark);
+  --warning-border-color-dark: var(--adw-yellow-3);
+  --warning-fg-color-dark: var(--adw-yellow-1);
+  --error-bg-color-dark: var(--adw-red-4-dark);
+  --error-border-color-dark: var(--adw-red-3);
+  --error-fg-color-dark: var(--adw-red-1);
+  --accent-green-dark-bg: #26a269;
+  --accent-green-dark-fg: #ffffff;
+  --accent-red-dark-bg: #c01c28;
+  --accent-red-dark-fg: #ffffff;
+  --accent-yellow-dark-bg: #cd9309;
+  --accent-yellow-dark-fg: rgba(0,0,0,0.87);
+  --accent-purple-dark-bg: #613583;
+  --accent-purple-dark-fg: #ffffff;
+  --accent-orange-dark-bg: #c64600;
+  --accent-orange-dark-fg: #ffffff;
+  --accent-pink-dark-bg: #e6a7b4;
+  --accent-pink-dark-fg: #ffffff;
+  --accent-slate-dark-bg: #5a6773;
+  --accent-slate-dark-fg: #ffffff;
+  --accent-blue-standalone: #1c71d8;
+  --accent-green-standalone: #1b8553;
+  --accent-red-standalone: #c01c28;
+  --accent-yellow-standalone: #9c6e03;
+  --accent-purple-standalone: #813d9c;
+  --accent-orange-standalone: #e66100;
+  --accent-pink-standalone: #e6a7b4;
+  --accent-slate-standalone: #5a6773;
+  --accent-blue-dark-standalone: #78aeed;
+  --accent-green-dark-standalone: #8ff0a4;
+  --accent-red-dark-standalone: #ff7b63;
+  --accent-yellow-dark-standalone: #f8e45c;
+  --accent-purple-dark-standalone: #dc8add;
+  --accent-orange-dark-standalone: #ffbe6f;
+  --accent-pink-dark-standalone: #ff8cc6;
+  --accent-slate-dark-standalone: #8a98a5;
 }
 
-// Dark Theme
-@mixin dark-theme {
+:root {
   --accent-bg-color: var(--accent-blue-dark-bg);
   --accent-fg-color: var(--accent-blue-dark-fg);
   --accent-color: var(--accent-blue-dark-standalone);
   --destructive-bg-color: var(--accent-red-dark-bg);
   --destructive-fg-color: var(--accent-red-dark-fg);
   --destructive-color: var(--accent-red-dark-standalone);
-
-  // Banner colors for dark theme
   --info-bg-color: var(--info-bg-color-dark);
   --info-fg-color: var(--info-fg-color-dark);
   --info-border-color: var(--info-border-color-dark);
@@ -105,259 +141,121 @@
   --error-fg-color: var(--error-fg-color-dark);
   --error-border-color: var(--error-border-color-dark);
   --error-color: var(--accent-red-dark-standalone);
-
   --window-bg-color: #2d2d2d;
   --window-fg-color: #ffffff;
   --view-bg-color: #242424;
   --view-fg-color: #ffffff;
-
   --headerbar-bg-color: #3c3c3c;
   --headerbar-fg-color: #ffffff;
   --headerbar-border-color: rgba(255, 255, 255, 0.07);
   --headerbar-backdrop-color: var(--window-bg-color);
   --headerbar-shade-color: rgba(0, 0, 0, 0.36);
-
   --card-bg-color: #383838;
   --card-fg-color: #ffffff;
   --card-shade-color: rgba(0, 0, 0, 0.36);
-
-  --popover-bg-color: #4a4a4a; // Darker than card for popovers
+  --popover-bg-color: #4a4a4a;
   --popover-fg-color: #ffffff;
   --popover-shade-color: rgba(0, 0, 0, 0.36);
-
   --button-bg-color: #4d4d4d;
   --button-fg-color: #ffffff;
   --button-border-color: rgba(255, 255, 255, 0.07);
   --button-hover-bg-color: #5a5a5a;
   --button-active-bg-color: #676767;
-
   --button-flat-bg-color: transparent;
   --button-flat-hover-bg-color: rgba(255, 255, 255, 0.08);
   --button-flat-active-bg-color: rgba(255, 255, 255, 0.12);
-
   --sidebar-bg-color: #333333;
   --sidebar-fg-color: #ffffff;
   --sidebar-border-color: rgba(255,255,255,0.07);
   --sidebar-shade-color: rgba(0,0,0,0.36);
-
-  --secondary-sidebar-bg-color: #3a3a3a; // Slightly lighter than sidebar
+  --secondary-sidebar-bg-color: #3a3a3a;
   --secondary-sidebar-fg-color: #ffffff;
   --secondary-sidebar-border-color: rgba(255,255,255,0.07);
   --secondary-sidebar-shade-color: rgba(0,0,0,0.36);
-
-  --dialog-bg-color: #2f2f2f; // Slightly darker than window
+  --dialog-bg-color: #2f2f2f;
   --dialog-fg-color: #ffffff;
-
-  --thumbnail-bg-color: #242424; // Same as view
+  --thumbnail-bg-color: #242424;
   --thumbnail-fg-color: #ffffff;
-
-  --shade-color: rgba(0, 0, 0, 0.36); // General purpose shade/shadow
+  --shade-color: rgba(0, 0, 0, 0.36);
   --scrollbar-outline-color: rgba(0, 0, 0, 0.5);
   --link-color: var(--accent-bg-color);
-  --link-visited-color: #c0c0c0; // Lighter visited link for dark theme
-
-  // Progress Bar
+  --link-visited-color: #c0c0c0;
   --progress-bar-track-color: var(--shade-color);
   --progress-bar-fill-color: var(--accent-bg-color);
-}
-
-// Helper Variables (inspired by libadwaita, but not direct libadwaita variables)
-:root {
-  // Font Variables (use libadwaita standard system fonts)
-  --document-font-family: 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --monospace-font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
-  --font-size-base: 10pt; // Base font size (libadwaita uses relative units, this is an equivalent)
-  --font-size-small: 8pt;
-  --font-size-large: 12pt;
-  --font-size-h1: 18pt;
-  --font-size-h2: 16pt;
-  --font-size-h3: 14pt;
-  --font-size-h4: 12pt;
-
-  // Border Radius
-  --border-radius-small: 3px;
-  --border-radius-default: 6px; // Common border radius
-  --border-radius-large: 12px; // For larger elements like cards or windows
-  --window-radius: var(--border-radius-large); // Specific for main window corners
-
-  // Spacing (libadwaita uses multiples of 6px and 12px often)
-  --spacing-xxs: 3px;
-  --spacing-xs: 6px;
-  --spacing-s: 9px;
-  --spacing-m: 12px;
-  --spacing-l: 18px;
-  --spacing-xl: 24px;
-  --spacing-xxl: 36px;
-
-  // Opacity
-  --opacity-disabled: 0.5; // For disabled elements
-  --opacity-hover: 0.8; // General hover opacity if not changing color
-  --opacity-active: 0.6; // General active opacity if not changing color
-
-  // Border Color (general fallback if not specified by component)
-  --border-color-light: rgba(0, 0, 0, 0.12); // For light theme
-  --border-color-dark: rgba(255, 255, 255, 0.07); // For dark theme
-
-  // Accent Color Palette (Raw colors)
-  // Naming: --adw-{colorName}-{shade} (shade 1-5, 3 is often a good base)
-  // These are just examples, a full Adwaita palette has many more.
-  --adw-blue-1: #d3e5f7;
-  --adw-blue-3: #3584e4;
-  --adw-blue-5: #1a5fb4;
-  --adw-green-1: #d2f0d4;
-  --adw-green-3: #2ec27e;
-  --adw-green-5: #1b7749;
-  --adw-yellow-1: #fef4d5;
-  --adw-yellow-3: #f8c443;
-  --adw-yellow-5: #b07d0d;
-  --adw-red-1: #f7d4d4;
-  --adw-red-3: #e01b24;
-  --adw-red-5: #a50e17;
-  // Darker shades for dark theme backgrounds
-  --adw-blue-4-dark: #2a70c9;
-  --adw-green-4-dark: #218358;
-  --adw-yellow-4-dark: #b07d0d;
-  --adw-red-4-dark: #a50e17;
-
-  --adw-purple-3: #9141ac; // Placeholder, replace with actual Adwaita purple
-  --adw-orange-3: #ff7800; // Placeholder
-  --adw-pink-3: #ffc0cb;   // Placeholder
-  --adw-slate-3: #708090;  // Placeholder (Greys/Slates often called Stone or Iron in Adwaita)
-
-
-  // Definitive Accent Color Variables (to be used by JS)
-  // These provide a layer of abstraction. JS sets --accent-bg-color to one of these.
-
-  // Light Theme Accent Palette
-  --accent-blue-light-bg: var(--adw-blue-3);
-  --accent-blue-light-fg: #ffffff;
-
-  // Banner Colors (Light Theme)
-  --info-bg-color-light: var(--adw-blue-1);
-  --info-border-color-light: var(--adw-blue-3);
-  --info-fg-color-light: var(--adw-blue-5);
-  --success-bg-color-light: var(--adw-green-1);
-  --success-border-color-light: var(--adw-green-3);
-  --success-fg-color-light: var(--adw-green-5);
-  --warning-bg-color-light: var(--adw-yellow-1);
-  --warning-border-color-light: var(--adw-yellow-3);
-  --warning-fg-color-light: var(--adw-yellow-5);
-  --error-bg-color-light: var(--adw-red-1);
-  --error-border-color-light: var(--adw-red-3);
-  --error-fg-color-light: var(--adw-red-5);
-
-  --accent-green-light-bg: #2ec27e;
-  --accent-green-light-fg: #ffffff;
-  --accent-red-light-bg: var(--adw-red-3);
-  --accent-red-light-fg: #ffffff;
-  --accent-yellow-light-bg: #e5a50a;
-  --accent-yellow-light-fg: rgba(0,0,0,0.87);
-  --accent-purple-light-bg: var(--adw-purple-3);
-  --accent-purple-light-fg: #ffffff;
-  --accent-orange-light-bg: var(--adw-orange-3);
-  --accent-orange-light-fg: #ffffff;
-  --accent-pink-light-bg: var(--adw-pink-3);
-  --accent-pink-light-fg: rgba(0,0,0,0.87);
-  --accent-slate-light-bg: var(--adw-slate-3);
-  --accent-slate-light-fg: #ffffff;
-
-  // Dark Theme Accent Palette (values might need to be lighter/desaturated than light theme)
-  --accent-blue-dark-bg: var(--adw-blue-3);
-  --accent-blue-dark-fg: #ffffff;
-
-  // Banner Colors (Dark Theme)
-  --info-bg-color-dark: var(--adw-blue-4-dark);
-  --info-border-color-dark: var(--adw-blue-3);
-  --info-fg-color-dark: var(--adw-blue-1);
-  --success-bg-color-dark: var(--adw-green-4-dark);
-  --success-border-color-dark: var(--adw-green-3);
-  --success-fg-color-dark: var(--adw-green-1);
-  --warning-bg-color-dark: var(--adw-yellow-4-dark);
-  --warning-border-color-dark: var(--adw-yellow-3);
-  --warning-fg-color-dark: var(--adw-yellow-1);
-  --error-bg-color-dark: var(--adw-red-4-dark);
-  --error-border-color-dark: var(--adw-red-3);
-  --error-fg-color-dark: var(--adw-red-1);
-
-  --accent-green-dark-bg: #26a269;
-  --accent-green-dark-fg: #ffffff;
-  --accent-red-dark-bg: #c01c28;
-  --accent-red-dark-fg: #ffffff;
-  --accent-yellow-dark-bg: #cd9309;
-  --accent-yellow-dark-fg: rgba(0,0,0,0.87);
-  --accent-purple-dark-bg: #613583;
-  --accent-purple-dark-fg: #ffffff;
-  --accent-orange-dark-bg: #c64600;
-  --accent-orange-dark-fg: #ffffff;
-  --accent-pink-dark-bg: #e6a7b4;
-  --accent-pink-dark-fg: #ffffff;
-  --accent-slate-dark-bg: #5a6773;
-  --accent-slate-dark-fg: #ffffff;
-
-  // Standalone accent color (e.g., for text, icons on neutral backgrounds)
-  // For simplicity, these will be the same as the -bg colors for now.
-  // In a full system, these would be derived (e.g., via oklab) for optimal appearance.
-  --accent-blue-standalone: #1c71d8;
-  --accent-green-standalone: #1b8553;
-  --accent-red-standalone: #c01c28;
-  --accent-yellow-standalone: #9c6e03;
-  --accent-purple-standalone: #813d9c;
-  --accent-orange-standalone: #e66100;
-  --accent-pink-standalone: #e6a7b4;
-  --accent-slate-standalone: #5a6773;
-
-  // Dark theme standalone accents might need to be the lighter versions too
-  --accent-blue-dark-standalone: #78aeed;
-  --accent-green-dark-standalone: #8ff0a4;
-  --accent-red-dark-standalone: #ff7b63;
-  --accent-yellow-dark-standalone: #f8e45c;
-  --accent-purple-dark-standalone: #dc8add;
-  --accent-orange-dark-standalone: #ffbe6f;
-  --accent-pink-dark-standalone: #ff8cc6;
-  --accent-slate-dark-standalone: #8a98a5;
-
-}
-
-// Apply themes
-:root {
-  // Default to DARK theme directly in :root.
-  // All components should primarily use these CSS variables.
-  @include dark-theme;
-  // Set initial default accent to blue (dark theme version)
   --accent-bg-color: var(--accent-blue-dark-bg);
   --accent-fg-color: var(--accent-blue-dark-fg);
-  --accent-color: var(--accent-blue-dark-standalone); // Generic accent color for text/icons
+  --accent-color: var(--accent-blue-dark-standalone);
 }
 
 body.light-theme {
-  // Light theme is applied by adding .light-theme to the body.
-  // This block will override the dark theme variables set in :root.
-  @include light-theme;
-  // Set initial default accent to blue (light theme version)
-  // This ensures that if JS doesn't run or before it runs, the default accent matches the theme.
-  // JS will then override these if a different accent is chosen via localStorage.
+  --accent-bg-color: var(--accent-blue-light-bg);
+  --accent-fg-color: var(--accent-blue-light-fg);
+  --accent-color: var(--accent-blue-standalone);
+  --destructive-bg-color: var(--accent-red-light-bg);
+  --destructive-fg-color: var(--accent-red-light-fg);
+  --destructive-color: var(--accent-red-standalone);
+  --info-bg-color: var(--info-bg-color-light);
+  --info-fg-color: var(--info-fg-color-light);
+  --info-border-color: var(--info-border-color-light);
+  --success-bg-color: var(--success-bg-color-light);
+  --success-fg-color: var(--success-fg-color-light);
+  --success-border-color: var(--success-border-color-light);
+  --success-color: var(--accent-green-standalone);
+  --warning-bg-color: var(--warning-bg-color-light);
+  --warning-fg-color: var(--warning-fg-color-light);
+  --warning-border-color: var(--warning-border-color-light);
+  --warning-color: var(--accent-yellow-standalone);
+  --error-bg-color: var(--error-bg-color-light);
+  --error-fg-color: var(--error-fg-color-light);
+  --error-border-color: var(--error-border-color-light);
+  --error-color: var(--accent-red-standalone);
+  --window-bg-color: #f6f5f4;
+  --window-fg-color: rgba(0, 0, 0, 0.8);
+  --view-bg-color: #ffffff;
+  --view-fg-color: rgba(0, 0, 0, 0.8);
+  --headerbar-bg-color: #ebeae9;
+  --headerbar-fg-color: rgba(0, 0, 0, 0.8);
+  --headerbar-border-color: rgba(0, 0, 0, 0.12);
+  --headerbar-backdrop-color: var(--window-bg-color);
+  --headerbar-shade-color: rgba(0, 0, 0, 0.07);
+  --card-bg-color: #ffffff;
+  --card-fg-color: rgba(0, 0, 0, 0.8);
+  --card-shade-color: rgba(0, 0, 0, 0.07);
+  --popover-bg-color: #ffffff;
+  --popover-fg-color: rgba(0, 0, 0, 0.8);
+  --popover-shade-color: rgba(0, 0, 0, 0.07);
+  --button-bg-color: #ebeae9;
+  --button-fg-color: rgba(0, 0, 0, 0.8);
+  --button-border-color: rgba(0, 0, 0, 0.12);
+  --button-hover-bg-color: #deddda;
+  --button-active-bg-color: #d1cfce;
+  --button-flat-bg-color: transparent;
+  --button-flat-hover-bg-color: rgba(0, 0, 0, 0.05);
+  --button-flat-active-bg-color: rgba(0, 0, 0, 0.1);
+  --sidebar-bg-color: #f0efee;
+  --sidebar-fg-color: rgba(0,0,0,0.8);
+  --sidebar-border-color: rgba(0,0,0,0.12);
+  --sidebar-shade-color: rgba(0, 0, 0, 0.07);
+  --secondary-sidebar-bg-color: #e4e3e2;
+  --secondary-sidebar-fg-color: rgba(0,0,0,0.8);
+  --secondary-sidebar-border-color: rgba(0,0,0,0.12);
+  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.07);
+  --dialog-bg-color: #fdfcfb;
+  --dialog-fg-color: rgba(0, 0, 0, 0.8);
+  --thumbnail-bg-color: #ffffff;
+  --thumbnail-fg-color: rgba(0, 0, 0, 0.8);
+  --shade-color: rgba(0, 0, 0, 0.07);
+  --scrollbar-outline-color: #ffffff;
+  --link-color: var(--accent-bg-color);
+  --link-visited-color: #5a5a5a;
+  --progress-bar-track-color: var(--shade-color);
+  --progress-bar-fill-color: var(--accent-bg-color);
   --accent-bg-color: var(--accent-blue-light-bg);
   --accent-fg-color: var(--accent-blue-light-fg);
   --accent-color: var(--accent-blue-standalone);
 }
 
-// Note on JavaScript interaction for theme loading (loadSavedTheme function):
-// 1. Checks localStorage for 'theme'.
-//    - If 'light', adds 'light-theme' to body.
-//    - If 'dark', ensures 'light-theme' is NOT on body.
-// 2. If no localStorage, checks `prefers-color-scheme`.
-//    - If system prefers 'light', adds 'light-theme' to body.
-//    - If system prefers 'dark' (or no specific preference), 'light-theme' is NOT added,
-//      thus :root (dark) styles apply.
-//
-// The body.dark-theme selector and @media (prefers-color-scheme: dark) for :root
-// are removed from here as the JS logic combined with a :root default is cleaner.
-
-
-// The following @define-color rules are often used by GTK themes
-// to make colors available to the GTK C API.
-// We'll keep them and map them to our CSS variables.
-@mixin define-gtk-colors() {
+:root {
   @define-color accent_bg_color var(--accent-bg-color);
   @define-color accent_fg_color var(--accent-fg-color);
   @define-color destructive_bg_color var(--destructive-bg-color);
@@ -368,164 +266,179 @@ body.light-theme {
   @define-color warning_fg_color var(--warning-fg-color);
   @define-color error_bg_color var(--error-bg-color);
   @define-color error_fg_color var(--error-fg-color);
-
   @define-color window_bg_color var(--window-bg-color);
   @define-color window_fg_color var(--window-fg-color);
   @define-color view_bg_color var(--view-bg-color);
   @define-color view_fg_color var(--view-fg-color);
-
   @define-color headerbar_bg_color var(--headerbar-bg-color);
   @define-color headerbar_fg_color var(--headerbar-fg-color);
   @define-color headerbar_border_color var(--headerbar-border-color);
   @define-color headerbar_backdrop_color var(--headerbar-backdrop-color);
   @define-color headerbar_shade_color var(--headerbar-shade-color);
-
   @define-color card_bg_color var(--card-bg-color);
   @define-color card_fg_color var(--card-fg-color);
   @define-color card_shade_color var(--card-shade-color);
-
   @define-color popover_bg_color var(--popover-bg-color);
   @define-color popover_fg_color var(--popover-fg-color);
   @define-color popover_shade_color var(--popover-shade-color);
-
   @define-color dialog_bg_color var(--dialog-bg-color);
   @define-color dialog_fg_color var(--dialog-fg-color);
-
   @define-color thumbnail_bg_color var(--thumbnail-bg-color);
   @define-color thumbnail_fg_color var(--thumbnail-fg-color);
-
   @define-color sidebar_bg_color var(--sidebar-bg-color);
   @define-color sidebar_fg_color var(--sidebar-fg-color);
   @define-color sidebar_border_color var(--sidebar-border-color);
   @define-color sidebar_shade_color var(--sidebar-shade-color);
-
   @define-color secondary_sidebar_bg_color var(--secondary-sidebar-bg-color);
   @define-color secondary_sidebar_fg_color var(--secondary-sidebar-fg-color);
   @define-color secondary_sidebar_border_color var(--secondary-sidebar-border-color);
   @define-color secondary_sidebar_shade_color var(--secondary-sidebar-shade-color);
-
   @define-color shade_color var(--shade-color);
   @define-color scrollbar_outline_color var(--scrollbar-outline-color);
   @define-color progress_bar_track_color var(--progress-bar-track-color);
   @define-color progress_bar_fill_color var(--progress-bar-fill-color);
-  @define-color accent_color var(--accent-color); // For GTK mapping of the dynamic accent color
-
-  // These are not direct libadwaita CSS variables but often derived or context-specific.
-  // We'll keep the ones that are broadly applicable.
-  // --active-toggle-bg-color & --active-toggle-fg-color are very specific, handle in component SCSS.
-  // --overview-bg-color & --overview-fg-color are specific, handle in component/view SCSS.
-
-  // Oklab derived colors are a more advanced GTK feature for color manipulation.
-  // Libadwaita itself doesn't expose --accent-color directly in its public CSS variables,
-  // it's usually derived by applications if needed.
-  // For now, we will remove the oklab definitions here to keep it simpler and closer
-  // to standard CSS usage. If an application needs oklab, it can define it.
+  @define-color accent_color var(--accent-color);
 }
 
-:root {
-  @include define-gtk-colors();
-}
-// scss/_base.scss
-@use "variables"; // Make sure variables are available
-
-// Apply a natural box layout model to all elements
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
 html {
-  height: 100%; // Ensure HTML takes full height for full-height body layouts
-  // Prevent font size inflation on mobile devices
+  height: 100%;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
 }
 
 body {
-  font-family: var(--document-font-family); // Use the correct font family variable
-  font-size: var(--font-size-base);       // Use the correct base font size variable
-  color: var(--window-fg-color);          // Default text color from window variables
-  background-color: var(--window-bg-color); // Default background color from window variables
-  margin: 0; // Remove default body margin
-  min-height: 100vh; // Ensure body takes at least full viewport height
-  line-height: 1.5; // Default line height for readability
-
-  // Font smoothing for better text rendering
+  font-family: var(--document-font-family);
+  font-size: var(--font-size-base);
+  color: var(--window-fg-color);
+  background-color: var(--window-bg-color);
+  margin: 0;
+  min-height: 100vh;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility; // More control over text rendering
+  text-rendering: optimizeLegibility;
 }
 
-// Basic default for links (can be overridden by component styles)
 a {
-  color: var(--link-color); // Use link color variable
-  text-decoration: none; // Libadwaita often has no underline by default
-
-  &:hover {
-    text-decoration: underline; // Underline on hover
-  }
-
-  &:focus-visible { // Accessibility for keyboard navigation
-    outline: 2px solid var(--accent-bg-color);
-    outline-offset: 1px;
-    border-radius: var(--border-radius-small); // Slight rounding on focus outline
-  }
+  color: var(--link-color);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+a:focus-visible {
+  outline: 2px solid var(--accent-bg-color);
+  outline-offset: 1px;
+  border-radius: var(--border-radius-small);
 }
 
-// Remove default list styling
 ul, ol {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-// Default heading styles (can be overridden by .adw-label title classes)
 h1, h2, h3, h4, h5, h6 {
-  margin: var(--spacing-m) 0; // Basic margin for headings
-  font-weight: bold; // Default to bold
-  line-height: 1.3;  // Tighter line height for headings
+  margin: var(--spacing-m) 0;
+  font-weight: bold;
+  line-height: 1.3;
 }
 
-h1 { font-size: var(--font-size-h1); }
-h2 { font-size: var(--font-size-h2); }
-h3 { font-size: var(--font-size-h3); }
-h4 { font-size: var(--font-size-h4); }
-// h5, h6 can default to --font-size-base or --font-size-large if not defined in scale
+h1 {
+  font-size: var(--font-size-h1);
+}
 
-// Improve media defaults
+h2 {
+  font-size: var(--font-size-h2);
+}
+
+h3 {
+  font-size: var(--font-size-h3);
+}
+
+h4 {
+  font-size: var(--font-size-h4);
+}
+
 img, picture, video, canvas, svg {
   display: block;
   max-width: 100%;
 }
 
-// Remove built-in form typography styles
 input, button, textarea, select {
-  font: inherit; // Inherit font from body/parent
+  font: inherit;
 }
 
-// Ensure buttons have a pointer cursor by default (can be overridden)
-button, [role="button"] {
+button, [role=button] {
   cursor: pointer;
 }
-// scss/_avatar.scss
-@use "variables";
 
-// Define default avatar colors if they aren't in _variables.scss already
-// These can be overridden by users.
+.adw-action-row {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-m) var(--spacing-l);
+  background-color: var(--card-bg-color);
+  border-bottom: var(--border-width, 1px) solid var(--border-color-light);
+  min-height: 48px;
+}
+.adw-action-row.activatable {
+  cursor: pointer;
+}
+.adw-action-row.activatable:hover {
+  background-color: var(--button-hover-bg-color);
+}
+.adw-action-row.activatable:active {
+  background-color: var(--button-active-bg-color);
+}
+.adw-action-row .adw-action-row-prefix {
+  margin-right: var(--spacing-m);
+  display: flex;
+  align-items: center;
+}
+.adw-action-row .adw-action-row-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+.adw-action-row .adw-action-row-title {
+  font-size: var(--font-size-base);
+  color: var(--card-fg-color);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adw-action-row .adw-action-row-subtitle {
+  font-size: var(--font-size-small);
+  color: var(--card-fg-color);
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+.adw-action-row .adw-action-row-suffix {
+  margin-left: var(--spacing-m);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.dark-theme .adw-action-row,
+body.dark-theme .adw-action-row {
+  border-bottom-color: var(--border-color-dark);
+}
+
 :root {
-  --avatar-bg-color: var(--shade-color); // Using shade-color as a neutral default
-  --avatar-text-color: var(--view-fg-color); // Default text on avatar background
-}
-
-body.light-theme {
-  --avatar-bg-color: var(--shade-color); // e.g., a light gray
+  --avatar-bg-color: var(--shade-color);
   --avatar-text-color: var(--view-fg-color);
 }
-
-body.dark-theme {
-  --avatar-bg-color: var(--shade-color); // e.g., a darker gray
-  --avatar-text-color: var(--view-fg-color);
-}
-
 
 .adw-avatar {
   display: inline-flex;
@@ -534,1560 +447,1406 @@ body.dark-theme {
   border-radius: 50%;
   overflow: hidden;
   background-color: var(--avatar-bg-color);
-  color: var(--avatar-text-color); // Default text color for initials if not overridden by .adw-avatar-text
+  color: var(--avatar-text-color);
   font-weight: bold;
-  vertical-align: middle; // Helps align with adjacent text if needed
-  user-select: none; // Text in avatar usually not selectable
-  box-sizing: border-box; // Ensure padding/border are included in width/height
-
-  // Default size if not set by JS or specific class (optional)
-  // It's better if JS always sets the size for consistency.
-  // width: 48px;
-  // height: 48px;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; // Ensures the image covers the area, cropping if necessary
-    display: block; // Remove extra space below image
-  }
-
-  .adw-avatar-text {
-    color: var(--avatar-text-color); // Specific text color for initials
-    text-align: center;
-    line-height: 1; // Keep line height tight for initials
-    // Font size will be set dynamically by JavaScript based on avatar size
-  }
-
-  // Optional: Default placeholder (e.g., an icon) if no image, no text, no custom fallback
-  // &:empty::before {
-  //   content: "👤"; // Placeholder icon or SVG
-  //   font-size: calc(var(--avatar-current-size, 48px) * 0.6); // Adjust icon size based on avatar size
-  //   color: var(--avatar-text-color);
-  // }
+  vertical-align: middle;
+  user-select: none;
+  box-sizing: border-box;
+}
+.adw-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.adw-avatar .adw-avatar-text {
+  color: var(--avatar-text-color);
+  text-align: center;
+  line-height: 1;
 }
 
-// Optional: Predefined size classes (JS primarily controls size via style attribute)
-// These can be useful if you want to use avatars purely from HTML/CSS sometimes.
-// The font-size here is a rough guide; JS will calculate it more precisely.
-.adw-avatar.size-tiny { // Example: 16px
+.adw-avatar.size-tiny {
   width: 16px;
   height: 16px;
-  // .adw-avatar-text font-size would be ~6-7px
 }
-.adw-avatar.size-small { // Example: 24px
+
+.adw-avatar.size-small {
   width: 24px;
   height: 24px;
-  // .adw-avatar-text font-size would be ~10px
 }
-.adw-avatar.size-medium { // Example: 48px
+
+.adw-avatar.size-medium {
   width: 48px;
   height: 48px;
-  // .adw-avatar-text font-size would be ~18-20px
 }
-.adw-avatar.size-large { // Example: 72px
+
+.adw-avatar.size-large {
   width: 72px;
   height: 72px;
-  // .adw-avatar-text font-size would be ~28-30px
 }
-.adw-avatar.size-huge { // Example: 96px
+
+.adw-avatar.size-huge {
   width: 96px;
   height: 96px;
-  // .adw-avatar-text font-size would be ~38-40px
 }
 
-// scss/_banner.scss
-@use 'variables';
-
 .adw-banner {
-  padding: var(--adw-padding-medium) var(--adw-padding-large);
-  border-radius: var(--adw-border-radius);
+  padding: var(--spacing-m) var(--spacing-l);
+  border-radius: var(--border-radius-default);
   border: 1px solid transparent;
-  margin-bottom: var(--adw-spacing-medium);
+  margin-bottom: var(--spacing-m);
   display: flex;
   justify-content: space-between;
   align-items: center;
   opacity: 0;
   transform: translateY(-20px);
   transition: opacity 0.3s ease, transform 0.3s ease;
-
-  &.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  // Types
-  &.info {
-    background-color: var(--info-bg-color, lightblue); // Define these in _variables.scss or use existing
-    border-color: var(--info-border-color, blue);
-    color: var(--info-fg-color, darkblue);
-  }
-  &.success {
-    background-color: var(--success-bg-color, lightgreen);
-    border-color: var(--success-border-color, green);
-    color: var(--success-fg-color, darkgreen);
-  }
-  &.warning {
-    background-color: var(--warning-bg-color, lightyellow);
-    border-color: var(--warning-border-color, orange);
-    color: var(--warning-fg-color, darkorange);
-  }
-  &.error {
-    background-color: var(--error-bg-color, lightcoral);
-    border-color: var(--error-border-color, red);
-    color: var(--error-fg-color, darkred);
-  }
-
-  .adw-banner-message {
-    flex-grow: 1;
-  }
-
-  .adw-banner-close-button {
-    background: transparent;
-    border: none;
-    color: inherit;
-    font-size: 1.2em;
-    cursor: pointer;
-    padding: 0 var(--adw-padding-small);
-    margin-left: var(--adw-padding-medium);
-  }
 }
-
-// scss/_box.scss
-@use "variables";
+.adw-banner.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.adw-banner.info {
+  background-color: var(--info-bg-color);
+  border-color: var(--info-border-color);
+  color: var(--info-fg-color);
+}
+.adw-banner.success {
+  background-color: var(--success-bg-color);
+  border-color: var(--success-border-color);
+  color: var(--success-fg-color);
+}
+.adw-banner.warning {
+  background-color: var(--warning-bg-color);
+  border-color: var(--warning-border-color);
+  color: var(--warning-fg-color);
+}
+.adw-banner.error {
+  background-color: var(--error-bg-color);
+  border-color: var(--error-border-color);
+  color: var(--error-fg-color);
+}
+.adw-banner .adw-banner-message {
+  flex-grow: 1;
+}
+.adw-banner .adw-banner-close-button {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 0 var(--spacing-xs);
+  margin-left: var(--spacing-m);
+}
 
 .adw-box {
   display: flex;
-  // Default gap, can be overridden by utility classes or specific component styles
-  // gap: var(--spacing-m);
-
-  &.adw-box-vertical {
-    flex-direction: column;
-  }
-
-  // Alignment utility classes for .adw-box
-  &.align-start { align-items: flex-start; }
-  &.align-center { align-items: center; }
-  &.align-end { align-items: flex-end; }
-  &.align-stretch { align-items: stretch; } // Default for cross-axis if items have no size
-
-  &.justify-start { justify-content: flex-start; }
-  &.justify-center { justify-content: center; }
-  &.justify-end { justify-content: flex-end; }
-  &.justify-between { justify-content: space-between; }
-  &.justify-around { justify-content: space-around; }
-  &.justify-evenly { justify-content: space-evenly; }
-
-  // Spacing utility using gap (modern approach)
-  // Example: <div class="adw-box adw-box-spacing-s">
-  &.adw-box-spacing-xs { gap: var(--spacing-xs); }
-  &.adw-box-spacing-s { gap: var(--spacing-s); }
-  &.adw-box-spacing-m { gap: var(--spacing-m); }
-  &.adw-box-spacing-l { gap: var(--spacing-l); }
-  &.adw-box-spacing-xl { gap: var(--spacing-xl); }
-
-  // Forcing children to have equal width/height (homogeneous-like)
-  &.adw-box-fill-children > * {
-    flex-grow: 1;
-    flex-basis: 0; // Distribute space equally
-  }
+}
+.adw-box.adw-box-vertical {
+  flex-direction: column;
+}
+.adw-box.align-start {
+  align-items: flex-start;
+}
+.adw-box.align-center {
+  align-items: center;
+}
+.adw-box.align-end {
+  align-items: flex-end;
+}
+.adw-box.align-stretch {
+  align-items: stretch;
+}
+.adw-box.justify-start {
+  justify-content: flex-start;
+}
+.adw-box.justify-center {
+  justify-content: center;
+}
+.adw-box.justify-end {
+  justify-content: flex-end;
+}
+.adw-box.justify-between {
+  justify-content: space-between;
+}
+.adw-box.justify-around {
+  justify-content: space-around;
+}
+.adw-box.justify-evenly {
+  justify-content: space-evenly;
+}
+.adw-box.adw-box-spacing-xs {
+  gap: var(--spacing-xs);
+}
+.adw-box.adw-box-spacing-s {
+  gap: var(--spacing-s);
+}
+.adw-box.adw-box-spacing-m {
+  gap: var(--spacing-m);
+}
+.adw-box.adw-box-spacing-l {
+  gap: var(--spacing-l);
+}
+.adw-box.adw-box-spacing-xl {
+  gap: var(--spacing-xl);
+}
+.adw-box.adw-box-fill-children > * {
+  flex-grow: 1;
+  flex-basis: 0;
 }
 
-// .adw-row is more specific than a generic box, often for form-like layouts or item rows.
 .adw-row {
   display: flex;
-  align-items: center; // Default vertical alignment for rows
-  margin-bottom: var(--spacing-m); // Spacing between rows
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  // Spacing between direct children of a row.
-  // Using gap is often cleaner if widely supported and appropriate.
-  // This margin approach is a common fallback.
-  gap: var(--spacing-s); // Using gap for children spacing within a row
-  // If gap is not desired, or for older browser support, revert to margins:
-  // > *:not(:last-child) {
-  //   margin-right: var(--spacing-s);
-  // }
+  align-items: center;
+  margin-bottom: var(--spacing-m);
+  gap: var(--spacing-s);
+}
+.adw-row:last-child {
+  margin-bottom: 0;
 }
 
-// Example of a more specialized box, like a card
 .adw-card {
   background-color: var(--card-bg-color);
   color: var(--card-fg-color);
-  border-radius: var(--border-radius-large); // Cards usually have larger radius
-  padding: var(--spacing-l); // Generous padding for cards
-  box-shadow: 0 0 0 1px var(--border-color-light, rgba(0,0,0,0.08)),
-              0 4px 8px -2px rgba(0,0,0,0.1),
-              0 3px 6px rgba(0,0,0,0.08);
-  // Add dark theme shadow for card if needed, similar to .adw-dialog
+  border-radius: var(--border-radius-large);
+  padding: var(--spacing-l);
+  box-shadow: 0 0 0 1px var(--border-color-light, rgba(0, 0, 0, 0.08)), 0 4px 8px -2px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
 }
 
 .dark-theme .adw-card,
 body.dark-theme .adw-card {
-    box-shadow: 0 0 0 1px var(--border-color-dark, rgba(255,255,255,0.08)),
-              0 4px 8px -2px rgba(0,0,0,0.25),
-              0 3px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 0 0 1px var(--border-color-dark, rgba(255, 255, 255, 0.08)), 0 4px 8px -2px rgba(0, 0, 0, 0.25), 0 3px 6px rgba(0, 0, 0, 0.2);
 }
-@use "variables";
 
 .adw-button {
-  display: inline-flex; // Use flex for better content alignment
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-s) var(--spacing-m); // Adjusted padding using new variables
-  border-width: var(--border-width, 1px); // Use helper variable, provide fallback
+  padding: var(--spacing-s) var(--spacing-m);
+  border-width: var(--border-width, 1px);
   border-style: solid;
   border-color: var(--button-border-color);
-  border-radius: var(--border-radius-default); // Use new variable
+  border-radius: var(--border-radius-default);
   background-color: var(--button-bg-color);
   color: var(--button-fg-color);
   cursor: pointer;
   text-decoration: none;
-  font-size: var(--font-size-base); // Use new variable
+  font-size: var(--font-size-base);
   text-align: center;
-  transition: background-color 0.1s ease-out, border-color 0.1s ease-out, box-shadow 0.1s ease-out, filter 0.1s ease-out; // Libadwaita uses subtle transitions
-  font-weight: 500; // Libadwaita buttons are often slightly bolder
-
-  &:hover {
-    background-color: var(--button-hover-bg-color);
-  }
-
-  &:active,
-  &.active {
-    background-color: var(--button-active-bg-color);
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
-  }
-
-  &:focus-visible { // Clearer focus indication
-    outline: 2px solid var(--accent-bg-color);
-    outline-offset: 2px;
-  }
-
-  &.suggested-action {
-    background-color: var(--accent-bg-color);
-    color: var(--accent-fg-color);
-    border-color: transparent;
-
-    &:hover {
-      filter: brightness(95%);
-    }
-    &:active, &.active {
-      filter: brightness(90%);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
-    }
-  }
-
-  &.flat {
-    background-color: var(--button-flat-bg-color);
-    color: var(--button-fg-color);
-    border-color: transparent;
-    box-shadow: none;
-
-    &:hover {
-      background-color: var(--button-flat-hover-bg-color);
-    }
-    &:active, &.active {
-      background-color: var(--button-flat-active-bg-color);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-    }
-  }
-
-  // Renamed from .destructive to .destructive-action for consistency
-  &.destructive-action {
-    background-color: var(--destructive-bg-color);
-    color: var(--destructive-fg-color);
-    border-color: transparent;
-
-    &:hover {
-      filter: brightness(95%);
-    }
-    &:active, &.active {
-      filter: brightness(90%);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
-    }
-  }
-
-  &[disabled],
-  &:disabled {
-    background-color: var(--button-bg-color); // Use base bg
-    color: var(--button-fg-color); // Use base fg
-    border-color: var(--button-border-color); // Use base border
-    opacity: var(--opacity-disabled, 0.5); // Use opacity variable, provide fallback
-    cursor: not-allowed;
-    pointer-events: none;
-    box-shadow: none;
-  }
-
-  // Icon support within buttons (common in libadwaita)
-  .icon {
-    margin-right: var(--spacing-xs); // Space between icon and text
-  }
-
-  &.circular { // For icon-only circular buttons
-    padding: var(--spacing-s);
-    border-radius: 50%;
-    .icon {
-      margin-right: 0;
-    }
-  }
+  transition: background-color 0.1s ease-out, border-color 0.1s ease-out, box-shadow 0.1s ease-out, filter 0.1s ease-out;
+  font-weight: 500;
 }
-// scss/_checkbox.scss
-@use 'variables';
+.adw-button:hover {
+  background-color: var(--button-hover-bg-color);
+}
+.adw-button:active, .adw-button.active {
+  background-color: var(--button-active-bg-color);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.adw-button:focus-visible {
+  outline: 2px solid var(--accent-bg-color);
+  outline-offset: 2px;
+}
+.adw-button.suggested-action {
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+  border-color: transparent;
+}
+.adw-button.suggested-action:hover {
+  filter: brightness(95%);
+}
+.adw-button.suggested-action:active, .adw-button.suggested-action.active {
+  filter: brightness(90%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.adw-button.flat {
+  background-color: var(--button-flat-bg-color);
+  color: var(--button-fg-color);
+  border-color: transparent;
+  box-shadow: none;
+}
+.adw-button.flat:hover {
+  background-color: var(--button-flat-hover-bg-color);
+}
+.adw-button.flat:active, .adw-button.flat.active {
+  background-color: var(--button-flat-active-bg-color);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.adw-button.destructive-action {
+  background-color: var(--destructive-bg-color);
+  color: var(--destructive-fg-color);
+  border-color: transparent;
+}
+.adw-button.destructive-action:hover {
+  filter: brightness(95%);
+}
+.adw-button.destructive-action:active, .adw-button.destructive-action.active {
+  filter: brightness(90%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.adw-button[disabled], .adw-button:disabled {
+  background-color: var(--button-bg-color);
+  color: var(--button-fg-color);
+  border-color: var(--button-border-color);
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+}
+.adw-button .icon {
+  margin-right: var(--spacing-xs);
+}
+.adw-button.circular {
+  padding: var(--spacing-s);
+  border-radius: 50%;
+}
+.adw-button.circular .icon {
+  margin-right: 0;
+}
 
 .adw-checkbox {
   display: inline-flex;
   align-items: center;
   cursor: pointer;
   user-select: none;
-  gap: var(--spacing-s); // Use gap for spacing between indicator and label
-
-  input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-
-    &:checked + .adw-checkbox-indicator {
-      background-color: var(--accent-bg-color);
-      border-color: var(--accent-bg-color);
-
-      &:before {
-        content: "";
-        display: block;
-        width: 5px; // Slightly adjusted for visual balance
-        height: 9px; // Slightly adjusted for visual balance
-        border-style: solid;
-        border-color: var(--accent-fg-color);
-        border-width: 0 2px 2px 0;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        // Adjusted transform for better centering of a typical checkmark
-        transform: translate(-50%, -60%) rotate(45deg);
-      }
-    }
-
-    &:disabled + .adw-checkbox-indicator {
-      background-color: var(--shade-color); // Use shade for disabled background
-      border-color: var(--border-color-light); // Muted border
-      opacity: var(--opacity-disabled, 0.5); // Use variable
-      cursor: not-allowed;
-    }
-
-    &:disabled:checked + .adw-checkbox-indicator {
-        // Ensure disabled but checked state is also styled appropriately
-        background-color: var(--accent-bg-color); // Keep accent bg
-        border-color: var(--accent-bg-color); // Keep accent border
-        opacity: var(--opacity-disabled, 0.5);
-         &:before {
-            border-color: var(--accent-fg-color); // Keep checkmark color
-         }
-    }
-
-    &:focus-visible + .adw-checkbox-indicator {
-      outline: 2px solid var(--accent-bg-color);
-      outline-offset: 2px;
-    }
-  }
-
-  .adw-checkbox-indicator {
-    width: 18px; // Common size
-    height: 18px;
-    border-width: var(--border-width, 1px);
-    border-style: solid;
-    border-color: var(--border-color-light);
-    border-radius: var(--border-radius-small); // Checkboxes are usually less rounded than buttons
-    background-color: var(--view-bg-color);
-    // margin-right: var(--spacing-s); // Replaced by gap on parent
-    position: relative;
-    transition: background-color 0.1s ease-out, border-color 0.1s ease-out;
-    flex-shrink: 0; // Prevent indicator from shrinking
-  }
-
-  .adw-checkbox-label {
-    color: var(--view-fg-color);
-    line-height: 1.2; // Ensure label text aligns well if it wraps
-  }
+  gap: var(--spacing-s);
+}
+.adw-checkbox input[type=checkbox] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.adw-checkbox input[type=checkbox]:checked + .adw-checkbox-indicator {
+  background-color: var(--accent-bg-color);
+  border-color: var(--accent-bg-color);
+}
+.adw-checkbox input[type=checkbox]:checked + .adw-checkbox-indicator:before {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 9px;
+  border-style: solid;
+  border-color: var(--accent-fg-color);
+  border-width: 0 2px 2px 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%) rotate(45deg);
+}
+.adw-checkbox input[type=checkbox]:disabled + .adw-checkbox-indicator {
+  background-color: var(--shade-color);
+  border-color: var(--border-color-light);
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+}
+.adw-checkbox input[type=checkbox]:disabled:checked + .adw-checkbox-indicator {
+  background-color: var(--accent-bg-color);
+  border-color: var(--accent-bg-color);
+  opacity: var(--opacity-disabled, 0.5);
+}
+.adw-checkbox input[type=checkbox]:disabled:checked + .adw-checkbox-indicator:before {
+  border-color: var(--accent-fg-color);
+}
+.adw-checkbox input[type=checkbox]:focus-visible + .adw-checkbox-indicator {
+  outline: 2px solid var(--accent-bg-color);
+  outline-offset: 2px;
+}
+.adw-checkbox .adw-checkbox-indicator {
+  width: 18px;
+  height: 18px;
+  border-width: var(--border-width, 1px);
+  border-style: solid;
+  border-color: var(--border-color-light);
+  border-radius: var(--border-radius-small);
+  background-color: var(--view-bg-color);
+  position: relative;
+  transition: background-color 0.1s ease-out, border-color 0.1s ease-out;
+  flex-shrink: 0;
+}
+.adw-checkbox .adw-checkbox-label {
+  color: var(--view-fg-color);
+  line-height: 1.2;
 }
 
-.dark-theme .adw-checkbox,
-body.dark-theme .adw-checkbox {
-  input[type="checkbox"] {
-    &:disabled + .adw-checkbox-indicator {
-      border-color: var(--border-color-dark);
-    }
-  }
-  .adw-checkbox-indicator {
-    border-color: var(--border-color-dark);
-    background-color: var(--view-bg-color); // Ensure this is dark theme's view bg
-  }
-  .adw-checkbox-label {
-    color: var(--view-fg-color); // Ensure this is dark theme's view fg
-  }
+.dark-theme .adw-checkbox input[type=checkbox]:disabled + .adw-checkbox-indicator,
+body.dark-theme .adw-checkbox input[type=checkbox]:disabled + .adw-checkbox-indicator {
+  border-color: var(--border-color-dark);
 }
-// scss/_dialog.scss
-@use 'variables';
+.dark-theme .adw-checkbox .adw-checkbox-indicator,
+body.dark-theme .adw-checkbox .adw-checkbox-indicator {
+  border-color: var(--border-color-dark);
+  background-color: var(--view-bg-color);
+}
+.dark-theme .adw-checkbox .adw-checkbox-label,
+body.dark-theme .adw-checkbox .adw-checkbox-label {
+  color: var(--view-fg-color);
+}
 
 .adw-dialog {
   background-color: var(--dialog-bg-color);
   color: var(--dialog-fg-color);
-  border-radius: var(--window-radius); // Use window-radius for dialogs
-  // Softer, more diffused shadow, with a subtle border component
-  box-shadow: 0 0 0 1px var(--border-color-light, rgba(0,0,0,0.08)),
-              0 8px 16px -4px rgba(0,0,0,0.1),
-              0 6px 12px rgba(0,0,0,0.08);
-  padding: var(--spacing-l); // Adjusted padding, was large, using L now. XL could be too much for compact dialogs.
+  border-radius: var(--window-radius);
+  box-shadow: 0 0 0 1px var(--border-color-light, rgba(0, 0, 0, 0.08)), 0 8px 16px -4px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.08);
+  padding: var(--spacing-l);
   width: 90%;
-  max-width: 550px; // Slightly increased max-width
+  max-width: 550px;
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.95); // Start slightly smaller for pop effect
+  transform: translate(-50%, -50%) scale(0.95);
   z-index: 500;
   opacity: 0;
-  transition: opacity 0.15s ease-out, transform 0.15s ease-out; // Slightly faster transition
-
-  &.open {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  .adw-dialog-title {
-    font-size: var(--font-size-h3); // Adjusted font size
-    margin-bottom: var(--spacing-m);
-    font-weight: bold;
-    color: var(--headerbar-fg-color); // Dialog titles often match headerbar text color
-  }
-
-  .adw-dialog-content {
-    margin-bottom: var(--spacing-l); // Adjusted spacing
-    // Consider line-height for readability if content is text-heavy
-    // line-height: 1.6;
-  }
-
-  .adw-dialog-buttons {
-    display: flex; // Use flex for better button alignment and spacing
-    justify-content: flex-end; // Align buttons to the right
-    gap: var(--spacing-s); // Use gap for spacing between buttons
-
-    .adw-button {
-      margin-left: 0; // Remove margin-left if using gap
-      // Buttons in dialogs sometimes are less padded if space is tight
-      // padding: var(--spacing-xs) var(--spacing-s);
-    }
-  }
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+}
+.adw-dialog.open {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.adw-dialog .adw-dialog-title {
+  font-size: var(--font-size-h3);
+  margin-bottom: var(--spacing-m);
+  font-weight: bold;
+  color: var(--headerbar-fg-color);
+}
+.adw-dialog .adw-dialog-content {
+  margin-bottom: var(--spacing-l);
+}
+.adw-dialog .adw-dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-s);
+}
+.adw-dialog .adw-dialog-buttons .adw-button {
+  margin-left: 0;
 }
 
 .dark-theme .adw-dialog,
 body.dark-theme .adw-dialog {
-  box-shadow: 0 0 0 1px var(--border-color-dark, rgba(255,255,255,0.08)),
-              0 8px 16px -4px rgba(0,0,0,0.25), // Darker shadow for dark theme
-              0 6px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 0 0 1px var(--border-color-dark, rgba(255, 255, 255, 0.08)), 0 8px 16px -4px rgba(0, 0, 0, 0.25), 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-// Backdrop
 .adw-dialog-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.25); // More subtle backdrop
+  background-color: rgba(0, 0, 0, 0.25);
   z-index: 499;
   opacity: 0;
-  transition: opacity 0.15s ease-out; // Match dialog transition speed
-
-  &.open {
-    opacity: 1;
-  }
+  transition: opacity 0.15s ease-out;
 }
-// scss/_entry.scss
-@use "variables"; // Keep for potential mixins/functions
+.adw-dialog-backdrop.open {
+  opacity: 1;
+}
 
 .adw-entry {
-  padding: var(--spacing-s) var(--spacing-m); // Adjusted padding
+  padding: var(--spacing-s) var(--spacing-m);
   border-width: var(--border-width, 1px);
   border-style: solid;
-  // Use theme-aware border color. In light theme, this will be --border-color-light.
-  // In dark theme, --border-color-dark.
   border-color: var(--border-color-light);
   border-radius: var(--border-radius-default);
   background-color: var(--view-bg-color);
   color: var(--view-fg-color);
   font-size: var(--font-size-base);
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; // Smooth transition for focus
-  box-shadow: inset 0 1px 1px rgba(0,0,0,0.03); // Subtle inner shadow for depth
-
-  &:focus,
-  &:focus-within { // Use focus-within to style container if interactive elements inside are focused
-    outline: none;
-    border-color: var(--accent-bg-color); // Use accent-bg-color for border on focus
-    // Optional: Add a subtle box-shadow for a stronger focus indication, similar to Adwaita
-    box-shadow: inset 0 1px 1px rgba(0,0,0,0.03), 0 0 0 2px rgba(var(--accent-bg-color), 0.3);
-  }
-
-  &::placeholder {
-    color: var(--window-fg-color); // Use window-fg-color for placeholder
-    opacity: 0.6; // Make placeholder text lighter
-  }
-
-  &[disabled],
-  &:disabled {
-    opacity: var(--opacity-disabled, 0.5);
-    pointer-events: none;
-    background-color: var(--shade-color); // A slightly shaded background for disabled state
-    border-color: var(--border-color-light); // Keep border consistent or make it more muted
-    box-shadow: none; // No shadow when disabled
-    // color: var(--disabled-fg-color); // If you have a specific disabled foreground color
-  }
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.03);
+}
+.adw-entry:focus, .adw-entry:focus-within {
+  outline: none;
+  border-color: var(--accent-bg-color);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.03), 0 0 0 2px rgba(var(--accent-bg-color), 0.3);
+}
+.adw-entry::placeholder {
+  color: var(--window-fg-color);
+  opacity: 0.6;
+}
+.adw-entry[disabled], .adw-entry:disabled {
+  opacity: var(--opacity-disabled, 0.5);
+  pointer-events: none;
+  background-color: var(--shade-color);
+  border-color: var(--border-color-light);
+  box-shadow: none;
 }
 
-// Apply dark theme variables for border color
 .dark-theme .adw-entry,
 body.dark-theme .adw-entry {
   border-color: var(--border-color-dark);
-  box-shadow: inset 0 1px 1px rgba(255,255,255,0.03); // Subtle inner shadow for depth
-
-  &[disabled],
-  &:disabled {
-    border-color: var(--border-color-dark);
-    background-color: var(--shade-color); // ensure shade-color is appropriate for dark too
-  }
-
-  &::placeholder {
-    color: var(--window-fg-color);
-    opacity: 0.6;
-  }
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.03);
 }
-// scss/_headerbar.scss
-@use 'variables'; // Keep for potential mixins/functions
+.dark-theme .adw-entry[disabled], .dark-theme .adw-entry:disabled,
+body.dark-theme .adw-entry[disabled],
+body.dark-theme .adw-entry:disabled {
+  border-color: var(--border-color-dark);
+  background-color: var(--shade-color);
+}
+
+.adw-expander-row > .adw-action-row {
+  cursor: pointer;
+  position: relative;
+}
+.adw-expander-row > .adw-action-row .adw-expander-row-arrow {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--window-fg-color);
+  transition: transform 0.15s ease-in-out;
+  margin-left: var(--spacing-s);
+  opacity: 0.7;
+}
+.adw-expander-row > .adw-action-row.expanded .adw-expander-row-arrow {
+  transform: rotate(90deg);
+}
+.adw-expander-row > .adw-action-row .adw-action-row-suffix .adw-expander-row-arrow {
+  margin-left: 0;
+}
+.adw-expander-row .adw-expander-row-content-area {
+  padding: var(--spacing-m) var(--spacing-l);
+  padding-left: calc(var(--spacing-l) + var(--spacing-m) + 5px);
+  background-color: var(--shade-color);
+  border-bottom: var(--border-width, 1px) solid var(--border-color-light);
+  display: none;
+}
+.adw-expander-row .adw-expander-row-content-area.visible {
+  display: block;
+}
+.adw-expander-row:last-child > .adw-expander-row-content-area {
+  border-bottom-left-radius: var(--border-radius-default);
+  border-bottom-right-radius: var(--border-radius-default);
+}
+
+.dark-theme .adw-expander-row .adw-expander-row-content-area,
+body.dark-theme .adw-expander-row .adw-expander-row-content-area {
+  border-bottom-color: var(--border-color-dark);
+}
 
 .adw-header-bar {
   background-color: var(--headerbar-bg-color);
   color: var(--headerbar-fg-color);
   border-bottom: var(--border-width, 1px) solid var(--headerbar-border-color);
-  padding: var(--spacing-xs) var(--spacing-m); // Adjusted padding
+  padding: var(--spacing-xs) var(--spacing-m);
   display: flex;
   align-items: center;
-  // justify-content: space-between; // This can be tricky with a centered title
-  min-height: 48px; // A common minimum height for headerbars
-
-  .adw-header-bar-start,
-  .adw-header-bar-end {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0; // Prevent start/end items from shrinking too much
-
-    > * { // Direct children, usually buttons
-      margin-right: var(--spacing-xs);
-      &:last-child {
-        margin-right: 0;
-      }
-    }
-  }
-
-  .adw-header-bar-start {
-    // No specific styles needed here if using flex correctly on parent
-  }
-
-  .adw-header-bar-end {
-    margin-left: auto; // Pushes end content to the right
-    > * { // Direct children, usually buttons
-      margin-left: var(--spacing-xs); // Use margin-left for spacing in the end group
-      margin-right: 0;
-      &:first-child {
-        margin-left: 0;
-      }
-    }
-  }
-
-  .adw-header-bar-center-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center; // Center title/subtitle if they are stacked
-    justify-content: center; // Center them vertically if headerbar has extra height
-    flex-grow: 1;
-    flex-shrink: 1;
-    min-width: 0; // Essential for text-overflow ellipsis
-    text-align: center; // Fallback for non-flex content
-    margin: 0 var(--spacing-m); // Provide some space from start/end sections
-  }
-
-  .adw-header-bar-title {
-    font-size: var(--font-size-large); // Use defined font size
-    font-weight: bold; // Libadwaita titles are usually bold
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.2; // Adjust line height for better visual
-  }
-
-  .adw-header-bar-subtitle {
-    font-size: var(--font-size-small); // Use defined font size
-    color: var(--headerbar-fg-color); // Use headerbar fg color
-    opacity: 0.7; // Muted appearance for subtitle
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.2; // Adjust line height
-    margin-top: 2px; // Small space between title and subtitle
-  }
-
-  // Style for when content is scrolled underneath the headerbar
-  &.scrolled {
-    // Use the pre-defined headerbar-shade-color for the shadow
-    // The shadow is typically subtle and only on the bottom
-    box-shadow: 0 2px 4px -2px var(--headerbar-shade-color);
-    // Some themes might make the border slightly more opaque or change bg
-    // border-bottom-color: var(--headerbar-darker-shade-color); // If you have such a variable
-  }
+  min-height: 48px;
 }
-// scss/_label.scss
-@use 'variables';
+.adw-header-bar .adw-header-bar-start,
+.adw-header-bar .adw-header-bar-end {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.adw-header-bar .adw-header-bar-start > *,
+.adw-header-bar .adw-header-bar-start adw-button,
+.adw-header-bar .adw-header-bar-start a,
+.adw-header-bar .adw-header-bar-end > *,
+.adw-header-bar .adw-header-bar-end adw-button,
+.adw-header-bar .adw-header-bar-end a {
+  color: var(--headerbar-fg-color);
+}
+.adw-header-bar .adw-header-bar-start > *.adw-button.circular,
+.adw-header-bar .adw-header-bar-start adw-button.adw-button.circular,
+.adw-header-bar .adw-header-bar-start a.adw-button.circular,
+.adw-header-bar .adw-header-bar-end > *.adw-button.circular,
+.adw-header-bar .adw-header-bar-end adw-button.adw-button.circular,
+.adw-header-bar .adw-header-bar-end a.adw-button.circular {
+  padding: var(--spacing-xxs);
+}
+.adw-header-bar .adw-header-bar-start > *, .adw-header-bar .adw-header-bar-start adw-button, .adw-header-bar .adw-header-bar-start a {
+  margin-right: var(--spacing-xs);
+}
+.adw-header-bar .adw-header-bar-start > *:last-child, .adw-header-bar .adw-header-bar-start adw-button:last-child, .adw-header-bar .adw-header-bar-start a:last-child {
+  margin-right: 0;
+}
+.adw-header-bar .adw-header-bar-end {
+  margin-left: auto;
+}
+.adw-header-bar .adw-header-bar-end > *, .adw-header-bar .adw-header-bar-end adw-button, .adw-header-bar .adw-header-bar-end a {
+  margin-left: var(--spacing-xs);
+  margin-right: 0;
+}
+.adw-header-bar .adw-header-bar-end > *:first-child, .adw-header-bar .adw-header-bar-end adw-button:first-child, .adw-header-bar .adw-header-bar-end a:first-child {
+  margin-left: 0;
+}
+.adw-header-bar .adw-header-bar-center-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  text-align: center;
+  margin: 0 var(--spacing-m);
+}
+.adw-header-bar .adw-header-bar-title {
+  font-size: var(--font-size-large);
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+.adw-header-bar .adw-header-bar-subtitle {
+  font-size: var(--font-size-small);
+  color: var(--headerbar-fg-color);
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+.adw-header-bar.scrolled {
+  box-shadow: 0 2px 4px -2px var(--headerbar-shade-color);
+}
+.adw-header-bar a,
+.adw-header-bar adw-button,
+.adw-header-bar .adw-button {
+  color: var(--headerbar-fg-color);
+  text-decoration: none;
+}
+.adw-header-bar a:hover,
+.adw-header-bar adw-button:hover,
+.adw-header-bar .adw-button:hover {
+  color: var(--headerbar-fg-color);
+}
 
 .adw-label {
-  color: var(--view-fg-color); // Default color, assumes label is on a view background
-  font-family: var(--document-font-family); // Ensure consistent font family
-  line-height: 1.5; // Sensible default line height for readability
-  // user-select: text; // Uncomment if labels should generally be selectable
-
-  // Standard text selection style (libadwaita often uses accent color for this)
-  &::selection {
-    background-color: var(--accent-bg-color);
-    color: var(--accent-fg-color);
-  }
-
-  // Typographic Scale
-  &.h1, &.title-1 { // Allow both .h1 and .title-1 for flexibility
-    font-size: var(--font-size-h1);
-    font-weight: bold;
-    line-height: 1.3; // Tighter line height for large titles
-  }
-
-  &.h2, &.title-2 {
-    font-size: var(--font-size-h2);
-    font-weight: bold;
-    line-height: 1.3;
-  }
-
-  &.h3, &.title-3 {
-    font-size: var(--font-size-h3);
-    font-weight: bold;
-    line-height: 1.4;
-  }
-
-  &.h4, &.title-4 {
-    font-size: var(--font-size-h4);
-    font-weight: bold; // Often bold, but could be normal for subtitles
-    line-height: 1.4;
-  }
-
-  // Default/Body text style (if .adw-label is used without other classes)
-  // or explicitly with .body
-  &.body {
-    font-size: var(--font-size-base);
-    font-weight: normal; // Ensure body text is normal weight
-  }
-
-  // Small text, often used for captions or secondary information
-  &.small, &.caption {
-    font-size: var(--font-size-small);
-    color: var(--view-fg-color); // Start with base color
-    opacity: 0.75; // Muted appearance for captions
-  }
-
-  // Emphasized text (could be italic or bolder depending on style)
-  &.em {
-    font-style: italic;
-  }
-
-  // Strong text
-  &.strong {
-    font-weight: bold;
-  }
-
-  // Disabled label
-  &.disabled {
-    color: var(--view-fg-color); // Start with base color
-    opacity: var(--opacity-disabled, 0.5);
-    user-select: none; // Non-selectable when disabled
-  }
-
-  // Link-like label
-  &.link {
-    color: var(--link-color);
-    cursor: pointer;
-    text-decoration: none; // Libadwaita links usually don't have underlines by default
-    &:hover {
-      text-decoration: underline; // Underline on hover is common
-    }
-  }
+  color: var(--view-fg-color);
+  font-family: var(--document-font-family);
+  line-height: 1.5;
+}
+.adw-label::selection {
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+}
+.adw-label.h1, .adw-label.title-1 {
+  font-size: var(--font-size-h1);
+  font-weight: bold;
+  line-height: 1.3;
+}
+.adw-label.h2, .adw-label.title-2 {
+  font-size: var(--font-size-h2);
+  font-weight: bold;
+  line-height: 1.3;
+}
+.adw-label.h3, .adw-label.title-3 {
+  font-size: var(--font-size-h3);
+  font-weight: bold;
+  line-height: 1.4;
+}
+.adw-label.h4, .adw-label.title-4 {
+  font-size: var(--font-size-h4);
+  font-weight: bold;
+  line-height: 1.4;
+}
+.adw-label.body {
+  font-size: var(--font-size-base);
+  font-weight: normal;
+}
+.adw-label.small, .adw-label.caption {
+  font-size: var(--font-size-small);
+  color: var(--view-fg-color);
+  opacity: 0.75;
+}
+.adw-label.em {
+  font-style: italic;
+}
+.adw-label.strong {
+  font-weight: bold;
+}
+.adw-label.disabled {
+  color: var(--view-fg-color);
+  opacity: var(--opacity-disabled, 0.5);
+  user-select: none;
+}
+.adw-label.link {
+  color: var(--link-color);
+  cursor: pointer;
+  text-decoration: none;
+}
+.adw-label.link:hover {
+  text-decoration: underline;
 }
 
-// Ensure dark theme variables are picked up if view-fg-color changes
 .dark-theme .adw-label,
 body.dark-theme .adw-label {
-  color: var(--view-fg-color); // Re-affirm for specificity if needed
-
-  &.small, &.caption {
-    color: var(--view-fg-color);
-    opacity: 0.75; // Opacity works fine on dark theme too
-  }
-
-  &.disabled {
-    color: var(--view-fg-color);
-    opacity: var(--opacity-disabled, 0.5);
-  }
-
-  &.link {
-    color: var(--link-color); // This should be the dark theme link color from variables
-  }
-
-   &::selection {
-    background-color: var(--accent-bg-color); // Should use dark theme accent
-    color: var(--accent-fg-color); // Should use dark theme accent fg
-  }
+  color: var(--view-fg-color);
 }
-// scss/_listbox.scss
-
-@use 'variables';
+.dark-theme .adw-label.small, .dark-theme .adw-label.caption,
+body.dark-theme .adw-label.small,
+body.dark-theme .adw-label.caption {
+  color: var(--view-fg-color);
+  opacity: 0.75;
+}
+.dark-theme .adw-label.disabled,
+body.dark-theme .adw-label.disabled {
+  color: var(--view-fg-color);
+  opacity: var(--opacity-disabled, 0.5);
+}
+.dark-theme .adw-label.link,
+body.dark-theme .adw-label.link {
+  color: var(--link-color);
+}
+.dark-theme .adw-label::selection,
+body.dark-theme .adw-label::selection {
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+}
 
 .adw-list-box {
-  background-color: var(--view-bg-color); // Or --card-bg-color if used as a card
-  // Use theme-aware border color for the outer border
+  background-color: var(--view-bg-color);
   border: var(--border-width, 1px) solid var(--border-color-light);
   border-radius: var(--border-radius-default);
-  overflow: hidden; // Ensures rows inside respect the border radius
-
-  .adw-list-row {
-    display: flex;
-    align-items: center;
-    // justify-content: space-between; // If you want to push content to ends
-    padding: var(--spacing-m);
-    // Use theme-aware border color for separators
-    border-bottom: var(--border-width, 1px) solid var(--border-color-light);
-    transition: background-color 0.1s ease-out, color 0.1s ease-out;
-    cursor: default; // Default cursor, change if rows are interactive
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:hover {
-      // Use a subtle hover effect, slightly darker than view-bg or lighter than card-bg
-      // This needs careful variable choice. For now, a generic shade.
-      background-color: var(--shade-color);
-    }
-
-    &.interactive { // Add this class if the row itself is clickable
-        cursor: pointer;
-    }
-
-    &.activatable:hover { // For rows that can be "selected" but aren't yet
-        // A slightly more prominent hover, perhaps using button hover colors
-        background-color: var(--button-hover-bg-color);
-    }
-
-    &.activated,
-    &.selected { // Use .selected as well, common terminology
-      background-color: var(--accent-bg-color);
-      color: var(--accent-fg-color);
-
-      // Ensure text and icons within the activated row are readable
-      .adw-label, .icon, // Assuming you might have .adw-label or .icon classes
-      > * { // Or style all direct children
-        color: var(--accent-fg-color);
-      }
-    }
-
-    &[disabled],
-    &:disabled {
-        opacity: var(--opacity-disabled, 0.5);
-        cursor: not-allowed;
-        background-color: transparent; // Or a specific disabled bg for rows
-        &:hover {
-            background-color: transparent; // No hover effect on disabled rows
-        }
-    }
-
-    // Example: styling for a title and subtitle within a row
-    .title {
-      font-weight: 500; // Bolder title
-      color: var(--view-fg-color); // Default text color
-    }
-    .subtitle {
-      font-size: var(--font-size-small);
-      color: var(--view-fg-color); // Default text color
-      opacity: 0.7; // Muted subtitle
-    }
-    // If row is activated, title/subtitle color should be --accent-fg-color
-    &.activated .title,
-    &.activated .subtitle {
-        color: var(--accent-fg-color);
-        opacity: 1; // Ensure full opacity for subtitle
-    }
-  }
+  overflow: hidden;
+}
+.adw-list-box .adw-list-row {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-m);
+  border-bottom: var(--border-width, 1px) solid var(--border-color-light);
+  transition: background-color 0.1s ease-out, color 0.1s ease-out;
+  cursor: default;
+}
+.adw-list-box .adw-list-row:last-child {
+  border-bottom: none;
+}
+.adw-list-box .adw-list-row:hover {
+  background-color: var(--shade-color);
+}
+.adw-list-box .adw-list-row.interactive {
+  cursor: pointer;
+}
+.adw-list-box .adw-list-row.activatable:hover {
+  background-color: var(--button-hover-bg-color);
+}
+.adw-list-box .adw-list-row.activated, .adw-list-box .adw-list-row.selected {
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+}
+.adw-list-box .adw-list-row.activated .adw-label, .adw-list-box .adw-list-row.activated .icon,
+.adw-list-box .adw-list-row.activated > *, .adw-list-box .adw-list-row.selected .adw-label, .adw-list-box .adw-list-row.selected .icon,
+.adw-list-box .adw-list-row.selected > * {
+  color: var(--accent-fg-color);
+}
+.adw-list-box .adw-list-row[disabled], .adw-list-box .adw-list-row:disabled {
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+  background-color: transparent;
+}
+.adw-list-box .adw-list-row[disabled]:hover, .adw-list-box .adw-list-row:disabled:hover {
+  background-color: transparent;
+}
+.adw-list-box .adw-list-row .title {
+  font-weight: 500;
+  color: var(--view-fg-color);
+}
+.adw-list-box .adw-list-row .subtitle {
+  font-size: var(--font-size-small);
+  color: var(--view-fg-color);
+  opacity: 0.7;
+}
+.adw-list-box .adw-list-row.activated .title, .adw-list-box .adw-list-row.activated .subtitle {
+  color: var(--accent-fg-color);
+  opacity: 1;
 }
 
-// Dark theme adjustments for ListBox borders
 .dark-theme .adw-list-box,
 body.dark-theme .adw-list-box {
   border-color: var(--border-color-dark);
-
-  .adw-list-row {
-    border-bottom-color: var(--border-color-dark);
-
-    &:hover {
-      // A subtle hover for dark theme, often a slightly lighter shade of the bg
-      background-color: var(--shade-color); // Ensure this shade is suitable for dark
-    }
-
-    &.activatable:hover {
-        background-color: var(--button-hover-bg-color); // Ensure this is dark theme appropriate
-    }
-
-    // Ensure title/subtitle colors are correct for dark theme if not activated
-    .title {
-      color: var(--view-fg-color);
-    }
-    .subtitle {
-      color: var(--view-fg-color);
-    }
-  }
+}
+.dark-theme .adw-list-box .adw-list-row,
+body.dark-theme .adw-list-box .adw-list-row {
+  border-bottom-color: var(--border-color-dark);
+}
+.dark-theme .adw-list-box .adw-list-row:hover,
+body.dark-theme .adw-list-box .adw-list-row:hover {
+  background-color: var(--shade-color);
+}
+.dark-theme .adw-list-box .adw-list-row.activatable:hover,
+body.dark-theme .adw-list-box .adw-list-row.activatable:hover {
+  background-color: var(--button-hover-bg-color);
+}
+.dark-theme .adw-list-box .adw-list-row .title,
+body.dark-theme .adw-list-box .adw-list-row .title {
+  color: var(--view-fg-color);
+}
+.dark-theme .adw-list-box .adw-list-row .subtitle,
+body.dark-theme .adw-list-box .adw-list-row .subtitle {
+  color: var(--view-fg-color);
 }
 
-// Flat style: no outer border, often used when listbox fills a container
 .adw-list-box.flat {
   border: none;
-  border-radius: 0; // Or keep radius if desired, but typically flat means no outer decoration
-  // Row separators might need to be stronger if no outer border
-  // .adw-list-row {
-  //   border-bottom-color: var(--border-color-light-stronger); // Define if needed
-  // }
+  border-radius: 0;
 }
-// Dark theme for flat listbox
-.dark-theme .adw-list-box.flat,
-body.dark-theme .adw-list-box.flat {
-  // .adw-list-row {
-  //   border-bottom-color: var(--border-color-dark-stronger); // Define if needed
-  // }
-}
-// scss/_progressbar.scss
-@use "variables";
 
 .adw-progress-bar {
   width: 100%;
-  height: 6px; // Libadwaita progress bars are often more slender
-  // Use a variable for background, shade-color is a good candidate for the track
+  height: 6px;
   background-color: var(--progress-bar-track-color, var(--shade-color));
-  border-radius: 3px; // Half of height
+  border-radius: 3px;
   overflow: hidden;
-  position: relative; // For indeterminate state animation
-
-  .adw-progress-bar-value {
-    height: 100%;
-    // Use accent color for the progress value.
-    // Define --progress-bar-fill-color if it needs to be different from accent.
-    background-color: var(--progress-bar-fill-color, var(--accent-bg-color));
-    width: 0%; // Default to 0%, can be set by JS or inline style
-    transition: width 0.15s ease-out; // Faster, smoother animation
-    border-radius: 3px; // Match parent border-radius
-  }
-
-  &[disabled] {
-    opacity: var(--opacity-disabled, 0.5); // Use variable
-    cursor: not-allowed;
-    // Colors should remain to indicate progress, opacity handles the disabled look
-  }
-
-  // Indeterminate state styling (basic, can be enhanced with animations)
-  &.indeterminate {
-    .adw-progress-bar-value {
-      width: 100% !important; // Value takes full width for some indeterminate styles
-      background-color: transparent; // Hide the normal value bar background
-      // Animation for indeterminate state (example: a moving bar)
-      // This requires defining @keyframes animation elsewhere
-      // animation: progress-indeterminate 2s infinite linear;
-    }
-    // Example of an animated sub-element for indeterminate
-    // This is a common pattern in libadwaita
-    &:before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 30%; // Width of the moving indicator
-        background-color: var(--accent-bg-color);
-        border-radius: 3px;
-        animation: adw-progress-indeterminate 1.5s infinite ease-in-out;
-    }
-  }
+  position: relative;
+}
+.adw-progress-bar .adw-progress-bar-value {
+  height: 100%;
+  background-color: var(--progress-bar-fill-color, var(--accent-bg-color));
+  width: 0%;
+  transition: width 0.15s ease-out;
+  border-radius: 3px;
+}
+.adw-progress-bar[disabled] {
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+}
+.adw-progress-bar.indeterminate .adw-progress-bar-value {
+  width: 100% !important;
+  background-color: transparent;
+}
+.adw-progress-bar.indeterminate:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 30%;
+  background-color: var(--accent-bg-color);
+  border-radius: 3px;
+  animation: adw-progress-indeterminate 1.5s infinite ease-in-out;
 }
 
-// Define the indeterminate animation
 @keyframes adw-progress-indeterminate {
   0% {
-    left: -35%; // Start off-screen to the left
+    left: -35%;
     width: 30%;
   }
   50% {
     left: 50%;
-    width: 40%; // Pulse width slightly in the middle
+    width: 40%;
   }
   100% {
-    left: 105%; // End off-screen to the right
+    left: 105%;
     width: 30%;
   }
 }
-
-// Variables to be added to _variables.scss if not already present:
-// :root {
-//   --progress-bar-track-color: var(--shade-color); // Or a specific color
-//   --progress-bar-fill-color: var(--accent-bg-color);
-// }
-// body.light-theme {
-//   --progress-bar-track-color: var(--shade-color); // e.g. rgba(0,0,0,0.1)
-// }
-// body.dark-theme {
-//   --progress-bar-track-color: var(--shade-color); // e.g. rgba(255,255,255,0.1)
-// }
-
-// Ensure dark theme variables are respected if they differ significantly
-.dark-theme .adw-progress-bar,
-body.dark-theme .adw-progress-bar {
-    background-color: var(--progress-bar-track-color, var(--shade-color));
-
-    .adw-progress-bar-value {
-        background-color: var(--progress-bar-fill-color, var(--accent-bg-color));
-    }
-
-    &.indeterminate:before {
-        background-color: var(--accent-bg-color);
-    }
-}
-// scss/_radio.scss
-@use 'variables';
-
 .adw-radio {
   display: inline-flex;
   align-items: center;
   cursor: pointer;
   user-select: none;
-  gap: var(--spacing-s); // Use gap for spacing
-
-  input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-
-    &:checked + .adw-radio-indicator {
-      // Outer circle background remains view-bg-color or transparent
-      // Border color changes to accent
-      border-color: var(--accent-bg-color);
-
-      &:before { // This is the inner dot
-        content: "";
-        display: block;
-        width: 8px; // Size of the inner dot
-        height: 8px;
-        border-radius: 50%;
-        background-color: var(--accent-bg-color); // Dot color is accent
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
-    }
-
-    &:disabled + .adw-radio-indicator {
-      background-color: var(--shade-color); // Use shade for disabled background
-      border-color: var(--border-color-light); // Muted border
-      opacity: var(--opacity-disabled, 0.5);
-      cursor: not-allowed;
-
-      &:before { // Inner dot for disabled but checked
-        background-color: transparent; // No dot or very muted dot
-      }
-    }
-
-    &:disabled:checked + .adw-radio-indicator {
-        border-color: var(--accent-bg-color); // Keep accent border color
-        opacity: var(--opacity-disabled, 0.5);
-        &:before {
-            background-color: var(--accent-bg-color); // Keep accent dot color
-        }
-    }
-
-    &:focus-visible + .adw-radio-indicator {
-      outline: 2px solid var(--accent-bg-color);
-      outline-offset: 2px;
-    }
-  }
-
-  .adw-radio-indicator {
-    width: 18px;
-    height: 18px;
-    border-width: var(--border-width, 1px); // Use 2px for a more standard radio look if preferred
-    border-style: solid;
-    border-color: var(--border-color-light);
-    border-radius: 50%; // Perfectly circular
-    background-color: var(--view-bg-color); // Background of the outer circle
-    // margin-right: var(--spacing-s); // Replaced by gap
-    position: relative;
-    transition: background-color 0.1s ease-out, border-color 0.1s ease-out;
-    flex-shrink: 0; // Prevent indicator from shrinking
-  }
-
-  .adw-radio-label {
-    color: var(--view-fg-color);
-    line-height: 1.2;
-  }
+  gap: var(--spacing-s);
 }
-
-.dark-theme .adw-radio,
-body.dark-theme .adw-radio {
-  input[type="radio"] {
-    &:disabled + .adw-radio-indicator {
-      border-color: var(--border-color-dark);
-    }
-     &:disabled:checked + .adw-radio-indicator {
-        border-color: var(--accent-bg-color);
-     }
-  }
-  .adw-radio-indicator {
-    border-color: var(--border-color-dark);
-    background-color: var(--view-bg-color);
-  }
-  .adw-radio-label {
-    color: var(--view-fg-color);
-  }
+.adw-radio input[type=radio] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
-// scss/_switch.scss
-@use 'variables';
-
-.adw-switch {
+.adw-radio input[type=radio]:checked + .adw-radio-indicator {
+  border-color: var(--accent-bg-color);
+}
+.adw-radio input[type=radio]:checked + .adw-radio-indicator:before {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--accent-bg-color);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.adw-radio input[type=radio]:disabled + .adw-radio-indicator {
+  background-color: var(--shade-color);
+  border-color: var(--border-color-light);
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+}
+.adw-radio input[type=radio]:disabled + .adw-radio-indicator:before {
+  background-color: transparent;
+}
+.adw-radio input[type=radio]:disabled:checked + .adw-radio-indicator {
+  border-color: var(--accent-bg-color);
+  opacity: var(--opacity-disabled, 0.5);
+}
+.adw-radio input[type=radio]:disabled:checked + .adw-radio-indicator:before {
+  background-color: var(--accent-bg-color);
+}
+.adw-radio input[type=radio]:focus-visible + .adw-radio-indicator {
+  outline: 2px solid var(--accent-bg-color);
+  outline-offset: 2px;
+}
+.adw-radio .adw-radio-indicator {
+  width: 18px;
+  height: 18px;
+  border-width: var(--border-width, 1px);
+  border-style: solid;
+  border-color: var(--border-color-light);
+  border-radius: 50%;
+  background-color: var(--view-bg-color);
   position: relative;
-  display: inline-block;
-  width: 44px; // Standard width
-  height: 24px; // Standard height
-  flex-shrink: 0; // Prevent shrinking in flex layouts
-
-  input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-
-    &:checked + .adw-switch-slider {
-      background-color: var(--accent-bg-color); // Use accent background for ON state
-    }
-
-    &:checked + .adw-switch-slider:before {
-      transform: translateX(20px); // Moves the knob to the right
-    }
-
-    &:disabled + .adw-switch-slider {
-      background-color: var(--shade-color); // Muted background when disabled
-      opacity: var(--opacity-disabled, 0.5); // Apply standard disabled opacity
-      cursor: not-allowed;
-
-      &:before {
-        background-color: var(--window-bg-color); // Knob color for disabled
-        opacity: 0.7; // Make knob slightly more transparent or match parent opacity
-      }
-    }
-
-    &:disabled:checked + .adw-switch-slider {
-      background-color: var(--accent-bg-color); // Keep accent color for checked disabled
-      opacity: var(--opacity-disabled, 0.5);
-       &:before {
-        // Knob color for disabled but checked state can be same as normal checked, opacity handles the rest
-        background-color: #ffffff; // Or var(--accent-fg-color) if it's always white
-      }
-    }
-
-    &:focus-visible + .adw-switch-slider {
-      outline: 2px solid var(--accent-bg-color);
-      outline-offset: 3px; // Slightly more offset for switches
-    }
-  }
-
-  .adw-switch-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    // Default background for OFF state (usually a gray)
-    background-color: var(--shade-color); // Using shade-color for OFF state background
-    border-radius: 12px; // Pill shape (height / 2)
-    transition: background-color 0.15s ease-out, transform 0.15s ease-out;
-
-    &:before { // This is the knob
-      position: absolute;
-      content: "";
-      height: 20px; // Knob height
-      width: 20px;  // Knob width
-      left: 2px;    // Padding from left
-      bottom: 2px;  // Padding from bottom
-      background-color: #ffffff; // Knob color (typically white)
-      border-radius: 50%; // Circular knob
-      transition: transform 0.15s ease-out;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.2); // Subtle shadow on the knob
-    }
-  }
+  transition: background-color 0.1s ease-out, border-color 0.1s ease-out;
+  flex-shrink: 0;
+}
+.adw-radio .adw-radio-label {
+  color: var(--view-fg-color);
+  line-height: 1.2;
 }
 
-.dark-theme .adw-switch,
-body.dark-theme .adw-switch {
-  input {
-    &:disabled + .adw-switch-slider {
-      // Ensure shade-color is appropriate for dark theme disabled state
-      // background-color: var(--shade-color);
-       &:before {
-        // Knob for disabled switch in dark theme could be a darker shade of white
-        // background-color: rgba(255,255,255,0.8);
-      }
-    }
-     &:disabled:checked + .adw-switch-slider {
-       &:before {
-         background-color: #ffffff; // Keep knob white for checked disabled
-      }
-    }
-  }
-  .adw-switch-slider {
-    // OFF state background for dark theme, usually a darker gray
-    background-color: var(--shade-color); // Ensure this is a good dark theme off-state color
-    &:before {
-      background-color: #ffffff; // Knob remains white
-    }
-  }
+.dark-theme .adw-radio input[type=radio]:disabled + .adw-radio-indicator,
+body.dark-theme .adw-radio input[type=radio]:disabled + .adw-radio-indicator {
+  border-color: var(--border-color-dark);
 }
-// scss/_viewswitcher.scss
-@use "variables";
-
-.adw-view-switcher {
-  display: flex;
-  flex-direction: column;
-  // border: 1px solid var(--border-color-light); // Optional: if view switcher needs a border
-  // border-radius: var(--border-radius-default);
-  // background-color: var(--view-bg-color);
+.dark-theme .adw-radio input[type=radio]:disabled:checked + .adw-radio-indicator,
+body.dark-theme .adw-radio input[type=radio]:disabled:checked + .adw-radio-indicator {
+  border-color: var(--accent-bg-color);
+}
+.dark-theme .adw-radio .adw-radio-indicator,
+body.dark-theme .adw-radio .adw-radio-indicator {
+  border-color: var(--border-color-dark);
+  background-color: var(--view-bg-color);
+}
+.dark-theme .adw-radio .adw-radio-label,
+body.dark-theme .adw-radio .adw-radio-label {
+  color: var(--view-fg-color);
 }
 
-.adw-view-switcher-bar {
-  display: flex;
-  justify-content: center; // Center buttons by default
-  padding: var(--spacing-s);
-  background-color: var(--headerbar-bg-color); // Use headerbar color for the bar
-  border-bottom: var(--border-width, 1px) solid var(--headerbar-border-color); // Match headerbar border
-
-  // Style for linked buttons look (common in libadwaita view switchers)
-  .adw-button {
-    border-radius: 0;
-    border-right-width: 0; // Remove right border for all but last
-    box-shadow: none; // Remove individual button shadows if any
-
-    &:first-child {
-      border-top-left-radius: var(--border-radius-default);
-      border-bottom-left-radius: var(--border-radius-default);
-    }
-
-    &:last-child {
-      border-top-right-radius: var(--border-radius-default);
-      border-bottom-right-radius: var(--border-radius-default);
-      border-right-width: var(--border-width, 1px); // Add back right border for the last button
-    }
-
-    // Active state for view switcher button
-    &.active {
-      background-color: var(--accent-bg-color);
-      color: var(--accent-fg-color);
-      border-color: var(--accent-bg-color); // Ensure border matches active background
-      // z-index: 1; // Ensure active button's border overlaps inactive ones cleanly
-    }
-
-    &:not(.active):hover {
-        background-color: var(--button-hover-bg-color);
-    }
-  }
-}
-
-.adw-view-switcher-content {
-  padding: var(--spacing-m);
-  // background-color: var(--view-bg-color); // Content area background
-  // flex-grow: 1; // If inside a flex container
-
-  > * { // Direct children are the views
-    display: none; // Hide all views by default
-    &.active-view {
-      display: block; // Show only the active view
-    }
-  }
-}
-
-// Dark theme adjustments
-.dark-theme .adw-view-switcher-bar,
-body.dark-theme .adw-view-switcher-bar {
-  background-color: var(--headerbar-bg-color);
-  border-bottom-color: var(--headerbar-border-color);
-
-  .adw-button {
-    &.active {
-      background-color: var(--accent-bg-color);
-      color: var(--accent-fg-color);
-      border-color: var(--accent-bg-color);
-    }
-    &:not(.active):hover {
-        background-color: var(--button-hover-bg-color);
-    }
-  }
-}
-
-// .dark-theme .adw-view-switcher-content,
-// body.dark-theme .adw-view-switcher-content {
-//   background-color: var(--view-bg-color);
-// }
-
-// scss/_flap.scss
-@use "variables";
-
-.adw-flap {
-  display: flex;
-  overflow: hidden; // Prevent content spill during transition
-  position: relative; // For potential absolute positioning of a toggle button if needed
-
-  // Default flap width, can be overridden by setting the CSS variable
-  --adw-flap-width: 280px;
-  // Transition speed for flap folding
-  --adw-flap-transition-speed: 0.25s;
-}
-
-.adw-flap-flap-content {
-  width: var(--adw-flap-width);
-  flex-shrink: 0; // Prevent flap from shrinking when main content is large
-  transition: width var(--adw-flap-transition-speed) ease-in-out,
-              visibility var(--adw-flap-transition-speed) ease-in-out,
-              opacity var(--adw-flap-transition-speed) ease-in-out;
-  background-color: var(--sidebar-bg-color); // Or card-bg-color, or view-bg-color
-  border-right: var(--border-width, 1px) solid var(--sidebar-border-color); // Separator
-  overflow: hidden; // Hide content that doesn't fit during transition
-  opacity: 1;
-  visibility: visible;
-}
-
-.adw-flap-main-content {
-  flex-grow: 1;
-  // Transition for smooth reflow if main content width changes due to flap
-  transition: margin-left var(--adw-flap-transition-speed) ease-in-out;
-  overflow-x: auto; // Allow horizontal scroll if content is too wide
-}
-
-// Styles when flap is folded
-.adw-flap.folded {
-  .adw-flap-flap-content {
-    width: 0;
-    opacity: 0;
-    visibility: hidden;
-    border-right-width: 0; // Hide border when folded
-  }
-  // Optionally, if main content needs adjustment when flap is folded
-  // .adw-flap-main-content {
-  //   margin-left: 0;
-  // }
-}
-
-
-// The toggle button is not part of the flap component by default,
-// but here's an example if you were to include one inside or alongside.
-// .adw-flap-toggle-button {
-//   // Styling for a button that might control the flap
-//   position: absolute; // Example positioning
-//   top: var(--spacing-m);
-//   left: var(--spacing-m); // Or right, depending on flap side
-//   z-index: 10; // Ensure it's above flap content
-// }
-
-
-// Dark theme adjustments
-.dark-theme .adw-flap-flap-content,
-body.dark-theme .adw-flap-flap-content {
-  background-color: var(--sidebar-bg-color); // Ensure dark theme sidebar color
-  border-right-color: var(--sidebar-border-color); // Ensure dark theme border
-}
-
-// scss/_row_types.scss
-@use "variables";
-
-// Common base for specialized rows if needed, but AdwRow already provides some.
-// These rows are typically used within an AdwListBox or a similar container.
-
-// --- AdwActionRow ---
 .adw-action-row {
   display: flex;
   align-items: center;
   width: 100%;
-  gap: var(--spacing-m); // Gap between icon, text-content, chevron
-
-  .adw-action-row-icon {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    // Styling for icon size, color can be added here or come from .icon class
-    // e.g., width: 24px; height: 24px;
-    svg { // Assuming SVG icons
-        width: 16px;
-        height: 16px;
-        fill: currentColor;
-    }
-  }
-
-  .adw-action-row-text-content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow: hidden; // For text ellipsis on title/subtitle
-  }
-
-  .adw-action-row-title {
-    font-weight: normal; // Libadwaita titles in rows are often normal weight
-    color: var(--view-fg-color);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .adw-action-row-subtitle {
-    font-size: var(--font-size-small);
-    color: var(--view-fg-color);
-    opacity: 0.7; // Muted subtitle
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .adw-action-row-chevron {
-    flex-shrink: 0;
-    font-size: var(--font-size-large); // Make chevron a bit larger
-    opacity: 0.5;
-    // Example using text chevron, an SVG would be better for consistency
-    &::after {
-      content: "❯";
-    }
-  }
-
-  // When the row itself is interactive (e.g. has an onClick)
-  &.interactive {
-    &:hover {
-        // Standard row hover from AdwRow should apply
-    }
-    &:active {
-        // Standard row active state from AdwRow should apply
-    }
-  }
+  gap: var(--spacing-m);
 }
-
-
-// --- AdwEntryRow ---
+.adw-action-row .adw-action-row-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.adw-action-row .adw-action-row-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.adw-action-row .adw-action-row-text-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+.adw-action-row .adw-action-row-title {
+  font-weight: normal;
+  color: var(--view-fg-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adw-action-row .adw-action-row-subtitle {
+  font-size: var(--font-size-small);
+  color: var(--view-fg-color);
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adw-action-row .adw-action-row-chevron {
+  flex-shrink: 0;
+  font-size: var(--font-size-large);
+  opacity: 0.5;
+}
+.adw-action-row .adw-action-row-chevron::after {
+  content: "❯";
+}
 .adw-entry-row {
   display: flex;
   align-items: center;
   width: 100%;
   gap: var(--spacing-m);
-
-  .adw-entry-row-title {
-    // No specific styles needed if it's just an AdwLabel, it will inherit.
-    // font-weight: normal; // If needed to override default label boldness
-  }
-
-  .adw-entry-row-entry {
-    flex-grow: 1;
-    // The AdwEntry component itself will have its styles
-  }
+}
+.adw-entry-row .adw-entry-row-entry {
+  flex-grow: 1;
 }
 
-
-// --- AdwExpanderRow ---
-.adw-expander-row-wrapper {
-  // This wrapper contains the clickable row and the collapsible content
-  // It might need listbox styling if used outside a listbox (e.g. border-bottom)
-  &:not(:last-child) {
-    border-bottom: var(--border-width, 1px) solid var(--border-color-light);
-  }
+.adw-expander-row-wrapper:not(:last-child) {
+  border-bottom: var(--border-width, 1px) solid var(--border-color-light);
 }
+
 .dark-theme .adw-expander-row-wrapper:not(:last-child),
 body.dark-theme .adw-expander-row-wrapper:not(:last-child) {
-    border-bottom-color: var(--border-color-dark);
+  border-bottom-color: var(--border-color-dark);
 }
-
 
 .adw-expander-row {
   display: flex;
   align-items: center;
   width: 100%;
   gap: var(--spacing-m);
-  // padding: var(--spacing-m); // Padding is usually on the AdwRow base class
-
-  .adw-expander-row-text-content { // Similar to ActionRow's text content
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .adw-expander-row-title { /* Use AdwLabel styles */ }
-  .adw-expander-row-subtitle { /* Use AdwLabel styles, but ensure opacity is applied if AdwLabel doesn't do it by default */
-    font-size: var(--font-size-small);
-    opacity: 0.7;
-   }
-
-
-  .adw-expander-row-icon {
-    flex-shrink: 0;
-    transition: transform 0.15s ease-in-out;
-    font-size: var(--font-size-large);
-    opacity: 0.7;
-    &::after {
-      content: "❯"; // Default: collapsed state
-    }
-  }
-
-  // When expanded
-  &.expanded .adw-expander-row-icon {
-    transform: rotate(90deg);
-  }
+}
+.adw-expander-row .adw-expander-row-text-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+.adw-expander-row .adw-expander-row-title { /* Use AdwLabel styles */ }
+.adw-expander-row .adw-expander-row-subtitle { /* Use AdwLabel styles, but ensure opacity is applied if AdwLabel doesn't do it by default */
+  font-size: var(--font-size-small);
+  opacity: 0.7;
+}
+.adw-expander-row .adw-expander-row-icon {
+  flex-shrink: 0;
+  transition: transform 0.15s ease-in-out;
+  font-size: var(--font-size-large);
+  opacity: 0.7;
+}
+.adw-expander-row .adw-expander-row-icon::after {
+  content: "❯";
+}
+.adw-expander-row.expanded .adw-expander-row-icon {
+  transform: rotate(90deg);
 }
 
 .adw-expander-row-content {
-  // display: none; // JS will toggle this or use max-height
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out, padding 0.2s ease-out, opacity 0.2s ease-out;
-  padding: 0 var(--spacing-m); // Horizontal padding when closed
+  padding: 0 var(--spacing-m);
   opacity: 0;
   visibility: hidden;
-
-  // Styles for the content area when expanded
-  &.expanded {
-    // display: block; // If not using max-height animation
-    max-height: 1000px; // Large enough for most content, for animation
-    padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m); // Full padding when open
-    opacity: 1;
-    visibility: visible;
-    // border-top: 1px solid var(--border-color-light); // Optional separator
-    // margin-left: var(--spacing-xl); // Optional indent for content
-  }
 }
-.dark-theme .adw-expander-row-content.expanded,
-body.dark-theme .adw-expander-row-content.expanded {
-    // border-top-color: var(--border-color-dark);
+.adw-expander-row-content.expanded {
+  max-height: 1000px;
+  padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);
+  opacity: 1;
+  visibility: visible;
 }
 
-
-// --- AdwComboRow ---
 .adw-combo-row {
   display: flex;
   align-items: center;
   width: 100%;
   gap: var(--spacing-m);
-
-  .adw-combo-row-text-content { // Similar to ActionRow's text content
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .adw-combo-row-title { /* Use AdwLabel styles */ }
-  .adw-combo-row-subtitle { /* Use AdwLabel styles, ensure opacity */
-    font-size: var(--font-size-small);
-    opacity: 0.7;
-  }
-
-  .adw-combo-row-select {
-    // Basic styling, can be enhanced
-    padding: var(--spacing-xs) var(--spacing-s);
-    border: var(--border-width, 1px) solid var(--button-border-color);
-    border-radius: var(--border-radius-default);
-    background-color: var(--button-bg-color);
-    color: var(--button-fg-color);
-    min-width: 150px; // Ensure select has some width
-
-    &:hover {
-      background-color: var(--button-hover-bg-color);
-    }
-    &:focus-visible {
-      outline: 2px solid var(--accent-bg-color);
-      outline-offset: 1px;
-    }
-    &:disabled {
-        opacity: var(--opacity-disabled, 0.5);
-        cursor: not-allowed;
-    }
-  }
+}
+.adw-combo-row .adw-combo-row-text-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+.adw-combo-row .adw-combo-row-title { /* Use AdwLabel styles */ }
+.adw-combo-row .adw-combo-row-subtitle { /* Use AdwLabel styles, ensure opacity */
+  font-size: var(--font-size-small);
+  opacity: 0.7;
+}
+.adw-combo-row .adw-combo-row-select {
+  padding: var(--spacing-xs) var(--spacing-s);
+  border: var(--border-width, 1px) solid var(--button-border-color);
+  border-radius: var(--border-radius-default);
+  background-color: var(--button-bg-color);
+  color: var(--button-fg-color);
+  min-width: 150px;
+}
+.adw-combo-row .adw-combo-row-select:hover {
+  background-color: var(--button-hover-bg-color);
+}
+.adw-combo-row .adw-combo-row-select:focus-visible {
+  outline: 2px solid var(--accent-bg-color);
+  outline-offset: 1px;
+}
+.adw-combo-row .adw-combo-row-select:disabled {
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
 }
 
-// Dark theme for ComboRow select (if not covered by button variables)
 .dark-theme .adw-combo-row .adw-combo-row-select,
 body.dark-theme .adw-combo-row .adw-combo-row-select {
-    border-color: var(--button-border-color);
-    background-color: var(--button-bg-color);
-    color: var(--button-fg-color);
-     &:hover {
-      background-color: var(--button-hover-bg-color);
-    }
+  border-color: var(--button-border-color);
+  background-color: var(--button-bg-color);
+  color: var(--button-fg-color);
+}
+.dark-theme .adw-combo-row .adw-combo-row-select:hover,
+body.dark-theme .adw-combo-row .adw-combo-row-select:hover {
+  background-color: var(--button-hover-bg-color);
 }
 
-// scss/_window.scss
-@use "variables";
+:root {
+  --spinner-color: var(--accent-color);
+  --spinner-track-color: var(--shade-color);
+}
+
+.adw-spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border-width: 3px;
+  border-style: solid;
+  border-color: var(--spinner-track-color);
+  border-top-color: var(--spinner-color);
+  animation: adw-spinner-spin 0.75s linear infinite;
+  vertical-align: middle;
+}
+.adw-spinner.small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+.adw-spinner.large {
+  width: 36px;
+  height: 36px;
+  border-width: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .adw-spinner {
+    animation: none;
+  }
+}
+
+@keyframes adw-spinner-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.adw-split-button {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: var(--border-radius-default);
+  background-color: var(--button-bg-color);
+  border: var(--border-width, 1px) solid var(--button-border-color);
+  font-size: var(--font-size-base);
+  color: var(--button-fg-color);
+  box-shadow: none;
+}
+.adw-split-button:focus-within {
+  outline: 2px solid var(--accent-bg-color);
+  outline-offset: 2px;
+}
+.adw-split-button .adw-split-button-action {
+  padding: var(--spacing-s) var(--spacing-m);
+  cursor: pointer;
+  text-align: center;
+  flex-grow: 1;
+  border-right: var(--border-width, 1px) solid var(--button-border-color);
+  border-radius: var(--border-radius-default) 0 0 var(--border-radius-default);
+  transition: background-color 0.1s ease-out;
+  color: inherit;
+}
+.adw-split-button .adw-split-button-action:hover {
+  background-color: var(--button-hover-bg-color);
+}
+.adw-split-button .adw-split-button-action:active {
+  background-color: var(--button-active-bg-color);
+}
+.adw-split-button .adw-split-button-action:focus-visible {
+  outline: none;
+}
+.adw-split-button .adw-split-button-dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-s) var(--spacing-xs);
+  cursor: pointer;
+  border-radius: 0 var(--border-radius-default) var(--border-radius-default) 0;
+  transition: background-color 0.1s ease-out;
+  color: inherit;
+}
+.adw-split-button .adw-split-button-dropdown .adw-split-button-arrow {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid currentColor;
+}
+.adw-split-button .adw-split-button-dropdown:hover {
+  background-color: var(--button-hover-bg-color);
+}
+.adw-split-button .adw-split-button-dropdown:active {
+  background-color: var(--button-active-bg-color);
+}
+.adw-split-button .adw-split-button-dropdown:focus-visible {
+  outline: none;
+}
+.adw-split-button.suggested-action {
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+  border-color: transparent;
+}
+.adw-split-button.suggested-action .adw-split-button-action {
+  border-right-color: transparent;
+}
+.adw-split-button.suggested-action .adw-split-button-action:hover {
+  background-color: rgba(var(--accent-fg-color-rgb, 255, 255, 255), 0.1);
+}
+.adw-split-button.suggested-action .adw-split-button-action:active {
+  background-color: rgba(var(--accent-fg-color-rgb, 255, 255, 255), 0.2);
+}
+.adw-split-button.suggested-action .adw-split-button-dropdown:hover {
+  background-color: rgba(var(--accent-fg-color-rgb, 255, 255, 255), 0.1);
+}
+.adw-split-button.suggested-action .adw-split-button-dropdown:active {
+  background-color: rgba(var(--accent-fg-color-rgb, 255, 255, 255), 0.2);
+}
+.adw-split-button.suggested-action .adw-split-button-dropdown .adw-split-button-arrow {
+  border-top-color: var(--accent-fg-color);
+}
+.adw-split-button[disabled], .adw-split-button:disabled {
+  background-color: var(--button-bg-color);
+  color: var(--button-fg-color);
+  border-color: var(--button-border-color);
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.adw-split-button[disabled] .adw-split-button-action,
+.adw-split-button[disabled] .adw-split-button-dropdown, .adw-split-button:disabled .adw-split-button-action,
+.adw-split-button:disabled .adw-split-button-dropdown {
+  pointer-events: none;
+}
+.adw-split-button[disabled].suggested-action, .adw-split-button:disabled.suggested-action {
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+  border-color: transparent;
+}
+.adw-split-button[disabled].suggested-action .adw-split-button-action, .adw-split-button:disabled.suggested-action .adw-split-button-action {
+  border-right-color: transparent;
+}
+
+.adw-status-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-xxl) var(--spacing-xl);
+  height: 100%;
+  box-sizing: border-box;
+  color: var(--window-fg-color);
+}
+.adw-status-page .adw-status-page-icon {
+  font-size: 4.5rem;
+  margin-bottom: var(--spacing-l);
+  opacity: 0.7;
+}
+.adw-status-page .adw-status-page-title {
+  font-size: var(--font-size-h2);
+  font-weight: bold;
+  margin-bottom: var(--spacing-s);
+  color: var(--window-fg-color);
+}
+.adw-status-page .adw-status-page-description {
+  font-size: var(--font-size-large);
+  color: var(--window-fg-color);
+  opacity: 0.7;
+  max-width: 450px;
+  line-height: 1.5;
+  margin-bottom: var(--spacing-xl);
+}
+.adw-status-page .adw-status-page-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.adw-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.adw-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.adw-switch input:checked + .adw-switch-slider {
+  background-color: var(--accent-bg-color);
+}
+.adw-switch input:checked + .adw-switch-slider:before {
+  transform: translateX(20px);
+}
+.adw-switch input:disabled + .adw-switch-slider {
+  background-color: var(--shade-color);
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+}
+.adw-switch input:disabled + .adw-switch-slider:before {
+  background-color: var(--window-bg-color);
+  opacity: 0.7;
+}
+.adw-switch input:disabled:checked + .adw-switch-slider {
+  background-color: var(--accent-bg-color);
+  opacity: var(--opacity-disabled, 0.5);
+}
+.adw-switch input:disabled:checked + .adw-switch-slider:before {
+  background-color: #ffffff;
+}
+.adw-switch input:focus-visible + .adw-switch-slider {
+  outline: 2px solid var(--accent-bg-color);
+  outline-offset: 3px;
+}
+.adw-switch .adw-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--shade-color);
+  border-radius: 12px;
+  transition: background-color 0.15s ease-out, transform 0.15s ease-out;
+}
+.adw-switch .adw-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.15s ease-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.adw-view-switcher {
+  display: flex;
+  flex-direction: column;
+}
+
+.adw-view-switcher-bar {
+  display: flex;
+  justify-content: flex-start;
+  background-color: transparent;
+  border-bottom: var(--border-width, 1px) solid var(--border-color, var(--headerbar-border-color));
+}
+.adw-view-switcher-bar .adw-button {
+  background-color: transparent;
+  border: var(--border-width, 1px) solid transparent;
+  border-bottom: none;
+  border-radius: var(--border-radius-default) var(--border-radius-default) 0 0;
+  padding: var(--spacing-s) var(--spacing-m);
+  margin-right: var(--spacing-xs);
+  margin-bottom: calc(-1 * var(--border-width, 1px));
+  box-shadow: none;
+  color: var(--secondary-text-color, var(--window-fg-color));
+  opacity: 0.8;
+}
+.adw-view-switcher-bar .adw-button:hover {
+  background-color: var(--button-hover-bg-color);
+  color: var(--window-fg-color);
+  opacity: 1;
+}
+.adw-view-switcher-bar .adw-button.active {
+  background-color: var(--window-bg-color);
+  color: var(--accent-color, var(--window-fg-color));
+  font-weight: bold;
+  border-color: var(--border-color, var(--headerbar-border-color));
+  border-bottom-color: transparent;
+  opacity: 1;
+}
+
+.adw-view-switcher-content {
+  padding: var(--spacing-m);
+  background-color: var(--window-bg-color);
+  border: var(--border-width, 1px) solid var(--border-color, var(--headerbar-border-color));
+  border-top: none;
+  border-radius: 0 0 var(--border-radius-default) var(--border-radius-default);
+}
+.adw-view-switcher-content > * {
+  display: none;
+}
+.adw-view-switcher-content > *.active-view {
+  display: block;
+}
+
+.adw-flap {
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  --adw-flap-width: 280px;
+  --adw-flap-transition-speed: 0.25s;
+}
+
+.adw-flap-flap-content {
+  width: var(--adw-flap-width);
+  flex-shrink: 0;
+  transition: width var(--adw-flap-transition-speed) ease-in-out, visibility var(--adw-flap-transition-speed) ease-in-out, opacity var(--adw-flap-transition-speed) ease-in-out;
+  background-color: var(--sidebar-bg-color);
+  border-right: var(--border-width, 1px) solid var(--sidebar-border-color);
+  overflow: hidden;
+  opacity: 1;
+  visibility: visible;
+}
+
+.adw-flap-main-content {
+  flex-grow: 1;
+  transition: margin-left var(--adw-flap-transition-speed) ease-in-out;
+  overflow-x: auto;
+}
+
+.adw-flap.folded .adw-flap-flap-content {
+  width: 0;
+  opacity: 0;
+  visibility: hidden;
+  border-right-width: 0;
+}
+
+.dark-theme .adw-flap-flap-content,
+body.dark-theme .adw-flap-flap-content {
+  background-color: var(--sidebar-bg-color);
+  border-right-color: var(--sidebar-border-color);
+}
+
+.adw-password-entry-row {
+  gap: var(--spacing-s);
+}
+.adw-password-entry-row .adw-entry-row-title {
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+.adw-password-entry-row .adw-entry-row-entry {
+  flex-grow: 1;
+}
+.adw-password-entry-row .adw-button.circular.flat {
+  flex-shrink: 0;
+}
+.adw-password-entry-row .adw-button.circular.flat .icon svg {
+  width: var(--icon-size-inline, 16px);
+  height: var(--icon-size-inline, 16px);
+}
 
 .adw-window {
   background-color: var(--window-bg-color);
   color: var(--window-fg-color);
-  border-radius: var(--window-radius); // Use the specific window radius variable
-  // Libadwaita-style shadow: a subtle border line + softer, larger shadows
-  box-shadow: 0 0 0 1px var(--border-color-light, rgba(0,0,0,0.12)), // Simulates a border
-              0 8px 16px -4px rgba(0,0,0,0.15), // Softer, wider shadow
-              0 6px 12px rgba(0,0,0,0.1);    // Another layer for depth
-  display: flex; // If the window directly contains a headerbar and content area
+  border-radius: var(--window-radius);
+  box-shadow: 0 0 0 1px var(--border-color-light, rgba(0, 0, 0, 0.12)), 0 8px 16px -4px rgba(0, 0, 0, 0.15), 0 6px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
   flex-direction: column;
-  overflow: hidden; // Important to ensure content respects the border-radius
-
-  // If the window has a distinct titlebar/headerbar as its first child
-  > .adw-header-bar:first-child {
-    // Ensure headerbar blends with top corners of the window
-    border-top-left-radius: var(--window-radius);
-    border-top-right-radius: var(--window-radius);
-    // Headerbar might not need its own bottom border if window shadow is sufficient
-    // border-bottom-width: 0; // Or handled by a 'flat' class on headerbar
-  }
-
-  .adw-window-content {
-    padding: var(--spacing-l); // Standard padding for window content area
-    flex-grow: 1; // Allow content to fill available space
-    // If content is scrollable, it should handle its own scrolling
-    // overflow-y: auto;
-  }
+  overflow: hidden;
+}
+.adw-window > .adw-header-bar:first-child {
+  border-top-left-radius: var(--window-radius);
+  border-top-right-radius: var(--window-radius);
+}
+.adw-window .adw-window-content {
+  padding: var(--spacing-l);
+  flex-grow: 1;
 }
 
-// Dark theme adjustments for the window shadow
 .dark-theme .adw-window,
 body.dark-theme .adw-window {
-  box-shadow: 0 0 0 1px var(--border-color-dark, rgba(255,255,255,0.12)),
-              0 8px 16px -4px rgba(0,0,0,0.3), // Darker, more pronounced shadow
-              0 6px 12px rgba(0,0,0,0.25);
+  box-shadow: 0 0 0 1px var(--border-color-dark, rgba(255, 255, 255, 0.12)), 0 8px 16px -4px rgba(0, 0, 0, 0.3), 0 6px 12px rgba(0, 0, 0, 0.25);
 }
 
-// Styling for inactive windows (optional, but common)
-.adw-window:not(.active) {
-  // Inactive windows often have a slightly desaturated background or more subdued shadow
-  // background-color: var(--window-bg-color-inactive, var(--window-bg-color)); // Define if needed
-  // box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.1); // Less prominent shadow
-  // color: var(--window-fg-color-inactive, var(--window-fg-color)); opacity: 0.8; // Muted text
-}
+/*# sourceMappingURL=style.css.map */
