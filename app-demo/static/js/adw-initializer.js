@@ -418,6 +418,123 @@ document.addEventListener('DOMContentLoaded', () => {
     splitButtonElement.replaceWith(newSplitButton);
   });
 
+  // Handle <adw-dialog>
+  document.querySelectorAll('adw-dialog').forEach(adwDialogElement => {
+    const title = adwDialogElement.getAttribute('title');
+    const id = adwDialogElement.id; // Preserve ID
+
+    let contentInput;
+    const contentSlotElement = adwDialogElement.querySelector('[slot="content"]');
+    if (contentSlotElement) {
+        const contentWrapper = document.createElement('div');
+        Array.from(contentSlotElement.childNodes).forEach(child => contentWrapper.appendChild(child.cloneNode(true)));
+        contentInput = contentWrapper;
+    } else {
+        // Fallback: use text content if no slot="content"
+        const tempDiv = document.createElement('div');
+        // Move all children that are not action slots to the content wrapper
+        Array.from(adwDialogElement.childNodes).forEach(child => {
+            if (child.nodeType === Node.ELEMENT_NODE && child.getAttribute('slot') === 'actions') {
+                // Skip action slot elements
+            } else {
+                tempDiv.appendChild(child.cloneNode(true));
+            }
+        });
+        if (tempDiv.innerHTML.trim() !== '') {
+            contentInput = tempDiv;
+        } else {
+            contentInput = document.createElement('p'); // Default empty paragraph if no content
+        }
+    }
+
+    const actionButtonElements = Array.from(adwDialogElement.querySelectorAll('[slot="actions"] > adw-button, [slot="actions"] > button'));
+    const buttons = actionButtonElements.map(btnEl => {
+        const btnOptions = {
+            suggested: btnEl.getAttribute('appearance') === 'suggested' || btnEl.classList.contains('suggested-action'),
+            destructive: btnEl.getAttribute('appearance') === 'destructive' || btnEl.classList.contains('destructive-action'),
+            flat: btnEl.hasAttribute('flat') || btnEl.getAttribute('appearance') === 'flat',
+            // onClick handlers are set by the script using the dialog.
+        };
+        const newBtn = Adw.createButton(btnEl.textContent.trim(), btnOptions);
+        if(btnEl.id) newBtn.id = btnEl.id; // Preserve button ID
+        // Copy other relevant attributes like type if needed, though Adw.createButton might not use them.
+        if(btnEl.getAttribute('type')) newBtn.setAttribute('type', btnEl.getAttribute('type'));
+        return newBtn;
+    });
+
+    const dialogComponent = Adw.createDialog({ title, content: contentInput, buttons });
+
+    if (id) {
+        dialogComponent.dialog.id = id; // Apply original ID to the new dialog element
+    }
+
+    // Make methods available on the DOM element itself
+    dialogComponent.dialog.showModal = dialogComponent.open;
+    dialogComponent.dialog.close = dialogComponent.close; // This is the standard method name
+
+    adwDialogElement.replaceWith(dialogComponent.dialog);
+  });
+
+  // Handle <adw-spinner>
+  document.querySelectorAll('adw-spinner').forEach(adwSpinnerElement => {
+    const options = {
+      size: adwSpinnerElement.getAttribute('size'),
+      id: adwSpinnerElement.id // Preserve ID
+    };
+    const newSpinner = Adw.createSpinner(options);
+    // createSpinner returns the element directly, so if id was set via options, it's on newSpinner.
+    // If not, ensure it's copied if it was on the original tag.
+    if (options.id && !newSpinner.id) {
+        newSpinner.id = options.id;
+    }
+    // Copy other attributes
+    const originalAttrs = getAttributes(adwSpinnerElement);
+    for (const attrName in originalAttrs) {
+        if (!['size', 'id', 'class'].includes(attrName) && !newSpinner.hasAttribute(attrName)) {
+            newSpinner.setAttribute(attrName, originalAttrs[attrName]);
+        } else if (attrName === 'class') {
+            newSpinner.className += ' ' + originalAttrs[attrName];
+        }
+    }
+    adwSpinnerElement.replaceWith(newSpinner);
+  });
+
+  // Handle <adw-status-page>
+  document.querySelectorAll('adw-status-page').forEach(adwStatusPageElement => {
+    const iconSlotElement = adwStatusPageElement.querySelector('[slot="icon"]');
+    const iconHTML = iconSlotElement ? iconSlotElement.innerHTML : undefined;
+
+    const actionElementsSlot = adwStatusPageElement.querySelector('[slot="actions"]');
+    let actionElements = [];
+    if (actionElementsSlot) {
+        actionElements = Array.from(actionElementsSlot.children).map(el => el.cloneNode(true));
+    }
+
+    const options = {
+      title: adwStatusPageElement.getAttribute('title'),
+      description: adwStatusPageElement.getAttribute('description'),
+      iconHTML: iconHTML,
+      actions: actionElements, // Pass cloned action elements
+      id: adwStatusPageElement.id // Preserve ID
+    };
+
+    const newStatusPage = Adw.createStatusPage(options);
+    // createStatusPage returns the element directly. Ensure ID is preserved.
+    if (options.id && !newStatusPage.id) {
+        newStatusPage.id = options.id;
+    }
+    // Copy other attributes
+    const originalAttrs = getAttributes(adwStatusPageElement);
+     for (const attrName in originalAttrs) {
+        if (!['title', 'description', 'id', 'class'].includes(attrName) && !newStatusPage.hasAttribute(attrName) && attrName !== 'slot') { // slot is handled
+            newStatusPage.setAttribute(attrName, originalAttrs[attrName]);
+        } else if (attrName === 'class') {
+            newStatusPage.className += ' ' + originalAttrs[attrName];
+        }
+    }
+    adwStatusPageElement.replaceWith(newStatusPage);
+  });
+
   // --- GENERIC HANDLERS (SHOULD BE LAST OR CAREFUL WITH SPECIFICITY) ---
   const simpleReplaceTags = ['adw-application-window', 'adw-page'];
   simpleReplaceTags.forEach(tagName => {
