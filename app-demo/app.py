@@ -46,6 +46,7 @@ class PostForm(FlaskForm):
         allow_blank=True
     )
     submit = SubmitField('Submit Post')
+    tags_string = StringField('Tags (comma-separated)', validators=[Optional(), Length(max=250)])
 
 class ProfileEditForm(FlaskForm):
     full_name = StringField('Display Name', validators=[Optional(), Length(max=120)])
@@ -55,6 +56,13 @@ class ProfileEditForm(FlaskForm):
     website_url = StringField('Website URL', validators=[Optional(), Length(max=200)]) # Basic validation for now
     is_profile_public = BooleanField('Make Profile Public')
     submit = SubmitField('Update Profile')
+
+class CommentForm(FlaskForm):
+    text = TextAreaField('Comment', validators=[DataRequired(), Length(min=1, max=2000)])
+    submit = SubmitField('Post Comment')
+
+class DeleteCommentForm(FlaskForm):
+    submit = SubmitField('Delete') # Not rendered, but used for CSRF validation
 
 def allowed_file(filename):
     from flask import current_app
@@ -90,6 +98,24 @@ post_categories = db.Table('post_categories',
     db.Column('category_id', db.Integer, db.ForeignKey('category.id'), primary_key=True)
 )
 
+# Association table for Post and Tag (many-to-many)
+post_tags = db.Table('post_tags',
+    db.Column('post_id', db.Integer, db.ForeignKey('post.id'), primary_key=True),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
+)
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+
+    def __init__(self, name):
+        self.name = name
+        self.slug = name.lower().replace(' ', '-').replace('.', '').replace('#', 'sharp').replace('+', 'plus') # Basic slug generation
+
+    def __repr__(self):
+        return f'<Tag {self.name}>'
+
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
@@ -111,6 +137,24 @@ class Post(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     categories = db.relationship('Category', secondary=post_categories, lazy='subquery',
                                  backref=db.backref('posts', lazy=True))
+    tags = db.relationship('Tag', secondary=post_tags, lazy='subquery',
+                           backref=db.backref('posts', lazy=True))
+    # Relationship defined after Comment model
+    # comments defined below, after Comment class
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+
+    author = db.relationship('User', backref=db.backref('comments', lazy='dynamic'))
+    # post relationship will be set up via backref from Post.comments
+
+# Update Post model to include ordered comments relationship
+Post.comments = db.relationship('Comment', backref='post', lazy='dynamic', order_by=desc(Comment.created_at))
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -162,10 +206,49 @@ def create_app(config_overrides=None):
         posts = pagination.items
         return render_template('index.html', posts=posts, pagination=pagination)
 
-    @_app.route('/posts/<int:post_id>')
+    @_app.route('/posts/<int:post_id>', methods=['GET', 'POST'])
     def view_post(post_id):
         post = Post.query.get_or_404(post_id)
-        return render_template('post.html', post=post)
+        form = CommentForm()
+        delete_form = DeleteCommentForm() # For CSRF protection on delete buttons
+
+        if form.validate_on_submit() and current_user.is_authenticated:
+            comment = Comment(text=form.text.data, author=current_user, post_id=post_id)
+            db.session.add(comment)
+            db.session.commit()
+            flash('Comment posted successfully!', 'success')
+            return redirect(url_for('view_post', post_id=post_id))
+
+        comments = post.comments.all() # .all() to execute query and get list
+        return render_template('post.html', post=post, form=form, comments=comments, delete_form=delete_form)
+
+    @_app.route('/comment/<int:comment_id>/delete', methods=['POST'])
+    @login_required
+    def delete_comment(comment_id):
+        # Validate CSRF token for the delete operation
+        # The form used in the template must contain CSRF token.
+        # We can use a generic form for this or ensure the request is otherwise protected.
+        # For simplicity with a direct POST link/button, ensure your global CSRF protects it.
+        # Better: use a minimal form for the delete button.
+        delete_form = DeleteCommentForm()
+        if delete_form.validate_on_submit(): # This will check CSRF
+            comment = Comment.query.get_or_404(comment_id)
+            if comment.author != current_user and comment.post.author != current_user:
+                abort(403)
+
+            post_id = comment.post_id
+            db.session.delete(comment)
+            db.session.commit()
+            flash('Comment deleted.', 'success')
+            return redirect(url_for('view_post', post_id=post_id))
+        else:
+            # This case might happen if CSRF validation fails
+            flash('Failed to delete comment. Invalid request.', 'danger')
+            # Try to redirect to the post page, or handle error appropriately
+            comment = Comment.query.get(comment_id) # Fetch comment to get post_id if possible
+            if comment:
+                return redirect(url_for('view_post', post_id=comment.post_id))
+            return redirect(url_for('index')) # Fallback
 
     @_app.route('/category/<string:category_slug>')
     def posts_by_category(category_slug):
@@ -189,9 +272,21 @@ def create_app(config_overrides=None):
                 # Assign categories
                 for category in form.categories.data:
                     new_post.categories.append(category)
+
+                # Process tags
+                tags_string = form.tags_string.data
+                if tags_string:
+                    tag_names = [name.strip() for name in tags_string.split(',') if name.strip()]
+                    for tag_name in tag_names:
+                        tag = Tag.query.filter_by(name=tag_name).first()
+                        if not tag:
+                            tag = Tag(name=tag_name)
+                            db.session.add(tag) # Add new tag to session
+                        new_post.tags.append(tag)
+
                 db.session.add(new_post)
                 db.session.commit()
-                _app.logger.info(f"Post committed to DB. ID: {new_post.id}, Title: '{new_post.title}' by user '{current_user.username}'. Categories: {[c.name for c in new_post.categories]}")
+                _app.logger.info(f"Post committed to DB. ID: {new_post.id}, Title: '{new_post.title}' by user '{current_user.username}'. Categories: {[c.name for c in new_post.categories]}. Tags: {[t.name for t in new_post.tags]}")
                 flash('Post created successfully!', 'success')
                 return redirect(url_for('index'))
             except Exception as e:
@@ -222,16 +317,32 @@ def create_app(config_overrides=None):
         if post.author != current_user:
             abort(403)
         form = PostForm(obj=post)
+        if not form.tags_string.data and request.method == 'GET': # Populate on GET if empty
+            form.tags_string.data = ', '.join([tag.name for tag in post.tags])
+
         if form.validate_on_submit():
             post.title = form.title.data
             post.content = form.content.data
             # Update categories
-            post.categories = [] # Clear existing categories first
+            post.categories = []
             for category in form.categories.data:
                 post.categories.append(category)
+
+            # Update tags
+            post.tags = [] # Clear existing tags first
+            tags_string = form.tags_string.data
+            if tags_string:
+                tag_names = [name.strip() for name in tags_string.split(',') if name.strip()]
+                for tag_name in tag_names:
+                    tag = Tag.query.filter_by(name=tag_name).first()
+                    if not tag:
+                        tag = Tag(name=tag_name)
+                        db.session.add(tag) # Add new tag to session
+                    post.tags.append(tag)
+
             try:
                 db.session.commit()
-                _app.logger.info(f"Post {post.id} updated by user '{current_user.username}'. Categories: {[c.name for c in post.categories]}")
+                _app.logger.info(f"Post {post.id} updated by user '{current_user.username}'. Categories: {[c.name for c in post.categories]}. Tags: {[t.name for t in post.tags]}")
                 flash('Post updated successfully!', 'success')
                 return redirect(url_for('view_post', post_id=post.id))
             except Exception as e:
@@ -282,12 +393,14 @@ def create_app(config_overrides=None):
         posts_pagination = Post.query.with_parent(user_profile).order_by(Post.created_at.desc()).paginate(
             page=page, per_page=per_page, error_out=False
         )
-        return render_template('profile.html', user_profile=user_profile, posts_pagination=posts_pagination)
+        default_avatar_url = url_for('static', filename='img/default_avatar.png')
+        return render_template('profile.html', user_profile=user_profile, posts_pagination=posts_pagination, default_avatar_url=default_avatar_url)
 
     @_app.route('/profile/edit', methods=['GET', 'POST'])
     @login_required
     def edit_profile():
         form = ProfileEditForm(obj=current_user)
+        default_avatar_url = url_for('static', filename='img/default_avatar.png')
         if form.validate_on_submit():
             current_user.profile_info = form.profile_info.data
             current_user.full_name = form.full_name.data
@@ -340,10 +453,10 @@ def create_app(config_overrides=None):
                     field_label_text = label.text if label else field_name.replace('_', ' ').title()
                     flash(f"Error in {field_label_text}: {error}", 'warning')
             # return render_template for validation failure should be here, inside the elif
-            return render_template('edit_profile.html', form=form, user_profile=current_user)
+            return render_template('edit_profile.html', form=form, user_profile=current_user, default_avatar_url=default_avatar_url)
 
         # This is for GET request
-        return render_template('edit_profile.html', form=form, user_profile=current_user)
+        return render_template('edit_profile.html', form=form, user_profile=current_user, default_avatar_url=default_avatar_url)
 
     @_app.route('/settings')
     @login_required
@@ -363,6 +476,20 @@ def create_app(config_overrides=None):
         # For now, no form processing, just rendering the template.
         # A ContactForm could be added later if needed.
         return render_template('contact.html')
+
+    @_app.route('/adwaita-showcase')
+    def adwaita_showcase_page():
+        return render_template('adwaita_showcase.html')
+
+    @_app.route('/tag/<string:tag_slug>')
+    def posts_by_tag(tag_slug):
+        tag = Tag.query.filter_by(slug=tag_slug).first_or_404()
+        page = request.args.get('page', 1, type=int)
+        per_page = 5 # Or from app config
+        # Assuming 'posts' is the backref from Tag to Post
+        pagination = Post.query.filter(Post.tags.contains(tag)).order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+        posts = pagination.items
+        return render_template('posts_by_tag.html', tag=tag, posts=posts, pagination=pagination)
 
     @_app.route('/api/settings/theme', methods=['POST'])
     @login_required

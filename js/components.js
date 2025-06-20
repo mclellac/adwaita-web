@@ -103,6 +103,9 @@ function createAdwEntry(options = {}) {
     entry.setAttribute("disabled", "");
     entry.setAttribute("aria-disabled", "true");
   }
+  if (opts.name) {
+    entry.name = opts.name;
+  }
   return entry;
 }
 
@@ -657,6 +660,9 @@ function createAdwCheckbox(options = {}) {
     wrapper.setAttribute("aria-disabled", "true");
     wrapper.classList.add("disabled");
   }
+  if (opts.name) {
+    input.name = opts.name;
+  }
   return wrapper;
 }
 
@@ -705,6 +711,11 @@ function createAdwRadioButton(options = {}) {
     input.setAttribute("disabled", "");
     wrapper.setAttribute("aria-disabled", "true");
     wrapper.classList.add("disabled");
+  }
+  // Name is already set for radio button in its factory: input.name = opts.name;
+  // Value needs to be set.
+  if (opts.value) {
+    input.value = opts.value;
   }
   return wrapper;
 }
@@ -1647,3 +1658,2089 @@ window.Adw = {
 
 // Ensure loadSavedTheme is called, which now also handles accent color loading.
 window.addEventListener("DOMContentLoaded", loadSavedTheme);
+
+class AdwButton extends HTMLElement {
+    static get observedAttributes() {
+        return ['href', 'suggested', 'destructive', 'flat', 'disabled', 'active', 'circular', 'icon', 'appearance', 'type'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+        if (this.getAttribute('type') === 'submit') {
+            const internalButton = this.shadowRoot.querySelector('button, a');
+            if (internalButton) {
+                internalButton.addEventListener('click', (e) => {
+                    // Check if the button itself is already submitting (e.g. type="submit" in shadow DOM)
+                    // This check might be too simple if Adw.createButton creates a button with type="submit"
+                    if (internalButton.type !== 'submit') {
+                        e.preventDefault(); // Prevent default if it's not a shadow DOM submit button
+                    }
+                    const form = this.closest('form');
+                    if (form) {
+                        // More robust way to submit: requestSubmit if available, fallback to temporary button
+                        if (typeof form.requestSubmit === 'function') {
+                            form.requestSubmit();
+                        } else {
+                            const tempSubmit = document.createElement('button');
+                            tempSubmit.type = 'submit';
+                            tempSubmit.style.display = 'none';
+                            form.appendChild(tempSubmit);
+                            tempSubmit.click();
+                            form.removeChild(tempSubmit);
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _render() {
+        // Clear previous content
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {};
+        AdwButton.observedAttributes.forEach(attr => {
+            if (this.hasAttribute(attr)) {
+                const value = this.getAttribute(attr);
+                // Convert to boolean if attribute is boolean-like
+                if (['suggested', 'destructive', 'flat', 'disabled', 'active', 'circular'].includes(attr)) {
+                    options[attr] = value !== null && value !== 'false';
+                } else {
+                    options[attr] = value;
+                }
+            }
+        });
+
+        // Special handling for isCircular for createAdwButton compatibility
+        if (options.circular) {
+            options.isCircular = options.circular;
+            delete options.circular;
+        }
+
+
+        const buttonElement = Adw.createButton(this.textContent.trim(), options);
+        this.shadowRoot.appendChild(buttonElement);
+    }
+}
+customElements.define('adw-button', AdwButton);
+
+class AdwBox extends HTMLElement {
+    static get observedAttributes() {
+        return ['orientation', 'align', 'justify', 'spacing', 'fill-children'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _render() {
+        // Clear previous content
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {};
+        AdwBox.observedAttributes.forEach(attr => {
+            if (this.hasAttribute(attr)) {
+                const value = this.getAttribute(attr);
+                if (attr === 'fill-children') { // boolean attribute
+                     options.fillChildren = value !== null && value !== 'false';
+                } else {
+                    options[attr] = value;
+                }
+            }
+        });
+
+        const boxElement = Adw.createBox(options);
+
+        const slotElement = document.createElement('slot');
+        boxElement.appendChild(slotElement);
+
+        this.shadowRoot.appendChild(boxElement);
+    }
+}
+customElements.define('adw-box', AdwBox);
+
+// AdwEntry Component
+class AdwEntry extends HTMLElement {
+    static get observedAttributes() {
+        return ['placeholder', 'value', 'disabled', 'name', 'required', 'type'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._inputElement = null; // To store reference to the internal input
+    }
+
+    connectedCallback() {
+        this._render();
+        // Reflect initial value and setup listener for internal changes
+        if (this._inputElement) {
+            if (this.hasAttribute('value')) {
+                 this._inputElement.value = this.getAttribute('value');
+            }
+            this._inputElement.addEventListener('input', () => {
+                // No need to setAttribute here, as it might cause infinite loops
+                // The 'value' property getter will reflect the live value
+                // If external value changes are needed, specific event can be dispatched
+            });
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+             // Ensure internal input's value is updated if 'value' attribute changes
+            if (name === 'value' && this._inputElement && this._inputElement.value !== newValue) {
+                this._inputElement.value = newValue;
+            }
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {};
+        AdwEntry.observedAttributes.forEach(attr => {
+            if (this.hasAttribute(attr)) {
+                const val = this.getAttribute(attr);
+                if (attr === 'disabled' || attr === 'required') {
+                    options[attr] = val !== null && val !== 'false';
+                } else {
+                    options[attr] = val;
+                }
+            }
+        });
+
+        this._inputElement = Adw.createEntry(options);
+
+        // Set attributes not directly handled by createEntry or needing override
+        if (this.hasAttribute('name')) {
+            this._inputElement.name = this.getAttribute('name');
+        }
+        if (this.hasAttribute('required')) {
+            if (this.getAttribute('required') !== null && this.getAttribute('required') !== 'false') {
+                 this._inputElement.setAttribute('required', '');
+            } else {
+                this._inputElement.removeAttribute('required');
+            }
+        }
+        if (this.hasAttribute('type')) {
+            this._inputElement.type = this.getAttribute('type');
+        }
+
+
+        this.shadowRoot.appendChild(this._inputElement);
+    }
+
+    get value() {
+        return this._inputElement ? this._inputElement.value : this.getAttribute('value');
+    }
+
+    set value(val) {
+        if (this._inputElement) {
+            this._inputElement.value = val;
+        }
+        // Reflect change to attribute if desired, though can cause loops if not handled carefully
+        // For now, setting property directly on internal input is primary
+        this.setAttribute('value', val);
+    }
+}
+customElements.define('adw-entry', AdwEntry);
+
+// AdwLabel Component
+class AdwLabel extends HTMLElement {
+    static get observedAttributes() {
+        // Note: 'title' global HTML attribute vs. 'title-level' for styling.
+        // 'title-level' will be used for the custom attribute.
+        return ['for', 'title-level', 'body', 'caption', 'link', 'disabled'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {};
+        if (this.hasAttribute('for')) {
+            options.for = this.getAttribute('for');
+        }
+        if (this.hasAttribute('title-level')) {
+            // The factory expects 'title' as the option key for heading level
+            options.title = parseInt(this.getAttribute('title-level'), 10);
+        }
+        if (this.hasAttribute('body')) {
+            options.isBody = this.getAttribute('body') !== null && this.getAttribute('body') !== 'false';
+        }
+        if (this.hasAttribute('caption')) {
+            options.isCaption = this.getAttribute('caption') !== null && this.getAttribute('caption') !== 'false';
+        }
+        if (this.hasAttribute('link')) {
+            options.isLink = this.getAttribute('link') !== null && this.getAttribute('link') !== 'false';
+        }
+        if (this.hasAttribute('disabled')) {
+            options.isDisabled = this.getAttribute('disabled') !== null && this.getAttribute('disabled') !== 'false';
+        }
+
+        // Determine tag, default to 'label' but allow 'span' if not 'for' to avoid confusion.
+        // The factory `createAdwLabel` handles `htmlTag` option.
+        if (!this.hasAttribute('for') && !options.isLink) {
+             // If it's not acting as a traditional label for an input, and not a link,
+             // 'span' or 'p' might be more semantically appropriate than a <label> tag.
+             // The factory defaults to 'label', so we might not need to set htmlTag explicitly unless a different default is desired.
+             // For now, let's rely on the factory's default logic for htmlTag based on 'for' attribute.
+        }
+
+
+        const labelElement = Adw.createLabel(this.textContent.trim(), options);
+        this.shadowRoot.appendChild(labelElement);
+    }
+}
+customElements.define('adw-label', AdwLabel);
+
+// AdwEntryRow Component
+class AdwEntryRow extends HTMLElement {
+    static get observedAttributes() {
+        return ['title', 'subtitle', 'required', 'name', 'value', 'placeholder', 'disabled'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._internalEntry = null;
+    }
+
+    connectedCallback() {
+        this._render();
+        if (this._internalEntry && this.hasAttribute('value')) {
+            this._internalEntry.value = this.getAttribute('value');
+        }
+         // Listen for input events on the internal entry to update the component's value property
+        if (this._internalEntry) {
+            this._internalEntry.addEventListener('input', () => {
+                // This ensures the 'value' getter returns the live value.
+                // No setAttribute here to avoid potential loops if attributeChangedCallback also sets value.
+            });
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+            // If the 'value' attribute is changed externally, update the internal entry
+            if (name === 'value' && this._internalEntry && this._internalEntry.value !== newValue) {
+                this._internalEntry.value = newValue;
+            }
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            title: this.getAttribute('title') || '',
+            entryOptions: {}
+        };
+
+        if (this.hasAttribute('subtitle')) {
+            options.subtitle = this.getAttribute('subtitle');
+        }
+        if (this.hasAttribute('required')) {
+            options.entryOptions.required = this.getAttribute('required') !== null && this.getAttribute('required') !== 'false';
+        }
+        if (this.hasAttribute('name')) {
+            options.entryOptions.name = this.getAttribute('name');
+        }
+        if (this.hasAttribute('value')) {
+            options.entryOptions.value = this.getAttribute('value');
+        }
+        if (this.hasAttribute('placeholder')) {
+            options.entryOptions.placeholder = this.getAttribute('placeholder');
+        }
+        if (this.hasAttribute('disabled')) {
+            options.entryOptions.disabled = this.getAttribute('disabled') !== null && this.getAttribute('disabled') !== 'false';
+        }
+
+        const entryRowElement = Adw.createEntryRow(options);
+        this.shadowRoot.appendChild(entryRowElement);
+
+        // Store a reference to the input within the created row
+        this._internalEntry = entryRowElement.querySelector('.adw-entry-row-entry input, input.adw-entry');
+         if (!this._internalEntry) { // Fallback selector if the class name is just adw-entry
+            this._internalEntry = entryRowElement.querySelector('input.adw-entry');
+        }
+    }
+
+    get value() {
+        return this._internalEntry ? this._internalEntry.value : this.getAttribute('value');
+    }
+
+    set value(val) {
+        if (this._internalEntry) {
+            this._internalEntry.value = val;
+        }
+        this.setAttribute('value', val);
+    }
+}
+customElements.define('adw-entry-row', AdwEntryRow);
+
+// AdwPasswordEntryRow Component
+class AdwPasswordEntryRow extends HTMLElement {
+    static get observedAttributes() {
+        return ['title', 'subtitle', 'required', 'name', 'value', 'placeholder', 'disabled'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._internalEntry = null;
+    }
+
+    connectedCallback() {
+        this._render();
+        if (this._internalEntry && this.hasAttribute('value')) {
+            this._internalEntry.value = this.getAttribute('value');
+        }
+        if (this._internalEntry) {
+            this._internalEntry.addEventListener('input', () => {
+                // Value getter reflects live value
+            });
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+            if (name === 'value' && this._internalEntry && this._internalEntry.value !== newValue) {
+                this._internalEntry.value = newValue;
+            }
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            title: this.getAttribute('title') || '',
+            entryOptions: {}
+        };
+
+        if (this.hasAttribute('subtitle')) {
+            options.subtitle = this.getAttribute('subtitle');
+        }
+        // Attributes for the entryOptions part of Adw.createPasswordEntryRow
+        if (this.hasAttribute('required')) {
+            options.entryOptions.required = this.getAttribute('required') !== null && this.getAttribute('required') !== 'false';
+        }
+        if (this.hasAttribute('name')) {
+            options.entryOptions.name = this.getAttribute('name');
+        }
+        if (this.hasAttribute('value')) {
+            options.entryOptions.value = this.getAttribute('value');
+        }
+        if (this.hasAttribute('placeholder')) {
+            options.entryOptions.placeholder = this.getAttribute('placeholder');
+        }
+        if (this.hasAttribute('disabled')) {
+            options.entryOptions.disabled = this.getAttribute('disabled') !== null && this.getAttribute('disabled') !== 'false';
+        }
+
+        const passwordEntryRowElement = Adw.createPasswordEntryRow(options);
+        this.shadowRoot.appendChild(passwordEntryRowElement);
+
+        // Store a reference to the input within the created row
+        // The Adw.createPasswordEntryRow factory nests the input
+        this._internalEntry = passwordEntryRowElement.querySelector('input[type="password"], input[type="text"]');
+    }
+
+    get value() {
+        return this._internalEntry ? this._internalEntry.value : this.getAttribute('value');
+    }
+
+    set value(val) {
+        if (this._internalEntry) {
+            this._internalEntry.value = val;
+        }
+        this.setAttribute('value', val);
+    }
+}
+customElements.define('adw-password-entry-row', AdwPasswordEntryRow);
+
+// AdwActionRow Component
+class AdwActionRow extends HTMLElement {
+    static get observedAttributes() {
+        return ['title', 'subtitle', 'icon', 'show-chevron'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._onClick = null; // To store click listener attached to the host
+    }
+
+    connectedCallback() {
+        this._render();
+        // The factory Adw.createActionRow handles its own click based on options.onClick.
+        // If we want to allow <adw-action-row onclick="..."> or .addEventListener('click', ...)
+        // on the host element, we need to proxy that to the internal clickable element or re-render.
+        // For now, we'll rely on the factory's onClick option passed during _render.
+        // If a click listener is directly attached to <adw-action-row>, it will work due to event bubbling
+        // from the shadow DOM element if it's not stopped.
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    // Allow programmatic click listening
+    set onClick(handler) {
+        if (typeof handler === 'function') {
+            this._onClick = handler;
+        } else {
+            this._onClick = null;
+        }
+        this._render(); // Re-render to pass the new onClick to the factory
+    }
+
+    get onClick() {
+        return this._onClick;
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            title: this.getAttribute('title') || ''
+        };
+
+        if (this.hasAttribute('subtitle')) {
+            options.subtitle = this.getAttribute('subtitle');
+        }
+        if (this.hasAttribute('icon')) {
+            // Assuming 'icon' attribute contains SVG HTML or a class name
+            options.iconHTML = this.getAttribute('icon');
+        }
+        if (this.hasAttribute('show-chevron')) {
+            options.showChevron = this.getAttribute('show-chevron') !== null && this.getAttribute('show-chevron') !== 'false';
+        }
+
+        if (this._onClick) {
+            options.onClick = (event) => {
+                 // If the event originates from within the shadow DOM, it's already handled.
+                 // This ensures the host's own click listener is called.
+                if (this._onClick) {
+                    this._onClick(event);
+                }
+            };
+        }
+
+
+        const actionRowElement = Adw.createActionRow(options);
+        this.shadowRoot.appendChild(actionRowElement);
+    }
+}
+customElements.define('adw-action-row', AdwActionRow);
+
+// AdwSwitch Component
+class AdwSwitch extends HTMLElement {
+    static get observedAttributes() {
+        return ['checked', 'disabled', 'label'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._internalSwitch = null;
+    }
+
+    connectedCallback() {
+        this._render();
+        if (this._internalSwitch) {
+            // Reflect initial checked state from attribute to property
+            this.checked = this.hasAttribute('checked');
+
+            // Listen to change on internal input to update property and dispatch event
+            const inputElement = this._internalSwitch.querySelector('input[type="checkbox"]');
+            if (inputElement) {
+                inputElement.addEventListener('change', (e) => {
+                    this.checked = inputElement.checked; // Update property
+                    // The event from the internal checkbox will bubble out of shadow DOM if not stopped.
+                    // We can re-dispatch a custom event for consistency, or rely on bubbling.
+                    // For now, let's dispatch a new 'change' event from the host.
+                    this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+                });
+            }
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+            if (name === 'checked') {
+                this.checked = this.hasAttribute('checked');
+            }
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            label: this.getAttribute('label') || '',
+            checked: this.hasAttribute('checked'),
+            disabled: this.hasAttribute('disabled'),
+            // Pass existing onChanged if any (e.g. from programmatic setter, though not standard for this component)
+            onChanged: (event) => {
+                 // This internal onChanged is for the factory.
+                 // The component's own change event is handled in connectedCallback by listening to the input.
+            }
+        };
+
+        this._internalSwitch = Adw.createSwitch(options);
+        this.shadowRoot.appendChild(this._internalSwitch);
+
+        // Ensure the internal input reflects the current 'checked' property if it was set before rendering
+        const inputElement = this._internalSwitch.querySelector('input[type="checkbox"]');
+        if (inputElement && this.hasOwnProperty('_checked')) { // Check if _checked has been explicitly set
+             inputElement.checked = this._checked;
+        }
+    }
+
+    get checked() {
+        const inputElement = this._internalSwitch ? this._internalSwitch.querySelector('input[type="checkbox"]') : null;
+        return inputElement ? inputElement.checked : (this._checked || false);
+    }
+
+    set checked(value) {
+        const isChecked = Boolean(value);
+        this._checked = isChecked; // Store internal state
+        const inputElement = this._internalSwitch ? this._internalSwitch.querySelector('input[type="checkbox"]') : null;
+        if (inputElement) {
+            inputElement.checked = isChecked;
+        }
+        if (isChecked) {
+            this.setAttribute('checked', '');
+        } else {
+            this.removeAttribute('checked');
+        }
+    }
+}
+customElements.define('adw-switch', AdwSwitch);
+
+// AdwCheckbox Component
+class AdwCheckbox extends HTMLElement {
+    static get observedAttributes() {
+        return ['checked', 'disabled', 'label', 'name'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._internalCheckbox = null; // Reference to the HTMLLabelElement wrapper
+        this._inputElement = null; // Reference to the HTMLInputElement
+    }
+
+    connectedCallback() {
+        this._render();
+        if (this._inputElement) {
+            this.checked = this.hasAttribute('checked'); // Set initial state
+
+            this._inputElement.addEventListener('change', () => {
+                this.checked = this._inputElement.checked; // Update property
+                this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+            });
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render(); // Re-render on attribute change
+            if (name === 'checked') { // Ensure property reflects attribute change
+                this.checked = this.hasAttribute('checked');
+            }
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            label: this.getAttribute('label') || '',
+            checked: this.hasAttribute('checked'),
+            disabled: this.hasAttribute('disabled'),
+            name: this.getAttribute('name') || undefined, // Pass name to factory
+            onChanged: () => {
+                // Factory's onChanged. Component's change event handled in connectedCallback.
+            }
+        };
+
+        this._internalCheckbox = Adw.createCheckbox(options);
+        this.shadowRoot.appendChild(this._internalCheckbox);
+        this._inputElement = this._internalCheckbox.querySelector('input[type="checkbox"]');
+
+        // Ensure internal input reflects current 'checked' property if set before render
+        if (this._inputElement && this.hasOwnProperty('_checked')) {
+            this._inputElement.checked = this._checked;
+        }
+        // The factory Adw.createCheckbox should ideally handle setting the name on the input.
+        // If not, we might need to set it manually here:
+        if (this._inputElement && options.name && !this._inputElement.name) {
+             this._inputElement.name = options.name;
+        }
+    }
+
+    get checked() {
+        return this._inputElement ? this._inputElement.checked : (this._checked || false);
+    }
+
+    set checked(value) {
+        const isChecked = Boolean(value);
+        this._checked = isChecked;
+        if (this._inputElement) {
+            this._inputElement.checked = isChecked;
+        }
+        if (isChecked) {
+            this.setAttribute('checked', '');
+        } else {
+            this.removeAttribute('checked');
+        }
+    }
+}
+customElements.define('adw-checkbox', AdwCheckbox);
+
+// AdwRadioButton Component
+class AdwRadioButton extends HTMLElement {
+    static get observedAttributes() {
+        return ['checked', 'disabled', 'label', 'name', 'value'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._internalRadio = null; // Reference to the HTMLLabelElement wrapper
+        this._inputElement = null; // Reference to the HTMLInputElement
+    }
+
+    connectedCallback() {
+        this._render();
+        if (this._inputElement) {
+            // Initial state from attribute
+            this.checked = this.hasAttribute('checked');
+
+            this._inputElement.addEventListener('change', () => {
+                // When a radio button is checked, its 'checked' property becomes true.
+                // Other radio buttons in the same group automatically become unchecked by the browser.
+                // We need to reflect this new 'checked' state in our property and attribute.
+                this.checked = this._inputElement.checked;
+                this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+            });
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+            if (name === 'checked') {
+                this.checked = this.hasAttribute('checked');
+            }
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            label: this.getAttribute('label') || '',
+            checked: this.hasAttribute('checked'),
+            disabled: this.hasAttribute('disabled'),
+            name: this.getAttribute('name') || '', // Name is crucial for radio group
+            value: this.getAttribute('value') || '', // Value is also crucial
+            onChanged: () => {
+                // Factory's onChanged. Component's change event handled in connectedCallback.
+            }
+        };
+
+        if (!options.name) {
+            console.warn("AdwRadioButton: 'name' attribute is essential for radio button grouping and functionality.");
+        }
+
+        this._internalRadio = Adw.createRadioButton(options);
+        this.shadowRoot.appendChild(this._internalRadio);
+        this._inputElement = this._internalRadio.querySelector('input[type="radio"]');
+
+        if (this._inputElement && this.hasOwnProperty('_checked')) {
+             this._inputElement.checked = this._checked;
+        }
+        // Factories Adw.createRadioButton should handle setting name and value.
+        // Add manual setting if factory doesn't.
+        if (this._inputElement && options.name && this._inputElement.name !== options.name) {
+             this._inputElement.name = options.name;
+        }
+        if (this._inputElement && options.value && this._inputElement.value !== options.value) {
+             this._inputElement.value = options.value;
+        }
+    }
+
+    get checked() {
+        return this._inputElement ? this._inputElement.checked : (this._checked || false);
+    }
+
+    set checked(value) {
+        const isChecked = Boolean(value);
+        this._checked = isChecked; // Internal state
+        if (this._inputElement) {
+            this._inputElement.checked = isChecked;
+        }
+        if (isChecked) {
+            this.setAttribute('checked', '');
+        } else {
+            this.removeAttribute('checked');
+        }
+        // Note: Setting 'checked' on one radio button programmatically doesn't
+        // automatically uncheck others in the same group via JavaScript alone
+        // if they are not part of the same document or shadow root initially.
+        // The browser handles this for user interactions.
+        // For programmatic changes across a group, one might need a coordinating manager
+        // if radio buttons are in different shadow DOMs, but not an issue here as factory creates them together.
+    }
+}
+customElements.define('adw-radio-button', AdwRadioButton);
+
+// AdwListBox Component
+class AdwListBox extends HTMLElement {
+    static get observedAttributes() {
+        return ['flat', 'selectable'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {};
+        if (this.hasAttribute('flat')) {
+            // Factory expects isFlat
+            options.isFlat = this.getAttribute('flat') !== null && this.getAttribute('flat') !== 'false';
+        }
+        if (this.hasAttribute('selectable')) {
+            options.selectable = this.getAttribute('selectable') !== null && this.getAttribute('selectable') !== 'false';
+        }
+
+        const listBoxElement = Adw.createListBox(options);
+
+        // Add slot for AdwRow or other elements
+        const slotElement = document.createElement('slot');
+        listBoxElement.appendChild(slotElement);
+
+        this.shadowRoot.appendChild(listBoxElement);
+    }
+}
+customElements.define('adw-list-box', AdwListBox);
+
+// AdwRow Component
+class AdwRow extends HTMLElement {
+    static get observedAttributes() {
+        return ['activated', 'interactive'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._onClick = null; // For programmatic click listener
+    }
+
+    connectedCallback() {
+        this._render();
+        // Event bubbling will make host click listeners work if the internal row is clicked.
+        // If Adw.createRow itself attaches a listener that stops propagation, this might need adjustment.
+        // For now, relying on factory's onClick option and event bubbling.
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    // Allow programmatic click listening
+    set onClick(handler) {
+        if (typeof handler === 'function') {
+            this._onClick = handler;
+        } else {
+            this._onClick = null;
+        }
+        this._render(); // Re-render to pass the new onClick to the factory
+    }
+
+    get onClick() {
+        return this._onClick;
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {};
+        if (this.hasAttribute('activated')) {
+            options.activated = this.getAttribute('activated') !== null && this.getAttribute('activated') !== 'false';
+        }
+        if (this.hasAttribute('interactive')) {
+            options.interactive = this.getAttribute('interactive') !== null && this.getAttribute('interactive') !== 'false';
+        }
+
+        // If an onClick property has been set on the element, use it
+        if (this._onClick) {
+            options.onClick = this._onClick;
+            // Ensure interactive is true if onClick is set, as factory might depend on it
+            options.interactive = true;
+        } else if (options.interactive) {
+            // If interactive attribute is set but no programmatic _onClick,
+            // set up a default onClick handler that simply re-dispatches the event from the host.
+            // This ensures that if someone adds an event listener to <adw-row>, it will fire.
+            options.onClick = (event) => {
+                // Prevent re-triggering if the event is already from the host or already handled
+                if (event.target === this) return;
+
+                const clickEvent = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    composed: true // Allow event to cross shadow DOM boundary
+                });
+                this.dispatchEvent(clickEvent);
+            };
+        }
+
+
+        // The Adw.createRow factory does not take children directly for slotting.
+        // It's designed to have its children passed in the options if they are known at creation time.
+        // For a general <adw-row><child/></adw-row> custom element, we must provide a slot.
+        const rowElement = Adw.createRow(options);
+
+        const slotElement = document.createElement('slot');
+        rowElement.appendChild(slotElement); // The factory's output should be the container for the slot.
+
+        this.shadowRoot.appendChild(rowElement);
+    }
+}
+customElements.define('adw-row', AdwRow);
+
+// AdwWindowTitle Component
+class AdwWindowTitle extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+        const h1 = document.createElement('h1');
+        h1.classList.add('adw-header-bar-title');
+        const slot = document.createElement('slot');
+        h1.appendChild(slot);
+        this.shadowRoot.appendChild(h1);
+    }
+}
+customElements.define('adw-window-title', AdwWindowTitle);
+
+// AdwHeaderBar Component
+class AdwHeaderBar extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const header = document.createElement('header');
+        header.classList.add('adw-header-bar');
+
+        const startBox = document.createElement('div');
+        startBox.classList.add('adw-header-bar-start');
+        const startSlot = document.createElement('slot');
+        startSlot.name = 'start';
+        startBox.appendChild(startSlot);
+
+        const centerBox = document.createElement('div');
+        centerBox.classList.add('adw-header-bar-center-box');
+        const titleSlot = document.createElement('slot');
+        titleSlot.name = 'title';
+        const subtitleSlot = document.createElement('slot');
+        subtitleSlot.name = 'subtitle';
+        centerBox.appendChild(titleSlot);
+        centerBox.appendChild(subtitleSlot);
+
+        const endBox = document.createElement('div');
+        endBox.classList.add('adw-header-bar-end');
+        const endSlot = document.createElement('slot');
+        endSlot.name = 'end';
+        endBox.appendChild(endSlot);
+
+        header.appendChild(startBox);
+        header.appendChild(centerBox);
+        header.appendChild(endBox);
+        this.shadowRoot.appendChild(header);
+    }
+}
+customElements.define('adw-header-bar', AdwHeaderBar);
+
+// AdwApplicationWindow Component
+class AdwApplicationWindow extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const windowDiv = document.createElement('div');
+        windowDiv.classList.add('adw-window');
+
+        const headerSlot = document.createElement('slot');
+        headerSlot.name = 'header';
+        windowDiv.appendChild(headerSlot);
+
+        const mainContent = document.createElement('main');
+        mainContent.classList.add('adw-window-content');
+        const defaultSlot = document.createElement('slot');
+        mainContent.appendChild(defaultSlot);
+        windowDiv.appendChild(mainContent);
+
+        this.shadowRoot.appendChild(windowDiv);
+    }
+}
+customElements.define('adw-application-window', AdwApplicationWindow);
+
+// AdwAvatar Component
+class AdwAvatar extends HTMLElement {
+    static get observedAttributes() {
+        return ['size', 'image-src', 'text', 'alt'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {};
+        if (this.hasAttribute('size')) {
+            options.size = parseInt(this.getAttribute('size'), 10);
+        }
+        if (this.hasAttribute('image-src')) {
+            options.imageSrc = this.getAttribute('image-src');
+        }
+        if (this.hasAttribute('text')) {
+            options.text = this.getAttribute('text');
+        }
+        if (this.hasAttribute('alt')) {
+            options.alt = this.getAttribute('alt');
+        }
+        // `customFallback` option is not handled via attributes for simplicity here.
+
+        const avatarElement = Adw.createAvatar(options);
+        this.shadowRoot.appendChild(avatarElement);
+    }
+}
+customElements.define('adw-avatar', AdwAvatar);
+
+// AdwFlap Component
+class AdwFlap extends HTMLElement {
+    static get observedAttributes() {
+        return ['folded', 'flap-width', 'transition-speed'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._flapInstance = null; // To store the object returned by the factory
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+            // For 'folded' attribute, also call the instance method if available
+            if (name === 'folded' && this._flapInstance) {
+                this._flapInstance.setFolded(this.hasAttribute('folded'));
+            }
+        }
+    }
+
+    _render() {
+        // For AdwFlap, the factory manages its own content.
+        // We need to extract slotted content *before* clearing the shadow DOM if we re-render.
+        // However, the factory pattern for AdwFlap takes content as arguments,
+        // so we should ideally only call the factory once in connectedCallback
+        // and manage updates via methods.
+        // For simplicity in this pass, if _render is called again, it will recreate.
+
+        const flapContent = this.querySelector('[slot="flap"]');
+        const mainContent = this.querySelector('[slot="main"]');
+
+        // Clear previous content if any (except the style link)
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            isFolded: this.hasAttribute('folded'),
+            flapContent: flapContent ? flapContent.cloneNode(true) : document.createElement('div'), // Pass clones or placeholders
+            mainContent: mainContent ? mainContent.cloneNode(true) : document.createElement('div')
+        };
+
+        if (this.hasAttribute('flap-width')) {
+            options.flapWidth = this.getAttribute('flap-width');
+        }
+        if (this.hasAttribute('transition-speed')) {
+            options.transitionSpeed = this.getAttribute('transition-speed');
+        }
+
+        this._flapInstance = Adw.createFlap(options);
+        this.shadowRoot.appendChild(this._flapInstance.element);
+
+        // If content was passed as clones, the original slotted elements are still in light DOM.
+        // To make them appear in the shadow DOM's slots (if the factory used slots, which it doesn't directly),
+        // we would need a different approach.
+        // Since createAdwFlap directly appends content, we ensure the slots are empty in shadow DOM
+        // and the factory manages the content passed to it.
+        // The provided solution expects light DOM slots to be projected into the factory's structure.
+        // The current Adw.createFlap directly appends flapContent and mainContent.
+        // For custom element usage with slots, Adw.createFlap would ideally create placeholders (e.g. divs)
+        // and the custom element would put <slot name="flap"> and <slot name="main"> into those placeholders.
+        //
+        // Revised approach for _render, assuming Adw.createFlap is slot-UNaware:
+        // The custom element itself will create the structure for slots,
+        // and the factory's output will be placed *inside* the main content area.
+        // This contradicts the instruction "Calls Adw.createFlap(options)" and then "factory-generated element is appended".
+        // Let's stick to the instructions: Adw.createFlap is called, and its element is appended.
+        // This means the light DOM slot content needs to be *moved* into the structure generated by Adw.createFlap.
+        // This is usually done by passing the actual DOM elements to the factory.
+        // The factory Adw.createFlap already appends these elements.
+
+        // The Adw.createFlap factory takes the flapContent and mainContent *elements* themselves.
+        // So, if the user uses <div slot="flap">, we should pass that specific div.
+        // The factory then appends them. This means they are moved from light DOM.
+        // This is a bit tricky if _render is called multiple times.
+        // A more robust way is for the factory to expect content for slots and the custom element to provide them.
+        // For now, the factory Adw.createFlap takes direct elements.
+
+        // If the factory appends the passed elements, we must ensure not to pass them again if _render is recalled.
+        // This implies that the factory should be called ideally once.
+        // Or, the custom element should handle the slot projection itself.
+
+        // Re-evaluating: The AdwFlap component will pass the *actual slotted elements* to the factory.
+        // The factory then incorporates them. This means they are moved from light DOM to shadow DOM.
+        // This is fine for initial render. Attribute changes will re-run _render.
+        // If slotted content changes, MutationObserver would be needed for AdwFlap to react.
+        // For now, only attribute changes trigger _render.
+    }
+
+    // Expose methods
+    toggleFlap(explicitState) {
+        if (this._flapInstance) {
+            this._flapInstance.toggleFlap(explicitState);
+            // Reflect folded state back to attribute
+            if (this._flapInstance.isFolded()) {
+                this.setAttribute('folded', '');
+            } else {
+                this.removeAttribute('folded');
+            }
+        }
+    }
+
+    isFolded() {
+        return this._flapInstance ? this._flapInstance.isFolded() : this.hasAttribute('folded');
+    }
+
+    setFolded(state) {
+        if (this._flapInstance) {
+            this._flapInstance.setFolded(state);
+             if (state) {
+                this.setAttribute('folded', '');
+            } else {
+                this.removeAttribute('folded');
+            }
+        } else if (state) {
+            this.setAttribute('folded', '');
+        } else {
+            this.removeAttribute('folded');
+        }
+    }
+}
+customElements.define('adw-flap', AdwFlap);
+
+// AdwViewSwitcher Component
+class AdwViewSwitcher extends HTMLElement {
+    static get observedAttributes() {
+        return ['label', 'active-view']; // 'active-view' to programmatically set active view by name
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._viewSwitcherInstance = null;
+        this._observer = null;
+    }
+
+    connectedCallback() {
+        this._render();
+        // Observe changes in light DOM children to re-render if views are added/removed
+        this._observer = new MutationObserver(() => {
+            // Potentially debounce or check if relevant nodes changed
+            this._render();
+        });
+        this._observer.observe(this, { childList: true, subtree: false }); // Only direct children
+    }
+
+    disconnectedCallback() {
+        if (this._observer) {
+            this._observer.disconnect();
+            this._observer = null;
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            if (name === 'active-view' && this._viewSwitcherInstance) {
+                this._viewSwitcherInstance.setActiveView(newValue);
+            } else {
+                // Re-render for other attribute changes like 'label'
+                this._render();
+            }
+        }
+    }
+
+    _parseViews() {
+        const views = [];
+        // Iterate over direct children of the <adw-view-switcher> element
+        Array.from(this.children).forEach(child => {
+            if (child.hasAttribute('view-name')) {
+                // We need to pass the content of the view.
+                // The factory expects content to be an HTMLElement or an HTML string.
+                // We pass a clone of the child element itself as the content.
+                // The factory will then append this clone to its panel.
+                // This moves the responsibility of how to display to the factory,
+                // which already creates panels.
+                // The child element itself IS the content.
+                views.push({
+                    name: child.getAttribute('view-name'),
+                    content: child.cloneNode(true), // Pass a clone to the factory
+                    id: child.id || undefined // Pass ID if present
+                });
+            } else {
+                console.warn("AdwViewSwitcher: Child element is missing 'view-name' attribute and will be ignored.", child);
+            }
+        });
+        return views;
+    }
+
+    _render() {
+        // Clear previous content (except style link)
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const views = this._parseViews();
+        const options = {
+            views: views,
+            label: this.getAttribute('label') || undefined,
+            activeViewName: this.getAttribute('active-view') || (views.length > 0 ? views[0].name : undefined),
+            onViewChanged: (viewName, buttonId, panelId) => {
+                this.setAttribute('active-view', viewName); // Reflect active view change
+                this.dispatchEvent(new CustomEvent('view-changed', {
+                    detail: { viewName, buttonId, panelId },
+                    bubbles: true,
+                    composed: true
+                }));
+            }
+        };
+
+        this._viewSwitcherInstance = Adw.createViewSwitcher(options);
+        this.shadowRoot.appendChild(this._viewSwitcherInstance);
+    }
+
+    // Method to programmatically set the active view
+    setActiveView(viewName) {
+        if (this._viewSwitcherInstance) {
+            this._viewSwitcherInstance.setActiveView(viewName);
+        } else {
+             // If called before instance is ready, set attribute to be picked up by _render
+            this.setAttribute('active-view', viewName);
+        }
+    }
+}
+customElements.define('adw-view-switcher', AdwViewSwitcher);
+
+// AdwProgressBar Component
+class AdwProgressBar extends HTMLElement {
+    static get observedAttributes() {
+        return ['value', 'indeterminate', 'disabled'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {};
+        if (this.hasAttribute('value')) {
+            options.value = parseFloat(this.getAttribute('value'));
+        }
+        if (this.hasAttribute('indeterminate')) {
+            options.isIndeterminate = this.getAttribute('indeterminate') !== null && this.getAttribute('indeterminate') !== 'false';
+        }
+        if (this.hasAttribute('disabled')) {
+            options.disabled = this.getAttribute('disabled') !== null && this.getAttribute('disabled') !== 'false';
+        }
+
+        const progressBarElement = Adw.createProgressBar(options);
+        this.shadowRoot.appendChild(progressBarElement);
+    }
+}
+customElements.define('adw-progress-bar', AdwProgressBar);
+
+// AdwSpinner Component
+class AdwSpinner extends HTMLElement {
+    static get observedAttributes() {
+        return ['size', 'active'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._spinnerElement = null;
+    }
+
+    connectedCallback() {
+        if (!this.hasAttribute('active')) { // Default to active if attribute not present
+            this.setAttribute('active', 'true');
+        }
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            if (name === 'active') {
+                this._updateActivityState();
+            } else {
+                this._render();
+            }
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {};
+        if (this.hasAttribute('size')) {
+            options.size = this.getAttribute('size');
+        }
+
+        this._spinnerElement = Adw.createSpinner(options);
+        this.shadowRoot.appendChild(this._spinnerElement);
+        this._updateActivityState();
+    }
+
+    _updateActivityState() {
+        if (this._spinnerElement) {
+            const isActive = this.getAttribute('active') !== null && this.getAttribute('active') !== 'false';
+            if (isActive) {
+                this._spinnerElement.classList.remove('hidden'); // Assuming 'hidden' class controls display
+            } else {
+                this._spinnerElement.classList.add('hidden');
+            }
+        }
+    }
+}
+customElements.define('adw-spinner', AdwSpinner);
+
+// AdwSplitButton Component
+class AdwSplitButton extends HTMLElement {
+    static get observedAttributes() {
+        return ['action-text', 'action-href', 'suggested', 'disabled', 'dropdown-aria-label'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            onActionClick: (event) => {
+                this.dispatchEvent(new CustomEvent('action-click', { bubbles: true, composed: true, detail: { originalEvent: event } }));
+            },
+            onDropdownClick: (event) => {
+                this.dispatchEvent(new CustomEvent('dropdown-click', { bubbles: true, composed: true, detail: { originalEvent: event } }));
+            }
+        };
+
+        if (this.hasAttribute('action-text')) {
+            options.actionText = this.getAttribute('action-text');
+        }
+        if (this.hasAttribute('action-href')) {
+            options.actionHref = this.getAttribute('action-href');
+        }
+        if (this.hasAttribute('suggested')) {
+            options.suggested = this.getAttribute('suggested') !== null && this.getAttribute('suggested') !== 'false';
+        }
+        if (this.hasAttribute('disabled')) {
+            options.disabled = this.getAttribute('disabled') !== null && this.getAttribute('disabled') !== 'false';
+        }
+        if (this.hasAttribute('dropdown-aria-label')) {
+            options.dropdownAriaLabel = this.getAttribute('dropdown-aria-label');
+        }
+
+        const splitButtonElement = Adw.createSplitButton(options);
+        this.shadowRoot.appendChild(splitButtonElement);
+    }
+}
+customElements.define('adw-split-button', AdwSplitButton);
+
+// AdwStatusPage Component
+class AdwStatusPage extends HTMLElement {
+    static get observedAttributes() {
+        return ['title', 'description', 'icon'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+        // Observe slot changes for actions
+        const slot = this.shadowRoot.querySelector('slot[name="actions"]');
+        if (slot) {
+            slot.addEventListener('slotchange', () => this._render());
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _render() {
+        // Collect slotted actions before clearing shadow DOM
+        const actionsSlot = this.querySelector('[slot="actions"]');
+        const actions = actionsSlot ? Array.from(actionsSlot.children).map(child => child.cloneNode(true)) : [];
+
+
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            actions: actions // Pass cloned actions to the factory
+        };
+        if (this.hasAttribute('title')) {
+            options.title = this.getAttribute('title');
+        }
+        if (this.hasAttribute('description')) {
+            options.description = this.getAttribute('description');
+        }
+        if (this.hasAttribute('icon')) {
+            options.iconHTML = this.getAttribute('icon'); // Map 'icon' to 'iconHTML'
+        }
+
+        const statusPageElement = Adw.createStatusPage(options);
+
+        // If the factory doesn't already provide a slot for actions,
+        // and we want to use light DOM for actions, we might need to adjust.
+        // The current Adw.createStatusPage factory takes an array of elements for actions.
+        // So, we find the actions slot in the factory-generated element and append our slotted items,
+        // or ensure the factory handles them.
+        // For this implementation, we pass the action elements (clones) directly to the factory.
+
+        // The factory Adw.createStatusPage directly appends the action elements.
+        // If the factory needs to be more flexible with slots, its internal structure would need adjustment.
+        // Given current factory, passing cloned `actions` is the direct way.
+        // The custom element itself will not have a <slot name="actions"> in its Shadow DOM
+        // because the factory consumes the action elements.
+
+        this.shadowRoot.appendChild(statusPageElement);
+
+        // If we wanted to use a slot in THIS component's shadow DOM instead of passing clones:
+        // (This would require Adw.createStatusPage to be modified or not used for the actions part)
+        // const actionsDiv = statusPageElement.querySelector('.adw-status-page-actions');
+        // if (actionsDiv) {
+        //     const actionsSlotElement = document.createElement('slot');
+        //     actionsSlotElement.name = 'actions';
+        //     actionsDiv.innerHTML = ''; // Clear what factory might have put
+        //     actionsDiv.appendChild(actionsSlotElement);
+        // }
+    }
+}
+customElements.define('adw-status-page', AdwStatusPage);
+
+// AdwExpanderRow Component
+class AdwExpanderRow extends HTMLElement {
+    static get observedAttributes() {
+        return ['title', 'subtitle', 'expanded'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+    }
+
+    connectedCallback() {
+        this._render();
+         // Listen for slot changes to re-render if content changes
+        const slot = this.shadowRoot.querySelector('slot[name="content"]');
+        if (slot) { // This slot is not actually in shadow DOM with current _render
+            // The factory consumes the content. A true slot-based approach would be different.
+            // For now, if light DOM content changes, this won't auto-update unless an attribute changes too.
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _render() {
+        const contentSlot = this.querySelector('[slot="content"]');
+        // Clone content for the factory, if it exists
+        const contentClone = contentSlot ? contentSlot.cloneNode(true) : document.createElement('div');
+
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            title: this.getAttribute('title') || '',
+            content: contentClone // Pass the cloned content to the factory
+        };
+
+        if (this.hasAttribute('subtitle')) {
+            options.subtitle = this.getAttribute('subtitle');
+        }
+        if (this.hasAttribute('expanded')) {
+            options.expanded = this.getAttribute('expanded') !== null && this.getAttribute('expanded') !== 'false';
+        }
+
+        const expanderRowElement = Adw.createExpanderRow(options);
+        this.shadowRoot.appendChild(expanderRowElement);
+
+        // The factory Adw.createExpanderRow directly appends the 'content' element.
+        // So, no <slot name="content"> is rendered in this component's shadow DOM.
+        // The light DOM element provided via <div slot="content">...</div> is effectively moved (via clone)
+        // into the structure created by the factory.
+    }
+}
+customElements.define('adw-expander-row', AdwExpanderRow);
+
+// AdwComboRow Component
+class AdwComboRow extends HTMLElement {
+    static get observedAttributes() {
+        return ['title', 'subtitle', 'selected-value', 'disabled', 'select-options'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._internalSelect = null;
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+            // If selected-value changes, update internal select if it exists
+            if (name === 'selected-value' && this._internalSelect && this._internalSelect.value !== newValue) {
+                this._internalSelect.value = newValue;
+            }
+        }
+    }
+
+    _parseSelectOptions() {
+        const attr = this.getAttribute('select-options');
+        if (!attr) return [];
+        try {
+            const parsed = JSON.parse(attr);
+            if (Array.isArray(parsed)) {
+                return parsed;
+            }
+            console.warn('AdwComboRow: "select-options" attribute is not a valid JSON array.', parsed);
+            return [];
+        } catch (e) {
+            console.error('AdwComboRow: Error parsing "select-options" attribute:', e);
+            return [];
+        }
+    }
+
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            title: this.getAttribute('title') || '',
+            selectOptions: this._parseSelectOptions(),
+            onChanged: (value, event) => {
+                this.setAttribute('selected-value', value); // Reflect change to attribute
+                this.dispatchEvent(new CustomEvent('change', {
+                    detail: { value: value, originalEvent: event },
+                    bubbles: true,
+                    composed: true
+                }));
+            }
+        };
+
+        if (this.hasAttribute('subtitle')) {
+            options.subtitle = this.getAttribute('subtitle');
+        }
+        if (this.hasAttribute('selected-value')) {
+            options.selectedValue = this.getAttribute('selected-value');
+        }
+        if (this.hasAttribute('disabled')) {
+            options.disabled = this.getAttribute('disabled') !== null && this.getAttribute('disabled') !== 'false';
+        }
+
+        const comboRowElement = Adw.createComboRow(options);
+        this.shadowRoot.appendChild(comboRowElement);
+        this._internalSelect = comboRowElement.querySelector('select');
+    }
+
+    get value() {
+        return this._internalSelect ? this._internalSelect.value : this.getAttribute('selected-value');
+    }
+
+    set value(val) {
+        if (this._internalSelect) {
+            this._internalSelect.value = val;
+        }
+        this.setAttribute('selected-value', val);
+        // Dispatch change event if value is set programmatically
+        this.dispatchEvent(new CustomEvent('change', {
+            detail: { value: val },
+            bubbles: true,
+            composed: true
+        }));
+    }
+}
+customElements.define('adw-combo-row', AdwComboRow);
+
+// AdwDialog Component
+class AdwDialog extends HTMLElement {
+    static get observedAttributes() {
+        return ['title', 'close-on-backdrop-click', 'open'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._dialogInstance = null; // To store { dialog, open, close } from factory
+    }
+
+    connectedCallback() {
+        this._render(); // Initial render
+        if (this.hasAttribute('open')) {
+            this.open();
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue === newValue) return;
+
+        if (name === 'open') {
+            if (newValue !== null) this.open();
+            else this.close();
+        } else {
+            // Re-render if other attributes like title change
+            // This might be disruptive if the dialog is open, consider implications
+            this._render();
+        }
+    }
+
+    _render() {
+        // Content and buttons are passed to the factory.
+        // If _render is called multiple times (e.g. title changes),
+        // we need to ensure we're not duplicating or losing state of slotted content.
+        // Cloning slotted content is a common strategy here.
+
+        const contentSlot = this.querySelector('[slot="content"]');
+        const buttonsSlot = this.querySelector('[slot="buttons"]');
+
+        const contentClone = contentSlot ? contentSlot.cloneNode(true) : document.createElement('div');
+        const buttonElements = buttonsSlot ? Array.from(buttonsSlot.children).map(child => child.cloneNode(true)) : [];
+
+        // Clear previous shadow DOM content except style
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const options = {
+            title: this.getAttribute('title') || undefined,
+            closeOnBackdropClick: this.hasAttribute('close-on-backdrop-click') ? (this.getAttribute('close-on-backdrop-click') !== 'false') : true,
+            content: contentClone,
+            buttons: buttonElements,
+            onClose: () => {
+                this.removeAttribute('open'); // Reflect state to attribute
+                this.dispatchEvent(new CustomEvent('close', {bubbles: true, composed: true}));
+            }
+        };
+
+        this._dialogInstance = Adw.createDialog(options);
+        // The factory returns an object with the dialog element and open/close methods.
+        // The dialog element itself (this._dialogInstance.dialog) is designed to be appended to the body by its open() method.
+        // So, we don't append it to this component's shadow DOM directly.
+        // This custom element acts as a controller.
+        // If the dialog was meant to be encapsulated, the factory would need to return just the element.
+        // For now, this component doesn't render anything into its own shadow other than style.
+        // Or, if we want it in shadow DOM, the factory's open/close needs to target this shadow DOM.
+        // The current Adw.createDialog appends to document.body.
+        // So, this AdwDialog custom element will not have the dialog in its shadow.
+        // This means the <slot> elements are effectively not used for rendering *within this component's shadow DOM*.
+        // They are used to *provide content* to the factory.
+    }
+
+    open() {
+        if (this._dialogInstance) {
+            this._dialogInstance.open();
+            if (!this.hasAttribute('open')) {
+                this.setAttribute('open', '');
+            }
+        } else {
+            // If called before _render (e.g. attribute set early), set attribute to ensure it opens after render.
+            this.setAttribute('open', '');
+        }
+    }
+
+    close() {
+        if (this._dialogInstance) {
+            this._dialogInstance.close();
+            // The onClose callback in options should handle removing the attribute.
+        }
+    }
+}
+customElements.define('adw-dialog', AdwDialog);
+
+// AdwBanner Component
+class AdwBanner extends HTMLElement {
+    static get observedAttributes() {
+        return ['message', 'type', 'dismissible', 'show'];
+    }
+
+    constructor() {
+        super();
+        // No shadow DOM needed as this is a controller element.
+        // The factory appends the banner to the document body or a specified container.
+        this._bannerInstance = null; // To keep track of the created banner element if needed
+    }
+
+    connectedCallback() {
+        if (this.hasAttribute('show')) {
+            this.show();
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'show' && oldValue !== newValue) {
+            if (newValue !== null) this.show();
+            else this.hide(); // Or rely on internal dismiss
+        }
+        // Other attribute changes might require re-showing the banner if it's complex
+        // For now, only 'show' attribute directly controls visibility after initial creation.
+    }
+
+    show() {
+        const message = this.getAttribute('message') || '';
+        if (!message && !this.innerHTML.trim()) { // Use innerHTML as fallback for message
+            console.warn('AdwBanner: Message is empty. Banner not shown.');
+            return;
+        }
+
+        const finalMessage = message || this.innerHTML.trim();
+
+        // Remove existing banner if any, to prevent duplicates from this controller
+        if (this._bannerInstance && this._bannerInstance.parentElement) {
+            this._bannerInstance.remove();
+        }
+
+        const options = {
+            type: this.getAttribute('type') || 'info',
+            dismissible: this.hasAttribute('dismissible') ? (this.getAttribute('dismissible') !== 'false') : true,
+            // container: this.parentElement, // Default is document.body, could make this configurable
+            id: this.id ? `${this.id}-instance` : undefined // Optional ID for the instance
+        };
+
+        this._bannerInstance = Adw.createAdwBanner(finalMessage, options);
+
+        // Reflect that the banner is being shown, if not already set
+        if (!this.hasAttribute('show')) {
+            this.setAttribute('show', '');
+        }
+
+        // Listen for removal of the banner to update 'show' attribute
+        // This requires the factory to provide a way to hook into dismissal,
+        // or use MutationObserver on bannerInstance's parent.
+        // Adw.createAdwBanner's close button has its own removal logic.
+        // We can add a custom event or check if the banner is still in DOM.
+        if (this._bannerInstance && options.dismissible) {
+            const observer = new MutationObserver(() => {
+                if (!this._bannerInstance || !this._bannerInstance.isConnected) {
+                    this.removeAttribute('show');
+                    observer.disconnect();
+                }
+            });
+            // Observe the parent of the banner instance, typically document.body
+            if (this._bannerInstance.parentNode) {
+                 observer.observe(this._bannerInstance.parentNode, { childList: true });
+            }
+        } else if (!options.dismissible && this._bannerInstance) {
+            // For non-dismissible banners shown by this controller,
+            // they'd persist until hide() is called or element is removed.
+        }
+
+
+    }
+
+    hide() {
+        if (this._bannerInstance && this._bannerInstance.parentElement) {
+            // Adw.createAdwBanner's close button has animation before removal.
+            // We should trigger that if possible, or just remove directly.
+            const closeButton = this._bannerInstance.querySelector('.adw-banner-close-button');
+            if (closeButton) {
+                closeButton.click(); // Simulate click to trigger dismissal logic
+            } else {
+                this._bannerInstance.remove(); // Fallback direct removal
+            }
+        }
+        this._bannerInstance = null;
+        // Attribute is removed by onClose logic or directly if hide is called
+        // this.removeAttribute('show');
+    }
+}
+customElements.define('adw-banner', AdwBanner);
+
+// AdwToast Component
+class AdwToast extends HTMLElement {
+    static get observedAttributes() {
+        return ['message', 'type', 'timeout', 'show'];
+    }
+
+    constructor() {
+        super();
+        // No shadow DOM for this controller element.
+        this._toastInstance = null;
+    }
+
+    connectedCallback() {
+        if (this.hasAttribute('show')) {
+            this.show();
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'show' && oldValue !== newValue) {
+            if (newValue !== null) this.show();
+            // Hiding is typically handled by timeout or user action on the toast itself.
+            // A direct hide() method could be added if needed to programmatically remove.
+        }
+    }
+
+    show() {
+        const message = this.getAttribute('message') || '';
+         if (!message && !this.innerHTML.trim()) { // Use innerHTML as fallback for message
+            console.warn('AdwToast: Message is empty. Toast not shown.');
+            return;
+        }
+        const finalMessage = message || this.innerHTML.trim();
+
+        // Prevent duplicate toasts from the same controller instance if show() is called multiple times
+        if (this._toastInstance && this._toastInstance.isConnected) {
+            this._toastInstance.remove();
+        }
+
+        const options = {
+            type: this.getAttribute('type') || undefined,
+            timeout: this.hasAttribute('timeout') ? parseInt(this.getAttribute('timeout'), 10) : 4000
+        };
+
+        const buttonSlot = this.querySelector('[slot="button"]');
+        if (buttonSlot) {
+            options.button = buttonSlot.cloneNode(true); // Pass a clone of the button
+        }
+
+        this._toastInstance = Adw.createAdwToast(finalMessage, options);
+
+        if (!this.hasAttribute('show')) {
+            this.setAttribute('show', '');
+        }
+
+        // Toasts are transient; they remove themselves.
+        // We can listen for removal to update the 'show' attribute.
+        const observer = new MutationObserver(() => {
+            if (!this._toastInstance || !this._toastInstance.isConnected) {
+                this.removeAttribute('show');
+                observer.disconnect();
+            }
+        });
+         // Observe the parent of the toast instance, typically document.body
+        if (this._toastInstance.parentNode) {
+            observer.observe(this._toastInstance.parentNode, { childList: true });
+        } else {
+            // If not appended yet (e.g. factory defers it), this might be too early.
+            // Adw.createAdwToast appends to body immediately.
+        }
+    }
+
+    // Optional: hide method if programmatic removal is needed
+    hide() {
+        if (this._toastInstance && this._toastInstance.isConnected) {
+            this._toastInstance.remove(); // Or trigger its fade-out animation if it has one
+        }
+        this._toastInstance = null;
+        this.removeAttribute('show');
+    }
+}
+customElements.define('adw-toast', AdwToast);

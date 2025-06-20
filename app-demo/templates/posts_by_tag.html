@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Posts tagged with "{{ tag.name }}"{% endblock %}
+
+{% block content %}
+<div class="main-content-clamped">
+    <h2 style="margin-bottom: var(--spacing-l);">Posts tagged with <mark>{{ tag.name }}</mark></h2>
+
+    {% if posts %}
+        <div class="post-list">
+            {% for post in posts %}
+                <article class="post-summary" style="margin-bottom: var(--spacing-xl); padding-bottom: var(--spacing-l); border-bottom: 1px solid var(--border-color);">
+                    <h3><a href="{{ url_for('view_post', post_id=post.id) }}" style="text-decoration: none;">{{ post.title }}</a></h3>
+                    <p class="post-meta-summary" style="font-size: 0.9em; color: var(--secondary-text-color); margin-bottom: var(--spacing-xs);">
+                        By {{ post.author.username }} on {{ post.created_at.strftime('%Y-%m-%d') }}
+                    </p>
+                    <p class="post-excerpt">{{ post.content | truncate(200, True) }}</p>
+
+                    {% if post.categories %}
+                    <div class="categories-summary" style="margin-top: var(--spacing-s);">
+                        <adw-label is_body="true" style="font-size: 0.9em; margin-right: var(--spacing-xs);">Categories:</adw-label>
+                        {% for category in post.categories %}
+                            <a href="{{ url_for('posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact" style="margin-right: var(--spacing-xxs);">{{ category.name }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if post.tags %}
+                    <div class="tags-summary" style="margin-top: var(--spacing-xs);">
+                        <adw-label is_body="true" style="font-size: 0.9em; margin-right: var(--spacing-xs);">Tags:</adw-label>
+                        {% for t in post.tags %}
+                          <a href="{{ url_for('posts_by_tag', tag_slug=t.slug) }}" class="adw-button flat compact" style="margin-right: var(--spacing-xxs);">{{ t.name }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </div>
+
+        {# Pagination #}
+        {% if pagination and (pagination.has_prev or pagination.has_next) %}
+        <nav aria-label="Page navigation" class="pagination-nav" style="margin-top: var(--spacing-xl); text-align: center;">
+            <adw-box orientation="horizontal" justify="center" spacing="s">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('posts_by_tag', tag_slug=tag.slug, page=pagination.prev_num) }}" class="adw-button">
+                        Previous
+                    </a>
+                {% else %}
+                    <adw-button disabled>Previous</adw-button>
+                {% endif %}
+
+                <span class="adw-label" style="align-self: center;">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+
+                {% if pagination.has_next %}
+                    <a href="{{ url_for('posts_by_tag', tag_slug=tag.slug, page=pagination.next_num) }}" class="adw-button">
+                        Next
+                    </a>
+                {% else %}
+                    <adw-button disabled>Next</adw-button>
+                {% endif %}
+            </adw-box>
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <p>No posts found with this tag.</p>
+    {% endif %}
+
+     <div class="adw-box justify-center" style="margin-top: var(--spacing-xl);">
+         <adw-button href="{{ url_for('index') }}">Back to Home</adw-button>
+    </div>
+</div>
+{% endblock %}

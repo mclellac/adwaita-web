@@ -20,8 +20,16 @@
     <div class="post-categories" style="margin-bottom: var(--spacing-m);">
         <adw-label is_body="true"><strong>Categories:</strong></adw-label>
         {% for category in post.categories %}
-            {# Later, this will link to the category view page #}
             <a href="{{ url_for('posts_by_category', category_slug=category.slug) }}" class="adw-button flat small" style="margin-left: var(--spacing-xs);">{{ category.name }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if post.tags %}
+    <div class="post-tags" style="margin-bottom: var(--spacing-m);">
+        <adw-label is_body="true" style="margin-right: var(--spacing-xs);"><strong>Tags:</strong></adw-label>
+        {% for tag in post.tags %}
+          <a href="{{ url_for('posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact" style="margin-right: var(--spacing-xxs);">{{ tag.name }}</a>
         {% endfor %}
     </div>
     {% endif %}
@@ -31,8 +39,10 @@
     </div>
 
     {% if post.author == current_user %}
-    <div class="form-button-container" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-l);"> {# Re-using form-button-container for consistency #}
+    <div class="form-button-container" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-l);">
         <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form" style="display: inline;">
+            {# Assuming delete_form is passed from the route for CSRF in post deletion #}
+            {% if delete_form %}{{ delete_form.hidden_tag() }}{% endif %}
             <adw-button id="open-delete-dialog-btn" appearance="destructive">Delete Post</adw-button>
         </form>
         <adw-button href="{{ url_for('edit_post', post_id=post.id) }}">Edit Post</adw-button>
@@ -49,7 +59,59 @@
     </adw-dialog>
     {% endif %}
 
-    <div class="adw-box justify-center" style="margin-top: var(--spacing-l);">
+    <hr style="margin: var(--spacing-xl) 0;">
+
+    {# Comments Section #}
+    <div class="comments-section" style="margin-top: var(--spacing-xl);">
+        <h3>Comments</h3>
+        {% if comments %}
+            {% for comment in comments %}
+            <adw-box orientation="vertical" spacing="s" class="comment-card" style="margin-bottom: var(--spacing-m); padding: var(--spacing-m); border: 1px solid var(--border-color); border-radius: var(--border-radius-md);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xs);">
+                    <strong>{{ comment.author.username }}</strong>
+                    <small class="text-muted" style="font-size: 0.85em; color: var(--secondary-text-color);">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</small>
+                </div>
+                <p style="white-space: pre-wrap; margin-bottom: var(--spacing-s);">{{ comment.text }}</p>
+                {% if current_user.is_authenticated and (comment.author == current_user or post.author == current_user) %}
+                    <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" style="text-align: right;">
+                        {{ delete_form.hidden_tag() }} {# CSRF for delete comment form #}
+                        <input type="hidden" name="_method" value="DELETE"> {# If needed by backend/JS framework #}
+                        <adw-button type="submit" appearance="destructive-action" class="compact small">Delete Comment</adw-button>
+                    </form>
+                {% endif %}
+            </adw-box>
+            {% endfor %}
+        {% else %}
+            <p>No comments yet.</p>
+        {% endif %}
+    </div>
+
+    {# Comment Submission Form #}
+    {% if current_user.is_authenticated %}
+    <div class="comment-form-section" style="margin-top: var(--spacing-xl);">
+        <h4>Leave a Comment</h4>
+        <form method="POST" action="{{ url_for('view_post', post_id=post.id) }}">
+            {{ form.hidden_tag() }} {# CSRF token for comment form #}
+            <div style="margin-bottom: var(--spacing-m);">
+                {{ form.text.label(class="adw-label") }}<br>
+                {{ form.text(rows=4, class="adw-entry", style="width: 100%; min-height: 80px;") }}
+                {% if form.text.errors %}
+                    <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                        {% for error in form.text.errors %}<span>{{ error }}</span><br>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <adw-button type="submit" appearance="suggested-action">{{ form.submit.label.text }}</adw-button>
+        </form>
+    </div>
+    {% else %}
+    <div style="margin-top: var(--spacing-xl);">
+        <p><a href="{{ url_for('login', next=request.url) }}">Login</a> to leave a comment.</p>
+    </div>
+    {% endif %}
+
+
+    <div class="adw-box justify-center" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
          <adw-button href="{{ url_for('index') }}">Back to Posts</adw-button>
     </div>
 </div>
@@ -62,12 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmBtn = document.getElementById('confirm-delete-btn');
     const deleteForm = document.getElementById('delete-post-form');
 
-    if (openDialogBtn) { // Only if the delete button is present (post author is current user)
-        openDialogBtn.addEventListener('click', () => {
-            if (deleteDialog && typeof deleteDialog.showModal === 'function') {
-                deleteDialog.showModal();
+    if (openDialogBtn) {
+        openDialogBtn.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent immediate form submission if button is inside form
+            if (deleteDialog && typeof deleteDialog.open === 'function') {
+                deleteDialog.open();
             } else {
-                console.error('Delete dialog not found or showModal not supported.');
+                console.error('Delete dialog not found or does not have an open method.');
             }
         });
     }
