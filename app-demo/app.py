@@ -167,9 +167,9 @@ def edit_post(post_id):
             # flash('Post updated successfully!', 'success')
             return redirect(url_for('view_post', post_id=post.id))
         else:
-            # flash('Title and content are required.', 'danger')
+            flash('Title and content are required.', 'warning')
             # Re-render form with an error or rely on HTML5 validation
-            pass # Fall through to render template
+            # Fall through to render template
 
     return render_template('edit_post.html', post=post)
 

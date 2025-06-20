@@ -260,3 +260,17 @@ adw-list-box {
        background-color: var(--my-custom-error-bg, pink);
    }
 */
+
+/* Settings Page Control Containers */
+.settings-control-container {
+    padding-left: var(--spacing-m);
+    padding-top: var(--spacing-s);
+    padding-bottom: var(--spacing-m);
+}
+
+.accent-color-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Consider using Adwaita spacing like var(--spacing-s) if appropriate */
+    align-items: center;
+}
