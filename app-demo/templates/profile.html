@@ -28,6 +28,26 @@
         <div class="adw-row" style="width: 100%;">
             <strong class="adw-label" style="margin-right: var(--spacing-s);">Username:</strong> <span class="adw-label">{{ user_profile.username }}</span>
         </div>
+
+        {% if user_profile.full_name %}
+        <div class="adw-row" style="width: 100%;">
+            <strong class="adw-label" style="margin-right: var(--spacing-s);">Full Name:</strong> <span class="adw-label">{{ user_profile.full_name }}</span>
+        </div>
+        {% endif %}
+
+        {% if user_profile.location %}
+        <div class="adw-row" style="width: 100%;">
+            <strong class="adw-label" style="margin-right: var(--spacing-s);">Location:</strong> <span class="adw-label">{{ user_profile.location }}</span>
+        </div>
+        {% endif %}
+
+        {% if user_profile.website_url %}
+        <div class="adw-row" style="width: 100%;">
+            <strong class="adw-label" style="margin-right: var(--spacing-s);">Website:</strong>
+            <a href="{{ user_profile.website_url }}" target="_blank" rel="noopener noreferrer" class="adw-label link">{{ user_profile.website_url }}</a>
+        </div>
+        {% endif %}
+
         {# Using adw-expander-row for potentially long profile information #}
         <adw-expander-row title="Profile Information" subtitle="View user's bio" style="width: 100%;">
             <p style="padding-top: var(--spacing-s);">{{ user_profile.profile_info if user_profile.profile_info else 'No profile information provided.' }}</p>
@@ -40,9 +60,9 @@
         {% endif %}
 
         <h2 style="margin-top: var(--spacing-l); width: 100%; text-align: center;">Posts by {{ user_profile.username }}</h2>
-            {% if user_profile.posts and user_profile.posts|length > 0 %}
+            {% if posts_pagination and posts_pagination.items %}
                 <adw-list-box style="width: 100%;">
-                    {% for post in user_profile.posts %}
+                    {% for post in posts_pagination.items %}
                         <adw-action-row
                             title="{{ post.title }}"
                             subtitle="Posted on: {{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else 'N/A' }} UTC"
@@ -50,11 +70,43 @@
                         </adw-action-row>
                     {% endfor %}
                 </adw-list-box>
+
+                {# Pagination Controls #}
+                <div class="pagination-controls adw-box adw-box-horizontal align-center justify-center" style="margin-top: var(--spacing-m); gap: var(--spacing-s);">
+                    {% if posts_pagination.has_prev %}
+                        <a href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.prev_num) }}" class="adw-button">
+                            <span class="adw-button-content">
+                                <span class="adw-button-icon adw-icon-start">arrow_back</span> Previous
+                            </span>
+                        </a>
+                    {% else %}
+                        <adw-button disabled>
+                             <span class="adw-button-content">
+                                <span class="adw-button-icon adw-icon-start">arrow_back</span> Previous
+                            </span>
+                        </adw-button>
+                    {% endif %}
+
+                    <span class="adw-label">Page {{ posts_pagination.page }} of {{ posts_pagination.pages }}.</span>
+
+                    {% if posts_pagination.has_next %}
+                         <a href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.next_num) }}" class="adw-button">
+                            <span class="adw-button-content">
+                                Next <span class="adw-button-icon adw-icon-end">arrow_forward</span>
+                            </span>
+                        </a>
+                    {% else %}
+                        <adw-button disabled>
+                            <span class="adw-button-content">
+                                Next <span class="adw-button-icon adw-icon-end">arrow_forward</span>
+                            </span>
+                        </adw-button>
+                    {% endif %}
+                </div>
             {% else %}
                 <adw-status-page title="No Posts Yet" description="{{ user_profile.username }} has not made any posts.">
-                    <div slot="icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">📝</div> {# Using a different emoji placeholder #}
+                    <div slot="icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">📝</div>
                 </adw-status-page>
             {% endif %}
-
     </div>
 {% endblock %}

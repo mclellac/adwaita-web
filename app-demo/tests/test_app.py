@@ -4,54 +4,47 @@ from flask import request, url_for, session # Added for request.path and url_for
 from io import BytesIO # Added for file upload simulation
 import time # Added for time.sleep in edit_post test
 from unittest.mock import patch, MagicMock # Added for mocking
-# Trying to import 'app' directly, assuming app-demo is in sys.path somehow
-from app import app, db, User, Post # app also imports Image from PIL
+from app import create_app, db, User, Post # Import create_app and extensions
+from datetime import datetime, timezone, timedelta # Added for post creation timestamps
 
 
-# Scope 'session' might be more appropriate if db setup is costly and shared across all test files (if any more are added)
-# For a single test file, 'module' is fine.
-@pytest.fixture(scope='module')
-def test_client_setup():
-    app.config['TESTING'] = True
-    # Use an environment variable for the test database URL if possible, fallback to in-memory SQLite
-    # For CI/CD, you might set TEST_DATABASE_URL to a PostgreSQL test instance.
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('TEST_DATABASE_URL', 'sqlite:///:memory:')
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Silence the warning
-    app.config['WTF_CSRF_ENABLED'] = False # Disable CSRF for testing forms
-    app.config['LOGIN_DISABLED'] = False # Ensure login is not globally disabled for tests that need it
-    app.config['SECRET_KEY'] = 'test-secret-key' # Consistent secret key for tests
-    app.config['LOGIN_MANAGER_LOGIN_VIEW'] = 'login' # Explicitly set for tests if needed
-    app.config['SERVER_NAME'] = 'localhost.test' # For url_for to work outside request context
-    app.config['APPLICATION_ROOT'] = '/'
-    app.config['PREFERRED_URL_SCHEME'] = 'http'
+# Changed scope from 'module' to 'function' for better test isolation.
+# This ensures each test gets a fresh app configuration and database.
+@pytest.fixture(scope='function')
+def app_instance(): # Renamed from test_client_setup to reflect it yields the app
+    # Configuration for testing
+    test_config = {
+        'TESTING': True,
+        'SQLALCHEMY_DATABASE_URI': os.environ.get('TEST_DATABASE_URL', 'sqlite:///:memory:'),
+        'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+        'WTF_CSRF_ENABLED': False,
+        'LOGIN_DISABLED': False,
+        'SECRET_KEY': 'test-secret-key',
+        'LOGIN_MANAGER_LOGIN_VIEW': 'login', # Ensure this is set
+        'SERVER_NAME': 'localhost.test', # For url_for to work outside request context
+        'APPLICATION_ROOT': '/',
+        'PREFERRED_URL_SCHEME': 'http',
+        # UPLOAD_FOLDER is set within create_app by default, can be overridden here if needed
+    }
+    _app = create_app(config_overrides=test_config)
 
-    # Initialize extensions with the test-configured app
-    # We need to import init_extensions or call db.init_app and login_manager.init_app directly
-    from app import init_extensions # Assuming app.py where init_extensions is defined
-    init_extensions(app)
+    # db.create_all() is called within create_app's app_context.
+    # So, no need to call it again here.
 
-    with app.app_context():
-        db.create_all()
-        # No initial global data for now, tests can set up their own.
+    yield _app # Provide the app instance
 
-    client = app.test_client()
-
-    # Yield the client
-    yield client
-
-    # Teardown: drop all tables
-    with app.app_context():
-        db.session.remove()
+    # Teardown: drop all tables - this needs to happen in an app context
+    with _app.app_context():
+        db.session.remove() # Good practice
         db.drop_all()
 
-# Renaming fixture to avoid conflict if there's one named test_client from pytest itself or another plugin.
-# This fixture now depends on test_client_setup to ensure app is configured and DB is up.
+
 @pytest.fixture
-def client(test_client_setup):
-    return test_client_setup
+def client(app_instance): # Depends on app_instance
+    return app_instance.test_client()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def new_user_data_factory():
     """Factory to create different user data if needed, returning a dict."""
     def _factory(username_suffix="", profile_info_extra=""):
@@ -63,9 +56,9 @@ def new_user_data_factory():
     return _factory
 
 @pytest.fixture
-def new_user(client, new_user_data_factory): # Depends on client to ensure app_context and db
+def new_user(app_instance, new_user_data_factory): # Depends on app_instance for app_context
     user_data = new_user_data_factory() # Get default user data
-    with app.app_context():
+    with app_instance.app_context(): # Use app_instance's context
         user = User.query.filter_by(username=user_data['username']).first()
         if not user:
             user = User(username=user_data['username'], profile_info=user_data['profile_info'])
@@ -76,6 +69,8 @@ def new_user(client, new_user_data_factory): # Depends on client to ensure app_c
 
 # Helper function for login
 def login_user_helper(client, username, password):
+    # url_for needs an app context if used outside a request,
+    # but client.post creates its own request context.
     return client.post('/login', data=dict(
         username=username,
         password=password
@@ -83,44 +78,42 @@ def login_user_helper(client, username, password):
 
 # Helper function for logout
 def logout_user_helper(client):
-    return client.get('/logout', follow_redirects=True)
+    return client.get('/logout', follow_redirects=True) # Same as above
 
 # --- Basic Tests ---
-def test_index_page(client):
+def test_index_page(client): # app_instance not strictly needed if not using url_for here
     response = client.get('/')
     assert response.status_code == 200
-    assert b"All Blog Posts" in response.data # Check for a known string on the index page
+    assert b"All Blog Posts" in response.data
 
 # --- Authentication Tests ---
-def test_user_login_logout(client, new_user, new_user_data_factory):
-    user_data = new_user_data_factory() # Get default user data matching the new_user fixture
+def test_user_login_logout(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
 
-    # Test successful login
     response = login_user_helper(client, user_data['username'], user_data['password'])
     assert response.status_code == 200
-    assert b"Logout" in response.data # Assuming "Logout" link is visible after login
-    assert f"Logged in as {user_data['username']}".encode() not in response.data # Example check, adjust as per your layout
+    assert b"Logout" in response.data
+    assert f"Logged in as {user_data['username']}".encode() not in response.data
 
-    # Test accessing a protected page (e.g., profile)
-    response = client.get(f'/profile/{user_data["username"]}')
+    with app_instance.app_context():
+        response = client.get(url_for('profile', username=user_data["username"]))
     assert response.status_code == 200
     assert user_data['username'].encode() in response.data
 
-    # Test logout
     response = logout_user_helper(client)
     assert response.status_code == 200
-    assert b"Login" in response.data # Assuming "Login" link is visible after logout
+    assert b"Login" in response.data
     assert b"Logout" not in response.data
 
-    # Test accessing a protected page after logout
-    response = client.get(f'/profile/{user_data["username"]}', follow_redirects=True) # follow to login page
-    assert response.status_code == 200 # Should redirect to login
-    assert b"Login" in response.data # On the login page
+    with app_instance.app_context():
+        response = client.get(url_for('profile', username=user_data["username"]), follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Login" in response.data
 
 def test_login_failed_wrong_password(client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
     response = login_user_helper(client, user_data['username'], 'wrongpassword')
-    assert response.status_code == 200 # Login page reloads with error
+    assert response.status_code == 200
     assert b"Invalid username or password." in response.data
     assert b"Logout" not in response.data
 
@@ -131,222 +124,203 @@ def test_login_failed_nonexistent_user(client):
     assert b"Logout" not in response.data
 
 # --- Settings Page Tests ---
-def test_settings_page_loads_authenticated(client, new_user, new_user_data_factory):
+def test_settings_page_loads_authenticated(app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
     login_user_helper(client, user_data['username'], user_data['password'])
 
-    with app.app_context():
+    with app_instance.app_context():
         response = client.get(url_for('settings_page'))
     assert response.status_code == 200
-    assert b"Settings" in response.data # Page Title
-    assert b"Appearance" in response.data # Preferences Group
-    assert b"Accent Color" in response.data # Action Row for Accent Color
-    assert b"Dark Mode" in response.data # Action Row for Theme
+    assert b"Settings" in response.data
+    assert b"Appearance" in response.data
+    assert b"Accent Color" in response.data
+    assert b"Dark Mode" in response.data
 
-def test_settings_page_redirects_unauthenticated(client):
-    with app.app_context():
-        response = client.get(url_for('settings_page')) # No login
-    assert response.status_code == 200 # TODO: APP BUG - Should be 302, settings_page not protected
-    # The following lines would be correct if the page redirected to login
-    # with app.app_context(): # url_for needs app context for redirect check
-    #     expected_redirect_url = url_for('login', _external=False)
-    # For redirects, response.location includes the domain if SERVER_NAME is set.
-    # url_for with _external=False generates a relative path.
-    # We need to ensure comparison is consistent.
-    # If response.location is absolute (e.g. "http://localhost.test/login"),
-    # then expected_redirect_url should also be absolute or we compare paths.
-    # For now, let's assume url_for with _external=False and SERVER_NAME gives relative path.
-    # Or, more robustly, parse the path from response.location.
-    # from urllib.parse import urlparse # This line is removed as expected_redirect_url is not defined for the current app bug
-    # assert urlparse(response.location).path == expected_redirect_url # This line is removed
+def test_settings_page_redirects_unauthenticated(app_instance, client):
+    with app_instance.app_context():
+        response = client.get(url_for('settings_page'))
+    assert response.status_code == 302
+
+    from urllib.parse import urlparse, parse_qs
+    with app_instance.app_context():
+        # Ensure expected paths are relative for comparison with parsed_location.path
+        expected_login_path = url_for('login', _external=False)
+        expected_settings_path_for_next_param = url_for('settings_page', _external=False)
+
+    parsed_location = urlparse(response.location)
+    assert parsed_location.path == expected_login_path
+
+    query_params = parse_qs(parsed_location.query)
+    assert 'next' in query_params
+    # The 'next' parameter in the redirect URL should also be a relative path
+    assert query_params['next'][0] == expected_settings_path_for_next_param
 
 
 # --- Blog Post Creation Tests ---
 
-# Renamed from test_create_post_post_and_verify and enhanced
-def test_create_post_success(client, new_user, new_user_data_factory):
+def test_create_post_success(app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
+    # Fetch user_id within an app_context to ensure 'new_user' (or a fresh query) is session-attached
+    with app_instance.app_context():
+        # It's safer to re-fetch the user by a stable identifier from user_data
+        # or ensure new_user is merged if its attributes are needed.
+        # For just the ID, fetching by username is robust.
+        temp_user = User.query.filter_by(username=user_data['username']).first()
+        assert temp_user is not None, "User for post creation not found."
+        user_id = temp_user.id
+
     login_user_helper(client, user_data['username'], user_data['password'])
 
     post_data = {
         'title': 'My Successful Test Post',
         'content': 'This is the content of my successful test post.'
     }
-    # Make the POST request, but don't follow redirects immediately to check the redirect response itself
-    response_post = client.post('/create', data=post_data) # Removed follow_redirects=True initially
+    with app_instance.app_context():
+        response_post = client.post(url_for('create_post'), data=post_data)
 
-    assert response_post.status_code == 302 # Check for redirect
-    with app.app_context(): # url_for needs app context
-        expected_redirect_url = url_for('index', _external=False) # Get relative path
+    assert response_post.status_code == 302
+    with app_instance.app_context():
+        expected_redirect_url = url_for('index', _external=False)
     assert response_post.location == expected_redirect_url
 
-    # Now follow the redirect to check flash message and content on index page
     response_redirect = client.get(response_post.location)
     assert response_redirect.status_code == 200
-    assert b"Post created successfully!" in response_redirect.data # Check flash message
+    assert b"Post created successfully!" in response_redirect.data
     assert post_data['title'].encode('utf-8') in response_redirect.data
-    # Author check might be more complex if only username is shown; new_user.username would be good
-    assert new_user.username.encode('utf-8') in response_redirect.data
 
+    with app_instance.app_context(): # Re-fetch user in this context to ensure it's attached
+        user_for_check = db.session.get(User, user_id) # Use captured user_id
+        assert user_for_check is not None
+        assert user_for_check.username.encode('utf-8') in response_redirect.data
 
-    # Verify post in database
-    with app.app_context():
+    with app_instance.app_context():
+        # User for authorship check, fetched by the captured user_id
+        author_user = db.session.get(User, user_id)
+        assert author_user is not None
         created_post = Post.query.filter_by(title=post_data['title']).first()
         assert created_post is not None
         assert created_post.content == post_data['content']
-        assert created_post.author.id == new_user.id
-        assert created_post.user_id == new_user.id # Explicitly check user_id foreign key
+        assert created_post.author.id == author_user.id
+        assert created_post.user_id == author_user.id
 
 
-def test_create_post_unauthenticated(client):
+def test_create_post_unauthenticated(app_instance, client):
     post_data = {
         'title': 'Unauthenticated Post Attempt',
         'content': 'This content should not be saved.'
     }
-    response = client.post('/create', data=post_data) # follow_redirects=False by default
+    with app_instance.app_context():
+        response = client.post(url_for('create_post'), data=post_data)
 
-    assert response.status_code == 302 # TODO: APP BUG - This test assumes it redirects to index after creating a post even if unauthenticated.
-                                      # It should ideally redirect to login (302) and not create the post.
-                                      # Current app behavior: Creates post as new_user (due to fixture context?) and redirects to index.
-    with app.app_context():
-        # This is the current redirect behavior observed from logs when a post is created by 'testuser'
-        expected_redirect_url = url_for('index', _external=False)
+    assert response.status_code == 302
     from urllib.parse import urlparse
-    assert urlparse(response.location).path == expected_redirect_url
+    with app_instance.app_context():
+        expected_login_url = url_for('login', _external=False) # Ensure relative path
+    assert urlparse(response.location).path == expected_login_url
 
-
-    # Verify post IS created (current buggy behavior)
-    with app.app_context():
+    with app_instance.app_context():
         post = Post.query.filter_by(title=post_data['title']).first()
-        assert post is not None # TODO: APP BUG - Post should NOT be created
-        # If we want to be more specific about the bug:
-        # assert post.author.username == 'testuser' # Assuming it's created by the 'new_user' from fixture context
+        assert post is None
 
 
-def test_create_post_missing_data(client, new_user, new_user_data_factory):
+def test_create_post_missing_data(app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
     login_user_helper(client, user_data['username'], user_data['password'])
 
-    # Test case 1: Missing title
-    response_missing_title = client.post('/create', data={'content': 'Some content without a title'})
-    assert response_missing_title.status_code == 200 # Form re-rendered
-    assert b"Title and content are required." in response_missing_title.data # Check flash message
-    with app.app_context():
+    with app_instance.app_context():
+        response_missing_title = client.post(url_for('create_post'), data={'content': 'Some content without a title'})
+    assert response_missing_title.status_code == 200
+    assert b"This field is required." in response_missing_title.data
+    with app_instance.app_context():
         assert Post.query.filter_by(content='Some content without a title').first() is None
 
-    # Test case 2: Missing content
-    response_missing_content = client.post('/create', data={'title': 'Some title without content'})
-    assert response_missing_content.status_code == 200 # Form re-rendered
-    assert b"Title and content are required." in response_missing_content.data # Check flash message
-    with app.app_context():
+    with app_instance.app_context():
+        response_missing_content = client.post(url_for('create_post'), data={'title': 'Some title without content'})
+    assert response_missing_content.status_code == 200
+    assert b"This field is required." in response_missing_content.data
+    with app_instance.app_context():
         assert Post.query.filter_by(title='Some title without content').first() is None
 
-    # Test case 3: Missing both title and content
-    response_missing_both = client.post('/create', data={})
+    with app_instance.app_context():
+        response_missing_both = client.post(url_for('create_post'), data={})
     assert response_missing_both.status_code == 200
-    assert b"Title and content are required." in response_missing_both.data
-    # No need to check DB again if previous checks are fine and logic is simple
+    assert b"This field is required." in response_missing_both.data
 
 
 # --- Profile Update Tests ---
-def test_profile_edit_get(client, new_user, new_user_data_factory):
+def test_profile_edit_get(app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
     login_user_helper(client, user_data['username'], user_data['password'])
 
-    response = client.get('/profile/edit')
+    with app_instance.app_context():
+        response = client.get(url_for('edit_profile'))
     assert response.status_code == 200
-    assert b"Edit Profile" in response.data # Check for a known title or element
-    # Check if current profile info is in the form (if it exists)
-    # Ensure new_user.profile_info is not None before encoding
+    assert b"Edit Profile" in response.data
     if new_user.profile_info:
         assert new_user.profile_info.encode('utf-8') in response.data
 
-def test_profile_edit_post(client, new_user, new_user_data_factory):
+def test_profile_edit_post(app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
     login_user_helper(client, user_data['username'], user_data['password'])
-
     new_info = "This is updated profile information."
-    # current_path before POST
-    # print(f"Current path before POST: {request.path}") # This won't work here, request is out of context
 
-    # Make the POST request
-    response = client.post('/profile/edit', data={'profile_info': new_info}, follow_redirects=True)
+    with app_instance.app_context():
+        response = client.post(url_for('edit_profile'), data={'profile_info': new_info}, follow_redirects=True)
 
     assert response.status_code == 200
-    # After follow_redirects=True, response.request.path should be the path of the redirected page
-    with app.app_context(): # url_for needs app context
+    with app_instance.app_context():
         expected_path = url_for('profile', username=new_user.username, _external=False)
     assert response.request.path == expected_path
     assert new_info.encode('utf-8') in response.data
 
-    # Verify in database
-    with app.app_context():
-        # Re-fetch the user from the session to ensure it's the updated instance
-        # No, better to query it to ensure commit worked
+    with app_instance.app_context():
         updated_user = db.session.get(User, new_user.id)
         assert updated_user.profile_info == new_info
 
-# --- Blog Post Creation Tests ---
-# The test_create_post_get is fine as it is, can be kept.
-# test_create_post_post_and_verify was renamed and enhanced to test_create_post_success.
-# The old test_create_post_post_and_verify will be removed by the diff.
 
-# Renaming this to clarify it's more of an integration test for the photo upload
-def test_profile_photo_upload_integration(client, new_user, new_user_data_factory):
+def test_profile_photo_upload_integration(app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
     login_user_helper(client, user_data['username'], user_data['password'])
 
-    # Simulate file upload
-    data = {
-        'profile_info': 'Updated info during photo upload test.' # Can also update other fields
-    }
-    # Create a dummy file for upload
-    # The name 'profile_photo' must match the name attribute of the file input field in the form
+    data = {'profile_info': 'Updated info during photo upload test.'}
     import base64
-    # Using a 1x1 black PNG:
     png_bytes = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60eADAAAAABJRU5ErkJggg==")
     data['profile_photo'] = (BytesIO(png_bytes), 'test_photo.png')
 
-    response = client.post('/profile/edit', data=data, content_type='multipart/form-data', follow_redirects=True)
+    with app_instance.app_context():
+        response = client.post(url_for('edit_profile'), data=data, content_type='multipart/form-data', follow_redirects=True)
     assert response.status_code == 200
 
-    with app.app_context(): # url_for needs app context
+    with app_instance.app_context():
         expected_path = url_for('profile', username=new_user.username, _external=False)
-    assert response.request.path == expected_path # Check redirect to profile
+    assert response.request.path == expected_path
 
-    # Verify in database
-    with app.app_context():
+    with app_instance.app_context():
         updated_user = db.session.get(User, new_user.id)
-        assert updated_user is not None # Ensure user is found
+        assert updated_user is not None
         assert updated_user.profile_photo_url is not None
-        assert 'test_photo.png' in updated_user.profile_photo_url # Changed to .png
-    assert updated_user.username in updated_user.profile_photo_url # As per current naming convention
+        assert updated_user.profile_photo_url.startswith('uploads/profile_pics/')
+        assert updated_user.profile_photo_url.endswith('.png')
     assert updated_user.profile_info == 'Updated info during photo upload test.'
 
-    # Verify the photo URL is used in the response data (e.g., in an <img> tag)
-    # This depends on how the path is constructed; current code uses relative path for static.
-    # For a direct check, you might need to parse HTML or check for a fragment of the URL.
-    # Ensure updated_user and its photo_url are fresh before this assertion
-    with app.app_context():
+    with app_instance.app_context():
         fresh_user_for_check = db.session.get(User, new_user.id)
         assert fresh_user_for_check.profile_photo_url.encode('utf-8') in response.data
 
 
 # --- Unit Tests for Profile Photo Upload with Mocking ---
 
-@patch('app.Image.open')
-@patch('app.os.makedirs')
-@patch('app.secure_filename')
-def test_edit_profile_photo_upload_success(mock_secure_filename, mock_makedirs, mock_image_open, client, new_user, new_user_data_factory):
+@patch('app.Image.open') # Use 'app.Image.open' as per the create_app structure
+@patch('app.os.makedirs') # Use 'app.os.makedirs'
+@patch('app.secure_filename') # Use 'app.secure_filename'
+def test_edit_profile_photo_upload_success(mock_secure_filename, mock_makedirs, mock_image_open, app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
     login_user_helper(client, user_data['username'], user_data['password'])
 
-    # Configure mocks
     mock_secure_filename.return_value = 'test_image.png'
     mock_img_instance = MagicMock()
     mock_image_open.return_value = mock_img_instance
 
-    # Simulate file upload
     import base64
     png_bytes = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/2+BqAAAAABJRU5ErkJggg==")
     file_data = (BytesIO(png_bytes), 'test_image.png')
@@ -355,142 +329,185 @@ def test_edit_profile_photo_upload_success(mock_secure_filename, mock_makedirs, 
         'profile_photo': file_data
     }
 
-    # POST request
-    response = client.post('/profile/edit', data=data, content_type='multipart/form-data') # No follow_redirects initially
+    with app_instance.app_context():
+        response = client.post(url_for('edit_profile'), data=data, content_type='multipart/form-data')
 
-    assert response.status_code == 302 # Should redirect to profile page
-    with app.app_context():
+    assert response.status_code == 302
+    with app_instance.app_context():
         expected_redirect_url = url_for('profile', username=new_user.username, _external=False)
-    assert response.location == expected_redirect_url # This is a 302, so response.location is correct
+    assert response.location == expected_redirect_url
 
-    # Follow redirect to check flash message
     response_redirect = client.get(response.location)
-    assert b"Profile photo updated successfully!" in response_redirect.data # Check for general success or photo specific
-    # Or check "Profile updated successfully!" if that's the one being flashed.
-    # The app.py logic is: flash photo success, then general success if only info changed,
-    # or if photo was attempted and URL set, general success is skipped.
-    # So "Profile photo updated successfully!" is the one to check.
+    assert b"Profile photo updated successfully!" in response_redirect.data
 
-    # Assertions on mocks
     mock_secure_filename.assert_called_once_with('test_image.png')
-    # The file object passed to Image.open is a FileStorage object.
-    # We can check that Image.open was called, but checking the exact instance might be tricky
-    # if it's wrapped or changed. Checking it was called once is a good start.
     mock_image_open.assert_called_once()
     mock_img_instance.thumbnail.assert_called_once_with((200, 200))
 
-    # Construct the expected save path for the assertion on img.save()
-    # Expected unique_filename = f"{new_user.username}_{mock_secure_filename.return_value}"
-    # save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-    # This path construction happens inside the route.
-    # We need to ensure the mock_img_instance.save was called with a path that ends correctly.
-    assert mock_img_instance.save.call_args[0][0].endswith(f"{new_user.username}_test_image.png")
+    saved_path = mock_img_instance.save.call_args[0][0]
+    assert saved_path.startswith(app_instance.config['UPLOAD_FOLDER']) # Check against app_instance config
+    assert saved_path.endswith('.png')
 
-    mock_makedirs.assert_called_once_with(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    mock_makedirs.assert_called_once_with(app_instance.config['UPLOAD_FOLDER'], exist_ok=True) # Check against app_instance config
 
-
-    # Verify DB update
-    with app.app_context():
+    with app_instance.app_context():
         updated_user = db.session.get(User, new_user.id)
-        assert updated_user.profile_photo_url == f"uploads/profile_pics/{new_user.username}_test_image.png"
+        assert updated_user.profile_photo_url.startswith("uploads/profile_pics/")
+        assert updated_user.profile_photo_url.endswith(".png")
         assert updated_user.profile_info == 'Info during mocked photo upload.'
 
-
-def test_edit_profile_photo_upload_invalid_file_type(client, new_user, new_user_data_factory):
+def test_edit_profile_additional_fields(app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
     login_user_helper(client, user_data['username'], user_data['password'])
 
-    original_photo_url = new_user.profile_photo_url # Could be None
+    # Store the user_id while new_user is attached
+    with app_instance.app_context():
+        # It's safer to fetch the user by a stable identifier from user_data
+        # to get its ID for later checks.
+        live_user = User.query.filter_by(username=user_data['username']).first()
+        assert live_user is not None
+        user_id = live_user.id
 
-    # Simulate file upload with an invalid extension
+    profile_data = {
+        'full_name': 'Test User Full Name',
+        'location': 'Test Location, Test Country',
+        'website_url': 'https://testwebsite.example.com',
+        'profile_info': 'Updated profile info along with new fields.' # Can also update existing fields
+    }
+
+    # POST the new data
+    with app_instance.app_context():
+        response_post = client.post(url_for('edit_profile'), data=profile_data, follow_redirects=True)
+
+    assert response_post.status_code == 200 # Should redirect to profile page
+
+    # Verify on profile page
+    assert profile_data['full_name'].encode('utf-8') in response_post.data
+    assert profile_data['location'].encode('utf-8') in response_post.data
+    assert profile_data['website_url'].encode('utf-8') in response_post.data # Check if URL is displayed as text
+    assert f'href="{profile_data["website_url"]}"'.encode('utf-8') in response_post.data # Check if it's a link
+    assert profile_data['profile_info'].encode('utf-8') in response_post.data
+
+    # Verify in database
+    with app_instance.app_context():
+        updated_user = db.session.get(User, user_id) # Use the stored user_id
+        assert updated_user is not None
+        assert updated_user.full_name == profile_data['full_name']
+        assert updated_user.location == profile_data['location']
+        assert updated_user.website_url == profile_data['website_url']
+        assert updated_user.profile_info == profile_data['profile_info']
+
+
+def test_edit_profile_photo_upload_invalid_file_type(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    original_photo_url = new_user.profile_photo_url
+
     file_data = (BytesIO(b"dummytextbytes"), 'test_document.txt')
     data = {'profile_photo': file_data}
 
-    # POST request - follow redirects to check flash message on the rendered page
-    response = client.post('/profile/edit', data=data, content_type='multipart/form-data', follow_redirects=True)
+    with app_instance.app_context():
+        response = client.post(url_for('edit_profile'), data=data, content_type='multipart/form-data', follow_redirects=True)
 
-    assert response.status_code == 200 # Should re-render profile page (or edit_profile if no redirect on error)
-                                      # The current code redirects to profile even on photo error.
-    with app.app_context():
-        expected_path = url_for('profile', username=new_user.username, _external=False) # It redirects to profile page
+    assert response.status_code == 200
+    with app_instance.app_context():
+        expected_path = url_for('profile', username=new_user.username, _external=False)
     assert response.request.path == expected_path
 
+    assert b"Invalid file type for photo." in response.data
 
-    assert b"Invalid file type for photo." in response.data # Check flash message
-
-    # Verify DB state (profile_photo_url should not have changed)
-    with app.app_context():
+    with app_instance.app_context():
         user_after_attempt = db.session.get(User, new_user.id)
         assert user_after_attempt.profile_photo_url == original_photo_url
 
 
-@pytest.mark.xfail(reason="APP BUG: User's posts are not displayed on the profile page, even when checking for JS-generated structure.")
-def test_user_posts_on_profile_page(client, new_user, new_user_data_factory):
+# Removed @pytest.mark.xfail
+def test_user_posts_on_profile_page(app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
     login_user_helper(client, user_data['username'], user_data['password'])
 
-    # Create a couple of posts for this user
-    post_titles = ["User's First Post", "User's Second Post"]
-    with app.app_context():
-        # Ensure the new_user object is merged into the current session if it's detached
-        user_for_posts = db.session.merge(new_user)
-        db.session.add(Post(title=post_titles[0], content="Content 1", author=user_for_posts))
-        db.session.add(Post(title=post_titles[1], content="Content 2", author=user_for_posts))
+    num_posts_to_create = 7
+    per_page_in_app = 5 # Should match what's in app.py profile route
+    post_titles = [f"Test Post {i+1}" for i in range(num_posts_to_create)]
+
+    # Need timedelta for creating distinct post times
+    from datetime import timedelta
+
+    with app_instance.app_context():
+        # Fetch the user by username to ensure it's attached to this session for post creation
+        user_for_posts = User.query.filter_by(username=user_data['username']).first()
+        assert user_for_posts is not None, "User not found for post creation: " + user_data['username']
+
+        for i in range(num_posts_to_create):
+            # Create posts with slightly different creation times for reliable ordering
+            post_time = datetime.now(timezone.utc) - timedelta(minutes=num_posts_to_create - i)
+            db.session.add(Post(title=post_titles[i], content=f"Content for post {i+1}", author=user_for_posts, created_at=post_time))
         db.session.commit()
-        # Detach to simulate end of session, then re-fetch in a new context for the test
-        # db.session.expunge(user_for_posts)
 
+    # Test Page 1
+    with app_instance.app_context():
+        response_page1 = client.get(url_for('profile', username=user_data['username'], page=1))
+    assert response_page1.status_code == 200
+    html_content_page1 = response_page1.data.decode('utf-8')
 
-    with app.app_context():
-        # Re-fetch the user to ensure their 'posts' relationship is loaded in this context
-        # Use user_data['username'] as new_user might be detached
-        profile_user = User.query.filter_by(username=user_data['username']).first()
-        assert profile_user is not None
-        response = client.get(url_for('profile', username=profile_user.username))
-        assert response.status_code == 200
-        # TODO: APP BUG - User's posts are not displayed on the profile page.
-        # Marking these assertions as xfail until app logic is corrected.
-        # For now, to make the test suite "pass" by acknowledging the known issue:
-        # These assertions will fail due to the app bug if not for xfail.
-        # Convert response data to string for easier searching of HTML structure
-        html_content = response.data.decode('utf-8')
-        assert f'<span class="adw-action-row-title">{post_titles[0]}</span>' in html_content, "APP BUG: Post 1 not on profile page"
-        assert f'<span class="adw-action-row-title">{post_titles[1]}</span>' in html_content, "APP BUG: Post 2 not on profile page"
-        assert b"Posts by " + profile_user.username.encode('utf-8') in response.data, "APP BUG: 'Posts by' title missing or incorrect"
+    # Posts are ordered desc by created_at. Post N is newest, Post 1 is oldest.
+    # Page 1 should have: Post 7, Post 6, Post 5, Post 4, Post 3
+    expected_titles_page1 = post_titles[num_posts_to_create-per_page_in_app:][::-1]
 
-def test_edit_post(client, new_user, new_user_data_factory):
+    for i in range(per_page_in_app):
+        # Checking for title within the adw-action-row structure
+        assert f'title="{expected_titles_page1[i]}"' in html_content_page1
+
+    assert b"Page 1 of 2" in response_page1.data
+    assert "Next" in html_content_page1 # Check for the word "Next" in button
+    # For disabled state, the text "Previous" would still be there but inside a disabled button
+    assert "Previous" in html_content_page1
+
+    # Test Page 2
+    with app_instance.app_context():
+        response_page2 = client.get(url_for('profile', username=user_data['username'], page=2))
+    assert response_page2.status_code == 200
+    html_content_page2 = response_page2.data.decode('utf-8')
+
+    # Page 2 should have the remaining 2 posts: Post 2, Post 1
+    expected_titles_page2 = post_titles[:num_posts_to_create-per_page_in_app][::-1]
+
+    for i in range(len(expected_titles_page2)):
+         assert f'title="{expected_titles_page2[i]}"' in html_content_page2
+
+    # Ensure posts from page 1 are not on page 2 (e.g. check Post 7 is not on page 2)
+    assert f'title="{expected_titles_page1[0]}"' not in html_content_page2
+
+    assert b"Page 2 of 2" in response_page2.data
+    assert "Previous" in html_content_page2 # "Previous" link should be active
+    assert "Next" in html_content_page2 # "Next" button text, but should be disabled or not a link
+
+def test_edit_post(app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
     login_user_helper(client, user_data['username'], user_data['password'])
 
-    # First, create a post
     original_title = "Original Post Title to Edit"
     original_content = "Original content."
-    with app.app_context():
+    with app_instance.app_context():
         post_to_edit = Post(title=original_title, content=original_content, author=new_user)
         db.session.add(post_to_edit)
         db.session.commit()
         post_id = post_to_edit.id
-        # Ensure created_at is set for comparison later
         original_created_at = post_to_edit.created_at
         original_updated_at = post_to_edit.updated_at
 
-
-    # GET the edit page
-    # edit_url = url_for('edit_post', post_id=post_id) # Need app context for url_for outside request
-    with app.app_context():
+    with app_instance.app_context():
         response_get = client.get(url_for('edit_post', post_id=post_id))
     assert response_get.status_code == 200
     assert original_title.encode('utf-8') in response_get.data
     assert original_content.encode('utf-8') in response_get.data
 
-    # POST the changes
     edited_title = "Edited Post Title"
     edited_content = "Edited content."
-
-    # Make a small delay to ensure updated_at will be different if system clock resolution is low
     time.sleep(0.01)
 
-    with app.app_context():
+    with app_instance.app_context():
         response_post = client.post(
             url_for('edit_post', post_id=post_id),
             data={'title': edited_title, 'content': edited_content},
@@ -498,21 +515,18 @@ def test_edit_post(client, new_user, new_user_data_factory):
         )
     assert response_post.status_code == 200
 
-    # Verify redirection to the view_post page
-    with app.app_context():
+    with app_instance.app_context():
         expected_redirect_url = url_for('view_post', post_id=post_id, _external=False)
     assert response_post.request.path == expected_redirect_url
 
-    # Verify content on the view_post page
     assert edited_title.encode('utf-8') in response_post.data
     assert edited_content.encode('utf-8') in response_post.data
-    assert original_title.encode('utf-8') not in response_post.data # Original title should be gone
+    assert original_title.encode('utf-8') not in response_post.data
 
-    # Verify in database
-    with app.app_context():
+    with app_instance.app_context():
         updated_post = db.session.get(Post, post_id)
         assert updated_post is not None
         assert updated_post.title == edited_title
         assert updated_post.content == edited_content
         assert updated_post.updated_at > original_updated_at
-        assert updated_post.updated_at > original_created_at # Also ensure it's greater than created_at
+        assert updated_post.updated_at > original_created_at
