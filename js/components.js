@@ -1647,7 +1647,7 @@ window.Adw = {
   // Functions from the second assignment (or both)
   createActionRow: createAdwActionRow,
   createEntryRow: createAdwEntryRow,
-  createPasswordEntryRow: createAdwPasswordEntryRow,
+  createAdwPasswordEntryRow: createAdwPasswordEntryRow,
   createExpanderRow: createAdwExpanderRow,
   createComboRow: createAdwComboRow,
   createAvatar: createAdwAvatar,
