@@ -16,6 +16,16 @@
         </p>
     </div>
 
+    {% if post.categories %}
+    <div class="post-categories" style="margin-bottom: var(--spacing-m);">
+        <adw-label is_body="true"><strong>Categories:</strong></adw-label>
+        {% for category in post.categories %}
+            {# Later, this will link to the category view page #}
+            <a href="{{ url_for('posts_by_category', category_slug=category.slug) }}" class="adw-button flat small" style="margin-left: var(--spacing-xs);">{{ category.name }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="post-content" style="margin-bottom: var(--spacing-xl); white-space: pre-wrap;">
         {{ post.content | safe }}
     </div>

@@ -31,6 +31,19 @@
                             </div>
                         {% endif %}
                     </div>
+
+                    {# Categories Field #}
+                    <div class="adw-row" style="padding: var(--spacing-s) var(--spacing-m); display: flex; flex-direction: column;">
+                        {{ form.categories.label(class_='adw-label', style='margin-bottom: var(--spacing-s); font-weight: bold;') }}
+                        <div class="adw-checkbox-group" style="display: flex; flex-direction: column; gap: var(--spacing-xs);">
+                            {{ form.categories() }} {# Renders as a list of checkboxes #}
+                        </div>
+                        {% if form.categories.errors %}
+                            <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                                {% for error in form.categories.errors %}{{ error }}<br>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
                 </adw-list-box>
                 <div style="display: flex; justify-content: flex-end; padding: var(--spacing-m) var(--spacing-m) 0 var(--spacing-m);">
                     {{ form.submit(class_='adw-button suggested-action') }}

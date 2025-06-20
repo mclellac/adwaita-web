@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Contact Us - {{ super() }}{% endblock %}
+{% block content %}
+<adw-clamp style="max-width: 700px; margin: 20px auto; padding: var(--spacing-l);">
+    <adw-box orientation="vertical" spacing="l">
+        <h1 class="adw-title-1" style="text-align: center;">Contact Us</h1>
+
+        <adw-preferences-group title="Get in Touch">
+            <adw-action-row title="Email" subtitle="For general inquiries, please email us at: demo@example.com (not a real address)."></adw-action-row>
+            <adw-action-row title="Issues" subtitle="If you find a bug or have a feature request for Adwaita-Web, please check the main project repository."></adw-action-row>
+        </adw-preferences-group>
+
+        {# Placeholder for a future contact form #}
+        <adw-preferences-group title="Send a Message (Placeholder)">
+            <adw-entry-row title="Your Name" name="contact_name" placeholder="Enter your name"></adw-entry-row>
+            <adw-entry-row title="Your Email" name="contact_email" type="email" placeholder="Enter your email"></adw-entry-row>
+            <adw-action-row title="Message" class="content-entry-row">
+                 <textarea class="adw-entry" name="contact_message" rows="5" placeholder="Your message here..." style="width: 100%; margin-top: var(--spacing-xs);"></textarea>
+            </adw-action-row>
+            <div style="display: flex; justify-content: flex-end; padding: var(--spacing-m) 0;">
+                <adw-button appearance="suggested" disabled>Send (Disabled)</adw-button>
+            </div>
+        </adw-preferences-group>
+
+        <div style="text-align: center; margin-top: var(--spacing-xl);">
+            <adw-button href="{{ url_for('index') }}">Back to Home</adw-button>
+        </div>
+    </adw-box>
+</adw-clamp>
+{% endblock %}

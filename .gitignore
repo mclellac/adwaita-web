@@ -4,7 +4,7 @@
 # Generated Adwaita-Web assets
 app-demo/static/css/adwaita-web.css
 app-demo/static/css/adwaita-web.css.map
-app-demo/static/js/components.js
+app-demo/static/js/*
 
 # Python
 __pycache__/
