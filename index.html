@@ -2876,7 +2876,1298 @@ const comboRow = Adw.createComboRow({
         customElementExamplesBox.appendChild(adwEntryRowSubsectionTitle);
         customElementExamplesBox.appendChild(adwEntryRowExampleOuterContainer);
         customElementExamplesBox.appendChild(adwEntryRowCodeDetails);
-        // TODO: Add more custom element subsections to customElementExamplesBox here
+
+        // --- adw-password-entry-row subsection ---
+        const adwPasswordEntryRowSubsectionTitle = Adw.createLabel("adw-password-entry-row", {title:2});
+
+        const adwPasswordEntryRowExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm'
+        });
+
+        // Re-using or adapting the helper for internal input listeners
+        function addPasswordInternalInputListener(entryRowElement, eventName, callback) {
+            if (entryRowElement._internalEntry) {
+                entryRowElement._internalEntry.addEventListener(eventName, callback);
+            } else {
+                console.warn(`_internalEntry not found for ${entryRowElement.getAttribute('title') || 'password entry row'}. Listener not attached.`);
+            }
+        }
+
+        // 1. Simple PasswordEntryRow
+        const simplePasswordEntryRow = document.createElement('adw-password-entry-row');
+        simplePasswordEntryRow.setAttribute('title', 'Password:');
+        simplePasswordEntryRow.setAttribute('placeholder', 'Enter password...');
+        adwPasswordEntryRowExampleOuterContainer.appendChild(simplePasswordEntryRow);
+        addPasswordInternalInputListener(simplePasswordEntryRow, 'input', (e) => console.log(`Password field 'Password:' input: ${e.target.value}`));
+
+        // 2. PasswordEntryRow with Initial Value
+        const valuePasswordEntryRow = document.createElement('adw-password-entry-row');
+        valuePasswordEntryRow.setAttribute('title', 'Current Password:');
+        valuePasswordEntryRow.setAttribute('value', 'pa$$wOrd'); // Value attribute should handle special chars fine
+        adwPasswordEntryRowExampleOuterContainer.appendChild(valuePasswordEntryRow);
+        addPasswordInternalInputListener(valuePasswordEntryRow, 'input', (e) => console.log(`Password field 'Current Password:' input: ${e.target.value}`));
+
+        // 3. Disabled PasswordEntryRow
+        const disabledPasswordEntryRow = document.createElement('adw-password-entry-row');
+        disabledPasswordEntryRow.setAttribute('title', 'Old Password:');
+        disabledPasswordEntryRow.setAttribute('placeholder', 'Cannot edit');
+        disabledPasswordEntryRow.setAttribute('disabled', '');
+        disabledPasswordEntryRow.setAttribute('value', 'secret123');
+        adwPasswordEntryRowExampleOuterContainer.appendChild(disabledPasswordEntryRow);
+
+        // 4. Required PasswordEntryRow
+        const requiredPasswordEntryRow = document.createElement('adw-password-entry-row');
+        requiredPasswordEntryRow.setAttribute('title', 'New Password (Required):');
+        requiredPasswordEntryRow.setAttribute('placeholder', 'Must be filled');
+        requiredPasswordEntryRow.setAttribute('required', '');
+        adwPasswordEntryRowExampleOuterContainer.appendChild(requiredPasswordEntryRow);
+        addPasswordInternalInputListener(requiredPasswordEntryRow, 'input', (e) => console.log(`Password field 'New Password (Required):' input: ${e.target.value}`));
+
+        const adwPasswordEntryRowCodeSample = `
+<!-- Simple PasswordEntryRow with Title and Placeholder -->
+<adw-password-entry-row title="Password:" placeholder="Enter your password"></adw-password-entry-row>
+
+<!-- PasswordEntryRow with an Initial Value -->
+<adw-password-entry-row title="Current Password:" value="s3cr3tV@lu3!"></adw-password-entry-row>
+
+<!-- Disabled PasswordEntryRow -->
+<adw-password-entry-row title="Old Password:" value="previousSecret" disabled></adw-password-entry-row>
+
+<!-- Required PasswordEntryRow -->
+<adw-password-entry-row title="New Password:" placeholder="Set a new password" required></adw-password-entry-row>
+
+<!-- Attributes:
+    title:        The label text displayed to the left of the entry.
+    placeholder:  Placeholder text for the internal password input element.
+    value:        Initial value for the internal password input element.
+    disabled:     Boolean. If present, disables the internal input and visibility toggle.
+    required:     Boolean. If present, marks the internal input as required (for forms).
+    name:         Passed to internal input (for form submission).
+    inputmode:    Passed to internal input.
+    maxlength:    Passed to internal input.
+    pattern:      Passed to internal input (regex for validation).
+    readonly:     Passed to internal input.
+-->
+<!-- Feature: Includes a built-in button to toggle password visibility. -->
+
+<script>
+    // Accessing the internal input element:
+    const pEntryRow = document.querySelector('adw-password-entry-row[title="Password:"]');
+
+    // The adw-password-entry-row custom element, like adw-entry-row, might expose
+    // its internal input (e.g., as _internalEntry).
+    if (pEntryRow && pEntryRow._internalEntry) {
+        // Get value from internal input
+        console.log('Current password value (use with caution):', pEntryRow._internalEntry.value);
+
+        // Listen to input events directly on the internal input
+        pEntryRow._internalEntry.addEventListener('input', (event) => {
+            console.log('Internal password input event (value hidden for security demo):',
+                        event.target.value.length > 0 ? '*'.repeat(event.target.value.length) : '');
+        });
+    }
+
+    // The adw-password-entry-row may also dispatch its own custom events for input/change.
+    // For this component, the input event seems to bubble from the native input.
+    // The visibility toggle is handled internally by the component.
+</script>
+        `;
+        const adwPasswordEntryRowCodeDetails = createCodeSampleDetails('Show <adw-password-entry-row> Code', adwPasswordEntryRowCodeSample);
+
+        // Append the adw-password-entry-row subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwPasswordEntryRowSubsectionTitle);
+        customElementExamplesBox.appendChild(adwPasswordEntryRowExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwPasswordEntryRowCodeDetails);
+
+        // --- adw-action-row subsection ---
+        const adwActionRowSubsectionTitle = Adw.createLabel("adw-action-row", {title:2});
+
+        const adwActionRowExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 's'
+        });
+
+        const actionRowDemoLabel = Adw.createLabel("ActionRows within an <adw-list-box>:", { isBody: true });
+        adwActionRowExampleOuterContainer.appendChild(actionRowDemoLabel);
+
+        const listBoxForActionRows = document.createElement('adw-list-box');
+
+        // 1. Simple ActionRow
+        const simpleActionRow = document.createElement('adw-action-row');
+        simpleActionRow.setAttribute('title', 'Open Settings');
+        simpleActionRow.setAttribute('subtitle', 'Configure application preferences');
+        simpleActionRow.addEventListener('click', () => Adw.createToast('Settings ActionRow clicked!'));
+        listBoxForActionRows.appendChild(simpleActionRow);
+
+        // 2. ActionRow with Icon
+        const iconActionRow = document.createElement('adw-action-row');
+        iconActionRow.setAttribute('title', 'View Profile');
+        iconActionRow.setAttribute('subtitle', 'See your user details');
+        iconActionRow.setAttribute('icon', "<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='M8 8a3 3 0 1 0 0-6a3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0a2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1s1-4 6-4s6 3 6 4Z'/></svg>");
+        iconActionRow.addEventListener('click', () => Adw.createToast('Profile ActionRow clicked!'));
+        listBoxForActionRows.appendChild(iconActionRow);
+
+        // 3. ActionRow without Chevron
+        const noChevronActionRow = document.createElement('adw-action-row');
+        noChevronActionRow.setAttribute('title', 'Advanced Options');
+        noChevronActionRow.setAttribute('subtitle', 'No chevron shown');
+        noChevronActionRow.setAttribute('show-chevron', 'false');
+        noChevronActionRow.addEventListener('click', () => Adw.createToast('Advanced Options (no chevron) ActionRow clicked!'));
+        listBoxForActionRows.appendChild(noChevronActionRow);
+
+        // 4. "Disabled" (Non-interactive) ActionRow
+        const nonInteractiveActionRow = document.createElement('adw-action-row');
+        nonInteractiveActionRow.setAttribute('title', 'Non-Interactive Action');
+        nonInteractiveActionRow.setAttribute('subtitle', 'This row has no click listener');
+        // By not adding a click listener, it will appear less interactive.
+        // True disabling would require a 'disabled' attribute and internal CSS,
+        // or for 'interactive' attribute to be absent (if that's how component is designed).
+        // The Adw.createActionRow factory makes it interactive if onClick is provided.
+        // The custom element <adw-action-row> is interactive by default due to its click listener for chevron.
+        // To make it truly non-interactive, one might need to remove its internal listeners or set pointer-events: none.
+        // For this demo, we just don't add an *additional* JS listener.
+        // It will still show hover effects due to CSS unless interactive="false" is supported and implemented.
+        listBoxForActionRows.appendChild(nonInteractiveActionRow);
+
+        adwActionRowExampleOuterContainer.appendChild(listBoxForActionRows);
+
+        const adwActionRowCodeSample = `
+<!-- adw-action-row is typically used inside an adw-list-box -->
+<adw-list-box>
+    <adw-action-row title="Backup" subtitle="Manage your backup settings" icon="<svg>...</svg>"></adw-action-row>
+
+    <adw-action-row title="Privacy" subtitle="Control your privacy options"></adw-action-row>
+
+    <adw-action-row title="About" subtitle="Version 1.0" show-chevron="false"></adw-action-row>
+
+    <!-- A row that might appear non-interactive if no JS listener is attached,
+         or if it had a 'disabled' attribute (currently not standard on adw-action-row CE) -->
+    <adw-action-row title="View Logs (Admin only)" subtitle="Requires permissions"></adw-action-row>
+</adw-list-box>
+
+<!-- Attributes:
+    title:        The main text for the row.
+    subtitle:     Secondary text displayed below the title.
+    icon:         An SVG string for an icon to display at the start of the row.
+    show-chevron: Boolean ("true" or "false"). Defaults to "true" (shows chevron).
+                  Set to "false" to hide the navigation chevron.
+-->
+
+<script>
+    // Interactivity is primarily added via JavaScript click event listeners.
+    // The custom element <adw-action-row> itself might have default styling for hover/active states.
+    const backupRow = document.querySelector('adw-action-row[title="Backup"]');
+    if (backupRow) {
+        backupRow.addEventListener('click', () => {
+            console.log('Backup row clicked!');
+            // Perform action, e.g., navigate to backup settings page.
+        });
+    }
+
+    // Note on 'disabled':
+    // The <adw-action-row> custom element doesn't have a 'disabled' attribute in the
+    // current components.js definition. Its interactivity is tied to whether you attach
+    // click listeners and how it's styled. The underlying Adw.createRow factory function
+    // sets 'interactive' class based on presence of an onClick handler.
+    // For the custom element, it's interactive by default due to internal event handling for chevron.
+    // To make an <adw-action-row> truly non-interactive, you might need to avoid attaching
+    // listeners and potentially apply custom styling (e.g., 'opacity: 0.5; pointer-events: none;').
+</script>
+        `;
+        const adwActionRowCodeDetails = createCodeSampleDetails('Show <adw-action-row> Code', adwActionRowCodeSample);
+
+        // Append the adw-action-row subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwActionRowSubsectionTitle);
+        customElementExamplesBox.appendChild(adwActionRowExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwActionRowCodeDetails);
+
+        // --- adw-expander-row subsection ---
+        const adwExpanderRowSubsectionTitle = Adw.createLabel("adw-expander-row", {title:2});
+
+        const adwExpanderRowExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 's'
+        });
+
+        const expanderRowDemoLabel = Adw.createLabel("ExpanderRows within an <adw-list-box>:", { isBody: true });
+        adwExpanderRowExampleOuterContainer.appendChild(expanderRowDemoLabel);
+
+        const listBoxForExpanderRows = document.createElement('adw-list-box');
+
+        // 1. Simple ExpanderRow
+        const simpleExpander = document.createElement('adw-expander-row');
+        simpleExpander.setAttribute('title', 'Show More Details');
+        simpleExpander.setAttribute('subtitle', 'Click to expand');
+
+        const simpleContent = document.createElement('adw-label');
+        simpleContent.textContent = 'This is some detailed information that was initially hidden inside the expander row. It can be any HTML content.';
+        simpleContent.setAttribute('slot', 'content');
+        // Add some padding to the slotted content for better visuals
+        simpleContent.style.padding = 'var(--spacing-m)';
+        simpleContent.style.borderTop = '1px solid var(--border-color)';
+        simpleContent.style.marginTop = '-1px'; // Helps align with row's bottom border
+        simpleExpander.appendChild(simpleContent);
+        listBoxForExpanderRows.appendChild(simpleExpander);
+
+        // 2. Initially Expanded ExpanderRow
+        const expandedExpander = document.createElement('adw-expander-row');
+        expandedExpander.setAttribute('title', 'Initially Open');
+        expandedExpander.setAttribute('subtitle', 'This section starts expanded');
+        expandedExpander.setAttribute('expanded', ''); // Boolean attribute for initially expanded
+
+        const expandedContentBox = document.createElement('adw-box');
+        expandedContentBox.setAttribute('slot', 'content');
+        expandedContentBox.setAttribute('orientation', 'vertical');
+        expandedContentBox.setAttribute('spacing', 's');
+        expandedContentBox.style.cssText = 'padding: var(--spacing-m); background-color: var(--window-bg-color); border-top: 1px solid var(--border-color); margin-top: -1px;';
+
+        const ecLabel = document.createElement('adw-label');
+        ecLabel.textContent = 'Content for the pre-expanded row. This can include various elements.';
+        expandedContentBox.appendChild(ecLabel);
+
+        const ecButton = document.createElement('adw-button');
+        ecButton.textContent = 'A button inside the expander';
+        ecButton.setAttribute('small','');
+        expandedContentBox.appendChild(ecButton);
+
+        expandedExpander.appendChild(expandedContentBox);
+        listBoxForExpanderRows.appendChild(expandedExpander);
+
+        adwExpanderRowExampleOuterContainer.appendChild(listBoxForExpanderRows);
+
+        const adwExpanderRowCodeSample = `
+<!-- adw-expander-row is typically used inside an adw-list-box -->
+<adw-list-box>
+    <adw-expander-row title="User Agreement" subtitle="View terms and conditions">
+        <div slot="content" style="padding: 15px;">
+            <p>This is the full user agreement text...</p>
+            <adw-label body>You agree to all terms by using this service.</adw-label>
+        </div>
+    </adw-expander-row>
+
+    <adw-expander-row title="Advanced Settings" subtitle="Configure advanced parameters" expanded>
+        <adw-box slot="content" orientation="vertical" spacing="m" style="padding: 15px;">
+            <adw-label>Parameter X:</adw-label>
+            <adw-entry placeholder="Value for X"></adw-entry>
+            <adw-checkbox label="Enable Feature Y"></adw-checkbox>
+        </adw-box>
+    </adw-expander-row>
+</adw-list-box>
+
+<!-- Attributes for adw-expander-row:
+    title:        The main text for the row, always visible.
+    subtitle:     Secondary text displayed below the title.
+    expanded:     Boolean. If present, the row is initially expanded.
+-->
+<!-- Content for the expandable section:
+    Place any HTML element(s) inside the <adw-expander-row> and give them the
+    attribute slot="content". This content will be shown/hidden.
+-->
+
+<script>
+    // To control expansion programmatically:
+    const myExpander = document.querySelector('adw-expander-row[title="User Agreement"]');
+    if (myExpander) {
+        // To expand:
+        // myExpander.setAttribute('expanded', '');
+        // Or if a property is exposed: myExpander.expanded = true;
+
+        // To collapse:
+        // myExpander.removeAttribute('expanded');
+        // Or if a property is exposed: myExpander.expanded = false;
+
+        // Listen for expansion state changes (if the component emits an event like 'toggle' or 'change')
+        // myExpander.addEventListener('toggle', (event) => {
+        //    console.log('Expander toggled. Expanded:', event.detail.expanded);
+        //    // Note: 'toggle' event and 'event.detail.expanded' are hypothetical here,
+        //    // actual event names/details depend on the component's implementation.
+        //    // The current adw-expander-row updates 'expanded' attribute, so MutationObserver could be used too.
+        // });
+    }
+</script>
+        `;
+        const adwExpanderRowCodeDetails = createCodeSampleDetails('Show <adw-expander-row> Code', adwExpanderRowCodeSample);
+
+        // Append the adw-expander-row subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwExpanderRowSubsectionTitle);
+        customElementExamplesBox.appendChild(adwExpanderRowExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwExpanderRowCodeDetails);
+
+        // --- adw-combo-row subsection ---
+        const adwComboRowSubsectionTitle = Adw.createLabel("adw-combo-row", {title:2});
+
+        const adwComboRowExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 's'
+        });
+
+        const comboRowDemoLabel = Adw.createLabel("ComboRows within an <adw-list-box>:", { isBody: true });
+        adwComboRowExampleOuterContainer.appendChild(comboRowDemoLabel);
+
+        const listBoxForComboRows = document.createElement('adw-list-box');
+
+        // 1. Simple ComboRow
+        const simpleComboRow = document.createElement('adw-combo-row');
+        simpleComboRow.setAttribute('title', 'Choose Option:');
+        simpleComboRow.setAttribute('subtitle', 'Select one item from the list');
+        const simpleComboOptions = ["Option A", "Option B", {label: "Option C (Value is C)", value: "C"}];
+        simpleComboRow.setAttribute('select-options', JSON.stringify(simpleComboOptions));
+        simpleComboRow.setAttribute('selected-value', 'B'); // Pre-select "Option B"
+        simpleComboRow.addEventListener('change', (event) => {
+            Adw.createToast(`ComboRow selected: ${event.detail.value}`);
+        });
+        listBoxForComboRows.appendChild(simpleComboRow);
+
+        // 2. Disabled ComboRow
+        const disabledComboRow = document.createElement('adw-combo-row');
+        disabledComboRow.setAttribute('title', 'Disabled Choice:');
+        disabledComboRow.setAttribute('subtitle', 'This selection cannot be changed');
+        const disabledComboOptions = ["No choice available"];
+        disabledComboRow.setAttribute('select-options', JSON.stringify(disabledComboOptions));
+        disabledComboRow.setAttribute('selected-value', 'No choice available');
+        disabledComboRow.setAttribute('disabled', '');
+        listBoxForComboRows.appendChild(disabledComboRow);
+
+        adwComboRowExampleOuterContainer.appendChild(listBoxForComboRows);
+
+        const adwComboRowCodeSample = `
+<!-- adw-combo-row is typically used inside an adw-list-box -->
+<adw-list-box>
+    <adw-combo-row
+        title="Preferred Contact Method"
+        subtitle="How should we reach you?"
+        select-options='["Email", "Phone", {"label": "Fax (if you must)", "value": "fax"}]'
+        selected-value='Phone'>
+    </adw-combo-row>
+
+    <adw-combo-row
+        title="Notification Level"
+        select-options='[{"label": "All Updates", "value": "all"}, {"label": "Mentions Only", "value": "mentions"}, {"label": "None", "value": "none"}]'
+        selected-value='all'>
+    </adw-combo-row>
+
+    <adw-combo-row
+        title="Disabled Combo"
+        select-options='["Cannot Change This"]'
+        selected-value='Cannot Change This'
+        disabled>
+    </adw-combo-row>
+</adw-list-box>
+
+<!-- Attributes for adw-combo-row:
+    title:          The main text for the row.
+    subtitle:       Secondary text displayed below the title.
+    select-options: A JSON string representing an array of options.
+                    Each option can be a simple string (which will be used for both label and value)
+                    or an object like { "label": "Displayed Text", "value": "actual_value" }.
+    selected-value: The initial value that should be selected from the options.
+    disabled:       Boolean. If present, disables the combo row.
+-->
+
+<script>
+    // To listen for changes:
+    const myComboRow = document.querySelector('adw-combo-row[title="Preferred Contact Method"]');
+    if (myComboRow) {
+        myComboRow.addEventListener('change', (event) => {
+            // event.detail.value contains the selected value
+            console.log('ComboRow changed. Selected value:', event.detail.value);
+            // Perform actions based on the new value.
+        });
+    }
+
+    // To get or set the selected value programmatically:
+    // Get current value:
+    // const currentValue = myComboRow.getAttribute('selected-value');
+    // console.log('Current selected value:', currentValue);
+
+    // Set selected value:
+    // myComboRow.setAttribute('selected-value', 'fax');
+    // This should update the dropdown display if 'fax' is a valid value in its options.
+
+    // To update options programmatically:
+    // const newOptions = ["New Option 1", {"label": "New Option 2", "value": "val2"}];
+    // myComboRow.setAttribute('select-options', JSON.stringify(newOptions));
+</script>
+        `;
+        const adwComboRowCodeDetails = createCodeSampleDetails('Show <adw-combo-row> Code', adwComboRowCodeSample);
+
+        // Append the adw-combo-row subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwComboRowSubsectionTitle);
+        customElementExamplesBox.appendChild(adwComboRowExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwComboRowCodeDetails);
+        // Note: The TODO comment removal will be handled after this last component is added.
+
+        // --- adw-status-page subsection ---
+        const adwStatusPageSubsectionTitle = Adw.createLabel("adw-status-page", {title:2});
+
+        const adwStatusPageExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm'
+        });
+
+        // 1. Simple StatusPage
+        const simpleStatusPageDemoContainer = Adw.createBox({orientation: 'vertical', spacing: 'xs'});
+        const simpleStatusPageLabel = Adw.createLabel("Basic Status Page:", {isBody: true});
+        simpleStatusPageDemoContainer.appendChild(simpleStatusPageLabel);
+        const simpleStatusPage = document.createElement('adw-status-page');
+        simpleStatusPage.setAttribute('title', 'No Items Found');
+        simpleStatusPage.setAttribute('description', 'There are no items to display in this section. Try adjusting your filters or creating a new item.');
+        simpleStatusPage.setAttribute('icon', "<svg width='64' height='64' viewBox='0 0 24 24'><path fill='currentColor' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/></svg>");
+        simpleStatusPageDemoContainer.appendChild(simpleStatusPage);
+        adwStatusPageExampleOuterContainer.appendChild(simpleStatusPageDemoContainer);
+
+        // 2. StatusPage with Actions
+        const actionsStatusPageDemoContainer = Adw.createBox({orientation: 'vertical', spacing: 'xs'});
+        const actionsStatusPageLabel = Adw.createLabel("Status Page with Actions:", {isBody: true});
+        actionsStatusPageDemoContainer.appendChild(actionsStatusPageLabel);
+        const actionsStatusPage = document.createElement('adw-status-page');
+        actionsStatusPage.setAttribute('title', 'Action Required');
+        actionsStatusPage.setAttribute('description', 'Please complete the setup process to continue.');
+        actionsStatusPage.setAttribute('icon', "<svg width='64' height='64' viewBox='0 0 24 24'><path fill='currentColor' d='M13 16.5V11h4v5.5h-4ZM7 18V6l10 6-10 6Z'/></svg>"); // Example: play icon
+
+        const setupButton = document.createElement('adw-button');
+        setupButton.textContent = 'Complete Setup';
+        setupButton.setAttribute('slot', 'actions');
+        setupButton.setAttribute('suggested', '');
+        setupButton.addEventListener('click', () => Adw.createToast('"Complete Setup" button clicked!'));
+        actionsStatusPage.appendChild(setupButton);
+
+        const laterButton = document.createElement('adw-button');
+        laterButton.textContent = 'Later';
+        laterButton.setAttribute('slot', 'actions');
+        laterButton.addEventListener('click', () => Adw.createToast('"Later" button clicked!'));
+        actionsStatusPage.appendChild(laterButton);
+
+        actionsStatusPageDemoContainer.appendChild(actionsStatusPage);
+        adwStatusPageExampleOuterContainer.appendChild(actionsStatusPageDemoContainer);
+
+        const adwStatusPageCodeSample = `
+<!-- Basic Status Page -->
+<adw-status-page
+    title="No Search Results"
+    description="Your search query did not match any documents. Try using different keywords."
+    icon="<svg width='64' height='64'><!-- Your SVG for search/empty --></svg>">
+</adw-status-page>
+
+<!-- Status Page with Actions -->
+<adw-status-page
+    title="Connection Failed"
+    description="Unable to connect to the server. Please check your network connection and try again."
+    icon="<svg width='64' height='64'><!-- Your SVG for error/network issue --></svg>">
+
+    <adw-button slot="actions" suggested>Retry Connection</adw-button>
+    <adw-button slot="actions">Network Settings</adw-button>
+    <adw-button slot="actions">Help</adw-button>
+</adw-status-page>
+
+<!-- Attributes for adw-status-page:
+    title:        The main title text for the status page.
+    description:  A more detailed description or message.
+    icon:         An SVG string for the icon displayed at the top.
+-->
+<!-- Slotted Content:
+    Any element with attribute slot="actions" will be placed in the actions area,
+    typically below the description. These are usually buttons.
+-->
+
+<script>
+    // Example: Adding a click listener to an action button
+    const retryButton = document.querySelector('adw-status-page[title="Connection Failed"] adw-button[suggested]');
+    if (retryButton) {
+        retryButton.addEventListener('click', () => {
+            console.log('Retry Connection button clicked!');
+            // Implement retry logic here.
+        });
+    }
+</script>
+        `;
+        const adwStatusPageCodeDetails = createCodeSampleDetails('Show <adw-status-page> Code', adwStatusPageCodeSample);
+
+        // Append the adw-status-page subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwStatusPageSubsectionTitle);
+        customElementExamplesBox.appendChild(adwStatusPageExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwStatusPageCodeDetails);
+        // The TODO comment removal will be re-evaluated after all components are added.
+
+        // --- adw-view-switcher subsection ---
+        const adwViewSwitcherSubsectionTitle = Adw.createLabel("adw-view-switcher", {title:2});
+
+        const adwViewSwitcherExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 's'
+        });
+
+        const viewSwitcherDemoLabel = Adw.createLabel("Live Demo:", { isBody: true });
+        adwViewSwitcherExampleOuterContainer.appendChild(viewSwitcherDemoLabel);
+
+        const demoViewSwitcher = document.createElement('adw-view-switcher');
+        demoViewSwitcher.setAttribute('label', 'Demo ViewSwitcher Navigation'); // Aria-label for the switcher controls
+        demoViewSwitcher.setAttribute('active-view', 'View 1');
+
+        // View 1 Content
+        const view1Content = document.createElement('adw-box');
+        view1Content.setAttribute('view-name', 'View 1');
+        view1Content.setAttribute('orientation', 'vertical'); // Content box orientation
+        view1Content.setAttribute('spacing', 'm');
+        view1Content.style.cssText = 'padding: 20px; border: 1px solid var(--border-color); min-height: 100px;';
+        const v1Label = document.createElement('adw-label');
+        v1Label.setAttribute('title-level', '3');
+        v1Label.textContent = 'Content for View 1';
+        view1Content.appendChild(v1Label);
+        const v1Entry = document.createElement('adw-entry');
+        v1Entry.setAttribute('placeholder', 'Entry in View 1');
+        view1Content.appendChild(v1Entry);
+        demoViewSwitcher.appendChild(view1Content);
+
+        // View 2 Content
+        const view2Content = document.createElement('adw-box');
+        view2Content.setAttribute('view-name', 'View 2');
+        view2Content.setAttribute('orientation', 'vertical');
+        view2Content.setAttribute('spacing', 'm');
+        view2Content.style.cssText = 'padding: 20px; border: 1px solid var(--border-color); min-height: 100px;';
+        const v2Label = document.createElement('adw-label');
+        v2Label.setAttribute('title-level', '3');
+        v2Label.textContent = 'Content for View 2';
+        view2Content.appendChild(v2Label);
+        const v2Button = document.createElement('adw-button');
+        v2Button.textContent = 'Button in View 2';
+        v2Button.addEventListener('click', () => Adw.createToast('Button in View 2 clicked!'));
+        view2Content.appendChild(v2Button);
+        demoViewSwitcher.appendChild(view2Content);
+
+        // View 3 Content
+        const view3Content = document.createElement('adw-label'); // Using just a label as content
+        view3Content.setAttribute('view-name', 'View 3');
+        view3Content.style.cssText = 'display: block; padding: 20px; border: 1px solid var(--border-color); min-height: 100px;';
+        view3Content.textContent = 'This is just a label acting as the content for View 3.';
+        demoViewSwitcher.appendChild(view3Content);
+
+        demoViewSwitcher.addEventListener('view-changed', (event) => {
+            Adw.createToast(`Switched to: ${event.detail.viewName}`);
+        });
+
+        adwViewSwitcherExampleOuterContainer.appendChild(demoViewSwitcher);
+
+        const adwViewSwitcherCodeSample = `
+<!-- adw-view-switcher manages visibility of its direct children based on 'view-name' -->
+<adw-view-switcher label="Main Content Views" active-view="Dashboard">
+
+    <!-- View 1: Dashboard -->
+    <div view-name="Dashboard" style="padding: 10px; border: 1px solid #ccc;">
+        <adw-label title-level="2">Dashboard Content</adw-label>
+        <p>Welcome to your dashboard!</p>
+    </div>
+
+    <!-- View 2: Settings -->
+    <adw-box view-name="Settings" orientation="vertical" spacing="m" style="padding: 10px; border: 1px solid #ccc;">
+        <adw-label title-level="2">Settings Panel</adw-label>
+        <adw-checkbox label="Enable notifications"></adw-checkbox>
+        <adw-button>Save Settings</adw-button>
+    </adw-box>
+
+    <!-- View 3: Profile (Just a label for this example) -->
+    <adw-label view-name="Profile" style="padding: 10px; border: 1px solid #ccc;">
+        User profile information goes here.
+    </adw-label>
+
+</adw-view-switcher>
+
+<!-- Attributes for adw-view-switcher:
+    label:        Accessibility label for the group of switcher buttons.
+    active-view:  The 'view-name' of the child element that should be initially visible.
+-->
+<!-- Child Elements:
+    Direct children of <adw-view-switcher> should have a 'view-name' attribute.
+    The <adw-view-switcher> will display the child whose 'view-name' matches the
+    current active view.
+-->
+
+<script>
+    // To listen for view changes:
+    const myViewSwitcher = document.querySelector('adw-view-switcher');
+    if (myViewSwitcher) {
+        myViewSwitcher.addEventListener('view-changed', (event) => {
+            // event.detail.viewName contains the 'view-name' of the newly active view
+            console.log('View switched to:', event.detail.viewName);
+            // Load data or perform actions based on the new view.
+        });
+    }
+
+    // To change the view programmatically:
+    // myViewSwitcher.setAttribute('active-view', 'Settings');
+    // Or, if a property is exposed (check component implementation):
+    // myViewSwitcher.activeView = 'Settings';
+</script>
+        `;
+        const adwViewSwitcherCodeDetails = createCodeSampleDetails('Show <adw-view-switcher> Code', adwViewSwitcherCodeSample);
+
+        // Append the adw-view-switcher subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwViewSwitcherSubsectionTitle);
+        customElementExamplesBox.appendChild(adwViewSwitcherExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwViewSwitcherCodeDetails);
+        // The TODO comment was removed in the previous step, so no need to repeat here if this is the true last one.
+        // If more are added later, this logic might need to be the very last one.
+
+        // --- adw-flap subsection ---
+        const adwFlapSubsectionTitle = Adw.createLabel("adw-flap", {title:2});
+
+        const adwFlapExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 's'
+        });
+
+        const flapDemoLabel = Adw.createLabel("Live Demo:", { isBody: true });
+        adwFlapExampleOuterContainer.appendChild(flapDemoLabel);
+
+        const demoFlap = document.createElement('adw-flap');
+        demoFlap.setAttribute('folded', ''); // Start folded
+        demoFlap.style.cssText = 'border: 1px solid var(--border-color); min-height: 180px; margin-top: var(--spacing-s); width: 100%;';
+
+        // Flap Content
+        const flapContent = document.createElement('adw-box');
+        flapContent.setAttribute('slot', 'flap');
+        flapContent.setAttribute('orientation', 'vertical');
+        flapContent.setAttribute('spacing', 's');
+        flapContent.style.cssText = 'padding: var(--spacing-m); background-color: var(--secondary-bg-color); width: 220px; height: 100%; border-right: 1px solid var(--border-color);';
+
+        const flapContentLabel = document.createElement('adw-label');
+        flapContentLabel.setAttribute('title-level', '4');
+        flapContentLabel.textContent = 'Flap Content Area';
+        flapContent.appendChild(flapContentLabel);
+
+        const flapButton = document.createElement('adw-button');
+        flapButton.textContent = 'Button in Flap';
+        flapButton.addEventListener('click', () => Adw.createToast('Button in flap clicked!'));
+        flapContent.appendChild(flapButton);
+        demoFlap.appendChild(flapContent);
+
+        // Main Content
+        const mainFlapAreaContent = document.createElement('adw-box');
+        mainFlapAreaContent.setAttribute('slot', 'main');
+        mainFlapAreaContent.setAttribute('orientation', 'vertical');
+        mainFlapAreaContent.setAttribute('spacing', 's');
+        mainFlapAreaContent.style.cssText = 'padding: var(--spacing-m);';
+
+        const mainContentLabel = document.createElement('adw-label');
+        mainContentLabel.setAttribute('title-level', '4');
+        mainContentLabel.textContent = 'Main Content Area';
+        mainFlapAreaContent.appendChild(mainContentLabel);
+
+        const mainContentDesc = document.createElement('adw-label');
+        mainContentDesc.textContent = 'This is the primary content area. When the flap is revealed, this area might reflow or be overlaid depending on the transition type.';
+        mainFlapAreaContent.appendChild(mainContentDesc);
+        demoFlap.appendChild(mainFlapAreaContent);
+
+        // Toggle Button for the Flap
+        const toggleFlapButton = Adw.createButton("Toggle Flap");
+        toggleFlapButton.addEventListener('click', () => {
+            demoFlap.toggleFlap();
+        });
+        // Insert button before the flap element for control
+        adwFlapExampleOuterContainer.appendChild(toggleFlapButton);
+        adwFlapExampleOuterContainer.appendChild(demoFlap);
+
+
+        const adwFlapCodeSample = `
+<!-- adw-flap requires two main slotted children: one for 'flap' and one for 'main' -->
+<adw-button id="myFlapToggleButton">Toggle Flap</adw-button>
+<adw-flap id="myDemoFlap" folded style="border: 1px solid #ccc; min-height: 150px;">
+
+    <!-- Content for the flap panel -->
+    <div slot="flap" style="padding: 10px; background-color: #f0f0f0; width: 200px; height: 100%;">
+        <h4>Flap Section</h4>
+        <p>Navigation or tools can go here.</p>
+        <adw-button>Flap Action</adw-button>
+    </div>
+
+    <!-- Main content area -->
+    <div slot="main" style="padding: 10px;">
+        <h4>Main Section</h4>
+        <p>This is where the primary content resides.</p>
+    </div>
+
+</adw-flap>
+
+<!-- Attributes for adw-flap:
+    folded:          Boolean. If present, the flap starts in its folded (hidden or narrow) state.
+    transition-type: String. Can be "slide" (main content slides with flap) or "over" (flap slides over main content).
+                     (Note: Check custom element's specific support for this attribute. Factory supports it.)
+    flap-position:   String. Can be "start" or "end". Defines which side the flap appears on.
+                     (Note: Check custom element's specific support. Factory supports it.)
+-->
+<!-- Child Elements:
+    Use slot="flap" for the content of the collapsible panel.
+    Use slot="main" for the main content area.
+-->
+
+<script>
+    const flapElement = document.getElementById('myDemoFlap');
+    const toggleButton = document.getElementById('myFlapToggleButton');
+
+    if (flapElement && toggleButton) {
+        toggleButton.addEventListener('click', () => {
+            // Call the toggleFlap() method on the custom element instance
+            flapElement.toggleFlap();
+        });
+    }
+
+    // You can also control it directly:
+    // flapElement.fold();   // To hide the flap
+    // flapElement.unfold(); // To show the flap
+    // These methods (fold/unfold/toggleFlap) need to be explicitly exposed by the custom element.
+    // The current adw-flap.js exposes toggleFlap().
+</script>
+        `;
+        const adwFlapCodeDetails = createCodeSampleDetails('Show <adw-flap> Code', adwFlapCodeSample);
+
+        // Append the adw-flap subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwFlapSubsectionTitle);
+        customElementExamplesBox.appendChild(adwFlapExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwFlapCodeDetails);
+        // The TODO comment was removed in the previous step.
+
+        // --- adw-dialog subsection ---
+        const adwDialogSubsectionTitle = Adw.createLabel("adw-dialog", {title:2});
+
+        const adwDialogExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 's'
+        });
+
+        const dialogDemoLabel = Adw.createLabel("Live Demo:", { isBody: true });
+        adwDialogExampleOuterContainer.appendChild(dialogDemoLabel);
+
+        // Create the adw-dialog element (initially hidden)
+        const demoDialog = document.createElement('adw-dialog');
+        demoDialog.setAttribute('title', 'My Sample Dialog');
+        demoDialog.id = 'demoDialog1'; // For potential direct query, though not used in this direct example
+        // demoDialog.setAttribute('close-on-backdrop-click', ''); // Example if this attribute is supported
+
+        // Content Slot
+        const dialogContent = document.createElement('adw-box');
+        dialogContent.setAttribute('slot', 'content');
+        dialogContent.setAttribute('orientation', 'vertical');
+        dialogContent.setAttribute('spacing', 's');
+        dialogContent.style.padding = 'var(--spacing-m)'; // Add padding to content area
+
+        const dialogContentLabel = document.createElement('adw-label');
+        dialogContentLabel.textContent = 'This is the main content area of the dialog. You can put forms, text, or other components here.';
+        dialogContent.appendChild(dialogContentLabel);
+
+        const dialogEntry = document.createElement('adw-entry');
+        dialogEntry.setAttribute('placeholder', 'Enter some data...');
+        dialogContent.appendChild(dialogEntry);
+        demoDialog.appendChild(dialogContent);
+
+        // Buttons Slot
+        const cancelButton = document.createElement('adw-button');
+        cancelButton.textContent = 'Cancel';
+        cancelButton.setAttribute('slot', 'buttons');
+        cancelButton.dataset.action = 'cancel'; // For the event listener
+        demoDialog.appendChild(cancelButton);
+
+        const okButton = document.createElement('adw-button');
+        okButton.textContent = 'OK';
+        okButton.setAttribute('slot', 'buttons');
+        okButton.dataset.action = 'ok';
+        okButton.setAttribute('suggested', '');
+        demoDialog.appendChild(okButton);
+
+        // Event listener for actions on slotted buttons (using event delegation on the dialog)
+        demoDialog.addEventListener('click', (event) => {
+            const target = event.target.closest('adw-button[slot="buttons"]');
+            if (target) {
+                const action = target.dataset.action;
+                if (action === 'ok') {
+                    Adw.createToast('OK button clicked. Value: ' + (dialogEntry.value || 'empty'), {timeout: 2000});
+                    demoDialog.close(); // Call the custom element's close method
+                } else if (action === 'cancel') {
+                    Adw.createToast('Cancel button clicked.', {timeout: 2000});
+                    demoDialog.close();
+                }
+            }
+        });
+
+        // Event listener for the 'close' event dispatched by the dialog
+        demoDialog.addEventListener('close', () => {
+            demoDialog.removeAttribute('open'); // Ensure 'open' attribute is removed
+            Adw.createToast('Dialog was closed (via "close" event).', {timeout: 2000});
+        });
+
+        // Button to open the dialog
+        const openDialogButtonInstance = Adw.createButton("Open Dialog");
+        openDialogButtonInstance.addEventListener('click', () => {
+            // demoDialog.setAttribute('open', ''); // This should trigger the dialog to open via attributeChangedCallback
+            demoDialog.open(); // Or prefer using a method if available and more reliable
+        });
+
+        adwDialogExampleOuterContainer.appendChild(openDialogButtonInstance);
+        adwDialogExampleOuterContainer.appendChild(demoDialog); // Add dialog to DOM (hidden)
+
+
+        const adwDialogCodeSample = `
+<!-- Basic structure of adw-dialog -->
+<!-- It's typically added to the DOM but not visible until 'open' attribute is set or open() method is called. -->
+<adw-button id="triggerMyDialog">Open My Dialog</adw-button>
+
+<adw-dialog id="myDialog" title="Confirmation Required" close-on-backdrop-click>
+    <div slot="content" style="padding: 15px;">
+        <adw-label body>Are you sure you want to proceed with this action?</adw-label>
+        <adw-entry placeholder="Optional reason..."></adw-entry>
+    </div>
+    <adw-button slot="buttons" data-action="no">No, Cancel</adw-button>
+    <adw-button slot="buttons" data-action="yes" suggested>Yes, Proceed</adw-button>
+</adw-dialog>
+
+<!-- Attributes for adw-dialog:
+    title:                    The title displayed in the dialog's header.
+    open:                     Boolean. If present, the dialog is shown. Remove to hide.
+    close-on-backdrop-click:  Boolean. If present, clicking the backdrop closes the dialog.
+                               (Check component implementation for this attribute's support).
+-->
+<!-- Child Elements (Slots):
+    Use slot="content" for the main body of the dialog.
+    Use slot="buttons" for action buttons at the bottom of the dialog.
+-->
+
+<script>
+    const dialog = document.getElementById('myDialog');
+    const openButton = document.getElementById('triggerMyDialog');
+
+    if (openButton && dialog) {
+        openButton.addEventListener('click', () => {
+            // To open the dialog:
+            // dialog.setAttribute('open', '');
+            // OR (preferred if method exists):
+            dialog.open();
+        });
+    }
+
+    if (dialog) {
+        // Listen for button clicks within the dialog (using event delegation)
+        dialog.addEventListener('click', (event) => {
+            const targetButton = event.target.closest('adw-button[slot="buttons"]');
+            if (targetButton) {
+                const action = targetButton.dataset.action;
+                if (action === 'yes') {
+                    console.log('Proceed action chosen.');
+                    dialog.close(); // Close the dialog
+                } else if (action === 'no') {
+                    console.log('Cancel action chosen.');
+                    dialog.close(); // Close the dialog
+                }
+            }
+        });
+
+        // Listen for the 'close' event dispatched by the dialog when it closes
+        dialog.addEventListener('close', () => {
+            console.log('Dialog was closed.');
+            // Ensure 'open' attribute is removed if not handled by close() method internally
+            dialog.removeAttribute('open');
+        });
+    }
+
+    // Programmatic control methods (must be exposed by the custom element):
+    // dialog.open();
+    // dialog.close();
+</script>
+        `;
+        const adwDialogCodeDetails = createCodeSampleDetails('Show <adw-dialog> Code', adwDialogCodeSample);
+
+        // Append the adw-dialog subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwDialogSubsectionTitle);
+        customElementExamplesBox.appendChild(adwDialogExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwDialogCodeDetails);
+        // TODO comment removal will be handled finally if this is the last one.
+
+        // --- adw-banner subsection ---
+        const adwBannerSubsectionTitle = Adw.createLabel("adw-banner", {title:2});
+
+        const adwBannerExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm'
+        });
+
+        const bannerDemoLabel = Adw.createLabel(
+            "Live Demo: Banners appear at the top of the page. Define them, then show them.",
+            { isBody: true, isCaption: true } // Caption style for less emphasis
+        );
+        adwBannerExampleOuterContainer.appendChild(bannerDemoLabel);
+
+        // Create banner elements (they will be hidden initially and attach to body when shown)
+        const demoInfoBanner = document.createElement('adw-banner');
+        demoInfoBanner.setAttribute('message', 'This is an informational banner (dismissible by default).');
+        demoInfoBanner.setAttribute('type', 'info');
+        demoInfoBanner.id = 'demoInfoBanner'; // Optional ID
+        // Append to a container in the DOM so it's part of the document, even if not visible here.
+        adwBannerExampleOuterContainer.appendChild(demoInfoBanner);
+
+
+        const demoSuccessBanner = document.createElement('adw-banner');
+        demoSuccessBanner.setAttribute('message', 'Action was completed successfully! (Non-dismissible for demo)');
+        demoSuccessBanner.setAttribute('type', 'success');
+        demoSuccessBanner.setAttribute('dismissible', 'false');
+        demoSuccessBanner.id = 'demoSuccessBanner';
+        adwBannerExampleOuterContainer.appendChild(demoSuccessBanner);
+
+        const demoWarningBanner = document.createElement('adw-banner');
+        demoWarningBanner.setAttribute('message', 'Warning: Please check the input details.');
+        demoWarningBanner.setAttribute('type', 'warning');
+        demoWarningBanner.id = 'demoWarningBanner';
+        adwBannerExampleOuterContainer.appendChild(demoWarningBanner);
+
+        const demoErrorBanner = document.createElement('adw-banner');
+        demoErrorBanner.setAttribute('message', 'Error: An unexpected issue occurred. Please try again.');
+        demoErrorBanner.setAttribute('type', 'error');
+        demoErrorBanner.id = 'demoErrorBanner';
+        adwBannerExampleOuterContainer.appendChild(demoErrorBanner);
+
+        // Container for trigger buttons
+        const bannerTriggerButtonsBox = Adw.createBox({
+            orientation: 'horizontal',
+            spacing: 's',
+            wrap: true
+        });
+
+        const showInfoButton = Adw.createButton("Show Info Banner");
+        showInfoButton.addEventListener('click', () => demoInfoBanner.show());
+        bannerTriggerButtonsBox.appendChild(showInfoButton);
+
+        const showSuccessButton = Adw.createButton("Show Success Banner");
+        showSuccessButton.addEventListener('click', () => demoSuccessBanner.show());
+        bannerTriggerButtonsBox.appendChild(showSuccessButton);
+
+        const showWarningButton = Adw.createButton("Show Warning Banner");
+        showWarningButton.addEventListener('click', () => demoWarningBanner.show());
+        bannerTriggerButtonsBox.appendChild(showWarningButton);
+
+        const showErrorButton = Adw.createButton("Show Error Banner");
+        showErrorButton.addEventListener('click', () => demoErrorBanner.show());
+        bannerTriggerButtonsBox.appendChild(showErrorButton);
+
+        adwBannerExampleOuterContainer.appendChild(bannerTriggerButtonsBox);
+
+
+        const adwBannerCodeSample = `
+<!-- Define an adw-banner. It's hidden by default unless 'show' is present. -->
+<!-- Banners are typically appended to the document body when shown. -->
+<adw-banner
+    id="mySampleBanner"
+    message="Your profile has been updated successfully."
+    type="success"
+    dismissible="true">
+    <!-- Optional: Add an action button inside the banner -->
+    <!-- <adw-button slot="action" small>View Profile</adw-button> -->
+</adw-banner>
+
+<adw-button id="triggerBannerButton">Show Sample Banner</adw-button>
+
+<!-- Attributes for adw-banner:
+    message:      The text message to display in the banner. (Required)
+    type:         "info" (default), "success", "warning", "error". Styles the banner accordingly.
+    dismissible:  Boolean ("true" or "false"). If "true" (default), a dismiss button is shown.
+    show:         Boolean. If present, the banner is displayed. Remove to hide.
+                  (Note: The component typically manages its own attachment/detachment from body
+                   based on this attribute or show()/hide() methods).
+-->
+<!-- Slotted Content:
+    Use slot="action" to add a button or other interactive element within the banner.
+    (Note: slot="action" support depends on the custom element's template. The factory supports it.)
+-->
+
+<script>
+    const banner = document.getElementById('mySampleBanner');
+    const triggerBtn = document.getElementById('triggerBannerButton');
+
+    if (banner && triggerBtn) {
+        triggerBtn.addEventListener('click', () => {
+            // To show the banner:
+            // banner.setAttribute('show', '');
+            // OR (preferred if method exists):
+            banner.show();
+        });
+    }
+
+    // If the banner is dismissible, it will handle its own hiding when its dismiss button is clicked.
+    // To hide programmatically:
+    // banner.hide();
+    // OR
+    // banner.removeAttribute('show');
+
+    // If the banner has an action button slotted:
+    // const actionButton = banner.querySelector('[slot="action"]');
+    // if (actionButton) {
+    //    actionButton.addEventListener('click', () => {
+    //        console.log('Banner action clicked!');
+    //        banner.hide();
+    //    });
+    // }
+</script>
+        `;
+        const adwBannerCodeDetails = createCodeSampleDetails('Show <adw-banner> Code', adwBannerCodeSample);
+
+        // Append the adw-banner subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwBannerSubsectionTitle);
+        customElementExamplesBox.appendChild(adwBannerExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwBannerCodeDetails);
+        // Final TODO comment removal will be handled after this component if it's the last one.
+
+        // --- adw-toast subsection ---
+        const adwToastSubsectionTitle = Adw.createLabel("adw-toast", {title:2});
+
+        const adwToastExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm'
+        });
+
+        const toastDemoLabel = Adw.createLabel(
+            "Live Demo: Toasts appear in a global overlay, typically at the bottom or top of the viewport.",
+            { isBody: true, isCaption: true }
+        );
+        adwToastExampleOuterContainer.appendChild(toastDemoLabel);
+
+        // Create toast elements (they are hidden by default and manage their own global overlay display)
+        // They are added to this container just to be part of the DOM initially.
+        const demoToast1 = document.createElement('adw-toast');
+        demoToast1.setAttribute('message', 'Default toast message. Disappears after a short delay.');
+        demoToast1.id = 'demoToast1'; // Default type is 'info', default timeout is > 0
+        adwToastExampleOuterContainer.appendChild(demoToast1);
+
+        const demoToast2 = document.createElement('adw-toast');
+        demoToast2.setAttribute('message', 'Success toast! This one stays for 5 seconds.');
+        demoToast2.setAttribute('type', 'success');
+        demoToast2.setAttribute('timeout', '5000');
+        demoToast2.id = 'demoToast2';
+        adwToastExampleOuterContainer.appendChild(demoToast2);
+
+        const demoToast3 = document.createElement('adw-toast');
+        demoToast3.setAttribute('message', 'Error occurred. Click the button to dismiss.');
+        demoToast3.setAttribute('type', 'error');
+        demoToast3.setAttribute('timeout', '0'); // Indicates it should persist until action/manual hide
+        demoToast3.id = 'demoToast3';
+
+        const dismissButton = document.createElement('adw-button');
+        dismissButton.textContent = 'Dismiss';
+        dismissButton.setAttribute('slot', 'button');
+        dismissButton.setAttribute('small', ''); // Small button for toast action
+        dismissButton.addEventListener('click', () => demoToast3.hide());
+        demoToast3.appendChild(dismissButton);
+        adwToastExampleOuterContainer.appendChild(demoToast3);
+
+        // Container for trigger buttons
+        const toastTriggerButtonsBox = Adw.createBox({
+            orientation: 'horizontal',
+            spacing: 's',
+            wrap: true
+        });
+
+        const showToast1Button = Adw.createButton("Show Default Toast");
+        showToast1Button.addEventListener('click', () => demoToast1.show());
+        toastTriggerButtonsBox.appendChild(showToast1Button);
+
+        const showToast2Button = Adw.createButton("Show Success Toast (5s)");
+        showToast2Button.addEventListener('click', () => demoToast2.show());
+        toastTriggerButtonsBox.appendChild(showToast2Button);
+
+        const showToast3Button = Adw.createButton("Show Error Toast with Button");
+        showToast3Button.addEventListener('click', () => demoToast3.show());
+        toastTriggerButtonsBox.appendChild(showToast3Button);
+
+        adwToastExampleOuterContainer.appendChild(toastTriggerButtonsBox);
+
+        const adwToastCodeSample = `
+<!-- Define an adw-toast. It's hidden by default. -->
+<!-- Toasts are displayed in a global overlay when shown. -->
+<adw-toast
+    id="mySampleToast"
+    message="This is a sample toast message."
+    type="info"
+    timeout="3000">
+    <!-- Optional: Add an action button -->
+    <!-- <adw-button slot="button" small>Action</adw-button> -->
+</adw-toast>
+
+<adw-button id="triggerMyToastButton">Show Sample Toast</adw-button>
+
+<!-- Attributes for adw-toast:
+    message:      The text message to display in the toast. (Required)
+    type:         "info" (default), "success", "warning", "error". Styles the toast.
+    timeout:      Duration in milliseconds before the toast auto-hides.
+                  Set to "0" for a persistent toast that requires manual dismissal
+                  (e.g., via a slotted button or calling hide()). Default is usually around 3000-4000ms.
+    show:         Boolean attribute. If present when connected, the toast is displayed.
+                  (The component typically manages its own display via show()/hide() methods).
+-->
+<!-- Slotted Content:
+    Use slot="button" to add an <adw-button> or similar interactive element to the toast.
+-->
+
+<script>
+    const toastElement = document.getElementById('mySampleToast');
+    const triggerToastBtn = document.getElementById('triggerMyToastButton');
+
+    if (toastElement && triggerToastBtn) {
+        triggerToastBtn.addEventListener('click', () => {
+            // To show the toast:
+            toastElement.show();
+            // Or, less commonly for toasts: toastElement.setAttribute('show', '');
+        });
+    }
+
+    // If the toast has an action button, add a listener to it:
+    // const toastAction = toastElement.querySelector('[slot="button"]');
+    // if (toastAction) {
+    //    toastAction.addEventListener('click', () => {
+    //        console.log('Toast action clicked!');
+    //        toastElement.hide(); // Example: hide toast on action
+    //    });
+    // }
+
+    // To hide programmatically (if not auto-hiding or if it has no dismiss UI):
+    // toastElement.hide();
+    // Or: toastElement.removeAttribute('show');
+
+    // Note: The 'adw-toast' custom element wrapper should handle the global overlay
+    // and positioning, similar to how Adw.createToast() factory does.
+</script>
+        `;
+        const adwToastCodeDetails = createCodeSampleDetails('Show <adw-toast> Code', adwToastCodeSample);
+
+        // Append the adw-toast subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwToastSubsectionTitle);
+        customElementExamplesBox.appendChild(adwToastExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwToastCodeDetails);
+
+        // --- adw-application-window subsection ---
+        const adwAppWindowSubsectionTitle = Adw.createLabel("adw-application-window", {title:2});
+
+        const adwAppWindowExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 's'
+        });
+
+        const appWindowDemoLabel = Adw.createLabel(
+            "Live Demo (styled to appear as a contained window):",
+            { isBody: true, isCaption: true }
+        );
+        adwAppWindowExampleOuterContainer.appendChild(appWindowDemoLabel);
+
+        const demoAppWindow = document.createElement('adw-application-window');
+        demoAppWindow.style.cssText = `
+            border: 1px solid var(--border-color);
+            position: relative;
+            height: 350px;
+            width: 100%;
+            max-width: 500px;
+            margin: var(--spacing-s) auto;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: var(--border-radius-l);
+            box-shadow: var(--card-shadow);
+        `;
+
+        // Header Slot
+        const demoAppWindowHeader = document.createElement('adw-header-bar');
+        demoAppWindowHeader.setAttribute('slot', 'header');
+
+        const ICON_MENU_PLACEHOLDER = "<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='M2.5 4.5A.5.5 0 0 1 3 4h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0 3A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0 3A.5.5 0 0 1 3 10h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z'/></svg>";
+        const ICON_MORE_PLACEHOLDER = "<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM7 11.5a1 1 0 1 1 2 0a1 1 0 0 1-2 0Zm.5-7a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5-.5h-1a.5.5 0 0 1-.5-.5Z'/></svg>";
+
+
+        const headerStartButton = document.createElement('adw-button');
+        headerStartButton.setAttribute('slot', 'start');
+        headerStartButton.setAttribute('icon', ICON_MENU_PLACEHOLDER);
+        demoAppWindowHeader.appendChild(headerStartButton);
+
+        const headerTitle = document.createElement('adw-window-title');
+        headerTitle.setAttribute('slot', 'title');
+        headerTitle.textContent = 'My App Window';
+        demoAppWindowHeader.appendChild(headerTitle);
+
+        const headerEndButton = document.createElement('adw-button');
+        headerEndButton.setAttribute('slot', 'end');
+        headerEndButton.setAttribute('icon', ICON_MORE_PLACEHOLDER);
+        demoAppWindowHeader.appendChild(headerEndButton);
+
+        demoAppWindow.appendChild(demoAppWindowHeader);
+
+        // Default Content Slot
+        const appWindowContentBox = document.createElement('adw-box');
+        appWindowContentBox.setAttribute('orientation', 'vertical');
+        appWindowContentBox.setAttribute('spacing', 'm');
+        appWindowContentBox.style.cssText = 'padding: var(--spacing-l); flex-grow: 1; overflow-y: auto;';
+
+        const contentTitle = document.createElement('adw-label');
+        contentTitle.setAttribute('title-level', '3');
+        contentTitle.textContent = 'Main Content of the Window';
+        appWindowContentBox.appendChild(contentTitle);
+
+        const contentEntry = document.createElement('adw-entry');
+        contentEntry.setAttribute('placeholder', 'Type something here...');
+        appWindowContentBox.appendChild(contentEntry);
+
+        const contentButton = document.createElement('adw-button');
+        contentButton.setAttribute('suggested', '');
+        contentButton.textContent = 'Submit Action';
+        contentButton.addEventListener('click', () => Adw.createToast('Submit button in window clicked!'));
+        appWindowContentBox.appendChild(contentButton);
+
+        demoAppWindow.appendChild(appWindowContentBox);
+        adwAppWindowExampleOuterContainer.appendChild(demoAppWindow);
+
+        const adwAppWindowCodeSample = `
+<!-- adw-application-window typically forms the root of your UI -->
+<adw-application-window style="height: 300px; border: 1px solid #ccc; position: relative;">
+    <!-- Header Area -->
+    <adw-header-bar slot="header">
+        <adw-button slot="start" icon="<svg>...</svg>"></adw-button>
+        <adw-window-title slot="title">Application Name</adw-window-title>
+        <adw-button slot="end" icon="<svg>...</svg>"></adw-button>
+    </adw-header-bar>
+
+    <!-- Main Content Area (default slot) -->
+    <adw-box orientation="vertical" spacing="m" style="padding: 20px;">
+        <adw-label title-level="2">Welcome!</adw-label>
+        <p>This is the main content area of the application window.</p>
+        <adw-button>Click Me</adw-button>
+    </adw-box>
+</adw-application-window>
+
+<!-- Attributes for adw-application-window:
+    (Currently, no specific attributes are defined for adw-application-window itself in components.js,
+     it primarily serves as a structural container using slots.)
+-->
+<!-- Child Elements (Slots):
+    Use slot="header" to provide an <adw-header-bar> or a similar component for the window's header.
+    Other direct children without a slot attribute (or with slot="") go into the main content area.
+-->
+
+<script>
+    // Accessing the application window:
+    const appWindow = document.querySelector('adw-application-window');
+    if (appWindow) {
+        // You can then access slotted elements like the header or content
+        // const header = appWindow.querySelector('[slot="header"]');
+        // const mainContent = appWindow.querySelector('adw-box:not([slot])'); // Example selector
+        // console.log('App window header:', header);
+        // console.log('App window main content container:', mainContent);
+    }
+</script>
+        `;
+        const adwAppWindowCodeDetails = createCodeSampleDetails('Show <adw-application-window> Code', adwAppWindowCodeSample);
+
+        // Append the adw-application-window subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwAppWindowSubsectionTitle);
+        customElementExamplesBox.appendChild(adwAppWindowExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwAppWindowCodeDetails);
+
+        // This is the TRUE last component, ensure TODO comment is removed.
+        const finalTodoComment = Array.from(customElementExamplesBox.childNodes).find(node => node.nodeType === Node.COMMENT_NODE && node.textContent.includes('TODO: Add more custom element subsections'));
+        if (finalTodoComment) {
+            customElementExamplesBox.removeChild(finalTodoComment);
+        }
 
         const customElementShowcaseBox = Adw.createBox({
             orientation: 'vertical',
