@@ -19,7 +19,7 @@ mkdir -p "${JS_OUTPUT_DIR}"
 
 # Compile SASS to CSS
 echo "Compiling SASS: ${SASS_INPUT_FILE} to ${CSS_OUTPUT_FILE}"
-sassc "${SASS_INPUT_FILE}" "${CSS_OUTPUT_FILE}" -m -t compact
+sassc "${SASS_INPUT_FILE}" "${CSS_OUTPUT_FILE}" -t compact
 
 # Remove the app-demo/static/scss directory if it exists
 if [ -d "app-demo/static/scss" ]; then

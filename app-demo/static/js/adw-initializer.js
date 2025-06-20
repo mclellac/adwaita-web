@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
       div.appendChild(titleElement);
     }
     moveChildren(prefGroupElement, div);
-    prefPageElement.replaceWith(div);
+    prefGroupElement.replaceWith(div);
   });
 
 
@@ -280,10 +280,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!['title', 'subtitle', 'expanded', 'class'].includes(attrName) && !newExpanderRow.hasAttribute(attrName)) {
         newExpanderRow.setAttribute(attrName, originalAttrs[attrName]);
       } else if (attrName === 'class') {
-        newExpanderRow.element.className += ' ' + originalAttrs[attrName]; // createExpanderRow returns {element: ...}
+        // createAdwExpanderRow now returns the element directly
+        newExpanderRow.className += ' ' + originalAttrs[attrName];
       }
     }
-    expanderRowElement.replaceWith(newExpanderRow.element);
+    expanderRowElement.replaceWith(newExpanderRow);
   });
 
   document.querySelectorAll('adw-password-entry-row').forEach(passwordEntryRowElement => {
