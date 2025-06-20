@@ -1,3 +1,4 @@
+console.log('[Debug] adw-initializer.js execution started');
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.Adw) {
     console.error('Adw components library not loaded. Make sure components.js is included before this initializer.');
@@ -311,6 +312,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     options.labelForEntry = passwordEntryRowElement.getAttribute('label-for-entry') !== "false";
+
+    // Logging before calling createAdwPasswordEntryRow
+    console.log('[Debug] Initializer: Attempting to process <adw-password-entry-row>. Options prepared:', options);
+    console.log('[Debug] Initializer: About to call window.Adw.createAdwPasswordEntryRow. Checking window.Adw object keys:');
+    if (window.Adw) {
+        console.log(Object.keys(window.Adw).join(', '));
+        if (typeof window.Adw.createAdwPasswordEntryRow === 'function') {
+            console.log('[Debug] Initializer: window.Adw.createAdwPasswordEntryRow IS a function.');
+        } else {
+            console.error('[Debug] Initializer: window.Adw.createAdwPasswordEntryRow IS NOT a function just before calling it!');
+        }
+    } else {
+        console.error('[Debug] Initializer: window.Adw object is NOT defined just before calling createAdwPasswordEntryRow!');
+    }
 
     const newPasswordEntryRow = window.Adw.createAdwPasswordEntryRow(options);
     for (const attrName in originalAttrs) {
