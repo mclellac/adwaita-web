@@ -8,32 +8,23 @@
     <form method="POST" action="{{ url_for('create_post') }}" novalidate>
         {{ form.hidden_tag() }} {# CSRF token #}
 
-        <adw-entry-row
-            title="{{ form.title.label.text }}"
-            name="{{ form.title.name }}"
-            id="{{ form.title.id or 'title_field' }}"
-            value="{{ form.title.data or '' }}"
-            placeholder="Enter post title"
-            {% if form.title.flags.required %}required{% endif %}
-            style="margin-bottom: var(--spacing-s);">
-        </adw-entry-row>
-        {% if form.title.errors %}
-            <div id="{{ form.title.id or 'title_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); margin-bottom: var(--spacing-m);">
-                {% for error in form.title.errors %}<span>{{ error }}</span><br>{% endfor %}
-            </div>
-        {% else %}
-            <div style="margin-bottom: var(--spacing-m);"></div> {# Maintain spacing even if no error #}
-        {% endif %}
+        <div class="form-group">
+            {{ form.title.label(for=form.title.id or 'title_field') }}
+            {{ form.title(class_='adw-entry', id=form.title.id or 'title_field', placeholder='Enter post title', **{'aria-describedby': form.title.id ~ '-errors' if form.title.errors else None}) }}
+            {% if form.title.errors %}
+                <div id="{{ form.title.id or 'title_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                    {% for error in form.title.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% endif %}
+        </div>
 
-        <div class="form-group"> {# Keep .form-group for overall spacing if needed, or remove if adw-box handles it #}
-            {{ form.content.label(for=form.content.id or 'content_field', class_='adw-label') }} {# Add adw-label class to label #}
-            {{ form.content(class_='adw-entry', rows='15', id=form.content.id or 'content_field', placeholder='Write your blog post here...', style='width: 100%; display: block; margin-top: var(--spacing-xs);') }}
+        <div class="form-group">
+            {{ form.content.label(for=form.content.id or 'content_field') }}
+            {{ form.content(class_='adw-entry', rows='15', id=form.content.id or 'content_field', placeholder='Write your blog post here...', **{'aria-describedby': form.content.id ~ '-errors' if form.content.errors else None}) }}
             {% if form.content.errors %}
-                <div id="{{ form.content.id or 'content_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); margin-bottom: var(--spacing-m);">
+                <div id="{{ form.content.id or 'content_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
                     {% for error in form.content.errors %}<span>{{ error }}</span><br>{% endfor %}
                 </div>
-            {% else %}
-                <div style="margin-bottom: var(--spacing-m);"></div> {# Maintain spacing even if no error #}
             {% endif %}
         </div>
 
