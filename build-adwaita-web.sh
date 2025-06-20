@@ -26,4 +26,8 @@ cp "${JS_INPUT_DIR}/components.js" "${JS_OUTPUT_DIR}/components.js"
 # If there are other JS files to copy, add them here. e.g.:
 # cp "${JS_INPUT_DIR}/another-script.js" "${JS_OUTPUT_DIR}/another-script.js"
 
+# Copy SCSS files
+echo "Copying SCSS files from scss to ${CSS_OUTPUT_DIR}/scss"
+cp -r "scss" "${CSS_OUTPUT_DIR}/scss"
+
 echo "Build complete. Adwaita-Web assets are updated in app-demo."
