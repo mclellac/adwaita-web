@@ -258,4 +258,51 @@
   });
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[Debug] DOMContentLoaded event fired. Checking custom element definitions...');
+    const elementsToCheck = [
+        'adw-button', 'adw-box', 'adw-entry-row',
+        'adw-header-bar', 'adw-application-window', 'adw-avatar',
+        'adw-dialog', 'adw-toast', 'adw-banner',
+        'adw-label', 'adw-entry', 'adw-password-entry-row',
+        'adw-checkbox', 'adw-radio-button', 'adw-switch',
+        'adw-list-box', 'adw-row', 'adw-view-switcher', 'adw-flap',
+        'adw-window-title', 'adw-progress-bar', 'adw-spinner',
+        'adw-status-page', 'adw-split-button', 'adw-expander-row', 'adw-combo-row'
+        // Add all other adw components here
+    ];
+    elementsToCheck.forEach(tagName => {
+        const DefinedElementClass = customElements.get(tagName);
+        if (DefinedElementClass) {
+            console.log(`[Debug] ${tagName} is defined. Class:`, DefinedElementClass);
+            try {
+                const instance = document.createElement(tagName);
+                console.log(`[Debug] Successfully created instance of ${tagName}:`, instance);
+                if (instance.shadowRoot) {
+                    console.log(`[Debug] ${tagName} instance has a shadowRoot.`);
+                } else {
+                    // For controller components like banner/toast/dialog, this is expected.
+                    if (!['adw-banner', 'adw-toast', 'adw-dialog'].includes(tagName)) {
+                        console.warn(`[Debug] ${tagName} instance does NOT have a shadowRoot.`);
+                    } else {
+                        console.log(`[Debug] ${tagName} (controller) instance does not typically have a shadowRoot.`);
+                    }
+                }
+            } catch (e) {
+                console.error(`[Debug] Error creating instance of ${tagName}:`, e);
+            }
+        } else {
+            console.error(`[Debug] ${tagName} is NOT defined.`);
+        }
+    });
+
+    if (window.Adw) {
+        console.log('[Debug] window.Adw object is available:', window.Adw);
+    } else {
+        console.error('[Debug] window.Adw object is NOT available.');
+    }
+});
+</script>
+
 {% endblock %}

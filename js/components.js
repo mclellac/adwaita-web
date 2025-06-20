@@ -1,3 +1,4 @@
+console.log('[Debug] components.js execution started');
 function adwGenerateId(prefix = 'adw-id') {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
