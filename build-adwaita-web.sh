@@ -6,7 +6,8 @@
 set -e
 
 # Define paths
-SASS_INPUT="scss/style.scss"
+SASS_SOURCE_DIR="scss"
+SASS_INPUT_FILE="${SASS_SOURCE_DIR}/style.scss"
 CSS_OUTPUT_DIR="app-demo/static/css"
 CSS_OUTPUT_FILE="${CSS_OUTPUT_DIR}/adwaita-web.css"
 JS_INPUT_DIR="js"
@@ -16,20 +17,15 @@ JS_OUTPUT_DIR="app-demo/static/js"
 mkdir -p "${CSS_OUTPUT_DIR}"
 mkdir -p "${JS_OUTPUT_DIR}"
 
-# Copy SCSS files first (moved from below)
-echo "Copying SCSS files from scss to app-demo/static/scss"
-cp -r "scss" "app-demo/static/scss"
-
 # Compile SASS to CSS
-echo "Changing directory to app-demo/static for SASS compilation"
-ORIGINAL_PWD=$(pwd)
-cd "app-demo/static" || exit 1 # Exit if cd fails
+echo "Compiling SASS: ${SASS_INPUT_FILE} to ${CSS_OUTPUT_FILE}"
+sassc "${SASS_INPUT_FILE}" "${CSS_OUTPUT_FILE}" -m -t compact
 
-echo "Compiling SASS: scss/style.scss to css/adwaita-web.css"
-sassc "scss/style.scss" "css/adwaita-web.css" -m -t compact
-
-echo "Changing directory back to ${ORIGINAL_PWD}"
-cd "${ORIGINAL_PWD}" || exit 1 # Exit if cd fails
+# Remove the app-demo/static/scss directory if it exists
+if [ -d "app-demo/static/scss" ]; then
+  echo "Removing app-demo/static/scss directory to prevent potential conflicts."
+  rm -rf "app-demo/static/scss"
+fi
 
 # Copy JavaScript files
 echo "Copying JavaScript files from ${JS_INPUT_DIR} to ${JS_OUTPUT_DIR}"
