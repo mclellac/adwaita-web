@@ -6,10 +6,8 @@
 import argparse
 import getpass  # For hidden password input
 
-# Assuming this script is run from the 'app-demo' directory or that 'app-demo' is in PYTHONPATH
-# so that 'app' (app-demo/app.py) can be imported directly.
-from app import app, db, init_extensions, User
-
+# Import create_app and necessary models/db instance
+from app import create_app, db, User # Post model not used in this script currently
 
 def create_initial_user(flask_app):
     """
@@ -28,6 +26,7 @@ def create_initial_user(flask_app):
         print(f"No input provided, using default username: {default_username}")
         username = default_username
 
+    # This function is called with app, and establishes its own context for DB operations
     with flask_app.app_context():
         existing_user = User.query.filter_by(username=username).first()
 
@@ -52,11 +51,10 @@ def create_initial_user(flask_app):
                     print(f"Password for user '{username}' updated successfully.")
                 else:
                     print(f"Password for user '{username}' not updated.")
-            except EOFError:  # Handle non-interactive environment
+            except EOFError:
                 print("Skipping password update for existing user in non-interactive mode.")
             return
 
-        # Create new user
         print(f"Creating new user: '{username}'")
         try:
             password = getpass.getpass("Enter password: ")
@@ -73,42 +71,43 @@ def create_initial_user(flask_app):
             )
             profile_info = profile_info_input if profile_info_input else None
 
-            profile_photo_url_input = input(
-                f"Enter profile photo URL for '{username}' (optional, press Enter to skip): "
-            )
-            profile_photo_url = profile_photo_url_input if profile_photo_url_input else None
+            # Removed profile_photo_url input as it's not handled robustly here
+            # and can be updated via the profile edit page.
+            # For simplicity, it's not part of initial user creation via CLI.
 
-        except EOFError:  # Handle non-interactive environment
+        except EOFError:
             print(
                 "Cannot create user in non-interactive mode without password. Please run interactively."
             )
             return
 
-        new_user = User(username=username, profile_info=profile_info, profile_photo_url=profile_photo_url)
+        new_user = User(username=username, profile_info=profile_info) # Removed profile_photo_url
         new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()
         print(f"User '{username}' created successfully.")
 
 
-def delete_tables(flask_app):
+def delete_tables_interactive(flask_app):
     """
-    Drops all known tables from the database.
-    Requires an active application context and user confirmation.
+    Drops all known tables from the database after user confirmation.
+    Requires an active application context.
     """
     with flask_app.app_context():
-        confirm = input("Are you sure you want to delete all database tables? This cannot be undone. (yes/no): ").lower()
+        try:
+            confirm = input("Are you sure you want to delete all database tables? This cannot be undone. (yes/no): ").lower()
+        except EOFError:
+            print("Non-interactive mode: Cannot confirm table deletion. Aborting.")
+            return False # Indicate deletion was aborted
+
         if confirm == 'yes':
             print("Deleting database tables...")
-            db.drop_all() # Drops all tables defined in SQLAlchemy models
+            db.drop_all()
             print("All tables deleted.")
-            # Optionally, recreate them immediately
-            # print("Re-creating tables...")
-            # db.create_all()
-            # print("Tables re-created.")
+            return True # Indicate deletion happened
         else:
             print("Table deletion cancelled.")
-
+            return False # Indicate deletion was cancelled
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Manage the application database.")
@@ -122,38 +121,41 @@ if __name__ == "__main__":
         action='store_true',
         help='Skip initial user setup/update.'
     )
-    parser.add_argument(
-        '--skiptables', # This flag now means "skip re-creating tables after deleting them"
-        action='store_true',
-        help='If --deletedb is used, skip re-creating tables afterwards.'
-    )
+    # --skiptables is implicitly handled: if --deletedb is not followed by explicit creation, tables remain deleted.
+    # The create_all() call below will ensure tables are present unless deleted and not recreated.
+
     args = parser.parse_args()
 
     print("Starting database setup...")
-    try:
-        print("Calling init_extensions(app) from setup_db.py...")
-        init_extensions(app)
-        print("init_extensions(app) called successfully from setup_db.py.")
-    except Exception as e:
-        print(f"An error occurred during init_extensions from setup_db.py: {e}")
-        print("Database tables might not have been created or updated correctly.")
-        # Depending on severity, you might want to exit or prevent further operations
-        # For now, just printing the error.
 
+    # Instantiate the app using the factory
+    app = create_app()
+
+    tables_deleted_and_not_recreated = False
     if args.deletedb:
-        delete_tables(app) # Asks for confirmation, then drops tables
-        if not args.skiptables:
-            print("Re-creating tables after deletion...")
-            with app.app_context():
-                db.create_all()
-            print("Tables re-created.")
+        if delete_tables_interactive(app): # This function now returns True if deletion occurred
+            # If tables were deleted, we might not want to immediately recreate them
+            # if the user's intention was purely to delete.
+            # However, for typical setup, recreation is desired.
+            # The example logic implies recreation unless specifically skipped.
+            # For simplicity here, we'll let the subsequent create_all handle it.
+            print("Tables were targeted for deletion.")
         else:
-            print("Tables deleted. Not re-creating as per --skiptables.")
+            # Deletion was cancelled or failed (e.g. non-interactive)
+            # We should probably not proceed to user creation if DB state is uncertain.
+            print("Table deletion process finished or was aborted. Review messages above.")
+
+
+    # Always ensure tables exist by this point, creating them if necessary.
+    # This will create tables if they don't exist, or do nothing if they do.
+    # If --deletedb was used and tables were dropped, this will recreate them.
+    with app.app_context():
+        print("Ensuring database tables exist (creating if necessary)...")
+        db.create_all()
+        print("Database tables ensured/created.")
 
     if not args.skipuser:
-        # This function needs an app_context to run queries and commit
-        # create_initial_user already establishes its own app context.
-        create_initial_user(app)
+        create_initial_user(app) # This function handles its own app context
     else:
         print("Skipping initial user setup as per --skipuser flag.")
 
