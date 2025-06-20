@@ -102,14 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // CSRF Token handling:
-          // Flask-WTF typically uses a hidden input for form submissions.
-          // For JS fetch POSTs, the token needs to be included in headers.
-          // A common way is to get it from a meta tag or a global JS variable if available.
-          // Example: 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-          // For this app, let's assume csrf is handled by Flask-Login session for these API calls,
-          // or the API routes are exempted via `csrf.exempt(save_theme_preference)` etc.
-          // If not, this will fail with a 400 Bad Request (CSRF token missing).
+          'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify(data),
       });

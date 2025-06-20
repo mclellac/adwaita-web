@@ -4,10 +4,10 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect, FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, SubmitField, FileField, BooleanField
-from wtforms.validators import DataRequired, Length, Optional, Email
+from wtforms.validators import DataRequired, Length, Optional, Email, EqualTo
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from wtforms.widgets import ListWidget, CheckboxInput
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
@@ -25,6 +25,12 @@ class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
+
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=8)])
+    confirm_new_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password', message='New passwords must match.')])
+    submit = SubmitField('Change Password')
 
 # Query factory for PostForm categories
 def category_query_factory():
@@ -356,10 +362,6 @@ def create_app(config_overrides=None):
                     flash(f"Error in {getattr(form, field).label.text}: {error}", 'warning')
         return render_template('edit_post.html', form=form, post=post)
 
-    @_app.route('/test-widget')
-    def test_widget_page():
-        return render_template('test_widget.html')
-
     @_app.route('/login', methods=['GET', 'POST'])
     def login():
         if current_user.is_authenticated:
@@ -463,9 +465,44 @@ def create_app(config_overrides=None):
     def settings_page():
         return render_template('settings.html')
 
-    @_app.route('/test-new-widgets')
-    def test_new_widgets_page():
-        return render_template('test_new_widgets.html')
+    @_app.route('/settings/change-password', methods=['GET', 'POST'])
+    @login_required
+    def change_password_page():
+        form = ChangePasswordForm()
+        if form.validate_on_submit():
+            if current_user.check_password(form.current_password.data):
+                current_user.set_password(form.new_password.data)
+                db.session.commit()
+                flash('Your password has been updated successfully!', 'success')
+                return redirect(url_for('settings_page'))
+            else:
+                flash('Invalid current password.', 'danger')
+        return render_template('change_password.html', form=form)
+
+    @_app.route('/search')
+    def search_results():
+        query = request.args.get('q', '').strip()
+        page = request.args.get('page', 1, type=int)
+        per_page = 5
+        posts = []
+        pagination = None
+
+        if query:
+            search_term = f"%{query}%"
+            posts_query = Post.query.filter(
+                or_(
+                    Post.title.ilike(search_term),
+                    Post.content.ilike(search_term)
+                )
+            ).order_by(Post.created_at.desc())
+            pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
+            posts = pagination.items
+        else:
+            # No query, so we can paginate an empty query or simply show no results
+            # For simplicity, pass empty posts and no pagination, template will handle message
+            pass
+
+        return render_template('search_results.html', query=query, posts=posts, pagination=pagination)
 
     @_app.route('/about')
     def about_page():
@@ -476,10 +513,6 @@ def create_app(config_overrides=None):
         # For now, no form processing, just rendering the template.
         # A ContactForm could be added later if needed.
         return render_template('contact.html')
-
-    @_app.route('/adwaita-showcase')
-    def adwaita_showcase_page():
-        return render_template('adwaita_showcase.html')
 
     @_app.route('/tag/<string:tag_slug>')
     def posts_by_tag(tag_slug):

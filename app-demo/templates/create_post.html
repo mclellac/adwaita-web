@@ -4,62 +4,57 @@
 
 {% block content %}
 <div class="main-content-clamped">
-    <h2>Create New Post</h2>
+    <h1 style="margin-bottom: var(--spacing-l);">Create New Post</h1> {# Using h1 for page title #}
     <form method="POST" action="{{ url_for('create_post') }}" novalidate>
         {{ form.hidden_tag() }} {# CSRF token #}
-        <adw-preferences-page>
-            <adw-preferences-group title="Blog Post Details">
-                <adw-list-box>
-                    <adw-entry-row
-                        title="{{ form.title.label.text }}"
-                        name="{{ form.title.name }}"
-                        id="{{ form.title.id or 'title_field' }}"
-                        placeholder="Enter post title"
-                        value="{{ form.title.data or '' }}"
-                        {% if form.title.flags.required %}required{% endif %}
-                        subtitle="{{ form.title.errors[0] if form.title.errors else '' }}">
-                        {# The input element is created by the JS initializer for adw-entry-row #}
-                    </adw-entry-row>
+        <adw-list-box style="margin-bottom: var(--spacing-l);">
+            <adw-entry-row
+                title="{{ form.title.label.text }}"
+                name="{{ form.title.name }}"
+                id="{{ form.title.id or 'title_field' }}"
+                placeholder="Enter post title"
+                value="{{ form.title.data or '' }}"
+                {% if form.title.flags.required %}required{% endif %}
+                subtitle="{{ form.title.errors[0] if form.title.errors else '' }}">
+            </adw-entry-row>
 
-                    {# Content Field - using a generic row structure inside list-box #}
-                    <div class="adw-row" style="padding: var(--spacing-s) var(--spacing-m); display: flex; flex-direction: column;">
-                        {{ form.content.label(class_='adw-label', style='margin-bottom: var(--spacing-xs);') }}
-                        {{ form.content(class_='adw-entry', rows='10', id=form.content.id or 'content_field', placeholder='Write your blog post here...', style='width: 100%; min-height: 150px;') }}
-                        {% if form.content.errors %}
-                            <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                                {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
-                            </div>
-                        {% endif %}
+            {# Content Field - using a generic row structure inside list-box #}
+            <div class="adw-row" style="padding: var(--spacing-s) var(--spacing-m); display: flex; flex-direction: column;">
+                {{ form.content.label(class_='adw-label', style='margin-bottom: var(--spacing-xs);') }}
+                {{ form.content(class_='adw-entry', rows='10', id=form.content.id or 'content_field', placeholder='Write your blog post here...', style='width: 100%; min-height: 150px;') }}
+                {% if form.content.errors %}
+                    <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                        {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
                     </div>
+                {% endif %}
+            </div>
 
-                    {# Categories Field #}
-                    <div class="adw-row" style="padding: var(--spacing-s) var(--spacing-m); display: flex; flex-direction: column;">
-                        {{ form.categories.label(class_='adw-label', style='margin-bottom: var(--spacing-s); font-weight: bold;') }}
-                        <div class="adw-checkbox-group" style="display: flex; flex-direction: column; gap: var(--spacing-xs);">
-                            {{ form.categories() }} {# Renders as a list of checkboxes #}
-                        </div>
-                        {% if form.categories.errors %}
-                            <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                                {% for error in form.categories.errors %}{{ error }}<br>{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <adw-entry-row
-                        title="{{ form.tags_string.label.text }}"
-                        name="{{ form.tags_string.name }}"
-                        id="{{ form.tags_string.id or 'tags_string_field' }}"
-                        placeholder="e.g., tech, travel, food"
-                        value="{{ form.tags_string.data or '' }}"
-                        subtitle="{{ form.tags_string.errors[0] if form.tags_string.errors else 'Comma-separated values.' }}">
-                    </adw-entry-row>
-
-                </adw-list-box>
-                <div style="display: flex; justify-content: flex-end; padding: var(--spacing-m) var(--spacing-m) 0 var(--spacing-m);">
-                    {{ form.submit(class_='adw-button suggested-action') }}
+            {# Categories Field #}
+            <div class="adw-row" style="padding: var(--spacing-s) var(--spacing-m); display: flex; flex-direction: column;">
+                {{ form.categories.label(class_='adw-label', style='margin-bottom: var(--spacing-s); font-weight: bold;') }}
+                <div class="adw-checkbox-group" style="display: flex; flex-direction: column; gap: var(--spacing-xs);">
+                    {{ form.categories() }} {# Renders as a list of checkboxes #}
                 </div>
-            </adw-preferences-group>
-        </adw-preferences-page>
+                {% if form.categories.errors %}
+                    <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                        {% for error in form.categories.errors %}{{ error }}<br>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <adw-entry-row
+                title="{{ form.tags_string.label.text }}"
+                name="{{ form.tags_string.name }}"
+                id="{{ form.tags_string.id or 'tags_string_field' }}"
+                placeholder="e.g., tech, travel, food"
+                value="{{ form.tags_string.data or '' }}"
+                subtitle="{{ form.tags_string.errors[0] if form.tags_string.errors else 'Comma-separated values.' }}">
+            </adw-entry-row>
+        </adw-list-box>
+
+        <div style="display: flex; justify-content: flex-end; gap: var(--spacing-s);">
+            {{ form.submit(class_='adw-button suggested-action') }}
+        </div>
     </form>
 </div>
 {% endblock %}

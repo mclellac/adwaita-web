@@ -699,3 +699,242 @@ def test_delete_own_comment(app_instance, client, new_user, new_user_data_factor
         assert Comment.query.get(comment_id) is None
         # Ensure post still exists
         assert Post.query.get(post_id) is not None
+
+
+# --- Change Password Tests ---
+class TestChangePassword:
+    def test_change_password_page_get_unauthenticated(self, app_instance, client):
+        with app_instance.app_context():
+            response = client.get(url_for('change_password_page'))
+        assert response.status_code == 302 # Should redirect to login
+        assert url_for('login') in response.location
+
+    def test_change_password_page_post_unauthenticated(self, app_instance, client):
+        with app_instance.app_context():
+            response = client.post(url_for('change_password_page'), data={
+                'current_password': 'any',
+                'new_password': 'new_secure_password',
+                'confirm_new_password': 'new_secure_password'
+            })
+        assert response.status_code == 302 # Should redirect to login
+        assert url_for('login') in response.location
+
+    def test_change_password_page_get_authenticated(self, app_instance, client, new_user, new_user_data_factory):
+        user_data = new_user_data_factory()
+        login_user_helper(client, user_data['username'], user_data['password'])
+        with app_instance.app_context():
+            response = client.get(url_for('change_password_page'))
+        assert response.status_code == 200
+        assert b"Change Password" in response.data
+        assert b"Current Password" in response.data
+        assert b"New Password" in response.data
+        assert b"Confirm New Password" in response.data
+
+    def test_change_password_success(self, app_instance, client, new_user, new_user_data_factory):
+        user_data = new_user_data_factory()
+        login_user_helper(client, user_data['username'], user_data['password'])
+
+        new_password = "new_password_!@#"
+        with app_instance.app_context():
+            response = client.post(url_for('change_password_page'), data={
+                'current_password': user_data['password'],
+                'new_password': new_password,
+                'confirm_new_password': new_password
+            }, follow_redirects=True)
+
+        assert response.status_code == 200
+        assert url_for('settings_page') in response.request.path # Check final URL after redirect
+        assert b"Your password has been updated successfully!" in response.data
+
+        # Verify new password works
+        logout_user_helper(client)
+        response_login_new_pw = login_user_helper(client, user_data['username'], new_password)
+        assert response_login_new_pw.status_code == 200
+        assert b"Logout" in response_login_new_pw.data # Successful login indicator
+
+        # Verify old password no longer works
+        logout_user_helper(client)
+        response_login_old_pw = login_user_helper(client, user_data['username'], user_data['password'])
+        assert response_login_old_pw.status_code == 200
+        assert b"Invalid username or password." in response_login_old_pw.data
+
+    def test_change_password_wrong_current(self, app_instance, client, new_user, new_user_data_factory):
+        user_data = new_user_data_factory()
+        login_user_helper(client, user_data['username'], user_data['password'])
+
+        with app_instance.app_context():
+            response = client.post(url_for('change_password_page'), data={
+                'current_password': 'wrong_current_password',
+                'new_password': 'new_password123',
+                'confirm_new_password': 'new_password123'
+            })
+
+        assert response.status_code == 200 # Re-renders the form
+        assert b"Invalid current password." in response.data
+        assert b"Change Password" in response.data # Still on the change password page
+
+        # Verify password has not changed
+        logout_user_helper(client)
+        response_login_original_pw = login_user_helper(client, user_data['username'], user_data['password'])
+        assert b"Logout" in response_login_original_pw.data # Original password still works
+
+    def test_change_password_mismatched_new(self, app_instance, client, new_user, new_user_data_factory):
+        user_data = new_user_data_factory()
+        login_user_helper(client, user_data['username'], user_data['password'])
+
+        with app_instance.app_context():
+            response = client.post(url_for('change_password_page'), data={
+                'current_password': user_data['password'],
+                'new_password': 'new_password123',
+                'confirm_new_password': 'mismatched_password321'
+            })
+
+        assert response.status_code == 200 # Re-renders the form
+        assert b"New passwords must match." in response.data # WTForms error
+        assert b"Change Password" in response.data
+
+    def test_change_password_new_password_too_short(self, app_instance, client, new_user, new_user_data_factory):
+        user_data = new_user_data_factory()
+        login_user_helper(client, user_data['username'], user_data['password'])
+
+        short_password = "short"
+        with app_instance.app_context():
+            response = client.post(url_for('change_password_page'), data={
+                'current_password': user_data['password'],
+                'new_password': short_password,
+                'confirm_new_password': short_password
+            })
+
+        assert response.status_code == 200 # Re-renders the form
+        assert b"Field must be at least 8 characters long." in response.data # WTForms error for Length(min=8)
+        assert b"Change Password" in response.data
+
+# --- Search Functionality Tests ---
+class TestSearchFunctionality:
+    def _create_posts_for_search(self, app_instance, new_user, titles_contents):
+        """Helper to create multiple posts with specific titles and contents."""
+        posts_created = []
+        with app_instance.app_context():
+            for i, (title, content) in enumerate(titles_contents):
+                # Create posts with slightly different creation times for reliable ordering if needed
+                post_time = datetime.now(timezone.utc) - timedelta(minutes=len(titles_contents) - i)
+                post = Post(title=title, content=content, author=new_user, created_at=post_time)
+                db.session.add(post)
+                posts_created.append(post)
+            db.session.commit()
+        return posts_created
+
+    def test_search_results_found_in_title(self, app_instance, client, new_user):
+        self._create_posts_for_search(app_instance, new_user, [
+            ("Unique Searchable Title", "Some content here."),
+            ("Another Post", "Different content."),
+            ("Title with Searchable word", "More words.")
+        ])
+
+        with app_instance.app_context():
+            response = client.get(url_for('search_results', q='Searchable'))
+        assert response.status_code == 200
+        assert b"Search Results for 'Searchable'" in response.data
+        assert b"Unique Searchable Title" in response.data
+        assert b"Title with Searchable word" in response.data
+        assert b"Another Post" not in response.data # This one should not match
+
+    def test_search_results_found_in_content(self, app_instance, client, new_user):
+        self._create_posts_for_search(app_instance, new_user, [
+            ("First Title", "Content with a specific keyword to find."),
+            ("Second Title", "Other random text."),
+            ("Third Title", "Another instance of the keyword here.")
+        ])
+
+        with app_instance.app_context():
+            response = client.get(url_for('search_results', q='keyword'))
+        assert response.status_code == 200
+        assert b"Search Results for 'keyword'" in response.data
+        assert b"Content with a specific keyword to find." in response.data # Full content might not be shown, check title
+        assert b"First Title" in response.data
+        assert b"Third Title" in response.data
+        assert b"Second Title" not in response.data
+
+    def test_search_results_case_insensitive(self, app_instance, client, new_user):
+        self._create_posts_for_search(app_instance, new_user, [
+            ("Post about Apples", "Oranges and APPLES are fruits.")
+        ])
+
+        with app_instance.app_context():
+            response = client.get(url_for('search_results', q='apples')) # Search lowercase
+        assert response.status_code == 200
+        assert b"Search Results for 'apples'" in response.data
+        assert b"Post about Apples" in response.data # Title matches
+        assert b"Oranges and APPLES are fruits." in response.data # Content matches (via title)
+
+    def test_search_results_not_found(self, app_instance, client, new_user):
+        self._create_posts_for_search(app_instance, new_user, [
+            ("Regular Post", "Some regular content.")
+        ])
+
+        with app_instance.app_context():
+            response = client.get(url_for('search_results', q='NonExistentTermXYZ'))
+        assert response.status_code == 200
+        assert b"No Results Found" in response.data
+        assert b"Sorry, no posts matched your search for 'NonExistentTermXYZ'" in response.data
+        assert b"Regular Post" not in response.data # No posts should be listed
+
+    def test_search_results_empty_query_param(self, app_instance, client):
+        # Test with q=''
+        with app_instance.app_context():
+            response = client.get(url_for('search_results', q=''))
+        assert response.status_code == 200
+        # Expecting the "Please enter a search term" or similar state
+        assert b"Search Posts" in response.data # General page title
+        assert b"Please enter a term in the search bar above to find posts." in response.data
+        assert b"Search Results for ''" not in response.data # Should not say "results for empty query"
+        assert b"No Results Found" not in response.data # Should not show "no results for query"
+
+    def test_search_results_no_query_param(self, app_instance, client):
+        # Test with no q parameter at all
+        with app_instance.app_context():
+            response = client.get(url_for('search_results'))
+        assert response.status_code == 200
+        assert b"Search Posts" in response.data
+        assert b"Please enter a term in the search bar above to find posts." in response.data
+        assert b"No Results Found" not in response.data
+
+    def test_search_pagination(self, app_instance, client, new_user):
+        search_term = "pageable"
+        # Create more posts than per_page (e.g., 7 if per_page is 5)
+        num_posts_to_create = 7
+        per_page_in_app = 5 # Should match app.py search_results route
+
+        titles_contents = []
+        for i in range(num_posts_to_create):
+            titles_contents.append(
+                (f"Post {i+1} with {search_term}", f"Content for post {i+1} also mentioning {search_term}.")
+            )
+        # Add one post that doesn't match
+        titles_contents.append(("Non-matching post", "Content without the term."))
+
+        self._create_posts_for_search(app_instance, new_user, titles_contents)
+
+        # Test Page 1
+        with app_instance.app_context():
+            response_page1 = client.get(url_for('search_results', q=search_term, page=1))
+        assert response_page1.status_code == 200
+        # Posts are ordered by created_at desc. Newest first.
+        # Post 7 ... Post 3 should be on page 1
+        for i in range(num_posts_to_create, num_posts_to_create - per_page_in_app, -1):
+             assert f"Post {i} with {search_term}".encode() in response_page1.data
+        # Post 2 should not be on page 1
+        assert f"Post {num_posts_to_create - per_page_in_app} with {search_term}".encode() not in response_page1.data
+        assert b"Non-matching post" not in response_page1.data
+        assert b"Next" in response_page1.data # Pagination control
+
+        # Test Page 2
+        with app_instance.app_context():
+            response_page2 = client.get(url_for('search_results', q=search_term, page=2))
+        assert response_page2.status_code == 200
+        # Posts Post 2, Post 1 should be on page 2
+        for i in range(num_posts_to_create - per_page_in_app, 0, -1):
+            assert f"Post {i} with {search_term}".encode() in response_page2.data
+        # Post 3 should not be on page 2
+        assert f"Post {per_page_in_app + 1} with {search_term}".encode() not in response_page2.data
+        assert b"Previous" in response_page2.data # Pagination control

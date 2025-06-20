@@ -23,13 +23,7 @@
 
       <!-- Placeholder for other settings groups -->
       <adw-preferences-group title="Account">
-        <adw-action-row title="Change Password" subtitle="Not implemented yet"></adw-action-row>
-        <adw-action-row title="Export Data" subtitle="Not implemented yet"></adw-action-row>
-      </adw-preferences-group>
-
-      <adw-preferences-group title="Test Pages">
-        <adw-action-row title="Test Widget Page" clickable href="{{ url_for('test_widget_page') }}"></adw-action-row>
-        <adw-action-row title="Test New Widgets Page" clickable href="{{ url_for('test_new_widgets_page') }}"></adw-action-row>
+        <adw-action-row title="Change Password" subtitle="Update your account password" clickable href="{{ url_for('change_password_page') }}"></adw-action-row>
       </adw-preferences-group>
 
     </adw-preferences-page>
