@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}About Us - {{ super() }}{% endblock %}
+{% block content %}
+<adw-clamp style="max-width: 800px; margin: 20px auto; padding: var(--spacing-l);">
+    <adw-box orientation="vertical" spacing="l">
+        <h1 class="adw-title-1" style="text-align: center;">About This Application</h1>
+
+        <adw-preferences-group>
+            <adw-action-row title="Purpose" subtitle="This is a demonstration application showcasing the Adwaita-Web UI library integration with a Flask backend."></adw-action-row>
+            <adw-action-row title="Features" subtitle="It includes a basic blog, user profiles, and various examples of Adwaita widgets in action."></adw-action-row>
+            <adw-expander-row title="Technology Stack" subtitle="Learn more about the tech used.">
+                <div slot="rows" style="padding: var(--spacing-m);">
+                    <p><adw-label is_body="true"><strong>Frontend:</strong> Adwaita-Web (Custom JS/SCSS), Flask Templates (Jinja2)</adw-label></p>
+                    <p><adw-label is_body="true"><strong>Backend:</strong> Flask (Python)</adw-label></p>
+                    <p><adw-label is_body="true"><strong>Database:</strong> SQLAlchemy with PostgreSQL (default)</adw-label></p>
+                    <p><adw-label is_body="true"><strong>UI Library:</strong> Adwaita-Web (toplevel scss & js)</adw-label></p>
+                </div>
+            </adw-expander-row>
+        </adw-preferences-group>
+
+        <div style="text-align: center; margin-top: var(--spacing-xl);">
+            <adw-button href="{{ url_for('index') }}">Back to Home</adw-button>
+        </div>
+    </adw-box>
+</adw-clamp>
+{% endblock %}

@@ -1,17 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}Blog Posts{% endblock %}
+{% block title %}Posts in {{ category.name }} - {{ super() }}{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: var(--spacing-xl, 32px);"> {# Provides some top/bottom margin #}
-    <h1 class="page-title" style="text-align: center; margin-bottom: var(--spacing-l, 24px); font-size: var(--font-size-xxl, 1.5rem);">All Blog Posts</h1>
+<div style="margin-bottom: var(--spacing-xl, 32px);">
+    <h1 class="page-title" style="text-align: center; margin-bottom: var(--spacing-l, 24px); font-size: var(--font-size-xxl, 1.5rem);">
+        Posts in Category: {{ category.name }}
+    </h1>
+
+    {# Re-use the spinner from index.html, hidden by default #}
     <div style="text-align: center; margin-bottom: var(--spacing-m);">
-        <adw-spinner size="large" id="index-loading-spinner" style="display: none;"></adw-spinner>
+      <adw-spinner size="large" id="category-loading-spinner" style="display: none;"></adw-spinner>
     </div>
 
     {% if posts %}
-        <div class="blog-posts-container"> {# More semantic container name #}
+        <div class="blog-posts-container">
             {% for post in posts %}
+            {# Re-use the card structure from index.html #}
             <adw-box orientation="vertical" class="blog-post-card" style="margin-bottom: var(--spacing-l); padding: var(--spacing-m); border-radius: var(--border-radius-md); border: 1px solid var(--border-color); box-shadow: var(--box-shadow-sm);">
                 <h3><a href="{{ url_for('view_post', post_id=post.id) }}" class="post-title">{{ post.title }}</a></h3>
                 <p class="post-meta" style="font-size: var(--font-size-small); color: var(--secondary-text-color);">
@@ -20,15 +25,14 @@
                 </p>
                 {% if post.content %}
                 <p class="post-excerpt">
-                    {{ post.content | truncate(100, True) }} {# Show first 100 characters as excerpt #}
+                    {{ post.content | truncate(100, True) }}
                 </p>
                 {% endif %}
-
                 {% if post.categories %}
                 <div class="post-categories-list" style="margin-top: var(--spacing-s); display: flex; flex-wrap: wrap; gap: var(--spacing-xxs);">
                     <adw-label is_caption="true" style="font-weight: bold; margin-right: var(--spacing-xs);">Categories:</adw-label>
-                    {% for category in post.categories %}
-                        <a href="{{ url_for('posts_by_category', category_slug=category.slug) }}" class="adw-button flat small" style="font-size: var(--font-size-small); padding: var(--spacing-xxs) var(--spacing-xs);">{{ category.name }}</a>
+                    {% for cat in post.categories %} {# Changed loop var to avoid conflict with outer category #}
+                        <a href="{{ url_for('posts_by_category', category_slug=cat.slug) }}" class="adw-button flat small" style="font-size: var(--font-size-small); padding: var(--spacing-xxs) var(--spacing-xs);">{{ cat.name }}</a>
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -39,42 +43,37 @@
             {% endfor %}
         </div>
     {% else %}
-        <adw-status-page title="No Posts Yet" description="Be the first to create a post and share your thoughts!">
-            <div slot="icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">📄</div> {# Using an emoji as a placeholder icon #}
+        <adw-status-page title="No Posts Found" description="There are no posts in the category '{{ category.name }}'.">
+            <div slot="icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">📄</div>
             <div slot="actions">
-                <adw-button href="{{ url_for('create_post') }}" appearance="suggested">Create a Post</adw-button>
+                <adw-button href="{{ url_for('index') }}">View All Posts</adw-button>
             </div>
         </adw-status-page>
     {% endif %}
 
-    {# Pagination Links #}
+    {# Pagination Links - Re-use from index.html, ensuring url_for points to posts_by_category #}
     {% if pagination and pagination.pages > 1 %}
     <nav aria-label="Page navigation" class="pagination-nav" style="margin-top: var(--spacing-xl); display: flex; justify-content: center; align-items: center; gap: var(--spacing-xs);">
-        {# Previous Page Link #}
         {% if pagination.has_prev %}
-            <a href="{{ url_for('index', page=pagination.prev_num) }}" class="adw-button">
+            <a href="{{ url_for('posts_by_category', category_slug=category.slug, page=pagination.prev_num) }}" class="adw-button">
                 &laquo; Previous
             </a>
         {% else %}
             <adw-button disabled>&laquo; Previous</adw-button>
         {% endif %}
-
-        {# Page Numbers #}
         {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
             {% if page_num %}
                 {% if page_num == pagination.page %}
                     <adw-button class="active" appearance="suggested" aria-current="page">{{ page_num }}</adw-button>
                 {% else %}
-                    <a href="{{ url_for('index', page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                    <a href="{{ url_for('posts_by_category', category_slug=category.slug, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                 {% endif %}
             {% else %}
                 <span class="adw-button flat disabled" style="cursor: default;">&hellip;</span>
             {% endif %}
         {% endfor %}
-
-        {# Next Page Link #}
         {% if pagination.has_next %}
-            <a href="{{ url_for('index', page=pagination.next_num) }}" class="adw-button">
+            <a href="{{ url_for('posts_by_category', category_slug=category.slug, page=pagination.next_num) }}" class="adw-button">
                 Next &raquo;
             </a>
         {% else %}

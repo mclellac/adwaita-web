@@ -21,6 +21,8 @@
         <adw-header-bar>
             <adw-window-title slot="title">Blog CMS</adw-window-title>
             <a href="{{ url_for('index') }}" class="adw-button" slot="start">Home</a>
+            <a href="{{ url_for('about_page') }}" class="adw-button" slot="start">About</a>
+            <a href="{{ url_for('contact_page') }}" class="adw-button" slot="start">Contact</a>
 
         {% if current_user.is_authenticated %}
             <a href="{{ url_for('profile', username=current_user.username) }}" slot="start" class="adw-button flat circular" title="View Profile" style="padding: var(--spacing-xxs); margin-right: var(--spacing-xs);">

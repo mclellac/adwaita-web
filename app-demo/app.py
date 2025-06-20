@@ -5,6 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect, FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, SubmitField, FileField, BooleanField
 from wtforms.validators import DataRequired, Length, Optional, Email
+from wtforms_sqlalchemy.fields import QuerySelectMultipleField
+from wtforms.widgets import ListWidget, CheckboxInput
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -24,9 +26,25 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
+# Query factory for PostForm categories
+def category_query_factory():
+    return Category.query.all()
+
+def get_category_pk(obj):
+    return obj.id
+
 class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(), Length(min=1, max=120)])
     content = TextAreaField('Content', validators=[DataRequired()])
+    categories = QuerySelectMultipleField(
+        'Categories',
+        query_factory=category_query_factory,
+        get_pk=get_category_pk,
+        get_label='name',
+        widget=ListWidget(prefix_label=False),
+        option_widget=CheckboxInput(),
+        allow_blank=True
+    )
     submit = SubmitField('Submit Post')
 
 class ProfileEditForm(FlaskForm):
@@ -66,6 +84,24 @@ class User(UserMixin, db.Model):
     def get_id(self):
         return str(self.id)
 
+# Association table for Post and Category (many-to-many)
+post_categories = db.Table('post_categories',
+    db.Column('post_id', db.Integer, db.ForeignKey('post.id'), primary_key=True),
+    db.Column('category_id', db.Integer, db.ForeignKey('category.id'), primary_key=True)
+)
+
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False) # For URL-friendly names
+
+    def __init__(self, name):
+        self.name = name
+        self.slug = name.lower().replace(' ', '-').replace('.', '') # Simple slug generation
+
+    def __repr__(self):
+        return f'<Category {self.name}>'
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
@@ -73,6 +109,8 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    categories = db.relationship('Category', secondary=post_categories, lazy='subquery',
+                                 backref=db.backref('posts', lazy=True))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -129,6 +167,15 @@ def create_app(config_overrides=None):
         post = Post.query.get_or_404(post_id)
         return render_template('post.html', post=post)
 
+    @_app.route('/category/<string:category_slug>')
+    def posts_by_category(category_slug):
+        category = Category.query.filter_by(slug=category_slug).first_or_404()
+        page = request.args.get('page', 1, type=int)
+        per_page = 5 # Or from app config
+        pagination = Post.query.with_parent(category).order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+        posts = pagination.items
+        return render_template('posts_by_category.html', category=category, posts=posts, pagination=pagination)
+
     @_app.route('/create', methods=['GET', 'POST'])
     @login_required
     def create_post():
@@ -139,9 +186,12 @@ def create_app(config_overrides=None):
             _app.logger.info(f"Create post attempt by user '{current_user.username}' (ID: {current_user.id}). Title: '{title}', Content present: {bool(content)}")
             try:
                 new_post = Post(title=title, content=content, author=current_user)
+                # Assign categories
+                for category in form.categories.data:
+                    new_post.categories.append(category)
                 db.session.add(new_post)
                 db.session.commit()
-                _app.logger.info(f"Post committed to DB. ID: {new_post.id}, Title: '{new_post.title}' by user '{current_user.username}'.")
+                _app.logger.info(f"Post committed to DB. ID: {new_post.id}, Title: '{new_post.title}' by user '{current_user.username}'. Categories: {[c.name for c in new_post.categories]}")
                 flash('Post created successfully!', 'success')
                 return redirect(url_for('index'))
             except Exception as e:
@@ -175,8 +225,13 @@ def create_app(config_overrides=None):
         if form.validate_on_submit():
             post.title = form.title.data
             post.content = form.content.data
+            # Update categories
+            post.categories = [] # Clear existing categories first
+            for category in form.categories.data:
+                post.categories.append(category)
             try:
                 db.session.commit()
+                _app.logger.info(f"Post {post.id} updated by user '{current_user.username}'. Categories: {[c.name for c in post.categories]}")
                 flash('Post updated successfully!', 'success')
                 return redirect(url_for('view_post', post_id=post.id))
             except Exception as e:
@@ -298,6 +353,16 @@ def create_app(config_overrides=None):
     @_app.route('/test-new-widgets')
     def test_new_widgets_page():
         return render_template('test_new_widgets.html')
+
+    @_app.route('/about')
+    def about_page():
+        return render_template('about.html')
+
+    @_app.route('/contact')
+    def contact_page():
+        # For now, no form processing, just rendering the template.
+        # A ContactForm could be added later if needed.
+        return render_template('contact.html')
 
     @_app.route('/api/settings/theme', methods=['POST'])
     @login_required
