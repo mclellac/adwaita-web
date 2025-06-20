@@ -1,24 +1,22 @@
-// scss/_dialog.scss
 @use 'variables';
 
 .adw-dialog {
   background-color: var(--dialog-bg-color);
   color: var(--dialog-fg-color);
-  border-radius: var(--window-radius); // Use window-radius for dialogs
-  // Softer, more diffused shadow, with a subtle border component
+  border-radius: var(--window-radius);
   box-shadow: 0 0 0 1px var(--border-color-light, rgba(0,0,0,0.08)),
               0 8px 16px -4px rgba(0,0,0,0.1),
               0 6px 12px rgba(0,0,0,0.08);
-  padding: var(--spacing-l); // Adjusted padding, was large, using L now. XL could be too much for compact dialogs.
+  padding: var(--spacing-l);
   width: 90%;
-  max-width: 550px; // Slightly increased max-width
+  max-width: 550px;
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.95); // Start slightly smaller for pop effect
+  transform: translate(-50%, -50%) scale(0.95);
   z-index: 500;
   opacity: 0;
-  transition: opacity 0.15s ease-out, transform 0.15s ease-out; // Slightly faster transition
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
 
   &.open {
     opacity: 1;
@@ -26,27 +24,25 @@
   }
 
   .adw-dialog-title {
-    font-size: var(--font-size-h3); // Adjusted font size
+    font-size: var(--font-size-h3);
     margin-bottom: var(--spacing-m);
     font-weight: bold;
-    color: var(--headerbar-fg-color); // Dialog titles often match headerbar text color
+    color: var(--headerbar-fg-color);
   }
 
   .adw-dialog-content {
-    margin-bottom: var(--spacing-l); // Adjusted spacing
+    margin-bottom: var(--spacing-l);
     // Consider line-height for readability if content is text-heavy
-    // line-height: 1.6;
   }
 
   .adw-dialog-buttons {
-    display: flex; // Use flex for better button alignment and spacing
-    justify-content: flex-end; // Align buttons to the right
-    gap: var(--spacing-s); // Use gap for spacing between buttons
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-s);
 
     .adw-button {
-      margin-left: 0; // Remove margin-left if using gap
+      margin-left: 0;
       // Buttons in dialogs sometimes are less padded if space is tight
-      // padding: var(--spacing-xs) var(--spacing-s);
     }
   }
 }
@@ -54,21 +50,20 @@
 .dark-theme .adw-dialog,
 body.dark-theme .adw-dialog {
   box-shadow: 0 0 0 1px var(--border-color-dark, rgba(255,255,255,0.08)),
-              0 8px 16px -4px rgba(0,0,0,0.25), // Darker shadow for dark theme
+              0 8px 16px -4px rgba(0,0,0,0.25),
               0 6px 12px rgba(0,0,0,0.2);
 }
 
-// Backdrop
 .adw-dialog-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.25); // More subtle backdrop
+  background-color: rgba(0, 0, 0, 0.25);
   z-index: 499;
   opacity: 0;
-  transition: opacity 0.15s ease-out; // Match dialog transition speed
+  transition: opacity 0.15s ease-out;
 
   &.open {
     opacity: 1;
