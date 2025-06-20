@@ -41,6 +41,37 @@
             {% endif %}
         </adw-action-row>
 
+        {# New Fields #}
+        <div class="form-group" style="margin-top: var(--spacing-m);">
+            {{ form.full_name.label(class="adw-label") }}
+            {{ form.full_name(class="adw-entry", placeholder="Your full name", style="width: 100%;") }}
+            {% if form.full_name.errors %}
+                <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                    {% for error in form.full_name.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group" style="margin-top: var(--spacing-m);">
+            {{ form.location.label(class="adw-label") }}
+            {{ form.location(class="adw-entry", placeholder="City, Country", style="width: 100%;") }}
+            {% if form.location.errors %}
+                <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                    {% for error in form.location.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group" style="margin-top: var(--spacing-m);">
+            {{ form.website_url.label(class="adw-label") }}
+            {{ form.website_url(class="adw-entry", placeholder="https://yourwebsite.com", style="width: 100%;") }}
+            {% if form.website_url.errors %}
+                <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                    {% for error in form.website_url.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
         <div class="form-button-container">
             {{ form.submit(class_='adw-button suggested-action', value='Save Profile') }}
             <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button">Cancel</a>

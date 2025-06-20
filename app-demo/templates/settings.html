@@ -33,81 +33,102 @@
         function renderAccentColorButtons() {
             if (!accentContainer) return;
 
-            try {
-                const colors = Adw.getAccentColors();
-                let currentAccent = localStorage.getItem('accentColor') || Adw.DEFAULT_ACCENT_COLOR || 'blue';
+            if (window.Adw && typeof Adw.getAccentColors === 'function' && typeof Adw.setAccentColor === 'function') {
+                try {
+                    const colors = Adw.getAccentColors();
+                    let currentAccent = localStorage.getItem('accentColor') || (Adw.DEFAULT_ACCENT_COLOR || 'blue');
 
-                if (!colors || colors.length === 0) {
-                    accentContainer.innerHTML = '<small>No accent colors available.</small>';
-                    return;
-                }
-
-                accentContainer.innerHTML = '';
-
-                const isLightTheme = document.body.classList.contains('light-theme');
-                const themeSuffix = isLightTheme ? '-light' : '-dark';
-
-                colors.forEach(color => {
-                    const button = document.createElement('button');
-                    button.classList.add('adw-button');
-                    button.style.backgroundColor = `var(--accent-${color}${themeSuffix}-bg, var(--adw-${color}-3))`;
-                    button.style.color = `var(--accent-${color}${themeSuffix}-fg, #ffffff)`;
-
-                    button.style.minWidth = '80px';
-                    button.style.padding = 'var(--spacing-xs) var(--spacing-s)';
-                    button.style.border = '2px solid transparent';
-                    button.style.borderRadius = 'var(--border-radius-default)';
-                    button.textContent = color.charAt(0).toUpperCase() + color.slice(1);
-
-                    if (color === currentAccent) {
-                        button.style.borderColor = 'var(--accent-color)';
-                        button.classList.add('suggested-action');
+                    if (!colors || colors.length === 0) {
+                        accentContainer.innerHTML = '<small>No accent colors available.</small>';
+                        return;
                     }
 
-                    button.addEventListener('click', () => {
-                        Adw.setAccentColor(color);
-                        currentAccent = color;
-                        renderAccentColorButtons();
+                    accentContainer.innerHTML = ''; // Clear previous buttons
+
+                    const isLightTheme = document.body.classList.contains('light-theme');
+                    const themeSuffix = isLightTheme ? '-light' : '-dark';
+
+                    colors.forEach(color => {
+                        const button = document.createElement('button');
+                        button.classList.add('adw-button'); // Use Adwaita class for potential styling by the library
+                        button.style.backgroundColor = `var(--accent-${color}${themeSuffix}-bg, var(--adw-${color}-3))`;
+                        button.style.color = `var(--accent-${color}${themeSuffix}-fg, #ffffff)`;
+                        button.style.minWidth = '80px';
+                        button.style.padding = 'var(--spacing-xs) var(--spacing-s)';
+                        button.style.border = '2px solid transparent';
+                        button.style.borderRadius = 'var(--border-radius-default)';
+                        button.textContent = color.charAt(0).toUpperCase() + color.slice(1);
+
+                        if (color === currentAccent) {
+                            button.style.borderColor = 'var(--accent-color)';
+                            button.classList.add('suggested-action'); // Adwaita class for suggested action
+                        }
+
+                        button.addEventListener('click', () => {
+                            Adw.setAccentColor(color);
+                            // currentAccent = color; // Adw.setAccentColor should trigger adwThemeChanged or similar
+                            // renderAccentColorButtons(); // Rely on adwThemeChanged to re-render
+                        });
+                        accentContainer.appendChild(button);
                     });
-                    accentContainer.appendChild(button);
-                });
-            } catch (e) {
-                accentContainer.innerHTML = '<small>Error loading accent colors.</small>';
-                console.error("Error setting up accent colors:", e);
+                } catch (e) {
+                    accentContainer.innerHTML = '<small>Error loading accent colors.</small>';
+                    console.error("Error setting up accent colors:", e);
+                }
+            } else {
+                accentContainer.innerHTML = '<small>Adwaita library not fully loaded for accent colors.</small>';
+                console.warn("Adw.getAccentColors or Adw.setAccentColor not available.");
             }
         }
 
         renderAccentColorButtons();
 
         if (themeSwitchContainer) {
-            try {
-                const isCurrentlyLight = document.body.classList.contains('light-theme');
-                const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                // Adw.js loadSaveTheme handles the initial body class, so we can check that.
-                const initialSwitchStateIsDark = !document.body.classList.contains('light-theme');
+            if (window.Adw && typeof Adw.createSwitch === 'function' && typeof Adw.toggleTheme === 'function') {
+                try {
+                    // Adw.js loadSaveTheme handles the initial body class.
+                    const initialSwitchStateIsDark = !document.body.classList.contains('light-theme');
 
+                    const themeSwitch = Adw.createSwitch({
+                        checked: initialSwitchStateIsDark,
+                        onChanged: () => {
+                            Adw.toggleTheme(); // This should trigger 'adwThemeChanged'
+                        }
+                    });
+                    themeSwitchContainer.innerHTML = ''; // Clear previous content
+                    themeSwitchContainer.appendChild(themeSwitch);
 
-                const themeSwitch = Adw.createSwitch({
-                    checked: initialSwitchStateIsDark,
-                    onChanged: () => {
-                        Adw.toggleTheme();
-                    }
-                });
-                themeSwitchContainer.innerHTML = '';
-                themeSwitchContainer.appendChild(themeSwitch);
-
-            } catch (e) {
-                themeSwitchContainer.innerHTML = '<small>Error creating theme switch.</small>';
-                console.error("Error setting up theme switch:", e);
+                } catch (e) {
+                    themeSwitchContainer.innerHTML = '<small>Error creating theme switch.</small>';
+                    console.error("Error setting up theme switch:", e);
+                }
+            } else {
+                themeSwitchContainer.innerHTML = '<small>Adwaita library not fully loaded for theme switch.</small>';
+                console.warn("Adw.createSwitch or Adw.toggleTheme not available.");
             }
         }
 
         document.addEventListener('adwThemeChanged', (event) => {
-            renderAccentColorButtons();
-            if (themeSwitchContainer && themeSwitchContainer.querySelector('input[type="checkbox"]')) {
-                 themeSwitchContainer.querySelector('input[type="checkbox"]').checked = !event.detail.isLight;
+            console.log('adwThemeChanged event detected in settings.html', event.detail);
+            renderAccentColorButtons(); // Re-render accent colors as they might depend on the theme
+            if (themeSwitchContainer && window.Adw && typeof Adw.createSwitch === 'function') {
+                const currentSwitch = themeSwitchContainer.querySelector('input[type="checkbox"]');
+                if (currentSwitch) {
+                    currentSwitch.checked = !event.detail.isLight;
+                }
             }
         });
+
+        // Fallback if Adw is not ready immediately
+        if (!window.Adw) {
+            console.warn("Adwaita (Adw) not available on DOMContentLoaded. Accent colors and theme switch might be delayed or non-functional if Adw loads later without an event.");
+            accentContainer.innerHTML = '<small>Waiting for Adwaita library...</small>';
+            themeSwitchContainer.innerHTML = '<small>Waiting for Adwaita library...</small>';
+            // Optionally, set up a MutationObserver or a timer to re-check for Adw,
+            // but adw-initializer.js itself runs on DOMContentLoaded.
+            // If components.js (which defines Adw) is also on DOMContentLoaded or defer,
+            // the order becomes critical.
+        }
     });
 </script>
 {% endblock %}
