@@ -7,33 +7,37 @@
     <h2>Edit Post</h2>
     <form method="POST" action="{{ url_for('edit_post', post_id=post.id) }}" novalidate>
         {{ form.hidden_tag() }} {# CSRF token #}
+        <adw-preferences-page>
+            <adw-preferences-group title="Edit Post Details">
+                <adw-list-box>
+                    <adw-entry-row
+                        title="{{ form.title.label.text }}"
+                        name="{{ form.title.name }}"
+                        id="{{ form.title.id or 'title_field' }}"
+                        placeholder="Enter post title"
+                        value="{{ form.title.data or '' }}"
+                        {% if form.title.flags.required %}required{% endif %}
+                        subtitle="{{ form.title.errors[0] if form.title.errors else '' }}">
+                        {# The input element is created by the JS initializer for adw-entry-row #}
+                    </adw-entry-row>
 
-        <div class="form-group">
-            {{ form.title.label(for=form.title.id or 'title_field') }}
-            {{ form.title(class_='adw-entry', id=form.title.id or 'title_field', **{'aria-describedby': form.title.id ~ '-errors' if form.title.errors else None}) }}
-            {% if form.title.errors %}
-                <div id="{{ form.title.id or 'title_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                    {% for error in form.title.errors %}<span>{{ error }}</span><br>{% endfor %}
+                    {# Content Field - using a generic row structure inside list-box #}
+                    <div class="adw-row" style="padding: var(--spacing-s) var(--spacing-m); display: flex; flex-direction: column;">
+                        {{ form.content.label(class_='adw-label', style='margin-bottom: var(--spacing-xs);') }}
+                        {{ form.content(class_='adw-entry', rows='10', id=form.content.id or 'content_field', placeholder='Write your blog post here...', style='width: 100%; min-height: 150px;') }}
+                        {% if form.content.errors %}
+                            <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                                {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </adw-list-box>
+                <div style="display: flex; justify-content: flex-end; gap: var(--spacing-s); padding: var(--spacing-m) var(--spacing-m) 0 var(--spacing-m);">
+                    <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button">Cancel</a>
+                    {{ form.submit(class_='adw-button suggested-action', value='Update Post') }}
                 </div>
-            {% endif %}
-        </div>
-
-        <div class="form-group">
-            {{ form.content.label(for=form.content.id or 'content_field') }}
-            {{ form.content(class_='adw-entry', rows='15', id=form.content.id or 'content_field', **{'aria-describedby': form.content.id ~ '-errors' if form.content.errors else None}) }}
-            {% if form.content.errors %}
-                <div id="{{ form.content.id or 'content_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                    {% for error in form.content.errors %}<span>{{ error }}</span><br>{% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
-        <div class="form-button-container">
-            {{ form.submit(class_='adw-button suggested-action', value='Update Post') }}
-            {# The default label for SubmitField is 'Submit Post', override if needed #}
-            {# Or, if you named your submit field 'update_post' in the form, it would be form.update_post #}
-            <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button">Cancel</a>
-        </div>
+            </adw-preferences-group>
+        </adw-preferences-page>
     </form>
 </div>
 {% endblock %}
