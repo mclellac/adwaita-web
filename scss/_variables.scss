@@ -1,9 +1,9 @@
 // Adwaita-like color palette
 // Light Theme
 @mixin light-theme {
-  --accent-bg-color: var(--accent-blue-light-bg);
-  --accent-fg-color: var(--accent-blue-light-fg);
-  --accent-color: var(--accent-blue-standalone);
+  --accent-bg-color: var(--accent-blue-light-bg) !important;
+  --accent-fg-color: var(--accent-blue-light-fg) !important;
+  --accent-color: var(--accent-blue-standalone) !important;
   --destructive-bg-color: var(--accent-red-light-bg);
   --destructive-fg-color: var(--accent-red-light-fg);
   --destructive-color: var(--accent-red-standalone);
@@ -332,13 +332,12 @@
 body.light-theme {
   // Light theme is applied by adding .light-theme to the body.
   // This block will override the dark theme variables set in :root.
-  @include light-theme;
-  // Set initial default accent to blue (light theme version)
-  // This ensures that if JS doesn't run or before it runs, the default accent matches the theme.
-  // JS will then override these if a different accent is chosen via localStorage.
-  --accent-bg-color: var(--accent-blue-light-bg);
-  --accent-fg-color: var(--accent-blue-light-fg);
-  --accent-color: var(--accent-blue-standalone);
+  @include light-theme; // This will now bring in the !important from the mixin
+  // The following are for the default blue accent if JS doesn't override,
+  // making them !important as well for this test.
+  --accent-bg-color: var(--accent-blue-light-bg) !important;
+  --accent-fg-color: var(--accent-blue-light-fg) !important;
+  --accent-color: var(--accent-blue-standalone) !important;
 }
 
 // Note on JavaScript interaction for theme loading (loadSavedTheme function):
