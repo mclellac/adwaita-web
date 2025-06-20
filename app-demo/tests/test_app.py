@@ -530,3 +530,172 @@ def test_edit_post(app_instance, client, new_user, new_user_data_factory):
         assert updated_post.content == edited_content
         assert updated_post.updated_at > original_updated_at
         assert updated_post.updated_at > original_created_at
+
+
+# --- Tag Functionality Tests ---
+def test_create_post_with_tags(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    post_data_1 = {
+        'title': 'Post with Tags 1',
+        'content': 'Content for post with tags 1.',
+        'tags_string': 'tech, python, webdev'
+    }
+    with app_instance.app_context():
+        response_post_1 = client.post(url_for('create_post'), data=post_data_1, follow_redirects=True)
+
+    assert response_post_1.status_code == 200
+    assert b"Post created successfully!" in response_post_1.data
+
+    with app_instance.app_context():
+        created_post_1 = Post.query.filter_by(title=post_data_1['title']).first()
+        assert created_post_1 is not None
+        assert len(created_post_1.tags) == 3
+        tag_names_1 = sorted([tag.name for tag in created_post_1.tags])
+        assert tag_names_1 == sorted(['tech', 'python', 'webdev'])
+
+        # Check if Tag objects were created
+        assert Tag.query.filter_by(name='tech').first() is not None
+        assert Tag.query.filter_by(name='python').first() is not None
+        assert Tag.query.filter_by(name='webdev').first() is not None
+        initial_tag_count = Tag.query.count() # Should be 3
+
+    # Create another post with some overlapping and some new tags
+    post_data_2 = {
+        'title': 'Post with Tags 2',
+        'content': 'Content for post with tags 2.',
+        'tags_string': 'python, flask, newtag' # 'python' is existing, 'flask' and 'newtag' are new
+    }
+    with app_instance.app_context():
+        response_post_2 = client.post(url_for('create_post'), data=post_data_2, follow_redirects=True)
+
+    assert response_post_2.status_code == 200
+    assert b"Post created successfully!" in response_post_2.data
+
+    with app_instance.app_context():
+        created_post_2 = Post.query.filter_by(title=post_data_2['title']).first()
+        assert created_post_2 is not None
+        assert len(created_post_2.tags) == 3
+        tag_names_2 = sorted([tag.name for tag in created_post_2.tags])
+        assert tag_names_2 == sorted(['python', 'flask', 'newtag'])
+
+        # Verify existing tag 'python' was reused and new tags 'flask', 'newtag' were created
+        assert Tag.query.filter_by(name='python').count() == 1 # Still only one 'python' tag
+        assert Tag.query.filter_by(name='flask').first() is not None
+        assert Tag.query.filter_by(name='newtag').first() is not None
+        assert Tag.query.count() == initial_tag_count + 2 # Total tags should be 3 (initial) + 2 (new) = 5
+
+
+def test_edit_post_with_tags(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    # Create an initial post with tags
+    initial_tags_string = "alpha, beta, gamma"
+    with app_instance.app_context():
+        post = Post(title="Post to Edit Tags", content="Initial content.", author=new_user)
+        tag_names = [name.strip() for name in initial_tags_string.split(',') if name.strip()]
+        for tag_name in tag_names:
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+                db.session.add(tag)
+            post.tags.append(tag)
+        db.session.add(post)
+        db.session.commit()
+        post_id = post.id
+
+    # Edit the post with new tags
+    edited_tags_string = "alpha, delta, epsilon" # 'alpha' remains, 'beta', 'gamma' removed, 'delta', 'epsilon' added
+    edit_data = {
+        'title': 'Post to Edit Tags', # Title and content can be the same or different
+        'content': 'Updated content.',
+        'tags_string': edited_tags_string
+    }
+    with app_instance.app_context():
+        response_edit = client.post(url_for('edit_post', post_id=post_id), data=edit_data, follow_redirects=True)
+
+    assert response_edit.status_code == 200
+    assert b"Post updated successfully!" in response_edit.data
+
+    with app_instance.app_context():
+        updated_post = db.session.get(Post, post_id)
+        assert updated_post is not None
+        updated_tag_names = sorted([tag.name for tag in updated_post.tags])
+        assert updated_tag_names == sorted(['alpha', 'delta', 'epsilon'])
+
+        # Verify database state for tags
+        assert Tag.query.filter_by(name='alpha').first() is not None
+        assert Tag.query.filter_by(name='beta').first() is not None # Should still exist in DB, just not associated
+        assert Tag.query.filter_by(name='gamma').first() is not None # Same as beta
+        assert Tag.query.filter_by(name='delta').first() is not None
+        assert Tag.query.filter_by(name='epsilon').first() is not None
+
+
+# --- Comment Functionality Tests ---
+def test_create_comment_on_post(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    # Create a post first
+    with app_instance.app_context():
+        post = Post(title="Post for Commenting", content="Content that will be commented on.", author=new_user)
+        db.session.add(post)
+        db.session.commit()
+        post_id = post.id
+
+    comment_text = "This is a test comment!"
+    with app_instance.app_context():
+        response_comment = client.post(
+            url_for('view_post', post_id=post_id),
+            data={'text': comment_text},
+            follow_redirects=True
+        )
+
+    assert response_comment.status_code == 200
+    assert b"Comment posted successfully!" in response_comment.data
+    assert comment_text.encode('utf-8') in response_comment.data # Comment should be visible on the page
+
+    with app_instance.app_context():
+        # Fetch the post again to access its comments relationship
+        # post_with_comments = Post.query.get(post_id) # This might be detached from session
+        post_with_comments = db.session.get(Post, post_id) # Better way to get from session
+        assert post_with_comments is not None
+
+        # Query comments directly to be certain
+        comments = Comment.query.filter_by(post_id=post_id).all()
+        assert len(comments) == 1
+        assert comments[0].text == comment_text
+        assert comments[0].author_id == new_user.id
+        assert comments[0].post_id == post_id
+
+        # Also check through relationship
+        assert len(post_with_comments.comments.all()) == 1
+        assert post_with_comments.comments[0].text == comment_text
+
+
+def test_delete_own_comment(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    with app_instance.app_context():
+        post = Post(title="Post for Deleting Own Comment", content="Content.", author=new_user)
+        comment_to_delete = Comment(text="My own comment to delete", author=new_user, post=post)
+        db.session.add_all([post, comment_to_delete])
+        db.session.commit()
+        post_id = post.id
+        comment_id = comment_to_delete.id
+
+    with app_instance.app_context():
+        # The DeleteCommentForm is implicitly created and validated in the route for CSRF
+        response_delete = client.post(url_for('delete_comment', comment_id=comment_id), follow_redirects=True)
+
+    assert response_delete.status_code == 200
+    assert b"Comment deleted." in response_delete.data
+    assert b"My own comment to delete" not in response_delete.data # Comment text should be gone
+
+    with app_instance.app_context():
+        assert Comment.query.get(comment_id) is None
+        # Ensure post still exists
+        assert Post.query.get(post_id) is not None

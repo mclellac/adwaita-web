@@ -1,3 +1,4 @@
+console.log('[Debug] adw-initializer.js execution started');
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.Adw) {
     console.error('Adw components library not loaded. Make sure components.js is included before this initializer.');
