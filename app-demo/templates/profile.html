@@ -51,7 +51,9 @@
                     {% endfor %}
                 </adw-list-box>
             {% else %}
-                <p style="padding: var(--spacing-m); text-align: center;">This user has not made any posts yet.</p>
+                <adw-status-page title="No Posts Yet" description="{{ user_profile.username }} has not made any posts.">
+                    <div slot="icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">📝</div> {# Using a different emoji placeholder #}
+                </adw-status-page>
             {% endif %}
 
     </div>

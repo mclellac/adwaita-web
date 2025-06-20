@@ -1,4 +1,3 @@
-// scss/_expander_row.scss
 @use 'variables';
 
 .adw-expander-row {
@@ -8,9 +7,9 @@
 
   // Styling for the header part of the expander row (which is an action row)
   // to ensure it's clickable and shows the arrow correctly.
-  > .adw-action-row { // Assuming the first child is an action row used as header
+  > .adw-action-row {
     cursor: pointer;
-    position: relative; // For absolute positioning of the arrow if needed by CSS only arrow
+    position: relative;
 
     // Arrow styling (simple CSS triangle)
     .adw-expander-row-arrow {
@@ -18,9 +17,9 @@
       height: 0;
       border-left: 5px solid transparent;
       border-right: 5px solid transparent;
-      border-top: 5px solid var(--window-fg-color); // Arrow color
+      border-top: 5px solid var(--window-fg-color);
       transition: transform 0.15s ease-in-out;
-      margin-left: var(--spacing-s); // Space from title/subtitle if in content area, or part of suffix
+      margin-left: var(--spacing-s);
       opacity: 0.7;
     }
 
@@ -31,7 +30,7 @@
 
   // If the arrow is part of the suffix in the action row:
   > .adw-action-row .adw-action-row-suffix .adw-expander-row-arrow {
-     margin-left: 0; // No extra margin if it's the only thing in suffix
+     margin-left: 0;
   }
 
 
@@ -39,9 +38,9 @@
     padding: var(--spacing-m) var(--spacing-l);
     padding-left: calc(var(--spacing-l) + var(--spacing-m) + 5px); // Indent content (approx icon width + margin)
                                                               // Adjust if using prefix icons of known width
-    background-color: var(--shade-color); // Slightly different background for expanded content
+    background-color: var(--shade-color);
     border-bottom: var(--border-width, 1px) solid var(--border-color-light);
-    display: none; // Hidden by default
+    display: none;
 
     &.visible {
       display: block;
