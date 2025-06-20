@@ -6,7 +6,7 @@
 <div class="main-content-clamped post-view-container">
     <h1>{{ post.title }}</h1>
 
-    <div class="post-meta-detail" style="margin-bottom: var(--spacing-l); color: var(--adw-secondary-text-color, #555);">
+    <div class="post-meta-detail" style="margin-bottom: var(--spacing-l); color: var(--secondary-text-color);">
         <p style="margin-bottom: var(--spacing-xxs);">By: {{ post.author.username if post.author else 'Unknown Author' }}</p>
         <p style="font-size: 0.9em;">
             <small>Posted on: {{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else 'N/A' }} UTC</small>

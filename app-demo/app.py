@@ -2,14 +2,19 @@ from datetime import datetime, timezone
 from flask import Flask, render_template, url_for, abort, request, redirect, flash # Added flash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import CSRFProtect, FlaskForm
+from wtforms import StringField, PasswordField, TextAreaField, SubmitField, FileField
+from wtforms.validators import DataRequired, Length, Optional, Email
 from sqlalchemy import desc # Added for ordering
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename # Added for file uploads
 import os # For secret key
 import logging # Added for logging
 from PIL import Image # Added for image resizing
+import uuid # For unique filenames
 
 app = Flask(__name__)
+csrf = CSRFProtect(app) # Initialize CSRF protection
 
 # Basic logging configuration
 if not app.debug: # Only configure basic logging if not in debug mode
@@ -44,6 +49,22 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Explicitly set, though se
 UPLOAD_FOLDER = 'app-demo/static/uploads/profile_pics'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Define WTForms classes
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
+
+class PostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(min=1, max=120)])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    submit = SubmitField('Submit Post')
+
+class ProfileEditForm(FlaskForm):
+    profile_info = TextAreaField('Profile Info', validators=[Optional(), Length(max=5000)])
+    profile_photo = FileField('Profile Photo', validators=[Optional()]) # Add specific file validators if needed (e.g., FileAllowed)
+    submit = SubmitField('Update Profile')
 
 db = SQLAlchemy() # Initialize SQLAlchemy without app
 
@@ -111,28 +132,28 @@ def view_post(post_id):
 @app.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_post():
-    if request.method == 'POST':
-        title = request.form.get('title')
-        content = request.form.get('content')
+    form = PostForm()
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
         app.logger.info(f"Create post attempt by user '{current_user.username}' (ID: {current_user.id}). Title: '{title}', Content present: {bool(content)}")
-        if title and content:
-            try:
-                # User details already logged above.
-                new_post = Post(title=title, content=content, author=current_user)
-                db.session.add(new_post)
-                app.logger.info(f"Post object created and added to session for user '{current_user.username}'.") # Enhanced log
-                db.session.commit()
-                app.logger.info(f"Post committed to DB. ID: {new_post.id}, Title: '{new_post.title}' by user '{current_user.username}'.") # Enhanced log
-                flash('Post created successfully!', 'success')
-                return redirect(url_for('index'))
-            except Exception as e:
-                db.session.rollback()
-                app.logger.error(f"Error creating post: {e}", exc_info=True)
-                flash(f'Error creating post: {e}', 'danger')
-        else:
-            app.logger.warning("Post creation failed: Title or content missing.")
-            flash('Title and content are required.', 'warning')
-    return render_template('create_post.html')
+        try:
+            new_post = Post(title=title, content=content, author=current_user)
+            db.session.add(new_post)
+            db.session.commit()
+            app.logger.info(f"Post committed to DB. ID: {new_post.id}, Title: '{new_post.title}' by user '{current_user.username}'.")
+            flash('Post created successfully!', 'success')
+            return redirect(url_for('index'))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error creating post: {e}", exc_info=True)
+            flash(f'Error creating post: {e}', 'danger')
+    elif request.method == 'POST': # Catches validation errors from form.errors
+        app.logger.warning(f"Post creation by {current_user.username} failed validation. Errors: {form.errors}")
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Error in {getattr(form, field).label.text}: {error}", 'warning')
+    return render_template('create_post.html', form=form)
 
 @app.route('/posts/<int:post_id>/delete', methods=['POST'])
 @login_required
@@ -155,23 +176,27 @@ def edit_post(post_id):
     if post.author != current_user:
         abort(403)  # Forbidden
 
-    if request.method == 'POST':
-        title = request.form.get('title')
-        content = request.form.get('content')
+    form = PostForm(obj=post) # Populate form with existing post data on GET
 
-        if title and content:
-            post.title = title
-            post.content = content
-            # post.updated_at will be updated by onupdate
+    if form.validate_on_submit(): # Handles POST requests and validation
+        post.title = form.title.data
+        post.content = form.content.data
+        # post.updated_at will be updated by onupdate
+        try:
             db.session.commit()
-            # flash('Post updated successfully!', 'success')
+            flash('Post updated successfully!', 'success')
             return redirect(url_for('view_post', post_id=post.id))
-        else:
-            flash('Title and content are required.', 'warning')
-            # Re-render form with an error or rely on HTML5 validation
-            # Fall through to render template
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error updating post {post.id}: {e}", exc_info=True)
+            flash(f'Error updating post: {e}', 'danger')
+    elif request.method == 'POST': # Catches validation errors
+        app.logger.warning(f"Post {post.id} update by {current_user.username} failed validation. Errors: {form.errors}")
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Error in {getattr(form, field).label.text}: {error}", 'warning')
 
-    return render_template('edit_post.html', post=post)
+    return render_template('edit_post.html', form=form, post=post) # Pass both form and post
 
 @app.route('/test-widget')
 def test_widget_page():
@@ -181,17 +206,19 @@ def test_widget_page():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    error = None
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    form = LoginForm()
+    if form.validate_on_submit(): # Handles POST requests and validation
+        username = form.username.data
+        password = form.password.data
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             login_user(user)
+            flash('Logged in successfully.', 'success')
             return redirect(url_for('index'))
         else:
-            error = 'Invalid username or password.'
-    return render_template('login.html', error=error)
+            flash('Invalid username or password.', 'danger')
+    # For GET requests or if form validation fails, render the login page with the form
+    return render_template('login.html', form=form)
 
 @app.route('/logout')
 @login_required
@@ -210,73 +237,63 @@ def profile(username):
 @app.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    if request.method == 'POST':
-        new_profile_info = request.form.get('profile_info')
-        current_user.profile_info = new_profile_info
-        app.logger.info(f"User {current_user.username} updated profile_info.")
+    form = ProfileEditForm(obj=current_user) # Populate with current_user data on GET
 
-        if 'profile_photo' in request.files:
-            file = request.files['profile_photo']
-            app.logger.info(f"Found 'profile_photo' in request.files. Filename: '{file.filename}' for user {current_user.username}")
+    if form.validate_on_submit():
+        current_user.profile_info = form.profile_info.data
+        app.logger.info(f"User {current_user.username} updating profile_info.")
 
-            if file and file.filename != '': # Check if a file was selected and has a name
-                if allowed_file(file.filename):
-                    try:
-                        original_filename = secure_filename(file.filename)
-                        app.logger.info(f"Original secure filename: '{original_filename}' for user {current_user.username}")
+        file = form.profile_photo.data # This is a FileStorage object
+        if file and file.filename: # Check if a file was selected and has a name
+            if allowed_file(file.filename):
+                try:
+                    original_filename = secure_filename(file.filename)
+                    ext = original_filename.rsplit('.', 1)[-1].lower()
+                    unique_filename = f"{uuid.uuid4()}.{ext}"
 
-                        unique_filename = f"{current_user.username}_{original_filename}"
-                        app.logger.info(f"Generated unique_filename: '{unique_filename}' for user {current_user.username}")
+                    upload_folder_path = app.config['UPLOAD_FOLDER']
+                    save_path = os.path.join(upload_folder_path, unique_filename)
 
-                        upload_folder_path = app.config['UPLOAD_FOLDER']
-                        save_path = os.path.join(upload_folder_path, unique_filename)
-                        app.logger.info(f"Full save_path: '{save_path}' for user {current_user.username}")
+                    os.makedirs(upload_folder_path, exist_ok=True)
 
-                        os.makedirs(upload_folder_path, exist_ok=True)
-                        app.logger.info(f"Ensured upload folder exists: '{upload_folder_path}' for user {current_user.username}")
+                    img = Image.open(file.stream) # Use file.stream for FileStorage
+                    img.thumbnail((200, 200))
+                    img.save(save_path)
 
-                        # Resize image
-                        img = Image.open(file)
-                        img.thumbnail((200, 200))
-                        img.save(save_path)
-                        app.logger.info(f"Resized and saved image to '{save_path}' for user {current_user.username}")
+                    relative_path = os.path.join('uploads/profile_pics', unique_filename) # Store the new unique filename path
+                    current_user.profile_photo_url = relative_path
+                    app.logger.info(f"Resized and saved image to '{save_path}' for user {current_user.username}. Relative path: {relative_path}")
+                    flash('Profile photo updated successfully!', 'success')
+                except Exception as e:
+                    app.logger.error(f"Error uploading profile photo for user {current_user.username}: {e}", exc_info=True)
+                    flash(f'Error uploading profile photo: {e}', 'danger')
+            else:
+                app.logger.warning(f"Profile photo upload failed for user {current_user.username}: File type not allowed. Filename: '{file.filename}'")
+                flash('Invalid file type for photo. Allowed types are png, jpg, jpeg, gif.', 'warning')
 
-                        relative_path = os.path.join('uploads/profile_pics', unique_filename)
-                        current_user.profile_photo_url = relative_path
-                        app.logger.info(f"Stored relative path in profile_photo_url: '{relative_path}' for user {current_user.username}")
-
-                        flash('Profile photo updated successfully!', 'success')
-                    except Exception as e:
-                        app.logger.error(f"Error uploading profile photo for user {current_user.username}: {e}", exc_info=True)
-                        flash(f'Error uploading profile photo: {e}', 'danger')
-                else:
-                    app.logger.warning(f"Profile photo upload failed for user {current_user.username}: File type not allowed. Filename: '{file.filename}'")
-                    # flash('Invalid file type for photo. Allowed types are png, jpg, jpeg, gif.', 'warning') # Previous version had 'danger' here
-                    # The instruction mentioned "The flash message for invalid file type was already present in one version of the code, ensure it's correctly placed."
-                    # The previous version from read_files used 'danger', but 'warning' is more appropriate as per the new code block. Let's use 'warning'.
-                    flash('Invalid file type for photo. Allowed types are png, jpg, jpeg, gif.', 'warning')
-
-
-        db.session.add(current_user) # current_user is already in session and tracked by SQLAlchemy
+        # db.session.add(current_user) # Not strictly necessary as current_user is already in session
         try:
             db.session.commit()
             app.logger.info(f"Profile changes for {current_user.username} committed to DB.")
-            # Flash success for overall profile update if no specific photo error occurred, or if photo success was already flashed.
-            # Avoid double-flashing success if photo was also successful.
-            # If only profile_info was changed, this is the only success message.
-            if not ('profile_photo' in request.files and request.files['profile_photo'].filename != ''): # only flash general success if no photo was attempted or photo was empty
-                 flash('Profile updated successfully!', 'success') # General success if no photo was processed or if photo succeeded silently earlier
-            elif 'profile_photo' in request.files and request.files['profile_photo'].filename != '' and current_user.profile_photo_url: # if photo was attempted and a url is set
-                pass # Photo success already flashed.
+            # Avoid double-flashing if photo status was already flashed
+            if not (file and file.filename): # Only flash general success if no photo was processed
+                 flash('Profile updated successfully!', 'success')
         except Exception as e:
             db.session.rollback()
             app.logger.error(f"Error committing profile changes for user {current_user.username}: {e}", exc_info=True)
             flash(f'Error saving profile changes: {e}', 'danger')
 
         return redirect(url_for('profile', username=current_user.username))
+    elif request.method == 'POST': # Catches validation errors from form.errors
+        app.logger.warning(f"Profile edit by {current_user.username} failed validation. Errors: {form.errors}")
+        for field_name, field_errors in form.errors.items():
+            for error in field_errors:
+                # Get label text if available, otherwise use field name
+                label = getattr(getattr(form, field_name), 'label', None)
+                field_label_text = label.text if label else field_name.replace('_', ' ').title()
+                flash(f"Error in {field_label_text}: {error}", 'warning')
 
-    # GET request: display the edit profile form with current data
-    return render_template('edit_profile.html', user_profile=current_user)
+    return render_template('edit_profile.html', form=form, user_profile=current_user)
 
 @app.route('/settings')
 @login_required
@@ -286,6 +303,21 @@ def settings_page():
 @app.route('/test-new-widgets')
 def test_new_widgets_page():
     return render_template('test_new_widgets.html')
+
+# Error Handlers
+@app.errorhandler(403)
+def forbidden_page(error):
+    return render_template('403.html'), 403
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def server_error_page(error):
+    # Log the error for debugging
+    app.logger.error(f"Server error: {error}", exc_info=True)
+    return render_template('500.html'), 500
 
 # Flask-Login and SQLAlchemy must be initialized with the app instance.
 # This can be done here for non-test runs, or deferred for tests.

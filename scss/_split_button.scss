@@ -75,21 +75,21 @@
     .adw-split-button-action {
       border-right-color: transparent;
       &:hover {
-        background-color: rgba(var(--accent-fg-color-rgb, 255,255,255), 0.1);
+        background-color: rgba(255,255,255, 0.1); // Assuming accent-fg-color is white
       }
       &:active {
-        background-color: rgba(var(--accent-fg-color-rgb, 255,255,255), 0.2);
+        background-color: rgba(255,255,255, 0.2); // Assuming accent-fg-color is white
       }
     }
     .adw-split-button-dropdown {
       &:hover {
-        background-color: rgba(var(--accent-fg-color-rgb, 255,255,255), 0.1);
+        background-color: rgba(255,255,255, 0.1); // Assuming accent-fg-color is white
       }
       &:active {
-        background-color: rgba(var(--accent-fg-color-rgb, 255,255,255), 0.2);
+        background-color: rgba(255,255,255, 0.2); // Assuming accent-fg-color is white
       }
       .adw-split-button-arrow{
-         border-top-color: var(--accent-fg-color);
+         border-top-color: var(--accent-fg-color); // This should work as it's a color property
       }
     }
   }

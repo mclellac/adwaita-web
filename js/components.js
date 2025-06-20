@@ -1,5 +1,10 @@
 // js/components.js
 
+// Unique ID generator
+function adwGenerateId(prefix = 'adw-id') {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
 /**
  * Creates an Adwaita-style button.
  * @param {string} text - The text content of the button. Can be empty if using an icon.
@@ -848,6 +853,10 @@ function createAdwViewSwitcher(options = {}) {
 
   const bar = document.createElement("div");
   bar.classList.add("adw-view-switcher-bar");
+  bar.setAttribute("role", "tablist");
+  if (opts.label) { // Optional label for the tablist itself
+    bar.setAttribute("aria-label", opts.label);
+  }
 
   const contentContainer = document.createElement("div");
   contentContainer.classList.add("adw-view-switcher-content");
@@ -856,65 +865,124 @@ function createAdwViewSwitcher(options = {}) {
   if (views.length === 0) {
     console.warn("AdwViewSwitcher: No views provided.");
   }
-  let currentActiveButton = null;
-  let currentActiveViewElement = null;
+
+  const buttons = []; // Store buttons for keyboard navigation
 
   views.forEach((view, index) => {
     if (!view || typeof view.name !== 'string' || !view.content) {
         console.warn("AdwViewSwitcher: Invalid view object at index", index, view);
-        return; // Skip invalid view object
+        return;
     }
 
+    const viewId = view.id || adwGenerateId('adw-view-panel');
+    const buttonId = adwGenerateId('adw-view-tab');
+
     const viewContentElement = view.content instanceof Node ? view.content : document.createElement('div');
-    if (!(view.content instanceof Node)) {
-        // SECURITY: Caller is responsible for sanitizing HTML strings passed as view.content
+    if (!(view.content instanceof Node) && typeof view.content === 'string') {
+        // SECURITY: Caller is responsible for sanitizing HTML strings.
         viewContentElement.innerHTML = view.content;
     }
-    viewContentElement.dataset.viewName = view.name;
+    viewContentElement.id = viewId;
+    viewContentElement.setAttribute("role", "tabpanel");
+    viewContentElement.setAttribute("aria-labelledby", buttonId);
+    viewContentElement.classList.add("adw-view-panel"); // Base class for panels
+    viewContentElement.setAttribute("tabindex", "0"); // Make panel focusable for content
     contentContainer.appendChild(viewContentElement);
 
     const button = Adw.createButton(view.name, {
-      onClick: () => {
-        if (currentActiveButton) {
-          currentActiveButton.classList.remove("active");
-        }
-        if (currentActiveViewElement) {
-          currentActiveViewElement.classList.remove("active-view");
-        }
-
-        button.classList.add("active");
-        viewContentElement.classList.add("active-view");
-
-        currentActiveButton = button;
-        currentActiveViewElement = viewContentElement;
-
-        if (typeof opts.onViewChanged === 'function') {
-          opts.onViewChanged(view.name);
-        }
-      },
+      // Let setActiveView handle class changes and ARIA attributes
+      onClick: () => switcherElement.setActiveView(view.name, true), // true to focus button
+      ...(view.buttonOptions || {}) // Spread any additional button options from view object
     });
-    button.dataset.viewName = view.name;
+    button.id = buttonId;
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-controls", viewId);
+    button.setAttribute("aria-selected", "false"); // Will be updated by setActiveView
+    button.dataset.viewName = view.name; // Keep for easy identification
     bar.appendChild(button);
+    buttons.push(button);
 
-    if ((opts.activeViewName && view.name === opts.activeViewName) || (!opts.activeViewName && index === 0)) {
-      button.classList.add("active");
+    // Initial active state
+    const isActive = (opts.activeViewName && view.name === opts.activeViewName) || (!opts.activeViewName && index === 0);
+    if (isActive) {
+      button.classList.add("active"); // Visual active state
+      button.setAttribute("aria-selected", "true");
       viewContentElement.classList.add("active-view");
-      currentActiveButton = button;
-      currentActiveViewElement = viewContentElement;
+    } else {
+      viewContentElement.setAttribute("hidden", ""); // Hide inactive panels
     }
   });
 
   switcherElement.appendChild(bar);
   switcherElement.appendChild(contentContainer);
 
-  switcherElement.setActiveView = (viewName) => {
-    const buttonToActivate = Array.from(bar.children).find(btn => btn.dataset.viewName === viewName);
-    if (buttonToActivate && typeof buttonToActivate.click === 'function') {
-      buttonToActivate.click();
-    } else {
-        console.warn(`AdwViewSwitcher: View with name "${viewName}" not found or button not clickable.`);
+  switcherElement.setActiveView = (viewName, focusButton = false) => {
+    let newActiveButton = null;
+
+    buttons.forEach(btn => {
+        const isButtonForView = btn.dataset.viewName === viewName;
+        btn.classList.toggle("active", isButtonForView);
+        btn.setAttribute("aria-selected", isButtonForView ? "true" : "false");
+        if (isButtonForView) {
+            newActiveButton = btn;
+        }
+    });
+
+    Array.from(contentContainer.children).forEach(panel => {
+        // Check if this panel is controlled by the newActiveButton
+        const isPanelForView = panel.id === newActiveButton?.getAttribute("aria-controls");
+        panel.classList.toggle("active-view", isPanelForView);
+        if (isPanelForView) {
+            panel.removeAttribute("hidden");
+        } else {
+            panel.setAttribute("hidden", "");
+        }
+    });
+
+    if (newActiveButton && focusButton) {
+        newActiveButton.focus();
+    }
+
+    if (newActiveButton && typeof opts.onViewChanged === 'function') {
+        // Pass view name, and optionally the IDs of the button and panel
+        opts.onViewChanged(viewName, newActiveButton.id, newActiveButton.getAttribute("aria-controls"));
     }
   };
+
+  // Keyboard navigation for tabs in the tablist
+  bar.addEventListener("keydown", (event) => {
+    const currentIndex = buttons.findIndex(btn => btn === document.activeElement || btn.contains(document.activeElement));
+
+    if (currentIndex === -1 && !(event.key === "ArrowRight" || event.key === "ArrowLeft" || event.key === "Home" || event.key === "End")) {
+      // If focus is not within a tab button and key is not a navigation key, do nothing.
+      // This allows Tab key to move focus out of the tablist.
+      return;
+    }
+
+    let newIndex = currentIndex;
+    let shouldPreventDefault = false;
+
+    if (event.key === "ArrowRight") {
+        newIndex = (currentIndex + 1) % buttons.length;
+        shouldPreventDefault = true;
+    } else if (event.key === "ArrowLeft") {
+        newIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+        shouldPreventDefault = true;
+    } else if (event.key === "Home") {
+        newIndex = 0;
+        shouldPreventDefault = true;
+    } else if (event.key === "End") {
+        newIndex = buttons.length - 1;
+        shouldPreventDefault = true;
+    }
+
+    if (shouldPreventDefault) {
+        event.preventDefault(); // Prevent page scroll for arrow keys, home, end
+        buttons[newIndex].focus();
+        // To auto-activate on arrow navigation (uncomment next line):
+        // buttons[newIndex].click();
+    }
+  });
 
   return switcherElement;
 }

@@ -36,5 +36,41 @@
             </div>
         </adw-status-page>
     {% endif %}
+
+    {# Pagination Links #}
+    {% if pagination and pagination.pages > 1 %}
+    <nav aria-label="Page navigation" class="pagination-nav" style="margin-top: var(--spacing-xl); display: flex; justify-content: center; align-items: center; gap: var(--spacing-xs);">
+        {# Previous Page Link #}
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('index', page=pagination.prev_num) }}" class="adw-button">
+                &laquo; Previous
+            </a>
+        {% else %}
+            <adw-button disabled>&laquo; Previous</adw-button>
+        {% endif %}
+
+        {# Page Numbers #}
+        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                    <adw-button class="active" appearance="suggested" aria-current="page">{{ page_num }}</adw-button>
+                {% else %}
+                    <a href="{{ url_for('index', page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                {% endif %}
+            {% else %}
+                <span class="adw-button flat disabled" style="cursor: default;">&hellip;</span>
+            {% endif %}
+        {% endfor %}
+
+        {# Next Page Link #}
+        {% if pagination.has_next %}
+            <a href="{{ url_for('index', page=pagination.next_num) }}" class="adw-button">
+                Next &raquo;
+            </a>
+        {% else %}
+            <adw-button disabled>Next &raquo;</adw-button>
+        {% endif %}
+    </nav>
+    {% endif %}
 </div>
 {% endblock %}

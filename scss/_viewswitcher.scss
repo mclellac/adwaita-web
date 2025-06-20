@@ -20,21 +20,21 @@
     margin-right: var(--spacing-xs);
     margin-bottom: calc(-1 * var(--border-width, 1px));
     box-shadow: none;
-    color: var(--secondary-text-color, var(--window-fg-color));
+    color: var(--secondary-text-color); // Use defined secondary text color
     opacity: 0.8;
 
     &:hover {
       background-color: var(--button-hover-bg-color);
-      color: var(--window-fg-color);
+      color: var(--window-fg-color); // Full window foreground on hover
       opacity: 1;
     }
 
     &.active {
-      background-color: var(--window-bg-color);
-      color: var(--accent-color, var(--window-fg-color));
+      background-color: var(--window-bg-color); // Match content area background
+      color: var(--accent-color); // Use accent color for active tab text
       font-weight: bold;
-      border-color: var(--border-color, var(--headerbar-border-color));
-      border-bottom-color: transparent;
+      border-color: var(--headerbar-border-color); // Use a defined border color
+      border-bottom-color: transparent; // "Merge" with content area
       opacity: 1;
     }
   }
@@ -43,7 +43,7 @@
 .adw-view-switcher-content {
   padding: var(--spacing-m);
   background-color: var(--window-bg-color);
-  border: var(--border-width, 1px) solid var(--border-color, var(--headerbar-border-color));
+  border: var(--border-width, 1px) solid var(--headerbar-border-color); // Use a defined border color
   border-top: none;
   border-radius: 0 0 var(--border-radius-default) var(--border-radius-default);
 

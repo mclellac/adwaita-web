@@ -1,8 +1,8 @@
 @use 'variables';
 
 .adw-toast {
-  background-color: var(--toast-bg-color);
-  color: var(--toast-fg-color);
+  background-color: var(--toast-bg-color, #303030); // Fallback if variables not loaded
+  color: var(--toast-fg-color, #ffffff); // Fallback
   border-radius: var(--border-radius-default);
   padding: var(--spacing-m);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -27,10 +27,10 @@
     }
 
   &.adw-toast-success {
-    border-left: 4px solid var(--success-color);
+    border-left: 4px solid var(--accent-green-standalone);
   }
 
   &.adw-toast-info {
-    border-left: 4px solid var(--info-color);
+    border-left: 4px solid var(--accent-blue-standalone);
   }
 }

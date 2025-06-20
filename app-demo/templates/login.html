@@ -4,21 +4,34 @@
 <div class="main-content-clamped">
     <h2>Login</h2>
     {% if error %}
-        <div class="adw-banner error visible" role="alert" style="margin-bottom: var(--spacing-m);">
-            {{ error }}
-        </div>
+        {# Flash messages will handle general errors like 'Invalid username or password' #}
+        {# Specific field errors will be shown below the fields #}
     {% endif %}
-    <form method="post" action="{{ url_for('login') }}">
+    <form method="post" action="{{ url_for('login') }}" novalidate>
+        {{ form.hidden_tag() }} {# CSRF token and other hidden fields #}
+
         <div class="form-group">
-            <label for="username_field">Username</label>
-            <input type="text" name="username" id="username_field" class="adw-entry" required value="{{ request.form.username if request and request.form else '' }}">
+            {{ form.username.label(for=form.username.id or 'username_field') }}
+            {{ form.username(class_='adw-entry', id=form.username.id or 'username_field', **{'aria-describedby': form.username.id ~ '-errors' if form.username.errors else None}) }}
+            {% if form.username.errors %}
+                <div id="{{ form.username.id or 'username_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                    {% for error in form.username.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% endif %}
         </div>
+
         <div class="form-group">
-            <label for="password_field">Password</label>
-            <input type="password" name="password" id="password_field" class="adw-entry" required>
+            {{ form.password.label(for=form.password.id or 'password_field') }}
+            {{ form.password(class_='adw-entry', id=form.password.id or 'password_field', **{'aria-describedby': form.password.id ~ '-errors' if form.password.errors else None}) }}
+            {% if form.password.errors %}
+                <div id="{{ form.password.id or 'password_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                    {% for error in form.password.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% endif %}
         </div>
+
         <div class="form-button-container">
-            <adw-button type="submit" appearance="suggested">Login</adw-button>
+             {{ form.submit(class_='adw-button suggested-action') }}
         </div>
     </form>
 </div>

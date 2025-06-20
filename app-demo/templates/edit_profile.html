@@ -3,24 +3,47 @@
 {% block content %}
 <div class="main-content-clamped">
     <h2>Edit Profile</h2>
-    <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
-        <adw-expander-row title="Profile Information">
-            <textarea name="profile_info" id="profile_info_field" class="adw-entry" rows="8">{{ current_user.profile_info or '' }}</textarea>
+    <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }} {# CSRF token #}
+
+        {# Using adw-expander-row for profile_info #}
+        {# Note: WTForms rendering inside custom elements can be tricky.
+           This assumes adw-expander-row can correctly render/contain standard HTML form elements. #}
+        <adw-expander-row title="Profile Information" {% if form.profile_info.errors %}expanded{% endif %}>
+            {# Assigning class directly to TextAreaField #}
+            {{ form.profile_info(class_='adw-entry', rows='8', id=form.profile_info.id or 'profile_info_field', **{'aria-describedby': form.profile_info.id ~ '-errors' if form.profile_info.errors else None}) }}
+            {% if form.profile_info.errors %}
+                <div id="{{ form.profile_info.id or 'profile_info_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); padding-left: var(--spacing-m); padding-bottom: var(--spacing-s);">
+                    {% for error in form.profile_info.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% endif %}
         </adw-expander-row>
 
-        <adw-action-row title="Profile Photo" subtitle="{{ 'Change photo' if current_user.profile_photo_url else 'Upload new photo' }}">
+        {# Using adw-action-row for profile_photo #}
+        <adw-action-row title="Profile Photo"
+                        subtitle="{{ 'Current photo below. Upload to change.' if current_user.profile_photo_url else 'Upload new photo' }}"
+                        {% if form.profile_photo.errors %}class="has-error"{% endif %}>
             {% if current_user.profile_photo_url %}
             <span slot="prefix" class="adw-avatar size-large" style="margin-right: 12px; --adw-avatar-size: 48px;">
                 <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Current profile photo" style="width: 100%; height: 100%; object-fit: cover;">
             </span>
             {% endif %}
-            <label for="profile_photo_field" class="adw-button" slot="suffix" style="align-self: center; margin: 0; cursor: pointer;">Upload Photo</label>
-            <input type="file" name="profile_photo" id="profile_photo_field" accept="image/*" style="display: none;">
+
+            {# Custom styling for FileField: Render the field, but hide the default input. Style its label. #}
+            {# This is a common pattern for custom file input styling. #}
+            {{ form.profile_photo.label(for=form.profile_photo.id or 'profile_photo_field', class_='adw-button', style='align-self: center; margin: 0; cursor: pointer;', slot='suffix') }}
+            {{ form.profile_photo(id=form.profile_photo.id or 'profile_photo_field', style='display:none;', **{'aria-describedby': form.profile_photo.id ~ '-errors' if form.profile_photo.errors else None}) }}
+            {% if form.profile_photo.errors %}
+                 {# Error display for file input might need to be outside or styled differently if it breaks layout #}
+                 <div slot="suffix" id="{{ form.profile_photo.id or 'profile_photo_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); width: 100%; text-align: right;">
+                     {% for error in form.profile_photo.errors %}<span>{{ error }}</span><br>{% endfor %}
+                 </div>
+            {% endif %}
         </adw-action-row>
 
         <div class="form-button-container">
-            <adw-button type="submit" appearance="suggested">Save Profile</adw-button>
-            <adw-button href="{{ url_for('profile', username=current_user.username) }}">Cancel</adw-button>
+            {{ form.submit(class_='adw-button suggested-action', value='Save Profile') }}
+            <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button">Cancel</a>
         </div>
     </form>
 </div>
