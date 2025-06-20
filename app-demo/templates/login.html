@@ -2,42 +2,40 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding-top: var(--spacing-xxl); padding-bottom: var(--spacing-xxl);"> {# Adjusted min-height and added padding #}
-  <adw-box style="width: 400px; padding: var(--spacing-xl); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-lg);"> {# Used Adwaita vars for styling #}
-    <h2 style="text-align: center; font-size: var(--font-size-xxl); margin-bottom: var(--spacing-lg);">Login</h2>
+<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding-top: var(--spacing-xxl); padding-bottom: var(--spacing-xxl);">
+  <div style="width: 400px; display: flex; flex-direction: column; gap: var(--spacing-lg);"> {# Outer container for centering and width, with gap for button spacing #}
+    <h2 style="text-align: center; font-size: var(--font-size-xxl);">Login</h2>
 
     {# Flashed messages will be handled by base.html's script #}
-    {# The script in base.html looks for this block to generate toasts/banners #}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {# This block itself doesn't render anything visible here #}
-      {# It just makes `messages` available to the base.html script #}
     {% endwith %}
 
-    <form method="POST" action=""> {# Action set to "" to post to the current URL #}
-      {{ form.hidden_tag() }} {# CSRF token and other hidden fields #}
+    <form method="POST" action="" style="display: contents;"> {# Use display:contents for form if it's just a wrapper for list-box and button #}
+      {{ form.hidden_tag() }} {# CSRF token #}
 
-      <adw-entry-row
-        title="Username"
-        name="username"
-        required="true"
-        value="{{ form.username.data if form and form.username.data is not none else request.form.username or '' }}"
-        style="margin-bottom: var(--spacing-md);">
-      </adw-entry-row>
+      <adw-list-box style="margin-bottom: var(--spacing-md);"> {# Added margin to separate from button #}
+        <adw-entry-row
+          title="Username"
+          name="username"
+          required="true"
+          value="{{ form.username.data if form and form.username.data is not none else request.form.username or '' }}">
+        </adw-entry-row>
 
-      <adw-password-entry-row
-        title="Password"
-        name="password"
-        required="true"
-        style="margin-bottom: var(--spacing-xl);"> {# Increased bottom margin before button #}
-      </adw-password-entry-row>
+        <adw-password-entry-row
+          title="Password"
+          name="password"
+          required="true">
+        </adw-password-entry-row>
+      </adw-list-box>
 
       <adw-button
         appearance="suggested-action"
         type="submit"
-        style="width: 100%; padding: var(--spacing-sm) 0; font-size: var(--font-size-lg);"> {# Added padding and font-size #}
+        style="width: 100%; padding: var(--spacing-sm) 0; font-size: var(--font-size-lg);">
         Login
       </adw-button>
     </form>
-  </adw-box>
+  </div>
 </div>
 {% endblock %}
