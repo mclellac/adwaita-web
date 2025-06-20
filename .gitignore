@@ -1,0 +1,35 @@
+# Sass cache
+.sass-cache/
+
+# Generated Adwaita-Web assets
+app-demo/static/css/adwaita-web.css
+app-demo/static/css/adwaita-web.css.map
+app-demo/static/js/components.js
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Flask instance folder
+instance/
+
+#പറ_CONFIG_SECRETS_DB_DIR_
+# Example: app-demo/instance/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Uploads - if profile_pics shouldn't be versioned
+# app-demo/static/uploads/profile_pics/
