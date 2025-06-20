@@ -1,81 +1,114 @@
 {% extends "base.html" %}
+
 {% block title %}Edit Profile - {{ super() }}{% endblock %}
+
 {% block content %}
-<div class="main-content-clamped">
-    <h2>Edit Profile</h2>
-    <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data" novalidate>
-        {{ form.hidden_tag() }} {# CSRF token #}
+<adw-preferences-view style="max-width: 700px; margin: 20px auto;">
+  <adw-preferences-page title="Edit Your Profile">
+    <form method="POST" action="" enctype="multipart/form-data"> {# action="" to post to current URL #}
+      {{ form.hidden_tag() }}
 
-        {# Using adw-expander-row for profile_info #}
-        {# Note: WTForms rendering inside custom elements can be tricky.
-           This assumes adw-expander-row can correctly render/contain standard HTML form elements. #}
-        <adw-expander-row title="Profile Information" {% if form.profile_info.errors %}expanded{% endif %}>
-            {# Assigning class directly to TextAreaField #}
-            {{ form.profile_info(class_='adw-entry', rows='8', id=form.profile_info.id or 'profile_info_field', **{'aria-describedby': form.profile_info.id ~ '-errors' if form.profile_info.errors else None}) }}
-            {% if form.profile_info.errors %}
-                <div id="{{ form.profile_info.id or 'profile_info_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); padding-left: var(--spacing-m); padding-bottom: var(--spacing-s);">
-                    {% for error in form.profile_info.errors %}<span>{{ error }}</span><br>{% endfor %}
-                </div>
-            {% endif %}
+      <adw-preferences-group title="Public Information">
+        {# Display Name #}
+        <adw-entry-row title="{{ form.full_name.label.text }}"
+                       name="{{ form.full_name.name }}"
+                       value="{{ form.full_name.data or '' }}">
+        </adw-entry-row>
+        {# TODO: Add {{ form.full_name.errors }} display if needed #}
+
+        {# Bio #}
+        <adw-expander-row title="{{ form.profile_info.label.text }}" subtitle="Tell us a bit about yourself. Supports basic HTML.">
+          {# Using a standard textarea within the slot for multi-line input.
+             The 'adw-entry' class can be added for styling if it's defined in SCSS for textareas.
+             For Adwaita Web Components, a dedicated <adw-textarea-row> might be preferred if available,
+             but <adw-expander-row> with a <textarea> in the slot is a valid pattern. #}
+          <textarea name="{{ form.profile_info.name }}" slot="rows" rows="5" style="width: 100%; min-height: 100px; margin-top: var(--spacing-s); margin-bottom: var(--spacing-s); padding: var(--spacing-s); border: 1px solid var(--border-color); border-radius: var(--border-radius-default); background-color: var(--input-bg-color, white); color: var(--text-color);" class="adw-entry">{{ form.profile_info.data or '' }}</textarea>
         </adw-expander-row>
+        {# TODO: Add {{ form.profile_info.errors }} display if needed #}
 
-        {# Using adw-action-row for profile_photo #}
-        <adw-action-row title="Profile Photo"
-                        subtitle="{{ 'Current photo below. Upload to change.' if current_user.profile_photo_url else 'Upload new photo' }}"
-                        {% if form.profile_photo.errors %}class="has-error"{% endif %}>
-            {% if current_user.profile_photo_url %}
-            <span slot="prefix" class="adw-avatar size-large" style="margin-right: 12px; --adw-avatar-size: 48px;">
-                <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Current profile photo" style="width: 100%; height: 100%; object-fit: cover;">
-            </span>
-            {% endif %}
+        {# Location #}
+        <adw-entry-row title="{{ form.location.label.text }}"
+                       name="{{ form.location.name }}"
+                       value="{{ form.location.data or '' }}">
+        </adw-entry-row>
+        {# TODO: Add {{ form.location.errors }} display if needed #}
 
-            {# Custom styling for FileField: Render the field, but hide the default input. Style its label. #}
-            {# This is a common pattern for custom file input styling. #}
-            {{ form.profile_photo.label(for=form.profile_photo.id or 'profile_photo_field', class_='adw-button', style='align-self: center; margin: 0; cursor: pointer;', slot='suffix') }}
-            {{ form.profile_photo(id=form.profile_photo.id or 'profile_photo_field', style='display:none;', **{'aria-describedby': form.profile_photo.id ~ '-errors' if form.profile_photo.errors else None}) }}
-            {% if form.profile_photo.errors %}
-                 {# Error display for file input might need to be outside or styled differently if it breaks layout #}
-                 <div slot="suffix" id="{{ form.profile_photo.id or 'profile_photo_field' }}-errors" class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); width: 100%; text-align: right;">
-                     {% for error in form.profile_photo.errors %}<span>{{ error }}</span><br>{% endfor %}
-                 </div>
+        {# Website URL #}
+        <adw-entry-row title="{{ form.website_url.label.text }}"
+                       name="{{ form.website_url.name }}"
+                       type="url"
+                       placeholder="https://example.com"
+                       value="{{ form.website_url.data or '' }}">
+        </adw-entry-row>
+        {# TODO: Add {{ form.website_url.errors }} display if needed #}
+
+        {# Make Profile Public #}
+        {# Hidden input will be created/managed by JS to ensure correct form submission for the boolean value #}
+        <adw-switch-row title="{{ form.is_profile_public.label.text }}"
+                        subtitle="Allow others to see your profile page"
+                        name="is_profile_public_display" {# Name changed to avoid conflict with hidden input if JS fails early #}
+                        {% if form.is_profile_public.data %}active{% endif %}>
+        </adw-switch-row>
+        {# Actual input for WTForms is form.is_profile_public, which we'll manage with a hidden field via JS #}
+        {# TODO: Add {{ form.is_profile_public.errors }} display if needed #}
+
+      </adw-preferences-group>
+
+      <adw-preferences-group title="Profile Photo">
+        <adw-action-row title="{{ form.profile_photo.label.text }}" subtitle="Upload a new photo. Max 2MB.">
+          {# Standard file input. For better Adwaita styling, this might need a custom component or more CSS. #}
+          {# For now, using the direct WTForms field rendering. #}
+          <div style="display: flex; flex-direction: column; gap: var(--spacing-s); padding-top: var(--spacing-s); padding-bottom: var(--spacing-s);">
+            {{ form.profile_photo() }} {# This will render <input type="file"> #}
+            {% if user_profile and user_profile.profile_photo_url %}
+              <div style="margin-top: var(--spacing-m);">
+                <p style="font-size: var(--font-size-small); color: var(--secondary-text-color); margin-bottom: var(--spacing-xs);">Current photo:</p>
+                <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="Current profile photo" style="max-width: 100px; max-height: 100px; border-radius: var(--border-radius-default); border: 1px solid var(--border-color);">
+              </div>
             {% endif %}
+          </div>
         </adw-action-row>
+         {# TODO: Add {{ form.profile_photo.errors }} display if needed #}
+      </adw-preferences-group>
 
-        {# New Fields #}
-        <div class="form-group" style="margin-top: var(--spacing-m);">
-            {{ form.full_name.label(class="adw-label") }}
-            {{ form.full_name(class="adw-entry", placeholder="Your full name", style="width: 100%;") }}
-            {% if form.full_name.errors %}
-                <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                    {% for error in form.full_name.errors %}<span>{{ error }}</span><br>{% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
-        <div class="form-group" style="margin-top: var(--spacing-m);">
-            {{ form.location.label(class="adw-label") }}
-            {{ form.location(class="adw-entry", placeholder="City, Country", style="width: 100%;") }}
-            {% if form.location.errors %}
-                <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                    {% for error in form.location.errors %}<span>{{ error }}</span><br>{% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
-        <div class="form-group" style="margin-top: var(--spacing-m);">
-            {{ form.website_url.label(class="adw-label") }}
-            {{ form.website_url(class="adw-entry", placeholder="https://yourwebsite.com", style="width: 100%;") }}
-            {% if form.website_url.errors %}
-                <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                    {% for error in form.website_url.errors %}<span>{{ error }}</span><br>{% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
-        <div class="form-button-container">
-            {{ form.submit(class_='adw-button suggested-action', value='Save Profile') }}
-            <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button">Cancel</a>
-        </div>
+      <div style="margin-top: var(--spacing-xl); display: flex; justify-content: flex-end; gap: var(--spacing-s);">
+        <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button">Cancel</a>
+        {{ form.submit(class="adw-button suggested-action") }}
+      </div>
     </form>
-</div>
+  </adw-preferences-page>
+</adw-preferences-view>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const publicSwitchRow = document.querySelector('adw-switch-row[name="is_profile_public_display"]');
+    if (publicSwitchRow) {
+      // Create a hidden input to ensure correct boolean value is submitted for WTForms
+      let hiddenInput = document.querySelector('input[type="hidden"][name="is_profile_public"]');
+      if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'is_profile_public'; // This name must match the WTForms field name
+        // Insert before the form's submit button or at the end of the form for simplicity,
+        // or more precisely before the switch row if it's part of a specific group.
+        // For ProfileEditForm, it's fine to append to the form.
+        publicSwitchRow.closest('form').appendChild(hiddenInput);
+      }
+
+      // Set initial value for hidden input based on the switch's state
+      // WTForms BooleanField by default expects 'y' for True, and '' or no value for False
+      // when using the standard CheckboxInput widget.
+      // However, if data is directly populated, it might handle True/False.
+      // To be safe, we'll submit 'y' or an empty string.
+      hiddenInput.value = publicSwitchRow.active ? 'y' : '';
+
+      publicSwitchRow.addEventListener('state-set', function(event) {
+        hiddenInput.value = event.detail.active ? 'y' : '';
+      });
+    }
+  });
+</script>
 {% endblock %}

@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
-from flask import Flask, render_template, url_for, abort, request, redirect, flash
+from flask import Flask, render_template, url_for, abort, request, redirect, flash, jsonify
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect, FlaskForm
-from wtforms import StringField, PasswordField, TextAreaField, SubmitField, FileField
+from wtforms import StringField, PasswordField, TextAreaField, SubmitField, FileField, BooleanField
 from wtforms.validators import DataRequired, Length, Optional, Email
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -30,11 +30,12 @@ class PostForm(FlaskForm):
     submit = SubmitField('Submit Post')
 
 class ProfileEditForm(FlaskForm):
-    profile_info = TextAreaField('Profile Info', validators=[Optional(), Length(max=5000)])
-    profile_photo = FileField('Profile Photo', validators=[Optional()])
-    full_name = StringField('Full Name', validators=[Optional(), Length(max=120)])
+    full_name = StringField('Display Name', validators=[Optional(), Length(max=120)])
+    profile_info = TextAreaField('Bio (supports some HTML)', validators=[Optional(), Length(max=5000)])
+    profile_photo = FileField('Profile Photo (Max 2MB)', validators=[Optional()])
     location = StringField('Location', validators=[Optional(), Length(max=100)])
     website_url = StringField('Website URL', validators=[Optional(), Length(max=200)]) # Basic validation for now
+    is_profile_public = BooleanField('Make Profile Public')
     submit = SubmitField('Update Profile')
 
 def allowed_file(filename):
@@ -51,6 +52,9 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(120), nullable=True)
     location = db.Column(db.String(100), nullable=True)
     website_url = db.Column(db.String(200), nullable=True)
+    is_profile_public = db.Column(db.Boolean, default=True, nullable=False)
+    theme = db.Column(db.String(80), nullable=True, default='system')
+    accent_color = db.Column(db.String(80), nullable=True, default='default')
     posts = db.relationship('Post', backref='author', lazy=True, order_by=desc("created_at"))
 
     def set_password(self, password):
@@ -294,6 +298,56 @@ def create_app(config_overrides=None):
     @_app.route('/test-new-widgets')
     def test_new_widgets_page():
         return render_template('test_new_widgets.html')
+
+    @_app.route('/api/settings/theme', methods=['POST'])
+    @login_required
+    def save_theme_preference():
+        data = request.get_json()
+        if not data or 'theme' not in data:
+            _app.logger.warning(f"Invalid theme save request by {current_user.username}: 'theme' missing in JSON data.")
+            return jsonify({'status': 'error', 'message': 'Missing theme data'}), 400
+
+        new_theme = data['theme']
+        # Basic validation for theme value
+        allowed_themes = ['light', 'dark', 'system']
+        if new_theme not in allowed_themes:
+            _app.logger.warning(f"Invalid theme value '{new_theme}' from {current_user.username}.")
+            return jsonify({'status': 'error', 'message': 'Invalid theme value'}), 400
+
+        current_user.theme = new_theme
+        try:
+            db.session.commit()
+            _app.logger.info(f"Theme preference for {current_user.username} updated to '{new_theme}'.")
+            return jsonify({'status': 'success', 'message': 'Theme updated successfully'})
+        except Exception as e:
+            db.session.rollback()
+            _app.logger.error(f"Error saving theme for user {current_user.username}: {e}", exc_info=True)
+            return jsonify({'status': 'error', 'message': 'Failed to save theme preference'}), 500
+
+    @_app.route('/api/settings/accent_color', methods=['POST'])
+    @login_required
+    def save_accent_color_preference():
+        data = request.get_json()
+        if not data or 'accent_color' not in data:
+            _app.logger.warning(f"Invalid accent_color save request by {current_user.username}: 'accent_color' missing in JSON data.")
+            return jsonify({'status': 'error', 'message': 'Missing accent_color data'}), 400
+
+        new_accent_color = data['accent_color']
+        # Basic validation for accent_color value (can be expanded)
+        # For now, assumes any string is fine, but a list of allowed colors would be better.
+        # Example: allowed_colors = ['default', 'blue', 'green', 'orange', 'red', 'purple']
+        # if new_accent_color not in allowed_colors:
+        #     return jsonify({'status': 'error', 'message': 'Invalid accent color'}), 400
+
+        current_user.accent_color = new_accent_color
+        try:
+            db.session.commit()
+            _app.logger.info(f"Accent color preference for {current_user.username} updated to '{new_accent_color}'.")
+            return jsonify({'status': 'success', 'message': 'Accent color updated successfully'})
+        except Exception as e:
+            db.session.rollback()
+            _app.logger.error(f"Error saving accent_color for user {current_user.username}: {e}", exc_info=True)
+            return jsonify({'status': 'error', 'message': 'Failed to save accent color preference'}), 500
 
     @_app.errorhandler(403)
     def forbidden_page(error):
