@@ -4,7 +4,7 @@
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 215-655-036
-127.0.0.1 - - [20/Jun/2025 20:51:38] "[35m[1mGET / HTTP/1.1[0m" 500 -
+127.0.0.1 - - [20/Jun/2025 21:10:03] "[35m[1mGET / HTTP/1.1[0m" 500 -
 Traceback (most recent call last):
   File "/home/jules/.pyenv/versions/3.12.11/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 145, in __init__
     self._dbapi_connection = engine.raw_connection()
@@ -166,5 +166,5 @@ sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to serve
 	Is the server running on that host and accepting TCP/IP connections?
 
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
-127.0.0.1 - - [20/Jun/2025 20:51:38] "GET /about HTTP/1.1" 200 -
-127.0.0.1 - - [20/Jun/2025 20:51:38] "GET /contact HTTP/1.1" 200 -
+127.0.0.1 - - [20/Jun/2025 21:10:03] "GET /about HTTP/1.1" 200 -
+127.0.0.1 - - [20/Jun/2025 21:10:03] "GET /contact HTTP/1.1" 200 -
