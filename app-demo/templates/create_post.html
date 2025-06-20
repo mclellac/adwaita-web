@@ -44,6 +44,16 @@
                             </div>
                         {% endif %}
                     </div>
+
+                    <adw-entry-row
+                        title="{{ form.tags_string.label.text }}"
+                        name="{{ form.tags_string.name }}"
+                        id="{{ form.tags_string.id or 'tags_string_field' }}"
+                        placeholder="e.g., tech, travel, food"
+                        value="{{ form.tags_string.data or '' }}"
+                        subtitle="{{ form.tags_string.errors[0] if form.tags_string.errors else 'Comma-separated values.' }}">
+                    </adw-entry-row>
+
                 </adw-list-box>
                 <div style="display: flex; justify-content: flex-end; padding: var(--spacing-m) var(--spacing-m) 0 var(--spacing-m);">
                     {{ form.submit(class_='adw-button suggested-action') }}

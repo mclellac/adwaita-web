@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% block title %}Adwaita Components Showcase{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 20px; padding-bottom: 20px;">
+  <h1>Adwaita Web Components Showcase</h1>
+  <p>This page demonstrates the various Adwaita-styled web components available.</p>
+
+  <hr style="margin: 30px 0;">
+
+  <!-- Layout Components -->
+  <h2>Layout Components</h2>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-box&gt;</code></h3>
+    <p>Horizontal Box with spacing:</p>
+    <adw-box orientation="horizontal" spacing="m" style="padding: 10px; border: 1px solid #ccc;">
+      <adw-button>Button 1</adw-button>
+      <adw-button>Button 2</adw-button>
+      <adw-button>Button 3</adw-button>
+    </adw-box>
+    <br>
+    <p>Vertical Box with spacing:</p>
+    <adw-box orientation="vertical" spacing="s" style="padding: 10px; border: 1px solid #ccc; width: 200px;">
+      <adw-button style="width: 100%;">Button A</adw-button>
+      <adw-button style="width: 100%;">Button B</adw-button>
+      <adw-button style="width: 100%;">Button C</adw-button>
+    </adw-box>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-list-box&gt;</code></h3>
+    <adw-list-box style="max-width: 400px;">
+      <adw-action-row title="Action Row 1" subtitle="Subtitle for action 1"></adw-action-row>
+      <adw-entry-row title="Username Entry" name="showcase_user"></adw-entry-row>
+      <adw-action-row title="Another Action" subtitle="With a chevron" show-chevron="true"></adw-action-row>
+    </adw-list-box>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-row&gt;</code></h3>
+    <adw-row style="padding: 10px; border: 1px solid #ccc;">
+      <span>This is a standalone AdwRow.</span>
+      <adw-button appearance="flat">Flat Button in Row</adw-button>
+    </adw-row>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-flap&gt;</code></h3>
+    <adw-flap id="showcaseFlap" style="border: 1px solid #ccc; min-height: 150px;">
+      <div slot="flap" style="padding: 10px; background-color: #f0f0f0;">Flap Content Area. Can contain navigation or other elements.</div>
+      <div slot="main" style="padding: 10px;">Main Content Area. Toggle the flap to hide/show the flap content.</div>
+    </adw-flap>
+    <br>
+    <adw-button onclick="document.getElementById('showcaseFlap').toggleFlap()">Toggle Flap</adw-button>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-view-switcher&gt;</code></h3>
+    <adw-view-switcher label="Sample Views" id="showcaseViewSwitcher">
+      <div view-name="View One" style="padding: 10px;">Content for the first view.</div>
+      <div view-name="View Two" style="padding: 10px;">Content for the second view. It's different!</div>
+      <div view-name="View Three" style="padding: 10px;">Third view's content here.</div>
+    </adw-view-switcher>
+  </section>
+
+  <hr style="margin: 30px 0;">
+
+  <!-- Input Components -->
+  <h2>Input Components</h2>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-button&gt;</code></h3>
+    <adw-box spacing="s" style="flex-wrap: wrap;">
+      <adw-button>Normal Button</adw-button>
+      <adw-button appearance="suggested-action">Suggested Action</adw-button>
+      <adw-button appearance="destructive-action">Destructive Action</adw-button>
+      <adw-button appearance="flat">Flat Button</adw-button>
+      <adw-button appearance="circular" icon="folder-symbolic" aria-label="Folder"></adw-button>
+      <adw-button disabled>Disabled Button</adw-button>
+    </adw-box>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-split-button&gt;</code></h3>
+    <adw-split-button id="showcaseSplitButton" action-text="Main Action" dropdown-aria-label="More actions"></adw-split-button>
+    <p id="splitButtonLog" style="margin-top: 5px; font-size: 0.9em;"></p>
+    <script>
+      document.getElementById('showcaseSplitButton').addEventListener('action-click', () => {
+        document.getElementById('splitButtonLog').textContent = 'Main action clicked at ' + new Date().toLocaleTimeString();
+      });
+      document.getElementById('showcaseSplitButton').addEventListener('dropdown-click', () => {
+        document.getElementById('splitButtonLog').textContent = 'Dropdown arrow clicked at ' + new Date().toLocaleTimeString();
+        // In a real app, this would open a menu/popover.
+      });
+    </script>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-entry&gt;</code></h3>
+    <adw-entry placeholder="Enter some text..." style="width: 300px;"></adw-entry>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-entry-row&gt;</code></h3>
+    <adw-entry-row title="Entry Row Title" name="showcase_entry_row" placeholder="Placeholder..." style="max-width: 400px;"></adw-entry-row>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-password-entry-row&gt;</code></h3>
+    <adw-password-entry-row title="Password Row Title" name="showcase_password_row" style="max-width: 400px;"></adw-password-entry-row>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-checkbox&gt;</code></h3>
+    <adw-checkbox label="A sample checkbox" name="showcase_checkbox"></adw-checkbox>
+    <adw-checkbox label="Checked by default" name="showcase_checkbox_checked" checked></adw-checkbox>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-radio-button&gt;</code></h3>
+    <adw-box orientation="vertical" spacing="xs">
+      <adw-radio-button label="Radio Option 1" name="showcase_radio_group" value="opt1"></adw-radio-button>
+      <adw-radio-button label="Radio Option 2 (checked)" name="showcase_radio_group" value="opt2" checked></adw-radio-button>
+      <adw-radio-button label="Radio Option 3" name="showcase_radio_group" value="opt3"></adw-radio-button>
+    </adw-box>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-switch&gt;</code></h3>
+    <adw-switch label="A sample switch"></adw-switch>
+    <adw-switch label="Initially on" checked></adw-switch>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-combo-row&gt;</code></h3>
+    <adw-combo-row title="Choose an Option"
+                     name="showcase_combo"
+                     select-options='[{"label":"Option the First","value":"1"},{"label":"Second Option","value":"2"},{"label":"Option C","value":"3"}]'
+                     selected-value="2"
+                     style="max-width: 400px;"></adw-combo-row>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-expander-row&gt;</code></h3>
+    <adw-expander-row title="Expandable Section" subtitle="Click to see more" style="max-width: 400px;">
+      <div slot="content" style="padding: 10px; border-top: 1px solid #eee;">
+        This is the content that appears when the expander row is opened.
+        It can contain any HTML.
+      </div>
+    </adw-expander-row>
+  </section>
+
+  <hr style="margin: 30px 0;">
+
+  <!-- Display & Info Components -->
+  <h2>Display & Info Components</h2>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-label&gt;</code></h3>
+    <adw-label>This is a standard label.</adw-label><br>
+    <adw-label title-level="1">Title Level 1 (like H1)</adw-label><br>
+    <adw-label title-level="4">Title Level 4 (like H4)</adw-label><br>
+    <adw-label body>Body text style label.</adw-label><br>
+    <adw-label caption>Caption style label.</adw-label><br>
+    <adw-label link onclick="alert('Link label clicked!')">This is a link-styled label.</adw-label>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-avatar&gt;</code></h3>
+    <adw-box spacing="m" style="align-items: center;">
+      <adw-avatar text="JD" image-src="path/to/invalid/image.png"></adw-avatar>
+      <adw-avatar text="AB" size="64"></adw-avatar>
+      <adw-avatar image-src="https://via.placeholder.com/48" alt="Placeholder Image"></adw-avatar>
+      <adw-avatar text="Unsupported" size="32"></adw-avatar>
+    </adw-box>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-progress-bar&gt;</code></h3>
+    <adw-progress-bar value="65" style="margin-bottom: 10px;"></adw-progress-bar>
+    <adw-progress-bar indeterminate></adw-progress-bar>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-spinner&gt;</code></h3>
+    <adw-box spacing="m" style="align-items: center;">
+      <adw-spinner active size="small"></adw-spinner>
+      <adw-spinner active></adw-spinner>
+      <adw-spinner active size="large"></adw-spinner>
+      <adw-spinner active="false" size="large"> (Inactive spinner, hidden)</adw-spinner>
+    </adw-box>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-status-page&gt;</code></h3>
+    <div style="border: 1px solid #ccc; padding: 20px;">
+      <adw-status-page title="Sample Status Page" description="This is a description of the status. Something might have happened.">
+        <div slot="actions">
+          <adw-button appearance="suggested-action">Primary Action</adw-button>
+          <adw-button>Secondary Action</adw-button>
+        </div>
+      </adw-status-page>
+    </div>
+  </section>
+
+  <hr style="margin: 30px 0;">
+
+  <!-- Notification Components -->
+  <h2>Notification Components</h2>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-banner&gt;</code></h3>
+    <p>The banner below is shown on page load because of the 'show' attribute.</p>
+    <adw-banner message="This is an informational banner shown on load." type="info" dismissible show></adw-banner>
+    <br>
+    <adw-banner id="manualBanner" message="This is a warning banner, manually triggered." type="warning" dismissible></adw-banner>
+    <adw-button onclick="document.getElementById('manualBanner').show()">Show Manual Banner</adw-button>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-toast&gt;</code></h3>
+    <adw-toast id="showcaseToast" message="This is a success toast!" type="success">
+        <adw-button slot="button" appearance="flat" onclick="alert('Toast button clicked!')">Action</adw-button>
+    </adw-toast>
+    <adw-button onclick="document.getElementById('showcaseToast').show()">Show Toast</adw-button>
+  </section>
+
+  <section style="margin-bottom: 30px;">
+    <h3><code>&lt;adw-dialog&gt;</code></h3>
+    <adw-dialog id="showcaseDialog" title="Sample Dialog Title">
+      <div slot="content">
+        <p>This is the content area of the dialog. You can put any HTML here.</p>
+        <adw-entry placeholder="An entry field in a dialog"></adw-entry>
+      </div>
+      <div slot="buttons">
+        <adw-button onclick="document.getElementById('showcaseDialog').close()">Close</adw-button>
+        <adw-button appearance="suggested-action" onclick="alert('Confirmed!'); document.getElementById('showcaseDialog').close()">Confirm</adw-button>
+      </div>
+    </adw-dialog>
+    <adw-button onclick="document.getElementById('showcaseDialog').open()">Open Dialog</adw-button>
+  </section>
+
+</div>
+
+<script>
+  // Example of programmatically interacting with a component if needed
+  document.addEventListener('DOMContentLoaded', () => {
+    const combo = document.querySelector('adw-combo-row[name="showcase_combo"]');
+    if(combo) {
+      combo.addEventListener('change', (event) => {
+        console.log('Combo Row new value:', event.detail.value);
+        const logP = document.createElement('p');
+        logP.textContent = `Combo Row changed to: ${event.detail.value}`;
+        combo.insertAdjacentElement('afterend', logP);
+      });
+    }
+  });
+</script>
+
+{% endblock %}
