@@ -34,6 +34,7 @@ cd "${ORIGINAL_PWD}" || exit 1 # Exit if cd fails
 # Copy JavaScript files
 echo "Copying JavaScript files from ${JS_INPUT_DIR} to ${JS_OUTPUT_DIR}"
 cp "${JS_INPUT_DIR}/components.js" "${JS_OUTPUT_DIR}/components.js"
+cp "${JS_INPUT_DIR}/adw-initializer.js" "${JS_OUTPUT_DIR}/adw-initializer.js"
 # If there are other JS files to copy, add them here. e.g.:
 # cp "${JS_INPUT_DIR}/another-script.js" "${JS_OUTPUT_DIR}/another-script.js"
 
