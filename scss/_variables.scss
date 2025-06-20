@@ -1,5 +1,3 @@
-// Adwaita-like color palette
-// Light Theme
 @mixin light-theme {
   --accent-bg-color: var(--accent-blue-light-bg);
   --accent-fg-color: var(--accent-blue-light-fg);
@@ -8,7 +6,6 @@
   --destructive-fg-color: var(--accent-red-light-fg);
   --destructive-color: var(--accent-red-standalone);
 
-  // Banner colors for light theme
   --info-bg-color: var(--info-bg-color-light);
   --info-fg-color: var(--info-fg-color-light);
   --info-border-color: var(--info-border-color-light);
@@ -34,15 +31,15 @@
   --headerbar-fg-color: rgba(0, 0, 0, 0.8);
   --headerbar-border-color: rgba(0, 0, 0, 0.12);
   --headerbar-backdrop-color: var(--window-bg-color);
-  --headerbar-shade-color: rgba(0, 0, 0, 0.07); // For box-shadow
+  --headerbar-shade-color: rgba(0, 0, 0, 0.07);
 
   --card-bg-color: #ffffff;
   --card-fg-color: rgba(0, 0, 0, 0.8);
-  --card-shade-color: rgba(0, 0, 0, 0.07); // For box-shadow
+  --card-shade-color: rgba(0, 0, 0, 0.07);
 
   --popover-bg-color: #ffffff;
   --popover-fg-color: rgba(0, 0, 0, 0.8);
-  --popover-shade-color: rgba(0, 0, 0, 0.07); // For box-shadow
+  --popover-shade-color: rgba(0, 0, 0, 0.07);
 
   --button-bg-color: #ebeae9;
   --button-fg-color: rgba(0, 0, 0, 0.8);
@@ -67,15 +64,14 @@
   --dialog-bg-color: #fdfcfb; // Slightly lighter than window
   --dialog-fg-color: rgba(0, 0, 0, 0.8);
 
-  --thumbnail-bg-color: #ffffff; // Usually white
+  --thumbnail-bg-color: #ffffff;
   --thumbnail-fg-color: rgba(0, 0, 0, 0.8);
 
-  --shade-color: rgba(0, 0, 0, 0.07); // General purpose shade/shadow
+  --shade-color: rgba(0, 0, 0, 0.07);
   --scrollbar-outline-color: #ffffff;
   --link-color: var(--accent-bg-color);
-  --link-visited-color: #5a5a5a; // Standard visited link color
+  --link-visited-color: #5a5a5a;
 
-  // Progress Bar
   --progress-bar-track-color: var(--shade-color);
   --progress-bar-fill-color: var(--accent-bg-color);
 
@@ -85,7 +81,6 @@
   --secondary-text-color: rgba(0,0,0,0.7); // For less important text
 }
 
-// Dark Theme
 @mixin dark-theme {
   --accent-bg-color: var(--accent-blue-dark-bg);
   --accent-fg-color: var(--accent-blue-dark-fg);
@@ -94,7 +89,6 @@
   --destructive-fg-color: var(--accent-red-dark-fg);
   --destructive-color: var(--accent-red-dark-standalone);
 
-  // Banner colors for dark theme
   --info-bg-color: var(--info-bg-color-dark);
   --info-fg-color: var(--info-fg-color-dark);
   --info-border-color: var(--info-border-color-dark);
@@ -156,16 +150,14 @@
   --thumbnail-bg-color: #242424; // Same as view
   --thumbnail-fg-color: #ffffff;
 
-  --shade-color: rgba(0, 0, 0, 0.36); // General purpose shade/shadow
+  --shade-color: rgba(0, 0, 0, 0.36);
   --scrollbar-outline-color: rgba(0, 0, 0, 0.5);
   --link-color: var(--accent-bg-color);
   --link-visited-color: #c0c0c0; // Lighter visited link for dark theme
 
-  // Progress Bar
   --progress-bar-track-color: var(--shade-color);
   --progress-bar-fill-color: var(--accent-bg-color);
 
-  // Toast
   --toast-bg-color: #424242; // Slightly lighter dark grey for dark theme
   --toast-fg-color: #ffffff;
   --secondary-text-color: rgba(255,255,255,0.7); // For less important text
@@ -184,11 +176,10 @@
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
 
-  // Border Radius
   --border-radius-small: 3px;
-  --border-radius-default: 6px; // Common border radius
-  --border-radius-large: 12px; // For larger elements like cards or windows
-  --window-radius: var(--border-radius-large); // Specific for main window corners
+  --border-radius-default: 6px;
+  --border-radius-large: 12px;
+  --window-radius: var(--border-radius-large);
 
   // Spacing (libadwaita uses multiples of 6px and 12px often)
   --spacing-xxs: 3px;
@@ -199,19 +190,17 @@
   --spacing-xl: 24px;
   --spacing-xxl: 36px;
 
-  // Opacity
-  --opacity-disabled: 0.5; // For disabled elements
-  --opacity-hover: 0.8; // General hover opacity if not changing color
-  --opacity-active: 0.6; // General active opacity if not changing color
+  --opacity-disabled: 0.5;
+  --opacity-hover: 0.8;
+  --opacity-active: 0.6;
 
   // Border Color (general fallback if not specified by component)
-  --border-color-light: rgba(0, 0, 0, 0.12); // For light theme
-  --border-color-dark: rgba(255, 255, 255, 0.07); // For dark theme
+  --border-color-light: rgba(0, 0, 0, 0.12);
+  --border-color-dark: rgba(255, 255, 255, 0.07);
 
   // Note: --accent-fg-color-rgb was removed as SCSS cannot use CSS variables in rgba() directly.
   // Direct values (e.g., 255,255,255 for white) should be used in rgba() within component SCSS if needed.
 
-  // Accent Color Palette (Raw colors)
   // Naming: --adw-{colorName}-{shade} (shade 1-5, 3 is often a good base)
   // These are just examples, a full Adwaita palette has many more.
   --adw-blue-1: #d3e5f7;
@@ -241,11 +230,9 @@
   // Definitive Accent Color Variables (to be used by JS)
   // These provide a layer of abstraction. JS sets --accent-bg-color to one of these.
 
-  // Light Theme Accent Palette
   --accent-blue-light-bg: var(--adw-blue-3);
   --accent-blue-light-fg: #ffffff;
 
-  // Banner Colors (Light Theme)
   --info-bg-color-light: var(--adw-blue-1);
   --info-border-color-light: var(--adw-blue-3);
   --info-fg-color-light: var(--adw-blue-5);
@@ -278,7 +265,6 @@
   --accent-blue-dark-bg: var(--adw-blue-3);
   --accent-blue-dark-fg: #ffffff;
 
-  // Banner Colors (Dark Theme)
   --info-bg-color-dark: var(--adw-blue-4-dark);
   --info-border-color-dark: var(--adw-blue-3);
   --info-fg-color-dark: var(--adw-blue-1);
@@ -331,15 +317,13 @@
 
 }
 
-// Apply themes
 :root {
   // Default to DARK theme directly in :root.
   // All components should primarily use these CSS variables.
   @include dark-theme;
-  // Set initial default accent to blue (dark theme version)
   --accent-bg-color: var(--accent-blue-dark-bg);
   --accent-fg-color: var(--accent-blue-dark-fg);
-  --accent-color: var(--accent-blue-dark-standalone); // Generic accent color for text/icons
+  --accent-color: var(--accent-blue-dark-standalone);
 }
 
 body.light-theme {
@@ -420,7 +404,7 @@ body.light-theme {
   @define-color scrollbar_outline_color var(--scrollbar-outline-color);
   @define-color progress_bar_track_color var(--progress-bar-track-color);
   @define-color progress_bar_fill_color var(--progress-bar-fill-color);
-  @define-color accent_color var(--accent-color); // For GTK mapping of the dynamic accent color
+  @define-color accent_color var(--accent-color);
 
   // These are not direct libadwaita CSS variables but often derived or context-specific.
   // We'll keep the ones that are broadly applicable.

@@ -1,23 +1,23 @@
 from datetime import datetime, timezone
-from flask import Flask, render_template, url_for, abort, request, redirect, flash # Added flash
+from flask import Flask, render_template, url_for, abort, request, redirect, flash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect, FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, SubmitField, FileField
 from wtforms.validators import DataRequired, Length, Optional, Email
-from sqlalchemy import desc # Added for ordering
+from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename # Added for file uploads
-import os # For secret key
-import logging # Added for logging
-from PIL import Image # Added for image resizing
-import uuid # For unique filenames
+from werkzeug.utils import secure_filename
+import os
+import logging
+from PIL import Image
+import uuid
 
 app = Flask(__name__)
-csrf = CSRFProtect(app) # Initialize CSRF protection
+csrf = CSRFProtect(app)
 
 # Basic logging configuration
-if not app.debug: # Only configure basic logging if not in debug mode
+if not app.debug:
     app.logger.setLevel(logging.INFO)
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.INFO)
@@ -29,13 +29,11 @@ if not app.debug: # Only configure basic logging if not in debug mode
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'a_default_very_secret_key_for_development_only') # In production, use a proper secret key
 
 # Database Configuration
-# Get PostgreSQL connection details from environment variables
 POSTGRES_USER = os.environ.get('POSTGRES_USER', 'postgres')
-POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'postgres') # Changed default password
+POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'postgres')
 POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'localhost')
 POSTGRES_DB = os.environ.get('POSTGRES_DB', 'appdb')
 
-# Construct the database URI
 # If password is empty, it might imply peer authentication or other auth methods
 if POSTGRES_PASSWORD:
     SQLALCHEMY_DATABASE_URI = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}"
@@ -43,14 +41,12 @@ else:
     SQLALCHEMY_DATABASE_URI = f"postgresql://{POSTGRES_USER}@{POSTGRES_HOST}/{POSTGRES_DB}"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', SQLALCHEMY_DATABASE_URI)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Explicitly set, though setdefault could also be used
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Define upload folder and allowed extensions for profile pictures
 UPLOAD_FOLDER = 'app-demo/static/uploads/profile_pics'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Define WTForms classes
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -63,25 +59,23 @@ class PostForm(FlaskForm):
 
 class ProfileEditForm(FlaskForm):
     profile_info = TextAreaField('Profile Info', validators=[Optional(), Length(max=5000)])
-    profile_photo = FileField('Profile Photo', validators=[Optional()]) # Add specific file validators if needed (e.g., FileAllowed)
+    profile_photo = FileField('Profile Photo', validators=[Optional()])
     submit = SubmitField('Update Profile')
 
-db = SQLAlchemy() # Initialize SQLAlchemy without app
+db = SQLAlchemy()
 
 login_manager = LoginManager()
 # login_manager.init_app(app) # Will be called after db.init_app or if app is fully initialized
-login_manager.login_view = 'login' # Name of voluntee login route
+login_manager.login_view = 'login'
 
-# Helper function to check allowed file extensions
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Define SQLAlchemy Models
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False) # Increased length for hash
+    password_hash = db.Column(db.String(256), nullable=False)
     profile_info = db.Column(db.Text, nullable=True)
     profile_photo_url = db.Column(db.String(512), nullable=True)
     posts = db.relationship('Post', backref='author', lazy=True, order_by=desc("created_at"))
@@ -92,7 +86,6 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    # Flask-Login integration
     def get_id(self):
         return str(self.id)
 
@@ -110,7 +103,6 @@ def load_user(user_id):
     # user_id is a string, convert to int for query
     return db.session.get(User, int(user_id))
 
-# Removed in-memory posts_data and next_post_id
 
 @app.context_processor
 def inject_user():
@@ -119,7 +111,7 @@ def inject_user():
 @app.route('/')
 def index():
     page = request.args.get('page', 1, type=int)
-    per_page = 5  # Or any number of items per page you prefer
+    per_page = 5
     pagination = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
     posts = pagination.items
     return render_template('index.html', posts=posts, pagination=pagination)
@@ -148,7 +140,7 @@ def create_post():
             db.session.rollback()
             app.logger.error(f"Error creating post: {e}", exc_info=True)
             flash(f'Error creating post: {e}', 'danger')
-    elif request.method == 'POST': # Catches validation errors from form.errors
+    elif request.method == 'POST':
         app.logger.warning(f"Post creation by {current_user.username} failed validation. Errors: {form.errors}")
         for field, errors in form.errors.items():
             for error in errors:
@@ -160,13 +152,10 @@ def create_post():
 def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
-        # Forbidden, or redirect with an error message
-        abort(403) # Or flash a message and redirect
+        abort(403)
 
     db.session.delete(post)
     db.session.commit()
-    # Flash a success message (optional)
-    # flash('Post deleted successfully.', 'success')
     return redirect(url_for('index'))
 
 @app.route('/posts/<int:post_id>/edit', methods=['GET', 'POST'])
@@ -178,7 +167,7 @@ def edit_post(post_id):
 
     form = PostForm(obj=post) # Populate form with existing post data on GET
 
-    if form.validate_on_submit(): # Handles POST requests and validation
+    if form.validate_on_submit():
         post.title = form.title.data
         post.content = form.content.data
         # post.updated_at will be updated by onupdate
@@ -190,13 +179,13 @@ def edit_post(post_id):
             db.session.rollback()
             app.logger.error(f"Error updating post {post.id}: {e}", exc_info=True)
             flash(f'Error updating post: {e}', 'danger')
-    elif request.method == 'POST': # Catches validation errors
+    elif request.method == 'POST':
         app.logger.warning(f"Post {post.id} update by {current_user.username} failed validation. Errors: {form.errors}")
         for field, errors in form.errors.items():
             for error in errors:
                 flash(f"Error in {getattr(form, field).label.text}: {error}", 'warning')
 
-    return render_template('edit_post.html', form=form, post=post) # Pass both form and post
+    return render_template('edit_post.html', form=form, post=post)
 
 @app.route('/test-widget')
 def test_widget_page():
@@ -207,7 +196,7 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm()
-    if form.validate_on_submit(): # Handles POST requests and validation
+    if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
         user = User.query.filter_by(username=username).first()
@@ -230,8 +219,6 @@ def logout():
 @login_required
 def profile(username):
     user_profile = User.query.filter_by(username=username).first_or_404()
-    # The old authorization comments are still relevant if further restrictions are needed.
-    # For now, if the user exists, their profile page is shown.
     return render_template('profile.html', user_profile=user_profile)
 
 @app.route('/profile/edit', methods=['GET', 'POST'])
@@ -244,7 +231,7 @@ def edit_profile():
         app.logger.info(f"User {current_user.username} updating profile_info.")
 
         file = form.profile_photo.data # This is a FileStorage object
-        if file and file.filename: # Check if a file was selected and has a name
+        if file and file.filename:
             if allowed_file(file.filename):
                 try:
                     original_filename = secure_filename(file.filename)
@@ -260,7 +247,7 @@ def edit_profile():
                     img.thumbnail((200, 200))
                     img.save(save_path)
 
-                    relative_path = os.path.join('uploads/profile_pics', unique_filename) # Store the new unique filename path
+                    relative_path = os.path.join('uploads/profile_pics', unique_filename)
                     current_user.profile_photo_url = relative_path
                     app.logger.info(f"Resized and saved image to '{save_path}' for user {current_user.username}. Relative path: {relative_path}")
                     flash('Profile photo updated successfully!', 'success')
@@ -276,7 +263,7 @@ def edit_profile():
             db.session.commit()
             app.logger.info(f"Profile changes for {current_user.username} committed to DB.")
             # Avoid double-flashing if photo status was already flashed
-            if not (file and file.filename): # Only flash general success if no photo was processed
+            if not (file and file.filename):
                  flash('Profile updated successfully!', 'success')
         except Exception as e:
             db.session.rollback()
@@ -284,7 +271,7 @@ def edit_profile():
             flash(f'Error saving profile changes: {e}', 'danger')
 
         return redirect(url_for('profile', username=current_user.username))
-    elif request.method == 'POST': # Catches validation errors from form.errors
+    elif request.method == 'POST':
         app.logger.warning(f"Profile edit by {current_user.username} failed validation. Errors: {form.errors}")
         for field_name, field_errors in form.errors.items():
             for error in field_errors:
@@ -304,7 +291,6 @@ def settings_page():
 def test_new_widgets_page():
     return render_template('test_new_widgets.html')
 
-# Error Handlers
 @app.errorhandler(403)
 def forbidden_page(error):
     return render_template('403.html'), 403
@@ -315,7 +301,6 @@ def page_not_found(error):
 
 @app.errorhandler(500)
 def server_error_page(error):
-    # Log the error for debugging
     app.logger.error(f"Server error: {error}", exc_info=True)
     return render_template('500.html'), 500
 
@@ -334,23 +319,9 @@ def init_extensions(flask_app):
             print("db.create_all() executed successfully.")
         except Exception as e:
             print(f"Error during db.create_all(): {e}")
-            # Optionally, re-raise or handle more gracefully
-            # For setup_db.py, printing might be enough, but for app runtime, this could be critical
             raise
     print("Exited application context for db.create_all().")
 
 if __name__ == '__main__':
-    init_extensions(app) # Initialize extensions for direct run
-    # Create example users if needed (code for this is already commented out but can be used for testing)
-    # with app.app_context():
-    #     if not User.query.filter_by(username="testuser").first():
-    #         user = User(username="testuser", profile_info="Just a test user.")
-    #         user.set_password("password123")
-    #         db.session.add(user)
-    #         db.session.commit()
-    #     if not User.query.filter_by(username="admin").first():
-    #         admin = User(username="admin", profile_info="Administrator account.")
-    #         admin.set_password("adminpassword")
-    #         db.session.add(admin)
-    #         db.session.commit()
+    init_extensions(app)
     app.run(debug=True)
