@@ -772,15 +772,17 @@ function setAccentColor(colorName) {
         colorName = DEFAULT_ACCENT_COLOR;
     }
 
-    const rootStyle = document.documentElement.style;
     const isLightTheme = document.body.classList.contains('light-theme');
+    const styleTargetElement = isLightTheme ? document.body : document.documentElement;
+    const styleTarget = styleTargetElement.style;
+
     const themeSuffix = isLightTheme ? '-light' : '-dark';
 
-    rootStyle.setProperty('--accent-bg-color', `var(--accent-${colorName}${themeSuffix}-bg)`);
-    rootStyle.setProperty('--accent-fg-color', `var(--accent-${colorName}${themeSuffix}-fg)`);
+    styleTarget.setProperty('--accent-bg-color', `var(--accent-${colorName}${themeSuffix}-bg)`);
+    styleTarget.setProperty('--accent-fg-color', `var(--accent-${colorName}${themeSuffix}-fg)`);
 
     const standaloneSuffix = isLightTheme ? '' : '-dark';
-    rootStyle.setProperty('--accent-color', `var(--accent-${colorName}${standaloneSuffix}-standalone, var(--accent-${colorName}-standalone))`);
+    styleTarget.setProperty('--accent-color', `var(--accent-${colorName}${standaloneSuffix}-standalone, var(--accent-${colorName}-standalone))`);
 
     localStorage.setItem('accentColor', colorName);
 }
