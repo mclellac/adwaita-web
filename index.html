@@ -1196,6 +1196,1727 @@ const comboRow = Adw.createComboRow({
         // Will be inserted after specializedRowsListBox
 
 
+        // --- Custom Element Showcase Definition ---
+        const customElementShowcaseTitle = Adw.createLabel("Custom Element Showcase", {title:1});
+
+        const customElementExamplesBox = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm',
+            children: [
+                // Placeholders removed, new content will be added below
+            ]
+        });
+
+        // --- adw-button subsection ---
+        const adwButtonSubsectionTitle = Adw.createLabel("adw-button", {title:2});
+
+        const adwButtonExamplesBox = Adw.createBox({
+            orientation: 'horizontal', // Arrange buttons in a row
+            spacing: 'm',              // Medium spacing between buttons
+            wrap: true,                // Allow buttons to wrap to the next line
+        });
+
+        // Standard Button
+        const adwBtnStandard = document.createElement('adw-button');
+        adwBtnStandard.textContent = 'Standard Button';
+        adwBtnStandard.addEventListener('click', () => Adw.createToast("Standard adw-button clicked"));
+        adwButtonExamplesBox.appendChild(adwBtnStandard);
+
+        // Suggested Button
+        const adwBtnSuggested = document.createElement('adw-button');
+        adwBtnSuggested.setAttribute('suggested', '');
+        adwBtnSuggested.textContent = 'Suggested Button';
+        adwBtnSuggested.addEventListener('click', () => Adw.createToast("Suggested adw-button clicked"));
+        adwButtonExamplesBox.appendChild(adwBtnSuggested);
+
+        // Destructive Button
+        const adwBtnDestructive = document.createElement('adw-button');
+        adwBtnDestructive.setAttribute('destructive', '');
+        adwBtnDestructive.textContent = 'Destructive Button';
+        adwBtnDestructive.addEventListener('click', () => Adw.createToast("Destructive adw-button clicked"));
+        adwButtonExamplesBox.appendChild(adwBtnDestructive);
+
+        // Flat Button
+        const adwBtnFlat = document.createElement('adw-button');
+        adwBtnFlat.setAttribute('flat', '');
+        adwBtnFlat.textContent = 'Flat Button';
+        adwBtnFlat.addEventListener('click', () => Adw.createToast("Flat adw-button clicked"));
+        adwButtonExamplesBox.appendChild(adwBtnFlat);
+
+        // Disabled Button
+        const adwBtnDisabled = document.createElement('adw-button');
+        adwBtnDisabled.setAttribute('disabled', '');
+        adwBtnDisabled.textContent = 'Disabled Button';
+        // No click listener for disabled button
+        adwButtonExamplesBox.appendChild(adwBtnDisabled);
+
+        // Icon Button
+        const adwBtnIcon = document.createElement('adw-button');
+        adwBtnIcon.setAttribute('icon', "<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM7 11.5a1 1 0 1 1 2 0a1 1 0 0 1-2 0Zm.5-7a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5Z'/></svg>");
+        adwBtnIcon.textContent = 'Icon Button';
+        adwBtnIcon.addEventListener('click', () => Adw.createToast("Icon adw-button clicked"));
+        adwButtonExamplesBox.appendChild(adwBtnIcon);
+
+        // Circular Icon Button
+        const adwBtnCircular = document.createElement('adw-button');
+        adwBtnCircular.setAttribute('circular', '');
+        adwBtnCircular.setAttribute('icon', "<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385C2.49 8.673 3.25 9.776 4.138 10.737MB8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15'/></svg>");
+        // No text content for circular icon buttons typically
+        adwBtnCircular.addEventListener('click', () => Adw.createToast("Circular adw-button clicked"));
+        adwButtonExamplesBox.appendChild(adwBtnCircular);
+
+        const adwButtonCodeSample = `
+<!-- Standard Button -->
+<adw-button>Standard Button</adw-button>
+
+<!-- Suggested Button (for primary actions) -->
+<adw-button suggested>Suggested Button</adw-button>
+
+<!-- Destructive Button (for actions like delete) -->
+<adw-button destructive>Destructive Button</adw-button>
+
+<!-- Flat Button (borderless) -->
+<adw-button flat>Flat Button</adw-button>
+
+<!-- Disabled Button -->
+<adw-button disabled>Disabled Button</adw-button>
+
+<!-- Button with Icon -->
+<adw-button icon="<svg>...</svg>">Icon Button</adw-button>
+<!-- Note: SVG string should be properly escaped if defined in HTML directly,
+     or use a JS variable if setting via JS. For this demo, assume JS context. -->
+
+<!-- Circular Icon Button (typically icon-only) -->
+<adw-button circular icon="<svg>...</svg>"></adw-button>
+
+<script>
+    // To add event listeners or manipulate programmatically:
+    const myButton = document.querySelector('adw-button'); // or get by ID
+    myButton.addEventListener('click', () => {
+        console.log('adw-button clicked!');
+    });
+
+    // To set attributes programmatically:
+    // myButton.setAttribute('suggested', ''); // For boolean attributes
+    // myButton.removeAttribute('disabled');
+    // myButton.setAttribute('icon', '<svg>...</svg>');
+    // myButton.textContent = 'New Label';
+</script>
+        `;
+        const adwButtonCodeDetails = createCodeSampleDetails('Show <adw-button> Code', adwButtonCodeSample);
+
+        // Append the adw-button subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwButtonSubsectionTitle);
+        customElementExamplesBox.appendChild(adwButtonExamplesBox);
+        customElementExamplesBox.appendChild(adwButtonCodeDetails);
+
+        // --- adw-box subsection ---
+        const adwBoxSubsectionTitle = Adw.createLabel("adw-box", {title:2});
+
+        const adwBoxExamplesContainer = Adw.createBox({ // Main container for all adw-box examples
+            orientation: 'vertical',
+            spacing: 'l' // Large spacing between different box example setups
+        });
+
+        // Helper to create simple styled items for boxes
+        function createBoxDemoItem(text) {
+            const item = document.createElement('div');
+            item.textContent = text;
+            item.style.padding = 'var(--spacing-xs)';
+            item.style.border = '1px dashed var(--border-color)';
+            item.style.backgroundColor = 'var(--window-bg-color)'; // Use a subtle background
+            return item;
+        }
+
+        // 1. Horizontal Box Example
+        const horizontalBoxTitle = Adw.createLabel("Horizontal Box (spacing='m')", { title: 5, isBody: true });
+        const horizontalBox = document.createElement('adw-box');
+        horizontalBox.setAttribute('orientation', 'horizontal');
+        horizontalBox.setAttribute('spacing', 'm');
+        horizontalBox.appendChild(createBoxDemoItem('Item 1'));
+        horizontalBox.appendChild(createBoxDemoItem('Item 2'));
+        horizontalBox.appendChild(createBoxDemoItem('Item 3'));
+
+        const horizontalBoxDemo = Adw.createBox({ orientation: 'vertical', spacing: 'xs'});
+        horizontalBoxDemo.appendChild(horizontalBoxTitle);
+        horizontalBoxDemo.appendChild(horizontalBox);
+        adwBoxExamplesContainer.appendChild(horizontalBoxDemo);
+
+        // 2. Vertical Box Example
+        const verticalBoxTitle = Adw.createLabel("Vertical Box (spacing='s')", { title: 5, isBody: true });
+        const verticalBox = document.createElement('adw-box');
+        verticalBox.setAttribute('orientation', 'vertical');
+        verticalBox.setAttribute('spacing', 's');
+        verticalBox.appendChild(createBoxDemoItem('Item A'));
+        verticalBox.appendChild(createBoxDemoItem('Item B'));
+        verticalBox.appendChild(createBoxDemoItem('Item C'));
+
+        const verticalBoxDemo = Adw.createBox({ orientation: 'vertical', spacing: 'xs'});
+        verticalBoxDemo.appendChild(verticalBoxTitle);
+        verticalBoxDemo.appendChild(verticalBox);
+        adwBoxExamplesContainer.appendChild(verticalBoxDemo);
+
+        // 3. Box with Alignment/Justification
+        const alignedBoxTitle = Adw.createLabel("Aligned/Justified Box (align='center', justify='between')", { title: 5, isBody: true });
+        const alignedBox = document.createElement('adw-box');
+        alignedBox.setAttribute('orientation', 'horizontal');
+        alignedBox.setAttribute('spacing', 'm');
+        alignedBox.setAttribute('align', 'center');    // Vertical alignment of children
+        alignedBox.setAttribute('justify', 'between'); // Horizontal distribution of children
+        alignedBox.style.cssText = 'height: 80px; border: 1px solid var(--accent-color); padding: var(--spacing-xs); width: 300px;'; // Fixed width for predictable justify
+        alignedBox.appendChild(createBoxDemoItem('Start Child'));
+        alignedBox.appendChild(createBoxDemoItem('End Child'));
+
+        const alignedBoxDemo = Adw.createBox({ orientation: 'vertical', spacing: 'xs'});
+        alignedBoxDemo.appendChild(alignedBoxTitle);
+        alignedBoxDemo.appendChild(alignedBox);
+        adwBoxExamplesContainer.appendChild(alignedBoxDemo);
+
+        const adwBoxCodeSample = `
+<!-- Horizontal Box -->
+<adw-box orientation="horizontal" spacing="m">
+    <div>Item 1</div>
+    <div>Item 2</div>
+</adw-box>
+
+<!-- Vertical Box -->
+<adw-box orientation="vertical" spacing="s">
+    <div>Item A</div>
+    <div>Item B</div>
+</adw-box>
+
+<!-- Box with Alignment and Justification -->
+<!-- 'align' controls cross-axis alignment (e.g., items in a row align vertically) -->
+<!-- 'justify' controls main-axis distribution (e.g., items in a row spread out horizontally) -->
+<adw-box orientation="horizontal" spacing="m" align="center" justify="between" style="height: 50px; border: 1px solid lightgray;">
+    <div>Start</div>
+    <div>End</div>
+</adw-box>
+
+<!-- Possible values for spacing: "xs", "s", "m", "l", "xl" (or custom CSS value) -->
+<!-- Possible values for align: "start", "center", "end", "stretch", "baseline" -->
+<!-- Possible values for justify: "start", "center", "end", "between", "around", "evenly" -->
+
+<script>
+    // Creating an adw-box and adding children programmatically:
+    const myBox = document.createElement('adw-box');
+    myBox.setAttribute('orientation', 'vertical');
+    myBox.setAttribute('spacing', 's');
+
+    const child1 = document.createElement('div');
+    child1.textContent = 'Programmatic Child 1';
+    myBox.appendChild(child1);
+
+    const child2 = document.createElement('adw-label'); // Can use other custom elements
+    child2.textContent = 'Programmatic Child 2';
+    myBox.appendChild(child2);
+
+    // document.body.appendChild(myBox); // Or append to any other container
+</script>
+        `;
+        const adwBoxCodeDetails = createCodeSampleDetails('Show <adw-box> Code', adwBoxCodeSample);
+
+        // Append the adw-box subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwBoxSubsectionTitle);
+        customElementExamplesBox.appendChild(adwBoxExamplesContainer);
+        customElementExamplesBox.appendChild(adwBoxCodeDetails);
+
+        // --- adw-entry subsection ---
+        const adwEntrySubsectionTitle = Adw.createLabel("adw-entry", {title:2});
+
+        const adwEntryExamplesBox = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm' // Medium spacing between entry examples
+        });
+
+        // 1. Standard Entry
+        const standardEntryLabel = Adw.createLabel("Standard:");
+        const standardEntry = document.createElement('adw-entry');
+        standardEntry.setAttribute('placeholder', 'Enter text here...');
+        standardEntry.addEventListener('input', (e) => Adw.createToast(`Input: ${e.target.value}`, {timeout: 1500}));
+        const standardEntryRow = Adw.createRow({ children: [standardEntryLabel, standardEntry] });
+        adwEntryExamplesBox.appendChild(standardEntryRow);
+
+        // 2. Disabled Entry
+        const disabledEntryLabel = Adw.createLabel("Disabled:");
+        const disabledEntry = document.createElement('adw-entry');
+        disabledEntry.setAttribute('placeholder', 'Disabled entry');
+        disabledEntry.setAttribute('disabled', '');
+        disabledEntry.setAttribute('value', 'Cannot change');
+        const disabledEntryRow = Adw.createRow({ children: [disabledEntryLabel, disabledEntry] });
+        adwEntryExamplesBox.appendChild(disabledEntryRow);
+
+        // 3. Entry with Initial Value
+        const valueEntryLabel = Adw.createLabel("With Value:");
+        const valueEntry = document.createElement('adw-entry');
+        valueEntry.setAttribute('value', 'Initial text');
+        valueEntry.addEventListener('input', (e) => Adw.createToast(`Input: ${e.target.value}`, {timeout: 1500}));
+        const valueEntryRow = Adw.createRow({ children: [valueEntryLabel, valueEntry] });
+        adwEntryExamplesBox.appendChild(valueEntryRow);
+
+        // 4. Password Entry
+        const passwordEntryLabel = Adw.createLabel("Password Type:");
+        const passwordEntry = document.createElement('adw-entry');
+        passwordEntry.setAttribute('type', 'password');
+        passwordEntry.setAttribute('placeholder', 'Password');
+        passwordEntry.addEventListener('input', (e) => console.log(`Password entry input: ${e.target.value}`)); // Log to console for passwords
+        const passwordEntryRow = Adw.createRow({ children: [passwordEntryLabel, passwordEntry] });
+        adwEntryExamplesBox.appendChild(passwordEntryRow);
+
+        const adwEntryCodeSample = `
+<!-- Standard Entry with Placeholder -->
+<adw-entry placeholder="Enter text here..."></adw-entry>
+
+<!-- Disabled Entry with a Value -->
+<adw-entry placeholder="Disabled entry" disabled value="Cannot change"></adw-entry>
+
+<!-- Entry with an Initial Value -->
+<adw-entry value="Initial text"></adw-entry>
+
+<!-- Password Entry -->
+<adw-entry type="password" placeholder="Password"></adw-entry>
+
+<!-- Other useful attributes:
+    maxlength="50"       (Maximum number of characters)
+    name="username"      (For form submission)
+    inputmode="numeric"  (Hint for virtual keyboards)
+    readonly             (Value cannot be changed, but can be focused/selected)
+-->
+
+<script>
+    // To get value or listen to events:
+    const myEntry = document.querySelector('adw-entry[placeholder="Enter text here..."]');
+
+    // Get current value
+    // console.log(myEntry.value);
+    // Note: For custom elements, direct .value access might depend on implementation.
+    // It's often more reliable to use getAttribute('value') for initial static value,
+    // and rely on events for dynamic value changes if .value property is not explicitly managed.
+    // For adw-entry, it's assumed .value property is synchronized.
+
+    myEntry.addEventListener('input', (event) => {
+        console.log('Input event:', event.target.value);
+    });
+
+    myEntry.addEventListener('change', (event) => {
+        // Change event typically fires when the input loses focus after its value was changed.
+        console.log('Change event:', event.target.value);
+    });
+
+    // To set value programmatically:
+    // myEntry.value = "New value";
+    // or myEntry.setAttribute('value', "New value");
+</script>
+        `;
+        const adwEntryCodeDetails = createCodeSampleDetails('Show <adw-entry> Code', adwEntryCodeSample);
+
+        // Append the adw-entry subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwEntrySubsectionTitle);
+        customElementExamplesBox.appendChild(adwEntryExamplesBox);
+        customElementExamplesBox.appendChild(adwEntryCodeDetails);
+
+        // --- adw-label subsection ---
+        const adwLabelSubsectionTitle = Adw.createLabel("adw-label", {title:2});
+
+        const adwLabelExamplesBox = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm' // Medium spacing between label examples
+        });
+
+        // 1. Basic Label
+        const basicLabel = document.createElement('adw-label');
+        basicLabel.textContent = 'This is a basic label.';
+        adwLabelExamplesBox.appendChild(basicLabel);
+
+        // 2. Title Labels
+        const titleLabel1 = document.createElement('adw-label');
+        titleLabel1.setAttribute('title-level', '1');
+        titleLabel1.textContent = 'Title Level 1';
+        adwLabelExamplesBox.appendChild(titleLabel1);
+
+        const titleLabel2 = document.createElement('adw-label');
+        titleLabel2.setAttribute('title-level', '2');
+        titleLabel2.textContent = 'Title Level 2';
+        adwLabelExamplesBox.appendChild(titleLabel2);
+
+        const titleLabel3 = document.createElement('adw-label');
+        titleLabel3.setAttribute('title-level', '3');
+        titleLabel3.textContent = 'Title Level 3';
+        adwLabelExamplesBox.appendChild(titleLabel3);
+
+        const titleLabel4 = document.createElement('adw-label');
+        titleLabel4.setAttribute('title-level', '4');
+        titleLabel4.textContent = 'Title Level 4';
+        adwLabelExamplesBox.appendChild(titleLabel4);
+
+        // Add a small visual separator for clarity if needed, or rely on box spacing
+        // const separator = document.createElement('hr'); // Or Adw.Separator if available as custom el
+        // adwLabelExamplesBox.appendChild(separator);
+
+
+        // 3. Body Text Label
+        const bodyLabel = document.createElement('adw-label');
+        bodyLabel.setAttribute('body', '');
+        bodyLabel.textContent = 'This is body text. It might be longer and wrap around, demonstrating standard paragraph styling.';
+        adwLabelExamplesBox.appendChild(bodyLabel);
+
+        // 4. Caption Label
+        const captionLabel = document.createElement('adw-label');
+        captionLabel.setAttribute('caption', '');
+        captionLabel.textContent = 'This is a caption. Usually smaller, for secondary information.';
+        adwLabelExamplesBox.appendChild(captionLabel);
+
+        // 5. Disabled Label
+        const disabledLabelInstance = document.createElement('adw-label');
+        disabledLabelInstance.setAttribute('disabled', '');
+        disabledLabelInstance.textContent = 'This is a disabled label.';
+        adwLabelExamplesBox.appendChild(disabledLabelInstance);
+
+        // 6. Link-styled Label
+        const linkLabel = document.createElement('adw-label');
+        linkLabel.setAttribute('link', '');
+        linkLabel.textContent = 'This is a link-styled label.';
+        linkLabel.addEventListener('click', () => Adw.createToast('Link-styled adw-label clicked!'));
+        adwLabelExamplesBox.appendChild(linkLabel);
+
+
+        const adwLabelCodeSample = `
+<!-- Basic Label (default styling) -->
+<adw-label>This is a basic label.</adw-label>
+
+<!-- Title Labels (Levels 1-4) -->
+<adw-label title-level="1">Title Level 1</adw-label>
+<adw-label title-level="2">Title Level 2</adw-label>
+<adw-label title-level="3">Title Level 3</adw-label>
+<adw-label title-level="4">Title Level 4</adw-label>
+
+<!-- Body Text Label (for standard paragraph text) -->
+<adw-label body>This is body text, suitable for paragraphs.</adw-label>
+
+<!-- Caption Label (for smaller, secondary text) -->
+<adw-label caption>This is a caption, often used for hints or subtext.</adw-label>
+
+<!-- Disabled Label -->
+<adw-label disabled>This label is disabled.</adw-label>
+
+<!-- Link-styled Label (appears like a hyperlink) -->
+<adw-label link>This label looks like a link.</adw-label>
+<!-- To make it interactive, add a click listener in JavaScript:
+<script>
+    const linkLabel = document.querySelector('adw-label[link]');
+    linkLabel.addEventListener('click', () => {
+        alert('Link label clicked!');
+    });
+</script>
+-->
+
+<!-- Other potential attributes (depending on full component spec):
+    selectable="true"  (If text selection is desired)
+    wrap="true"        (Controls text wrapping, usually true by default for body/caption)
+-->
+        `;
+        const adwLabelCodeDetails = createCodeSampleDetails('Show <adw-label> Code', adwLabelCodeSample);
+
+        // Append the adw-label subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwLabelSubsectionTitle);
+        customElementExamplesBox.appendChild(adwLabelExamplesBox);
+        customElementExamplesBox.appendChild(adwLabelCodeDetails);
+
+        // --- adw-switch subsection ---
+        const adwSwitchSubsectionTitle = Adw.createLabel("adw-switch", {title:2});
+
+        const adwSwitchExamplesBox = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm' // Medium spacing between switch examples
+        });
+
+        // 1. Standard Switch
+        const standardSwitch = document.createElement('adw-switch');
+        standardSwitch.setAttribute('label', 'Enable Feature');
+        standardSwitch.addEventListener('change', (event) => {
+            Adw.createToast(`Switch 'Enable Feature' is now: ${event.target.checked ? 'ON' : 'OFF'}`);
+        });
+        adwSwitchExamplesBox.appendChild(standardSwitch);
+
+        // 2. Checked Switch
+        const checkedSwitch = document.createElement('adw-switch');
+        checkedSwitch.setAttribute('label', 'Initially On');
+        checkedSwitch.setAttribute('checked', '');
+        checkedSwitch.addEventListener('change', (event) => {
+            Adw.createToast(`Switch 'Initially On' is now: ${event.target.checked ? 'ON' : 'OFF'}`);
+        });
+        adwSwitchExamplesBox.appendChild(checkedSwitch);
+
+        // 3. Disabled Switch (Off)
+        const disabledSwitchOff = document.createElement('adw-switch');
+        disabledSwitchOff.setAttribute('label', 'Disabled (Off)');
+        disabledSwitchOff.setAttribute('disabled', '');
+        adwSwitchExamplesBox.appendChild(disabledSwitchOff);
+
+        // 4. Disabled Switch (On)
+        const disabledSwitchOn = document.createElement('adw-switch');
+        disabledSwitchOn.setAttribute('label', 'Disabled (On)');
+        disabledSwitchOn.setAttribute('checked', '');
+        disabledSwitchOn.setAttribute('disabled', '');
+        adwSwitchExamplesBox.appendChild(disabledSwitchOn);
+
+        const adwSwitchCodeSample = `
+<!-- Standard Switch with a Label -->
+<adw-switch label="Enable Notifications"></adw-switch>
+
+<!-- Switch that is Checked by Default -->
+<adw-switch label="Start Service on Boot" checked></adw-switch>
+
+<!-- Disabled Switch (in 'off' state) -->
+<adw-switch label="Feature X (Not available)" disabled></adw-switch>
+
+<!-- Disabled Switch (in 'on' state) -->
+<adw-switch label="Feature Y (Enabled by admin)" checked disabled></adw-switch>
+
+<script>
+    // To listen for state changes:
+    const mySwitch = document.querySelector('adw-switch[label="Enable Notifications"]');
+    mySwitch.addEventListener('change', (event) => {
+        // event.target.checked will be true if the switch is on, false otherwise
+        console.log('Switch state changed to:', event.target.checked);
+        // Update application state or perform actions based on the new switch state.
+    });
+
+    // To get or set the state programmatically:
+    // Get current state:
+    // const currentState = mySwitch.checked;
+    // Note: .checked property access depends on custom element implementation.
+    // For adw-switch, it's assumed .checked property reflects the state.
+
+    // Set state:
+    // mySwitch.checked = true; // To turn on
+    // mySwitch.checked = false; // To turn off
+    // Alternatively, using attributes:
+    // mySwitch.setAttribute('checked', ''); // To turn on
+    // mySwitch.removeAttribute('checked'); // To turn off
+</script>
+        `;
+        const adwSwitchCodeDetails = createCodeSampleDetails('Show <adw-switch> Code', adwSwitchCodeSample);
+
+        // Append the adw-switch subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwSwitchSubsectionTitle);
+        customElementExamplesBox.appendChild(adwSwitchExamplesBox);
+        customElementExamplesBox.appendChild(adwSwitchCodeDetails);
+
+        // --- adw-checkbox subsection ---
+        const adwCheckboxSubsectionTitle = Adw.createLabel("adw-checkbox", {title:2});
+
+        const adwCheckboxExamplesBox = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm' // Medium spacing between checkbox examples
+        });
+
+        // 1. Standard Checkbox
+        const standardCheckbox = document.createElement('adw-checkbox');
+        standardCheckbox.setAttribute('label', 'Accept Terms');
+        standardCheckbox.addEventListener('change', (event) => {
+            Adw.createToast(`Checkbox 'Accept Terms' is now: ${event.target.checked ? 'CHECKED' : 'UNCHECKED'}`);
+        });
+        adwCheckboxExamplesBox.appendChild(standardCheckbox);
+
+        // 2. Checked Checkbox
+        const checkedCheckbox = document.createElement('adw-checkbox');
+        checkedCheckbox.setAttribute('label', 'Subscribe to Newsletter');
+        checkedCheckbox.setAttribute('checked', '');
+        checkedCheckbox.addEventListener('change', (event) => {
+            Adw.createToast(`Checkbox 'Subscribe to Newsletter' is now: ${event.target.checked ? 'CHECKED' : 'UNCHECKED'}`);
+        });
+        adwCheckboxExamplesBox.appendChild(checkedCheckbox);
+
+        // 3. Disabled Checkbox (Unchecked)
+        const disabledCheckboxUnchecked = document.createElement('adw-checkbox');
+        disabledCheckboxUnchecked.setAttribute('label', 'Disabled (Unchecked)');
+        disabledCheckboxUnchecked.setAttribute('disabled', '');
+        adwCheckboxExamplesBox.appendChild(disabledCheckboxUnchecked);
+
+        // 4. Disabled Checkbox (Checked)
+        const disabledCheckboxChecked = document.createElement('adw-checkbox');
+        disabledCheckboxChecked.setAttribute('label', 'Disabled (Checked)');
+        disabledCheckboxChecked.setAttribute('checked', '');
+        disabledCheckboxChecked.setAttribute('disabled', '');
+        adwCheckboxExamplesBox.appendChild(disabledCheckboxChecked);
+
+        const adwCheckboxCodeSample = `
+<!-- Standard Checkbox with a Label -->
+<adw-checkbox label="I agree to the conditions"></adw-checkbox>
+
+<!-- Checkbox that is Checked by Default -->
+<adw-checkbox label="Send me promotional emails" checked></adw-checkbox>
+
+<!-- Disabled Checkbox (in 'unchecked' state) -->
+<adw-checkbox label="Option X (Not applicable)" disabled></adw-checkbox>
+
+<!-- Disabled Checkbox (in 'checked' state) -->
+<adw-checkbox label="Option Y (Pre-selected by admin)" checked disabled></adw-checkbox>
+
+<!-- Checkbox with 'name' and 'value' attributes for form submission -->
+<adw-checkbox label="Include Gift Wrap" name="giftwrap" value="yes"></adw-checkbox>
+
+
+<script>
+    // To listen for state changes:
+    const myCheckbox = document.querySelector('adw-checkbox[label="I agree to the conditions"]');
+    myCheckbox.addEventListener('change', (event) => {
+        // event.target.checked will be true if the checkbox is checked, false otherwise
+        console.log('Checkbox state changed to:', event.target.checked);
+        // Update application state or perform actions based on the new checkbox state.
+    });
+
+    // To get or set the state programmatically:
+    // Get current state:
+    // const currentState = myCheckbox.checked;
+    // Note: .checked property access depends on custom element implementation.
+    // For adw-checkbox, it's assumed .checked property reflects the state.
+
+    // Set state:
+    // myCheckbox.checked = true; // To check
+    // myCheckbox.checked = false; // To uncheck
+    // Alternatively, using attributes:
+    // myCheckbox.setAttribute('checked', ''); // To check
+    // myCheckbox.removeAttribute('checked');   // To uncheck
+</script>
+        `;
+        const adwCheckboxCodeDetails = createCodeSampleDetails('Show <adw-checkbox> Code', adwCheckboxCodeSample);
+
+        // Append the adw-checkbox subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwCheckboxSubsectionTitle);
+        customElementExamplesBox.appendChild(adwCheckboxExamplesBox);
+        customElementExamplesBox.appendChild(adwCheckboxCodeDetails);
+
+        // --- adw-radio-button subsection ---
+        const adwRadioButtonSubsectionTitle = Adw.createLabel("adw-radio-button", {title:2});
+
+        const adwRadioButtonExamplesBox = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm' // Medium spacing between radio button group examples
+        });
+
+        // Radio Group 1: Interactive
+        const group1Container = Adw.createBox({orientation: 'vertical', spacing: 's'});
+        const group1Label = Adw.createLabel("Choose a shipping method:", {isBody: true});
+        group1Container.appendChild(group1Label);
+
+        const radioValuesGroup1 = [
+            { value: "standard", label: "Standard Shipping" },
+            { value: "express", label: "Express Shipping" },
+            { value: "priority", label: "Priority Shipping" }
+        ];
+
+        radioValuesGroup1.forEach((item, index) => {
+            const radioButton = document.createElement('adw-radio-button');
+            radioButton.setAttribute('name', 'shippingGroup');
+            radioButton.setAttribute('value', item.value);
+            radioButton.setAttribute('label', item.label);
+            if (index === 0) {
+                radioButton.setAttribute('checked', ''); // Check the first one by default
+            }
+            radioButton.addEventListener('change', (event) => {
+                if (event.target.checked) {
+                    Adw.createToast(`Selected shipping: ${event.target.getAttribute('value')}`);
+                }
+            });
+            group1Container.appendChild(radioButton);
+        });
+        adwRadioButtonExamplesBox.appendChild(group1Container);
+
+        // Radio Group 2: Disabled
+        const group2Container = Adw.createBox({orientation: 'vertical', spacing: 's'});
+        const group2Label = Adw.createLabel("Subscription Tier (Disabled Options):", {isBody: true});
+        group2Container.appendChild(group2Label);
+
+        const radioDisabled1 = document.createElement('adw-radio-button');
+        radioDisabled1.setAttribute('name', 'tierGroup');
+        radioDisabled1.setAttribute('value', 'free');
+        radioDisabled1.setAttribute('label', 'Free Tier (Disabled)');
+        radioDisabled1.setAttribute('disabled', '');
+        group2Container.appendChild(radioDisabled1);
+
+        const radioDisabled2 = document.createElement('adw-radio-button');
+        radioDisabled2.setAttribute('name', 'tierGroup');
+        radioDisabled2.setAttribute('value', 'premium_disabled');
+        radioDisabled2.setAttribute('label', 'Premium Tier (Unavailable)');
+        radioDisabled2.setAttribute('disabled', '');
+        group2Container.appendChild(radioDisabled2);
+
+        const radioDisabledChecked = document.createElement('adw-radio-button');
+        radioDisabledChecked.setAttribute('name', 'tierGroup'); // Same group, but won't affect others due to disabled
+        radioDisabledChecked.setAttribute('value', 'pro_locked');
+        radioDisabledChecked.setAttribute('label', 'Pro Tier (Active & Disabled)');
+        radioDisabledChecked.setAttribute('checked', '');
+        radioDisabledChecked.setAttribute('disabled', '');
+        group2Container.appendChild(radioDisabledChecked);
+
+        adwRadioButtonExamplesBox.appendChild(group2Container);
+
+        const adwRadioButtonCodeSample = `
+<!-- Radio buttons are grouped by the 'name' attribute. -->
+<!-- Only one radio button in a group can be checked at a time. -->
+
+<!-- Group 1: Choose your preference -->
+<adw-label body>Select your preferred contact method:</adw-label>
+<adw-radio-button name="contactMethod" value="email" label="Email" checked></adw-radio-button>
+<adw-radio-button name="contactMethod" value="phone" label="Phone"></adw-radio-button>
+<adw-radio-button name="contactMethod" value="sms" label="SMS"></adw-radio-button>
+
+<!-- Group 2: Another independent choice -->
+<adw-label body>Select size:</adw-label>
+<adw-radio-button name="sizeOptions" value="s" label="Small"></adw-radio-button>
+<adw-radio-button name="sizeOptions" value="m" label="Medium" checked></adw-radio-button>
+<adw-radio-button name="sizeOptions" value="l" label="Large"></adw-radio-button>
+
+<!-- Disabled Radio Buttons -->
+<adw-label body>Disabled options:</adw-label>
+<adw-radio-button name="disabledGroup" value="dis1" label="Option X (Disabled)" disabled></adw-radio-button>
+<adw-radio-button name="disabledGroup" value="dis2" label="Option Y (Checked & Disabled)" checked disabled></adw-radio-button>
+
+<script>
+    // To listen for changes in a radio group:
+    const radioButtons = document.querySelectorAll('adw-radio-button[name="contactMethod"]');
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', (event) => {
+            if (event.target.checked) {
+                console.log('Selected contact method:', event.target.value);
+                // The 'value' attribute of the selected radio button is key.
+            }
+        });
+    });
+
+    // To get the currently selected value in a group:
+    // const selectedContactMethod = document.querySelector('adw-radio-button[name="contactMethod"]:checked')?.value;
+    // console.log('Currently selected:', selectedContactMethod);
+
+    // To check a radio button programmatically:
+    // const smsRadio = document.querySelector('adw-radio-button[value="sms"]');
+    // if (smsRadio) {
+    //    smsRadio.checked = true; // This should also uncheck other buttons in the same group.
+    //    // Or smsRadio.setAttribute('checked', '');
+    // }
+</script>
+        `;
+        const adwRadioButtonCodeDetails = createCodeSampleDetails('Show <adw-radio-button> Code', adwRadioButtonCodeSample);
+
+        // Append the adw-radio-button subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwRadioButtonSubsectionTitle);
+        customElementExamplesBox.appendChild(adwRadioButtonExamplesBox);
+        customElementExamplesBox.appendChild(adwRadioButtonCodeDetails);
+
+        // --- adw-progress-bar subsection ---
+        const adwProgressBarSubsectionTitle = Adw.createLabel("adw-progress-bar", {title:2});
+
+        const adwProgressBarExamplesBox = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm' // Medium spacing between progress bar examples
+        });
+
+        // 1. Standard Progress Bar
+        const standardProgressBarLabel = Adw.createLabel("Standard (50%):");
+        const standardProgressBar = document.createElement('adw-progress-bar');
+        standardProgressBar.setAttribute('value', '50');
+        const standardProgressBarRow = Adw.createRow({ children: [standardProgressBarLabel, standardProgressBar], align: 'center'});
+        adwProgressBarExamplesBox.appendChild(standardProgressBarRow);
+
+        // 2. Indeterminate Progress Bar
+        const indeterminateProgressBarLabel = Adw.createLabel("Indeterminate:");
+        const indeterminateProgressBar = document.createElement('adw-progress-bar');
+        indeterminateProgressBar.setAttribute('indeterminate', '');
+        const indeterminateProgressBarRow = Adw.createRow({ children: [indeterminateProgressBarLabel, indeterminateProgressBar], align: 'center' });
+        adwProgressBarExamplesBox.appendChild(indeterminateProgressBarRow);
+
+        // 3. Disabled Progress Bar
+        const disabledProgressBarInstanceLabel = Adw.createLabel("Disabled (75%):");
+        const disabledProgressBarInstance = document.createElement('adw-progress-bar');
+        disabledProgressBarInstance.setAttribute('value', '75');
+        disabledProgressBarInstance.setAttribute('disabled', '');
+        const disabledProgressBarRow = Adw.createRow({ children: [disabledProgressBarInstanceLabel, disabledProgressBarInstance], align: 'center' });
+        adwProgressBarExamplesBox.appendChild(disabledProgressBarRow);
+
+        // 4. Dynamic Progress Bar
+        const dynamicProgressBarContainer = Adw.createBox({orientation: 'vertical', spacing: 's'});
+        const dynamicProgressBarTitleLabel = Adw.createLabel("Dynamic Update:", {isBody: true});
+        dynamicProgressBarContainer.appendChild(dynamicProgressBarTitleLabel);
+
+        const dynamicProgressBar = document.createElement('adw-progress-bar');
+        dynamicProgressBar.setAttribute('value', '10'); // Initial value
+        dynamicProgressBarContainer.appendChild(dynamicProgressBar);
+
+        const dynamicControlsBox = Adw.createBox({orientation: 'horizontal', spacing: 's', align: 'center'});
+        const increaseButton = Adw.createButton("Increase (+10)", {
+            onClick: () => {
+                let currentValue = parseInt(dynamicProgressBar.getAttribute('value') || '0', 10);
+                currentValue = Math.min(100, currentValue + 10);
+                dynamicProgressBar.setAttribute('value', currentValue.toString());
+            }
+        });
+        const decreaseButton = Adw.createButton("Decrease (-10)", {
+            onClick: () => {
+                let currentValue = parseInt(dynamicProgressBar.getAttribute('value') || '0', 10);
+                currentValue = Math.max(0, currentValue - 10);
+                dynamicProgressBar.setAttribute('value', currentValue.toString());
+            }
+        });
+        dynamicControlsBox.appendChild(decreaseButton); // Decrease first for typical layout
+        dynamicControlsBox.appendChild(increaseButton);
+        dynamicProgressBarContainer.appendChild(dynamicControlsBox);
+        adwProgressBarExamplesBox.appendChild(dynamicProgressBarContainer);
+
+
+        const adwProgressBarCodeSample = `
+<!-- Standard Progress Bar with a specific value -->
+<adw-progress-bar value="60"></adw-progress-bar>
+
+<!-- Indeterminate Progress Bar (for tasks of unknown duration) -->
+<adw-progress-bar indeterminate></adw-progress-bar>
+
+<!-- Disabled Progress Bar -->
+<adw-progress-bar value="30" disabled></adw-progress-bar>
+
+<script>
+    // To update the progress programmatically:
+    const myProgressBar = document.querySelector('adw-progress-bar[value="60"]'); // Example selector
+
+    // Set a new value (0-100)
+    // myProgressBar.setAttribute('value', '85');
+
+    // To switch to indeterminate state:
+    // myProgressBar.setAttribute('indeterminate', '');
+    // myProgressBar.removeAttribute('value'); // Usually good to remove value for indeterminate
+
+    // To revert from indeterminate to a specific value:
+    // myProgressBar.removeAttribute('indeterminate');
+    // myProgressBar.setAttribute('value', '25');
+
+    // To disable/enable:
+    // myProgressBar.setAttribute('disabled', '');
+    // myProgressBar.removeAttribute('disabled');
+</script>
+        `;
+        const adwProgressBarCodeDetails = createCodeSampleDetails('Show <adw-progress-bar> Code', adwProgressBarCodeSample);
+
+        // Append the adw-progress-bar subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwProgressBarSubsectionTitle);
+        customElementExamplesBox.appendChild(adwProgressBarExamplesBox);
+        customElementExamplesBox.appendChild(adwProgressBarCodeDetails);
+
+        // --- adw-spinner subsection ---
+        const adwSpinnerSubsectionTitle = Adw.createLabel("adw-spinner", {title:2});
+
+        // Main vertical container for all spinner examples
+        const mainSpinnerContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm'
+        });
+
+        // Box for fixed size spinners (small, medium, large)
+        const adwSpinnerExamplesBox = Adw.createBox({
+            orientation: 'horizontal',
+            spacing: 'l', // Large spacing between different size examples
+            align: 'center'
+        });
+
+        // 1. Small Spinner
+        const smallSpinnerLabel = Adw.createLabel("Small:");
+        const smallSpinner = document.createElement('adw-spinner');
+        smallSpinner.setAttribute('size', 'small');
+        smallSpinner.setAttribute('active', '');
+        const smallSpinnerGroup = Adw.createBox({orientation: 'horizontal', spacing:'s', align:'center'});
+        smallSpinnerGroup.appendChild(smallSpinnerLabel);
+        smallSpinnerGroup.appendChild(smallSpinner);
+        adwSpinnerExamplesBox.appendChild(smallSpinnerGroup);
+
+        // 2. Medium (Default) Spinner
+        const mediumSpinnerLabel = Adw.createLabel("Medium (Default):");
+        const mediumSpinner = document.createElement('adw-spinner');
+        mediumSpinner.setAttribute('active', '');
+        const mediumSpinnerGroup = Adw.createBox({orientation: 'horizontal', spacing:'s', align:'center'});
+        mediumSpinnerGroup.appendChild(mediumSpinnerLabel);
+        mediumSpinnerGroup.appendChild(mediumSpinner);
+        adwSpinnerExamplesBox.appendChild(mediumSpinnerGroup);
+
+        // 3. Large Spinner
+        const largeSpinnerLabel = Adw.createLabel("Large:");
+        const largeSpinner = document.createElement('adw-spinner');
+        largeSpinner.setAttribute('size', 'large');
+        largeSpinner.setAttribute('active', '');
+        const largeSpinnerGroup = Adw.createBox({orientation: 'horizontal', spacing:'s', align:'center'});
+        largeSpinnerGroup.appendChild(largeSpinnerLabel);
+        largeSpinnerGroup.appendChild(largeSpinner);
+        adwSpinnerExamplesBox.appendChild(largeSpinnerGroup);
+
+        mainSpinnerContainer.appendChild(adwSpinnerExamplesBox); // Add the row of fixed spinners
+
+        // 4. Controllable Spinner
+        const controllableSpinnerContainer = Adw.createBox({orientation: 'vertical', spacing: 's'});
+        const controllableSpinnerTitleLabel = Adw.createLabel("Controllable Spinner:", {isBody: true});
+        controllableSpinnerContainer.appendChild(controllableSpinnerTitleLabel);
+
+        const controllableSpinnerGroup = Adw.createBox({orientation: 'horizontal', spacing: 's', align: 'center'});
+        const controllableSpinner = document.createElement('adw-spinner');
+        controllableSpinner.setAttribute('active', ''); // Start active
+
+        const stopButton = Adw.createButton("Stop Spinner", {
+            onClick: () => {
+                controllableSpinner.removeAttribute('active');
+            }
+        });
+        const startButton = Adw.createButton("Start Spinner", {
+            suggested: true, // Make "Start" look like a primary action here
+            onClick: () => {
+                controllableSpinner.setAttribute('active', '');
+            }
+        });
+        controllableSpinnerGroup.appendChild(controllableSpinner); // Spinner first
+        controllableSpinnerGroup.appendChild(startButton);
+        controllableSpinnerGroup.appendChild(stopButton);
+        controllableSpinnerContainer.appendChild(controllableSpinnerGroup);
+        mainSpinnerContainer.appendChild(controllableSpinnerContainer); // Add controllable spinner section
+
+        const adwSpinnerCodeSample = `
+<!-- Spinners are active by default if 'active' attribute is present -->
+
+<!-- Small Spinner -->
+<adw-spinner size="small" active></adw-spinner>
+
+<!-- Medium (Default Size) Spinner -->
+<adw-spinner active></adw-spinner>
+
+<!-- Large Spinner -->
+<adw-spinner size="large" active></adw-spinner>
+
+<!-- To control activation programmatically: -->
+<!-- <adw-spinner id="mySpinner"></adw-spinner> -->
+<script>
+    // const spinner = document.getElementById('mySpinner');
+
+    // To start the spinner:
+    // spinner.setAttribute('active', ''); // or spinner.active = true; (if property is supported)
+
+    // To stop the spinner:
+    // spinner.removeAttribute('active'); // or spinner.active = false; (if property is supported)
+
+    // Note on 'active' attribute vs. property:
+    // For boolean attributes in HTML, their presence means true, absence means false.
+    // Custom elements might also expose a JavaScript property (e.g., spinner.active = true/false).
+    // Using setAttribute/removeAttribute is the standard HTML way.
+</script>
+        `;
+        const adwSpinnerCodeDetails = createCodeSampleDetails('Show <adw-spinner> Code', adwSpinnerCodeSample);
+
+        // Append the adw-spinner subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwSpinnerSubsectionTitle);
+        customElementExamplesBox.appendChild(mainSpinnerContainer); // Add the main vertical container
+        customElementExamplesBox.appendChild(adwSpinnerCodeDetails);
+
+        // --- adw-avatar subsection ---
+        const adwAvatarSubsectionTitle = Adw.createLabel("adw-avatar", {title:2});
+
+        const adwAvatarExamplesContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm'
+        });
+
+        // Text Avatars Row
+        const avatarTextRowLabel = Adw.createLabel("Text Avatars:", {isBody: true});
+        const avatarTextRow = Adw.createBox({ orientation: 'horizontal', spacing: 'm', align: 'center' });
+
+        const avatarJD = document.createElement('adw-avatar');
+        avatarJD.setAttribute('text', 'John Doe');
+        avatarJD.setAttribute('size', '32');
+        avatarTextRow.appendChild(avatarJD);
+
+        const avatarJR = document.createElement('adw-avatar');
+        avatarJR.setAttribute('text', 'Jane Roe');
+        avatarJR.setAttribute('size', '48');
+        avatarTextRow.appendChild(avatarJR);
+
+        const avatarS = document.createElement('adw-avatar');
+        avatarS.setAttribute('text', 'Single');
+        avatarS.setAttribute('size', '64');
+        avatarTextRow.appendChild(avatarS);
+
+        const avatarXYZ = document.createElement('adw-avatar');
+        avatarXYZ.setAttribute('text', 'X Y Z'); // Should show XY
+        avatarXYZ.setAttribute('size', '72');
+        avatarTextRow.appendChild(avatarXYZ);
+
+        adwAvatarExamplesContainer.appendChild(avatarTextRowLabel);
+        adwAvatarExamplesContainer.appendChild(avatarTextRow);
+
+        // Image Avatars Row
+        const avatarImageRowLabel = Adw.createLabel("Image Avatars (with fallback):", {isBody: true});
+        const avatarImageRow = Adw.createBox({ orientation: 'horizontal', spacing: 'm', align: 'center' });
+        const imgSrc = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ddd'/%3E%3Ctext x='50' y='55' font-size='40' text-anchor='middle' fill='%23777'%3EIMG%3C/text%3E%3C/svg%3E";
+
+        const avatarImg1 = document.createElement('adw-avatar');
+        avatarImg1.setAttribute('image-src', imgSrc);
+        avatarImg1.setAttribute('alt', 'User Image 1');
+        avatarImg1.setAttribute('size', '48');
+        avatarImageRow.appendChild(avatarImg1);
+
+        const avatarImgFallback = document.createElement('adw-avatar');
+        avatarImgFallback.setAttribute('image-src', 'nonexistent.jpg');
+        avatarImgFallback.setAttribute('text', 'Err'); // Text fallback
+        avatarImgFallback.setAttribute('alt', 'Fallback Demo');
+        avatarImgFallback.setAttribute('size', '64');
+        avatarImageRow.appendChild(avatarImgFallback);
+
+        adwAvatarExamplesContainer.appendChild(avatarImageRowLabel);
+        adwAvatarExamplesContainer.appendChild(avatarImageRow);
+
+        const adwAvatarCodeSample = `
+<!-- Avatar with Text (initials are auto-generated) -->
+<adw-avatar text="John Doe" size="48"></adw-avatar>
+<adw-avatar text="Single" size="64"></adw-avatar>
+
+<!-- Avatar with Image -->
+<adw-avatar image-src="path/to/image.png" alt="User Avatar" size="72"></adw-avatar>
+
+<!-- Avatar with Image and Text Fallback -->
+<!-- If 'image-src' fails to load, the 'text' attribute will be used for initials. -->
+<adw-avatar image-src="broken-link.png" text="Fallback User" alt="User with Fallback" size="64"></adw-avatar>
+
+<!-- Different Sizes (numeric size in pixels) -->
+<adw-avatar text="Small" size="32"></adw-avatar>
+<adw-avatar text="Large" size="96"></adw-avatar>
+
+<!-- Attributes:
+    text:         String for generating initials if no image or if image fails.
+    image-src:    URL for the avatar image.
+    alt:          Alternative text for the image (accessibility).
+    size:         Size of the avatar in pixels (diameter).
+-->
+
+<script>
+    // Creating programmatically:
+    const avatar = document.createElement('adw-avatar');
+    avatar.setAttribute('text', 'New User');
+    avatar.setAttribute('size', '50');
+    // document.body.appendChild(avatar); // Append to a container
+
+    // Note on Custom Fallback:
+    // The Adw.createAvatar() JavaScript factory function supports a 'customFallback'
+    // option (passing an HTMLElement). However, the <adw-avatar> custom element
+    // wrapper itself does not currently expose this via an HTML attribute.
+    // For custom HTML fallbacks, use the Adw.createAvatar() factory.
+</script>
+        `;
+        const adwAvatarCodeDetails = createCodeSampleDetails('Show <adw-avatar> Code', adwAvatarCodeSample);
+
+        // Append the adw-avatar subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwAvatarSubsectionTitle);
+        customElementExamplesBox.appendChild(adwAvatarExamplesContainer);
+        customElementExamplesBox.appendChild(adwAvatarCodeDetails);
+
+        // --- adw-split-button subsection ---
+        const adwSplitButtonSubsectionTitle = Adw.createLabel("adw-split-button", {title:2});
+
+        const adwSplitButtonExamplesBox = Adw.createBox({
+            orientation: 'horizontal',
+            spacing: 'm',
+            wrap: true, // Allow buttons to wrap
+            align: 'center'
+        });
+
+        // 1. Basic Split Button
+        const basicSplitButton = document.createElement('adw-split-button');
+        basicSplitButton.setAttribute('action-text', 'Save');
+        basicSplitButton.addEventListener('action-click', () => Adw.createToast('Save action clicked!'));
+        basicSplitButton.addEventListener('dropdown-click', () => Adw.createToast('Save dropdown clicked!'));
+        adwSplitButtonExamplesBox.appendChild(basicSplitButton);
+
+        // 2. Suggested Split Button
+        const suggestedSplitButton = document.createElement('adw-split-button');
+        suggestedSplitButton.setAttribute('action-text', 'Submit');
+        suggestedSplitButton.setAttribute('suggested', '');
+        suggestedSplitButton.addEventListener('action-click', () => Adw.createToast('Submit action clicked!'));
+        suggestedSplitButton.addEventListener('dropdown-click', () => Adw.createToast('Submit dropdown clicked!'));
+        adwSplitButtonExamplesBox.appendChild(suggestedSplitButton);
+
+        // 3. Split Button for "Open Link" (action click only for custom element)
+        const linkActionSplitButton = document.createElement('adw-split-button');
+        linkActionSplitButton.setAttribute('action-text', 'Open Link (Action)');
+        linkActionSplitButton.addEventListener('action-click', () => Adw.createToast('Open Link action clicked! (Simulated)'));
+        linkActionSplitButton.addEventListener('dropdown-click', () => Adw.createToast('Open Link dropdown clicked!'));
+        adwSplitButtonExamplesBox.appendChild(linkActionSplitButton);
+
+        // 4. Disabled Split Button
+        const disabledSplitButton = document.createElement('adw-split-button');
+        disabledSplitButton.setAttribute('action-text', 'Disabled');
+        disabledSplitButton.setAttribute('disabled', '');
+        adwSplitButtonExamplesBox.appendChild(disabledSplitButton);
+
+        const adwSplitButtonCodeSample = `
+<!-- Basic Split Button -->
+<adw-split-button action-text="Save"></adw-split-button>
+
+<!-- Suggested Split Button (for primary actions) -->
+<adw-split-button action-text="Apply" suggested></adw-split-button>
+
+<!-- Disabled Split Button -->
+<adw-split-button action-text="Cannot Edit" disabled></adw-split-button>
+
+<!-- Attributes:
+    action-text:  The text displayed on the main action part of the button. (Required)
+    suggested:    Boolean attribute. If present, styles the action part as a suggested action.
+    disabled:     Boolean attribute. If present, disables both the action and dropdown parts.
+    action-href:  URL for the main action button to navigate to.
+                  (Note: While the Adw.createSplitButton JS factory supports 'actionHref',
+                  direct functionality of an 'action-href' attribute on the <adw-split-button>
+                  custom element depends on its specific implementation to reflect this to the
+                  underlying button. Verify behavior if using this attribute directly.)
+-->
+
+<script>
+    // Example: Handling events for a split button
+    const mySplitButton = document.querySelector('adw-split-button[action-text="Save"]');
+
+    if (mySplitButton) {
+        // Event dispatched when the main action part is clicked.
+        mySplitButton.addEventListener('action-click', () => {
+            console.log('Action part of "Save" button clicked!');
+            // Perform the main action, e.g., save data.
+        });
+
+        // Event dispatched when the dropdown arrow part is clicked.
+        mySplitButton.addEventListener('dropdown-click', (event) => {
+            console.log('Dropdown part of "Save" button clicked!');
+            // Typically, you would show a menu or list of alternative actions here.
+            // For example, using Adw.createPopover() if available, or a custom menu.
+            // The event.detail might contain coordinates if the component provides them.
+            Adw.createToast("Dropdown clicked! Implement menu logic here.");
+        });
+    }
+
+    // Programmatic control:
+    // To disable:
+    // mySplitButton.setAttribute('disabled', '');
+    // To enable:
+    // mySplitButton.removeAttribute('disabled');
+    // To change action text:
+    // mySplitButton.setAttribute('action-text', 'Save As');
+</script>
+        `;
+        const adwSplitButtonCodeDetails = createCodeSampleDetails('Show <adw-split-button> Code', adwSplitButtonCodeSample);
+
+        // Append the adw-split-button subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwSplitButtonSubsectionTitle);
+        customElementExamplesBox.appendChild(adwSplitButtonExamplesBox);
+        customElementExamplesBox.appendChild(adwSplitButtonCodeDetails);
+
+        // --- adw-window-title subsection ---
+        const adwWindowTitleSubsectionTitle = Adw.createLabel("adw-window-title", {title:2});
+
+        const adwWindowTitleExampleContainer = Adw.createBox({
+            orientation: 'vertical', // Container for the header bar example
+            spacing: 's'
+        });
+
+        const demoHeaderBarLabel = Adw.createLabel("Demo within an <adw-header-bar>:", { isBody: true });
+        adwWindowTitleExampleContainer.appendChild(demoHeaderBarLabel);
+
+        // Create an adw-header-bar to host the adw-window-title
+        const demoHeaderBar = document.createElement('adw-header-bar');
+        // Optionally add some start/end items to the header bar for context
+        const startButton = document.createElement('adw-button');
+        startButton.setAttribute('icon', ADW_ICON_NAV_BACK); // Using a predefined icon constant
+        startButton.setAttribute('slot', 'start');
+        demoHeaderBar.appendChild(startButton);
+
+        const endButton = document.createElement('adw-button');
+        endButton.setAttribute('icon', ADW_ICON_MENU); // Using a predefined icon constant
+        endButton.setAttribute('slot', 'end');
+        demoHeaderBar.appendChild(endButton);
+
+        // Create and add the adw-window-title
+        const windowTitleElement = document.createElement('adw-window-title');
+        windowTitleElement.textContent = 'My Application Title';
+        windowTitleElement.setAttribute('slot', 'title');
+        // The subtitle can also be set via an attribute if the custom element supports it,
+        // or by adding a child span with slot="subtitle" if using <template> internally.
+        // For this demo, we'll stick to the title text content.
+        // Example: windowTitleElement.setAttribute('subtitle', 'Subtitle Text');
+
+        demoHeaderBar.appendChild(windowTitleElement);
+        adwWindowTitleExampleContainer.appendChild(demoHeaderBar);
+
+
+        const adwWindowTitleCodeSample = `
+<!-- adw-window-title is typically used within an adw-header-bar -->
+<adw-header-bar>
+    <!-- Add other header bar elements like buttons in start/end slots -->
+    <adw-button slot="start" icon="<svg>...</svg>"></adw-button>
+
+    <adw-window-title slot="title">
+        Main Application Title
+        <!-- Optional: Subtitle can be placed in a span with slot="subtitle" -->
+        <!-- <span slot="subtitle">Subtitle text here</span> -->
+    </adw-window-title>
+    <!-- Or, if subtitle attribute is supported by the custom element: -->
+    <!-- <adw-window-title slot="title" title="Main Title" subtitle="Subtitle Text"></adw-window-title> -->
+
+    <adw-button slot="end" icon="<svg>...</svg>"></adw-button>
+</adw-header-bar>
+
+<script>
+    // To set the title or subtitle programmatically on an <adw-window-title> element:
+    const myWindowTitle = document.querySelector('adw-window-title');
+    if (myWindowTitle) {
+        // For the main title, you can set its textContent:
+        // myWindowTitle.textContent = 'New Main Title';
+        // (This assumes the default slot handles the main title text)
+
+        // If the custom element directly supports 'title' and 'subtitle' attributes
+        // for these specific roles (check component's implementation):
+        // myWindowTitle.setAttribute('title', 'New Main Title Attribute');
+        // myWindowTitle.setAttribute('subtitle', 'New Subtitle Attribute');
+
+        // If using slotted spans for title/subtitle:
+        // const mainTitleSpan = myWindowTitle.querySelector('[slot="title"]'); // If title is also slotted
+        // const subTitleSpan = myWindowTitle.querySelector('[slot="subtitle"]');
+        // if (mainTitleSpan) mainTitleSpan.textContent = 'New Slotted Main Title';
+        // if (subTitleSpan) subTitleSpan.textContent = 'New Slotted Subtitle';
+        // else {
+        //    const newSub = document.createElement('span');
+        //    newSub.slot = 'subtitle';
+        //    newSub.textContent = 'Newly Added Subtitle';
+        //    myWindowTitle.appendChild(newSub);
+        // }
+    }
+</script>
+        `;
+        const adwWindowTitleCodeDetails = createCodeSampleDetails('Show <adw-window-title> Code', adwWindowTitleCodeSample);
+
+        // Append the adw-window-title subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwWindowTitleSubsectionTitle);
+        customElementExamplesBox.appendChild(adwWindowTitleExampleContainer);
+        customElementExamplesBox.appendChild(adwWindowTitleCodeDetails);
+
+        // --- adw-header-bar subsection ---
+        const adwHeaderBarSubsectionTitle = Adw.createLabel("adw-header-bar", {title:2});
+
+        const adwHeaderBarExampleContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 's'
+        });
+
+        const demoHeaderBarInstanceLabel = Adw.createLabel("Live Demo:", { isBody: true });
+        adwHeaderBarExampleContainer.appendChild(demoHeaderBarInstanceLabel);
+
+        const demoHeaderBarInstance = document.createElement('adw-header-bar');
+
+        // Start Slot
+        const startSlotButton = document.createElement('adw-button');
+        startSlotButton.textContent = 'Start';
+        startSlotButton.setAttribute('slot', 'start');
+        demoHeaderBarInstance.appendChild(startSlotButton);
+
+        // Title Slot (using adw-window-title for consistency with previous example)
+        const titleSlotElement = document.createElement('adw-window-title');
+        titleSlotElement.textContent = 'Header Title';
+        titleSlotElement.setAttribute('slot', 'title');
+        // Subtitle for adw-window-title is typically handled by its own internal structure or attributes
+        // For adw-header-bar, we can directly slot a subtitle element.
+        demoHeaderBarInstance.appendChild(titleSlotElement);
+
+        // Subtitle Slot (as a separate span, direct child of header-bar)
+        const subtitleSlotElement = document.createElement('span');
+        subtitleSlotElement.textContent = 'Optional Subtitle';
+        subtitleSlotElement.setAttribute('slot', 'subtitle');
+        subtitleSlotElement.style.fontSize = 'var(--font-size-caption)';
+        subtitleSlotElement.style.color = 'var(--secondary-text-color)';
+        subtitleSlotElement.style.marginTop = 'var(--spacing-xs)'; // Adjust spacing if needed
+        demoHeaderBarInstance.appendChild(subtitleSlotElement);
+
+        // End Slot
+        const endSlotButton1 = document.createElement('adw-button');
+        endSlotButton1.textContent = 'End 1';
+        endSlotButton1.setAttribute('slot', 'end');
+        demoHeaderBarInstance.appendChild(endSlotButton1);
+
+        const endSlotButton2 = document.createElement('adw-button');
+        endSlotButton2.setAttribute('circular', '');
+        endSlotButton2.setAttribute('icon', "<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM7 11.5a1 1 0 1 1 2 0a1 1 0 0 1-2 0Zm.5-7a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5Z'/></svg>");
+        endSlotButton2.setAttribute('slot', 'end');
+        demoHeaderBarInstance.appendChild(endSlotButton2);
+
+        adwHeaderBarExampleContainer.appendChild(demoHeaderBarInstance);
+
+        const adwHeaderBarCodeSample = `
+<!-- adw-header-bar uses named slots to position content -->
+<adw-header-bar>
+    <!-- Content for the start (left in LTR) -->
+    <adw-button slot="start" icon="<svg>...</svg>">Back</adw-button>
+    <adw-label slot="start">Extra Start Item</adw-label>
+
+    <!-- Main title area -->
+    <adw-window-title slot="title">My Application</adw-window-title>
+    <!-- Subtitle (immediately follows the title slot or is part of adw-window-title) -->
+    <span slot="subtitle" style="font-size: var(--font-size-caption); color: var(--secondary-text-color);">
+        Subtitle here
+    </span>
+    <!-- Alternatively, if adw-window-title handles subtitle internally:
+    <adw-window-title slot="title" title="My Application" subtitle="Subtitle here"></adw-window-title>
+    -->
+
+    <!-- Content for the end (right in LTR) -->
+    <adw-button slot="end">Action 1</adw-button>
+    <adw-spinner slot="end" active size="small"></adw-spinner>
+</adw-header-bar>
+
+<script>
+    // Programmatic creation and slotting:
+    const headerBar = document.createElement('adw-header-bar');
+
+    const backButton = document.createElement('adw-button');
+    backButton.textContent = 'Back';
+    backButton.slot = 'start'; // Use .slot property or .setAttribute('slot', ...)
+    headerBar.appendChild(backButton);
+
+    const title = document.createElement('adw-window-title');
+    title.textContent = 'Dynamic Title';
+    title.slot = 'title';
+    headerBar.appendChild(title);
+
+    const subtitle = document.createElement('span');
+    subtitle.textContent = 'Dynamic Subtitle';
+    subtitle.slot = 'subtitle';
+    subtitle.style.fontSize = 'var(--font-size-caption)';
+    // ... other styles
+    headerBar.appendChild(subtitle);
+
+    const menuButton = document.createElement('adw-button');
+    menuButton.textContent = 'Menu';
+    menuButton.slot = 'end';
+    headerBar.appendChild(menuButton);
+
+    // document.body.prepend(headerBar); // Example: add to top of body
+</script>
+        `;
+        const adwHeaderBarCodeDetails = createCodeSampleDetails('Show <adw-header-bar> Code', adwHeaderBarCodeSample);
+
+        // Append the adw-header-bar subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwHeaderBarSubsectionTitle);
+        customElementExamplesBox.appendChild(adwHeaderBarExampleContainer);
+        customElementExamplesBox.appendChild(adwHeaderBarCodeDetails);
+
+        // --- adw-row subsection ---
+        const adwRowSubsectionTitle = Adw.createLabel("adw-row", {title:2});
+
+        const adwRowExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm'
+        });
+
+        // 1. Simple Row with Mixed Content
+        const simpleRowDemoContainer = Adw.createBox({orientation: 'vertical', spacing: 'xs'});
+        const simpleRowLabel = Adw.createLabel("Simple Row with Mixed Content:", {isBody: true});
+        simpleRowDemoContainer.appendChild(simpleRowLabel);
+        const simpleAdwRow = document.createElement('adw-row');
+
+        const srChildLabel = document.createElement('adw-label');
+        srChildLabel.textContent = 'Label Item';
+        simpleAdwRow.appendChild(srChildLabel);
+
+        const srChildSpan = document.createElement('span');
+        srChildSpan.textContent = 'Plain Text Item';
+        srChildSpan.style.margin = '0 var(--spacing-s)'; // Add some horizontal margin
+        simpleAdwRow.appendChild(srChildSpan);
+
+        const srChildButton = document.createElement('adw-button');
+        srChildButton.setAttribute('small', '');
+        srChildButton.textContent = 'Action';
+        simpleAdwRow.appendChild(srChildButton);
+        simpleRowDemoContainer.appendChild(simpleAdwRow);
+        adwRowExampleOuterContainer.appendChild(simpleRowDemoContainer);
+
+        // 2. Interactive Row
+        const interactiveRowDemoContainer = Adw.createBox({orientation: 'vertical', spacing: 'xs'});
+        const interactiveRowLabelText = Adw.createLabel("Interactive Row:", {isBody: true});
+        interactiveRowDemoContainer.appendChild(interactiveRowLabelText);
+        const interactiveAdwRow = document.createElement('adw-row');
+        interactiveAdwRow.setAttribute('interactive', '');
+        const irChildLabel = document.createElement('adw-label');
+        irChildLabel.textContent = 'This entire row is clickable.';
+        interactiveAdwRow.appendChild(irChildLabel);
+        interactiveAdwRow.addEventListener('click', () => Adw.createToast("Interactive adw-row clicked!"));
+        interactiveRowDemoContainer.appendChild(interactiveAdwRow);
+        adwRowExampleOuterContainer.appendChild(interactiveRowDemoContainer);
+
+        // 3. Activated Row
+        const activatedRowDemoContainer = Adw.createBox({orientation: 'vertical', spacing: 'xs'});
+        const activatedRowLabelText = Adw.createLabel("Activated Row:", {isBody: true});
+        activatedRowDemoContainer.appendChild(activatedRowLabelText);
+        const activatedAdwRow = document.createElement('adw-row');
+        activatedAdwRow.setAttribute('activated', '');
+        const arChildLabel = document.createElement('adw-label');
+        arChildLabel.textContent = 'This row is visually activated (e.g., selected state).';
+        activatedAdwRow.appendChild(arChildLabel);
+        // No click listener needed for activated, it's a visual state
+        activatedRowDemoContainer.appendChild(activatedAdwRow);
+        adwRowExampleOuterContainer.appendChild(activatedRowDemoContainer);
+
+        const adwRowCodeSample = `
+<!-- Basic adw-row: children are placed directly in its Light DOM -->
+<adw-row>
+    <adw-label>User:</adw-label>
+    <adw-entry placeholder="Enter username..."></adw-entry>
+    <adw-button>Submit</adw-button>
+</adw-row>
+
+<!-- Interactive Row (clickable) -->
+<adw-row interactive>
+    <adw-label>Settings Option</adw-label>
+    <!-- You might add an icon or chevron at the end -->
+</adw-row>
+
+<!-- Activated Row (visually highlighted, e.g., for selection) -->
+<adw-row activated>
+    <adw-label>Selected Item</adw-label>
+</adw-row>
+
+<!-- Attributes:
+    interactive: Boolean attribute. If present, the row becomes clickable and shows hover/active states.
+    activated:   Boolean attribute. If present, styles the row as if it's selected or active.
+-->
+
+<script>
+    // To handle clicks on an interactive row:
+    const interactiveRowExample = document.querySelector('adw-row[interactive]');
+    if (interactiveRowExample) {
+        interactiveRowExample.addEventListener('click', () => {
+            console.log('Interactive row was clicked!');
+            // Perform an action, navigate, or open details.
+        });
+    }
+
+    // To programmatically activate/deactivate a row:
+    const someRow = document.querySelector('adw-row'); // Select a specific row
+    // if (someRow) {
+    //    someRow.setAttribute('activated', ''); // Activate
+    //    // someRow.removeAttribute('activated'); // Deactivate
+    // }
+</script>
+        `;
+        const adwRowCodeDetails = createCodeSampleDetails('Show <adw-row> Code', adwRowCodeSample);
+
+        // Append the adw-row subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwRowSubsectionTitle);
+        customElementExamplesBox.appendChild(adwRowExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwRowCodeDetails);
+
+        // --- adw-list-box subsection ---
+        const adwListBoxSubsectionTitle = Adw.createLabel("adw-list-box", {title:2});
+
+        const adwListBoxExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm'
+        });
+
+        // Helper function to create an adw-row with a label
+        function createDemoRow(text, isInteractive = false, isActivated = false) {
+            const row = document.createElement('adw-row');
+            if (isInteractive) row.setAttribute('interactive', '');
+            if (isActivated) row.setAttribute('activated', '');
+
+            const label = document.createElement('adw-label');
+            label.textContent = text;
+            row.appendChild(label);
+            return row;
+        }
+
+        // 1. Simple ListBox with adw-row children
+        const simpleListBoxDemoContainer = Adw.createBox({orientation: 'vertical', spacing: 'xs'});
+        const simpleListBoxLabel = Adw.createLabel("ListBox with adw-row children:", {isBody: true});
+        simpleListBoxDemoContainer.appendChild(simpleListBoxLabel);
+        const simpleAdwListBox = document.createElement('adw-list-box');
+
+        const row1 = createDemoRow('Row 1 (Interactive)', true);
+        row1.addEventListener('click', () => Adw.createToast('Row 1 in Simple ListBox clicked!'));
+        simpleAdwListBox.appendChild(row1);
+        simpleAdwListBox.appendChild(createDemoRow('Row 2 (Activated)', false, true));
+        simpleAdwListBox.appendChild(createDemoRow('Row 3 (Standard)'));
+
+        simpleListBoxDemoContainer.appendChild(simpleAdwListBox);
+        adwListBoxExampleOuterContainer.appendChild(simpleListBoxDemoContainer);
+
+        // 2. Flat ListBox
+        const flatListBoxDemoContainer = Adw.createBox({orientation: 'vertical', spacing: 'xs'});
+        const flatListBoxLabelText = Adw.createLabel("Flat ListBox:", {isBody: true});
+        flatListBoxDemoContainer.appendChild(flatListBoxLabelText);
+        const flatAdwListBox = document.createElement('adw-list-box');
+        flatAdwListBox.setAttribute('flat', '');
+        flatAdwListBox.appendChild(createDemoRow('Flat Row A (Interactive)', true));
+        flatAdwListBox.appendChild(createDemoRow('Flat Row B'));
+        flatListBoxDemoContainer.appendChild(flatAdwListBox);
+        adwListBoxExampleOuterContainer.appendChild(flatListBoxDemoContainer);
+
+        // 3. Selectable ListBox
+        const selectableListBoxDemoContainer = Adw.createBox({orientation: 'vertical', spacing: 'xs'});
+        const selectableListBoxLabelText = Adw.createLabel("Selectable ListBox (sets ARIA role):", {isBody: true});
+        selectableListBoxDemoContainer.appendChild(selectableListBoxLabelText);
+        const selectableAdwListBox = document.createElement('adw-list-box');
+        selectableAdwListBox.setAttribute('selectable', ''); // This sets aria-multiselectable="false"
+
+        const optionRow1 = createDemoRow('Option 1 (role=option)', true); // Interactive for selection behavior
+        optionRow1.setAttribute('role', 'option');
+        optionRow1.addEventListener('click', (e) => {
+            // Basic single-selection visual simulation (not full ARIA selection handling)
+            const currentlySelected = selectableAdwListBox.querySelector('[aria-selected="true"]');
+            if (currentlySelected) currentlySelected.removeAttribute('aria-selected');
+            e.currentTarget.setAttribute('aria-selected', 'true');
+            Adw.createToast('Option 1 selected');
+        });
+        selectableAdwListBox.appendChild(optionRow1);
+
+        const optionRow2 = createDemoRow('Option 2 (role=option)', true);
+        optionRow2.setAttribute('role', 'option');
+        optionRow2.addEventListener('click', (e) => {
+            const currentlySelected = selectableAdwListBox.querySelector('[aria-selected="true"]');
+            if (currentlySelected) currentlySelected.removeAttribute('aria-selected');
+            e.currentTarget.setAttribute('aria-selected', 'true');
+            Adw.createToast('Option 2 selected');
+        });
+        selectableAdwListBox.appendChild(optionRow2);
+
+        selectableListBoxDemoContainer.appendChild(selectableAdwListBox);
+        adwListBoxExampleOuterContainer.appendChild(selectableListBoxDemoContainer);
+
+        const adwListBoxCodeSample = `
+<!-- Basic ListBox with adw-row children -->
+<adw-list-box>
+    <adw-row interactive>
+        <adw-label>Settings</adw-label>
+        <!-- Can add icons or other elements inside the row -->
+    </adw-row>
+    <adw-row activated>
+        <adw-label>Current Item</adw-label>
+    </adw-row>
+    <adw-row>
+        <adw-label>Another Item</adw-label>
+    </adw-row>
+</adw-list-box>
+
+<!-- Flat ListBox (removes outer border/shadow) -->
+<adw-list-box flat>
+    <adw-row>Row A</adw-row>
+    <adw-row>Row B</adw-row>
+</adw-list-box>
+
+<!-- Selectable ListBox (for accessibility, often used with role="option" on rows) -->
+<!-- The 'selectable' attribute on adw-list-box sets aria-multiselectable="false" by default.
+     For true multi-selection, you'd need an additional 'multi-selectable' attribute if supported,
+     or manage ARIA states manually. -->
+<adw-list-box selectable>
+    <adw-row interactive role="option">Option 1</adw-row>
+    <adw-row interactive role="option">Option 2</adw-row>
+    <adw-row interactive role="option" aria-selected="true">Option 3 (Pre-selected)</adw-row>
+</adw-list-box>
+
+<!-- Attributes for adw-list-box:
+    flat:        Boolean. If present, styles the listbox without a frame or shadow.
+    selectable:  Boolean. Sets 'role="listbox"' and 'aria-selectable="true"' on the host.
+                 If you intend single selection, child rows should have 'role="option"'.
+                 The component itself doesn't manage focus or actual selection state beyond ARIA.
+                 The 'adw-list-box' also sets 'aria-multiselectable="false"' when 'selectable' is present.
+                 For multi-selection, the component would need to support an attribute that sets this to true.
+-->
+<!-- Children of adw-list-box are typically adw-row or similar custom row elements. -->
+
+<script>
+    // Example: making rows in a selectable listbox visually toggle aria-selected
+    const selectableList = document.querySelector('adw-list-box[selectable]');
+    if (selectableList) {
+        const options = selectableList.querySelectorAll('adw-row[role="option"]');
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                // Simple single-select visual toggle for demo
+                const currentlySelected = selectableList.querySelector('[aria-selected="true"]');
+                if (currentlySelected) {
+                    currentlySelected.removeAttribute('aria-selected');
+                    // Also remove 'activated' if you used it for styling selection
+                    currentlySelected.removeAttribute('activated');
+                }
+                option.setAttribute('aria-selected', 'true');
+                // Optionally add 'activated' class for visual styling of selection
+                option.setAttribute('activated', '');
+
+                console.log(\`Option selected: \${option.textContent.trim()}\`);
+            });
+        });
+    }
+</script>
+        `;
+        const adwListBoxCodeDetails = createCodeSampleDetails('Show <adw-list-box> Code', adwListBoxCodeSample);
+
+        // Append the adw-list-box subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwListBoxSubsectionTitle);
+        customElementExamplesBox.appendChild(adwListBoxExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwListBoxCodeDetails);
+
+        // --- adw-entry-row subsection ---
+        const adwEntryRowSubsectionTitle = Adw.createLabel("adw-entry-row", {title:2});
+
+        const adwEntryRowExampleOuterContainer = Adw.createBox({
+            orientation: 'vertical',
+            spacing: 'm'
+        });
+
+        // Helper to add listener, ensuring internal entry exists
+        function addInternalInputListener(entryRowElement, eventName, callback) {
+            // The _internalEntry might be available synchronously after attributes are set,
+            // or might need a microtask if it's created in connectedCallback or similar.
+            // For this demo, we assume it's available after creation and attribute setting.
+            if (entryRowElement._internalEntry) {
+                entryRowElement._internalEntry.addEventListener(eventName, callback);
+            } else {
+                // Fallback or warning if not immediately available
+                console.warn(`_internalEntry not found immediately for ${entryRowElement.title}. Listener not attached for demo.`);
+                // Alternatively, queue it: Promise.resolve().then(() => {
+                // if (entryRowElement._internalEntry) entryRowElement._internalEntry.addEventListener(eventName, callback); });
+            }
+        }
+
+        // 1. Simple EntryRow
+        const simpleEntryRow = document.createElement('adw-entry-row');
+        simpleEntryRow.setAttribute('title', 'Username:');
+        simpleEntryRow.setAttribute('placeholder', 'Enter username...');
+        adwEntryRowExampleOuterContainer.appendChild(simpleEntryRow);
+        // Must append to DOM before _internalEntry is guaranteed by some frameworks/CE lifecycle
+        // However, our current CE implementation makes _internalEntry available after _render, which is called on attribute change.
+        addInternalInputListener(simpleEntryRow, 'input', (e) => Adw.createToast(`Username input: ${e.target.value}`, { timeout: 1500 }));
+
+
+        // 2. EntryRow with Initial Value
+        const valueEntryRowInstance = document.createElement('adw-entry-row');
+        valueEntryRowInstance.setAttribute('title', 'Email:');
+        valueEntryRowInstance.setAttribute('value', 'test@example.com');
+        adwEntryRowExampleOuterContainer.appendChild(valueEntryRowInstance);
+        addInternalInputListener(valueEntryRowInstance, 'input', (e) => Adw.createToast(`Email input: ${e.target.value}`, { timeout: 1500 }));
+
+        // 3. Disabled EntryRow
+        const disabledEntryRowInstance = document.createElement('adw-entry-row');
+        disabledEntryRowInstance.setAttribute('title', 'Confirmation Code:');
+        disabledEntryRowInstance.setAttribute('placeholder', 'Cannot edit');
+        disabledEntryRowInstance.setAttribute('disabled', '');
+        disabledEntryRowInstance.setAttribute('value', 'XYZ123');
+        adwEntryRowExampleOuterContainer.appendChild(disabledEntryRowInstance);
+
+        // 4. Required EntryRow
+        const requiredEntryRowInstance = document.createElement('adw-entry-row');
+        requiredEntryRowInstance.setAttribute('title', 'Required Field:');
+        requiredEntryRowInstance.setAttribute('placeholder', 'This field is required');
+        requiredEntryRowInstance.setAttribute('required', '');
+        adwEntryRowExampleOuterContainer.appendChild(requiredEntryRowInstance);
+        addInternalInputListener(requiredEntryRowInstance, 'input', (e) => Adw.createToast(`Required field input: ${e.target.value}`, { timeout: 1500 }));
+
+        const adwEntryRowCodeSample = `
+<!-- Simple EntryRow with Title and Placeholder -->
+<adw-entry-row title="Name:" placeholder="Enter your full name"></adw-entry-row>
+
+<!-- EntryRow with an Initial Value -->
+<adw-entry-row title="Website:" value="https://example.com"></adw-entry-row>
+
+<!-- Disabled EntryRow -->
+<adw-entry-row title="Reference ID:" value="REF98765" disabled></adw-entry-row>
+
+<!-- Required EntryRow (visual cue often provided by browser/CSS) -->
+<adw-entry-row title="API Key:" placeholder="Enter your API key" required></adw-entry-row>
+
+<!-- Attributes:
+    title:        The label text displayed to the left of the entry.
+    placeholder:  Placeholder text for the internal input element.
+    value:        Initial value for the internal input element.
+    disabled:     Boolean. If present, disables the internal input.
+    required:     Boolean. If present, marks the internal input as required (for forms).
+    type:         Passed to the internal input (e.g., "text", "password", "email", "number"). Default "text".
+    inputmode:    Passed to internal input (e.g. "numeric", "tel", "email").
+    maxlength:    Passed to internal input.
+    pattern:      Passed to internal input (regex for validation).
+    readonly:     Passed to internal input.
+-->
+
+<script>
+    // Accessing the internal input element and its events/properties:
+    const entryRow = document.querySelector('adw-entry-row[title="Name:"]');
+
+    // The adw-entry-row custom element might expose its internal input, e.g., as _internalEntry.
+    // This is an internal implementation detail and might change, but for current component:
+    if (entryRow && entryRow._internalEntry) {
+        // Get value from internal input
+        console.log('Current value:', entryRow._internalEntry.value);
+
+        // Listen to input events directly on the internal input
+        entryRow._internalEntry.addEventListener('input', (event) => {
+            console.log('Internal input event:', event.target.value);
+        });
+
+        // Set value on internal input
+        // entryRow._internalEntry.value = 'New Value from JS';
+    } else {
+        // If _internalEntry is not exposed or available yet, you might need to wait
+        // or rely on attributes for initial setup. For dynamic changes post-render,
+        // direct access or dedicated methods on the custom element would be needed.
+        // The 'value' attribute on adw-entry-row itself should reflect to the internal input.
+        // entryRow.setAttribute('value', 'New value via attribute');
+    }
+
+    // The adw-entry-row may also dispatch its own custom events for input/change.
+    // Check component documentation for 'input' or 'change' events on <adw-entry-row> itself.
+    // e.g., entryRow.addEventListener('input', (event) => { console.log(event.detail.value); });
+    // For this component, the input event seems to bubble from the native input.
+</script>
+        `;
+        const adwEntryRowCodeDetails = createCodeSampleDetails('Show <adw-entry-row> Code', adwEntryRowCodeSample);
+
+        // Append the adw-entry-row subsection to the customElementExamplesBox
+        customElementExamplesBox.appendChild(adwEntryRowSubsectionTitle);
+        customElementExamplesBox.appendChild(adwEntryRowExampleOuterContainer);
+        customElementExamplesBox.appendChild(adwEntryRowCodeDetails);
+        // TODO: Add more custom element subsections to customElementExamplesBox here
+
+        const customElementShowcaseBox = Adw.createBox({
+            orientation: 'vertical',
+            spacing: "l", // Large spacing for the overall section container
+            children: [
+                // The title (customElementShowcaseTitle) will be handled by a separate appendChild call
+                customElementExamplesBox
+            ]
+        });
+        const customElementShowcaseCodeSample = `
+// --- Custom Element Showcase ---
+
+// This section is for demonstrating natively defined Custom Elements.
+// For example, if you had defined:
+// customElements.define('my-sample-widget', class extends HTMLElement { ... });
+
+// You would then instantiate it and add it to a container:
+// const myWidget = document.createElement('my-sample-widget');
+// customElementExamplesBox.appendChild(myWidget); // Assuming customElementExamplesBox is an Adw.Box
+
+// The Adw.js components themselves are not Custom Elements in the traditional sense,
+// they are JavaScript objects that create and manage standard HTML elements.
+
+// Placeholder content for the showcase:
+const customElementExamplesBox = Adw.createBox({
+    orientation: 'vertical',
+    spacing: 'm',
+    children: [
+        Adw.createLabel("Placeholder for custom element 1 (e.g., <my-widget></my-widget>)."),
+        Adw.createLabel("Placeholder for custom element 2 (e.g., <another-custom-thing></another-custom-thing>).")
+    ]
+});
+
+// This customElementExamplesBox would then be part of the customElementShowcaseBox.
+// The customElementShowcaseBox (and its title) are added to the main content area.
+        `;
+        const customElementShowcaseCodeDetails = createCodeSampleDetails('Show Custom Element Code', customElementShowcaseCodeSample);
+        // customElementShowcaseCodeDetails will be inserted into the layout after customElementShowcaseBox by the insertDetailsAfter function.
+
+
         // Create the window and append it to the body.
         const windowEl = Adw.createWindow({header: headerBar, content: content});
         document.getElementById('app').appendChild(windowEl);
@@ -1331,8 +3052,32 @@ accentColors.forEach(colorName => {
         // Avatars: avatarCodeDetails is already appended to avatarSection.
         // The avatarSection itself is correctly placed in the main 'content' array.
 
+        // --- Append Custom Element Showcase to Content ---
+        // The 'content' Adw.Box should be defined before this point.
+        if (content) {
+            content.appendChild(customElementShowcaseTitle);
+            content.appendChild(customElementShowcaseBox);
+        } else {
+            console.error("Adw Demo: 'content' box not found for appending Custom Element Showcase.");
+        }
+
         // Specialized Rows:
         insertDetailsAfter(specializedRowsListBox, specializedRowsCodeDetails); // For Specialized List Rows
+
+        // Custom Element Showcase Code Details:
+        // Ensure customElementShowcaseBox is valid and in the DOM before inserting details after it.
+        if (customElementShowcaseBox && customElementShowcaseBox.parentElement) {
+            insertDetailsAfter(customElementShowcaseBox, customElementShowcaseCodeDetails);
+        } else if (content && content.contains(customElementShowcaseBox)) { // Fallback if parentElement check is tricky
+             insertDetailsAfter(customElementShowcaseBox, customElementShowcaseCodeDetails);
+        } else {
+            console.error("Adw Demo: customElementShowcaseBox not ready for inserting code details.");
+            // As a last resort, append to content if the specific element isn't found by insertDetailsAfter's logic
+            // This might happen if customElementShowcaseBox itself isn't a direct child of where insertDetailsAfter expects it.
+            // However, the goal is to place it *after* customElementShowcaseBox.
+            // The provided insertDetailsAfter might need to be robust enough or this might be complex.
+            // For now, relying on customElementShowcaseBox being correctly appended to 'content'.
+        }
 
     </script>
 </body>
