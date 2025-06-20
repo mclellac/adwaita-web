@@ -375,6 +375,12 @@ function createAdwToast(text, options = {}) {
   const toast = document.createElement("div");
   toast.classList.add("adw-toast");
   toast.textContent = text;
+
+  // Add type-specific class if options.type is provided
+  if (opts.type && typeof opts.type === 'string') {
+    toast.classList.add(`adw-toast-${opts.type.toLowerCase()}`);
+  }
+
   toast.setAttribute("role", "status");
   toast.setAttribute("aria-live", "assertive");
   toast.setAttribute("aria-atomic", "true");
@@ -766,15 +772,17 @@ function setAccentColor(colorName) {
         colorName = DEFAULT_ACCENT_COLOR;
     }
 
-    const rootStyle = document.documentElement.style;
     const isLightTheme = document.body.classList.contains('light-theme');
+    const styleTargetElement = isLightTheme ? document.body : document.documentElement;
+    const styleTarget = styleTargetElement.style;
+
     const themeSuffix = isLightTheme ? '-light' : '-dark';
 
-    rootStyle.setProperty('--accent-bg-color', `var(--accent-${colorName}${themeSuffix}-bg)`);
-    rootStyle.setProperty('--accent-fg-color', `var(--accent-${colorName}${themeSuffix}-fg)`);
+    styleTarget.setProperty('--accent-bg-color', `var(--accent-${colorName}${themeSuffix}-bg)`);
+    styleTarget.setProperty('--accent-fg-color', `var(--accent-${colorName}${themeSuffix}-fg)`);
 
     const standaloneSuffix = isLightTheme ? '' : '-dark';
-    rootStyle.setProperty('--accent-color', `var(--accent-${colorName}${standaloneSuffix}-standalone, var(--accent-${colorName}-standalone))`);
+    styleTarget.setProperty('--accent-color', `var(--accent-${colorName}${standaloneSuffix}-standalone, var(--accent-${colorName}-standalone))`);
 
     localStorage.setItem('accentColor', colorName);
 }
@@ -795,10 +803,10 @@ function loadSavedAccentColor() {
 function toggleTheme() {
     _originalToggleTheme(); // Call original theme toggle logic
     loadSavedAccentColor(); // Re-apply accent color based on the new theme
-
-    const isLight = document.body.classList.contains('light-theme');
-    const event = new CustomEvent('adwThemeChanged', { detail: { isLight: isLight } });
-    document.dispatchEvent(event);
+    // Dispatch custom event
+    document.dispatchEvent(new CustomEvent('adwThemeChanged', {
+        detail: { isLight: document.body.classList.contains('light-theme') }
+    }));
 }
 // End Accent Color Management
 
@@ -1355,6 +1363,7 @@ window.Adw = {
   toggleTheme: toggleTheme, // This is now the wrapped version
   getAccentColors: getAccentColors,
   setAccentColor: setAccentColor,
+  DEFAULT_ACCENT_COLOR: DEFAULT_ACCENT_COLOR, // Expose default accent color
 
   // New Row Types & Avatar
   createActionRow: createAdwActionRow,
@@ -1363,8 +1372,287 @@ window.Adw = {
   createComboRow: createAdwComboRow,
   createAvatar: createAdwAvatar,
   createViewSwitcher: createAdwViewSwitcher, // Ensure these are also included
-  createFlap: createAdwFlap
+  createFlap: createAdwFlap,
+  // createAdwPasswordEntryRow will be added here by the next change
 };
+
+// SVG Icons for Password Visibility Toggle
+const ADW_ICON_VISIBILITY_SHOW = `<svg viewBox="0 0 24 24" fill="currentColor" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`;
+const ADW_ICON_VISIBILITY_HIDE = `<svg viewBox="0 0 24 24" fill="currentColor" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>`;
+
+
+/**
+ * Creates an Adwaita-style Entry Row specifically for passwords.
+ * Includes a label, a password input, and a visibility toggle button.
+ * @param {object} [options={}] - Configuration options.
+ * @param {string} options.title - The title label for the entry row.
+ * @param {object} [options.entryOptions={}] - Options object to pass to `Adw.createEntry` for the password input.
+ *                                             Ensure `type` is not set here, as it will be managed.
+ * @param {boolean} [options.labelForEntry=true] - If true, associates the title label with the entry using `for` attribute.
+ * @returns {HTMLDivElement} The created PasswordEntryRow element (which is an AdwRow).
+ */
+function createAdwPasswordEntryRow(options = {}) {
+    const opts = options || {};
+    const entryOptions = { ...(opts.entryOptions || {}) }; // Clone entryOptions
+
+    // Ensure type is initially password and remove it from user-passed options
+    entryOptions.type = 'password';
+    if (opts.entryOptions && opts.entryOptions.hasOwnProperty('type')) {
+        delete entryOptions.type; // Function controls type
+    }
+
+    let entryId;
+    if (opts.labelForEntry !== false) { // Default to true
+        entryId = entryOptions.id || `adw-password-entry-${Date.now()}-${Math.random().toString(36).substring(2,7)}`;
+        if (!entryOptions.id) {
+            entryOptions.id = entryId; // Ensure entry gets the ID
+        }
+    }
+
+    const titleLabel = Adw.createLabel(opts.title || "Password", {
+        htmlTag: "label",
+        for: entryId
+    });
+    // Add a specific class for styling if AdwLabel doesn't have one for rows
+    titleLabel.classList.add("adw-entry-row-title");
+
+
+    const passwordEntry = Adw.createEntry(entryOptions);
+    // Override type for password entry, Adw.createEntry defaults to text
+    passwordEntry.type = 'password';
+    passwordEntry.classList.add("adw-entry-row-entry"); // For flex-grow
+
+    let passwordVisible = false;
+    const visibilityButton = Adw.createButton("", { // No text, icon only
+        icon: ADW_ICON_VISIBILITY_SHOW,
+        isCircular: true,
+        flat: true,
+        ariaLabel: "Show password", // Accessibility
+        onClick: () => {
+            passwordVisible = !passwordVisible;
+            if (passwordVisible) {
+                passwordEntry.type = "text";
+                visibilityButton.setIcon(ADW_ICON_VISIBILITY_HIDE);
+                visibilityButton.setAttribute("aria-label", "Hide password");
+            } else {
+                passwordEntry.type = "password";
+                visibilityButton.setIcon(ADW_ICON_VISIBILITY_SHOW);
+                visibilityButton.setAttribute("aria-label", "Show password");
+            }
+        }
+    });
+    // Helper method for AdwButton to change icon
+    if (!visibilityButton.setIcon) { // Polyfill if not part of AdwButton
+        visibilityButton.setIcon = function(iconHTML) {
+            const iconSpan = this.querySelector('.icon');
+            if (iconSpan) {
+                iconSpan.innerHTML = iconHTML;
+            } else { // If button was created without an icon initially
+                 const newIconSpan = document.createElement("span");
+                 newIconSpan.classList.add("icon");
+                 newIconSpan.innerHTML = iconHTML;
+                 this.insertBefore(newIconSpan, this.firstChild);
+            }
+        };
+    }
+
+
+    const row = Adw.createRow({
+        children: [titleLabel, passwordEntry, visibilityButton]
+    });
+    row.classList.add("adw-password-entry-row"); // Add class for specific styling
+    // Adjust AdwRow internal structure if it uses specific child classes for layout
+    // For example, making passwordEntry take up more space:
+    passwordEntry.style.flexGrow = "1"; // Ensure input takes available space
+    titleLabel.style.flexShrink = "0"; // Prevent label from shrinking
+    visibilityButton.style.flexShrink = "0"; // Prevent button from shrinking
+
+    return row;
+}
+
+
+// Export the functions.
+window.Adw = {
+  createButton: createAdwButton,
+  createEntry: createAdwEntry,
+  createSwitch: createAdwSwitch,
+  createLabel: createAdwLabel,
+  createHeaderBar: createAdwHeaderBar,
+  createWindow: createAdwWindow,
+  createBox: createAdwBox,
+  createRow: createAdwRow,
+  createToast: createAdwToast,
+  createAdwBanner: createAdwBanner, // Added new banner function
+  createDialog: createAdwDialog,
+  createProgressBar: createAdwProgressBar,
+  createCheckbox: createAdwCheckbox,
+  createRadioButton: createAdwRadioButton,
+  createListBox: createAdwListBox,
+  toggleTheme: toggleTheme, // This is now the wrapped version
+  getAccentColors: getAccentColors,
+  setAccentColor: setAccentColor,
+  DEFAULT_ACCENT_COLOR: DEFAULT_ACCENT_COLOR, // Expose default accent color
+
+  // New Row Types & Avatar
+  createActionRow: createAdwActionRow,
+  createEntryRow: createAdwEntryRow,
+  createPasswordEntryRow: createAdwPasswordEntryRow, // Added new row type
+  createExpanderRow: createAdwExpanderRow,
+  createComboRow: createAdwComboRow,
+  createAvatar: createAdwAvatar,
+  createViewSwitcher: createAdwViewSwitcher, // Ensure these are also included
+  createFlap: createAdwFlap,
+  createSpinner: createAdwSpinner, // Added new spinner function
+  createStatusPage: createAdwStatusPage, // Added new status page function
+  createSplitButton: createAdwSplitButton, // Added new split button function
+};
+
+/**
+ * Creates an Adwaita-style Split Button.
+ * @param {object} [options={}] - Configuration options.
+ * @param {string} [options.actionText="Action"] - Text for the main action part.
+ * @param {string} [options.actionHref] - URL for the main action part (makes it an <a> tag).
+ * @param {function} [options.onActionClick] - Click handler for the main action part (if not a link).
+ * @param {function} [options.onDropdownClick] - Click handler for the dropdown part.
+ * @param {boolean} [options.suggested=false] - If true, applies 'suggested-action' style.
+ * @param {boolean} [options.disabled=false] - If true, disables the button.
+ * @param {string} [options.id] - Optional ID for the main wrapper.
+ * @param {string} [options.dropdownAriaLabel="More options"] - ARIA label for the dropdown button.
+ * @returns {HTMLDivElement} The created split button element.
+ */
+function createAdwSplitButton(options = {}) {
+  const opts = options || {};
+  const splitButton = document.createElement("div");
+  splitButton.classList.add("adw-split-button");
+  if (opts.id) {
+    splitButton.id = opts.id;
+  }
+
+  if (opts.suggested) {
+    splitButton.classList.add("suggested-action");
+  }
+  if (opts.disabled) {
+    splitButton.setAttribute("disabled", "");
+    splitButton.setAttribute("aria-disabled", "true");
+  }
+
+  const isActionLink = !!opts.actionHref;
+  const actionPart = document.createElement(isActionLink ? "a" : "button");
+  actionPart.classList.add("adw-split-button-action");
+  actionPart.textContent = opts.actionText || "Action";
+
+  if (isActionLink) {
+    actionPart.href = opts.actionHref;
+    if (opts.disabled) { // Links don't have a native disabled attribute
+        actionPart.classList.add("disabled"); // Custom styling for disabled links
+        actionPart.setAttribute("aria-disabled", "true");
+        actionPart.style.pointerEvents = "none"; // Make it non-clickable
+    }
+  } else {
+    if (typeof opts.onActionClick === 'function' && !opts.disabled) {
+      actionPart.addEventListener("click", opts.onActionClick);
+    }
+    if (opts.disabled) {
+      actionPart.setAttribute("disabled", "");
+    }
+  }
+
+  const dropdownPart = document.createElement("button");
+  dropdownPart.classList.add("adw-split-button-dropdown");
+  dropdownPart.setAttribute("aria-haspopup", "true");
+  dropdownPart.setAttribute("aria-label", opts.dropdownAriaLabel || "More options");
+
+  const arrow = document.createElement("span");
+  arrow.classList.add("adw-split-button-arrow");
+  dropdownPart.appendChild(arrow);
+
+  if (typeof opts.onDropdownClick === 'function' && !opts.disabled) {
+    dropdownPart.addEventListener("click", opts.onDropdownClick);
+  }
+  if (opts.disabled) {
+    dropdownPart.setAttribute("disabled", "");
+  }
+
+  splitButton.appendChild(actionPart);
+  splitButton.appendChild(dropdownPart);
+
+  return splitButton;
+}
+
+/**
+ * Creates an Adwaita-style Status Page.
+ * @param {object} [options={}] - Configuration options.
+ * @param {string} [options.title] - The main title for the status page.
+ * @param {string} [options.description] - The descriptive text.
+ * @param {string} [options.iconHTML] - HTML string for an icon (e.g., SVG).
+ *                                      SECURITY: Ensure trusted/sanitized if user-supplied.
+ * @param {HTMLElement[]} [options.actions] - Array of action elements (e.g., buttons).
+ * @returns {HTMLDivElement} The created status page element.
+ */
+function createAdwStatusPage(options = {}) {
+  const opts = options || {};
+  const statusPage = document.createElement("div");
+  statusPage.classList.add("adw-status-page");
+
+  if (opts.iconHTML) {
+    const iconDiv = document.createElement("div");
+    iconDiv.classList.add("adw-status-page-icon");
+    // SECURITY: User of the framework is responsible for sanitizing HTML.
+    iconDiv.innerHTML = opts.iconHTML;
+    statusPage.appendChild(iconDiv);
+  }
+
+  if (opts.title) {
+    const titleDiv = document.createElement("div");
+    titleDiv.classList.add("adw-status-page-title");
+    titleDiv.textContent = opts.title;
+    statusPage.appendChild(titleDiv);
+  }
+
+  if (opts.description) {
+    const descriptionDiv = document.createElement("div");
+    descriptionDiv.classList.add("adw-status-page-description");
+    descriptionDiv.textContent = opts.description; // textContent is safe for descriptions
+    statusPage.appendChild(descriptionDiv);
+  }
+
+  if (opts.actions && Array.isArray(opts.actions) && opts.actions.length > 0) {
+    const actionsDiv = document.createElement("div");
+    actionsDiv.classList.add("adw-status-page-actions");
+    opts.actions.forEach(action => {
+      if (action instanceof Node) actionsDiv.appendChild(action);
+    });
+    statusPage.appendChild(actionsDiv);
+  }
+  return statusPage;
+}
+
+/**
+ * Creates an Adwaita-style spinner.
+ * @param {object} [options={}] - Configuration options for the spinner.
+ * @param {'small'|'large'} [options.size] - Optional size for the spinner. Default is medium.
+ * @param {string} [options.id] - Optional ID for the spinner element.
+ * @returns {HTMLDivElement} The created spinner element.
+ */
+function createAdwSpinner(options = {}) {
+  const opts = options || {};
+  const spinner = document.createElement("div");
+  spinner.classList.add("adw-spinner");
+  spinner.setAttribute("role", "status"); // Indicate it's a live region for updates (though visual)
+  // Consider adding aria-label if it's a standalone spinner without visible text explaining its purpose.
+  // e.g., spinner.setAttribute("aria-label", "Loading...");
+
+  if (opts.size === 'small') {
+    spinner.classList.add("small");
+  } else if (opts.size === 'large') {
+    spinner.classList.add("large");
+  }
+
+  if (opts.id) {
+    spinner.id = opts.id;
+  }
+  return spinner;
+}
 
 // Ensure loadSavedTheme is called, which now also handles accent color loading.
 window.addEventListener("DOMContentLoaded", loadSavedTheme);
