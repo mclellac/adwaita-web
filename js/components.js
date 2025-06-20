@@ -1,6 +1,3 @@
-// js/components.js
-
-// Unique ID generator
 function adwGenerateId(prefix = 'adw-id') {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
@@ -24,17 +21,17 @@ function adwGenerateId(prefix = 'adw-id') {
  * @returns {HTMLButtonElement|HTMLAnchorElement} The created button element.
  */
 function createAdwButton(text, options = {}) {
-  const opts = options || {}; // Ensure options is an object
+  const opts = options || {};
   const isLink = !!opts.href;
   const button = document.createElement(isLink ? "a" : "button");
   button.classList.add("adw-button");
-  if (text) { // Only set textContent if text is provided
+  if (text) {
     button.textContent = text;
   }
 
   if (isLink) {
     button.href = opts.href;
-    if (opts.disabled) { // Links don't have a disabled attribute
+    if (opts.disabled) {
         button.classList.add("disabled"); // Custom styling for disabled links
         button.setAttribute("aria-disabled", "true");
     }
@@ -67,7 +64,6 @@ function createAdwButton(text, options = {}) {
     const iconSpan = document.createElement("span");
     iconSpan.classList.add("icon");
     // SECURITY: User of the framework is responsible for sanitizing HTML if options.icon can be user-supplied.
-    // For this framework, we assume options.icon is trusted if it's HTML.
     if (typeof opts.icon === 'string' && opts.icon.trim().startsWith("<svg")) {
         iconSpan.innerHTML = opts.icon; // Potentially unsafe if opts.icon is untrusted HTML
     } else if (typeof opts.icon === 'string') {
@@ -133,7 +129,7 @@ function createAdwSwitch(options = {}) {
 
   const slider = document.createElement("span");
   slider.classList.add("adw-switch-slider");
-  slider.setAttribute("aria-hidden", "true"); // Decorative element
+  slider.setAttribute("aria-hidden", "true");
 
   wrapper.appendChild(input);
   wrapper.appendChild(slider);
@@ -193,7 +189,7 @@ function createAdwLabel(text, options = {}) {
   }
   if (opts.isLink) {
     label.classList.add("link");
-    if (tag === "label" || tag === "span" || tag === "p") { // Non-interactive elements by default
+    if (tag === "label" || tag === "span" || tag === "p") {
         label.setAttribute("tabindex", "0");
         label.setAttribute("role", "link");
         if (typeof opts.onClick === 'function') {
@@ -286,7 +282,6 @@ function createAdwWindow(options = {}) {
     content.appendChild(opts.content);
   } else if (opts.content) {
     console.warn("AdwWindow: options.content should be a DOM element. It was: ", opts.content);
-    // Potentially append as text or sanitized HTML if that's a desired fallback
   }
   windowEl.appendChild(content);
   return windowEl;
@@ -381,7 +376,6 @@ function createAdwToast(text, options = {}) {
   toast.classList.add("adw-toast");
   toast.textContent = text;
 
-  // Add type-specific class if options.type is provided
   if (opts.type && typeof opts.type === 'string') {
     toast.classList.add(`adw-toast-${opts.type.toLowerCase()}`);
   }
@@ -406,7 +400,7 @@ function createAdwToast(text, options = {}) {
   document.body.appendChild(toast);
   setTimeout(() => {
     toast.classList.add("visible");
-  }, 10); // Small delay to ensure CSS transition applies
+  }, 10); // Small delay to ensure CSS transition applies for fade-in
   return toast;
 }
 
@@ -425,13 +419,13 @@ function createAdwBanner(message, options = {}) {
   const opts = options || {};
   const banner = document.createElement('div');
   banner.classList.add('adw-banner');
-  banner.setAttribute('role', 'alert'); // Use 'alert' for important messages, could be 'status' for less critical ones.
+  banner.setAttribute('role', 'alert');
   if (opts.id) {
     banner.id = opts.id;
   }
 
-  const type = opts.type || 'info'; // Default to 'info'
-  banner.classList.add(type); // e.g., 'info', 'success', 'warning', 'error'
+  const type = opts.type || 'info';
+  banner.classList.add(type);
 
   const messageSpan = document.createElement('span');
   messageSpan.classList.add('adw-banner-message');
@@ -441,10 +435,9 @@ function createAdwBanner(message, options = {}) {
   if (opts.dismissible !== false) { // Default to true, so only explicitly false disables it
     const closeButton = document.createElement('button');
     closeButton.classList.add('adw-banner-close-button');
-    // Using a multiplication sign (×) for the close icon, common practice.
     // Ensure SCSS styles this appropriately or allows for an SVG icon.
     closeButton.innerHTML = '&times;';
-    closeButton.setAttribute('aria-label', 'Close banner'); // Accessibility: label for screen readers
+    closeButton.setAttribute('aria-label', 'Close banner');
     closeButton.onclick = () => {
       banner.classList.remove('visible'); // Trigger fade-out animation
       // Wait for animation to complete before removing the element
@@ -458,14 +451,12 @@ function createAdwBanner(message, options = {}) {
   }
 
   const container = opts.container instanceof HTMLElement ? opts.container : document.body;
-  // Prepend the banner to the container
   if (container.firstChild) {
     container.insertBefore(banner, container.firstChild);
   } else {
     container.appendChild(banner);
   }
 
-  // Trigger fade-in animation
   // A small delay ensures the element is in the DOM and CSS transitions can apply.
   setTimeout(() => {
     banner.classList.add('visible');
@@ -551,7 +542,7 @@ function createAdwDialog(options = {}) {
     backdrop.classList.remove('open');
     dialog.classList.remove('open');
     setTimeout(() => {
-      if (backdrop.parentNode) { // Check if still in DOM
+      if (backdrop.parentNode) {
         backdrop.remove();
       }
       if (typeof opts.onClose === 'function') {
@@ -611,7 +602,7 @@ function createAdwProgressBar(options = {}) {
   progressBar.appendChild(progressBarValue);
 
   if (typeof opts.value === 'number' && !opts.isIndeterminate) {
-    const clampedValue = Math.max(0, Math.min(100, opts.value)); // Clamp value
+    const clampedValue = Math.max(0, Math.min(100, opts.value));
     progressBarValue.style.width = `${clampedValue}%`;
     progressBar.setAttribute("aria-valuenow", clampedValue);
   }
@@ -683,7 +674,7 @@ function createAdwRadioButton(options = {}) {
   const opts = options || {};
   if (!opts.name) {
     console.error("AdwRadioButton: 'name' option is required.");
-    return document.createElement("div"); // Return empty div or throw error
+    return document.createElement("div");
   }
   const wrapper = document.createElement("label");
   wrapper.classList.add("adw-radio");
@@ -737,7 +728,6 @@ function createAdwListBox(options = {}) {
   }
   if (opts.selectable) {
     listBox.setAttribute("role", "listbox");
-    // Consider adding aria-multiselectable if opts.multiselect is true
   }
   opts.children?.forEach((child) => {
     if (child instanceof Node) listBox.appendChild(child);
@@ -745,7 +735,6 @@ function createAdwListBox(options = {}) {
   return listBox;
 }
 
-// --- Theme Toggle Function  ---
 // Note: This function is renamed to _originalToggleTheme and wrapped later
 function _originalToggleTheme() {
   const body = document.body;
@@ -754,7 +743,6 @@ function _originalToggleTheme() {
   localStorage.setItem("theme", isLight ? "light" : "dark");
 }
 
-// --- Accent Color Management ---
 const AVAILABLE_ACCENT_COLORS = ['blue', 'green', 'red', 'yellow', 'purple', 'orange', 'pink', 'slate'];
 const DEFAULT_ACCENT_COLOR = 'blue';
 
@@ -778,16 +766,25 @@ function setAccentColor(colorName) {
     }
 
     const isLightTheme = document.body.classList.contains('light-theme');
-    const styleTargetElement = isLightTheme ? document.body : document.documentElement;
-    const styleTarget = styleTargetElement.style;
+    // Always target documentElement's style for theme-wide variables
+    const styleTarget = document.documentElement.style;
 
-    const themeSuffix = isLightTheme ? '-light' : '-dark';
+    // Suffixes for background/foreground properties
+    const themeSuffixBgFg = isLightTheme ? '-light' : '-dark';
 
-    styleTarget.setProperty('--accent-bg-color', `var(--accent-${colorName}${themeSuffix}-bg)`);
-    styleTarget.setProperty('--accent-fg-color', `var(--accent-${colorName}${themeSuffix}-fg)`);
+    // Construct variable names for background and foreground colors
+    const accentBgVar = `var(--accent-${colorName}${themeSuffixBgFg}-bg)`;
+    const accentFgVar = `var(--accent-${colorName}${themeSuffixBgFg}-fg)`;
 
-    const standaloneSuffix = isLightTheme ? '' : '-dark';
-    styleTarget.setProperty('--accent-color', `var(--accent-${colorName}${standaloneSuffix}-standalone, var(--accent-${colorName}-standalone))`);
+    // Suffix for standalone accent color property (used for text, icons on neutral backgrounds)
+    // SCSS variables are --accent-{color}-standalone (light) and --accent-{color}-dark-standalone (dark)
+    const standaloneColorVar = isLightTheme ?
+        `var(--accent-${colorName}-standalone)` :
+        `var(--accent-${colorName}-dark-standalone)`;
+
+    styleTarget.setProperty('--accent-bg-color', accentBgVar);
+    styleTarget.setProperty('--accent-fg-color', accentFgVar);
+    styleTarget.setProperty('--accent-color', standaloneColorVar);
 
     localStorage.setItem('accentColor', colorName);
 }
@@ -806,17 +803,14 @@ function loadSavedAccentColor() {
 
 /** Toggles the theme between light and dark AND updates accent colors. */
 function toggleTheme() {
-    _originalToggleTheme(); // Call original theme toggle logic
-    loadSavedAccentColor(); // Re-apply accent color based on the new theme
-    // Dispatch custom event
+    _originalToggleTheme();
+    loadSavedAccentColor();
     document.dispatchEvent(new CustomEvent('adwThemeChanged', {
         detail: { isLight: document.body.classList.contains('light-theme') }
     }));
 }
-// End Accent Color Management
 
 
-// --- Load Saved Theme ---
 /** Loads the saved theme from localStorage or detects system preference. Also loads accent color. */
 function loadSavedTheme() {
   const body = document.body;
@@ -828,14 +822,12 @@ function loadSavedTheme() {
     body.classList.remove("light-theme");
   } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
     body.classList.add("light-theme");
-    // localStorage.setItem("theme", "light"); // Optionally save detected preference
   } else {
     body.classList.remove("light-theme");
   }
-  loadSavedAccentColor(); // Load accent color after theme class is set
+  loadSavedAccentColor();
 }
 
-// AdwViewSwitcher
 /**
  * Creates an Adwaita-style ViewSwitcher.
  * @param {object} [options={}] - Configuration options.
@@ -854,7 +846,7 @@ function createAdwViewSwitcher(options = {}) {
   const bar = document.createElement("div");
   bar.classList.add("adw-view-switcher-bar");
   bar.setAttribute("role", "tablist");
-  if (opts.label) { // Optional label for the tablist itself
+  if (opts.label) {
     bar.setAttribute("aria-label", opts.label);
   }
 
@@ -866,7 +858,7 @@ function createAdwViewSwitcher(options = {}) {
     console.warn("AdwViewSwitcher: No views provided.");
   }
 
-  const buttons = []; // Store buttons for keyboard navigation
+  const buttons = [];
 
   views.forEach((view, index) => {
     if (!view || typeof view.name !== 'string' || !view.content) {
@@ -885,31 +877,30 @@ function createAdwViewSwitcher(options = {}) {
     viewContentElement.id = viewId;
     viewContentElement.setAttribute("role", "tabpanel");
     viewContentElement.setAttribute("aria-labelledby", buttonId);
-    viewContentElement.classList.add("adw-view-panel"); // Base class for panels
-    viewContentElement.setAttribute("tabindex", "0"); // Make panel focusable for content
+    viewContentElement.classList.add("adw-view-panel");
+    viewContentElement.setAttribute("tabindex", "0");
     contentContainer.appendChild(viewContentElement);
 
     const button = Adw.createButton(view.name, {
       // Let setActiveView handle class changes and ARIA attributes
-      onClick: () => switcherElement.setActiveView(view.name, true), // true to focus button
-      ...(view.buttonOptions || {}) // Spread any additional button options from view object
+      onClick: () => switcherElement.setActiveView(view.name, true),
+      ...(view.buttonOptions || {})
     });
     button.id = buttonId;
     button.setAttribute("role", "tab");
     button.setAttribute("aria-controls", viewId);
-    button.setAttribute("aria-selected", "false"); // Will be updated by setActiveView
-    button.dataset.viewName = view.name; // Keep for easy identification
+    button.setAttribute("aria-selected", "false");
+    button.dataset.viewName = view.name;
     bar.appendChild(button);
     buttons.push(button);
 
-    // Initial active state
     const isActive = (opts.activeViewName && view.name === opts.activeViewName) || (!opts.activeViewName && index === 0);
     if (isActive) {
-      button.classList.add("active"); // Visual active state
+      button.classList.add("active");
       button.setAttribute("aria-selected", "true");
       viewContentElement.classList.add("active-view");
     } else {
-      viewContentElement.setAttribute("hidden", ""); // Hide inactive panels
+      viewContentElement.setAttribute("hidden", "");
     }
   });
 
@@ -929,7 +920,6 @@ function createAdwViewSwitcher(options = {}) {
     });
 
     Array.from(contentContainer.children).forEach(panel => {
-        // Check if this panel is controlled by the newActiveButton
         const isPanelForView = panel.id === newActiveButton?.getAttribute("aria-controls");
         panel.classList.toggle("active-view", isPanelForView);
         if (isPanelForView) {
@@ -944,18 +934,16 @@ function createAdwViewSwitcher(options = {}) {
     }
 
     if (newActiveButton && typeof opts.onViewChanged === 'function') {
-        // Pass view name, and optionally the IDs of the button and panel
         opts.onViewChanged(viewName, newActiveButton.id, newActiveButton.getAttribute("aria-controls"));
     }
   };
 
-  // Keyboard navigation for tabs in the tablist
   bar.addEventListener("keydown", (event) => {
     const currentIndex = buttons.findIndex(btn => btn === document.activeElement || btn.contains(document.activeElement));
 
+    // If focus is not within a tab button and key is not a navigation key, do nothing.
+    // This allows Tab key to move focus out of the tablist.
     if (currentIndex === -1 && !(event.key === "ArrowRight" || event.key === "ArrowLeft" || event.key === "Home" || event.key === "End")) {
-      // If focus is not within a tab button and key is not a navigation key, do nothing.
-      // This allows Tab key to move focus out of the tablist.
       return;
     }
 
@@ -977,19 +965,14 @@ function createAdwViewSwitcher(options = {}) {
     }
 
     if (shouldPreventDefault) {
-        event.preventDefault(); // Prevent page scroll for arrow keys, home, end
+        event.preventDefault();
         buttons[newIndex].focus();
-        // To auto-activate on arrow navigation (uncomment next line):
-        // buttons[newIndex].click();
     }
   });
 
   return switcherElement;
 }
-// Note: createAdwViewSwitcher was already being exported via window.Adw.createViewSwitcher = createAdwViewSwitcher;
-// No, it was added separately. Let's ensure it's in the main Adw object.
 
-// AdwFlap
 /**
  * Creates an Adwaita-style Flap component.
  * @param {object} [options={}] - Configuration options.
@@ -1026,7 +1009,7 @@ function createAdwFlap(options = {}) {
   flapElement.appendChild(flapContentElement);
   flapElement.appendChild(mainContentElement);
 
-  let currentIsFolded = !!opts.isFolded; // Ensure boolean
+  let currentIsFolded = !!opts.isFolded;
   if (currentIsFolded) {
     flapElement.classList.add("folded");
   }
@@ -1064,9 +1047,7 @@ function createAdwFlap(options = {}) {
     setFolded: setFoldState
   };
 }
-// Note: createAdwFlap was already being exported via window.Adw.createFlap = createAdwFlap;
 
-// AdwAvatar
 /**
  * Creates an Adwaita-style Avatar.
  * @param {object} [options={}] - Configuration options for the avatar.
@@ -1138,7 +1119,6 @@ function createAdwAvatar(options = {}) {
 
   return avatarElement;
 }
-// Note: createAdwAvatar was already being exported via window.Adw.createAvatar = createAdwAvatar;
 
 /**
  * Creates an Adwaita-style Action Row.
@@ -1167,18 +1147,18 @@ function createAdwActionRow(options = {}) {
     const textContentDiv = document.createElement("div");
     textContentDiv.classList.add("adw-action-row-text-content");
 
-    const titleLabel = Adw.createLabel(opts.title || "", { htmlTag: "span" }); // Use span for title
+    const titleLabel = Adw.createLabel(opts.title || "", { htmlTag: "span" });
     titleLabel.classList.add("adw-action-row-title");
     textContentDiv.appendChild(titleLabel);
 
     if (opts.subtitle && typeof opts.subtitle === 'string') {
-        const subtitleLabel = Adw.createLabel(opts.subtitle, { htmlTag: "span" }); // Use span for subtitle
+        const subtitleLabel = Adw.createLabel(opts.subtitle, { htmlTag: "span" });
         subtitleLabel.classList.add("adw-action-row-subtitle");
         textContentDiv.appendChild(subtitleLabel);
     }
     rowChildren.push(textContentDiv);
 
-    const showChevron = opts.showChevron !== false; // Default to true if onClick is present
+    const showChevron = opts.showChevron !== false;
     if (typeof opts.onClick === 'function' && showChevron) {
         const chevronSpan = document.createElement("span");
         chevronSpan.classList.add("adw-action-row-chevron");
@@ -1198,7 +1178,6 @@ function createAdwActionRow(options = {}) {
 
     return actionRow;
 }
-// Note: createAdwActionRow was already being exported via window.Adw.createActionRow = createAdwActionRow;
 
 /**
  * Creates an Adwaita-style Entry Row.
@@ -1215,16 +1194,16 @@ function createAdwEntryRow(options = {}) {
     const entryOptions = opts.entryOptions || {};
 
     let entryId;
-    if (opts.labelForEntry !== false) { // Default to true
+    if (opts.labelForEntry !== false) {
         entryId = entryOptions.id || `adw-entry-${Date.now()}-${Math.random().toString(36).substring(2,7)}`;
         if (!entryOptions.id) {
-            entryOptions.id = entryId; // Ensure entry gets the ID
+            entryOptions.id = entryId;
         }
     }
 
     const titleLabel = Adw.createLabel(opts.title || "", {
-        htmlTag: "label", // Ensure it's a label if labelForEntry is true
-        for: entryId // Will be undefined if labelForEntry is false or entryId not set
+        htmlTag: "label",
+        for: entryId
     });
     titleLabel.classList.add("adw-entry-row-title");
     rowChildren.push(titleLabel);
@@ -1238,7 +1217,6 @@ function createAdwEntryRow(options = {}) {
 
     return entryRow;
 }
-// Note: createAdwEntryRow was already being exported via window.Adw.createEntryRow = createAdwEntryRow;
 
 /**
  * Creates an Adwaita-style Expander Row.
@@ -1309,25 +1287,15 @@ function createAdwExpanderRow(options = {}) {
         if (isExpanded) {
             clickableRow.classList.add("expanded");
             contentDiv.classList.add("expanded");
-            // For max-height animation, set it to scrollHeight after a brief delay to allow rendering
-            // requestAnimationFrame(() => {
-            //    requestAnimationFrame(() => { // Double RAF for some rendering engines
-            //      contentDiv.style.maxHeight = contentDiv.scrollHeight + "px";
-            //    });
-            // });
         } else {
             clickableRow.classList.remove("expanded");
             contentDiv.classList.remove("expanded");
-            // contentDiv.style.maxHeight = "0"; // If using max-height animation
         }
     }
 
     if (isExpanded) {
         clickableRow.classList.add("expanded");
         contentDiv.classList.add("expanded");
-        // For initial state if using max-height animation, this is tricky without JS layout calculation
-        // For simplicity with pure CSS transition on max-height, it might jump open initially.
-        // Or, set a very large max-height in CSS for .expanded.
     }
 
     wrapper.appendChild(clickableRow);
@@ -1335,7 +1303,6 @@ function createAdwExpanderRow(options = {}) {
 
     return wrapper;
 }
-// Note: createAdwExpanderRow was already being exported via window.Adw.createExpanderRow = createAdwExpanderRow;
 
 /**
  * Creates an Adwaita-style Combo Row.
@@ -1408,10 +1375,7 @@ function createAdwComboRow(options = {}) {
 
     return comboRow;
 }
-// Note: createAdwComboRow was already being exported via window.Adw.createComboRow = createAdwComboRow;
 
-
-// Export the functions.
 window.Adw = {
   createButton: createAdwButton,
   createEntry: createAdwEntry,
@@ -1422,7 +1386,7 @@ window.Adw = {
   createBox: createAdwBox,
   createRow: createAdwRow,
   createToast: createAdwToast,
-  createAdwBanner: createAdwBanner, // Added new banner function
+  createAdwBanner: createAdwBanner,
   createDialog: createAdwDialog,
   createProgressBar: createAdwProgressBar,
   createCheckbox: createAdwCheckbox,
@@ -1431,17 +1395,15 @@ window.Adw = {
   toggleTheme: toggleTheme, // This is now the wrapped version
   getAccentColors: getAccentColors,
   setAccentColor: setAccentColor,
-  DEFAULT_ACCENT_COLOR: DEFAULT_ACCENT_COLOR, // Expose default accent color
+  DEFAULT_ACCENT_COLOR: DEFAULT_ACCENT_COLOR,
 
-  // New Row Types & Avatar
   createActionRow: createAdwActionRow,
   createEntryRow: createAdwEntryRow,
   createExpanderRow: createAdwExpanderRow,
   createComboRow: createAdwComboRow,
   createAvatar: createAdwAvatar,
-  createViewSwitcher: createAdwViewSwitcher, // Ensure these are also included
+  createViewSwitcher: createAdwViewSwitcher,
   createFlap: createAdwFlap,
-  // createAdwPasswordEntryRow will be added here by the next change
 };
 
 // SVG Icons for Password Visibility Toggle
@@ -1461,19 +1423,18 @@ const ADW_ICON_VISIBILITY_HIDE = `<svg viewBox="0 0 24 24" fill="currentColor" s
  */
 function createAdwPasswordEntryRow(options = {}) {
     const opts = options || {};
-    const entryOptions = { ...(opts.entryOptions || {}) }; // Clone entryOptions
+    const entryOptions = { ...(opts.entryOptions || {}) };
 
-    // Ensure type is initially password and remove it from user-passed options
     entryOptions.type = 'password';
     if (opts.entryOptions && opts.entryOptions.hasOwnProperty('type')) {
-        delete entryOptions.type; // Function controls type
+        delete entryOptions.type;
     }
 
     let entryId;
-    if (opts.labelForEntry !== false) { // Default to true
+    if (opts.labelForEntry !== false) {
         entryId = entryOptions.id || `adw-password-entry-${Date.now()}-${Math.random().toString(36).substring(2,7)}`;
         if (!entryOptions.id) {
-            entryOptions.id = entryId; // Ensure entry gets the ID
+            entryOptions.id = entryId;
         }
     }
 
@@ -1481,21 +1442,20 @@ function createAdwPasswordEntryRow(options = {}) {
         htmlTag: "label",
         for: entryId
     });
-    // Add a specific class for styling if AdwLabel doesn't have one for rows
     titleLabel.classList.add("adw-entry-row-title");
 
 
     const passwordEntry = Adw.createEntry(entryOptions);
     // Override type for password entry, Adw.createEntry defaults to text
     passwordEntry.type = 'password';
-    passwordEntry.classList.add("adw-entry-row-entry"); // For flex-grow
+    passwordEntry.classList.add("adw-entry-row-entry");
 
     let passwordVisible = false;
-    const visibilityButton = Adw.createButton("", { // No text, icon only
+    const visibilityButton = Adw.createButton("", {
         icon: ADW_ICON_VISIBILITY_SHOW,
         isCircular: true,
         flat: true,
-        ariaLabel: "Show password", // Accessibility
+        ariaLabel: "Show password",
         onClick: () => {
             passwordVisible = !passwordVisible;
             if (passwordVisible) {
@@ -1509,13 +1469,12 @@ function createAdwPasswordEntryRow(options = {}) {
             }
         }
     });
-    // Helper method for AdwButton to change icon
-    if (!visibilityButton.setIcon) { // Polyfill if not part of AdwButton
+    if (!visibilityButton.setIcon) {
         visibilityButton.setIcon = function(iconHTML) {
             const iconSpan = this.querySelector('.icon');
             if (iconSpan) {
                 iconSpan.innerHTML = iconHTML;
-            } else { // If button was created without an icon initially
+            } else {
                  const newIconSpan = document.createElement("span");
                  newIconSpan.classList.add("icon");
                  newIconSpan.innerHTML = iconHTML;
@@ -1528,18 +1487,16 @@ function createAdwPasswordEntryRow(options = {}) {
     const row = Adw.createRow({
         children: [titleLabel, passwordEntry, visibilityButton]
     });
-    row.classList.add("adw-password-entry-row"); // Add class for specific styling
+    row.classList.add("adw-password-entry-row");
     // Adjust AdwRow internal structure if it uses specific child classes for layout
     // For example, making passwordEntry take up more space:
-    passwordEntry.style.flexGrow = "1"; // Ensure input takes available space
-    titleLabel.style.flexShrink = "0"; // Prevent label from shrinking
-    visibilityButton.style.flexShrink = "0"; // Prevent button from shrinking
+    passwordEntry.style.flexGrow = "1";
+    titleLabel.style.flexShrink = "0";
+    visibilityButton.style.flexShrink = "0";
 
     return row;
 }
 
-
-// Export the functions.
 window.Adw = {
   createButton: createAdwButton,
   createEntry: createAdwEntry,
@@ -1550,7 +1507,7 @@ window.Adw = {
   createBox: createAdwBox,
   createRow: createAdwRow,
   createToast: createAdwToast,
-  createAdwBanner: createAdwBanner, // Added new banner function
+  createAdwBanner: createAdwBanner,
   createDialog: createAdwDialog,
   createProgressBar: createAdwProgressBar,
   createCheckbox: createAdwCheckbox,
@@ -1559,20 +1516,19 @@ window.Adw = {
   toggleTheme: toggleTheme, // This is now the wrapped version
   getAccentColors: getAccentColors,
   setAccentColor: setAccentColor,
-  DEFAULT_ACCENT_COLOR: DEFAULT_ACCENT_COLOR, // Expose default accent color
+  DEFAULT_ACCENT_COLOR: DEFAULT_ACCENT_COLOR,
 
-  // New Row Types & Avatar
   createActionRow: createAdwActionRow,
   createEntryRow: createAdwEntryRow,
-  createPasswordEntryRow: createAdwPasswordEntryRow, // Added new row type
+  createPasswordEntryRow: createAdwPasswordEntryRow,
   createExpanderRow: createAdwExpanderRow,
   createComboRow: createAdwComboRow,
   createAvatar: createAdwAvatar,
-  createViewSwitcher: createAdwViewSwitcher, // Ensure these are also included
+  createViewSwitcher: createAdwViewSwitcher,
   createFlap: createAdwFlap,
-  createSpinner: createAdwSpinner, // Added new spinner function
-  createStatusPage: createAdwStatusPage, // Added new status page function
-  createSplitButton: createAdwSplitButton, // Added new split button function
+  createSpinner: createAdwSpinner,
+  createStatusPage: createAdwStatusPage,
+  createSplitButton: createAdwSplitButton,
 };
 
 /**
@@ -1611,10 +1567,10 @@ function createAdwSplitButton(options = {}) {
 
   if (isActionLink) {
     actionPart.href = opts.actionHref;
-    if (opts.disabled) { // Links don't have a native disabled attribute
-        actionPart.classList.add("disabled"); // Custom styling for disabled links
+    if (opts.disabled) {
+        actionPart.classList.add("disabled");
         actionPart.setAttribute("aria-disabled", "true");
-        actionPart.style.pointerEvents = "none"; // Make it non-clickable
+        actionPart.style.pointerEvents = "none";
     }
   } else {
     if (typeof opts.onActionClick === 'function' && !opts.disabled) {
@@ -1680,7 +1636,7 @@ function createAdwStatusPage(options = {}) {
   if (opts.description) {
     const descriptionDiv = document.createElement("div");
     descriptionDiv.classList.add("adw-status-page-description");
-    descriptionDiv.textContent = opts.description; // textContent is safe for descriptions
+    descriptionDiv.textContent = opts.description;
     statusPage.appendChild(descriptionDiv);
   }
 
@@ -1706,9 +1662,7 @@ function createAdwSpinner(options = {}) {
   const opts = options || {};
   const spinner = document.createElement("div");
   spinner.classList.add("adw-spinner");
-  spinner.setAttribute("role", "status"); // Indicate it's a live region for updates (though visual)
-  // Consider adding aria-label if it's a standalone spinner without visible text explaining its purpose.
-  // e.g., spinner.setAttribute("aria-label", "Loading...");
+  spinner.setAttribute("role", "status");
 
   if (opts.size === 'small') {
     spinner.classList.add("small");

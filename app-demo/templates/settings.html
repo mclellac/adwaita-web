@@ -6,8 +6,7 @@
 <adw-preferences-page>
     <adw-preferences-group title="Appearance">
         <adw-expander-row title="Accent Color" subtitle="Select your preferred accent color">
-            <div id="accent-color-selector-container" class="settings-control-container accent-color-selector" style="padding-left: 0;"> {# Remove extra indent from settings-control-container if expander content area handles it #}
-                <!-- Accent color buttons will be populated here by JavaScript -->
+            <div id="accent-color-selector-container" class="settings-control-container accent-color-selector" style="padding-left: 0;">
                 <small>Loading accent colors...</small>
             </div>
         </adw-expander-row>
@@ -15,8 +14,7 @@
 
     <adw-preferences-group title="Theme">
         <adw-expander-row title="Dark Mode" subtitle="Toggle between light and dark themes">
-            <div id="theme-switch-container" class="settings-control-container" style="padding-left: 0;"> {# Remove extra indent #}
-                <!-- Adwaita switch will be populated here -->
+            <div id="theme-switch-container" class="settings-control-container" style="padding-left: 0;">
             </div>
         </adw-expander-row>
     </adw-preferences-group>
@@ -37,7 +35,6 @@
 
             try {
                 const colors = Adw.getAccentColors();
-                // Use Adw.DEFAULT_ACCENT_COLOR which was exposed in js/components.js
                 let currentAccent = localStorage.getItem('accentColor') || Adw.DEFAULT_ACCENT_COLOR || 'blue';
 
                 if (!colors || colors.length === 0) {
@@ -45,7 +42,7 @@
                     return;
                 }
 
-                accentContainer.innerHTML = ''; // Clear previous buttons
+                accentContainer.innerHTML = '';
 
                 const isLightTheme = document.body.classList.contains('light-theme');
                 const themeSuffix = isLightTheme ? '-light' : '-dark';
@@ -53,26 +50,23 @@
                 colors.forEach(color => {
                     const button = document.createElement('button');
                     button.classList.add('adw-button');
-                    // Use theme-specific variables for button's own display
-                    button.style.backgroundColor = `var(--accent-${color}${themeSuffix}-bg, var(--adw-${color}-3))`; // Fallback to a base shade
-                    button.style.color = `var(--accent-${color}${themeSuffix}-fg, #ffffff)`; // Fallback color
+                    button.style.backgroundColor = `var(--accent-${color}${themeSuffix}-bg, var(--adw-${color}-3))`;
+                    button.style.color = `var(--accent-${color}${themeSuffix}-fg, #ffffff)`;
 
                     button.style.minWidth = '80px';
                     button.style.padding = 'var(--spacing-xs) var(--spacing-s)';
-                    button.style.border = '2px solid transparent'; // Make border thicker for selection indication
+                    button.style.border = '2px solid transparent';
                     button.style.borderRadius = 'var(--border-radius-default)';
                     button.textContent = color.charAt(0).toUpperCase() + color.slice(1);
 
                     if (color === currentAccent) {
-                        // Highlight the selected button using the *current global* accent color for its border
                         button.style.borderColor = 'var(--accent-color)';
-                        button.classList.add('suggested-action'); // Optional: make it more prominent
+                        button.classList.add('suggested-action');
                     }
 
                     button.addEventListener('click', () => {
-                        Adw.setAccentColor(color); // This will update --accent-color
-                        currentAccent = color; // Update local currentAccent
-                        // Re-render to update all button styles (especially the border of the selected one)
+                        Adw.setAccentColor(color);
+                        currentAccent = color;
                         renderAccentColorButtons();
                     });
                     accentContainer.appendChild(button);
@@ -83,27 +77,23 @@
             }
         }
 
-        // Initial setup for accent colors
         renderAccentColorButtons();
 
-        // Theme Switch Setup
         if (themeSwitchContainer) {
             try {
                 const isCurrentlyLight = document.body.classList.contains('light-theme');
                 const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                // Initial state: if light-theme is set, it's light. If not, and system prefers dark, it's dark. Otherwise, default to light.
                 // Adw.js loadSaveTheme handles the initial body class, so we can check that.
                 const initialSwitchStateIsDark = !document.body.classList.contains('light-theme');
 
 
                 const themeSwitch = Adw.createSwitch({
-                    checked: initialSwitchStateIsDark, // true if dark mode is active
+                    checked: initialSwitchStateIsDark,
                     onChanged: () => {
-                        Adw.toggleTheme(); // This will trigger the 'adwThemeChanged' event
-                        // The event listener below will handle re-rendering accent buttons.
+                        Adw.toggleTheme();
                     }
                 });
-                themeSwitchContainer.innerHTML = ''; // Clear placeholder
+                themeSwitchContainer.innerHTML = '';
                 themeSwitchContainer.appendChild(themeSwitch);
 
             } catch (e) {
@@ -112,10 +102,8 @@
             }
         }
 
-        // Listen for theme changes to re-render accent color buttons
         document.addEventListener('adwThemeChanged', (event) => {
             renderAccentColorButtons();
-            // Update theme switch state if needed (though Adw.toggleTheme might already handle its visual state if it re-reads body class)
             if (themeSwitchContainer && themeSwitchContainer.querySelector('input[type="checkbox"]')) {
                  themeSwitchContainer.querySelector('input[type="checkbox"]').checked = !event.detail.isLight;
             }
