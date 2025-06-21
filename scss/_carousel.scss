@@ -1,0 +1,134 @@
+// SCSS for AdwCarousel
+@use "variables";
+
+.adw-carousel {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    // Default aspect ratio, can be overridden by user
+    // aspect-ratio: 16 / 9;
+    // background-color: var(--adw-view-background-color); // Or a neutral color
+    border-radius: var(--list-border-radius); // Consistent with other boxed elements
+
+    &-content-area {
+        display: flex;
+        width: 100%; // Ensure it takes full width of the carousel
+        height: 100%; // Ensure it takes full height
+        transition: transform 0.4s ease-in-out;
+        will-change: transform;
+    }
+
+    &-slide {
+        min-width: 100%;
+        flex-shrink: 0;
+        display: flex; // Allows easy centering of content within a slide
+        align-items: center;
+        justify-content: center;
+        // padding: var(--spacing-m); // Optional padding within each slide
+        box-sizing: border-box;
+        // background-color: transparent; // Or individual slide backgrounds
+
+        > img { // Basic styling for images within slides
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; // Or 'cover', depending on desired behavior
+            display: block;
+        }
+    }
+
+    // Navigation Buttons (optional, can be added via slots)
+    &-nav-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        // Use AdwButton styling if possible, or custom styling
+        // background-color: rgba(0,0,0,0.3);
+        // color: white;
+        // border: none;
+        // padding: var(--spacing-s);
+        // border-radius: 50%;
+        // cursor: pointer;
+        // transition: background-color 0.2s;
+
+        // &:hover {
+        //     background-color: rgba(0,0,0,0.6);
+        // }
+
+        &.prev {
+            left: var(--spacing-m);
+        }
+
+        &.next {
+            right: var(--spacing-m);
+        }
+    }
+
+    // Indicators (dots or thumbnails)
+    &-indicators {
+        position: absolute;
+        bottom: var(--spacing-s);
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: var(--spacing-xs);
+        z-index: 10;
+
+        .adw-carousel-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(var(--body-fg-color-rgb), 0.3); // Use foreground color with alpha
+            // border: 1px solid rgba(var(--body-bg-color-rgb), 0.5);
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+            &:hover {
+                background-color: rgba(var(--body-fg-color-rgb), 0.5);
+            }
+
+            &.active {
+                background-color: var(--accent-color); // Use accent color for active
+                transform: scale(1.2);
+            }
+        }
+    }
+
+    // Thumbnails as indicators (alternative style)
+    &.thumbnail-indicators {
+        .adw-carousel-indicators {
+            // Adjust positioning if thumbnails are larger
+            bottom: var(--spacing-m);
+            gap: var(--spacing-s);
+        }
+        .adw-carousel-indicator {
+            width: 60px; // Example size
+            height: 40px; // Example size
+            border-radius: var(--border-radius-small);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.7;
+            border: 2px solid transparent;
+
+            &:hover {
+                opacity: 1;
+            }
+            &.active {
+                opacity: 1;
+                border-color: var(--accent-color);
+                transform: scale(1.1); // Slight zoom for active thumbnail
+            }
+        }
+    }
+
+    // Allow looping
+    &.looping {
+        // JS handles the actual looping logic
+    }
+
+    // Autoplay
+    &.autoplay {
+        // JS handles autoplay logic
+    }
+}

@@ -2182,7 +2182,9 @@ function createAdwToolbarView(options = {}) {
     if (opts.topBar instanceof Node) {
         topBarSlot.appendChild(opts.topBar);
     }
-    topBarSlot.style.display = (opts.topBarRevealed !== false) ? '' : 'none';
+    // Add 'revealed' class by default or based on option for CSS transitions
+    if (opts.topBarRevealed !== false) topBarSlot.classList.add('revealed');
+    topBarSlot.style.display = (opts.topBarRevealed !== false && (opts.topBar || topBarSlot.innerHTML.trim() !== '')) ? '' : 'none';
 
     const contentSlot = document.createElement('div');
     contentSlot.classList.add('adw-toolbar-view-content');
@@ -2195,7 +2197,9 @@ function createAdwToolbarView(options = {}) {
     if (opts.bottomBar instanceof Node) {
         bottomBarSlot.appendChild(opts.bottomBar);
     }
-    bottomBarSlot.style.display = (opts.bottomBarRevealed !== false) ? '' : 'none';
+    if (opts.bottomBarRevealed !== false) bottomBarSlot.classList.add('revealed');
+    bottomBarSlot.style.display = (opts.bottomBarRevealed !== false && (opts.bottomBar || bottomBarSlot.innerHTML.trim() !== '')) ? '' : 'none';
+
 
     toolbarView.appendChild(topBarSlot);
     toolbarView.appendChild(contentSlot);
@@ -2203,32 +2207,51 @@ function createAdwToolbarView(options = {}) {
 
     toolbarView.setTopBar = (element) => {
         topBarSlot.innerHTML = '';
-        if (element instanceof Node) topBarSlot.appendChild(element);
-        topBarSlot.style.display = (element && opts.topBarRevealed !== false) ? '' : 'none';
+        if (element instanceof Node) {
+             topBarSlot.appendChild(element);
+             topBarSlot.style.display = opts.topBarRevealed !== false ? '' : 'none';
+             if(opts.topBarRevealed !== false) topBarSlot.classList.add('revealed'); else topBarSlot.classList.remove('revealed');
+        } else {
+            topBarSlot.style.display = 'none';
+            topBarSlot.classList.remove('revealed');
+        }
     };
     toolbarView.setBottomBar = (element) => {
         bottomBarSlot.innerHTML = '';
-        if (element instanceof Node) bottomBarSlot.appendChild(element);
-        bottomBarSlot.style.display = (element && opts.bottomBarRevealed !== false) ? '' : 'none';
+        if (element instanceof Node) {
+            bottomBarSlot.appendChild(element);
+            bottomBarSlot.style.display = opts.bottomBarRevealed !== false ? '' : 'none';
+            if(opts.bottomBarRevealed !== false) bottomBarSlot.classList.add('revealed'); else bottomBarSlot.classList.remove('revealed');
+        } else {
+            bottomBarSlot.style.display = 'none';
+            bottomBarSlot.classList.remove('revealed');
+        }
     };
     toolbarView.showTopBar = () => {
         opts.topBarRevealed = true;
-        if (topBarSlot.firstChild) topBarSlot.style.display = '';
+        if (topBarSlot.firstChild || topBarSlot.innerHTML.trim() !== '') {
+            topBarSlot.style.display = '';
+            topBarSlot.classList.add('revealed');
+        }
     };
     toolbarView.hideTopBar = () => {
         opts.topBarRevealed = false;
         topBarSlot.style.display = 'none';
+        topBarSlot.classList.remove('revealed');
     };
     toolbarView.showBottomBar = () => {
         opts.bottomBarRevealed = true;
-        if (bottomBarSlot.firstChild) bottomBarSlot.style.display = '';
+        if (bottomBarSlot.firstChild || bottomBarSlot.innerHTML.trim() !== '') {
+            bottomBarSlot.style.display = '';
+            bottomBarSlot.classList.add('revealed');
+        }
     };
     toolbarView.hideBottomBar = () => {
         opts.bottomBarRevealed = false;
         bottomBarSlot.style.display = 'none';
+        bottomBarSlot.classList.remove('revealed');
     };
 
-    // Add accessors for revealed state if needed
     Object.defineProperty(toolbarView, 'topBarRevealed', {
         get: () => opts.topBarRevealed !== false && topBarSlot.style.display !== 'none',
         set: (value) => value ? toolbarView.showTopBar() : toolbarView.hideTopBar()
@@ -2238,12 +2261,669 @@ function createAdwToolbarView(options = {}) {
         set: (value) => value ? toolbarView.showBottomBar() : toolbarView.hideBottomBar()
     });
 
-
     return toolbarView;
 }
 
-// All other Adw.* factory functions follow...
-// ... (createAdwProgressBar, createAdwCheckbox, etc.) ...
+/**
+ * Creates an AdwCarousel widget.
+ * @param {object} [options={}] Configuration options.
+ * @param {Array<HTMLElement|{content: HTMLElement, thumbnail?: string}>} [options.slides=[]] Array of slide elements or objects.
+ *        If object: { content: HTMLElement, thumbnail?: string (URL for indicator) }
+ * @param {boolean} [options.showIndicators=true] Whether to show dot indicators.
+ * @param {boolean} [options.showNavButtons=false] Whether to show previous/next navigation buttons.
+ * @param {boolean} [options.loop=true] Whether the carousel should loop.
+ * @param {boolean} [options.autoplay=false] Whether the carousel should play automatically.
+ * @param {number} [options.autoplayInterval=5000] Interval for autoplay in milliseconds.
+ * @param {'dots'|'thumbnails'} [options.indicatorStyle='dots'] Style of indicators.
+ * @returns {HTMLDivElement} The created carousel element.
+ */
+function createAdwCarousel(options = {}) {
+    const opts = {
+        showIndicators: true,
+        showNavButtons: false,
+        loop: true,
+        autoplay: false,
+        autoplayInterval: 5000,
+        indicatorStyle: 'dots',
+        ...options
+    };
+
+    const carousel = document.createElement('div');
+    carousel.classList.add('adw-carousel');
+    if (opts.loop) carousel.classList.add('looping');
+    if (opts.autoplay) carousel.classList.add('autoplay');
+    if (opts.indicatorStyle === 'thumbnails') carousel.classList.add('thumbnail-indicators');
+
+    const contentArea = document.createElement('div');
+    contentArea.classList.add('adw-carousel-content-area');
+    carousel.appendChild(contentArea);
+
+    let slideElements = [];
+    let slideThumbnails = [];
+
+    (opts.slides || []).forEach(slideInput => {
+        const slide = document.createElement('div');
+        slide.classList.add('adw-carousel-slide');
+        if (slideInput instanceof HTMLElement) {
+            slide.appendChild(slideInput);
+            slideThumbnails.push(null); // No specific thumbnail
+        } else if (typeof slideInput === 'object' && slideInput.content instanceof HTMLElement) {
+            slide.appendChild(slideInput.content);
+            slideThumbnails.push(slideInput.thumbnail || null);
+        } else {
+            console.warn("AdwCarousel: Invalid slide data provided", slideInput);
+            return; // Skip this slide
+        }
+        contentArea.appendChild(slide);
+        slideElements.push(slide);
+    });
+
+    if (slideElements.length === 0) {
+        const emptySlide = document.createElement('div');
+        emptySlide.classList.add('adw-carousel-slide');
+        emptySlide.textContent = "No slides to display.";
+        contentArea.appendChild(emptySlide);
+        slideElements.push(emptySlide);
+    }
+
+
+    let currentIndex = 0;
+    let autoplayTimer = null;
+
+    const indicatorsContainer = opts.showIndicators ? document.createElement('div') : null;
+    if (indicatorsContainer) {
+        indicatorsContainer.classList.add('adw-carousel-indicators');
+        carousel.appendChild(indicatorsContainer);
+    }
+
+    function updateIndicators() {
+        if (!indicatorsContainer) return;
+        indicatorsContainer.innerHTML = '';
+        slideElements.forEach((_, i) => {
+            const indicator = document.createElement('button');
+            indicator.classList.add('adw-carousel-indicator');
+            indicator.setAttribute('aria-label', `Go to slide ${i + 1}`);
+            if (i === currentIndex) {
+                indicator.classList.add('active');
+                indicator.setAttribute('aria-current', 'true');
+            }
+            if (opts.indicatorStyle === 'thumbnails' && slideThumbnails[i]) {
+                indicator.style.backgroundImage = `url('${slideThumbnails[i]}')`;
+            }
+            indicator.addEventListener('click', () => {
+                goToSlide(i);
+                resetAutoplay();
+            });
+            indicatorsContainer.appendChild(indicator);
+        });
+    }
+
+    function goToSlide(index, isAutoplayNext = false) {
+        if (!opts.loop && !isAutoplayNext) { // Allow autoplay to 'loop' visually even if loop=false by going to 0
+            if (index < 0 || index >= slideElements.length) {
+                 if (index < 0) index = 0;
+                 if (index >= slideElements.length) index = slideElements.length -1;
+                 // return; // Don't move if out of bounds and not looping
+            }
+        }
+
+        if (opts.loop) {
+            if (index < 0) {
+                index = slideElements.length - 1;
+            } else if (index >= slideElements.length) {
+                index = 0;
+            }
+        } else { // Not looping, clamp index
+             index = Math.max(0, Math.min(index, slideElements.length - 1));
+        }
+
+
+        currentIndex = index;
+        const offset = -currentIndex * 100;
+        contentArea.style.transform = `translateX(${offset}%)`;
+        updateIndicators();
+
+        // Update nav button states
+        if(opts.showNavButtons && !opts.loop){
+            prevButton.disabled = currentIndex === 0;
+            nextButton.disabled = currentIndex === slideElements.length - 1;
+        }
+
+        carousel.dispatchEvent(new CustomEvent('slide-changed', { detail: { currentIndex } }));
+    }
+
+    let prevButton, nextButton;
+
+    if (opts.showNavButtons) {
+        prevButton = createAdwButton('', {
+            icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.78 12.78a.75.75 0 0 1-1.06 0L4.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 1.06L6.06 8l3.72 3.72a.75.75 0 0 1 0 1.06z"/></svg>',
+            onClick: () => { goToSlide(currentIndex - 1); resetAutoplay(); },
+            isCircular: true,
+            flat: true // Or style as desired
+        });
+        prevButton.classList.add('adw-carousel-nav-button', 'prev');
+        prevButton.setAttribute('aria-label', 'Previous slide');
+        carousel.appendChild(prevButton);
+
+        nextButton = createAdwButton('', {
+            icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z"/></svg>',
+            onClick: () => { goToSlide(currentIndex + 1); resetAutoplay(); },
+            isCircular: true,
+            flat: true
+        });
+        nextButton.classList.add('adw-carousel-nav-button', 'next');
+        nextButton.setAttribute('aria-label', 'Next slide');
+        carousel.appendChild(nextButton);
+
+        if(!opts.loop){
+            prevButton.disabled = currentIndex === 0;
+            nextButton.disabled = currentIndex === slideElements.length - 1;
+        }
+    }
+
+    function startAutoplay() {
+        if (!opts.autoplay || slideElements.length <= 1) return;
+        stopAutoplay(); // Clear existing timer
+        autoplayTimer = setInterval(() => {
+            goToSlide(currentIndex + 1, true);
+        }, opts.autoplayInterval);
+    }
+
+    function stopAutoplay() {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+    }
+
+    function resetAutoplay() {
+        if (opts.autoplay) {
+            stopAutoplay();
+            startAutoplay();
+        }
+    }
+
+    carousel.addEventListener('mouseenter', stopAutoplay);
+    carousel.addEventListener('mouseleave', startAutoplay);
+    carousel.addEventListener('focusin', stopAutoplay);
+    carousel.addEventListener('focusout', startAutoplay);
+
+
+    // Initialize
+    goToSlide(0); // Show the first slide
+    if (opts.autoplay) {
+        startAutoplay();
+    }
+
+    // Public API for the factory-created element
+    carousel.goTo = (index) => { goToSlide(index); resetAutoplay(); };
+    carousel.next = () => { goToSlide(currentIndex + 1); resetAutoplay(); };
+    carousel.prev = () => { goToSlide(currentIndex - 1); resetAutoplay(); };
+    carousel.getCurrentIndex = () => currentIndex;
+    carousel.stopAutoplay = stopAutoplay;
+    carousel.startAutoplay = startAutoplay;
+
+    return carousel;
+}
+
+/**
+ * Creates an Adwaita-style Toggle Button.
+ * This is a specialized AdwButton that maintains an active state.
+ * @param {string} text - The text content of the button.
+ * @param {object} [options={}] - Configuration options.
+ * @param {boolean} [options.active=false] - Initial active state.
+ * @param {function(boolean, string=)} [options.onToggled] - Callback when the button is toggled: onToggled(isActive, value).
+ * @param {string} [options.value] - A value associated with the button, useful in groups.
+ * @returns {HTMLButtonElement} The created toggle button element.
+ */
+function createAdwToggleButton(text, options = {}) {
+    const opts = { active: false, ...options };
+    let isActive = opts.active;
+
+    const buttonOptions = { ...opts }; // Pass through other AdwButton options
+    delete buttonOptions.onToggled;
+    delete buttonOptions.value;
+
+    if (typeof buttonOptions.flat === 'undefined') {
+        buttonOptions.flat = true; // Default to flat for toggle buttons in groups
+    }
+
+    const toggleButton = createAdwButton(text, { ...buttonOptions, active: isActive });
+    toggleButton.classList.add('adw-toggle-button');
+    toggleButton.setAttribute('aria-pressed', String(isActive));
+    if(opts.value) {
+        toggleButton.dataset.value = opts.value;
+    }
+
+    const originalClickListener = toggleButton.onclick;
+
+    toggleButton.onclick = (event) => {
+        if (toggleButton.disabled) return;
+
+        if (typeof originalClickListener === 'function') {
+            originalClickListener(event);
+            if(event.defaultPrevented) return;
+        }
+
+        // isActive will be updated by the group or by its own setActive method if standalone
+        // For now, let the group handle the state change if it's part of one.
+        // If standalone, it should toggle. This logic is better handled by the group.
+        // Let's assume for now that the 'toggled' event is primary.
+
+        // Dispatch a custom event for the group to handle state.
+        // The button itself shouldn't unilaterally change its state if managed by a group.
+        toggleButton.dispatchEvent(new CustomEvent('adw-toggle-button-clicked', {
+            detail: { value: opts.value, currentState: isActive },
+            bubbles: true, composed: true
+        }));
+    };
+
+    toggleButton.setActive = (state, fireCallback = true) => { // Note: fireCallback default true
+        const newState = Boolean(state);
+        if (isActive === newState) return;
+
+        isActive = newState;
+        toggleButton.classList.toggle('active', isActive);
+        toggleButton.setAttribute('aria-pressed', String(isActive));
+
+        if (fireCallback && typeof opts.onToggled === 'function') {
+            opts.onToggled(isActive, opts.value);
+        }
+         // Dispatch 'toggled' event when state is programmatically changed and fireCallback is true
+        if (fireCallback) {
+            toggleButton.dispatchEvent(new CustomEvent('toggled', { detail: { isActive, value: opts.value } , bubbles: true, composed: true}));
+        }
+    };
+
+    toggleButton.isActive = () => isActive;
+
+    return toggleButton;
+}
+
+/**
+ * Creates an AdwToggleGroup.
+ * Manages a group of AdwToggleButtons, ensuring only one can be active at a time (like a radio group).
+ * @param {object} [options={}] - Configuration options.
+ * @param {Array<object|HTMLElement>} [options.buttons=[]] - Array of AdwToggleButton options or pre-created AdwToggleButton elements.
+ * @param {boolean} [options.linked=false] - If true, styles buttons as a single linked group.
+ * @param {string} [options.activeValue] - The value of the button to be initially active.
+ * @param {function(string|null)} [options.onActiveChanged] - Callback when active button changes: onActiveChanged(value_of_active_button).
+ * @returns {HTMLDivElement} The created toggle group element.
+ */
+function createAdwToggleGroup(options = {}) {
+    const opts = { linked: false, ...options };
+    const group = document.createElement('div');
+    group.classList.add('adw-toggle-group');
+    if (opts.linked) {
+        group.classList.add('linked');
+    }
+    group.setAttribute('role', 'radiogroup');
+
+    let buttons = [];
+    let currentActiveButton = null;
+
+    function _setActiveState(buttonToActivate, shouldFireExternalCallback = true) {
+        if (currentActiveButton === buttonToActivate && buttonToActivate.isActive()) {
+            return; // No change
+        }
+
+        if (currentActiveButton && currentActiveButton !== buttonToActivate) {
+            currentActiveButton.setActive(false, false); // Deactivate old, don't fire its internal onToggled
+        }
+
+        currentActiveButton = buttonToActivate;
+
+        if (currentActiveButton) {
+            if(!currentActiveButton.isActive()){ // Only set active if it's not already (e.g. from its own init)
+                 currentActiveButton.setActive(true, false); // Activate new, don't fire its internal onToggled
+            }
+        }
+
+        if (shouldFireExternalCallback && typeof opts.onActiveChanged === 'function') {
+            opts.onActiveChanged(currentActiveButton ? currentActiveButton.dataset.value : null);
+        }
+        if(shouldFireExternalCallback){ // Always dispatch group event if it's a user/programmatic change
+            group.dispatchEvent(new CustomEvent('active-changed', {
+                detail: { value: currentActiveButton ? currentActiveButton.dataset.value : null },
+                bubbles: true, composed: true
+            }));
+        }
+    }
+
+    (opts.buttons || []).forEach(btnOptOrEl => {
+        let button;
+        let btnValue;
+
+        if (btnOptOrEl instanceof HTMLElement && btnOptOrEl.classList.contains('adw-toggle-button')) {
+            button = btnOptOrEl;
+            btnValue = button.dataset.value || button.textContent.trim();
+            if(!button.dataset.value) button.dataset.value = btnValue;
+        } else if (typeof btnOptOrEl === 'object') {
+            btnValue = btnOptOrEl.value || btnOptOrEl.label || '';
+            button = createAdwToggleButton(btnOptOrEl.label || '', { ...btnOptOrEl, value: btnValue });
+        } else {
+            console.warn("AdwToggleGroup: Invalid item in buttons array.", btnOptOrEl);
+            return;
+        }
+
+        button.setAttribute('role', 'radio');
+
+        // Listen to the custom 'adw-toggle-button-clicked' event dispatched by the button
+        button.addEventListener('adw-toggle-button-clicked', (e) => {
+            if(button.disabled) return;
+            // The group decides if this button becomes the active one.
+            // Since it's a radiogroup, clicking a button means it should become active.
+            _setActiveState(button);
+        });
+
+        buttons.push(button);
+        group.appendChild(button);
+
+        // Initial active state based on options.activeValue or button's own active state
+        if (opts.activeValue && btnValue === opts.activeValue) {
+            if(currentActiveButton && currentActiveButton !== button) currentActiveButton.setActive(false, false);
+            currentActiveButton = button;
+        } else if (button.isActive() && !currentActiveButton) { // If button was created active and no group activeValue set
+            currentActiveButton = button;
+        } else if (button.isActive() && currentActiveButton && currentActiveButton !== button) {
+            button.setActive(false, false); // Ensure only one is active if multiple were pre-set
+        }
+    });
+
+    // After all buttons are processed, ensure only the designated one is active
+    if(currentActiveButton){
+        buttons.forEach(btn => {
+            if(btn !== currentActiveButton && btn.isActive()){
+                btn.setActive(false, false);
+            } else if (btn === currentActiveButton && !btn.isActive()){
+                btn.setActive(true, false); // Ensure the chosen one is indeed active
+            }
+        });
+    } else if (opts.activeValue) {
+         console.warn(`AdwToggleGroup: activeValue "${opts.activeValue}" did not match any button value.`);
+    }
+
+
+    group.getValue = () => currentActiveButton ? currentActiveButton.dataset.value : null;
+
+    group.setValue = (valueToActivate) => {
+        const buttonToActivate = buttons.find(btn => btn.dataset.value === valueToActivate);
+        if (buttonToActivate) {
+            _setActiveState(buttonToActivate);
+        } else {
+            console.warn(`AdwToggleGroup: Value "${valueToActivate}" not found in any button.`);
+        }
+    };
+
+    return group;
+}
+
+
+// AdwCarousel factory function is now above this block
+
+/**
+ * Creates an AdwNavigationSplitView widget.
+ * Provides a master-detail view with a collapsible sidebar and a content pane.
+ * The content pane typically hosts an AdwNavigationView or AdwTabView.
+ * @param {object} [options={}] Configuration options.
+ * @param {HTMLElement} [options.sidebar] The content for the sidebar.
+ * @param {HTMLElement} [options.content] The content for the main pane.
+ * @param {boolean} [options.showSidebar=true] Initial visibility of the sidebar.
+ * @param {boolean} [options.canCollapse=true] Whether the sidebar can be collapsed.
+ * @param {number} [options.collapseThreshold=768] Width in pixels below which the sidebar overlays content.
+ * @param {string} [options.sidebarWidth="300px"] Default width of the sidebar.
+ * @returns {HTMLDivElement} The created NavigationSplitView element.
+ */
+function createAdwNavigationSplitView(options = {}) {
+    const opts = {
+        showSidebar: true,
+        canCollapse: true,
+        collapseThreshold: 768, // Common tablet breakpoint
+        sidebarWidth: "300px",
+        ...options
+    };
+
+    const splitView = document.createElement('div');
+    splitView.classList.add('adw-navigation-split-view');
+
+    const sidebarPane = document.createElement('aside');
+    sidebarPane.classList.add('adw-navigation-split-view-sidebar');
+    sidebarPane.style.width = opts.sidebarWidth;
+    if (opts.sidebar instanceof Node) {
+        sidebarPane.appendChild(opts.sidebar);
+    }
+
+    const contentPane = document.createElement('div');
+    contentPane.classList.add('adw-navigation-split-view-content');
+    if (opts.content instanceof Node) {
+        contentPane.appendChild(opts.content);
+    }
+
+    const backdrop = document.createElement('div');
+    backdrop.classList.add('adw-navigation-split-view-backdrop');
+    backdrop.addEventListener('click', () => toggleSidebar(false));
+
+
+    splitView.appendChild(sidebarPane);
+    splitView.appendChild(contentPane);
+    splitView.appendChild(backdrop); // Add backdrop to the DOM but keep it hidden initially
+
+    let isSidebarVisible = opts.showSidebar;
+    let isOverlayMode = false;
+
+    function updateViewMode() {
+        const currentWidth = splitView.offsetWidth;
+        const newIsOverlayMode = opts.canCollapse && currentWidth < opts.collapseThreshold;
+
+        if (newIsOverlayMode !== isOverlayMode) {
+            isOverlayMode = newIsOverlayMode;
+            splitView.classList.toggle('sidebar-overlay', isOverlayMode);
+            // When switching modes, re-evaluate sidebar visibility
+            // If switching to overlay and sidebar was visible, it should remain revealed (if it was open)
+            // If switching from overlay to docked, sidebar should be visible if it was revealed
+            if (isOverlayMode) {
+                if(isSidebarVisible) { // If it was visible and we go to overlay, keep it revealed
+                    sidebarPane.classList.add('revealed');
+                    backdrop.classList.add('visible');
+                } else {
+                    sidebarPane.classList.remove('revealed');
+                    backdrop.classList.remove('visible');
+                }
+            } else { // Switching to docked mode
+                sidebarPane.classList.remove('revealed'); // Not using 'revealed' for docked
+                backdrop.classList.remove('visible');
+                sidebarPane.style.transform = ''; // Reset transform
+                sidebarPane.style.visibility = '';
+                if (isSidebarVisible) {
+                    sidebarPane.classList.remove('collapsed');
+                } else {
+                    sidebarPane.classList.add('collapsed');
+                }
+            }
+        }
+        // Ensure correct display based on current state even if mode didn't change
+        applySidebarVisibility();
+    }
+
+    function applySidebarVisibility() {
+        if (isOverlayMode) {
+            sidebarPane.classList.toggle('revealed', isSidebarVisible);
+            backdrop.classList.toggle('visible', isSidebarVisible);
+            if(isSidebarVisible) {
+                 sidebarPane.style.transform = 'translateX(0)';
+                 sidebarPane.style.visibility = 'visible';
+            } else {
+                 sidebarPane.style.transform = 'translateX(-100%)';
+                 setTimeout(() => { // Delay hiding until after transition
+                     if(!sidebarPane.classList.contains('revealed')) sidebarPane.style.visibility = 'hidden';
+                 }, 250); // Match transition time
+            }
+        } else { // Docked mode
+            sidebarPane.classList.toggle('collapsed', !isSidebarVisible);
+            sidebarPane.style.transform = '';
+            sidebarPane.style.visibility = '';
+            backdrop.classList.remove('visible');
+        }
+    }
+
+
+    function toggleSidebar(explicitShow) {
+        if (!opts.canCollapse && typeof explicitShow === 'undefined') return; // Cannot toggle if not collapsible unless forced
+
+        isSidebarVisible = (typeof explicitShow === 'boolean') ? explicitShow : !isSidebarVisible;
+        applySidebarVisibility();
+        splitView.dispatchEvent(new CustomEvent('sidebar-toggled', { detail: { isVisible: isSidebarVisible, isOverlay: isOverlayMode } }));
+    }
+
+    // ResizeObserver to handle breakpoint changes
+    let resizeObserver;
+    if (typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(updateViewMode);
+    }
+
+    splitView.showSidebar = () => toggleSidebar(true);
+    splitView.hideSidebar = () => toggleSidebar(false);
+    splitView.toggleSidebar = () => toggleSidebar();
+    splitView.isSidebarVisible = () => isSidebarVisible;
+    splitView.isOverlayMode = () => isOverlayMode;
+
+    // Method to connect observer when element is in DOM
+    splitView.connectObserver = () => {
+        if (resizeObserver && opts.canCollapse) {
+            resizeObserver.observe(splitView);
+            updateViewMode(); // Initial check
+        } else if (!opts.canCollapse) {
+            sidebarPane.classList.remove('collapsed'); // Ensure it's not collapsed if canCollapse is false
+            isSidebarVisible = true;
+            applySidebarVisibility();
+        }
+    };
+    splitView.disconnectObserver = () => {
+        if (resizeObserver) resizeObserver.disconnect();
+    };
+
+    // Initial state
+    if (!opts.showSidebar && opts.canCollapse) {
+        sidebarPane.classList.add('collapsed'); // Start collapsed if showSidebar is false
+    }
+    // updateViewMode will be called by connectObserver
+
+    return splitView;
+}
+
+/**
+ * Creates an AdwOverlaySplitView widget.
+ * Similar to NavigationSplitView but sidebar always overlays or is hidden.
+ * The content pane typically hosts an AdwNavigationView or AdwTabView.
+ * @param {object} [options={}] Configuration options.
+ * @param {HTMLElement} [options.sidebar] The content for the sidebar.
+ * @param {HTMLElement} [options.content] The content for the main pane.
+ * @param {boolean} [options.showSidebar=false] Initial visibility of the sidebar.
+ * @param {boolean} [options.canCollapse=true] Whether the sidebar can be collapsed (hidden). If false, it's always shown as overlay.
+ * @param {string} [options.sidebarPosition="start"|"end"] Position of the sidebar. Default "start".
+ * @param {string} [options.sidebarWidth="300px"] Default width of the sidebar.
+ * @returns {HTMLDivElement} The created OverlaySplitView element.
+ */
+function createAdwOverlaySplitView(options = {}) {
+    const opts = {
+        showSidebar: false, // Typically hidden by default for overlay
+        canCollapse: true,
+        sidebarPosition: "start",
+        sidebarWidth: "300px",
+        ...options
+    };
+
+    const splitView = document.createElement('div');
+    splitView.classList.add('adw-overlay-split-view');
+    if (opts.sidebarPosition === 'end') {
+        splitView.classList.add('sidebar-end');
+    }
+
+    const sidebarPane = document.createElement('aside');
+    sidebarPane.classList.add('adw-overlay-split-view-sidebar');
+    sidebarPane.style.width = opts.sidebarWidth;
+    if (opts.sidebar instanceof Node) {
+        sidebarPane.appendChild(opts.sidebar);
+    }
+    // Ensure sidebar is always in overlay mode for styling (position: absolute etc.)
+    // The 'revealed' class will control its actual visibility.
+    // No separate 'overlay-mode' class needed on the sidebar itself like in NavSplitView,
+    // as it's always in an overlaying state relative to content.
+
+    const contentPane = document.createElement('div');
+    contentPane.classList.add('adw-overlay-split-view-content');
+    if (opts.content instanceof Node) {
+        contentPane.appendChild(opts.content);
+    }
+
+    const backdrop = document.createElement('div');
+    backdrop.classList.add('adw-overlay-split-view-backdrop');
+    backdrop.addEventListener('click', () => {
+        if(opts.canCollapse) toggleSidebar(false); // Only close via backdrop if collapsible
+    });
+
+    // Order in DOM for start position: sidebar, content, backdrop
+    // Order in DOM for end position: content, sidebar, backdrop
+    if (opts.sidebarPosition === 'end') {
+        splitView.appendChild(contentPane);
+        splitView.appendChild(sidebarPane);
+    } else {
+        splitView.appendChild(sidebarPane);
+        splitView.appendChild(contentPane);
+    }
+    splitView.appendChild(backdrop);
+
+    let isSidebarVisible = opts.showSidebar;
+
+    function applySidebarVisibility() {
+        sidebarPane.classList.toggle('revealed', isSidebarVisible);
+        backdrop.classList.toggle('visible', isSidebarVisible && opts.canCollapse); // Backdrop only if collapsible
+
+        if (isSidebarVisible) {
+            sidebarPane.style.transform = 'translateX(0)';
+            sidebarPane.style.visibility = 'visible';
+        } else {
+            const translateDir = opts.sidebarPosition === 'end' ? '100%' : '-100%';
+            sidebarPane.style.transform = `translateX(${translateDir})`;
+            // Delay hiding visibility until after transition
+            setTimeout(() => {
+                 if(!sidebarPane.classList.contains('revealed')) sidebarPane.style.visibility = 'hidden';
+            }, 250); // Match SCSS transition time
+        }
+    }
+
+    function toggleSidebar(explicitShow) {
+        if (!opts.canCollapse && typeof explicitShow === 'boolean' && !explicitShow) {
+            // If not collapsible, cannot explicitly hide it once shown.
+            // It can only be explicitly shown if not already.
+            if(!isSidebarVisible && explicitShow) isSidebarVisible = true;
+            else return;
+        } else if (!opts.canCollapse && typeof explicitShow === 'undefined') {
+            // If not collapsible, toggle means show if hidden, no-op if shown
+            if (!isSidebarVisible) isSidebarVisible = true;
+            else return;
+        } else { // Is collapsible or explicit show
+            isSidebarVisible = (typeof explicitShow === 'boolean') ? explicitShow : !isSidebarVisible;
+        }
+
+        applySidebarVisibility();
+        splitView.dispatchEvent(new CustomEvent('sidebar-toggled', { detail: { isVisible: isSidebarVisible } }));
+    }
+
+    splitView.showSidebar = () => toggleSidebar(true);
+    splitView.hideSidebar = () => { if(opts.canCollapse) toggleSidebar(false); };
+    splitView.toggleSidebar = () => toggleSidebar(); // Respects canCollapse for hiding
+    splitView.isSidebarVisible = () => isSidebarVisible;
+
+    // Initial state
+    // The `canCollapse` property determines if it *can* be hidden. If false, it's always shown (once opts.showSidebar is true).
+    if (!opts.canCollapse) {
+        isSidebarVisible = true; // If not collapsible, force it to be shown.
+        splitView.classList.add('not-collapsible');
+    }
+    applySidebarVisibility(); // Apply initial state based on isSidebarVisible
+
+    return splitView;
+}
+
 
 window.Adw = {
   createButton: createAdwButton,
@@ -2292,7 +2972,12 @@ window.Adw = {
   createWrapBox: createAdwWrapBox,
   createClamp: createAdwClamp,
   createBreakpointBin: createAdwBreakpointBin,
-  createToolbarView: createAdwToolbarView
+  createToolbarView: createAdwToolbarView,
+  createAdwCarousel: createAdwCarousel,
+  createAdwToggleButton: createAdwToggleButton,
+  createAdwToggleGroup: createAdwToggleGroup,
+  createAdwNavigationSplitView: createAdwNavigationSplitView,
+  createAdwOverlaySplitView: createAdwOverlaySplitView
 };
 
 window.addEventListener("DOMContentLoaded", loadSavedTheme);
@@ -2310,7 +2995,7 @@ class AdwButton extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
         styleLink.rel = 'stylesheet';
-        styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
     }
 
@@ -2383,7 +3068,7 @@ class AdwBox extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
         styleLink.rel = 'stylesheet';
-        styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
     }
 
@@ -2421,7 +3106,7 @@ class AdwEntry extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._inputElement = null;
     }
@@ -2466,7 +3151,7 @@ class AdwLabel extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
     }
     connectedCallback() { this._render(); }
@@ -2491,7 +3176,7 @@ class AdwEntryRow extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._internalEntry = null;
     }
@@ -2532,7 +3217,7 @@ class AdwPasswordEntryRow extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._internalEntry = null;
     }
@@ -2573,7 +3258,7 @@ class AdwActionRow extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._onClick = null;
     }
@@ -2602,7 +3287,7 @@ class AdwSwitch extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._internalSwitch = null; this._inputElement = null;
     }
@@ -2644,7 +3329,7 @@ class AdwCheckbox extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._internalCheckbox = null; this._inputElement = null;
     }
@@ -2687,7 +3372,7 @@ class AdwRadioButton extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._internalRadio = null; this._inputElement = null;
     }
@@ -2732,7 +3417,7 @@ class AdwListBox extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
     }
     connectedCallback() { this._render(); }
@@ -2754,7 +3439,7 @@ class AdwRow extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._onClick = null;
     }
@@ -2789,7 +3474,7 @@ class AdwWindowTitle extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
     }
     connectedCallback() { this._render(); }
@@ -2805,7 +3490,7 @@ class AdwHeaderBar extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
     }
     connectedCallback() { this._render(); }
@@ -2829,7 +3514,7 @@ class AdwApplicationWindow extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
     }
     connectedCallback() { this._render(); }
@@ -2849,7 +3534,7 @@ class AdwAvatar extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
     }
     connectedCallback() { this._render(); }
@@ -2871,7 +3556,7 @@ class AdwFlap extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._flapInstance = null;
     }
@@ -2915,7 +3600,7 @@ class AdwViewSwitcher extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._viewSwitcherInstance = null; this._observer = null;
     }
@@ -2967,7 +3652,7 @@ class AdwProgressBar extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
     }
     connectedCallback() { this._render(); }
@@ -2988,7 +3673,7 @@ class AdwSpinner extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._spinnerElement = null;
     }
@@ -3023,7 +3708,7 @@ class AdwSplitButton extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
     }
     connectedCallback() { this._render(); }
@@ -3050,7 +3735,7 @@ class AdwStatusPage extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
     }
     connectedCallback() {
@@ -3101,7 +3786,7 @@ class AdwDialog extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' }); // Shadow DOM might not be strictly needed if dialog is always in body
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink); // Style link for completeness, though dialog is modal in body
         this._dialogInstance = null;
     }
@@ -3613,7 +4298,7 @@ class AdwSpinButton extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css'; // Adjust path as needed
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; // Adjust path as needed
         this.shadowRoot.appendChild(styleLink);
         this._spinButtonElement = null;
     }
@@ -3684,7 +4369,7 @@ class AdwSpinRow extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._spinRowElement = null;
     }
@@ -3750,7 +4435,7 @@ class AdwButtonRow extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._buttonRowElement = null;
         this._slotObserver = new MutationObserver(() => this._render());
@@ -3818,7 +4503,7 @@ class AdwTabButton extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._tabButtonElement = null;
     }
@@ -3898,7 +4583,7 @@ class AdwTabBar extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._tabBarElement = null; // This will be the element from the factory
         this._slotObserver = new MutationObserver(() => this._rebuildTabsFromSlotted());
@@ -4030,7 +4715,7 @@ class AdwTabPage extends HTMLElement { // Basic component for discoverability an
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
 
         const slot = document.createElement('slot');
         this._wrapper = document.createElement('div');
@@ -4057,7 +4742,7 @@ class AdwTabView extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
 
         this._tabViewFactoryInstance = null;
@@ -4224,7 +4909,7 @@ class AdwNavigationView extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
 
         this._navigationViewFactoryInstance = null;
@@ -4472,7 +5157,7 @@ class AdwBin extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css'; // Adjust path as needed
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; // Adjust path as needed
 
         const binDiv = document.createElement('div');
         binDiv.classList.add('adw-bin');
@@ -4786,7 +5471,10 @@ class AdwToolbarView extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet';
+        // Assuming styles are in a relative path or root path accessible to components
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+
 
         this._toolbarViewElement = document.createElement('div');
         this._toolbarViewElement.classList.add('adw-toolbar-view');
@@ -4810,12 +5498,20 @@ class AdwToolbarView extends HTMLElement {
 
         this._toolbarViewElement.append(this._topBarSlotContainer, this._contentSlotContainer, this._bottomBarSlotContainer);
         this.shadowRoot.append(styleLink, this._toolbarViewElement);
+
+        // Observe slotted children to update bar visibility if they become empty/non-empty
+        this._slotObserver = new MutationObserver(() => this._updateBarVisibility());
+
     }
 
     connectedCallback() {
         this._updateBarVisibility();
-        // No factory instance needed if we manage display via CSS/attributes directly.
-        // This WC will be more about structure and CSS.
+        this._slotObserver.observe(this._topBarSlot, { childList: true, subtree: true });
+        this._slotObserver.observe(this._bottomBarSlot, { childList: true, subtree: true });
+    }
+
+    disconnectedCallback() {
+        this._slotObserver.disconnect();
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -4824,26 +5520,128 @@ class AdwToolbarView extends HTMLElement {
         }
     }
 
-    _updateBarVisibility() {
-        const topBarRevealed = !this.hasAttribute('top-bar-revealed') || this.getAttribute('top-bar-revealed') !== 'false';
-        const bottomBarRevealed = !this.hasAttribute('bottom-bar-revealed') || this.getAttribute('bottom-bar-revealed') !== 'false';
-
-        this._topBarSlotContainer.style.display = topBarRevealed ? '' : 'none';
-        this._bottomBarSlotContainer.style.display = bottomBarRevealed ? '' : 'none';
-
-        // Add classes for CSS transitions/animations if desired
-        this._topBarSlotContainer.classList.toggle('revealed', topBarRevealed);
-        this._bottomBarSlotContainer.classList.toggle('revealed', bottomBarRevealed);
-
+    _hasSlottedContent(slot) {
+        return slot.assignedNodes({flatten: true}).some(node =>
+            node.nodeType === Node.ELEMENT_NODE ||
+            (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '')
+        );
     }
 
-    // Public methods (optional, could rely on attributes)
+    _updateBarVisibility() {
+        const topBarRevealedByAttr = !this.hasAttribute('top-bar-revealed') || this.getAttribute('top-bar-revealed') !== 'false';
+        const bottomBarRevealedByAttr = !this.hasAttribute('bottom-bar-revealed') || this.getAttribute('bottom-bar-revealed') !== 'false';
+
+        const hasTopContent = this._hasSlottedContent(this._topBarSlot);
+        const hasBottomContent = this._hasSlottedContent(this._bottomBarSlot);
+
+        const showTopBar = topBarRevealedByAttr && hasTopContent;
+        const showBottomBar = bottomBarRevealedByAttr && hasBottomContent;
+
+        this._topBarSlotContainer.style.display = showTopBar ? '' : 'none';
+        this._topBarSlotContainer.classList.toggle('revealed', showTopBar);
+
+        this._bottomBarSlotContainer.style.display = showBottomBar ? '' : 'none';
+        this._bottomBarSlotContainer.classList.toggle('revealed', showBottomBar);
+    }
+
     showTopBar() { this.setAttribute('top-bar-revealed', ''); }
-    hideTopBar() { this.removeAttribute('top-bar-revealed'); } // Or set to "false"
+    hideTopBar() { this.setAttribute('top-bar-revealed', 'false'); } // Explicitly false
     showBottomBar() { this.setAttribute('bottom-bar-revealed', ''); }
-    hideBottomBar() { this.removeAttribute('bottom-bar-revealed'); }
+    hideBottomBar() { this.setAttribute('bottom-bar-revealed', 'false'); } // Explicitly false
 }
 
+customElements.define('adw-toolbar-view', AdwToolbarView);
+
+class AdwCarousel extends HTMLElement {
+    static get observedAttributes() {
+        return ['show-indicators', 'show-nav-buttons', 'loop', 'autoplay', 'autoplay-interval', 'indicator-style'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._carouselInstance = null;
+        this._slotObserver = new MutationObserver(() => this._rebuildSlides());
+    }
+
+    connectedCallback() {
+        this._render();
+        this._slotObserver.observe(this, { childList: true, subtree: false }); // Observe direct children (slides)
+    }
+
+    disconnectedCallback() {
+        this._slotObserver.disconnect();
+        if (this._carouselInstance && this._carouselInstance.stopAutoplay) {
+            this._carouselInstance.stopAutoplay();
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render(); // Re-render on attribute change
+        }
+    }
+
+    _getSlottedSlides() {
+        return Array.from(this.children).map(child => {
+            // Expecting child to be <div> or <img> or an element with data-thumbnail
+            // For simplicity, pass the element itself. The factory can wrap it if needed.
+            // If child has a 'data-thumbnail' attribute, use it.
+            return {
+                content: child.cloneNode(true), // Factory expects content
+                thumbnail: child.dataset.thumbnail || undefined
+            };
+        });
+    }
+
+    _rebuildSlides() {
+        // This method is called when light DOM children change.
+        // We need to re-initialize the carousel with the new set of slides.
+        this._render();
+    }
+
+    _render() {
+        // Clear previous carousel instance from shadow DOM if any
+        if (this._carouselInstance && this._carouselInstance.parentElement === this.shadowRoot) {
+            this._carouselInstance.remove();
+        }
+        if (this._carouselInstance && this._carouselInstance.stopAutoplay) {
+            this._carouselInstance.stopAutoplay(); // Stop any previous autoplay
+        }
+
+
+        const options = {
+            slides: this._getSlottedSlides(),
+            showIndicators: !this.hasAttribute('show-indicators') || this.getAttribute('show-indicators') !== 'false',
+            showNavButtons: this.hasAttribute('show-nav-buttons') && this.getAttribute('show-nav-buttons') !== 'false',
+            loop: !this.hasAttribute('loop') || this.getAttribute('loop') !== 'false',
+            autoplay: this.hasAttribute('autoplay') && this.getAttribute('autoplay') !== 'false',
+            autoplayInterval: this.hasAttribute('autoplay-interval') ? parseInt(this.getAttribute('autoplay-interval'), 10) : 5000,
+            indicatorStyle: this.getAttribute('indicator-style') || 'dots',
+        };
+
+        this._carouselInstance = Adw.createAdwCarousel(options);
+        this.shadowRoot.appendChild(this._carouselInstance);
+
+        // Forward events from the factory instance to the custom element
+        this._carouselInstance.addEventListener('slide-changed', (e) => {
+            this.dispatchEvent(new CustomEvent('slide-changed', { detail: e.detail, bubbles: true, composed: true }));
+        });
+    }
+
+    // Public API methods
+    goTo(index) { if (this._carouselInstance) this._carouselInstance.goTo(index); }
+    next() { if (this._carouselInstance) this._carouselInstance.next(); }
+    prev() { if (this._carouselInstance) this._carouselInstance.prev(); }
+    getCurrentIndex() { return this._carouselInstance ? this._carouselInstance.getCurrentIndex() : -1; }
+    stopAutoplay() { if (this._carouselInstance) this._carouselInstance.stopAutoplay(); }
+    startAutoplay() { if (this._carouselInstance) this._carouselInstance.startAutoplay(); }
+}
+customElements.define('adw-carousel', AdwCarousel);
 
 class AdwPreferencesView extends HTMLElement {
     constructor() {
@@ -5064,6 +5862,418 @@ customElements.define('adw-wrap-box', AdwWrapBox);
 customElements.define('adw-clamp', AdwClamp);
 customElements.define('adw-breakpoint-bin', AdwBreakpointBin);
 customElements.define('adw-toolbar-view', AdwToolbarView);
+customElements.define('adw-carousel', AdwCarousel); // AdwCarousel was already defined, this is fine.
+
+class AdwOverlaySplitView extends HTMLElement {
+    static get observedAttributes() {
+        return ['show-sidebar', 'can-collapse', 'sidebar-position', 'sidebar-width'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._splitViewInstance = null;
+        this._slotObserver = null;
+    }
+
+    connectedCallback() {
+        this._render();
+        if (this.isConnected && this._splitViewInstance) {
+            // The factory's applySidebarVisibility handles initial state.
+            // No specific connectObserver needed for OverlaySplitView factory as it doesn't use ResizeObserver.
+        }
+
+        this._observer = new MutationObserver((mutations) => {
+            let needsReRender = false;
+            for (const mutation of mutations) {
+                if (mutation.type === 'childList') {
+                    const relevantNodes = [...Array.from(mutation.addedNodes), ...Array.from(mutation.removedNodes)];
+                    if (relevantNodes.some(node => (node.nodeType === Node.ELEMENT_NODE && (node.slot === 'sidebar' || node.slot === 'content')) || !node.slot)) {
+                        needsReRender = true;
+                        break;
+                    }
+                }
+            }
+            if (needsReRender) this._render();
+        });
+        this._observer.observe(this, { childList: true, subtree: false });
+    }
+
+    disconnectedCallback() {
+        if(this._observer) this._observer.disconnect();
+        // Factory doesn't have a disconnectObserver for OverlaySplitView
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _getSlottedContent(slotName) {
+        const slotted = this.querySelector(`:scope > [slot="${slotName}"]`);
+        return slotted ? slotted.cloneNode(true) : document.createElement('div');
+    }
+
+    _render() {
+        // Clear previous content from shadow DOM, except for the stylesheet
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild.nodeName !== 'LINK') {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const sidebarContent = this._getSlottedContent('sidebar');
+        const mainContent = this._getSlottedContent('content');
+
+        const options = {
+            sidebar: sidebarContent,
+            content: mainContent,
+            showSidebar: this.hasAttribute('show-sidebar') && this.getAttribute('show-sidebar') !== 'false',
+            canCollapse: !this.hasAttribute('can-collapse') || this.getAttribute('can-collapse') !== 'false',
+            sidebarPosition: this.getAttribute('sidebar-position') || "start",
+            sidebarWidth: this.getAttribute('sidebar-width') || "300px",
+        };
+
+        this._splitViewInstance = Adw.createAdwOverlaySplitView(options);
+        this.shadowRoot.appendChild(this._splitViewInstance);
+
+        this._splitViewInstance.addEventListener('sidebar-toggled', (e) => {
+            this.dispatchEvent(new CustomEvent('sidebar-toggled', { detail: e.detail, bubbles: true, composed: true }));
+            if (e.detail.isVisible) {
+                this.setAttribute('show-sidebar', '');
+            } else {
+                this.removeAttribute('show-sidebar');
+            }
+        });
+    }
+
+    // Public API methods
+    showSidebar() { if (this._splitViewInstance) this._splitViewInstance.showSidebar(); }
+    hideSidebar() { if (this._splitViewInstance) this._splitViewInstance.hideSidebar(); }
+    toggleSidebar() { if (this._splitViewInstance) this._splitViewInstance.toggleSidebar(); }
+    isSidebarVisible() { return this._splitViewInstance ? this._splitViewInstance.isSidebarVisible() : (this.hasAttribute('show-sidebar') ? this.getAttribute('show-sidebar') !== 'false' : false); }
+}
+customElements.define('adw-overlay-split-view', AdwOverlaySplitView);
+
+class AdwToggleButton extends HTMLElement {
+    static get observedAttributes() {
+        return ['label', 'active', 'disabled', 'value', 'icon', 'flat', 'suggested', 'destructive', 'circular'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._toggleButtonInstance = null;
+    }
+
+    connectedCallback() {
+        this._render();
+        // The factory's toggleButton.onclick handles dispatching 'adw-toggle-button-clicked'
+        // The factory's toggleButton.setActive handles internal state and 'toggled' event for direct programmatic changes.
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+            // If active attribute changes, ensure instance reflects it (if instance exists)
+            if (name === 'active' && this._toggleButtonInstance) {
+                 this._toggleButtonInstance.setActive(this.hasAttribute('active'), false); // Don't re-fire callback from attr change
+            }
+        }
+    }
+
+    _render() {
+        const currentInstanceParent = this._toggleButtonInstance ? this._toggleButtonInstance.parentElement : null;
+        if (currentInstanceParent === this.shadowRoot) {
+            this.shadowRoot.removeChild(this._toggleButtonInstance);
+        }
+
+        const options = {
+            active: this.hasAttribute('active'),
+            disabled: this.hasAttribute('disabled'),
+            value: this.getAttribute('value') || this.textContent.trim(),
+            icon: this.getAttribute('icon') || undefined,
+            flat: !this.hasAttribute('flat') || this.getAttribute('flat') !== 'false', // Default true
+            suggested: this.hasAttribute('suggested'),
+            destructive: this.hasAttribute('destructive'),
+            isCircular: this.hasAttribute('circular'),
+            // onToggled is managed by the group or if used standalone, via event listener on the custom element
+        };
+
+        const label = this.getAttribute('label') || this.textContent.trim();
+
+        this._toggleButtonInstance = Adw.createAdwToggleButton(label, options);
+        this.shadowRoot.appendChild(this._toggleButtonInstance);
+    }
+
+    // Public properties/methods
+    get active() {
+        return this._toggleButtonInstance ? this._toggleButtonInstance.isActive() : this.hasAttribute('active');
+    }
+
+    set active(value) {
+        const isActive = Boolean(value);
+        if (this.active === isActive) return;
+
+        if (isActive) this.setAttribute('active', '');
+        else this.removeAttribute('active');
+
+        if (this._toggleButtonInstance) {
+            this._toggleButtonInstance.setActive(isActive, true); // Fire callback for programmatic changes
+        }
+    }
+
+    get value() {
+        return this.getAttribute('value') || (this._toggleButtonInstance ? this._toggleButtonInstance.dataset.value : this.textContent.trim());
+    }
+
+    set value(val) {
+        this.setAttribute('value', val);
+        if(this._toggleButtonInstance) this._toggleButtonInstance.dataset.value = val;
+    }
+}
+customElements.define('adw-toggle-button', AdwToggleButton);
+
+class AdwToggleGroup extends HTMLElement {
+    static get observedAttributes() { return ['linked', 'active-value']; }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._toggleGroupInstance = null;
+        this._slotObserver = new MutationObserver(() => this._rebuildGroup());
+    }
+
+    connectedCallback() {
+        this._render();
+        this._slotObserver.observe(this, { childList: true, attributes: true, attributeFilter: ['value', 'active', 'label'], subtree: true }); // Observe children
+    }
+
+    disconnectedCallback() {
+        this._slotObserver.disconnect();
+    }
+
+    _rebuildGroup() {
+        // This is called when light DOM children (adw-toggle-button) change.
+        // Re-initialize the factory instance with the current set of buttons.
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render(); // Re-render if attributes like 'linked' or 'active-value' change
+        }
+    }
+
+    _getButtonOptionsFromSlotted() {
+        return Array.from(this.children)
+            .filter(child => child.matches('adw-toggle-button'))
+            .map(btn => ({
+                label: btn.getAttribute('label') || btn.textContent.trim(),
+                value: btn.getAttribute('value') || btn.textContent.trim(),
+                active: btn.hasAttribute('active'),
+                // Pass through other relevant attributes if createAdwToggleButton supports them
+                icon: btn.getAttribute('icon') || undefined,
+                disabled: btn.hasAttribute('disabled'),
+                flat: !btn.hasAttribute('flat') || btn.getAttribute('flat') !== 'false',
+            }));
+    }
+
+
+    _render() {
+        if (this._toggleGroupInstance && this._toggleGroupInstance.parentElement === this.shadowRoot) {
+            this.shadowRoot.removeChild(this._toggleGroupInstance);
+        }
+
+        const buttonOptions = this._getButtonOptionsFromSlotted();
+
+        const options = {
+            buttons: buttonOptions, // Pass options to factory, it will create AdwToggleButtons
+            linked: this.hasAttribute('linked'),
+            activeValue: this.getAttribute('active-value') || undefined,
+            onActiveChanged: (activeValue) => {
+                // Reflect change to attribute and dispatch event
+                if (activeValue === null) {
+                    this.removeAttribute('active-value');
+                } else {
+                    this.setAttribute('active-value', activeValue);
+                }
+                this.dispatchEvent(new CustomEvent('active-changed', { detail: { value: activeValue }, bubbles: true, composed: true }));
+            }
+        };
+
+        this._toggleGroupInstance = Adw.createAdwToggleGroup(options);
+        this.shadowRoot.appendChild(this._toggleGroupInstance);
+
+        // Ensure light DOM adw-toggle-buttons also reflect the group's active state
+        const currentGroupValue = this._toggleGroupInstance.getValue();
+        Array.from(this.children).forEach(child => {
+            if (child.matches('adw-toggle-button')) {
+                const childValue = child.getAttribute('value') || child.textContent.trim();
+                const shouldBeActive = childValue === currentGroupValue;
+                if (child.active !== shouldBeActive) { // Access .active property of AdwToggleButton
+                    child.active = shouldBeActive;
+                }
+            }
+        });
+    }
+
+    // Public API
+    get value() {
+        return this._toggleGroupInstance ? this._toggleGroupInstance.getValue() : this.getAttribute('active-value');
+    }
+
+    set value(newValue) {
+        this.setAttribute('active-value', newValue);
+        if (this._toggleGroupInstance) {
+            this._toggleGroupInstance.setValue(newValue);
+        }
+    }
+}
+customElements.define('adw-toggle-group', AdwToggleGroup);
+
+class AdwNavigationSplitView extends HTMLElement {
+    static get observedAttributes() {
+        return ['show-sidebar', 'can-collapse', 'collapse-threshold', 'sidebar-width'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._splitViewInstance = null;
+        this._slotObserver = null;
+    }
+
+    connectedCallback() {
+        this._render();
+        // The factory instance's connectObserver should be called after it's appended to shadow DOM and this WC is connected.
+        if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') {
+            // Defer to ensure DOM is ready for offsetWidth calculations in updateViewMode
+            requestAnimationFrame(() => {
+                if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') {
+                     this._splitViewInstance.connectObserver();
+                }
+            });
+        }
+
+        this._observer = new MutationObserver((mutations) => {
+            let needsReRender = false;
+            for (const mutation of mutations) {
+                if (mutation.type === 'childList') {
+                    const relevantNodes = [...Array.from(mutation.addedNodes), ...Array.from(mutation.removedNodes)];
+                    if (relevantNodes.some(node => (node.nodeType === Node.ELEMENT_NODE && (node.slot === 'sidebar' || node.slot === 'content')) || !node.slot)) {
+                        needsReRender = true;
+                        break;
+                    }
+                }
+            }
+            if (needsReRender) {
+                this._render();
+                 if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') {
+                    requestAnimationFrame(() => { // Ensure DOM is updated before re-connecting observer
+                        if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') {
+                            this._splitViewInstance.connectObserver();
+                        }
+                    });
+                }
+            }
+        });
+        this._observer.observe(this, { childList: true, subtree: false });
+    }
+
+    disconnectedCallback() {
+        if (this._splitViewInstance && typeof this._splitViewInstance.disconnectObserver === 'function') {
+            this._splitViewInstance.disconnectObserver();
+        }
+        if(this._observer) this._observer.disconnect();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+            if (this.isConnected && this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') {
+                 requestAnimationFrame(() => {
+                    if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') {
+                         this._splitViewInstance.connectObserver(); // Reconnect to apply new threshold/width logic
+                    }
+                });
+            }
+        }
+    }
+
+    _getSlottedContent(slotName) {
+        // Query direct children for the named slot.
+        // The factory expects the actual content element, not the <slot> element itself.
+        const slotted = this.querySelector(`:scope > [slot="${slotName}"]`);
+        return slotted ? slotted.cloneNode(true) : document.createElement('div'); // Return placeholder if no content
+    }
+
+    _render() {
+        if (this._splitViewInstance && typeof this._splitViewInstance.disconnectObserver === 'function') {
+            this._splitViewInstance.disconnectObserver();
+        }
+        // Clear previous content from shadow DOM, except for the stylesheet
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild.nodeName !== 'LINK') {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        const sidebarContent = this._getSlottedContent('sidebar');
+        const mainContent = this._getSlottedContent('content'); // Default slot
+
+        const options = {
+            sidebar: sidebarContent,
+            content: mainContent,
+            showSidebar: !this.hasAttribute('show-sidebar') || this.getAttribute('show-sidebar') !== 'false',
+            canCollapse: !this.hasAttribute('can-collapse') || this.getAttribute('can-collapse') !== 'false',
+            collapseThreshold: this.hasAttribute('collapse-threshold') ? parseInt(this.getAttribute('collapse-threshold'), 10) : 768,
+            sidebarWidth: this.getAttribute('sidebar-width') || "300px",
+        };
+
+        this._splitViewInstance = Adw.createAdwNavigationSplitView(options);
+        this.shadowRoot.appendChild(this._splitViewInstance);
+
+        if (this.isConnected && this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') {
+             requestAnimationFrame(() => { // Ensure DOM is fully updated
+                if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') {
+                    this._splitViewInstance.connectObserver();
+                }
+            });
+        }
+
+        this._splitViewInstance.addEventListener('sidebar-toggled', (e) => {
+            this.dispatchEvent(new CustomEvent('sidebar-toggled', { detail: e.detail, bubbles: true, composed: true }));
+            // Reflect internal state to attribute if needed
+            if (e.detail.isVisible) {
+                this.setAttribute('show-sidebar', '');
+            } else {
+                this.removeAttribute('show-sidebar');
+            }
+        });
+    }
+
+    // Public API methods
+    showSidebar() { if (this._splitViewInstance) this._splitViewInstance.showSidebar(); }
+    hideSidebar() { if (this._splitViewInstance) this._splitViewInstance.hideSidebar(); }
+    toggleSidebar() { if (this._splitViewInstance) this._splitViewInstance.toggleSidebar(); }
+    isSidebarVisible() { return this._splitViewInstance ? this._splitViewInstance.isSidebarVisible() : (this.hasAttribute('show-sidebar') ? this.getAttribute('show-sidebar') !== 'false' : true); }
+    isOverlayMode() { return this._splitViewInstance ? this._splitViewInstance.isOverlayMode() : false; }
+}
+customElements.define('adw-navigation-split-view', AdwNavigationSplitView);
 
 console.log('[Debug] components.js all custom elements defined and execution ended.');
 

@@ -1,0 +1,52 @@
+// SCSS for AdwToggleGroup and AdwToggleButton
+@use "variables";
+@use "button"; // Leverage existing button styles
+
+.adw-toggle-group {
+    display: inline-flex;
+    border-radius: var(--button-border-radius);
+    // overflow: hidden; // Ensures child button borders merge nicely
+
+    // Use a class on the group to make buttons appear linked
+    &.linked {
+        .adw-toggle-button {
+            border-radius: 0;
+            margin-left: -1px; // Overlap borders
+
+            &:first-child {
+                margin-left: 0;
+                border-top-left-radius: var(--button-border-radius);
+                border-bottom-left-radius: var(--button-border-radius);
+            }
+
+            &:last-child {
+                border-top-right-radius: var(--button-border-radius);
+                border-bottom-right-radius: var(--button-border-radius);
+            }
+
+            // Ensure borders are correctly handled for focused/active states too
+            &:focus, &:active {
+                position: relative; // To bring focused/active button above siblings for border
+                z-index: 1;
+            }
+        }
+    }
+}
+
+// AdwToggleButton specific styles (mostly inherits from .adw-button)
+.adw-toggle-button {
+    // Basic button styling is inherited from .adw-button through the factory.
+    // We just need to handle the 'active' state appearance more explicitly if needed,
+    // though the .active class from .adw-button might be sufficient.
+
+    // Example: more pronounced active state if default .active is not enough
+    // &.active {
+    //     background-color: var(--accent-color);
+    //     color: var(--accent-fg-color);
+    //     box-shadow: inset 0 0 0 1px var(--accent-color); // Inner shadow to reinforce
+    // }
+
+    // If not using .flat buttons by default for toggle buttons,
+    // you might want to ensure they look good in a group.
+    // The factory will likely use createAdwButton with appropriate options.
+}
