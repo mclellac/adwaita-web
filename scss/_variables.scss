@@ -6,32 +6,39 @@
   --destructive-fg-color: var(--accent-red-light-fg);
   --destructive-color: var(--accent-red-standalone);
 
-  --info-bg-color: var(--info-bg-color-light);
+  --info-bg-color: var(--info-bg-color-light); // This will be mapped to official values below
   --info-fg-color: var(--info-fg-color-light);
   --info-border-color: var(--info-border-color-light);
-  --success-bg-color: var(--success-bg-color-light);
-  --success-fg-color: var(--success-fg-color-light);
-  --success-border-color: var(--success-border-color-light);
-  --success-color: var(--accent-green-standalone);
-  --warning-bg-color: var(--warning-bg-color-light);
-  --warning-fg-color: var(--warning-fg-color-light);
-  --warning-border-color: var(--warning-border-color-light);
-  --warning-color: var(--accent-yellow-standalone);
-  --error-bg-color: var(--error-bg-color-light);
-  --error-fg-color: var(--error-fg-color-light);
-  --error-border-color: var(--error-border-color-light);
-  --error-color: var(--accent-red-standalone);
+  --success-bg-color: #2ec27e; // Official Libadwaita Light
+  --success-fg-color: #ffffff; // Official Libadwaita Light
+  --success-border-color: var(--success-border-color-light); // Keep for now, might remove if not used
+  --success-color: var(--accent-green-standalone); // Standalone matches: #1b8553
+  --warning-bg-color: #e5a50a; // Official Libadwaita Light
+  --warning-fg-color: rgba(0, 0, 0, 0.8); // Official Libadwaita Light & Dark
+  --warning-border-color: var(--warning-border-color-light); // Keep for now
+  --warning-color: var(--accent-yellow-standalone); // Standalone matches: #9c6e03
+  --error-bg-color: #e01b24; // Official Libadwaita Light (same as destructive)
+  --error-fg-color: #ffffff; // Official Libadwaita Light
+  --error-border-color: var(--error-border-color-light); // Keep for now
+  --error-color: var(--accent-red-standalone); // Standalone matches: #c01c28
 
-  --window-bg-color: #f6f5f4;
+  --window-bg-color: #fafafa; // Official Libadwaita Light
   --window-fg-color: rgba(0, 0, 0, 0.8);
   --view-bg-color: #ffffff;
   --view-fg-color: rgba(0, 0, 0, 0.8);
 
-  --headerbar-bg-color: #ebeae9;
+  --headerbar-bg-color: #ffffff; // Official Libadwaita Light
   --headerbar-fg-color: rgba(0, 0, 0, 0.8);
-  --headerbar-border-color: rgba(0, 0, 0, 0.12);
-  --headerbar-backdrop-color: var(--window-bg-color);
-  --headerbar-shade-color: rgba(0, 0, 0, 0.07);
+  --headerbar-border-color: rgba(0, 0, 0, 0.8); // Official: same as fg_color by default
+  --headerbar-backdrop-color: var(--window-bg-color); // Correct: alias of window_bg_color
+  --headerbar-shade-color: rgba(0, 0, 0, 0.12); // Official Libadwaita Light
+  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.12); // Official Libadwaita Light
+
+  --sidebar-backdrop-color: #f2f2f2; // Official Libadwaita Light
+
+  --secondary-sidebar-backdrop-color: #f6f6f6; // Official Libadwaita Light
+
+  --borders-color: rgba(0, 0, 0, 0.15); // Conceptual mapping for light theme (currentColor is usually dark)
 
   --card-bg-color: #ffffff;
   --card-fg-color: rgba(0, 0, 0, 0.8);
@@ -51,23 +58,23 @@
   --button-flat-hover-bg-color: rgba(0, 0, 0, 0.05);
   --button-flat-active-bg-color: rgba(0, 0, 0, 0.1);
 
-  --sidebar-bg-color: #f0efee;
+  --sidebar-bg-color: #ebebeb; // Official Libadwaita Light
   --sidebar-fg-color: rgba(0,0,0,0.8);
-  --sidebar-border-color: rgba(0,0,0,0.12);
-  --sidebar-shade-color: rgba(0, 0, 0, 0.07);
+  --sidebar-border-color: rgba(0,0,0,0.07); // Official Libadwaita Light
+  --sidebar-shade-color: rgba(0, 0, 0, 0.07); // Official Libadwaita Light
 
-  --secondary-sidebar-bg-color: #e4e3e2; // Slightly darker than sidebar
+  --secondary-sidebar-bg-color: #f3f3f3; // Official Libadwaita Light
   --secondary-sidebar-fg-color: rgba(0,0,0,0.8);
-  --secondary-sidebar-border-color: rgba(0,0,0,0.12);
-  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.07);
+  --secondary-sidebar-border-color: rgba(0,0,0,0.07); // Official Libadwaita Light
+  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.07); // Official Libadwaita Light
 
-  --dialog-bg-color: #fdfcfb; // Slightly lighter than window
+  --dialog-bg-color: #fafafa; // Official Libadwaita Light
   --dialog-fg-color: rgba(0, 0, 0, 0.8);
 
   --thumbnail-bg-color: #ffffff;
   --thumbnail-fg-color: rgba(0, 0, 0, 0.8);
 
-  --shade-color: rgba(0, 0, 0, 0.07);
+  --shade-color: rgba(0, 0, 0, 0.07); // Official Libadwaita Light
   --scrollbar-outline-color: #ffffff;
   --link-color: var(--accent-bg-color);
   --link-visited-color: #5a5a5a;
@@ -89,40 +96,47 @@
   --destructive-fg-color: var(--accent-red-dark-fg);
   --destructive-color: var(--accent-red-dark-standalone);
 
-  --info-bg-color: var(--info-bg-color-dark);
+  --info-bg-color: var(--info-bg-color-dark); // This will be mapped to official values below
   --info-fg-color: var(--info-fg-color-dark);
   --info-border-color: var(--info-border-color-dark);
-  --success-bg-color: var(--success-bg-color-dark);
-  --success-fg-color: var(--success-fg-color-dark);
+  --success-bg-color: #26a269; // Official Libadwaita Dark
+  --success-fg-color: #ffffff; // Official Libadwaita Dark
   --success-border-color: var(--success-border-color-dark);
-  --success-color: var(--accent-green-dark-standalone);
-  --warning-bg-color: var(--warning-bg-color-dark);
-  --warning-fg-color: var(--warning-fg-color-dark);
+  --success-color: var(--accent-green-dark-standalone); // Standalone matches: #8ff0a4
+  --warning-bg-color: #cd9309; // Official Libadwaita Dark
+  --warning-fg-color: rgba(0,0,0,0.8); // Official Libadwaita Light & Dark
   --warning-border-color: var(--warning-border-color-dark);
-  --warning-color: var(--accent-yellow-dark-standalone);
-  --error-bg-color: var(--error-bg-color-dark);
-  --error-fg-color: var(--error-fg-color-dark);
+  --warning-color: var(--accent-yellow-dark-standalone); // Standalone matches: #f8e45c
+  --error-bg-color: #c01c28; // Official Libadwaita Dark (same as destructive)
+  --error-fg-color: #ffffff; // Official Libadwaita Dark
   --error-border-color: var(--error-border-color-dark);
-  --error-color: var(--accent-red-dark-standalone);
+  --error-color: var(--accent-red-dark-standalone); // Standalone matches: #ff7b63
 
-  --window-bg-color: #2d2d2d;
+  --window-bg-color: #242424; // Official Libadwaita Dark
   --window-fg-color: #ffffff;
-  --view-bg-color: #242424;
+  --view-bg-color: #1e1e1e; // Official Libadwaita Dark
   --view-fg-color: #ffffff;
 
-  --headerbar-bg-color: #3c3c3c;
+  --headerbar-bg-color: #303030; // Official Libadwaita Dark
   --headerbar-fg-color: #ffffff;
-  --headerbar-border-color: rgba(255, 255, 255, 0.07);
-  --headerbar-backdrop-color: var(--window-bg-color);
-  --headerbar-shade-color: rgba(0, 0, 0, 0.36);
+  --headerbar-border-color: #ffffff; // Official: same as fg_color by default
+  --headerbar-backdrop-color: var(--window-bg-color); // Correct: alias of window_bg_color
+  --headerbar-shade-color: rgba(0, 0, 0, 0.36); // Official Libadwaita Dark
+  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.9); // Official Libadwaita Dark
 
-  --card-bg-color: #383838;
+  --sidebar-backdrop-color: #2a2a2a; // Official Libadwaita Dark
+
+  --secondary-sidebar-backdrop-color: #272727; // Official Libadwaita Dark
+
+  --borders-color: rgba(255, 255, 255, 0.5); // Conceptual mapping for dark theme (currentColor is usually light)
+
+  --card-bg-color: rgba(255, 255, 255, 0.08); // Official Libadwaita Dark
   --card-fg-color: #ffffff;
   --card-shade-color: rgba(0, 0, 0, 0.36);
 
-  --popover-bg-color: #4a4a4a; // Darker than card for popovers
+  --popover-bg-color: #383838; // Official Libadwaita Dark
   --popover-fg-color: #ffffff;
-  --popover-shade-color: rgba(0, 0, 0, 0.36);
+  --popover-shade-color: rgba(0, 0, 0, 0.25); // Official Libadwaita Dark
 
   --button-bg-color: #4d4d4d;
   --button-fg-color: #ffffff;
@@ -134,23 +148,23 @@
   --button-flat-hover-bg-color: rgba(255, 255, 255, 0.08);
   --button-flat-active-bg-color: rgba(255, 255, 255, 0.12);
 
-  --sidebar-bg-color: #333333;
+  --sidebar-bg-color: #303030; // Official Libadwaita Dark
   --sidebar-fg-color: #ffffff;
-  --sidebar-border-color: rgba(255,255,255,0.07);
-  --sidebar-shade-color: rgba(0,0,0,0.36);
+  --sidebar-border-color: rgba(0,0,0,0.36); // Official Libadwaita Dark
+  --sidebar-shade-color: rgba(0,0,0,0.25); // Official Libadwaita Dark
 
-  --secondary-sidebar-bg-color: #3a3a3a; // Slightly lighter than sidebar
+  --secondary-sidebar-bg-color: #2a2a2a; // Official Libadwaita Dark
   --secondary-sidebar-fg-color: #ffffff;
-  --secondary-sidebar-border-color: rgba(255,255,255,0.07);
-  --secondary-sidebar-shade-color: rgba(0,0,0,0.36);
+  --secondary-sidebar-border-color: rgba(0,0,0,0.36); // Official Libadwaita Dark
+  --secondary-sidebar-shade-color: rgba(0,0,0,0.25); // Official Libadwaita Dark
 
-  --dialog-bg-color: #2f2f2f; // Slightly darker than window
+  --dialog-bg-color: #383838; // Official Libadwaita Dark
   --dialog-fg-color: #ffffff;
 
-  --thumbnail-bg-color: #242424; // Same as view
+  --thumbnail-bg-color: #383838; // Official Libadwaita Dark
   --thumbnail-fg-color: #ffffff;
 
-  --shade-color: rgba(0, 0, 0, 0.36);
+  --shade-color: rgba(0, 0, 0, 0.25); // Official Libadwaita Dark
   --scrollbar-outline-color: rgba(0, 0, 0, 0.5);
   --link-color: var(--accent-bg-color);
   --link-visited-color: #c0c0c0; // Lighter visited link for dark theme
@@ -201,120 +215,185 @@
   // Note: --accent-fg-color-rgb was removed as SCSS cannot use CSS variables in rgba() directly.
   // Direct values (e.g., 255,255,255 for white) should be used in rgba() within component SCSS if needed.
 
-  // Naming: --adw-{colorName}-{shade} (shade 1-5, 3 is often a good base)
-  // These are just examples, a full Adwaita palette has many more.
-  --adw-blue-1: #d3e5f7;
+  // GNOME Color Palette
+  // Blue
+  --adw-blue-1: #99c1f1;
+  --adw-blue-2: #62a0ea;
   --adw-blue-3: #3584e4;
+  --adw-blue-4: #1c71d8;
   --adw-blue-5: #1a5fb4;
-  --adw-green-1: #d2f0d4;
-  --adw-green-3: #2ec27e;
-  --adw-green-5: #1b7749;
-  --adw-yellow-1: #fef4d5;
-  --adw-yellow-3: #f8c443;
-  --adw-yellow-5: #b07d0d;
-  --adw-red-1: #f7d4d4;
+  // Green
+  --adw-green-1: #8ff0a4;
+  --adw-green-2: #57e389;
+  --adw-green-3: #33d17a;
+  --adw-green-4: #2ec27e;
+  --adw-green-5: #26a269;
+  // Yellow
+  --adw-yellow-1: #f9f06b;
+  --adw-yellow-2: #f8e45c;
+  --adw-yellow-3: #f6d32d;
+  --adw-yellow-4: #f5c211;
+  --adw-yellow-5: #e5a50a;
+  // Orange
+  --adw-orange-1: #ffbe6f;
+  --adw-orange-2: #ffa348;
+  --adw-orange-3: #ff7800;
+  --adw-orange-4: #e66100;
+  --adw-orange-5: #c64600;
+  // Red
+  --adw-red-1: #f66151;
+  --adw-red-2: #ed333b;
   --adw-red-3: #e01b24;
-  --adw-red-5: #a50e17;
-  // Darker shades for dark theme backgrounds
-  --adw-blue-4-dark: #2a70c9;
-  --adw-green-4-dark: #218358;
-  --adw-yellow-4-dark: #b07d0d;
-  --adw-red-4-dark: #a50e17;
+  --adw-red-4: #c01c28;
+  --adw-red-5: #a51d2d;
+  // Purple
+  --adw-purple-1: #dc8add;
+  --adw-purple-2: #c061cb;
+  --adw-purple-3: #9141ac;
+  --adw-purple-4: #813d9c;
+  --adw-purple-5: #613583;
+  // Brown
+  --adw-brown-1: #cdab8f;
+  --adw-brown-2: #b5835a;
+  --adw-brown-3: #986a44;
+  --adw-brown-4: #865e3c;
+  --adw-brown-5: #63452c;
+  // Light (Greys)
+  --adw-light-1: #ffffff;
+  --adw-light-2: #f6f5f4;
+  --adw-light-3: #deddda;
+  --adw-light-4: #c0bfbc;
+  --adw-light-5: #9a9996;
+  // Dark (Greys)
+  --adw-dark-1: #77767b;
+  --adw-dark-2: #5e5c64;
+  --adw-dark-3: #3d3846;
+  --adw-dark-4: #241f31;
+  --adw-dark-5: #000000;
 
-  --adw-purple-3: #9141ac; // Placeholder, replace with actual Adwaita purple
-  --adw-orange-3: #ff7800; // Placeholder
-  --adw-pink-3: #ffc0cb;   // Placeholder
-  --adw-slate-3: #708090;  // Placeholder (Greys/Slates often called Stone or Iron in Adwaita)
+  // Darker shades for specific dark theme backgrounds (can be derived or specific)
+  // These were used previously for info/success etc. bg, will review their usage.
+  // For now, keeping them as they might be tuned variations of the main palette.
+  // --adw-blue-4-dark: #2a70c9; // slightly different from adw-blue-4. This is not standard. Use adw-blue-4.
+  // --adw-green-4-dark: #218358; // slightly different from adw-green-4. This is not standard. Use adw-green-4.
+  // --adw-yellow-4-dark: #b07d0d; // slightly different from adw-yellow-5/adw-yellow-4. This is not standard. Use adw-yellow-4 or 5.
+  // --adw-red-4-dark: #a50e17; // slightly different from adw-red-4/adw-red-5. This is not standard. Use adw-red-4 or 5.
 
 
   // Definitive Accent Color Variables (to be used by JS)
   // These provide a layer of abstraction. JS sets --accent-bg-color to one of these.
 
-  --accent-blue-light-bg: var(--adw-blue-3);
-  --accent-blue-light-fg: #ffffff;
+  // Default Blue Accent (matches Libadwaita default)
+  --accent-blue-light-bg: var(--adw-blue-3); // #3584e4
+  --accent-blue-light-fg: var(--adw-light-1); // #ffffff
+  --accent-blue-standalone: var(--adw-blue-4); // #1c71d8
 
+  --accent-blue-dark-bg: var(--adw-blue-3); // #3584e4
+  --accent-blue-dark-fg: var(--adw-light-1); // #ffffff
+  --accent-blue-dark-standalone: var(--adw-blue-1); // #78aeed (Mistake in official doc? blue_1 is #99c1f1, #78aeed is closer to blue_2. Using blue_1 for now as per doc text for dark standalone.)
+                                                 // After checking palette, #78aeed is not a direct palette color. The closest is blue_2 #62a0ea or blue_1 #99c1f1.
+                                                 // Libadwaita's own CSS uses hex values directly for standalone accents in dark, not necessarily from the 5-step palette for this specific shade.
+                                                 // For consistency with the provided doc link value, using #78aeed for --accent-blue-dark-standalone.
+
+  // Info, Success, Warning, Error Backgrounds and Foreground (for banners, etc.)
+  // Light Theme
   --info-bg-color-light: var(--adw-blue-1);
   --info-border-color-light: var(--adw-blue-3);
   --info-fg-color-light: var(--adw-blue-5);
-  --success-bg-color-light: var(--adw-green-1);
+
+  --success-bg-color-light: var(--adw-green-1); // Base for success banner bg
   --success-border-color-light: var(--adw-green-3);
-  --success-fg-color-light: var(--adw-green-5);
-  --warning-bg-color-light: var(--adw-yellow-1);
+  --success-fg-color-light: var(--adw-green-5); // Text on success banner
+
+  --warning-bg-color-light: var(--adw-yellow-1); // Base for warning banner bg
   --warning-border-color-light: var(--adw-yellow-3);
-  --warning-fg-color-light: var(--adw-yellow-5);
-  --error-bg-color-light: var(--adw-red-1);
+  --warning-fg-color-light: var(--adw-yellow-5); // Text on warning banner
+
+  --error-bg-color-light: var(--adw-red-1); // Base for error banner bg
   --error-border-color-light: var(--adw-red-3);
-  --error-fg-color-light: var(--adw-red-5);
+  --error-fg-color-light: var(--adw-red-5); // Text on error banner
 
-  --accent-green-light-bg: #2ec27e;
-  --accent-green-light-fg: #ffffff;
-  --accent-red-light-bg: var(--adw-red-3);
-  --accent-red-light-fg: #ffffff;
-  --accent-yellow-light-bg: #e5a50a;
-  --accent-yellow-light-fg: rgba(0,0,0,0.87);
-  --accent-purple-light-bg: var(--adw-purple-3);
-  --accent-purple-light-fg: #ffffff;
-  --accent-orange-light-bg: var(--adw-orange-3);
-  --accent-orange-light-fg: #ffffff;
-  --accent-pink-light-bg: var(--adw-pink-3);
-  --accent-pink-light-fg: rgba(0,0,0,0.87);
-  --accent-slate-light-bg: var(--adw-slate-3);
-  --accent-slate-light-fg: #ffffff;
-
-  // Dark Theme Accent Palette (values might need to be lighter/desaturated than light theme)
-  --accent-blue-dark-bg: var(--adw-blue-3);
-  --accent-blue-dark-fg: #ffffff;
-
-  --info-bg-color-dark: var(--adw-blue-4-dark);
+  // Dark Theme
+  --info-bg-color-dark: var(--adw-blue-5); // Using a darker blue for dark theme info bg
   --info-border-color-dark: var(--adw-blue-3);
   --info-fg-color-dark: var(--adw-blue-1);
-  --success-bg-color-dark: var(--adw-green-4-dark);
+
+  --success-bg-color-dark: var(--adw-green-5); // Darker green for dark theme success bg
   --success-border-color-dark: var(--adw-green-3);
   --success-fg-color-dark: var(--adw-green-1);
-  --warning-bg-color-dark: var(--adw-yellow-4-dark);
+
+  --warning-bg-color-dark: var(--adw-yellow-5); // Darker yellow for dark theme warning bg
   --warning-border-color-dark: var(--adw-yellow-3);
   --warning-fg-color-dark: var(--adw-yellow-1);
-  --error-bg-color-dark: var(--adw-red-4-dark);
+
+  --error-bg-color-dark: var(--adw-red-5); // Darker red for dark theme error bg
   --error-border-color-dark: var(--adw-red-3);
   --error-fg-color-dark: var(--adw-red-1);
 
-  --accent-green-dark-bg: #26a269;
-  --accent-green-dark-fg: #ffffff;
-  --accent-red-dark-bg: #c01c28;
-  --accent-red-dark-fg: #ffffff;
-  --accent-yellow-dark-bg: #cd9309;
-  --accent-yellow-dark-fg: rgba(0,0,0,0.87);
-  --accent-purple-dark-bg: #613583;
-  --accent-purple-dark-fg: #ffffff;
-  --accent-orange-dark-bg: #c64600;
-  --accent-orange-dark-fg: #ffffff;
-  --accent-pink-dark-bg: #e6a7b4;
-  --accent-pink-dark-fg: #ffffff;
-  --accent-slate-dark-bg: #5a6773;
-  --accent-slate-dark-fg: #ffffff;
 
-  // Standalone accent color (e.g., for text, icons on neutral backgrounds)
-  // For simplicity, these will be the same as the -bg colors for now.
-  // In a full system, these would be derived (e.g., via oklab) for optimal appearance.
+  // Other Accent Colors
+  --accent-green-light-bg: var(--adw-green-4); // #2ec27e
+  --accent-green-light-fg: var(--adw-light-1); // #ffffff
+  --accent-green-standalone: var(--adw-green-5); // #26a269 (Libadwaita uses #1b8553, which is darker than green_5. Using green_5 for consistency with palette steps)
+                                                // Official standalone: #1b8553. Let's use this directly.
+
+  --accent-red-light-bg: var(--adw-red-3); // #e01b24
+  --accent-red-light-fg: var(--adw-light-1); // #ffffff
+  --accent-red-standalone: var(--adw-red-4); // #c01c28
+
+  --accent-yellow-light-bg: var(--adw-yellow-5); // #e5a50a
+  --accent-yellow-light-fg: rgba(0,0,0,0.87); // Dark text for yellow
+  --accent-yellow-standalone: var(--adw-yellow-5); // Libadwaita uses #9c6e03. Using yellow_5 for now.
+                                                 // Official standalone: #9c6e03. Let's use this directly.
+
+  --accent-purple-light-bg: var(--adw-purple-3); // #9141ac
+  --accent-purple-light-fg: var(--adw-light-1); // #ffffff
+  --accent-purple-standalone: var(--adw-purple-4); // #813d9c
+
+  --accent-orange-light-bg: var(--adw-orange-3); // #ff7800
+  --accent-orange-light-fg: var(--adw-light-1); // #ffffff
+  --accent-orange-standalone: var(--adw-orange-4); // #e66100
+
+  // Dark Theme Accents
+  --accent-green-dark-bg: var(--adw-green-4); // #2ec27e (Libadwaita uses #26a269 for dark bg)
+  --accent-green-dark-fg: var(--adw-light-1);   // #ffffff
+  --accent-green-dark-standalone: var(--adw-green-1); // #8ff0a4 (Libadwaita uses #8ff0a4)
+
+  --accent-red-dark-bg: var(--adw-red-4); // #c01c28
+  --accent-red-dark-fg: var(--adw-light-1); // #ffffff
+  --accent-red-dark-standalone: var(--adw-red-1); // #ff7b63 (Libadwaita uses #ff7b63)
+
+  --accent-yellow-dark-bg: var(--adw-yellow-5); // #e5a50a (Libadwaita uses #cd9309 for dark bg)
+  --accent-yellow-dark-fg: rgba(0,0,0,0.87);  // Dark text
+  --accent-yellow-dark-standalone: var(--adw-yellow-2); // #f8e45c (Libadwaita uses #f8e45c)
+
+  --accent-purple-dark-bg: var(--adw-purple-3); // #9141ac
+  --accent-purple-dark-fg: var(--adw-light-1);  // #ffffff
+  --accent-purple-dark-standalone: var(--adw-purple-1); // #dc8add
+
+  --accent-orange-dark-bg: var(--adw-orange-3); // #ff7800
+  --accent-orange-dark-fg: var(--adw-light-1);  // #ffffff
+  --accent-orange-dark-standalone: var(--adw-orange-1); // #ffbe6f
+
+
+  // Standalone direct mapping from Libadwaita docs for precision
   --accent-blue-standalone: #1c71d8;
-  --accent-green-standalone: #1b8553;
-  --accent-red-standalone: #c01c28;
-  --accent-yellow-standalone: #9c6e03;
-  --accent-purple-standalone: #813d9c;
-  --accent-orange-standalone: #e66100;
-  --accent-pink-standalone: #e6a7b4;
-  --accent-slate-standalone: #5a6773;
-
-  // Dark theme standalone accents might need to be the lighter versions too
   --accent-blue-dark-standalone: #78aeed;
-  --accent-green-dark-standalone: #8ff0a4;
-  --accent-red-dark-standalone: #ff7b63;
-  --accent-yellow-dark-standalone: #f8e45c;
-  --accent-purple-dark-standalone: #dc8add;
-  --accent-orange-dark-standalone: #ffbe6f;
-  --accent-pink-dark-standalone: #ff8cc6;
-  --accent-slate-dark-standalone: #8a98a5;
 
+  --accent-green-standalone: #1b8553;
+  --accent-green-dark-standalone: #8ff0a4;
+
+  --accent-red-standalone: #c01c28;
+  --accent-red-dark-standalone: #ff7b63;
+
+  --accent-yellow-standalone: #9c6e03;
+  --accent-yellow-dark-standalone: #f8e45c;
+
+  --accent-purple-standalone: #813d9c;
+  --accent-purple-dark-standalone: #dc8add;
+
+  --accent-orange-standalone: #e66100;
+  --accent-orange-dark-standalone: #ffbe6f;
 }
 
 :root {
@@ -375,6 +454,12 @@ body.light-theme {
   @define-color headerbar_border_color var(--headerbar-border-color);
   @define-color headerbar_backdrop_color var(--headerbar-backdrop-color);
   @define-color headerbar_shade_color var(--headerbar-shade-color);
+  @define-color headerbar_darker_shade_color var(--headerbar-darker-shade-color);
+
+  @define-color sidebar_backdrop_color var(--sidebar-backdrop-color);
+  @define-color secondary_sidebar_backdrop_color var(--secondary-sidebar-backdrop-color);
+
+  @define-color borders_color var(--borders-color);
 
   @define-color card_bg_color var(--card-bg-color);
   @define-color card_fg_color var(--card-fg-color);
