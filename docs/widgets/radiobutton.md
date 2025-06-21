@@ -43,18 +43,18 @@ Adw.createRadioButton(options = {}) -> HTMLLabelElement (wrapper)
   const selectedContactSpan = document.getElementById('selected-contact');
 
   const radioName = "contactMethod";
+  const onContactChange = (e) => {
+    if(e.target.checked) selectedContactSpan.textContent = e.target.parentElement.textContent.trim();
+  };
 
   const emailRadio = Adw.createRadioButton({
-    label: "Email", name: radioName, value: "email", checked: true,
-    onChanged: (e) => { if(e.target.checked) selectedContactSpan.textContent = "Email"; }
+    label: "Email", name: radioName, value: "email", checked: true, onChanged: onContactChange
   });
   const phoneRadio = Adw.createRadioButton({
-    label: "Phone", name: radioName, value: "phone",
-    onChanged: (e) => { if(e.target.checked) selectedContactSpan.textContent = "Phone"; }
+    label: "Phone", name: radioName, value: "phone", onChanged: onContactChange
   });
   const mailRadio = Adw.createRadioButton({
-    label: "Mail (Post)", name: radioName, value: "post",
-    onChanged: (e) => { if(e.target.checked) selectedContactSpan.textContent = "Mail"; }
+    label: "Mail (Post)", name: radioName, value: "post", onChanged: onContactChange
   });
 
   radioGroup1Container.append(emailRadio, phoneRadio, mailRadio);

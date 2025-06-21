@@ -1,6 +1,10 @@
 # Toast
 
-An `AdwToast` is a small, non-modal notification that appears briefly to provide feedback or information to the user. Toasts are often managed by a central overlay or toast manager. Adwaita-Web provides `Adw.createToast()` for imperative creation and an `<adw-toast>` Web Component (though toasts are often created dynamically).
+An `AdwToast` is a small, non-modal notification that appears briefly to
+provide feedback or information to the user. Toasts are often managed by a
+central overlay or toast manager. Adwaita-Web provides `Adw.createToast()` for
+imperative creation and an `<adw-toast>` Web Component (though toasts are often
+created dynamically).
 
 ## JavaScript Factory: `Adw.createToast()`
 
@@ -16,10 +20,16 @@ Adw.createToast(title, options = {}) -> HTMLElement
 
 *   `title` (String): The main text to display in the toast.
 *   `options` (Object, optional): Configuration options:
-    *   `timeout` (Number, optional): Duration in milliseconds before the toast automatically dismisses. Defaults to `3000` (3 seconds). A value of `0` or negative might mean it persists until an action or manual dismissal.
-    *   `actionName` (String, optional): If provided, an action button with this label is added to the toast.
-    *   `onAction` (Function, optional): A callback function executed when the action button is clicked. The toast instance is passed as an argument.
-    *   `priority` (String, optional): Priority of the toast. Can be `'normal'` or `'high'`. High priority toasts might be styled differently or placed above normal priority ones. Defaults to `'normal'`.
+    *   `timeout` (Number, optional): Duration in milliseconds before the toast
+        automatically dismisses. Defaults to `3000` (3 seconds). A value of `0` or
+        negative might mean it persists until an action or manual dismissal.
+    *   `actionName` (String, optional): If provided, an action button with this
+        label is added to the toast.
+    *   `onAction` (Function, optional): A callback function executed when the
+        action button is clicked. The toast instance is passed as an argument.
+    *   `priority` (String, optional): Priority of the toast. Can be `'normal'` or
+        `'high'`. High priority toasts might be styled differently or placed
+        above normal priority ones. Defaults to `'normal'`.
     *   `id` (String, optional): A specific ID to set on the toast element.
 
 **Returns:**
@@ -93,10 +103,12 @@ While toasts are often created dynamically via the factory, a web component can 
 **Example (Declarative, if part of a static view - less common for toasts):**
 
 ```html
-<!-- This toast would need to be managed (shown/hidden) by parent component logic -->
+<!-- This toast would need to be managed (shown/hidden) by parent logic -->
 <adw-toast title="Profile updated" timeout="2000" style="display: none;"></adw-toast>
 ```
-*Usage note: `<adw-toast>` elements are typically added and removed from the DOM dynamically by a toast management system rather than being statically placed in HTML and hidden/shown.*
+*Usage note: `<adw-toast>` elements are typically added and removed from the DOM
+dynamically by a toast management system rather than being statically placed in
+HTML and hidden/shown.*
 
 ## Styling
 

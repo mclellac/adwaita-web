@@ -1,0 +1,90 @@
+// scss/_entry_row.scss
+@use 'variables';
+
+.adw-entry-row {
+  display: flex;
+  align-items: center; // Vertically align label and entry
+  // Padding is handled by .adw-list-box > .adw-row if this is a child.
+  // If used standalone, it would need its own padding.
+  // Assuming it's primarily a child of adw-list-box for now.
+  // border-bottom: var(--border-width) solid var(--list-separator-color); // Handled by adw-list-box > .adw-row
+
+  // min-height: 48px; // Or derive from content, Adwaita rows are typically this tall
+
+  .adw-entry-row-label {
+    color: var(--view-fg-color);
+    font-size: var(--font-size-base);
+    margin-right: var(--spacing-l); // 18px space between label and entry
+    // Adwaita entry rows often have labels that are not overly emphasized.
+    // font-weight: 500; // Optional: if labels should be bolder like ActionRow titles
+  }
+
+  .adw-entry-row-entry-container {
+    flex-grow: 1; // Entry takes remaining space
+    display: flex; // Allows for easy integration of icons/spinners inside later if needed
+
+    .adw-entry {
+      // Standard Adwaita EntryRows often have flat/borderless entries integrated into the row.
+      // The row itself provides the visual grouping.
+      border: none; // Remove border from entry when inside an entry row
+      background-color: transparent; // Entry bg should blend with row bg
+      box-shadow: none; // No inner shadow for embedded entries
+      padding-left: 0; // Remove padding if border is gone, or adjust as needed
+      padding-right: 0;
+
+      // Focus indication needs to be on the entry itself, even if borderless
+      &:focus,
+      &:focus-within {
+        // Since the border is removed, we need a different focus style.
+        // Option 1: Outline (can be tricky with adjacent elements)
+        // outline: 2px solid var(--accent-color);
+        // outline-offset: 2px;
+
+        // Option 2: A subtle background change or underline for the text area
+        // For now, let the default browser outline appear on focus if no border.
+        // Or, we can add a focus style to the parent .adw-entry-row-entry-container
+        // or the .adw-entry-row itself when the entry is focused.
+        // Libadwaita EntryRow entries don't show a separate focus ring for the entry itself,
+        // the row's selection/focus state is usually enough.
+        // If the row is not activatable, then the entry needs its own clear focus.
+        // Let's try a subtle background change on focus for the embedded entry.
+        background-color: var(--list-row-hover-bg-color); // A very subtle change
+      }
+
+      &[disabled],
+      &:disabled {
+        background-color: transparent; // Keep transparent even when disabled
+        // Opacity is handled by the .adw-entry's own disabled style or the row's disabled style
+      }
+    }
+  }
+
+  // When the row itself is disabled
+  &[disabled],
+  &:disabled {
+    .adw-entry-row-label {
+      opacity: var(--opacity-disabled);
+    }
+    // The .adw-entry inside will also apply its disabled styles.
+  }
+}
+
+// Ensure it integrates well when inside a list-box (which it usually is)
+.adw-list-box > .adw-entry-row {
+  // Inherits padding from .adw-list-box > .adw-row
+  // Inherits border-bottom from .adw-list-box > .adw-row
+}
+
+// Dark theme adjustments (mostly handled by variables)
+.dark-theme .adw-entry-row,
+body.dark-theme .adw-entry-row {
+  .adw-entry-row-label {
+    color: var(--view-fg-color);
+  }
+  .adw-entry-row-entry-container .adw-entry {
+    &:focus,
+    &:focus-within {
+      background-color: var(--list-row-hover-bg-color);
+    }
+  }
+}

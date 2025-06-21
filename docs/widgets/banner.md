@@ -1,6 +1,9 @@
 # Banner
 
-An `AdwBanner` is a prominent message area typically displayed at the top of a view or window, used for important announcements or status messages that require user attention but are not necessarily modal. Adwaita-Web provides `Adw.createBanner()` and the `<adw-banner>` Web Component.
+An `AdwBanner` is a prominent message area typically displayed at the top of a
+view or window, used for important announcements or status messages that require
+user attention but are not necessarily modal. Adwaita-Web provides
+`Adw.createBanner()` and the `<adw-banner>` Web Component.
 
 ## JavaScript Factory: `Adw.createBanner()`
 
@@ -14,12 +17,20 @@ Adw.createBanner(title, options = {}) -> HTMLElement
 
 **Parameters:**
 
-*   `title` (String): The main text to display in the banner. HTML can be used if `useMarkup` is true.
+*   `title` (String): The main text to display in the banner. HTML can be used if
+    `useMarkup` is true.
 *   `options` (Object, optional): Configuration options:
-    *   `useMarkup` (Boolean, optional): If `true`, the `title` string is treated as HTML. Defaults to `false`. **Use with caution and ensure any HTML is sanitized if from user input.**
-    *   `buttonLabel` (String, optional): If provided, a button with this label is added to the banner.
-    *   `onButtonClicked` (Function, optional): A callback function executed when the button is clicked. The banner instance is passed as an argument.
-    *   `type` (String, optional): Sets the visual style of the banner. Common types could be `'info'`, `'warning'`, `'error'`, `'success'`. This usually applies a corresponding CSS class (e.g., `adw-banner-warning`). Defaults to a neutral/info style.
+    *   `useMarkup` (Boolean, optional): If `true`, the `title` string is treated
+        as HTML. Defaults to `false`. **Use with caution and ensure any HTML is
+        sanitized if from user input.**
+    *   `buttonLabel` (String, optional): If provided, a button with this label is
+        added to the banner.
+    *   `onButtonClicked` (Function, optional): A callback function executed when
+        the button is clicked. The banner instance is passed as an argument.
+    *   `type` (String, optional): Sets the visual style of the banner. Common types
+        could be `'info'`, `'warning'`, `'error'`, `'success'`. This usually
+        applies a corresponding CSS class (e.g., `adw-banner-warning`). Defaults
+        to a neutral/info style.
     *   `id` (String, optional): A specific ID to set on the banner element.
 
 **Returns:**
@@ -59,7 +70,8 @@ A declarative way to create Adwaita banners.
 *   `title` (String, required): The main text for the banner.
 *   `use-markup` (Boolean, optional): If present, treats the `title` as HTML.
 *   `button-label` (String, optional): Label for the action button.
-*   `type` (String, optional): Visual type: `'info'`, `'warning'`, `'error'`, `'success'`.
+*   `type` (String, optional): Visual type: `'info'`, `'warning'`, `'error'`,
+    `'success'`.
 
 **Properties:**
 *   `title` (String)
@@ -69,11 +81,15 @@ A declarative way to create Adwaita banners.
 
 **Events:**
 
-*   `button-clicked`: Fired when the action button (if present) is clicked. `event.detail` might contain the banner instance.
-*   `dismissed`: (Potentially) Fired if the banner has a built-in dismiss mechanism (e.g., a close button, not standard in Libadwaita banners but common in web implementations).
+*   `button-clicked`: Fired when the action button (if present) is clicked.
+    `event.detail` might contain the banner instance.
+*   `dismissed`: (Potentially) Fired if the banner has a built-in dismiss
+    mechanism (e.g., a close button, not standard in Libadwaita banners but
+    common in web implementations).
 
 **Slots:**
-*   If the `title` attribute is not used, the default slot can be used for the banner's main content.
+*   If the `title` attribute is not used, the default slot can be used for the
+    banner's main content.
 *   A named slot like `slot="action"` could be used for custom action elements instead of just `button-label`. (This would be an enhancement over basic Libadwaita).
 
 **Example:**
@@ -81,7 +97,7 @@ A declarative way to create Adwaita banners.
 ```html
 <adw-banner title="Welcome to Adwaita-Web!"></adw-banner>
 
-<adw-banner title="<strong>Update Required!</strong> Your software is out of date."
+<adw-banner title="&lt;strong&gt;Update Required!&lt;/strong&gt; Your software is out of date."
             use-markup
             button-label="Update Now"
             type="warning">

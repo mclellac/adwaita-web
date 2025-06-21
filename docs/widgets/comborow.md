@@ -1,6 +1,9 @@
 # ComboRow
 
-A ComboRow is a specialized `AdwRow` that combines a label (title and optional subtitle) with a dropdown select input (a `<select>` element). It's used for selecting one option from a list within a form or settings panel, typically inside an `AdwListBox`.
+A ComboRow is a specialized `AdwRow` that combines a label (title and optional
+subtitle) with a dropdown select input (a `<select>` element). It's used for
+selecting one option from a list within a form or settings panel, typically
+inside an `AdwListBox`.
 
 ## Web Component: `<adw-combo-row>`
 
@@ -69,7 +72,8 @@ Adwaita-Web provides the `<adw-combo-row>` Web Component for creating this type 
   langCombo.value = "fr-FR";
 
   langCombo.addEventListener('change', () => {
-    Adw.createToast(`Language changed to: ${langCombo.value} (${langCombo.querySelector('select option:checked').textContent})`);
+    const selectedLabel = langCombo.querySelector('select option:checked').textContent;
+    Adw.createToast(`Language changed to: ${langCombo.value} (${selectedLabel})`);
   });
 
   const soundCombo = document.getElementById('sound-combo-row');

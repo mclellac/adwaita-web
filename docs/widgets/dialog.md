@@ -18,10 +18,18 @@ Adw.createDialog(options = {}) -> { dialog: HTMLDivElement, open: function, clos
 
 *   `options` (Object, optional): Configuration options:
     *   `title` (String, optional): Title displayed at the top of the dialog.
-    *   `content` (HTMLElement | String, optional): The main content of the dialog. If a string is provided, it's wrapped in a `<p>` tag. *Security: If providing an HTMLElement, ensure its content is trusted/sanitized if it's user-generated HTML.*
-    *   `buttons` (Array<HTMLElement>, optional): An array of button elements (e.g., created with `Adw.createButton()`) to display in the dialog's action area.
-    *   `onClose` (Function, optional): Callback function executed when the dialog is closed (either programmatically, by Escape key, or backdrop click if enabled).
-    *   `closeOnBackdropClick` (Boolean, optional): If `true` (default), clicking the backdrop overlay will close the dialog. Set to `false` to prevent this.
+    *   `content` (HTMLElement | String, optional): The main content of the dialog.
+        If a string is provided, it's wrapped in a `<p>` tag. *Security: If
+        providing an HTMLElement, ensure its content is trusted/sanitized if it's
+        user-generated HTML.*
+    *   `buttons` (Array<HTMLElement>, optional): An array of button elements
+        (e.g., created with `Adw.createButton()`) to display in the dialog's
+        action area.
+    *   `onClose` (Function, optional): Callback function executed when the dialog
+        is closed (either programmatically, by Escape key, or backdrop click if
+        enabled).
+    *   `closeOnBackdropClick` (Boolean, optional): If `true` (default), clicking
+        the backdrop overlay will close the dialog. Set to `false` to prevent this.
 
 **Returns:**
 
@@ -39,7 +47,8 @@ Adw.createDialog(options = {}) -> { dialog: HTMLDivElement, open: function, clos
 
   const contentEl = document.createElement('div');
   const p = document.createElement('p');
-  p.textContent = "This is some custom content for the dialog. It can include various HTML elements.";
+  p.textContent = "This is some custom content for the dialog. " +
+                  "It can include various HTML elements.";
   const entry = Adw.createEntry({ placeholder: "Enter something..."});
   contentEl.append(p, entry);
 
@@ -100,9 +109,11 @@ A declarative way to define Adwaita dialogs.
 ```html
 <adw-button id="open-wc-dialog-btn">Open Web Component Dialog</adw-button>
 
-<adw-dialog id="my-wc-dialog" title="Web Component Dialog" close-on-backdrop-click="false">
+<adw-dialog id="my-wc-dialog" title="Web Component Dialog"
+            close-on-backdrop-click="false">
   <div slot="content">
-    <p>This dialog is defined declaratively using the <code>&lt;adw-dialog&gt;</code> tag.</p>
+    <p>This dialog is defined declaratively using the
+       <code>&lt;adw-dialog&gt;</code> tag.</p>
     <adw-entry placeholder="Your input here..."></adw-entry>
   </div>
   <div slot="buttons">

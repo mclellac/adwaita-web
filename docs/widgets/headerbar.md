@@ -34,13 +34,13 @@ Adw.createHeaderBar(options = {}) -> HTMLElement
   const container = document.getElementById('js-headerbar-container');
 
   const backButton = Adw.createButton("", {
-    icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"/></svg>', // Left arrow
+    icon: '<svg viewBox="0 0 16 16"><path d="M12 8a.5.5Z"/></svg>', // Left arrow (shortened)
     flat: true,
     onClick: () => Adw.createToast("Back button clicked")
   });
 
   const menuButton = Adw.createButton("", {
-    icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>', // Menu icon
+    icon: '<svg viewBox="0 0 16 16"><path d="M2.5 12a.5.5Z"/></svg>', // Menu icon (shortened)
     flat: true,
     onClick: () => Adw.createToast("Menu button clicked")
   });
@@ -85,13 +85,16 @@ A declarative way to define Adwaita header bars.
 ```html
 <adw-header-bar>
   <div slot="start">
-    <adw-button circular flat icon='<svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"/></svg>'></adw-button>
+    <adw-button circular flat icon='<svg viewBox="0 0 16 16"><path d="M12 8Z"/></svg>'></adw-button>
   </div>
   <adw-window-title slot="title">My App Title</adw-window-title>
-  <span slot="subtitle" style="font-size: var(--font-size-small); opacity: 0.7;">Details about view</span>
+  <span slot="subtitle"
+        style="font-size: var(--font-size-small); opacity: 0.7;">
+    Details about view
+  </span>
   <div slot="end">
     <adw-button flat>Action 1</adw-button>
-    <adw-button circular flat icon='<svg viewBox="0 0 16 16" fill="currentColor"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>'></adw-button>
+    <adw-button circular flat icon='<svg viewBox="0 0 16 16"><path d="M2.5 12Z"/></svg>'></adw-button>
   </div>
 </adw-header-bar>
 

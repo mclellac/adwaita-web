@@ -26,8 +26,11 @@ Adw.createClamp(options = {}) -> HTMLDivElement
 **Example:**
 
 ```html
-<div id="js-clamp-container" style="border: 1px solid var(--borders-color); padding: var(--spacing-s); width: 100%;">
-  <p style="text-align:center;"><em>Resize browser window to see clamp effect. Container is full width.</em></p>
+<div id="js-clamp-container"
+     style="border: 1px solid var(--borders-color); padding: var(--spacing-s); width: 100%;">
+  <p style="text-align:center;">
+    <em>Resize browser window to see clamp effect. Container is full width.</em>
+  </p>
 </div>
 <script>
   const container = document.getElementById('js-clamp-container');
@@ -36,8 +39,14 @@ Adw.createClamp(options = {}) -> HTMLDivElement
   const textBlock = document.createElement('div');
   textBlock.innerHTML = `
     <h3>Clamped Document</h3>
-    <p>This paragraph is inside an AdwClamp. It will be centered and its width will not exceed the maximumSize specified (defaulting to around 80 characters). This is ideal for long-form text to maintain readability on wide screens.</p>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    <p>This paragraph is inside an AdwClamp. It will be centered and its width
+    will not exceed the maximumSize specified (defaulting to around 80
+    characters). This is ideal for long-form text to maintain readability on
+    wide screens.</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    consequat.</p>
   `;
   textBlock.style.textAlign = "left"; // Content alignment
   textBlock.style.padding = "var(--spacing-m)";
@@ -93,19 +102,30 @@ A declarative way to use Adwaita clamp containers.
 
 ```html
 <div style="background-color: var(--shade-color); padding: var(--spacing-l);">
-  <adw-clamp maximum-size="50ch" style="background-color: var(--window-bg-color); padding: var(--spacing-m); border-radius: var(--border-radius-large);">
+  <adw-clamp maximum-size="50ch"
+             style="background-color: var(--window-bg-color); padding: var(--spacing-m);
+                    border-radius: var(--border-radius-large);">
     <h2>Article Title</h2>
-    <p>This text is within an <code>adw-clamp</code> Web Component. It will be centered on the page (if the clamp itself has room to be centered or is full width) and its content flow will not exceed 50 characters wide, making it pleasant to read.</p>
-    <p>Further paragraphs will also adhere to this width constraint, providing a focused reading experience. The clamp itself can have its own background and padding.</p>
+    <p>This text is within an <code>adw-clamp</code> Web Component. It will be
+    centered on the page (if the clamp itself has room to be centered or is
+    full width) and its content flow will not exceed 50 characters wide,
+    making it pleasant to read.</p>
+    <p>Further paragraphs will also adhere to this width constraint, providing a
+    focused reading experience. The clamp itself can have its own background
+    and padding.</p>
     <adw-button>Read More</adw-button>
   </adw-clamp>
 </div>
 
-<div style="background-color: var(--body-bg-color); padding: var(--spacing-l); margin-top: var(--spacing-m);">
-  <adw-clamp maximum-size="400px" scrollable style="height: 200px; border: 1px solid var(--borders-color); background-color: var(--view-bg-color); padding: var(--spacing-s);">
+<div style="background-color: var(--body-bg-color); padding: var(--spacing-l);
+            margin-top: var(--spacing-m);">
+  <adw-clamp maximum-size="400px" scrollable
+             style="height: 200px; border: 1px solid var(--borders-color);
+                    background-color: var(--view-bg-color); padding: var(--spacing-s);">
       <h4>Scrollable Clamped Area</h4>
       <p>This content is clamped to 400px width.</p>
-      <p>If it becomes taller than the clamp's explicit height (200px here), the clamp will become scrollable.</p>
+      <p>If it becomes taller than the clamp's explicit height (200px here),
+      the clamp will become scrollable.</p>
       <p>Lorem ipsum dolor sit amet...</p>
       <p>Consectetur adipiscing elit...</p>
       <p>Sed do eiusmod tempor incididunt...</p>

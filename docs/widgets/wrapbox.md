@@ -15,13 +15,25 @@ Adw.createWrapBox(options = {}) -> HTMLDivElement
 **Parameters:**
 
 *   `options` (Object, optional): Configuration options:
-    *   `children` (Array<HTMLElement>, optional): Child elements to add to the wrap box.
-    *   `orientation` (String, optional): Main layout direction before wrapping. Can be `"horizontal"` (default) or `"vertical"`.
-    *   `spacing` (String | Number, optional): Gap between items along the main axis and cross axis if `lineSpacing` is not set. Can be a predefined Adwaita spacing unit (e.g., "s", "m") or a CSS value (e.g., "10px", 10 for 10px). Defaults to a medium spacing.
-    *   `lineSpacing` (String | Number, optional): Gap between lines of wrapped items (cross-axis spacing). If not set, `spacing` is used for both item and line gaps.
-    *   `align` (String, optional): `align-items` value (cross-axis alignment of items within a line). E.g., `"start"`, `"center"`, `"end"`, `"stretch"`. Defaults to `"start"`.
-    *   `justify` (String, optional): `justify-content` value (main-axis alignment of items within a line). E.g., `"start"`, `"center"`, `"end"`, `"between"`. Defaults to `"start"`.
-    *   *Note: `align-content` (for alignment of wrapped lines) might also be configurable or default to stretch/start.*
+    *   `children` (Array<HTMLElement>, optional): Child elements to add to the
+        wrap box.
+    *   `orientation` (String, optional): Main layout direction before wrapping.
+        Can be `"horizontal"` (default) or `"vertical"`.
+    *   `spacing` (String | Number, optional): Gap between items along the main
+        axis and cross axis if `lineSpacing` is not set. Can be a predefined
+        Adwaita spacing unit (e.g., "s", "m") or a CSS value (e.g., "10px",
+        10 for 10px). Defaults to a medium spacing.
+    *   `lineSpacing` (String | Number, optional): Gap between lines of wrapped
+        items (cross-axis spacing). If not set, `spacing` is used for both item
+        and line gaps.
+    *   `align` (String, optional): `align-items` value (cross-axis alignment of
+        items within a line). E.g., `"start"`, `"center"`, `"end"`, `"stretch"`.
+        Defaults to `"start"`.
+    *   `justify` (String, optional): `justify-content` value (main-axis
+        alignment of items within a line). E.g., `"start"`, `"center"`, `"end"`,
+        `"between"`. Defaults to `"start"`.
+    *   *Note: `align-content` (for alignment of wrapped lines) might also be
+        configurable or default to stretch/start.*
 
 **Returns:**
 

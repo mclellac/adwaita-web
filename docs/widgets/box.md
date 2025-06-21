@@ -15,12 +15,23 @@ Adw.createBox(options = {}) -> HTMLDivElement
 **Parameters:**
 
 *   `options` (Object, optional): Configuration options:
-    *   `orientation` (String, optional): Flex direction. Can be `"horizontal"` (default) or `"vertical"`.
-    *   `align` (String, optional): `align-items` value. Common values: `"start"`, `"center"`, `"end"`, `"stretch"`, `"baseline"`.
-    *   `justify` (String, optional): `justify-content` value. Common values: `"start"`, `"center"`, `"end"`, `"between"` (space-between), `"around"` (space-around), `"evenly"` (space-evenly).
-    *   `spacing` (String, optional): Gap spacing between children. Maps to Adwaita spacing variables (e.g., `"xs"`, `"s"`, `"m"`, `"l"`, `"xl"`) or a direct CSS value like `"10px"`. If using predefined spacing like "m", it typically maps to a CSS variable like `var(--spacing-m)`.
-    *   `fillChildren` (Boolean, optional): If `true`, children will grow to fill available space along the main axis (applies `flex-grow: 1` to children via a class). Defaults to `false`.
-    *   `children` (Array<HTMLElement>, optional): An array of HTML elements to append as children to the box. *Security: Ensure children are trusted or sanitized if user-generated.*
+    *   `orientation` (String, optional): Flex direction. Can be `"horizontal"`
+        (default) or `"vertical"`.
+    *   `align` (String, optional): `align-items` value. Common values: `"start"`,
+        `"center"`, `"end"`, `"stretch"`, `"baseline"`.
+    *   `justify` (String, optional): `justify-content` value. Common values:
+        `"start"`, `"center"`, `"end"`, `"between"` (space-between),
+        `"around"` (space-around), `"evenly"` (space-evenly).
+    *   `spacing` (String, optional): Gap spacing between children. Maps to Adwaita
+        spacing variables (e.g., `"xs"`, `"s"`, `"m"`, `"l"`, `"xl"`) or a direct
+        CSS value like `"10px"`. If using predefined spacing like "m", it
+        typically maps to a CSS variable like `var(--spacing-m)`.
+    *   `fillChildren` (Boolean, optional): If `true`, children will grow to fill
+        available space along the main axis (applies `flex-grow: 1` to children
+        via a class). Defaults to `false`.
+    *   `children` (Array<HTMLElement>, optional): An array of HTML elements to
+        append as children to the box. *Security: Ensure children are trusted or
+        sanitized if user-generated.*
 
 **Returns:**
 
@@ -102,7 +113,8 @@ A declarative way to use Adwaita box containers.
 <br/>
 
 <!-- Horizontal box where children fill available width -->
-<adw-box orientation="horizontal" spacing="xs" fill-children style="border: 1px solid var(--borders-color); padding: 5px; width: 100%;">
+<adw-box orientation="horizontal" spacing="xs" fill-children
+           style="border: 1px solid var(--borders-color); padding: 5px; width: 100%;">
   <adw-button style="min-width: 100px;">A</adw-button> <!-- flex-grow will be applied -->
   <adw-label style="text-align: center;">B (Centered)</adw-label>
   <adw-button style="min-width: 100px;">C</adw-button>

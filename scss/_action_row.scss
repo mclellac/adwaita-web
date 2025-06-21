@@ -5,7 +5,7 @@
   align-items: center;
   padding: var(--spacing-m) var(--spacing-l);
   background-color: var(--card-bg-color); // Action Rows are often on card-like or view backgrounds
-  border-bottom: var(--border-width) solid var(--borders-color); // Use theme-aware --borders-color
+  border-bottom: var(--border-width) solid var(--list-separator-color); // Use new variable
   min-height: 48px; // Standard Adwaita row height
   gap: var(--spacing-m); // Use gap for spacing prefix, content, and suffix
 

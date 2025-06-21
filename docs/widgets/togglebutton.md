@@ -15,11 +15,16 @@ Adw.createAdwToggleButton(text, options = {}) -> HTMLButtonElement (with methods
 **Parameters:**
 
 *   `text` (String): The text content of the button.
-*   `options` (Object, optional): Configuration options, extending `Adw.createButton` options:
+*   `options` (Object, optional): Configuration options, extending
+    `Adw.createButton` options:
     *   `active` (Boolean, optional): Initial active state. Defaults to `false`.
-    *   `onToggled` (Function, optional): Callback when the button is toggled by user interaction or programmatically if `fireCallback` is true in `setActive`. Receives `(isActive: boolean, value?: string)`.
-    *   `value` (String, optional): A value associated with the button, useful when part of a group.
-    *   Other `Adw.createButton` options like `icon`, `flat` (defaults to `true`), `suggested`, `destructive`, `disabled`, `isCircular` are also applicable.
+    *   `onToggled` (Function, optional): Callback when the button is toggled by
+        user interaction or programmatically if `fireCallback` is true in
+        `setActive`. Receives `(isActive: boolean, value?: string)`.
+    *   `value` (String, optional): A value associated with the button, useful when
+        part of a group.
+    *   Other `Adw.createButton` options like `icon`, `flat` (defaults to `true`),
+        `suggested`, `destructive`, `disabled`, `isCircular` are also applicable.
 
 **Returns:**
 
@@ -39,7 +44,8 @@ Adw.createAdwToggleButton(text, options = {}) -> HTMLButtonElement (with methods
     // icon: "format-text-bold-symbolic", // Example if using icon font
     value: "bold",
     onToggled: (isActive, value) => {
-      Adw.createToast(`Bold is now ${isActive ? 'ON' : 'OFF'} (Value: ${value})`);
+      const state = isActive ? 'ON' : 'OFF';
+      Adw.createToast(`Bold is now ${state} (Value: ${value})`);
       document.body.style.fontWeight = isActive ? 'bold' : 'normal'; // Demo effect
     }
   });
@@ -83,8 +89,12 @@ A declarative way to define Adwaita toggle buttons.
 
 **Events:**
 
-*   `toggled`: Fired when the button's active state changes due to user interaction or programmatic change that fires callbacks. `event.detail` contains `{ isActive: boolean, value?: string }`.
-*   `adw-toggle-button-clicked`: (Internal) Fired on click, primarily for `AdwToggleGroup` to manage state. `event.detail` contains `{ value?: string, currentState: boolean }`.
+*   `toggled`: Fired when the button's active state changes due to user
+    interaction or programmatic change that fires callbacks. `event.detail`
+    contains `{ isActive: boolean, value?: string }`.
+*   `adw-toggle-button-clicked`: (Internal) Fired on click, primarily for
+    `AdwToggleGroup` to manage state. `event.detail` contains
+    `{ value?: string, currentState: boolean }`.
 
 **Example:**
 

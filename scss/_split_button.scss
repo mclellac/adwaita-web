@@ -12,7 +12,7 @@
   box-shadow: none;
 
   &:focus-within {
-    outline: 2px solid var(--accent-bg-color);
+    outline: 2px solid var(--accent-color); // Use standalone accent for outline
     outline-offset: 2px;
   }
 
@@ -21,7 +21,7 @@
     cursor: pointer;
     text-align: center;
     flex-grow: 1;
-    border-right: var(--border-width, 1px) solid var(--button-border-color);
+    // border-right: var(--border-width, 1px) solid var(--button-border-color); // Removed
     border-radius: var(--border-radius-default) 0 0 var(--border-radius-default);
     transition: background-color 0.1s ease-out;
     color: inherit;
@@ -43,6 +43,7 @@
     justify-content: center;
     padding: var(--spacing-s) var(--spacing-xs);
     cursor: pointer;
+    border-left: var(--border-width, 1px) solid var(--button-border-color); // Added separator here
     border-radius: 0 var(--border-radius-default) var(--border-radius-default) 0;
     transition: background-color 0.1s ease-out;
     color: inherit;
@@ -51,8 +52,8 @@
 
     // Ensure the icon itself is styled correctly within the dropdown part
     .adw-icon {
-      width: 1em; // Or a fixed small size e.g. 12px or 14px
-      height: 1em;
+      width: 12px; // Fixed size for dropdown arrow
+      height: 12px;
       // fill: currentColor; // AdwIcon component should handle this
     }
 
@@ -74,20 +75,21 @@
     border-color: transparent;
 
     .adw-split-button-action {
-      border-right-color: transparent;
+      // border-right-color: transparent; // Not needed as border-right was removed
       &:hover {
-        background-color: rgba(255,255,255, 0.1); // Assuming accent-fg-color is white
+        background-color: var(--accent-bg-hover-color);
       }
       &:active {
-        background-color: rgba(255,255,255, 0.2); // Assuming accent-fg-color is white
+        background-color: var(--accent-bg-active-color);
       }
     }
     .adw-split-button-dropdown {
+      border-left-color: var(--accent-bg-active-color); // Subtle separator for suggested state
       &:hover {
-        background-color: rgba(255,255,255, 0.1); // Assuming accent-fg-color is white
+        background-color: var(--accent-bg-hover-color);
       }
       &:active {
-        background-color: rgba(255,255,255, 0.2); // Assuming accent-fg-color is white
+        background-color: var(--accent-bg-active-color);
       }
       // .adw-split-button-arrow rule removed
       // Icon color will be handled by .adw-icon and currentColor if accent-fg-color is set on parent
@@ -113,7 +115,10 @@
         color: var(--accent-fg-color);
         border-color: transparent;
         .adw-split-button-action {
-            border-right-color: transparent; // Also make this transparent for disabled suggested
+            // No border here anymore
+        }
+        .adw-split-button-dropdown {
+            border-left-color: transparent; // Separator also transparent for disabled suggested
         }
     }
   }

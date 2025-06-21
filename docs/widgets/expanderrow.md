@@ -37,7 +37,8 @@ Adw.createExpanderRow(options = {}) -> HTMLDivElement
 
   // Create content for the expander
   const detailsContent = document.createElement('div');
-  detailsContent.style.padding = "var(--spacing-s) 0 0 var(--spacing-l)"; // Indent content
+  // Indent content for visual hierarchy
+  detailsContent.style.padding = "var(--spacing-s) 0 0 var(--spacing-l)";
   detailsContent.innerHTML = `
     <p>This is the detailed content that was hidden.</p>
     <adw-entry placeholder="Enter detail..."></adw-entry>
@@ -99,15 +100,19 @@ A declarative way to define Adwaita expander rows.
 
 ```html
 <adw-list-box style="max-width: 500px;">
-  <adw-expander-row title="User Profile" subtitle="Edit your personal information">
-    <div slot="content" style="padding: var(--spacing-m); border-top: 1px solid var(--borders-color);">
+  <adw-expander-row title="User Profile"
+                      subtitle="Edit your personal information">
+    <div slot="content"
+         style="padding: var(--spacing-m); border-top: 1px solid var(--borders-color);">
       <adw-entry-row title="Name" placeholder="Your Name"></adw-entry-row>
       <adw-entry-row title="Email" placeholder="Your Email"></adw-entry-row>
     </div>
   </adw-expander-row>
 
   <adw-expander-row title="Application Logs" expanded>
-    <pre slot="content" style="padding: var(--spacing-m); background-color: var(--shade-color); max-height: 100px; overflow-y: auto;">Log entry 1...
+    <pre slot="content"
+         style="padding: var(--spacing-m); background-color: var(--shade-color);
+                max-height: 100px; overflow-y: auto;">Log entry 1...
 Log entry 2...
 Log entry 3...</pre>
   </adw-expander-row>

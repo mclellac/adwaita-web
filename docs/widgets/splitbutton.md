@@ -37,7 +37,7 @@ Adw.createSplitButton(options = {}) -> HTMLDivElement
 
   const saveSplitButton = Adw.createSplitButton({
     actionText: "Save",
-    actionIconHTML: '<svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16"><path d="M2 2v12h12V2H2zm1 1h10v10H3V3zm2 2v2h6V5H5zm0 3v2h6V8H5zm0 3v2h4v-2H5z"/></svg>', // Save icon
+    actionIconHTML: '<svg viewBox="0 0 16 16"><path d="M2 2v12h12V2H2z"/></svg>', // Save icon (shortened)
     suggested: true,
     onActionClick: () => {
       Adw.createToast("Default Save action!");

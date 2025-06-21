@@ -8,7 +8,7 @@ Vanilla JavaScript UI framework that mimics the look and feel of GNOME's GTK4 an
 
 - **Adwaita Styling:** Aims to closely follow the visual style and naming conventions of libadwaita for a consistent GNOME desktop look on the web.
 - **Light and Dark Themes:** Built-in support for both light and dark themes. Includes automatic detection of system preference via `prefers-color-scheme`, manual toggling, and remembers the user's choice via `localStorage`.
-- **Component-Based:** Provides a suite of reusable UI components as JavaScript functions (e.g., Buttons, Entries, Switches, ViewSwitcher, Flap).
+- **Component-Based:** Primarily delivered as [Custom Elements (Web Components)](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) for easy declarative use in HTML. Helper JavaScript factory functions are also provided for imperative creation.
 - **CSS Variables:** Extensively uses CSS custom properties (variables) for theming, making customization of colors, fonts, and spacing straightforward, inspired by libadwaita's own variable system.
 - **Accent Colors:** Supports dynamic accent color switching, allowing users to choose from a predefined palette, with preferences saved.
 - **Responsive Design:** Components are designed to be reasonably responsive where applicable.

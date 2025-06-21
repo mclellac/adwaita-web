@@ -20,18 +20,26 @@ Adw.createAboutDialog(options = {}) -> { dialog: HTMLDivElement, open: function,
     *   `logo` (String, optional): URL for a larger logo image displayed prominently.
     *   `version` (String, optional): Application version string.
     *   `copyright` (String, optional): Copyright information (e.g., "© 2023 Your Name").
-    *   `developerName` (String | Array<String>, optional): Name(s) of the primary developer(s).
+    *   `developerName` (String | Array<String>, optional): Name(s) of the primary
+        developer(s).
     *   `website` (String, optional): URL of the application's or developer's website.
-    *   `websiteLabel` (String, optional): Custom label for the website link (defaults to the URL itself).
-    *   `licenseType` (String, optional): SPDX license identifier (e.g., "MIT", "GPL-3.0-or-later"). Will attempt to link to spdx.org.
-    *   `licenseText` (String, optional): The full text of the license, if not using a standard SPDX type or for custom licenses. Often displayed in a scrollable area or expander.
-    *   `comments` (String, optional): General comments or a brief description of the application.
+    *   `websiteLabel` (String, optional): Custom label for the website link
+        (defaults to the URL itself).
+    *   `licenseType` (String, optional): SPDX license identifier (e.g., "MIT",
+        "GPL-3.0-or-later"). Will attempt to link to spdx.org.
+    *   `licenseText` (String, optional): The full text of the license, if not
+        using a standard SPDX type or for custom licenses. Often displayed in a
+        scrollable area or expander.
+    *   `comments` (String, optional): General comments or a brief description of the
+        application.
     *   `developers` (Array<String>, optional): List of developers.
     *   `designers` (Array<String>, optional): List of designers.
     *   `documenters` (Array<String>, optional): List of documenters.
     *   `translatorCredits` (String, optional): Credits for translators.
     *   `artists` (Array<String>, optional): List of artists.
-    *   `acknowledgements` (Array<String | Object>, optional): List of acknowledgements. Can be strings or objects like `{title: "Group Name", names: ["Person A", "Library B"]}`.
+    *   `acknowledgements` (Array<String | Object>, optional): List of
+        acknowledgements. Can be strings or objects like
+        `{title: "Group Name", names: ["Person A", "Library B"]}`.
     *   `onClose` (Function, optional): Callback executed when the dialog is closed.
 
 **Returns:**
@@ -56,7 +64,8 @@ Adw.createAboutDialog(options = {}) -> { dialog: HTMLDivElement, open: function,
         developerName: "The Developer Team",
         website: "https://example.com",
         websiteLabel: "Visit our Website",
-        comments: "This application helps you do amazing things with web technologies, styled with Adwaita!",
+        comments: "This application helps you do amazing things with web " +
+                  "technologies, styled with Adwaita!",
         licenseType: "GPL-3.0-or-later",
         // licenseText: "Full license text here if not using SPDX or for custom details...",
         developers: ["Dev A", "Dev B"],
@@ -130,7 +139,8 @@ A declarative way to define Adwaita "About" dialogs.
   website="https://acme.example.com"
   license-type="MIT">
   <!-- Logo via slot -->
-  <img slot="logo" src="app-demo/static/img/default_avatar.png" alt="App Logo" style="width: 64px; height: 64px; border-radius: var(--border-radius-default);">
+  <img slot="logo" src="app-demo/static/img/default_avatar.png" alt="App Logo"
+       style="width: 64px; height: 64px; border-radius: var(--border-radius-default);">
   <!-- Comments via slot -->
   <p slot="comments">
     This is a demonstration of the Adwaita-Web About Dialog using Web Components.

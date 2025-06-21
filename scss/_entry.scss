@@ -4,7 +4,7 @@
   padding: var(--spacing-s) var(--spacing-m);
   border-width: var(--border-width, 1px);
   border-style: solid;
-  border-color: var(--borders-color); // Use theme-aware general border color
+  border-color: var(--button-border-color); // Changed to use button-border-color for consistency
   border-radius: var(--border-radius-default);
   background-color: var(--view-bg-color); // Entries are usually on view or window backgrounds
   color: var(--view-fg-color);

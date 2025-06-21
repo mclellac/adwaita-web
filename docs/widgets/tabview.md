@@ -50,9 +50,12 @@ The TabView system provides a way to manage multiple pages of content, where eac
     *   `pages` (Array<Object>, optional): Initial pages. Each object: `{ name: String, title: String, content: HTMLElement, isClosable?: boolean }`.
     *   `activePageName` (String, optional): Initially active page name.
     *   `showNewTabButton` (Boolean, optional): Passed to `AdwTabBar`.
-    *   `onNewTabRequested` (Function, optional): Passed to `AdwTabBar`. App should call `adwTabView.addPage()`.
+    *   `onNewTabRequested` (Function, optional): Passed to `AdwTabBar`. App should
+        call `adwTabView.addPage()`.
     *   `onPageChanged` (Function, optional): `onPageChanged(pageName)` callback.
-    *   `onBeforePageClose` (Function, optional): `onBeforePageClose(pageName) -> boolean`. Return `false` to prevent closing.
+    *   `onBeforePageClose` (Function, optional):
+        `onBeforePageClose(pageName) -> boolean`. Return `false` to prevent
+        closing.
     *   `onPageClosed` (Function, optional): `onPageClosed(pageName)` callback.
 *   **Returns**: The main tab view `<div>`, augmented with methods:
     *   `addPage(pageData, makeActive?)`
@@ -68,9 +71,11 @@ The TabView system provides a way to manage multiple pages of content, where eac
   const tabViewContainer = document.getElementById('js-tabview-container');
   let pageCounter = 2;
 
+  const page1Content = Adw.createLabel("Content for Page 1");
+  const page2Content = Adw.createEntry({placeholder: "Input for Page 2"});
   const initialPages = [
-    { name: "page1", title: "Page 1", content: Adw.createLabel("Content for Page 1"), isClosable: true },
-    { name: "page2", title: "Page Two", content: Adw.createEntry({placeholder: "Input for Page 2"}), isClosable: true }
+    { name: "page1", title: "Page 1", content: page1Content, isClosable: true },
+    { name: "page2", title: "Page Two", content: page2Content, isClosable: true }
   ];
 
   const myTabView = Adw.createTabView({

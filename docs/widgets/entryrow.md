@@ -16,19 +16,27 @@ Adw.createEntryRow(options = {}) -> HTMLDivElement
 
 *   `options` (Object, optional): Configuration options:
     *   `title` (String, required): The main title/label for the entry.
-    *   `subtitle` (String, optional): Additional descriptive text displayed below the title.
-    *   `entryOptions` (Object, optional): An object containing options to be passed directly to the underlying `Adw.createEntry()` factory function. Common `entryOptions` include:
+    *   `subtitle` (String, optional): Additional descriptive text displayed below
+        the title.
+    *   `entryOptions` (Object, optional): An object containing options to be
+        passed directly to the underlying `Adw.createEntry()` factory function.
+        Common `entryOptions` include:
         *   `placeholder` (String): Placeholder text for the entry.
         *   `value` (String): Initial value for the entry.
         *   `name` (String): The `name` attribute for the input element.
-        *   `type` (String): Input type (e.g., "text", "email", "search"). Defaults to "text".
+        *   `type` (String): Input type (e.g., "text", "email", "search").
+            Defaults to "text".
         *   `disabled` (Boolean): Disables only the entry field.
         *   `onInput` (Function): Input event handler for the entry.
-    *   `disabled` (Boolean, optional): If `true`, disables the entire row including the label and the entry. This is distinct from `entryOptions.disabled` which only disables the input field.
+    *   `disabled` (Boolean, optional): If `true`, disables the entire row
+        including the label and the entry. This is distinct from
+        `entryOptions.disabled` which only disables the input field.
 
 **Returns:**
 
-*   `(HTMLDivElement)`: The created `<div>` element representing the entry row. The internal `<input>` element can be accessed by querying within this div (e.g., `entryRowElement.querySelector('input.adw-entry')`).
+*   `(HTMLDivElement)`: The created `<div>` element representing the entry row.
+    The internal `<input>` element can be accessed by querying within this div
+    (e.g., `entryRowElement.querySelector('input.adw-entry')`).
 
 **Example:**
 
@@ -121,24 +129,15 @@ A declarative way to define Adwaita entry rows.
   <adw-entry-row
     title="Username"
     subtitle="Choose a unique username"
-    placeholder="e.g., ada_lovelace"
-    name="username"
-    required>
+    placeholder="e.g., ada_lovelace" name="username" required>
   </adw-entry-row>
 
-  <adw-entry-row
-    title="Website"
-    type="url"
-    placeholder="https://example.com"
-    value="https://gnome.org"
-    name="user_website">
+  <adw-entry-row title="Website" type="url" placeholder="https://example.com"
+                 value="https://gnome.org" name="user_website">
   </adw-entry-row>
 
-  <adw-entry-row
-    title="API Key"
-    subtitle="This field is disabled"
-    value=" preset-key-cannot-change"
-    disabled> <!-- Disables the whole row -->
+  <adw-entry-row title="API Key" subtitle="This field is disabled"
+                 value=" preset-key-cannot-change" disabled>
   </adw-entry-row>
 </adw-list-box>
 
@@ -146,7 +145,8 @@ A declarative way to define Adwaita entry rows.
   const usernameRow = document.querySelector('adw-entry-row[name="username"]');
   usernameRow.addEventListener('input', (event) => {
     // The event.target will be the <adw-entry-row> itself.
-    // To get the input's value, you'd use the .value property of the custom element.
+    // To get the input's value, you'd use the .value property of the
+    // custom element.
     console.log("Username:", usernameRow.value);
   });
 </script>

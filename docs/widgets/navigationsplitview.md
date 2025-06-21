@@ -1,6 +1,10 @@
 # NavigationSplitView
 
-An AdwNavigationSplitView is a layout container that provides a master-detail view, typically with a collapsible sidebar (master) and a main content pane (detail). The content pane often hosts an `AdwNavigationView` or `AdwTabView`. It's responsive, changing behavior at defined breakpoints (e.g., sidebar overlays content on narrower screens).
+An AdwNavigationSplitView is a layout container that provides a master-detail
+view, typically with a collapsible sidebar (master) and a main content pane
+(detail). The content pane often hosts an `AdwNavigationView` or `AdwTabView`.
+It's responsive, changing behavior at defined breakpoints (e.g., sidebar
+overlays content on narrower screens).
 
 ## JavaScript Factory: `Adw.createAdwNavigationSplitView()`
 
@@ -17,10 +21,16 @@ Adw.createAdwNavigationSplitView(options = {}) -> HTMLDivElement (with methods)
 *   `options` (Object, optional): Configuration options:
     *   `sidebar` (HTMLElement, required): The content for the sidebar.
     *   `content` (HTMLElement, required): The content for the main pane.
-    *   `showSidebar` (Boolean, optional): Initial visibility of the sidebar. Defaults to `true`.
-    *   `canCollapse` (Boolean, optional): Whether the sidebar can be collapsed. Defaults to `true`. If `false`, the sidebar is always visible in docked mode (unless screen is too narrow for docked mode).
-    *   `collapseThreshold` (Number, optional): Width in pixels below which the sidebar transitions to overlay mode (if `canCollapse` is true). Defaults to `768`.
-    *   `sidebarWidth` (String, optional): Default CSS width of the sidebar when docked (e.g., "300px"). Defaults to a predefined value.
+    *   `showSidebar` (Boolean, optional): Initial visibility of the sidebar.
+        Defaults to `true`.
+    *   `canCollapse` (Boolean, optional): Whether the sidebar can be collapsed.
+        Defaults to `true`. If `false`, the sidebar is always visible in docked
+        mode (unless screen is too narrow for docked mode).
+    *   `collapseThreshold` (Number, optional): Width in pixels below which the
+        sidebar transitions to overlay mode (if `canCollapse` is true). Defaults
+        to `768`.
+    *   `sidebarWidth` (String, optional): Default CSS width of the sidebar when
+        docked (e.g., "300px"). Defaults to a predefined value.
 
 **Returns:**
 

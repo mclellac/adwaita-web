@@ -37,9 +37,7 @@ Adw.createCheckbox(options = {}) -> HTMLLabelElement (wrapper)
   const rememberMeCheck = Adw.createCheckbox({
     label: "Remember me on this computer",
     name: "remember",
-    onChanged: (event) => {
-      Adw.createToast(`Remember me: ${event.target.checked}`);
-    }
+    onChanged: (event) => Adw.createToast(`Remember me: ${event.target.checked}`)
   });
   container.appendChild(rememberMeCheck);
 

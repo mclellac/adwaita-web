@@ -1,6 +1,9 @@
 # NavigationView
 
-An AdwNavigationView manages a stack of views (pages), allowing users to navigate between them using "push" (to a new view) and "pop" (back to the previous view) operations. It typically includes an `AdwHeaderBar` that updates its title and back button visibility based on the navigation stack.
+An AdwNavigationView manages a stack of views (pages), allowing users to
+navigate between them using "push" (to a new view) and "pop" (back to the
+previous view) operations. It typically includes an `AdwHeaderBar` that
+updates its title and back button visibility based on the navigation stack.
 
 ## JavaScript Factory: `Adw.createNavigationView()`
 
@@ -15,14 +18,20 @@ Adw.createNavigationView(options = {}) -> HTMLDivElement (with methods)
 **Parameters:**
 
 *   `options` (Object, optional): Configuration options:
-    *   `initialPages` (Array<Object>, optional): An array of page data objects to initialize the stack. The first page in the array is shown initially. Each object:
+    *   `initialPages` (Array<Object>, optional): An array of page data objects to
+        initialize the stack. The first page in the array is shown initially.
+        Each object:
         *   `name` (String, required): A unique identifier for the page.
-        *   `element` (HTMLElement, required): The HTML element representing the page content.
-        *   `header` (Object, optional): Configuration for the header bar when this page is active.
+        *   `element` (HTMLElement, required): The HTML element representing the
+            page content.
+        *   `header` (Object, optional): Configuration for the header bar when this
+            page is active.
             *   `title` (String, optional): Page title.
             *   `subtitle` (String, optional): Page subtitle.
-            *   `start` (Array<HTMLElement>, optional): Elements for the start of the header bar (prepended to back button if shown).
-            *   `end` (Array<HTMLElement>, optional): Elements for the end of the header bar.
+            *   `start` (Array<HTMLElement>, optional): Elements for the start of
+                the header bar (prepended to back button if shown).
+            *   `end` (Array<HTMLElement>, optional): Elements for the end of the
+                header bar.
 
 **Returns:**
 
@@ -34,7 +43,9 @@ Adw.createNavigationView(options = {}) -> HTMLDivElement (with methods)
 **Example:**
 
 ```html
-<div id="js-navview-container" style="height: 350px; border: 1px solid var(--borders-color); display: flex; flex-direction: column;"></div>
+<div id="js-navview-container"
+     style="height: 350px; border: 1px solid var(--borders-color);
+            display: flex; flex-direction: column;"></div>
 <script>
   const navViewContainer = document.getElementById('js-navview-container');
 
@@ -44,7 +55,8 @@ Adw.createNavigationView(options = {}) -> HTMLDivElement (with methods)
   const page1Button = Adw.createButton("Go to Page 2", {
     onClick: () => myNavView.push(page2Data) // page2Data defined below
   });
-  page1Content.append(Adw.createLabel("This is the first page.", {isBody: true}), page1Button);
+  const page1Label = Adw.createLabel("This is the first page.", {isBody: true});
+  page1Content.append(page1Label, page1Button);
 
   // --- Page 2 Content ---
   const page2Content = document.createElement('div');
@@ -52,7 +64,8 @@ Adw.createNavigationView(options = {}) -> HTMLDivElement (with methods)
   const page2Button = Adw.createButton("Go to Page 3 (Settings)", {
     onClick: () => myNavView.push(page3Data) // page3Data defined below
   });
-  page2Content.append(Adw.createLabel("This is the second page.", {isBody: true}), page2Button);
+  const page2Label = Adw.createLabel("This is the second page.", {isBody: true});
+  page2Content.append(page2Label, page2Button);
 
   // --- Page 3 Content ---
   const page3Content = Adw.createEntryRow({title: "Some Setting"}); // Example content
@@ -96,8 +109,11 @@ A declarative way to define Adwaita navigation views.
 
 **Slots:**
 
-*   Default slot: Place page elements here. Each page element should be identifiable (e.g., have a `data-page-name` or `page-name` attribute) and can define its header bar content via sub-slots.
-    *   A page element (e.g., a `<div>` or a custom `<adw-navigation-page>` component) should have a `data-page-name` (or `page-name`) attribute.
+*   Default slot: Place page elements here. Each page element should be
+    identifiable (e.g., have a `data-page-name` or `page-name` attribute) and
+    can define its header bar content via sub-slots.
+    *   A page element (e.g., a `<div>` or a custom `<adw-navigation-page>`
+        component) should have a `data-page-name` (or `page-name`) attribute.
     *   Inside a page element, you can define header parts:
         *   `<div slot="header-title">My Page Title</div>`
         *   `<div slot="header-subtitle">Subtitle</div>`
@@ -112,7 +128,11 @@ A declarative way to define Adwaita navigation views.
 
 **Methods:**
 
-*   `push(pageElementOrName)`: Pushes a new page. If `pageElementOrName` is a string, it's treated as the `data-page-name` of an existing slotted page to navigate to. If it's an HTMLElement, it's added to the view (if not already present) and pushed. The element should conform to the page structure with `data-page-name` and optional header slots.
+*   `push(pageElementOrName)`: Pushes a new page. If `pageElementOrName` is a
+    string, it's treated as the `data-page-name` of an existing slotted page to
+    navigate to. If it's an HTMLElement, it's added to the view (if not already
+    present) and pushed. The element should conform to the page structure with
+    `data-page-name` and optional header slots.
 *   `pop()`: Pops the current page.
 *   `getVisiblePageName() -> String | null`: Returns the name of the current page.
 

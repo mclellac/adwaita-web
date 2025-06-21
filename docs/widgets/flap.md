@@ -33,7 +33,9 @@ Adw.createFlap(options = {}) -> { element: HTMLDivElement, toggleFlap: function,
 **Example:**
 
 ```html
-<div id="js-flap-container" style="height: 250px; border: 1px solid var(--borders-color); position: relative; overflow: hidden;">
+<div id="js-flap-container"
+     style="height: 250px; border: 1px solid var(--borders-color);
+            position: relative; overflow: hidden;">
   <!-- Button to trigger flap will be added here -->
 </div>
 <script>
@@ -43,14 +45,16 @@ Adw.createFlap(options = {}) -> { element: HTMLDivElement, toggleFlap: function,
 
 
   const flapContentEl = document.createElement('div');
-  flapContentEl.innerHTML = '<h4>Flap Content</h4><p>This is the flap area. It can contain navigation or tools.</p>';
+  flapContentEl.innerHTML = '<h4>Flap Content</h4><p>This is the flap area. ' +
+                            'It can contain navigation or tools.</p>';
   flapContentEl.style.padding = "var(--spacing-m)";
   flapContentEl.style.backgroundColor = "var(--sidebar-bg-color)"; // Example background
   flapContentEl.style.height = "100%";
 
 
   const mainContentEl = document.createElement('div');
-  mainContentEl.innerHTML = '<h3>Main Content Area</h3><p>This is where the primary content goes.</p>';
+  mainContentEl.innerHTML = '<h3>Main Content Area</h3><p>This is where the ' +
+                            'primary content goes.</p>';
   mainContentEl.style.padding = "var(--spacing-m)";
 
   const myFlap = Adw.createFlap({
@@ -107,8 +111,12 @@ A declarative way to define Adwaita flaps.
 
 ```html
 <adw-button id="wc-flap-toggle-btn">Toggle Flap</adw-button>
-<adw-flap id="my-wc-flap" folded flap-width="280px" style="height: 300px; border: 1px solid var(--borders-color); margin-top: 5px;">
-  <div slot="flap" style="background-color: var(--popover-bg-color); padding: var(--spacing-m); height: 100%;">
+<adw-flap id="my-wc-flap" folded flap-width="280px"
+          style="height: 300px; border: 1px solid var(--borders-color);
+                 margin-top: 5px;">
+  <div slot="flap"
+       style="background-color: var(--popover-bg-color);
+              padding: var(--spacing-m); height: 100%;">
     <h4>Sidebar Flap</h4>
     <ul>
       <li>Navigation Item 1</li>
@@ -118,7 +126,8 @@ A declarative way to define Adwaita flaps.
 
   <div slot="main" style="padding: var(--spacing-m);"> <!-- Or use default slot -->
     <h3>Main Application Content</h3>
-    <p>This content remains visible, and the flap slides over or reflows next to it.</p>
+    <p>This content remains visible, and the flap slides over or reflows next
+    to it.</p>
   </div>
 </adw-flap>
 

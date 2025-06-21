@@ -15,15 +15,26 @@ Adw.createViewSwitcher(options = {}) -> HTMLDivElement (the main switcher contai
 **Parameters:**
 
 *   `options` (Object, optional): Configuration options:
-    *   `views` (Array<Object>, required): An array of view objects. Each object should have:
+    *   `views` (Array<Object>, required): An array of view objects. Each object
+        should have:
         *   `name` (String, required): A unique identifier for the view.
-        *   `content` (HTMLElement, required): The HTML element representing the content of this view.
-        *   `id` (String, optional): An ID for the view's content panel (used for ARIA).
-        *   `buttonOptions` (Object, optional): Options passed to `Adw.createButton` for this view's switcher button. Typically includes `text` or `icon`. Example: `{ text: "View Title" }`.
-    *   `activeViewName` (String, optional): The `name` of the view to be initially active. If not provided, the first view in the `views` array becomes active.
-    *   `label` (String, optional): An ARIA label for the view switcher bar (the group of buttons).
-    *   `isInline` (Boolean, optional): If `true`, styles the switcher buttons more compactly, suitable for inline use. Defaults to `false`.
-    *   `onViewChanged` (Function, optional): Callback function executed when the active view changes. Receives `(viewName, buttonId, panelId)` as arguments.
+        *   `content` (HTMLElement, required): The HTML element representing the
+            content of this view.
+        *   `id` (String, optional): An ID for the view's content panel (used for
+            ARIA).
+        *   `buttonOptions` (Object, optional): Options passed to
+            `Adw.createButton` for this view's switcher button. Typically
+            includes `text` or `icon`. Example: `{ text: "View Title" }`.
+    *   `activeViewName` (String, optional): The `name` of the view to be initially
+        active. If not provided, the first view in the `views` array becomes
+        active.
+    *   `label` (String, optional): An ARIA label for the view switcher bar (the
+        group of buttons).
+    *   `isInline` (Boolean, optional): If `true`, styles the switcher buttons more
+        compactly, suitable for inline use. Defaults to `false`.
+    *   `onViewChanged` (Function, optional): Callback function executed when the
+        active view changes. Receives `(viewName, buttonId, panelId)` as
+        arguments.
 
 **Returns:**
 
@@ -76,16 +87,23 @@ A declarative way to define Adwaita view switchers.
 **Attributes:**
 
 *   `label` (String, optional): ARIA label for the switcher button group.
-*   `active-view` (String, optional): The `view-name` of the initially active view. Can be dynamically changed to switch views.
-*   `is-inline` (Boolean, optional): If present, applies inline styling to the switcher buttons.
+*   `active-view` (String, optional): The `view-name` of the initially active
+    view. Can be dynamically changed to switch views.
+*   `is-inline` (Boolean, optional): If present, applies inline styling to the
+    switcher buttons.
 
 **Slots:**
 
-*   Default slot: Child elements that represent the views. Each child element **must** have a `view-name` attribute. The content of the child element is the view itself. The text content of a `label` attribute on the child or a `data-view-title` attribute can be used for the switcher button text if not specified via other means.
+*   Default slot: Child elements that represent the views. Each child element
+    **must** have a `view-name` attribute. The content of the child element is
+    the view itself. The text content of a `label` attribute on the child or a
+    `data-view-title` attribute can be used for the switcher button text if not
+    specified via other means.
 
 **Events:**
 
-*   `view-changed`: Fired when the active view changes. `event.detail` contains `{ viewName: String, buttonId: String, panelId: String }`.
+*   `view-changed`: Fired when the active view changes. `event.detail` contains
+    `{ viewName: String, buttonId: String, panelId: String }`.
 
 **Methods:**
 *   `setActiveView(viewName)`: Programmatically sets the active view.
