@@ -1,0 +1,24 @@
+// SCSS Mixins
+// This file can be used to define reusable SCSS mixins.
+// Example:
+// @mixin common-focus-style {
+//   &:focus-visible {
+//     outline: 2px solid var(--accent-color);
+//     outline-offset: 2px;
+//     border-radius: var(--border-radius-small);
+//   }
+// }
+//
+// Then in a component:
+// .my-interactive-element {
+//   @include common-focus-style;
+// }
+
+// Mixin for clearfix
+// @mixin clearfix {
+//   &::after {
+//     content: "";
+//     display: table;
+//     clear: both;
+//   }
+// }

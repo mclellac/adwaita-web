@@ -17,29 +17,33 @@
       height: 0;
       border-left: 5px solid transparent;
       border-right: 5px solid transparent;
-      border-top: 5px solid var(--window-fg-color);
+      border-top: 5px solid var(--view-fg-color); // Use view-fg-color for arrow, or a more specific control-icon-color
       transition: transform 0.15s ease-in-out;
-      margin-left: var(--spacing-s);
+      margin-left: var(--spacing-s); // This margin might be adjusted if suffix uses gap
       opacity: 0.7;
     }
 
     &.expanded .adw-expander-row-arrow {
-      transform: rotate(90deg);
+      transform: rotate(90deg); // Standard rotation for expanded state
     }
   }
 
   // If the arrow is part of the suffix in the action row:
-  > .adw-action-row .adw-action-row-suffix .adw-expander-row-arrow {
-     margin-left: 0;
-  }
+  // The parent .adw-action-row now uses 'gap', so direct margin on arrow might not be needed
+  // or might need adjustment based on how adw-action-row-suffix children are structured.
+  // For now, this specific override is kept but commented for review if suffix layout is changed.
+  // > .adw-action-row .adw-action-row-suffix .adw-expander-row-arrow {
+  //    margin-left: 0;
+  // }
 
 
   .adw-expander-row-content-area {
     padding: var(--spacing-m) var(--spacing-l);
-    padding-left: calc(var(--spacing-l) + var(--spacing-m) + 5px); // Indent content (approx icon width + margin)
-                                                              // Adjust if using prefix icons of known width
-    background-color: var(--shade-color);
-    border-bottom: var(--border-width, 1px) solid var(--border-color-light);
+    // Indentation logic might need review. If prefix area in action-row has fixed width, use that.
+    // Example: padding-left: calc(var(--prefix-width, 32px) + var(--spacing-l));
+    padding-left: calc(var(--spacing-l) + var(--spacing-m) + 5px); // Current logic
+    background-color: var(--expander-content-bg-color); // Use new variable
+    border-bottom: var(--border-width) solid var(--borders-color); // Use theme-aware --borders-color
     display: none;
 
     &.visible {
@@ -48,15 +52,18 @@
   }
 
    &:last-child > .adw-expander-row-content-area {
-        border-bottom-left-radius: var(--border-radius-default);
+        border-bottom-left-radius: var(--border-radius-default); // Match listbox radius
         border-bottom-right-radius: var(--border-radius-default);
+        // If this is the very last row of a listbox, its border-bottom should be none.
+        // This might need to be handled by .adw-list-box > .adw-expander-row:last-child > .adw-expander-row-content-area
+        // if the expander row itself doesn't have a bottom border.
    }
 }
 
-// Dark theme adjustments
-.dark-theme .adw-expander-row,
-body.dark-theme .adw-expander-row {
-  .adw-expander-row-content-area {
-    border-bottom-color: var(--border-color-dark);
-  }
-}
+// Dark theme adjustments are now handled by theme-aware variables like --borders-color and --expander-content-bg-color.
+// .dark-theme .adw-expander-row,
+// body.dark-theme .adw-expander-row {
+//   .adw-expander-row-content-area {
+//     border-bottom-color: var(--border-color-dark);
+//   }
+// }

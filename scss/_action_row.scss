@@ -4,23 +4,32 @@
   display: flex;
   align-items: center;
   padding: var(--spacing-m) var(--spacing-l);
-  background-color: var(--card-bg-color);
-  border-bottom: var(--border-width, 1px) solid var(--border-color-light);
-  min-height: 48px;
+  background-color: var(--card-bg-color); // Action Rows are often on card-like or view backgrounds
+  border-bottom: var(--border-width) solid var(--borders-color); // Use theme-aware --borders-color
+  min-height: 48px; // Standard Adwaita row height
+  gap: var(--spacing-m); // Use gap for spacing prefix, content, and suffix
 
   // If the row itself is clickable/activatable
   &.activatable {
     cursor: pointer;
+    outline-offset: -2px; // For focus outline to be inset
+
     &:hover {
-      background-color: var(--button-hover-bg-color);
+      // Using list-row states for consistency if action-row is visually similar to listbox rows
+      // If a stronger, button-like hover is desired, current variables are fine but ensure they are theme-aware.
+      background-color: var(--list-row-hover-bg-color);
     }
     &:active {
-      background-color: var(--button-active-bg-color);
+      background-color: var(--list-row-active-bg-color);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--accent-color);
+      border-radius: var(--border-radius-small); // Match a general small radius for focus
     }
   }
 
   .adw-action-row-prefix {
-    margin-right: var(--spacing-m);
+    // margin-right: var(--spacing-m); // Replaced by gap
     display: flex;
     align-items: center;
   }
@@ -30,7 +39,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-width: 0;
+    min-width: 0; // For text ellipsis
   }
 
   .adw-action-row-title {
@@ -44,16 +53,16 @@
 
   .adw-action-row-subtitle {
     font-size: var(--font-size-small);
-    color: var(--card-fg-color);
-    opacity: 0.7;
+    color: var(--card-fg-color); // Should be view-fg-color if on view-bg, or card-fg-color if on card-bg
+    opacity: 0.7; // Standard opacity for subtitles
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-top: 2px;
+    margin-top: var(--spacing-xxs); // Use variable
   }
 
   .adw-action-row-suffix {
-    margin-left: var(--spacing-m);
+    // margin-left: var(--spacing-m); // Replaced by gap
     display: flex;
     align-items: center;
     flex-shrink: 0;
@@ -68,8 +77,8 @@
   // }
 }
 
-// Dark theme adjustments
-.dark-theme .adw-action-row,
-body.dark-theme .adw-action-row {
-  border-bottom-color: var(--border-color-dark);
-}
+// Dark theme adjustments are handled by --borders-color now.
+// .dark-theme .adw-action-row,
+// body.dark-theme .adw-action-row {
+//   border-bottom-color: var(--border-color-dark);
+// }

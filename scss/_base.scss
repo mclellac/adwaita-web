@@ -38,8 +38,8 @@ a {
   }
 
   &:focus-visible { // Accessibility for keyboard navigation
-    outline: 2px solid var(--accent-bg-color);
-    outline-offset: 1px;
+    outline: 2px solid var(--accent-color); // Use the standalone accent color for outlines
+    outline-offset: 2px; // Slightly increased offset for better visibility around the element
     border-radius: var(--border-radius-small); // Slight rounding on focus outline
   }
 }

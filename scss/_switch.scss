@@ -13,35 +13,41 @@
     height: 0;
 
     &:checked + .adw-switch-slider {
-      background-color: var(--accent-bg-color);
+      background-color: var(--accent-color); // Use main accent color for "on" state
     }
 
     &:checked + .adw-switch-slider:before {
       transform: translateX(20px);
     }
 
-    &:disabled + .adw-switch-slider {
-      background-color: var(--shade-color);
-      opacity: var(--opacity-disabled, 0.5);
+    // Disabled state - OFF
+    &:disabled:not(:checked) + .adw-switch-slider {
+      background-color: var(--switch-slider-disabled-off-bg-color);
+      opacity: var(--opacity-disabled); // Apply overall opacity to disabled switch
       cursor: not-allowed;
 
       &:before {
-        background-color: var(--window-bg-color);
-        opacity: 0.7;
+        background-color: var(--switch-knob-disabled-bg-color);
+        opacity: 1; // Opacity is on the parent slider
       }
     }
 
+    // Disabled state - ON
     &:disabled:checked + .adw-switch-slider {
-      background-color: var(--accent-bg-color);
-      opacity: var(--opacity-disabled, 0.5);
+      background-color: var(--accent-color); // Keep accent for ON disabled, but apply opacity
+      opacity: var(--opacity-disabled);
+      cursor: not-allowed;
+
        &:before {
-        background-color: #ffffff;
+        background-color: var(--switch-knob-bg-color); // Knob remains its standard color for ON disabled
+        opacity: 1; // Opacity is on the parent slider
       }
     }
 
     &:focus-visible + .adw-switch-slider {
-      outline: 2px solid var(--accent-bg-color);
-      outline-offset: 3px;
+      outline: 2px solid var(--accent-color); // Use main accent color
+      outline-offset: 2px; // Standard offset
+      border-radius: 14px; // Slightly larger than slider to encompass it
     }
   }
 
@@ -52,21 +58,21 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--shade-color);
-    border-radius: 12px;
-    transition: background-color 0.15s ease-out, transform 0.15s ease-out;
+    background-color: var(--switch-slider-off-bg-color); // Use new variable for "off" state
+    border-radius: 12px; // Standard Adwaita switch radius
+    transition: background-color 0.15s ease-out, transform 0.15s ease-out, opacity 0.15s ease-out;
 
     &:before {
       position: absolute;
       content: "";
-      height: 20px;
-      width: 20px;
-      left: 2px;
-      bottom: 2px;
-      background-color: #ffffff;
-      border-radius: 50%;
-      transition: transform 0.15s ease-out;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      height: 20px; // Knob size
+      width: 20px;  // Knob size
+      left: 2px;    // Knob padding
+      bottom: 2px;  // Knob padding
+      background-color: var(--switch-knob-bg-color); // Use variable
+      border-radius: 50%; // Circular knob
+      transition: transform 0.15s ease-out, background-color 0.15s ease-out;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2); // Standard knob shadow
     }
   }
 }

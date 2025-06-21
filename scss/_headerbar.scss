@@ -14,37 +14,26 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    gap: var(--spacing-xs); // Use gap for spacing children
 
-    > *, // General direct children
-    adw-button, // Custom element
-    a { // Links
+    > * { // Style direct children. Assumes adw-button and a are direct children.
       color: var(--headerbar-fg-color);
 
       &.adw-button.circular { // Specific styling for circular buttons
-        padding: var(--spacing-xxs);
+        padding: var(--spacing-xxs); // This could be too small, ensure it's intended.
+                                     // Default circular button padding is var(--spacing-s)
       }
       // .adw-avatar styling or other specific child component styling here
     }
   }
 
   .adw-header-bar-start {
-    > *, adw-button, a { // Target all relevant children for margin
-      margin-right: var(--spacing-xs);
-      &:last-child {
-        margin-right: 0;
-      }
-    }
+    // Margins are now handled by gap
   }
 
   .adw-header-bar-end {
-    margin-left: auto;
-    > *, adw-button, a { // Target all relevant children for margin
-      margin-left: var(--spacing-xs);
-      margin-right: 0; // Reset right margin
-      &:first-child {
-        margin-left: 0;
-      }
-    }
+    margin-left: auto; // Keep this to push to the right
+    // Margins are now handled by gap
   }
 
   .adw-header-bar-center-box {
@@ -76,11 +65,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2;
-    margin-top: 2px;
+    margin-top: var(--spacing-xxs); // Use spacing variable
   }
 
   &.scrolled {
-    box-shadow: 0 2px 4px -2px var(--headerbar-shade-color);
+    // Libadwaita uses --headerbar-shade-color for this shadow
+    box-shadow: 0 1px 2px -1px var(--headerbar-shade-color), 0 1px 1px var(--headerbar-shade-color);
+    // A more common shadow might be:
+    // box-shadow: 0 2px 4px -2px var(--headerbar-shade-color); // Original
   }
 
   a,
