@@ -67,356 +67,308 @@ Vanilla JavaScript UI framework that mimics the look and feel of GNOME's GTK4 an
 
    This will automatically recompile `style.css` whenever you make changes to any of the SCSS files.
 
-4. **Include in your HTML:** Include the compiled `style.css` and the `components.js` file in your HTML:
+4. **Include in your HTML:** Include the compiled `style.css` and the `components.js` file in your HTML. `components.js` should be loaded as a module if you are using ES6 imports within your own scripts, or ensure it's loaded before scripts that use `Adw`. For web components to be defined, it must be included.
 
    ```html
    <head>
      <link rel="stylesheet" href="style.css" />
+     <!-- Ensure components.js is loaded, ideally as a module or before your app script -->
+     <script src="js/components.js" defer></script>
    </head>
    <body>
-     <div id="app"></div>
-     <script src="js/components.js"></script>
+     <div id="app">
+       <!-- You can now use Adwaita Web Components directly -->
+       <adw-button id="my-declarative-button" suggested>Click Me Declaratively!</adw-button>
+     </div>
      <script>
-       // Your application code using the Adw components goes here
+       // Example of interacting with the declarative button
+       document.getElementById('my-declarative-button').addEventListener('click', () => {
+         Adw.createToast("Declarative button clicked!");
+       });
      </script>
    </body>
    ```
 
 ## Usage
 
-The framework provides a global `Adw` object containing functions for creating each UI component. Each function takes an `options` object to customize the appearance and behavior of the component.
+Adwaita Web components can be used in two main ways:
 
-**Example:**
+1.  **Declaratively in HTML:** Most components are provided as [Custom Elements (Web Components)](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) that you can use directly in your HTML markup. This is the recommended approach for structuring your UI.
+    Example:
+    ```html
+    <adw-button suggested>Save</adw-button>
+    <adw-entry placeholder="Enter your name..."></adw-entry>
+    ```
 
-```javascript
-const myButton = Adw.createButton("Click Me", {
-  onClick: () => {
-    Adw.createToast("Button clicked!");
-  },
-  suggested: true,
-});
-
-document.getElementById("app").appendChild(myButton);
-```
+2.  **Imperatively via JavaScript:** The framework also provides a global `Adw` object containing factory functions (e.g., `Adw.createButton(...)`) for creating UI components from JavaScript. This is useful for dynamic content generation, one-off elements like toasts and dialogs, or if you prefer a JavaScript-driven approach.
+    Example:
+    ```javascript
+    const myButton = Adw.createButton("Click Me Imperatively", {
+      onClick: () => {
+        Adw.createToast("Imperative button clicked!");
+      },
+      suggested: true,
+    });
+    document.getElementById("app").appendChild(myButton);
+    ```
 
 ## Component Documentation
 
-All components are created using functions available under the global `Adw` object (e.g., `Adw.createButton(...)`).
-Detailed API information, including all options for each component, can be found in the JSDoc comments within `js/components.js`.
+Components can be used as HTML custom elements (e.g., `<adw-button>`) or created imperatively using JavaScript functions from the global `Adw` object (e.g., `Adw.createButton(...)`). Attributes in HTML map to options in the JavaScript factory functions.
 
-Here's an overview of common components and their basic usage:
+Detailed API information for JavaScript factories, including all options for each component, can be found in the JSDoc comments within the respective `js/components/*.js` files. For web components, attributes often mirror these options.
 
-### `Adw.createButton(text, options = {})`
+Here's an overview of common components:
+
+### Buttons (`<adw-button>` / `Adw.createButton()`)
 
 Creates a button.
 
-- **`text`**: `string` - Text displayed on the button.
-- **`options`**: `object`
-  - `onClick`: `function` - Callback for click events.
-  - `suggested`: `boolean` - Styles as a suggested action (e.g., primary button). Uses the current accent color.
-  - `destructive`: `boolean` - Styles as a destructive action (e.g., for delete).
-  - `flat`: `boolean` - Styles as a flat button (no border/background).
-  - `disabled`: `boolean` - Disables the button.
-  - `icon`: `string` - SVG string or icon font class for an icon. Icon is prepended.
-  - `isCircular`: `boolean` - For icon-only circular buttons.
-  - `href`: `string` - If provided, creates an `<a>` tag styled as a button.
-- **Example:**
+-   **HTML Example:**
+    ```html
+    <adw-button id="save-btn" suggested>Save</adw-button>
+    <adw-button id="icon-btn" icon="<svg><!-- icon --></svg>" circular></adw-button>
+    <adw-button flat>Flat</adw-button>
+    ```
+    Common attributes: `suggested`, `destructive`, `flat`, `disabled`, `icon`, `circular`. Text content goes inside the tags.
+-   **JS Factory:** `Adw.createButton(text, options = {})`
+    - `text`: `string` - Text displayed on the button.
+    - `options`: `object` (corresponds to HTML attributes)
+        - `onClick`: `function` - Callback for click events.
+        - `suggested`, `destructive`, `flat`, `disabled`, `icon`, `isCircular` (maps to `circular`), `href`.
 
-  ```javascript
-  const saveButton = Adw.createButton("Save", { suggested: true });
-  const iconButton = Adw.createButton("", {
-    icon: "<svg><!-- dummy svg --></svg>",
-    isCircular: true,
-  });
-  ```
-
-### `Adw.createEntry(options = {})`
+### Entries (`<adw-entry>` / `Adw.createEntry()`)
 
 Creates a text input field.
 
-- **`options`**: `object`
-  - `placeholder`: `string` - Placeholder text.
-  - `value`: `string` - Initial value.
-  - `onInput`: `function` - Callback for input events.
-  - `disabled`: `boolean` - Disables the entry.
-- **Example:**
+-   **HTML Example:**
+    ```html
+    <adw-entry placeholder="Enter your name..." value="Initial Text"></adw-entry>
+    <adw-entry disabled value="Cannot edit"></adw-entry>
+    ```
+    Common attributes: `placeholder`, `value`, `disabled`.
+-   **JS Factory:** `Adw.createEntry(options = {})`
+    - `options`: `placeholder`, `value`, `onInput`, `disabled`.
 
-  ```javascript
-  const nameEntry = Adw.createEntry({ placeholder: "Enter your name" });
-  ```
-
-### `Adw.createSwitch(options = {})`
+### Switches (`<adw-switch>` / `Adw.createSwitch()`)
 
 Creates a toggle switch.
 
-- **`options`**: `object`
-  - `checked`: `boolean` - Initial state.
-  - `onChanged`: `function` - Callback when state changes.
-  - `disabled`: `boolean` - Disables the switch.
-  - `label`: `string` - Optional label text next to the switch.
-- **Example:**
+-   **HTML Example:**
+    ```html
+    <adw-switch label="Enable Notifications" checked></adw-switch>
+    <adw-switch label="Disabled Switch" disabled></adw-switch>
+    ```
+    Common attributes: `label`, `checked`, `disabled`.
+-   **JS Factory:** `Adw.createSwitch(options = {})`
+    - `options`: `label`, `checked`, `onChanged`, `disabled`.
 
-  ```javascript
-  const notificationsSwitch = Adw.createSwitch({
-    label: "Enable Notifications",
-    checked: true,
-  });
-  ```
-
-### `Adw.createLabel(text, options = {})`
+### Labels (`<adw-label>` / `Adw.createLabel()`)
 
 Creates a text label. Can also be used for headings and other text elements.
 
-- **`text`**: `string` - The text content.
-- **`options`**: `object`
-  - `htmlTag`: `string` - HTML tag to use (default: "label"). E.g., "p", "h1", "span".
-  - `title`: `number` (1-4) - Applies heading style class `title-N`.
-  - `isCaption`: `boolean` - Applies caption style.
-  - `isLink`: `boolean` - Styles as a link. Provide `onClick` for action.
-  - `isDisabled`: `boolean` - Applies disabled style.
-- **Example:**
+-   **HTML Example:**
+    ```html
+    <adw-label title-level="1">Main Application Title</adw-label>
+    <adw-label is-caption>A small note or caption.</adw-label>
+    <adw-label is-body>Standard body text.</adw-label>
+    ```
+    Common attributes: `title-level` (1-4), `is-caption`, `is-body`, `is-link`, `disabled`. Text content goes inside.
+-   **JS Factory:** `Adw.createLabel(text, options = {})`
+    - `options`: `htmlTag`, `title` (maps to `title-level`), `isCaption`, `isLink`, `isDisabled`.
 
-  ```javascript
-  const mainTitle = Adw.createLabel("My Application", {
-    htmlTag: "h1",
-    title: 1,
-  });
-  const smallNote = Adw.createLabel("This is important.", { isCaption: true });
-  ```
+### Header Bars (`<adw-header-bar>` / `Adw.createHeaderBar()`)
 
-### `Adw.createHeaderBar(options = {})`
+Creates a header bar, typically used at the top of a window or view. Uses slots for content.
 
-Creates a header bar, typically used at the top of a window or view.
+-   **HTML Example:**
+    ```html
+    <adw-header-bar>
+      <adw-button slot="start" icon="<svg><!-- menu --></svg>" circular></adw-button>
+      <adw-window-title slot="title" title="My App" subtitle="Version 1.0"></adw-window-title>
+      <adw-button slot="end">Action</adw-button>
+    </adw-header-bar>
+    ```
+    Use `<adw-window-title slot="title">` for the title area.
+-   **JS Factory:** `Adw.createHeaderBar(options = {})`
+    - `options`: `title`, `subtitle` (for simple text titles), `start` (HTMLElement[]), `end` (HTMLElement[]).
 
-- **`options`**: `object`
-  - `title`: `string` - Main title.
-  - `subtitle`: `string` - Subtitle (optional).
-  - `start`: `HTMLElement[]` - Elements for the left side.
-  - `end`: `HTMLElement[]` - Elements for the right side.
-- **Example:**
+### Application Windows (`<adw-application-window>` / `Adw.createWindow()`)
 
-  ```javascript
-  const header = Adw.createHeaderBar({
-    title: "My App",
-    start: [
-      Adw.createButton("", { icon: "menu-icon-class", isCircular: true }),
-    ],
-  });
-  ```
+A top-level container, often holding a header bar and main content area.
 
-### `Adw.createWindow(options = {})`
+-   **HTML Example:**
+    ```html
+    <adw-application-window>
+      <adw-header-bar slot="header">
+        <!-- ... header content ... -->
+      </adw-header-bar>
+      <div class="main-content">
+        <p>Window content goes here.</p>
+      </div>
+    </adw-application-window>
+    ```
+-   **JS Factory:** `Adw.createWindow(options = {})` (Primarily for simpler, non-slotted content)
+    - `options`: `header` (HTMLElement), `content` (HTMLElement).
 
-Creates a window-like container.
+### Boxes (`<adw-box>` / `Adw.createBox()`)
 
-- **`options`**: `object`
-  - `header`: `HTMLElement` - An `Adw.createHeaderBar()` element (optional).
-  - `content`: `HTMLElement` - Main content for the window.
-- **Example:**
+A flexbox container.
 
-  ```javascript
-  const myContent = document.createElement("p");
-  myContent.textContent = "Window content goes here.";
-  const appWindow = Adw.createWindow({ content: myContent });
-  ```
+-   **HTML Example:**
+    ```html
+    <adw-box orientation="horizontal" spacing="s" align="center">
+      <adw-button>OK</adw-button>
+      <adw-button>Cancel</adw-button>
+    </adw-box>
+    ```
+    Attributes: `orientation` ('vertical'/'horizontal'), `spacing`, `align`, `justify`, `fill-children`.
+-   **JS Factory:** `Adw.createBox(options = {})`
+    - `options`: `orientation`, `align`, `justify`, `spacing`, `fillChildren`, `children`.
 
-### `Adw.createBox(options = {})`
+### List Boxes (`<adw-list-box>` / `Adw.createListBox()`) & Rows
 
-Creates a flexbox container.
+Creates a list box container. Rows are typically children.
 
-- **`options`**: `object`
-  - `orientation`: `"vertical"` or `"horizontal"` (default).
-  - `align`: `"start"`, `"center"`, `"end"`, `"stretch"`.
-  - `justify`: `"start"`, `"center"`, `"end"`, `"between"`, etc.
-  - `spacing`: `"xs"`, `"s"`, `"m"`, `"l"`, `"xl"` - applies gap.
-  - `fillChildren`: `boolean` - If true, children flex-grow.
-  - `children`: `HTMLElement[]` - Child elements.
-- **Example:**
+-   **HTML Example:**
+    ```html
+    <adw-list-box selectable>
+      <adw-row interactive>
+        <adw-label>Setting 1</adw-label>
+      </adw-row>
+      <adw-action-row title="Open Settings" subtitle="Configure preferences"></adw-action-row>
+    </adw-list-box>
+    ```
+    Attributes for `<adw-list-box>`: `flat` (removes outer border), `selectable`.
+    See specialized row components below.
+-   **JS Factory:** `Adw.createListBox(options = {})`
+    - `options`: `children` (HTMLElement[], typically created rows), `isFlat`, `selectable`.
+    **JS Factory for basic `<adw-row>`:** `Adw.createRow(options = {})`
+    - `options`: `children`, `activated`, `interactive`, `onClick`.
 
-  ```javascript
-  const buttonBox = Adw.createBox({
-    spacing: "s",
-    children: [Adw.createButton("OK"), Adw.createButton("Cancel")],
-  });
-  ```
-
-### `Adw.createRow(options = {})`
-
-Creates a row element, often used within `AdwListBox` or vertical `AdwBox`.
-
-- **`options`**: `object`
-  - `children`: `HTMLElement[]` - Child elements.
-  - `activated`: `boolean` - If true, applies 'activated' style.
-  - `interactive`: `boolean` - If true, applies hover styles and makes row focusable if `onClick` is present.
-  - `onClick`: `function` - Click handler.
-- **Example:** See `AdwListBox`.
-
-### `Adw.createListBox(options = {})`
-
-Creates a list box container.
-
-- **`options`**: `object`
-  - `children`: `HTMLElement[]` - Child elements, typically `Adw.createRow()`.
-  - `isFlat`: `boolean` - If true, removes outer border.
-  - `selectable`: `boolean` - Adds ARIA role="listbox".
-- **Example:**
-
-  ```javascript
-  const row1 = Adw.createRow({
-    interactive: true,
-    children: [Adw.createLabel("Setting 1")],
-  });
-  const listBox = Adw.createListBox({ children: [row1], selectable: true });
-  ```
-
-### `Adw.createProgressBar(options = {})`
+### Progress Bars (`<adw-progress-bar>` / `Adw.createProgressBar()`)
 
 Creates a progress bar.
 
-- **`options`**: `object`
-  - `value`: `number` (0-100) - Current progress.
-  - `isIndeterminate`: `boolean` - If true, shows an animated indeterminate state.
-  - `disabled`: `boolean` - Applies disabled style.
-- **Example:**
+-   **HTML Example:**
+    ```html
+    <adw-progress-bar value="50"></adw-progress-bar>
+    <adw-progress-bar indeterminate></adw-progress-bar>
+    ```
+    Attributes: `value` (0-100), `indeterminate`, `disabled`.
+-   **JS Factory:** `Adw.createProgressBar(options = {})`
+    - `options`: `value`, `isIndeterminate`, `disabled`.
 
+### Checkboxes & Radio Buttons (`<adw-checkbox>`, `<adw-radio-button>` / `Adw.createCheckbox()`, `Adw.createRadioButton()`)
+
+-   **HTML Example:**
+    ```html
+    <adw-checkbox label="I agree" checked></adw-checkbox>
+    <adw-radio-button label="Option 1" name="group1" checked></adw-radio-button>
+    <adw-radio-button label="Option 2" name="group1"></adw-radio-button>
+    ```
+    Attributes: `label`, `checked`, `disabled`, `name` (required for radio).
+-   **JS Factory:** `Adw.createCheckbox(options = {})`, `Adw.createRadioButton(options = {})`
+    - `options`: `label`, `checked`, `onChanged`, `disabled`, `name`.
+
+### Dialogs (`<adw-dialog>` / `Adw.createDialog()`)
+
+Creates a modal dialog. Declarative dialogs are defined in HTML and opened/closed via JavaScript.
+
+-   **HTML Example (Declarative Dialog):**
+    ```html
+    <adw-button id="open-my-dialog">Open Dialog</adw-button>
+
+    <adw-dialog id="my-sample-dialog" title="Confirm Action">
+      <div slot="content">Are you sure you want to proceed?</div>
+      <adw-button slot="buttons" data-action="confirm" suggested>Confirm</adw-button>
+      <adw-button slot="buttons" data-action="cancel">Cancel</adw-button>
+    </adw-dialog>
+
+    <script>
+      const dialog = document.getElementById('my-sample-dialog');
+      document.getElementById('open-my-dialog').addEventListener('click', () => dialog.open());
+      dialog.addEventListener('click', (event) => { // Example: handle button clicks
+        const action = event.target.closest('[data-action]')?.dataset.action;
+        if (action === 'confirm' || action === 'cancel') dialog.close();
+      });
+    </script>
+    ```
+    Attributes for `<adw-dialog>`: `title`, `open`, `close-on-backdrop-click`. Content and buttons are slotted.
+-   **JS Factory (Imperative Dialog):** `Adw.createDialog(options = {})`
+    - `options`: `title`, `content` (HTMLElement/string), `buttons` (HTMLElement[]), `onClose`, `closeOnBackdropClick`.
+    - Returns: `{ dialog, open, close }`. Useful for quick, dynamic dialogs.
+    - **Specialized Dialog Factories:** `Adw.createAlertDialog()`, `Adw.createAboutDialog()`, `Adw.createPreferencesDialog()` are also available for common dialog patterns.
+
+### Toasts (`Adw.createToast()`)
+
+Shows a temporary toast notification. This is an imperative-only component.
+
+- **`Adw.createToast(text, options = {})`**
+  - `text`: `string` - Message to display.
+  - `options`: `object`
+    - `button`: `HTMLElement` - Optional button in the toast.
+    - `timeout`: `number` (ms) - Duration. 0 for persistent (default: 4000ms).
+    - `type`: `string` ('info', 'success', 'warning', 'error') - Styles the toast.
+- **Example:**
   ```javascript
-  const progress = Adw.createProgressBar({ value: 50 });
-  const loadingBar = Adw.createProgressBar({ isIndeterminate: true });
+  Adw.createToast("File saved successfully.", { type: 'success' });
   ```
 
-### `Adw.createCheckbox(options = {})` / `Adw.createRadioButton(options = {})`
+### ViewSwitchers (`<adw-view-switcher>` / `Adw.createViewSwitcher()`)
 
-Creates a checkbox or radio button.
+Creates a view switcher with a button bar to toggle between different content views.
 
-- **`options`**: `object`
-  - `label`: `string` - Text label.
-  - `checked`: `boolean` - Initial state.
-  - `onChanged`: `function` - Callback for state changes.
-  - `disabled`: `boolean` - Disables the control.
-  - `name`: `string` - **Required for RadioButton** to group them.
-- **Example:**
+-   **HTML Example:**
+    ```html
+    <adw-view-switcher active-view-name="view1">
+      <adw-view name="view1" title="View One">
+        <p>Content for View One</p>
+      </adw-view>
+      <adw-view name="view2" title="View Two">
+        <p>Content for View Two</p>
+      </adw-view>
+    </adw-view-switcher>
+    ```
+    `<adw-view>` children define the views. Attributes for `<adw-view-switcher>`: `active-view-name`, `label`, `is-inline`. Attributes for `<adw-view>`: `name`, `title`.
+-   **JS Factory:** `Adw.createViewSwitcher(options = {})`
+    - `options`: `views` (Array of `{name, title, content}`), `activeViewName`, `onViewChanged`, `label`, `isInline`.
 
-  ```javascript
-  const termsCheck = Adw.createCheckbox({
-    label: "I agree",
-    onChanged: (e) => console.log(e.target.checked),
-  });
-  const option1 = Adw.createRadioButton({ label: "Option 1", name: "group1" });
-  ```
+### Avatars (`<adw-avatar>` / `Adw.createAvatar()`)
 
-### `Adw.createDialog(options = {})`
+Displays an image, text initials, or custom content as an avatar.
 
-Creates a modal dialog.
+-   **HTML Example:**
+    ```html
+    <adw-avatar text="Jules Verne" size="64"></adw-avatar>
+    <adw-avatar image="path/to/image.png" size="48"></adw-avatar>
+    <adw-avatar icon="<svg>...</svg>" shape="rounded"></adw-avatar>
+    ```
+    Attributes: `text`, `image`, `icon`, `size`, `shape` ('circular'/'rounded').
+-   **JS Factory:** `Adw.createAvatar(options = {})`
+    - `options`: `text`, `imageSrc` (maps to `image`), `iconHTML` (maps to `icon`), `size`, `shape`.
 
-- **`options`**: `object`
-  - `title`: `string` - Dialog title.
-  - `content`: `HTMLElement` or `string` - Main content.
-  - `buttons`: `HTMLElement[]` - Array of buttons for the dialog footer.
-  - `onClose`: `function` - Callback when dialog is closed.
-  - `closeOnBackdropClick`: `boolean` (default: `true`).
-- **Returns**: `object` `{ dialog, open, close }`
-- **Example:**
+### Flaps (`<adw-flap>` / `Adw.createFlap()`)
 
-  ```javascript
-  const myDialog = Adw.createDialog({
-    title: "Confirm Action",
-    content: Adw.createLabel("Are you sure you want to proceed?"),
-    buttons: [
-      Adw.createButton("Confirm", {
-        suggested: true,
-        onClick: () => myDialog.close(),
-      }),
-      Adw.createButton("Cancel", { onClick: () => myDialog.close() }),
-    ],
-  });
-  // myDialog.open();
-  ```
+Creates a two-pane layout with a collapsible "flap" panel.
 
-### `Adw.createToast(text, options = {})`
-
-Shows a temporary toast notification.
-
-- **`text`**: `string` - Message to display.
-- **`options`**: `object`
-  - `button`: `HTMLElement` - Optional button in the toast.
-  - `timeout`: `number` (ms) - Duration. 0 for persistent (default: 4000ms).
-- **Example:**
-
-  ```javascript
-  // Adw.createToast("File saved successfully.", {
-  //   button: Adw.createButton("Undo", { flat: true })
-  // });
-  ```
-
-### `Adw.createViewSwitcher(options = {})`
-
-Creates a view switcher with a button bar and content area.
-
-- **`options`**: `object`
-  - `views`: `Array<{name: string, content: HTMLElement|string}>` - Array of view objects.
-    - `name`: Text for the button.
-    - `content`: DOM element or HTML string for the view.
-  - `activeViewName`: `string` - Name of the initially active view.
-  - `onViewChanged`: `function(viewName)` - Callback when view changes.
-- **Returns**: `HTMLElement` with a `setActiveView(viewName)` method. Active button uses accent color.
-- **Example:**
-
-  ```javascript
-  const viewSwitcher = Adw.createViewSwitcher({
-    views: [
-      { name: "Home", content: Adw.createLabel("Welcome Home!") },
-      {
-        name: "Settings",
-        content: Adw.createLabel("Configure your settings."),
-      },
-    ],
-    activeViewName: "Home",
-  });
-  // viewSwitcher.setActiveView("Settings");
-  ```
-
-### `Adw.createAvatar(options = {})`
-
-Displays an image, text initials, or custom content as a circular avatar.
-
-- **`options`**: `object`
-  - `size` (number, default: 48): Diameter of the avatar in pixels.
-  - `imageSrc` (string): URL for the avatar image.
-  - `text` (string): Fallback text used to generate initials if no image or if image fails to load. Also used for default alt text.
-  - `customFallback` (HTMLElement): A custom DOM element to display as fallback.
-  - `alt` (string): Alt text for the image.
-- **Example:**
-
-  ```javascript
-  const avatar1 = Adw.createAvatar({ text: "Jules Verne", size: 64 });
-  const avatar2 = Adw.createAvatar({
-    imageSrc: "path/to/image.png",
-    text: "User Name",
-    size: 48,
-  });
-  ```
-
-### `Adw.createFlap(options = {})`
-
-Creates a two-pane layout with a collapsible "flap".
-
-- **`options`**: `object`
-  - `flapContent`: `HTMLElement` - Content for the collapsible flap panel.
-  - `mainContent`: `HTMLElement` - Content for the main panel.
-  - `isFolded`: `boolean` - Initial folded state (default: `false`).
-  - `flapWidth`: `string` - Custom CSS width for the flap (e.g., "300px").
-  - `transitionSpeed`: `string` - Custom CSS transition speed (e.g., "0.3s").
-- **Returns**: `object` `{ element, toggleFlap, isFolded, setFolded }`
-- **Example:**
-
-  ```javascript
-  const flap = Adw.createFlap({
-    flapContent: Adw.createLabel("This is the flap!"),
-    mainContent: Adw.createLabel("This is the main content area."),
-    isFolded: true,
-  });
-  // const toggleFlapButton = Adw.createButton("Toggle Flap", { onClick: () => flap.toggleFlap() });
-  // document.body.appendChild(toggleFlapButton);
-  // document.body.appendChild(flap.element);
+-   **HTML Example:**
+    ```html
+    <adw-button id="toggle-my-flap">Toggle Flap</adw-button>
+    <adw-flap id="my-flap">
+      <div slot="flap-content">Flap Panel Content</div>
+      <div slot="main-content">Main Area Content</div>
+    </adw-flap>
+    <script>
+      document.getElementById('toggle-my-flap').addEventListener('click', () => {
+        document.getElementById('my-flap').toggle();
+      });
+    </script>
+    ```
+    Attributes: `folded`, `reveal-duration`, `sidebar-position` ('start'/'end'), `swipe-to-open`, `swipe-to-close`. Content is slotted.
+-   **JS Factory:** `Adw.createFlap(options = {})`
+    - `options`: `flapContent`, `mainContent`, `isFolded` (maps to `folded`), etc.
+    - Returns `{ element, toggleFlap, isFolded, setFolded }`.
   ```
 
 ### Specialized ListBox Rows
