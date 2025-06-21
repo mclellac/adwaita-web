@@ -21,10 +21,10 @@
 <body>
     <adw-application-window id="main-window">
         <adw-header-bar slot="header" id="main-header-bar">
-            <adw-button slot="start" icon="<svg width='16' height='16'><path d='M2 8l6-6v4h6v4H8v4z'/></svg>" id="header-back-button"></adw-button>
+            <adw-button slot="start" icon="<svg width='16' height='16'><path d='M2 8l6-6v4h6v4H8v4z'/></svg>" id="header-back-button" aria-label="Back"></adw-button>
             <adw-window-title slot="title" title="Adwaita Widgets" subtitle="Declarative Demo"></adw-window-title>
             <adw-button slot="end" id="theme-toggle-button">Toggle Theme</adw-button>
-            <adw-button slot="end" icon="<svg width='16' height='16'><path d='M2 3h12v2H2zm0 4h12v2H2zm0 4h12v2H2z'/></svg>" id="header-menu-button"></adw-button>
+            <adw-button slot="end" icon="<svg width='16' height='16'><path d='M2 3h12v2H2zm0 4h12v2H2zm0 4h12v2H2z'/></svg>" id="header-menu-button" aria-label="Menu"></adw-button>
         </adw-header-bar>
 
         <div class="main-content-area">
@@ -38,7 +38,7 @@
                     <adw-button id="btn-disabled" disabled>Disabled</adw-button>
                     <adw-button id="btn-flat" flat>Flat Button</adw-button>
                     <adw-button id="btn-icon" icon="<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM7 11.5a1 1 0 1 1 2 0a1 1 0 0 1-2 0Zm.5-7a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5Z'/></svg>">With Icon</adw-button>
-                    <adw-button id="btn-circular" circular icon="<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385C2.49 8.673 3.25 9.776 4.138 10.737MB8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15'/></svg>"></adw-button>
+                    <adw-button id="btn-circular" circular icon="<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385C2.49 8.673 3.25 9.776 4.138 10.737MB8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15'/></svg>" aria-label="Favorite"></adw-button>
                 </div>
                 <details>
                     <summary>Show Button Code Examples (Declarative)</summary>
@@ -337,6 +337,106 @@ document.getElementById('show-banner-btn').addEventListener('click', () => {
                 </details>
             </section>
 
+            <!-- Declarative Alert Dialog -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Alert Dialog (Declarative)</adw-label>
+                <adw-button id="open-declarative-alert-dialog">Show Alert</adw-button>
+                <adw-alert-dialog id="declarative-alert-dialog-instance" heading="Alert!" body="This is a declaratively defined alert dialog.">
+                    <adw-button slot="responses" data-response="ok" suggested>OK</adw-button>
+                    <adw-button slot="responses" data-response="cancel">Cancel</adw-button>
+                </adw-alert-dialog>
+                <details>
+                    <summary>Show Alert Dialog Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-button id="open-alert-btn"&gt;Show Alert&lt;/adw-button&gt;
+&lt;adw-alert-dialog id="my-alert" heading="Alert!" body="This is an alert."&gt;
+    &lt;adw-button slot="responses" data-response="ok" suggested&gt;OK&lt;/adw-button&gt;
+&lt;/adw-alert-dialog&gt;
+&lt;script&gt;
+    document.getElementById('open-alert-btn').addEventListener('click', () => {
+        document.getElementById('my-alert').open();
+    });
+    document.getElementById('my-alert').addEventListener('response', (e) => {
+        console.log('Alert response:', e.detail.response);
+    });
+&lt;/script&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative Spin Button -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Spin Button (Declarative)</adw-label>
+                <adw-spin-button id="declarative-spin-button" value="5" min="0" max="10" step="1" climb-rate="0.1" digits="0"></adw-spin-button>
+                <adw-label id="declarative-spin-value-label">Current Value: 5</adw-label>
+                <details>
+                    <summary>Show Spin Button Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-spin-button id="my-spin-btn" value="5" min="0" max="10" step="1"&gt;&lt;/adw-spin-button&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative Toggle Button -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Toggle Button (Declarative)</adw-label>
+                <adw-toggle-button id="declarative-toggle-button" label="Toggle Me"></adw-toggle-button>
+                <adw-toggle-button id="declarative-toggle-button-icon" icon="<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM7 11.5a1 1 0 1 1 2 0a1 1 0 0 1-2 0Zm.5-7a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5Z'/></svg>" pressed aria-label="Info Toggle"></adw-toggle-button>
+                <details>
+                    <summary>Show Toggle Button Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-toggle-button label="Toggle Me"&gt;&lt;/adw-toggle-button&gt;
+&lt;adw-toggle-button icon="&lt;svg&gt;...&lt;/svg&gt;" pressed aria-label="My Toggle"&gt;&lt;/adw-toggle-button&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative Expander Row -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Expander Row (Declarative)</adw-label>
+                <adw-list-box>
+                    <adw-expander-row title="Expandable Section" subtitle="Click to see more" id="declarative-expander-row-showcase">
+                        <adw-action-row title="Nested Action Row 1"></adw-action-row>
+                        <adw-label is-body style="padding: var(--spacing-s) var(--spacing-l);">Some content inside the expander.</adw-label>
+                    </adw-expander-row>
+                    <adw-expander-row title="Initially Expanded" expanded>
+                        <adw-label is-body style="padding: var(--spacing-s) var(--spacing-l);">This one starts open.</adw-label>
+                    </adw-expander-row>
+                </adw-list-box>
+                <details>
+                    <summary>Show Expander Row Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-list-box&gt;
+    &lt;adw-expander-row title="Expandable Section" subtitle="Details..."&gt;
+        &lt;!-- Content for the expander --&gt;
+        &lt;adw-label&gt;More information here.&lt;/adw-label&gt;
+    &lt;/adw-expander-row&gt;
+&lt;/adw-list-box&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative Clamp -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Clamp (Declarative)</adw-label>
+                <adw-clamp maximum-size="50ch" style="border: 1px dashed var(--border-color); padding: var(--spacing-m);">
+                    <adw-box orientation="vertical" spacing="s">
+                        <adw-label title-level="3">Clamped Content</adw-label>
+                        <adw-label is-body>This content is clamped to a maximum width of 50 characters. It demonstrates how text or other elements can be constrained to improve readability or layout within a wider container. Try resizing the window to see the effect if the parent container is larger than 50ch.</adw-label>
+                        <adw-button>A Button</adw-button>
+                    </adw-box>
+                </adw-clamp>
+                <details>
+                    <summary>Show Clamp Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-clamp maximum-size="50ch"&gt;
+    &lt;!-- Content to be clamped --&gt;
+    &lt;adw-label&gt;This content will not exceed 50ch in width.&lt;/adw-label&gt;
+&lt;/adw-clamp&gt;
+                    </code></pre>
+                </details>
+            </section>
+
             <div id="legacy-js-factories-content">
                  <adw-label title-level="1" id="legacy-js-section-title" style="display:none; margin-top: var(--spacing-xl);">Legacy JS Factory Examples</adw-label>
                 <!-- JS factories will append their output here for components NOT YET converted to declarative in this file -->
@@ -411,10 +511,14 @@ document.getElementById('show-banner-btn').addEventListener('click', () => {
         // Declarative Flap Listener
         const declFlap = document.getElementById('declarative-flap-instance');
         document.getElementById('toggle-declarative-flap')?.addEventListener('click', () => {
-            if(declFlap) declFlap.toggle();
+            if(declFlap && typeof declFlap.toggleFlap === 'function') {
+                declFlap.toggleFlap();
+            } else if (declFlap) {
+                console.warn('AdwFlap instance found, but toggleFlap method is not available.', declFlap);
+            }
         });
-        declFlap?.addEventListener('flap-toggled', (e) => {
-            Adw.createToast(`Flap is now ${e.detail.isOpen ? 'open' : 'closed'}`);
+        declFlap?.addEventListener('fold-changed', (e) => { // AdwFlap dispatches 'fold-changed'
+            Adw.createToast(`Flap is now ${e.detail.isFolded ? 'closed' : 'open'}`);
         });
 
 
@@ -437,11 +541,43 @@ document.getElementById('show-banner-btn').addEventListener('click', () => {
         });
         declDialogInstance?.addEventListener('close', () => Adw.createToast('Declarative Dialog Closed'));
 
+        // Listener for the new Declarative Alert Dialog
+        const declAlertDialogInstance = document.getElementById('declarative-alert-dialog-instance');
+        document.getElementById('open-declarative-alert-dialog')?.addEventListener('click', () => {
+            if(declAlertDialogInstance) declAlertDialogInstance.open();
+        });
+        declAlertDialogInstance?.addEventListener('response', (e) => { // AdwAlertDialog dispatches 'response'
+            Adw.createToast(`Alert Dialog response: ${e.detail.response} (Declarative)`);
+            console.log('Declarative Alert Dialog response:', e.detail.response);
+        });
 
+        // Listener for the new Declarative Spin Button
+        const declSpinButton = document.getElementById('declarative-spin-button');
+        const declSpinValueLabel = document.getElementById('declarative-spin-value-label');
+        declSpinButton?.addEventListener('value-changed', (e) => { // AdwSpinButton dispatches 'value-changed'
+            if(declSpinValueLabel) declSpinValueLabel.textContent = `Current Value: ${e.detail.value}`;
+            Adw.createToast(`Spin Button value: ${e.detail.value}`, {timeout: 1000});
+        });
+
+        // Listeners for new Declarative Toggle Buttons
+        document.getElementById('declarative-toggle-button')?.addEventListener('toggled', (e) => { // AdwToggleButton dispatches 'toggled'
+            Adw.createToast(`Toggle Button '${e.target.label}' is now ${e.detail.pressed ? 'Pressed' : 'Not Pressed'}`);
+        });
+        document.getElementById('declarative-toggle-button-icon')?.addEventListener('toggled', (e) => {
+            Adw.createToast(`Icon Toggle Button is now ${e.detail.pressed ? 'Pressed' : 'Not Pressed'}`);
+        });
+
+        // Listener for the new Declarative Expander Row in its own section
+        document.getElementById('declarative-expander-row-showcase')?.addEventListener('expanded', (e) => { // AdwExpanderRow dispatches 'expanded'
+             Adw.createToast(`Expander Row '${e.target.title}' is now ${e.detail.expanded ? 'Expanded' : 'Collapsed'}`);
+        });
+        // Keep existing listeners for other rows
         document.getElementById('declarative-action-row')?.addEventListener('click', () => Adw.createToast("Declarative Action Row clicked!"));
         document.getElementById('declarative-entry-row')?.addEventListener('input', (e) => Adw.createToast(`Declarative Entry Row input: ${e.target.value || e.target.querySelector('input')?.value }`, {timeout:1000}));
         document.getElementById('declarative-password-row')?.addEventListener('input', (e) => console.log(`Declarative Password Row input: ${e.target.value || e.target.querySelector('input')?.value }`));
         document.getElementById('declarative-combo-row')?.addEventListener('change', (e) => Adw.createToast(`Declarative Combo Row selected: ${e.detail.value}`));
+        // Example for an existing expander row if it was different
+        // document.getElementById('declarative-expander-row')?.addEventListener('expanded', (e) => Adw.createToast(`Expander Row state: ${e.detail.expanded}`));
 
 
         // --- Legacy JS Factory Content & Custom Element Showcase ---
@@ -471,14 +607,20 @@ document.getElementById('show-banner-btn').addEventListener('click', () => {
         const accentPickerTitle = Adw.createLabel("Accent Color Picker (JS)", {title:1});
         const accentPickerBox = Adw.createBox({ orientation: 'horizontal', spacing: 's', align: 'center', children: [Adw.createLabel("Accents:")]});
         const accentColors = Adw.getAccentColors();
-        accentColors.forEach(colorName => {
-            const colorButton = Adw.createButton(colorName.charAt(0).toUpperCase() + colorName.slice(1), { onClick: () => Adw.setAccentColor(colorName) });
+        accentColors.forEach(colorObject => {
+            const buttonLabel = colorObject.name.charAt(0).toUpperCase() + colorObject.name.slice(1);
+            const colorButton = Adw.createButton(buttonLabel, { onClick: () => Adw.setAccentColor(colorObject.primary, colorObject.standalone) });
+
+            // For CSS variable names, use a simplified version of the color name (e.g., "green", "yellow")
+            // This assumes CSS variables like --accent-green-3, --adw-green-3 exist
+            const cssColorName = colorObject.name.split(' ')[0].toLowerCase();
+
             try {
-                // Attempt to style button for preview - might not work perfectly without knowing exact theme variables
-                colorButton.style.setProperty('background-color', `var(--accent-${colorName}-light-bg, var(--adw-${colorName}-3))`); // Fallback to a palette color
-                colorButton.style.setProperty('color', `var(--accent-${colorName}-light-fg, white)`);
-                colorButton.style.setProperty('border-color', `var(--accent-${colorName}-light-bg, var(--adw-${colorName}-3))`);
-            } catch (e) { console.warn("Could not apply style for accent button preview", e); }
+                // Attempt to style button for preview
+                colorButton.style.setProperty('background-color', `var(--accent-${cssColorName}-bg, var(--adw-${cssColorName}-3, ${colorObject.primary}))`);
+                colorButton.style.setProperty('color', `var(--accent-${cssColorName}-fg, white)`);
+                colorButton.style.setProperty('border-color', `var(--accent-${cssColorName}-border, var(--adw-${cssColorName}-4, ${colorObject.standalone}))`);
+            } catch (e) { console.warn("Could not apply style for accent button preview for " + colorObject.name, e); }
             accentPickerBox.appendChild(colorButton);
         });
         const accentPickerCodeSample = `// See JS code for Accent Picker generation in index.html`;

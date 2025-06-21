@@ -19,7 +19,7 @@ import * as layouts from './components/layouts.js'; // Added import for layouts
 
 const Adw = {
     config: {
-        cssPath: '/static/css/adwaita-web.css' // Default path, can be overridden by user
+        cssPath: 'app-demo/static/css/adwaita-web.css' // Default path, can be overridden by user
     },
     // Utilities
     adwGenerateId: utils.adwGenerateId,
