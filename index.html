@@ -350,11 +350,178 @@ document.getElementById('show-banner-btn').addEventListener('click', () => {
     <!-- Ensure all HTML content is defined before this main script block -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        console.log("Test: DOMContentLoaded script running. Intentionally minimal for debugging index.html syntax error.");
-        // If the error at index.html:398 persists even with this minimal script,
-        // it confirms the issue is structural (HTML outside this script is being parsed as JS).
-        // If the error at index.html:398 disappears, then the error was within the JS code
-        // that was previously in this block.
+        // Adw.js should be initialized by adw-initializer.js, which depends on Adw being global.
+        // Ensure Adw is available before trying to use it.
+        if (!window.Adw) {
+            console.error("Adw object not found. Aborting main script in index.html.");
+            return;
+        }
+
+        // --- Header Bar Event Listeners ---
+        document.getElementById('theme-toggle-button')?.addEventListener('click', Adw.toggleTheme);
+        document.getElementById('header-menu-button')?.addEventListener('click', () => alert("Menu clicked"));
+        document.getElementById('header-back-button')?.addEventListener('click', () => alert("Back button clicked"));
+
+        // --- Button Event Listeners (from initial declarative buttons) ---
+        document.getElementById('btn-click-me')?.addEventListener('click', () => Adw.createToast("Button Clicked", {timeout: 3000}));
+        document.getElementById('btn-suggested')?.addEventListener('click', () => Adw.createToast("Suggested Button Clicked"));
+        document.getElementById('btn-destructive')?.addEventListener('click', () => Adw.createToast("Destructive Button Clicked"));
+        document.getElementById('btn-flat')?.addEventListener('click', () => alert('Flat Button clicked!'));
+        document.getElementById('btn-icon')?.addEventListener('click', () => Adw.createToast("Icon Button Clicked"));
+        document.getElementById('btn-circular')?.addEventListener('click', () => Adw.createToast("Circular Button Clicked"));
+
+        // --- Event Listeners for NEW Declarative Sections ---
+        document.getElementById('declarative-entry')?.addEventListener('input', (e) => Adw.createToast(`Declarative Entry Input: ${e.target.value}`, {timeout:1000}));
+        document.getElementById('declarative-switch-1')?.addEventListener('change', (e) => Adw.createToast(`Declarative Switch 1: ${e.target.checked ? 'ON' : 'OFF'}`));
+        document.getElementById('declarative-checkbox-event')?.addEventListener('change', (e) => Adw.createToast(`Declarative Checkbox: ${e.target.checked ? 'Checked' : 'Unchecked'}`));
+        document.querySelectorAll('adw-radio-button[name="declarative-radio-group"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    Adw.createToast(`Declarative Radio selected: ${e.target.label}`);
+                }
+            });
+        });
+        document.getElementById('declarative-listbox-interactive-row')?.addEventListener('click', () => Adw.createToast("Declarative Interactive Row clicked!"));
+
+        // Declarative Banner Triggers
+        const declBannerContainer = document.getElementById('declarative-banner-container');
+        if (declBannerContainer) {
+            document.getElementById('trigger-info-banner-declarative')?.addEventListener('click', () => {
+                Adw.createAdwBanner("This is an informational message (declarative trigger).", { type: 'info', dismissible: true, container: declBannerContainer });
+            });
+            document.getElementById('trigger-error-banner-declarative')?.addEventListener('click', () => {
+                Adw.createAdwBanner("This is an error message (declarative trigger).", { type: 'error', dismissible: true, container: declBannerContainer });
+            });
+        }
+
+        // Declarative Split Button Listeners
+        const declSplitBtn = document.getElementById('declarative-split-btn');
+        declSplitBtn?.addEventListener('action', () => Adw.createToast("Split Button: Save Action clicked!"));
+        declSplitBtn?.addEventListener('menu-action', (e) => Adw.createToast(`Split Button Menu: ${e.detail.label} (${e.detail.action}) clicked!`));
+
+        const declSplitBtnIcon = document.getElementById('declarative-split-btn-icon');
+        declSplitBtnIcon?.addEventListener('action', () => Adw.createToast("Split Button (Icon): Open Action clicked!"));
+        declSplitBtnIcon?.addEventListener('menu-action', (e) => Adw.createToast(`Split Button (Icon) Menu: ${e.detail.label} (${e.detail.action}) clicked!`));
+
+        // Declarative ViewSwitcher Listener
+        document.getElementById('declarative-view-switcher')?.addEventListener('view-changed', (e) => {
+            Adw.createToast(`ViewSwitcher changed to: ${e.detail.title}`);
+        });
+
+        // Declarative Flap Listener
+        const declFlap = document.getElementById('declarative-flap-instance');
+        document.getElementById('toggle-declarative-flap')?.addEventListener('click', () => {
+            if(declFlap) declFlap.toggle();
+        });
+        declFlap?.addEventListener('flap-toggled', (e) => {
+            Adw.createToast(`Flap is now ${e.detail.isOpen ? 'open' : 'closed'}`);
+        });
+
+
+        const declDialogInstance = document.getElementById('declarative-dialog-instance');
+        document.getElementById('open-declarative-dialog')?.addEventListener('click', () => {
+            if(declDialogInstance) declDialogInstance.open();
+        });
+        declDialogInstance?.addEventListener('click', (event) => { // Handle buttons inside dialog
+            const target = event.target.closest('adw-button[slot="buttons"]');
+            if (target) {
+                const action = target.dataset.action;
+                if (action === 'ok') {
+                    Adw.createToast('Declarative Dialog OK');
+                    declDialogInstance.close();
+                } else if (action === 'cancel') {
+                    Adw.createToast('Declarative Dialog Cancel');
+                    declDialogInstance.close();
+                }
+            }
+        });
+        declDialogInstance?.addEventListener('close', () => Adw.createToast('Declarative Dialog Closed'));
+
+
+        document.getElementById('declarative-action-row')?.addEventListener('click', () => Adw.createToast("Declarative Action Row clicked!"));
+        document.getElementById('declarative-entry-row')?.addEventListener('input', (e) => Adw.createToast(`Declarative Entry Row input: ${e.target.value || e.target.querySelector('input')?.value }`, {timeout:1000}));
+        document.getElementById('declarative-password-row')?.addEventListener('input', (e) => console.log(`Declarative Password Row input: ${e.target.value || e.target.querySelector('input')?.value }`));
+        document.getElementById('declarative-combo-row')?.addEventListener('change', (e) => Adw.createToast(`Declarative Combo Row selected: ${e.detail.value}`));
+
+
+        // --- Legacy JS Factory Content & Custom Element Showcase ---
+        const legacyContentTarget = document.getElementById('legacy-js-factories-content');
+        const customElementsShowcaseTarget = document.getElementById('custom-elements-showcase-area');
+
+        if (!legacyContentTarget || !customElementsShowcaseTarget) {
+            console.error("Error: Target for legacy or custom element JS content not found.");
+            return;
+        }
+
+        // Helper function to create code sample blocks
+        function createCodeSampleDetails(summaryText, codeText) {
+            const details = document.createElement('details');
+            const summary = document.createElement('summary');
+            summary.textContent = summaryText;
+            details.appendChild(summary);
+            const pre = document.createElement('pre');
+            const code = document.createElement('code');
+            code.textContent = codeText.trim();
+            pre.appendChild(code);
+            details.appendChild(pre);
+            return details;
+        }
+
+        // Accent Color Picker (remains JS as it's dynamic)
+        const accentPickerTitle = Adw.createLabel("Accent Color Picker (JS)", {title:1});
+        const accentPickerBox = Adw.createBox({ orientation: 'horizontal', spacing: 's', align: 'center', children: [Adw.createLabel("Accents:")]});
+        const accentColors = Adw.getAccentColors();
+        accentColors.forEach(colorName => {
+            const colorButton = Adw.createButton(colorName.charAt(0).toUpperCase() + colorName.slice(1), { onClick: () => Adw.setAccentColor(colorName) });
+            try {
+                // Attempt to style button for preview - might not work perfectly without knowing exact theme variables
+                colorButton.style.setProperty('background-color', `var(--accent-${colorName}-light-bg, var(--adw-${colorName}-3))`); // Fallback to a palette color
+                colorButton.style.setProperty('color', `var(--accent-${colorName}-light-fg, white)`);
+                colorButton.style.setProperty('border-color', `var(--accent-${colorName}-light-bg, var(--adw-${colorName}-3))`);
+            } catch (e) { console.warn("Could not apply style for accent button preview", e); }
+            accentPickerBox.appendChild(colorButton);
+        });
+        const accentPickerCodeSample = `// See JS code for Accent Picker generation in index.html`;
+        const accentPickerCodeDetails = createCodeSampleDetails('Show Accent Picker Code (JS)', accentPickerCodeSample);
+
+        // Append Accent Picker to legacy content area
+        const legacyJsSectionTitle = document.getElementById('legacy-js-section-title');
+        if(legacyJsSectionTitle) legacyJsSectionTitle.style.display = 'block';
+        legacyContentTarget.appendChild(accentPickerTitle);
+        legacyContentTarget.appendChild(accentPickerBox);
+        legacyContentTarget.appendChild(accentPickerCodeDetails);
+
+
+        // --- Custom Element Showcase (Generated by JS, but demonstrates declarative usage in code samples) ---
+        const customElementShowcaseTitle = Adw.createLabel("Custom Element Showcase (Declarative Examples)", {title:1});
+        const customElementExamplesBox = Adw.createBox({ orientation: 'vertical', spacing: 'm' });
+
+        // Example: adw-button showcase (add more for other components as needed)
+        const adwButtonShowcaseTitle = Adw.createLabel("adw-button", {title:2});
+        customElementExamplesBox.appendChild(adwButtonShowcaseTitle);
+
+        const btnExample1 = document.createElement('adw-button');
+        btnExample1.textContent = "Regular CE Button";
+        customElementExamplesBox.appendChild(btnExample1);
+
+        const btnExample2 = document.createElement('adw-button');
+        btnExample2.textContent = "Suggested CE Button";
+        btnExample2.setAttribute('suggested', '');
+        customElementExamplesBox.appendChild(btnExample2);
+
+        customElementExamplesBox.appendChild(
+            createCodeSampleDetails("Show <adw-button> CE Code",
+            '<adw-button>Regular</adw-button>\n<adw-button suggested>Suggested</adw-button>')
+        );
+
+        // Placeholder for more complex showcase generation logic if it existed previously
+        // For now, this simple example demonstrates the pattern.
+
+        // Append Custom Element Showcase to its dedicated area
+        customElementsShowcaseTarget.appendChild(customElementShowcaseTitle);
+        customElementsShowcaseTarget.appendChild(customElementExamplesBox);
+
+        console.log("Restored main script in index.html executed.");
     });
     </script>
 </body>
