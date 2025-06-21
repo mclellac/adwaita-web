@@ -1735,42 +1735,7 @@ class AdwButton extends HTMLElement {
     }
 }
 // customElements.define('adw-button', AdwButton); // Moved to end
-
-class AdwButton extends HTMLElement { // This is a duplicate class definition from the previous incorrect merge
-    static get observedAttributes() {
-        return ['href', 'suggested', 'destructive', 'flat', 'disabled', 'active', 'circular', 'icon', 'appearance', 'type'];
-    }
-
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-        const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet';
-        styleLink.href = '/static/css/adwaita-web.css';
-        this.shadowRoot.appendChild(styleLink);
-    }
-
-    connectedCallback() { this._render(); }
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (oldValue !== newValue) this._render();
-    }
-
-    _render() {
-        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
-            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
-        }
-        const options = {};
-        AdwBox.observedAttributes.forEach(attr => { // BUG: Should be AdwButton.observedAttributes
-            if (this.hasAttribute(attr)) {
-                const value = this.getAttribute(attr);
-                options[attr.replace(/-([a-z])/g, g => g[1].toUpperCase())] = (attr === 'fill-children') ? (value !== null && value !== 'false') : value;
-            }
-        });
-        const boxElement = Adw.createBox(options); // BUG: Should be Adw.createButton
-        boxElement.appendChild(document.createElement('slot'));
-        this.shadowRoot.appendChild(boxElement); // BUG: Should be buttonElement
-    }
-}
+// The duplicate AdwButton class that was here has been removed.
 // customElements.define('adw-box', AdwBox); // Moved to end
 
 class AdwEntry extends HTMLElement {
