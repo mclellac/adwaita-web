@@ -16,18 +16,24 @@ Adw.createPasswordEntryRow(options = {}) -> HTMLDivElement
 
 *   `options` (Object, optional): Configuration options:
     *   `title` (String, required): The main title/label for the password entry.
-    *   `subtitle` (String, optional): Additional descriptive text displayed below the title.
-    *   `entryOptions` (Object, optional): An object containing options for the password input field itself. These are similar to `Adw.createEntry()` options but will default `type` to "password".
+    *   `subtitle` (String, optional): Additional descriptive text displayed below
+        the title.
+    *   `entryOptions` (Object, optional): An object containing options for the
+        password input field itself. These are similar to `Adw.createEntry()`
+        options but will default `type` to "password".
         *   `placeholder` (String): Placeholder text.
         *   `value` (String): Initial value.
         *   `name` (String): The `name` attribute.
         *   `disabled` (Boolean): Disables only the entry field.
-        *   `showPeekButton` (Boolean, optional): If `true` (often the default for this component), includes a button to toggle password visibility.
+        *   `showPeekButton` (Boolean, optional): If `true` (often the default for
+            this component), includes a button to toggle password visibility.
     *   `disabled` (Boolean, optional): If `true`, disables the entire row.
 
 **Returns:**
 
-*   `(HTMLDivElement)`: The created `<div>` element for the row. It contains the label and the password input mechanism (input field and optional peek button).
+*   `(HTMLDivElement)`: The created `<div>` element for the row. It contains the
+    label and the password input mechanism (input field and optional peek
+    button).
 
 **Example:**
 
@@ -59,7 +65,8 @@ Adw.createPasswordEntryRow(options = {}) -> HTMLDivElement
   container.appendChild(confirmPasswordRow);
 
   // Accessing the input value (the input element is usually type="password")
-  const inputInRow = passwordRow.querySelector('input[type="password"], input[type="text"]'); // Input type might change if peek is active
+  // Input type might change if peek is active
+  const inputInRow = passwordRow.querySelector('input[type="password"], input[type="text"]');
   if (inputInRow) {
     inputInRow.addEventListener('input', (e) => {
       console.log("Password field value:", e.target.value);

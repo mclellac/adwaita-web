@@ -15,10 +15,18 @@ Adw.createAdwToggleGroup(options = {}) -> HTMLDivElement (with methods)
 **Parameters:**
 
 *   `options` (Object, optional): Configuration options:
-    *   `buttons` (Array<Object | HTMLElement>, optional): An array of `AdwToggleButton` option objects (passed to `Adw.createAdwToggleButton`) or pre-created `AdwToggleButton` elements. Each button should have a unique `value`.
-    *   `linked` (Boolean, optional): If `true`, styles the buttons as a single linked group (e.g., like segments of a segmented button). Defaults to `false`.
-    *   `activeValue` (String, optional): The `value` of the button to be initially active.
-    *   `onActiveChanged` (Function, optional): Callback when the active button changes. Receives the `value` of the newly active button (or `null` if none become active, though typically one is always active in a group).
+    *   `buttons` (Array<Object | HTMLElement>, optional): An array of
+        `AdwToggleButton` option objects (passed to `Adw.createAdwToggleButton`)
+        or pre-created `AdwToggleButton` elements. Each button should have a
+        unique `value`.
+    *   `linked` (Boolean, optional): If `true`, styles the buttons as a single
+        linked group (e.g., like segments of a segmented button). Defaults to
+        `false`.
+    *   `activeValue` (String, optional): The `value` of the button to be initially
+        active.
+    *   `onActiveChanged` (Function, optional): Callback when the active button
+        changes. Receives the `value` of the newly active button (or `null` if
+        none become active, though typically one is always active in a group).
 
 **Returns:**
 

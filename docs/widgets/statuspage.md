@@ -33,9 +33,11 @@ Adw.createStatusPage(options = {}) -> HTMLDivElement
 
   // "No Results" Status Page
   const noResultsPage = Adw.createStatusPage({
-    iconHTML: '<svg viewBox="0 0 48 48" width="64" height="64"><path fill="currentColor" d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.84 0-16-7.16-16-16S15.16 8 24 8s16 7.16 16 16-7.16 16-16 16zm-4-20h8v4h-8v-4zm0 6h8v4h-8v-4z"/></svg>', // Example icon (magnifying glass with slash)
+    // Example icon (magnifying glass with slash, shortened for brevity)
+    iconHTML: '<svg viewBox="0 0 48 48" width="64" height="64"><path d="M24 4C12.95Z"/></svg>',
     title: "No Results Found",
-    description: "Your search query did not match any documents. Try using different keywords.",
+    description: "Your search query did not match any documents. " +
+                 "Try using different keywords.",
     actions: [
       Adw.createButton("Clear Search", {
         onClick: () => Adw.createToast("Search cleared (concept).")
@@ -53,9 +55,11 @@ Adw.createStatusPage(options = {}) -> HTMLDivElement
     onClick: () => Adw.createToast("Welcome action!")
   });
   const welcomePage = Adw.createStatusPage({
-    iconHTML: '<svg viewBox="0 0 48 48" width="64" height="64"><path fill="currentColor" d="M10 36V12h4v24h-4zm8-14v14h4V22h-4zm8 8v6h4v-6h-4zM24 4a20 20 0 100 40 20 20 0 000-40z"/></svg>', // Example 'welcome' icon
+    // Example 'welcome' icon (shortened)
+    iconHTML: '<svg viewBox="0 0 48 48" width="64" height="64"><path d="M10 36V12h4Z"/></svg>',
     title: "Welcome to My Application!",
-    description: "This application helps you manage your tasks efficiently. Click below to begin.",
+    description: "This application helps you manage your tasks efficiently. " +
+                 "Click below to begin.",
     actions: [welcomeAction]
   });
   container.innerHTML = ''; // Clear previous
@@ -89,8 +93,9 @@ A declarative way to define Adwaita status pages.
 <adw-status-page
   title="Empty Mailbox"
   description="There are no messages in your inbox."
-  icon="<svg viewBox='0 0 48 48' width='64' height='64' fill='currentColor'><path d='M8 12C5.79 12 4 13.79 4 16v16c0 2.21 1.79 4 4 4h32c2.21 0 4-1.79 4-4V16c0-2.21-1.79-4-4-4H8zm0 2h32c1.1 0 2 .9 2 2v2.51l-16.43 9.39c-.33.19-.71.19-1.04 0L6 22.51V16c0-1.1.9-2 2-2zm0 20v-13.5l15.39 8.79c.53.3 1.15.45 1.78.45.62 0 1.25-.15 1.78-.45L40 20.5V32c0 1.1-.9 2-2 2H8z'/></svg>"
-  style="max-width: 400px; margin: 20px auto; padding: 20px; border: 1px solid var(--borders-color);">
+  icon="<svg viewBox='0 0 48 48' width='64'><path d='M8 12C5.79Z'/></svg>"
+  style="max-width: 400px; margin: 20px auto; padding: 20px;
+         border: 1px solid var(--borders-color);">
   <div slot="actions">
     <adw-button suggested id="compose-mail-btn">Compose New Mail</adw-button>
   </div>

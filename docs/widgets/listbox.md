@@ -1,6 +1,9 @@
 # ListBox
 
-A ListBox is a container used to display a list of `AdwRow` (or row-like) elements. It groups rows together, often with a distinct visual style like a card or a bordered list. Adwaita-Web provides `Adw.createListBox()` and the `<adw-list-box>` Web Component.
+A ListBox is a container used to display a list of `AdwRow` (or row-like)
+elements. It groups rows together, often with a distinct visual style like a
+card or a bordered list. Adwaita-Web provides `Adw.createListBox()` and the
+`<adw-list-box>` Web Component.
 
 ## JavaScript Factory: `Adw.createListBox()`
 
@@ -15,9 +18,15 @@ Adw.createListBox(options = {}) -> HTMLDivElement
 **Parameters:**
 
 *   `options` (Object, optional): Configuration options:
-    *   `children` (Array<HTMLElement>, optional): An array of row elements (e.g., created with `Adw.createRow()`, `Adw.createActionRow()`) to populate the listbox.
-    *   `isFlat` (Boolean, optional): If `true`, removes the default box-shadow/card appearance, making it look more like a simple list. Defaults to `false`.
-    *   `selectable` (Boolean, optional): If `true`, indicates that rows within the listbox can be selected. This might add specific ARIA attributes or visual cues, but selection logic is typically handled by the rows themselves or application code. Defaults to `false`.
+    *   `children` (Array<HTMLElement>, optional): An array of row elements
+        (e.g., created with `Adw.createRow()`, `Adw.createActionRow()`) to
+        populate the listbox.
+    *   `isFlat` (Boolean, optional): If `true`, removes the default box-shadow/card
+        appearance, making it look more like a simple list. Defaults to `false`.
+    *   `selectable` (Boolean, optional): If `true`, indicates that rows within the
+        listbox can be selected. This might add specific ARIA attributes or
+        visual cues, but selection logic is typically handled by the rows
+        themselves or application code. Defaults to `false`.
 
 **Returns:**
 
@@ -31,9 +40,13 @@ Adw.createListBox(options = {}) -> HTMLDivElement
   const container = document.getElementById('js-listbox-container');
 
   // Create some rows
-  const row1 = Adw.createActionRow({ title: "General Settings", subtitle: "Network, Display, Sound" });
+  const row1 = Adw.createActionRow({
+    title: "General Settings", subtitle: "Network, Display, Sound"
+  });
   const row2 = Adw.createEntryRow({ title: "Username" });
-  const row3 = Adw.createSwitchRow({ title: "Enable Notifications", active: true }); // Assuming AdwSwitchRow exists
+  const row3 = Adw.createSwitchRow({ // Assuming AdwSwitchRow exists
+    title: "Enable Notifications", active: true
+  });
 
   // Create a ListBox with these rows
   const myListBox = Adw.createListBox({

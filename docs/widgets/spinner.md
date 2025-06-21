@@ -50,7 +50,8 @@ Adw.createSpinner(options = {}) -> HTMLDivElement
   loadingSpinner.style.display = 'none'; // Start hidden for JS factory
   loadingSpinner.style.marginLeft = 'var(--spacing-xs)';
 
-  const loadingBox = Adw.createBox({children: [loadingButton, loadingSpinner], align: 'center'});
+  const loadingBoxChildren = [loadingButton, loadingSpinner];
+  const loadingBox = Adw.createBox({children: loadingBoxChildren, align: 'center'});
   container.appendChild(loadingBox);
 
   let isLoading = false;

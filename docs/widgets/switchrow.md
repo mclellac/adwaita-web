@@ -50,7 +50,8 @@ Adwaita-Web provides the `<adw-switch-row>` Web Component as the primary way to 
 <script>
   const featureXSwitch = document.getElementById('feature-x-switch');
   featureXSwitch.addEventListener('change', () => {
-    Adw.createToast(`Feature X is now ${featureXSwitch.active ? 'ON' : 'OFF'}`);
+    const state = featureXSwitch.active ? 'ON' : 'OFF';
+    Adw.createToast(`Feature X is now ${state}`);
   });
 
   const darkModeSwitch = document.getElementById('dark-mode-switch');

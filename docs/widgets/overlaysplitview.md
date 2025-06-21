@@ -1,6 +1,11 @@
 # OverlaySplitView
 
-An AdwOverlaySplitView is a layout container similar to `AdwNavigationSplitView`, providing a sidebar and a main content pane. However, in an `AdwOverlaySplitView`, the sidebar *always* overlays the content (or is hidden) and does not have a "docked" mode where it pushes content aside. It's suitable for contexts where the sidebar is less frequently accessed or needs to be quickly shown/hidden without disturbing the main content flow.
+An AdwOverlaySplitView is a layout container similar to `AdwNavigationSplitView`,
+providing a sidebar and a main content pane. However, in an
+`AdwOverlaySplitView`, the sidebar *always* overlays the content (or is hidden)
+and does not have a "docked" mode where it pushes content aside. It's suitable
+for contexts where the sidebar is less frequently accessed or needs to be
+quickly shown/hidden without disturbing the main content flow.
 
 ## JavaScript Factory: `Adw.createAdwOverlaySplitView()`
 
@@ -17,10 +22,17 @@ Adw.createAdwOverlaySplitView(options = {}) -> HTMLDivElement (with methods)
 *   `options` (Object, optional): Configuration options:
     *   `sidebar` (HTMLElement, required): The content for the sidebar.
     *   `content` (HTMLElement, required): The content for the main pane.
-    *   `showSidebar` (Boolean, optional): Initial visibility of the sidebar. Defaults to `false` (sidebar is typically hidden by default in overlay views).
-    *   `canCollapse` (Boolean, optional): Whether the sidebar can be hidden by user interaction (e.g., backdrop click, Escape key). Defaults to `true`. If `false`, once shown, it might only be hideable programmatically or not at all via typical dismiss actions.
-    *   `sidebarPosition` (String, optional): Position of the sidebar. Can be `"start"` (left, default) or `"end"` (right).
-    *   `sidebarWidth` (String, optional): CSS width of the sidebar when shown (e.g., "300px"). Defaults to a predefined value.
+    *   `showSidebar` (Boolean, optional): Initial visibility of the sidebar.
+        Defaults to `false` (sidebar is typically hidden by default in overlay
+        views).
+    *   `canCollapse` (Boolean, optional): Whether the sidebar can be hidden by user
+        interaction (e.g., backdrop click, Escape key). Defaults to `true`. If
+        `false`, once shown, it might only be hideable programmatically or not at
+        all via typical dismiss actions.
+    *   `sidebarPosition` (String, optional): Position of the sidebar. Can be
+        `"start"` (left, default) or `"end"` (right).
+    *   `sidebarWidth` (String, optional): CSS width of the sidebar when shown
+        (e.g., "300px"). Defaults to a predefined value.
 
 **Returns:**
 
@@ -33,7 +45,10 @@ Adw.createAdwOverlaySplitView(options = {}) -> HTMLDivElement (with methods)
 **Example:**
 
 ```html
-<div id="js-overlaysplitview-container" style="height: 300px; border: 1px solid var(--borders-color); width: 100%; max-width: 600px; margin: auto; position: relative; overflow: hidden;">
+<div id="js-overlaysplitview-container"
+     style="height: 300px; border: 1px solid var(--borders-color);
+            width: 100%; max-width: 600px; margin: auto;
+            position: relative; overflow: hidden;">
   <!-- Button to trigger sidebar will be part of main content or external -->
 </div>
 <script>
@@ -42,7 +57,8 @@ Adw.createAdwOverlaySplitView(options = {}) -> HTMLDivElement (with methods)
   // --- Sidebar Content ---
   const sidebarContent = document.createElement('div');
   sidebarContent.style.padding = "var(--spacing-m)";
-  sidebarContent.style.backgroundColor = "var(--popover-bg-color)"; // Overlay often looks like a popover
+  // Overlay often looks like a popover
+  sidebarContent.style.backgroundColor = "var(--popover-bg-color)";
   sidebarContent.style.height = "100%";
   sidebarContent.innerHTML = `
     <h4>Filters</h4>
@@ -58,7 +74,9 @@ Adw.createAdwOverlaySplitView(options = {}) -> HTMLDivElement (with methods)
   const openOverlayBtn = Adw.createButton("Show Filters", {
       onClick: () => overlaySplitView.showSidebar()
   });
-  mainContent.append(openOverlayBtn, Adw.createLabel("Main application content goes here. The sidebar will overlay this."));
+  const mainLabel = "Main application content goes here. " +
+                    "The sidebar will overlay this.";
+  mainContent.append(openOverlayBtn, Adw.createLabel(mainLabel));
 
 
   const overlaySplitView = Adw.createAdwOverlaySplitView({
@@ -112,18 +130,27 @@ A declarative way to define Adwaita overlay split views.
   id="my-wc-overlaysplit"
   sidebar-position="end"
   sidebar-width="320px"
-  style="height: 350px; border: 1px solid var(--borders-color); margin-top: 5px; position: relative; overflow: hidden;">
+  style="height: 350px; border: 1px solid var(--borders-color);
+         margin-top: 5px; position: relative; overflow: hidden;">
 
-  <div slot="sidebar" style="background-color: var(--dialog-bg-color); padding: var(--spacing-m); height: 100%;">
+  <div slot="sidebar"
+       style="background-color: var(--dialog-bg-color);
+              padding: var(--spacing-m); height: 100%;">
     <h3>Quick Settings</h3>
     <adw-switch-row title="Dark Mode"></adw-switch-row>
     <adw-switch-row title="Notifications"></adw-switch-row>
-    <adw-button style="margin-top: var(--spacing-m)" onclick="document.getElementById('my-wc-overlaysplit').hideSidebar()">Close Settings</adw-button>
+    <adw-button style="margin-top: var(--spacing-m)"
+                onclick="document.getElementById('my-wc-overlaysplit').hideSidebar()">
+      Close Settings
+    </adw-button>
   </div>
 
-  <div slot="content" style="padding: var(--spacing-l); background-color: var(--view-bg-color); height:100%;">
+  <div slot="content"
+       style="padding: var(--spacing-l);
+              background-color: var(--view-bg-color); height:100%;">
     <h2>Main Application View</h2>
-    <p>This is the primary content. The settings sidebar will appear overlaying this content from the right.</p>
+    <p>This is the primary content. The settings sidebar will appear overlaying
+    this content from the right.</p>
   </div>
 </adw-overlay-split-view>
 

@@ -17,14 +17,23 @@ Adw.createAlertDialog(body, options = {}) -> { dialog: HTMLDivElement, open: fun
 *   `body` (String, required): The main message/body text of the alert.
 *   `options` (Object, optional): Configuration options:
     *   `heading` (String, optional): An optional heading for the alert dialog.
-    *   `choices` (Array<Object>, optional): An array of choice objects to create buttons. Each object:
+    *   `choices` (Array<Object>, optional): An array of choice objects to create
+        buttons. Each object:
         *   `label` (String, required): Text for the button.
-        *   `value` (String, required): A value associated with this choice, passed to `onResponse`.
-        *   `style` (String, optional): Style for the button. Can be `'default'`, `'suggested'`, or `'destructive'`.
+        *   `value` (String, required): A value associated with this choice, passed
+            to `onResponse`.
+        *   `style` (String, optional): Style for the button. Can be `'default'`,
+            `'suggested'`, or `'destructive'`.
         If no choices are provided, a default "OK" button is usually created.
-    *   `onResponse` (Function, optional): Callback function executed when a choice button is clicked. Receives the `value` of the chosen option as an argument. The dialog automatically closes after a response.
-    *   `customContent` (HTMLElement, optional): Optional custom HTML element to use as the dialog's content instead of the `body` string. If provided, `body` string might be ignored or used as a fallback label.
-    *   `closeOnBackdropClick` (Boolean, optional): Whether clicking the backdrop closes the dialog. Defaults to `false` for alert dialogs to ensure a choice is made.
+    *   `onResponse` (Function, optional): Callback function executed when a choice
+        button is clicked. Receives the `value` of the chosen option as an
+        argument. The dialog automatically closes after a response.
+    *   `customContent` (HTMLElement, optional): Optional custom HTML element to use
+        as the dialog's content instead of the `body` string. If provided, `body`
+        string might be ignored or used as a fallback label.
+    *   `closeOnBackdropClick` (Boolean, optional): Whether clicking the backdrop
+        closes the dialog. Defaults to `false` for alert dialogs to ensure a
+        choice is made.
 
 **Returns:**
 
@@ -42,10 +51,12 @@ Adw.createAlertDialog(body, options = {}) -> { dialog: HTMLDivElement, open: fun
 
   const showAlertBtn = Adw.createButton("Show Alert", {
     onClick: () => {
-      const alert = Adw.createAlertDialog("Are you sure you want to delete this item? This action cannot be undone.", {
-        heading: "Confirm Deletion",
-        choices: [
-          { label: "Cancel", value: "cancel" },
+      const alert = Adw.createAlertDialog(
+        "Are you sure you want to delete this item? This action cannot be undone.",
+        {
+          heading: "Confirm Deletion",
+          choices: [
+            { label: "Cancel", value: "cancel" },
           { label: "Delete", value: "delete", style: "destructive" }
         ],
         onResponse: (value) => {

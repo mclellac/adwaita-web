@@ -15,13 +15,21 @@ Adw.createPreferencesDialog(options = {}) -> { dialog: HTMLDivElement, open: fun
 **Parameters:**
 
 *   `options` (Object, optional): Configuration options:
-    *   `title` (String, optional): Title for the dialog window. Defaults to "Preferences".
-    *   `pages` (Array<Object>, required): An array of page objects. Each object defines a page in the preferences dialog:
+    *   `title` (String, optional): Title for the dialog window. Defaults to
+        "Preferences".
+    *   `pages` (Array<Object>, required): An array of page objects. Each object
+        defines a page in the preferences dialog:
         *   `name` (String, required): A unique internal name for the page.
-        *   `title` (String, required): The display title for the page (used in the ViewSwitcher button).
-        *   `pageElement` (HTMLElement, required): The HTML element that constitutes the content of this preference page. This element should be structured like an `AdwPreferencesPage` (see below or `adw-preferences-page` Web Component).
-    *   `initialPageName` (String, optional): The `name` of the page to show initially. Defaults to the first page in the `pages` array.
-    *   `onClose` (Function, optional): Callback function executed when the dialog is closed.
+        *   `title` (String, required): The display title for the page (used in
+            the ViewSwitcher button).
+        *   `pageElement` (HTMLElement, required): The HTML element that
+            constitutes the content of this preference page. This element should
+            be structured like an `AdwPreferencesPage` (see below or
+            `adw-preferences-page` Web Component).
+    *   `initialPageName` (String, optional): The `name` of the page to show
+        initially. Defaults to the first page in the `pages` array.
+    *   `onClose` (Function, optional): Callback function executed when the dialog
+        is closed.
 
 **Returns:**
 
@@ -49,12 +57,13 @@ A typical `pageElement` would be a `div` with class `adw-preferences-page` (or a
   appearanceTitle.classList.add('adw-preferences-group-title');
   appearanceTitle.textContent = "Appearance";
   appearanceGroup.appendChild(appearanceTitle);
-  appearanceGroup.appendChild(
-    Adw.createSwitchRow({ title: "Use Dark Theme", active: true, onChanged: (val) => Adw.toggleTheme(val ? 'dark' : 'light')}) // Assuming SwitchRow exists
-  );
-  appearanceGroup.appendChild(
-    Adw.createComboRow({ title: "Accent Color", selectOptions: [{label: "Blue", value: "blue"}, {label: "Green", value: "green"}], value: "blue" }) // Assuming ComboRow exists
-  );
+  const switchRowOpts = { title: "Use Dark Theme", active: true,
+                          onChanged: (val) => Adw.toggleTheme(val ? 'dark' : 'light')};
+  appearanceGroup.appendChild(Adw.createSwitchRow(switchRowOpts));
+  const comboOpts = { title: "Accent Color", value: "blue",
+                      selectOptions: [{label: "Blue", value: "blue"},
+                                      {label: "Green", value: "green"}]};
+  appearanceGroup.appendChild(Adw.createComboRow(comboOpts));
   generalPage.appendChild(appearanceGroup);
 
   // --- Page 2: Advanced Preferences ---

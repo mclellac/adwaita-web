@@ -17,13 +17,26 @@ Adw.createLabel(text, options = {}) -> HTMLLabelElement | HTMLSpanElement
 
 *   `text` (String): The text content of the label.
 *   `options` (Object, optional): Configuration options:
-    *   `mnemonicFor` (String, optional): The ID of an activatable widget that this label is for. If provided, an `<label>` element is created with a `for` attribute, and the first character of the text that can be a mnemonic will be underlined.
-    *   `selectable` (Boolean, optional): If `true`, allows the text to be selected by the user. Defaults to `false`.
-    *   `wrap` (Boolean, optional): If `true`, the text will wrap if it exceeds the available width. Defaults to `false`. CSS `white-space: normal` is applied.
-    *   `lines` (Number, optional): The number of lines to display. If set, and text exceeds this, ellipsization might occur based on `ellipsize` mode (though primarily works with `wrap: true`).
-    *   `justify` (String, optional): Text alignment. Accepts `'left'`, `'center'`, `'right'`, `'fill'`. Defaults to `'left'`. (CSS `text-align`)
-    *   `ellipsize` (String, optional): How to ellipsize text if it overflows. Accepts `'none'`, `'start'`, `'middle'`, `'end'`. Defaults to `'none'`. (CSS `text-overflow`, often requires `overflow: hidden` and `white-space: nowrap` or line-clamping for multi-line)
-    *   `cssClass` (Array<String>, optional): Additional CSS classes to apply to the label element.
+    *   `mnemonicFor` (String, optional): The ID of an activatable widget that
+        this label is for. If provided, an `<label>` element is created with a
+        `for` attribute, and the first character of the text that can be a
+        mnemonic will be underlined.
+    *   `selectable` (Boolean, optional): If `true`, allows the text to be
+        selected by the user. Defaults to `false`.
+    *   `wrap` (Boolean, optional): If `true`, the text will wrap if it exceeds the
+        available width. Defaults to `false`. CSS `white-space: normal` is
+        applied.
+    *   `lines` (Number, optional): The number of lines to display. If set, and
+        text exceeds this, ellipsization might occur based on `ellipsize` mode
+        (though primarily works with `wrap: true`).
+    *   `justify` (String, optional): Text alignment. Accepts `'left'`, `'center'`,
+        `'right'`, `'fill'`. Defaults to `'left'`. (CSS `text-align`)
+    *   `ellipsize` (String, optional): How to ellipsize text if it overflows.
+        Accepts `'none'`, `'start'`, `'middle'`, `'end'`. Defaults to `'none'`.
+        (CSS `text-overflow`, often requires `overflow: hidden` and
+        `white-space: nowrap` or line-clamping for multi-line)
+    *   `cssClass` (Array<String>, optional): Additional CSS classes to apply to
+        the label element.
     *   `id` (String, optional): A specific ID to set on the label element.
 
 **Returns:**
@@ -42,11 +55,16 @@ Adw.createLabel(text, options = {}) -> HTMLLabelElement | HTMLSpanElement
   container.appendChild(simpleLabel);
   container.appendChild(document.createElement('br'));
 
-  const wrappedLabel = Adw.createLabel("This is a longer label that will wrap within its container.", { wrap: true });
+  const wrappedLabel = Adw.createLabel(
+    "This is a longer label that will wrap within its container.",
+    { wrap: true }
+  );
   container.appendChild(wrappedLabel);
   container.appendChild(document.createElement('br'));
 
-  const selectableLabel = Adw.createLabel("This text is selectable.", { selectable: true });
+  const selectableLabel = Adw.createLabel(
+    "This text is selectable.", { selectable: true }
+  );
   container.appendChild(selectableLabel);
   container.appendChild(document.createElement('br'));
 

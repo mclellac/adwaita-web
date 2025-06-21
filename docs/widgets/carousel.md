@@ -43,7 +43,9 @@ Adw.createAdwCarousel(options = {}) -> HTMLDivElement (with methods)
   const container = document.getElementById('js-carousel-container');
 
   const slide1 = document.createElement('div');
-  slide1.style.cssText = "background-color: var(--adw-blue-1); height: 200px; display:flex; align-items:center; justify-content:center; color: var(--adw-blue-5); font-size: 2em;";
+  slide1.style.cssText = "background-color: var(--adw-blue-1); height: 200px; " +
+    "display:flex; align-items:center; justify-content:center; " +
+    "color: var(--adw-blue-5); font-size: 2em;";
   slide1.textContent = "Slide 1";
 
   const slide2 = document.createElement('img');
@@ -108,13 +110,19 @@ A declarative way to define Adwaita carousels.
 **Example:**
 
 ```html
-<adw-carousel show-nav-buttons autoplay autoplay-interval="3500" indicator-style="dots"
-              style="max-width: 600px; margin: auto; border: 1px solid var(--borders-color);"
-              id="wc-carousel">
-  <div style="background-color: var(--adw-purple-1); height: 250px; display:flex; align-items:center; justify-content:center; color: var(--adw-purple-5); font-size: 2.5em;">
+<adw-carousel show-nav-buttons autoplay autoplay-interval="3500"
+              indicator-style="dots" id="wc-carousel"
+              style="max-width: 600px; margin: auto;
+                     border: 1px solid var(--borders-color);">
+  <div style="background-color: var(--adw-purple-1); height: 250px;
+              display:flex; align-items:center; justify-content:center;
+              color: var(--adw-purple-5); font-size: 2.5em;">
     First Slide (Declarative)
   </div>
-  <img src="app-demo/static/img/default_avatar.png" alt="Image Slide" data-thumbnail="app-demo/static/img/default_avatar.png" style="width:100%; height:250px; object-fit:contain; background-color: var(--shade-color);">
+  <img src="app-demo/static/img/default_avatar.png" alt="Image Slide"
+       data-thumbnail="app-demo/static/img/default_avatar.png"
+       style="width:100%; height:250px; object-fit:contain;
+              background-color: var(--shade-color);">
   <div style="background-color: var(--adw-green-1); height: 250px; padding: 20px;">
     <h4>Rich Content Slide</h4>
     <p>This slide contains various HTML elements.</p>

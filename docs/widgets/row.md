@@ -43,9 +43,10 @@ Adw.createRow(options = {}) -> HTMLDivElement
   // Interactive row with an icon and text
   const row2Icon = document.createElement('span'); // Using a simple span for icon placeholder
   row2Icon.className = 'icon'; // Add your icon class or SVG here
-  row2Icon.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM7 4v3H4v2h3v3h2V9h3V7H9V4H7Z"/></svg>'; // Example plus icon
+  row2Icon.innerHTML = '<svg viewBox="0 0 16 16"><path d="M8 0a8Z"/></svg>'; // Shortened
   const row2Label = Adw.createLabel("Clickable Row");
-  const row2Box = Adw.createBox({children: [row2Icon, row2Label], spacing: "s", align: "center"});
+  const row2Children = [row2Icon, row2Label];
+  const row2Box = Adw.createBox({children: row2Children, spacing: "s", align: "center"});
 
   const row2 = Adw.createRow({
     children: [row2Box],
@@ -55,7 +56,8 @@ Adw.createRow(options = {}) -> HTMLDivElement
   container.appendChild(row2);
 
   // Activated (selected) row
-  const row3Content = Adw.createLabel("This row is activated/selected.");
+  const row3Label = "This row is activated/selected.";
+  const row3Content = Adw.createLabel(row3Label);
   const row3 = Adw.createRow({
     children: [row3Content],
     activated: true,

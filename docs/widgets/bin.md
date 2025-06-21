@@ -1,6 +1,9 @@
 # Bin
 
-An AdwBin is a simple container widget that holds a single child element. It's often used as a base class for more complex widgets that need to manage a single child, or as a straightforward way to apply Adwaita container styling or padding to a single item.
+An AdwBin is a simple container widget that holds a single child element.
+It's often used as a base class for more complex widgets that need to manage a
+single child, or as a straightforward way to apply Adwaita container styling
+or padding to a single item.
 
 ## JavaScript Factory: `Adw.createBin()`
 
@@ -62,16 +65,22 @@ A declarative way to use an Adwaita bin container.
 
 ```html
 <p>Bin with a card-like style applied to the Bin itself:</p>
-<adw-bin style="border: 1px solid var(--borders-color); border-radius: var(--border-radius-default); padding: var(--spacing-m); background-color: var(--view-bg-color); max-width: 300px;">
+<adw-bin style="border: 1px solid var(--borders-color); padding: var(--spacing-m);
+              border-radius: var(--border-radius-default); max-width: 300px;
+              background-color: var(--view-bg-color);">
   <adw-label title-level="2">Content Card</adw-label>
   <p>This content is wrapped by an AdwBin, styled to look like a simple card.</p>
   <adw-button flat>An action</adw-button>
 </adw-bin>
 
-<p style="margin-top: 1em;">Bin used to group an image and caption (though an AdwBox might be more semantically correct for multiple items):</p>
+<p style="margin-top: 1em;">
+  Bin used to group an image and caption (though an AdwBox might be more
+  semantically correct for multiple items):
+</p>
 <adw-bin>
   <div> <!-- The single child of the bin -->
-    <img src="app-demo/static/img/default_avatar.png" alt="Avatar" style="width: 80px; height: 80px; border-radius: 4px;">
+    <img src="app-demo/static/img/default_avatar.png" alt="Avatar"
+         style="width: 80px; height: 80px; border-radius: 4px;">
     <p style="font-size: var(--font-size-small); text-align: center;">Avatar Image</p>
   </div>
 </adw-bin>
@@ -81,8 +90,12 @@ A declarative way to use an Adwaita bin container.
 
 *   Primary SCSS: `scss/_bin.scss`.
 *   A Bin itself is often unstyled or has minimal styling (like `display: block`).
-*   Its primary purpose is to act as a container. Any significant visual styling (borders, padding, background) would often be applied directly to the bin element via classes or inline styles, or through styles applied to its single child.
-*   It does not impose flex or grid layout on its child by default, unless specific utility classes are added.
+*   Its primary purpose is to act as a container. Any significant visual styling
+    (borders, padding, background) would often be applied directly to the bin
+    element via classes or inline styles, or through styles applied to its
+    single child.
+*   It does not impose flex or grid layout on its child by default, unless
+    specific utility classes are added.
 
 ---
 Next: [WrapBox](./wrapbox.md)

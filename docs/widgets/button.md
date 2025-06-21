@@ -16,15 +16,26 @@ Adw.createButton(text, options = {}) -> HTMLButtonElement | HTMLAnchorElement
 
 *   `text` (String): The text content of the button. Can be empty if using only an icon.
 *   `options` (Object, optional): Configuration options:
-    *   `href` (String, optional): If provided, creates an `<a>` tag styled as a button. *Security: Ensure this URL is trusted or validated to prevent XSS via `javascript:` URLs.*
-    *   `onClick` (Function, optional): Callback function for the button's click event. Not called if the button is disabled.
-    *   `suggested` (Boolean, optional): If `true`, applies the 'suggested-action' class (e.g., for primary actions). Defaults to `false`.
-    *   `destructive` (Boolean, optional): If `true`, applies the 'destructive-action' class (e.g., for delete actions). Defaults to `false`.
-    *   `flat` (Boolean, optional): If `true`, applies the 'flat' class for a less prominent button. Defaults to `false`.
-    *   `disabled` (Boolean, optional): If `true`, disables the button. Defaults to `false`.
-    *   `active` (Boolean, optional): If `true`, applies the 'active' class (e.g., for toggle buttons). Defaults to `false`.
-    *   `isCircular` (Boolean, optional): If `true`, applies the 'circular' class, typically for icon-only buttons. Defaults to `false`.
-    *   `icon` (String, optional): HTML string for an SVG icon, or a CSS class name for an icon font. *Security: If providing an HTML string, ensure it's from a trusted source or sanitized.*
+    *   `href` (String, optional): If provided, creates an `<a>` tag styled as a
+        button. *Security: Ensure this URL is trusted or validated to prevent XSS
+        via `javascript:` URLs.*
+    *   `onClick` (Function, optional): Callback function for the button's click
+        event. Not called if the button is disabled.
+    *   `suggested` (Boolean, optional): If `true`, applies the 'suggested-action'
+        class (e.g., for primary actions). Defaults to `false`.
+    *   `destructive` (Boolean, optional): If `true`, applies the
+        'destructive-action' class (e.g., for delete actions). Defaults to `false`.
+    *   `flat` (Boolean, optional): If `true`, applies the 'flat' class for a less
+        prominent button. Defaults to `false`.
+    *   `disabled` (Boolean, optional): If `true`, disables the button. Defaults to
+        `false`.
+    *   `active` (Boolean, optional): If `true`, applies the 'active' class (e.g.,
+        for toggle buttons). Defaults to `false`.
+    *   `isCircular` (Boolean, optional): If `true`, applies the 'circular' class,
+        typically for icon-only buttons. Defaults to `false`.
+    *   `icon` (String, optional): HTML string for an SVG icon, or a CSS class name
+        for an icon font. *Security: If providing an HTML string, ensure it's from
+        a trusted source or sanitized.*
 
 **Returns:**
 
@@ -46,7 +57,7 @@ Adw.createButton(text, options = {}) -> HTMLButtonElement | HTMLAnchorElement
 
   // Icon button
   const iconButton = Adw.createButton("", {
-    icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/></svg>', // Plus icon
+    icon: '<svg viewBox="0 0 16 16"><path d="M8 2a.5.5Z"/></svg>', // Plus icon (shortened)
     isCircular: true,
     flat: true,
     onClick: () => Adw.createToast("Icon button clicked!")
@@ -94,7 +105,7 @@ A declarative way to use Adwaita buttons.
 <adw-button destructive flat>Delete Item</adw-button>
 
 <!-- Circular icon button -->
-<adw-button circular icon='<svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.5 5h-9V4h9v1zm0 3h-9V7h9v1zm-2 3h-7v-1h7v1zM3 14v-1h10v1H3zM1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/></svg>'>
+<adw-button circular icon='<svg viewBox="0 0 16 16"><path d="M12.5 5h-9Z"/></svg>'>
 </adw-button>
 
 <!-- Link as a button -->

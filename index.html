@@ -378,15 +378,64 @@ accentColors.forEach(color => {
             const accentColors = Adw.getAccentColors(); // Expects [{id: 'blue', name: 'Blue'}, ...]
             accentColors.forEach(color => {
                 const button = Adw.createButton(color.name, {
-                    onClick: () => Adw.setAccentColor(color.id) // Pass the ID (e.g., 'green')
+                    onClick: () => {
+                        Adw.setAccentColor(color.id);
+                        // Optionally, re-style the buttons if needed after global accent change,
+                        // but ideally they just use standard button styles that react to the theme.
+                    }
                 });
-                // Basic preview - relies on CSS variables from _variables.scss being available
-                // These variable names are defined in :root in _variables.scss
-                button.style.setProperty('background-color', `var(--accent-${color.id}-light-bg)`);
-                button.style.setProperty('color', `var(--accent-${color.id}-light-fg)`);
-                button.style.setProperty('border-color', `var(--accent-${color.id}-light-standalone)`);
+                // Style the button to use its specific accent for its border,
+                // but let its main background/foreground come from standard button theming.
+                // This way, it adapts to light/dark mode better.
+                // We need to know if light or dark theme is active to pick the right standalone color.
+                const isLightTheme = document.body.classList.contains('light-theme');
+                const standaloneColorVar = isLightTheme ? `var(--accent-${color.id}-light-standalone)` : `var(--accent-${color.id}-dark-standalone)`;
+                const bgColorVar = isLightTheme ? `var(--accent-${color.id}-light-bg)` : `var(--accent-${color.id}-dark-bg)`;
+                const fgColorVar = isLightTheme ? `var(--accent-${color.id}-light-fg)` : `var(--accent-${color.id}-dark-fg)`;
+
+                // For the demo, let's make the buttons themselves use their accent color
+                // This will make them visually represent the color they set.
+                button.style.setProperty('background-color', bgColorVar);
+                button.style.setProperty('color', fgColorVar);
+                button.style.setProperty('border-color', standaloneColorVar);
+                // To ensure text is readable, especially for yellow, we might need to adjust
+                if (color.id === 'yellow') {
+                    button.style.setProperty('color', 'rgba(0,0,0,0.8)'); // Force dark text on yellow
+                }
+
+
                 accentPickerContainer.appendChild(button);
             });
+
+            // Re-style accent buttons if theme changes
+            new MutationObserver((mutationsList, observer) => {
+                for(const mutation of mutationsList) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const isLightThemeCurrent = document.body.classList.contains('light-theme');
+                        accentPickerContainer.querySelectorAll('adw-button').forEach(btn => {
+                            // Find the color.id for this button. This is a bit fragile.
+                            // Assumes button text is unique or we store color.id on the button.
+                            const colorName = btn.textContent;
+                            const accentColorObj = accentColors.find(ac => ac.name === colorName);
+                            if (accentColorObj) {
+                                const colorId = accentColorObj.id;
+                                const newStandaloneColorVar = isLightThemeCurrent ? `var(--accent-${colorId}-light-standalone)` : `var(--accent-${colorId}-dark-standalone)`;
+                                const newBgColorVar = isLightThemeCurrent ? `var(--accent-${colorId}-light-bg)` : `var(--accent-${colorId}-dark-bg)`;
+                                const newFgColorVar = isLightThemeCurrent ? `var(--accent-${colorId}-light-fg)` : `var(--accent-${colorId}-dark-fg)`;
+
+                                btn.style.setProperty('background-color', newBgColorVar);
+                                btn.style.setProperty('color', newFgColorVar);
+                                btn.style.setProperty('border-color', newStandaloneColorVar);
+                                if (colorId === 'yellow') {
+                                    btn.style.setProperty('color', 'rgba(0,0,0,0.8)');
+                                }
+                            }
+                        });
+                        break; // Only need to react once per class change
+                    }
+                }
+            }).observe(document.body, { attributes: true });
+
         } else {
             console.warn("Accent color picker container not found.");
         }

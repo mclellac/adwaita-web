@@ -1,6 +1,9 @@
 # ToolbarView
 
-An AdwToolbarView is a layout container that arranges content with optional top and bottom toolbars. The main content area is typically scrollable, and the toolbars can be revealed or hidden. This is useful for views that need persistent actions or information visible at the top or bottom.
+An AdwToolbarView is a layout container that arranges content with optional top
+and bottom toolbars. The main content area is typically scrollable, and the
+toolbars can be revealed or hidden. This is useful for views that need
+persistent actions or information visible at the top or bottom.
 
 ## JavaScript Factory: `Adw.createToolbarView()`
 
@@ -50,18 +53,20 @@ Adw.createToolbarView(options = {}) -> HTMLDivElement (with methods)
 
 
   // --- Bottom Bar ---
+  const bottomBarChildren = [
+    Adw.createButton("Cancel", { onClick: () => Adw.createToast("Cancel") }),
+    Adw.createButton("Apply", { suggested: true, onClick: () => Adw.createToast("Apply") })
+  ];
   const bottomBarContent = Adw.createBox({
     orientation: "horizontal",
     spacing: "m",
     align: "center",
     justify: "end", // Align buttons to the right
-    children: [
-      Adw.createButton("Cancel", { onClick: () => Adw.createToast("Cancel") }),
-      Adw.createButton("Apply", { suggested: true, onClick: () => Adw.createToast("Apply") })
-    ]
+    children: bottomBarChildren
   });
   bottomBarContent.style.padding = "var(--spacing-s)";
-  bottomBarContent.style.backgroundColor = "var(--headerbar-bg-color)"; // Use headerbar colors for consistency
+  // Use headerbar colors for consistency
+  bottomBarContent.style.backgroundColor = "var(--headerbar-bg-color)";
   bottomBarContent.style.borderTop = "1px solid var(--borders-color)";
 
 
@@ -127,24 +132,33 @@ A declarative way to define Adwaita toolbar views.
                     id="wc-toolbar-view">
   <adw-header-bar slot="top-bar">
     <h1 slot="title">My Document</h1>
-    <adw-button slot="end" flat icon="<svg viewBox='0 0 16 16'><path d='M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z'/></svg>"></adw-button>
+    <adw-button slot="end" flat icon="<svg viewBox='0 0 16 16'><path d='M2.5 12Z'/></svg>"></adw-button>
   </adw-header-bar>
 
   <div style="padding: var(--spacing-l); overflow-y: auto;"> <!-- Main content -->
     <p>This is the primary scrollable content area of the toolbar view.</p>
     <p>It can contain text, images, forms, or other Adwaita components.</p>
     <!-- Add more content here to demonstrate scrolling -->
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-    <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-    <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-    <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-    <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua.</p>
+    <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+    ut aliquip ex ea commodo consequat.</p>
+    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+    dolore eu fugiat nulla pariatur.</p>
+    <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+    officia deserunt mollit anim id est laborum.</p>
+     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
+     tempor incididunt ut labore et dolore magna aliqua.</p>
+    <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+    ut aliquip ex ea commodo consequat.</p>
+    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+    dolore eu fugiat nulla pariatur.</p>
+    <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+    officia deserunt mollit anim id est laborum.</p>
   </div>
 
-  <adw-box slot="bottom-bar" spacing="m" align="center" style="padding: var(--spacing-s); border-top: 1px solid var(--borders-color);">
+  <adw-box slot="bottom-bar" spacing="m" align="center"
+           style="padding: var(--spacing-s); border-top: 1px solid var(--borders-color);">
     <adw-label>Status: Ready</adw-label>
     <div style="flex-grow: 1;"></div> <!-- Spacer -->
     <adw-button id="wc-tbv-action">Perform Action</adw-button>

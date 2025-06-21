@@ -20,11 +20,12 @@
   .adw-spin-button-entry {
     // AdwEntry styles are applied by the factory, but we might override some specifics
     border: none; // Remove individual entry border, wrapper has it
-    border-radius: 0; // No radius inside the wrapper
-    // padding-right: var(--spacing-xxs); // Slightly less padding if buttons are close
+    border-radius: 0;
     box-shadow: none; // No inner shadow
-    min-height: calc(var(--button-size-base) - 2px); // Match button height, minus border
-    height: calc(var(--button-size-base) - 2px);
+    // Remove fixed height, let AdwEntry's natural padding define its height.
+    // Ensure AdwEntry component has appropriate vertical padding (e.g., var(--spacing-s))
+    // height: auto; // Default
+    // min-height: auto; // Default
 
     &:focus, &:focus-within {
       box-shadow: none; // No focus shadow on entry if wrapper handles focus
@@ -34,17 +35,18 @@
   .adw-spin-button-buttons {
     display: flex;
     flex-direction: column;
-    // height: 100%; // Let content define height, align with entry via flex align-items on parent
-    // align-self: stretch; // Make button container take full height of flex parent
+    align-self: stretch; // Make button container take full height of the parent flex container
+    box-sizing: border-box;
 
     .adw-spin-button-control.adw-button { // Target the specific buttons
       background-color: var(--button-bg-color);
       border: none;
       border-radius: 0;
-      padding: var(--spacing-xxs) var(--spacing-xs); // Very minimal padding
-      min-height: 0;
-      height: 1.5em; // Adjust height to be small, relative to font or fixed
-      line-height: 1; // For better icon centering
+      padding: var(--spacing-xxs) var(--spacing-xs); // Minimal padding
+      min-height: 0; // Allow button to shrink
+      height: 50%; // Each button takes half the container height
+      box-sizing: border-box; // Padding and border included in height
+      line-height: 1; // For better icon centering if text was used
       box-shadow: none;
       display: flex; // Ensure icon inside is centered
       align-items: center;

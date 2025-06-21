@@ -1,6 +1,8 @@
 # BottomSheet
 
-An AdwBottomSheet is a modal sheet that slides up from the bottom of the screen, typically used on mobile or in narrow views to present contextual actions, navigation, or simple forms.
+An AdwBottomSheet is a modal sheet that slides up from the bottom of the
+screen, typically used on mobile or in narrow views to present contextual
+actions, navigation, or simple forms.
 
 ## JavaScript Factory: `Adw.createBottomSheet()`
 
@@ -43,12 +45,15 @@ Adw.createBottomSheet(options = {}) -> { sheet: HTMLDivElement, backdrop: HTMLDi
   sheetContent.style.maxHeight = "70vh"; // Allow content to scroll if too tall
   sheetContent.style.overflowY = "auto";
 
-  const title = Adw.createLabel("Sheet Title", {title: 2}); // Assuming AdwLabel with title option
-  const action1 = Adw.createButton("Action 1", {flat: true, onClick: () => {mySheet.close(); Adw.createToast("Action 1 chosen");} });
-  const action2 = Adw.createButton("Action 2", {flat: true, onClick: () => {mySheet.close(); Adw.createToast("Action 2 chosen");} });
+  const title = Adw.createLabel("Sheet Title", {title: 2});
+  const action1Opts = {flat: true, onClick: () => {mySheet.close(); Adw.createToast("Action 1 chosen");}};
+  const action1 = Adw.createButton("Action 1", action1Opts);
+  const action2Opts = {flat: true, onClick: () => {mySheet.close(); Adw.createToast("Action 2 chosen");}};
+  const action2 = Adw.createButton("Action 2", action2Opts);
   const cancelAction = Adw.createButton("Cancel", {suggested: true, onClick: () => mySheet.close() });
 
-  const contentBox = Adw.createBox({orientation: "vertical", spacing: "s", children: [title, action1, action2, Adw.createLabel("---"), cancelAction]});
+  const contentBoxChildren = [title, action1, action2, Adw.createLabel("---"), cancelAction];
+  const contentBox = Adw.createBox({orientation: "vertical", spacing: "s", children: contentBoxChildren});
   sheetContent.appendChild(contentBox);
 
 

@@ -122,6 +122,7 @@
   --list-row-selected-bg-color: var(--adw-blue-1); // #99c1f1
   --list-row-selected-fg-color: var(--adw-blue-5); // #1a5fb4
   --expander-content-bg-color: rgba(0,0,0,0.03);
+  --list-separator-color: rgba(0,0,0,0.07); // Subtle separator for light theme
 
   --entry-disabled-bg-color: rgba(0,0,0,0.04);
   --entry-disabled-border-color: rgba(0,0,0,0.1);
@@ -239,6 +240,7 @@
   --list-row-selected-bg-color: var(--adw-blue-5); // #1a5fb4
   --list-row-selected-fg-color: var(--adw-blue-1); // #99c1f1
   --expander-content-bg-color: rgba(255,255,255,0.03);
+  --list-separator-color: rgba(255,255,255,0.08); // Subtle separator for dark theme
 
   --entry-disabled-bg-color: rgba(255,255,255,0.04);
   --entry-disabled-border-color: rgba(255,255,255,0.1);

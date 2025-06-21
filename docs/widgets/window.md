@@ -70,13 +70,14 @@ A declarative way to define an Adwaita application window structure.
 <adw-application-window style="height: 450px; border: 1px solid var(--borders-color);">
   <adw-header-bar slot="header">
     <h1 slot="title">My WC Application</h1>
-    <adw-button slot="end" flat icon='<svg viewBox="0 0 16 16"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>'></adw-button>
+    <adw-button slot="end" flat icon='<svg viewBox="0 0 16 16"><path d="M2.5 12Z"/></svg>'></adw-button>
   </adw-header-bar>
 
   <!-- Default slot for main content -->
   <div style="padding: var(--spacing-l);">
     <h2>Welcome!</h2>
-    <p>This is the content area of the <code>&lt;adw-application-window&gt;</code>.</p>
+    <p>This is the content area of the
+       <code>&lt;adw-application-window&gt;</code>.</p>
     <p>It can contain any HTML or other Adwaita components.</p>
     <adw-box spacing="m">
         <adw-button suggested>Confirm</adw-button>
