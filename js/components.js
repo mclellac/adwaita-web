@@ -3746,3 +3746,362 @@ class AdwToast extends HTMLElement {
     }
 }
 customElements.define('adw-toast', AdwToast);
+
+// AdwPreferencesView Component
+class AdwPreferencesView extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css'; // Adjust path as needed
+
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('adw-preferences-view');
+
+        const slot = document.createElement('slot');
+        wrapper.appendChild(slot);
+
+        this.shadowRoot.append(styleLink, wrapper);
+    }
+}
+customElements.define('adw-preferences-view', AdwPreferencesView);
+
+// AdwPreferencesPage Component
+class AdwPreferencesPage extends HTMLElement {
+    static get observedAttributes() {
+        return ['title'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+
+        this._wrapper = document.createElement('div');
+        this._wrapper.classList.add('adw-preferences-page');
+
+        this._titleElement = document.createElement('h1'); // Or h2, depending on HIG for page title
+        this._titleElement.classList.add('adw-preferences-page-title');
+
+        const slot = document.createElement('slot');
+
+        this._wrapper.append(this._titleElement, slot);
+        this.shadowRoot.append(styleLink, this._wrapper);
+    }
+
+    connectedCallback() {
+        this._renderTitle();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'title' && oldValue !== newValue) {
+            this._renderTitle();
+        }
+    }
+
+    _renderTitle() {
+        this._titleElement.textContent = this.getAttribute('title') || 'Page';
+    }
+}
+customElements.define('adw-preferences-page', AdwPreferencesPage);
+
+// AdwPreferencesGroup Component
+class AdwPreferencesGroup extends HTMLElement {
+    static get observedAttributes() {
+        return ['title'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+
+        this._wrapper = document.createElement('div');
+        this._wrapper.classList.add('adw-preferences-group');
+
+        this._titleElement = document.createElement('div'); // Using div for styling flexibility, could be h2/h3
+        this._titleElement.classList.add('adw-preferences-group-title');
+
+        const slot = document.createElement('slot');
+
+        this._wrapper.append(this._titleElement, slot);
+        this.shadowRoot.append(styleLink, this._wrapper);
+    }
+
+    connectedCallback() {
+        this._renderTitle();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'title' && oldValue !== newValue) {
+            this._renderTitle();
+        }
+    }
+
+    _renderTitle() {
+        const title = this.getAttribute('title');
+        if (title) {
+            this._titleElement.textContent = title;
+            this._titleElement.style.display = '';
+        } else {
+            this._titleElement.textContent = '';
+            this._titleElement.style.display = 'none';
+        }
+    }
+}
+customElements.define('adw-preferences-group', AdwPreferencesGroup);
+
+
+// AdwSwitchRow Component
+class AdwSwitchRow extends HTMLElement {
+    static get observedAttributes() {
+        return ['title', 'subtitle', 'active', 'disabled'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+
+        this._wrapper = document.createElement('div');
+        this._wrapper.classList.add('adw-row', 'adw-switch-row'); // Mimics AdwRow structure
+
+        this._textContent = document.createElement('div');
+        this._textContent.classList.add('adw-action-row-text-content'); // Borrow class for layout
+
+        this._titleElement = document.createElement('span');
+        this._titleElement.classList.add('adw-action-row-title'); // Borrow class for layout
+
+        this._subtitleElement = document.createElement('span');
+        this._subtitleElement.classList.add('adw-action-row-subtitle'); // Borrow class for layout
+
+        this._switchElement = new AdwSwitch(); // Using the AdwSwitch web component
+
+        this._textContent.append(this._titleElement, this._subtitleElement);
+        this._wrapper.append(this._textContent, this._switchElement);
+        this.shadowRoot.append(styleLink, this._wrapper);
+
+        this._switchElement.addEventListener('change', (e) => {
+            // Reflect internal switch's checked state to 'active' attribute and property
+            this.active = this._switchElement.checked;
+            // Re-dispatch the change event from the host element
+            this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+        });
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _render() {
+        this._titleElement.textContent = this.getAttribute('title') || '';
+        const subtitle = this.getAttribute('subtitle');
+        if (subtitle) {
+            this._subtitleElement.textContent = subtitle;
+            this._subtitleElement.style.display = '';
+        } else {
+            this._subtitleElement.textContent = '';
+            this._subtitleElement.style.display = 'none';
+        }
+
+        const isActive = this.hasAttribute('active');
+        if (this._switchElement.checked !== isActive) {
+            this._switchElement.checked = isActive;
+        }
+
+        const isDisabled = this.hasAttribute('disabled');
+        if (this._switchElement.disabled !== isDisabled) {
+            this._switchElement.disabled = isDisabled;
+        }
+        this._wrapper.classList.toggle('disabled', isDisabled);
+    }
+
+    get active() {
+        return this._switchElement.checked;
+    }
+
+    set active(value) {
+        const isActive = Boolean(value);
+        if (this._switchElement.checked !== isActive) {
+            this._switchElement.checked = isActive;
+        }
+        if (isActive) {
+            this.setAttribute('active', '');
+        } else {
+            this.removeAttribute('active');
+        }
+    }
+
+    get disabled() {
+        return this.hasAttribute('disabled');
+    }
+
+    set disabled(value) {
+        const isDisabled = Boolean(value);
+        if (isDisabled) {
+            this.setAttribute('disabled', '');
+        } else {
+            this.removeAttribute('disabled');
+        }
+    }
+}
+customElements.define('adw-switch-row', AdwSwitchRow);
+
+
+// AdwComboRow Component
+class AdwComboRow extends HTMLElement {
+    static get observedAttributes() {
+        return ['title', 'subtitle', 'value', 'disabled'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = '/static/css/adwaita-web.css';
+
+        this._wrapper = document.createElement('div');
+        this._wrapper.classList.add('adw-row', 'adw-combo-row');
+
+        this._textContent = document.createElement('div');
+        this._textContent.classList.add('adw-combo-row-text-content'); // Similar to action row for layout
+
+        this._titleElement = document.createElement('span');
+        this._titleElement.classList.add('adw-combo-row-title');
+
+        this._subtitleElement = document.createElement('span');
+        this._subtitleElement.classList.add('adw-combo-row-subtitle');
+
+        this._selectElement = document.createElement('select');
+        this._selectElement.classList.add('adw-combo-row-select');
+
+        this._textContent.append(this._titleElement, this._subtitleElement);
+        this._wrapper.append(this._textContent, this._selectElement);
+        this.shadowRoot.append(styleLink, this._wrapper);
+
+        this._selectElement.addEventListener('change', (e) => {
+            this.value = this._selectElement.value; // Update property and attribute
+            this.dispatchEvent(new CustomEvent('change', {
+                bubbles: true,
+                composed: true,
+                detail: { value: this._selectElement.value }
+            }));
+        });
+
+        this._options = [];
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._render();
+        }
+    }
+
+    _render() {
+        this._titleElement.textContent = this.getAttribute('title') || '';
+        const subtitle = this.getAttribute('subtitle');
+        if (subtitle) {
+            this._subtitleElement.textContent = subtitle;
+            this._subtitleElement.style.display = '';
+        } else {
+            this._subtitleElement.textContent = '';
+            this._subtitleElement.style.display = 'none';
+        }
+
+        this._selectElement.disabled = this.hasAttribute('disabled');
+        this._wrapper.classList.toggle('disabled', this.hasAttribute('disabled'));
+
+        // Value might be set before options are populated, so re-apply if select has options
+        if (this._selectElement.options.length > 0) {
+             const valueAttr = this.getAttribute('value');
+             if (this._selectElement.value !== valueAttr) {
+                this._selectElement.value = valueAttr;
+             }
+        }
+    }
+
+    get value() {
+        return this._selectElement.value;
+    }
+
+    set value(val) {
+        if (this._selectElement.value !== val) {
+            this._selectElement.value = val;
+        }
+        // Reflect to attribute, using 'selected-value' as used in settings.js logic
+        if (val) {
+            this.setAttribute('value', val);
+        } else {
+            this.removeAttribute('value');
+        }
+    }
+
+    get selectOptions() {
+        return this._options;
+    }
+
+    set selectOptions(optionsArray) {
+        if (!Array.isArray(optionsArray)) {
+            this._options = [];
+            console.error('AdwComboRow: selectOptions must be an array.');
+        } else {
+            this._options = optionsArray;
+        }
+
+        this._selectElement.innerHTML = ''; // Clear existing options
+        this._options.forEach(opt => {
+            const optionElement = document.createElement('option');
+            if (typeof opt === 'object' && opt !== null && opt.hasOwnProperty('value') && opt.hasOwnProperty('label')) {
+                optionElement.value = opt.value;
+                optionElement.textContent = opt.label;
+            } else {
+                // Fallback if items are just strings, though spec is {value, label}
+                optionElement.value = opt;
+                optionElement.textContent = opt;
+            }
+            this._selectElement.appendChild(optionElement);
+        });
+
+        // After populating, try to set the current value attribute if it exists
+        const currentValue = this.getAttribute('value');
+        if (currentValue !== null) {
+            this.value = currentValue;
+        } else if (this._selectElement.options.length > 0) {
+             // If no value is set, default to the first option's value
+            this.value = this._selectElement.options[0].value;
+        }
+    }
+
+    get disabled() {
+        return this.hasAttribute('disabled');
+    }
+
+    set disabled(value) {
+        const isDisabled = Boolean(value);
+        if (isDisabled) {
+            this.setAttribute('disabled', '');
+        } else {
+            this.removeAttribute('disabled');
+        }
+        this._render(); // Re-render to apply disabled state
+    }
+}
+customElements.define('adw-combo-row', AdwComboRow);
