@@ -71,7 +71,7 @@
         width: 100%;
         height: 100%;
         background-color: var(--backdrop-color);
-        z-index: calc(#{variables.$zindex-flap} - 1); // Below sidebar, above content
+        z-index: calc(variables.$zindex-flap - 1); // Below sidebar, above content
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.25s ease-in-out, visibility 0.25s;
