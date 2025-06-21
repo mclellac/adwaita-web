@@ -3,15 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adwaita Web</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Adwaita Web - Declarative Demo</title>
+    <link rel="stylesheet" href="static/css/adwaita-web.css">
+    <script src="static/js/adw-initializer.js" defer></script>
+    <script src="static/js/components.js" defer></script>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        adw-application-window { flex-grow: 1; display: flex; flex-direction: column; }
+        .main-content-area { padding: var(--spacing-l); overflow-y: auto; flex-grow: 1; }
+        .widget-showcase { margin-bottom: var(--spacing-l); }
+        .widget-showcase > adw-label[title-level="1"] { margin-bottom: var(--spacing-m); }
+        .button-group adw-button { margin-right: var(--spacing-s); margin-bottom: var(--spacing-s); }
+    </style>
 </head>
 <body>
-    <div id="app"></div>
+    <adw-application-window id="main-window">
+        <adw-header-bar slot="header" id="main-header-bar">
+            <adw-button slot="start" icon="<svg width='16' height='16'><path d='M2 8l6-6v4h6v4H8v4z'/></svg>" id="header-back-button"></adw-button>
+            <adw-window-title slot="title" title="Adwaita Widgets" subtitle="Declarative Demo"></adw-window-title>
+            <adw-button slot="end" id="theme-toggle-button">Toggle Theme</adw-button>
+            <adw-button slot="end" icon="<svg width='16' height='16'><path d='M2 3h12v2H2zm0 4h12v2H2zm0 4h12v2H2z'/></svg>" id="header-menu-button"></adw-button>
+        </adw-header-bar>
 
-    <script src="js/components.js"></script>
+        <div class="main-content-area">
+            <!-- Buttons Section -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Buttons</adw-label>
+                <div class="button-group">
+                    <adw-button id="btn-click-me">Click Me!</adw-button>
+                    <adw-button id="btn-suggested" suggested>Suggested</adw-button>
+                    <adw-button id="btn-destructive" destructive>Delete</adw-button>
+                    <adw-button id="btn-disabled" disabled>Disabled</adw-button>
+                    <adw-button id="btn-flat" flat>Flat Button</adw-button>
+                    <adw-button id="btn-icon" icon="<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM7 11.5a1 1 0 1 1 2 0a1 1 0 0 1-2 0Zm.5-7a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5Z'/></svg>">With Icon</adw-button>
+                    <adw-button id="btn-circular" circular icon="<svg width='16' height='16' viewBox='0 0 16 16'><path fill='currentColor' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385C2.49 8.673 3.25 9.776 4.138 10.737MB8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15'/></svg>"></adw-button>
+                </div>
+                <details>
+                    <summary>Show Button Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-button id="btn-click-me"&gt;Click Me!&lt;/adw-button&gt;
+&lt;adw-button id="btn-suggested" suggested&gt;Suggested&lt;/adw-button&gt;
+&lt;adw-button id="btn-destructive" destructive&gt;Delete&lt;/adw-button&gt;
+&lt;adw-button id="btn-disabled" disabled&gt;Disabled&lt;/adw-button&gt;
+&lt;adw-button id="btn-flat" flat&gt;Flat Button&lt;/adw-button&gt;
+&lt;adw-button id="btn-icon" icon="&lt;svg&gt;...&lt;/svg&gt;"&gt;With Icon&lt;/adw-button&gt;
+&lt;adw-button id="btn-circular" circular icon="&lt;svg&gt;...&lt;/svg&gt;"&gt;&lt;/adw-button&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Other widget sections will be converted progressively -->
+            <!-- For now, the rest of the script that generates UI via JS factories will be kept, -->
+            <!-- but it will append to this .main-content-area instead of a dynamically created window. -->
+            <div id="legacy-js-factories-content">
+                <!-- JS factories will append their output here -->
+            </div>
+        </div>
+    </adw-application-window>
+
     <script>
-        // Helper function to create code sample blocks
+    document.addEventListener('DOMContentLoaded', () => {
+        // Adw.js should be initialized by adw-initializer.js
+
+        // --- Header Bar Event Listeners ---
+        document.getElementById('theme-toggle-button')?.addEventListener('click', Adw.toggleTheme);
+        document.getElementById('header-menu-button')?.addEventListener('click', () => alert("Menu clicked"));
+        document.getElementById('header-back-button')?.addEventListener('click', () => alert("Back button clicked"));
+
+        // --- Button Event Listeners ---
+        document.getElementById('btn-click-me')?.addEventListener('click', () => Adw.createToast("Button Clicked", {timeout: 3000}));
+        document.getElementById('btn-suggested')?.addEventListener('click', () => Adw.createToast("Suggested Button Clicked"));
+        document.getElementById('btn-destructive')?.addEventListener('click', () => Adw.createToast("Destructive Button Clicked"));
+        // No listener for disabled button
+        document.getElementById('btn-flat')?.addEventListener('click', () => alert('Flat Button clicked!'));
+        document.getElementById('btn-icon')?.addEventListener('click', () => Adw.createToast("Icon Button Clicked"));
+        document.getElementById('btn-circular')?.addEventListener('click', () => Adw.createToast("Circular Button Clicked"));
+
+        // --- Legacy JS Factory Content ---
+        // The existing script content that uses Adw.create... will go here,
+        // but modified to append to 'legacy-js-factories-content' div.
+
+        const legacyContentTarget = document.getElementById('legacy-js-factories-content');
+        if (!legacyContentTarget) {
+            console.error("Error: Target for legacy JS content not found.");
+            return;
+        }
+
+        // Helper function to create code sample blocks (keep for legacy code)
         function createCodeSampleDetails(summaryText, codeText) {
             const details = document.createElement('details');
             const summary = document.createElement('summary');
@@ -25,102 +103,11 @@
             return details;
         }
 
-        // --- Header Bar ---
-        const themeButton = Adw.createButton("Toggle Theme", {
-            onClick: Adw.toggleTheme,
-        });
-
-        const headerBar = Adw.createHeaderBar({
-            title: "Adwaita Widgets",
-            subtitle: "Demonstration",
-            start: [Adw.createButton("<", { href: "#" })],
-            end: [themeButton, Adw.createButton("☰", { onClick: () => alert("Menu clicked") })],
-        });
-
-        // --- Buttons ---
-        const button = Adw.createButton('Click Me!', {
-            onClick: () => Adw.createToast("Button Clicked", {timeout: 3000}),
-        });
-        const suggestedButton = Adw.createButton('Suggested', {
-            onClick: () => Adw.createToast("Suggested Button Clicked"),
-            suggested: true
-        });
-        const destructiveButton = Adw.createButton('Delete', {
-            onClick: () => Adw.createToast("Destructive Button Clicked"),
-            destructive: true, // Will now use .destructive-action
-        });
-        const disabledButton = Adw.createButton('Disabled', {
-            onClick: () => alert("This shouldnt be clickable!"),
-            disabled: true
-        });
-        const flatButton = Adw.createButton('Flat Button', {
-            onClick: () => alert('Flat Button clicked!'),
-            flat: true
-        });
-        // New button examples
-        const iconButton = Adw.createButton('With Icon', {
-            icon: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM7 11.5a1 1 0 1 1 2 0a1 1 0 0 1-2 0Zm.5-7a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5Z"/></svg>', // Simple placeholder SVG
-            onClick: () => Adw.createToast("Icon Button Clicked")
-        });
-        const circularButton = Adw.createButton('', {
-            icon: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385C2.49 8.673 3.25 9.776 4.138 10.737MB8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/></svg>', // Placeholder heart SVG
-            isCircular: true,
-            onClick: () => Adw.createToast("Circular Button Clicked")
-        });
-
-
-        const buttonsBox = Adw.createBox({
-            orientation: 'horizontal',
-            spacing: "m", // Adjusted spacing for better visual separation
-            children: [button, suggestedButton, destructiveButton, disabledButton, flatButton, iconButton, circularButton]
-        });
-
-        const buttonCodeSample = `
-// Basic Button
-const button = Adw.createButton('Click Me!', {
-    onClick: () => Adw.createToast("Button Clicked"),
-});
-
-// Suggested Button (e.g., for primary confirmation actions)
-const suggestedButton = Adw.createButton('Suggested', {
-    onClick: () => Adw.createToast("Suggested Button Clicked"),
-    suggested: true // Optional: makes it a suggested action
-});
-
-// Destructive Button (e.g., for delete or reset actions)
-const destructiveButton = Adw.createButton('Delete', {
-    onClick: () => Adw.createToast("Destructive Button Clicked"),
-    destructive: true, // Optional: styles for destructive actions
-});
-
-// Disabled Button
-const disabledButton = Adw.createButton('Disabled', {
-    onClick: () => { /* This won't run */ },
-    disabled: true
-});
-
-// Flat Button (borderless)
-const flatButton = Adw.createButton('Flat Button', {
-    onClick: () => Adw.createToast('Flat Button Clicked!'),
-    flat: true
-});
-
-// Button with Icon
-const iconButton = Adw.createButton('With Icon', {
-    icon: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM7 11.5a1 1 0 1 1 2 0a1 1 0 0 1-2 0Zm.5-7a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5Z"/></svg>', // Example SVG
-    onClick: () => Adw.createToast("Icon Button Clicked")
-});
-
-// Circular Button (typically for icons only)
-const circularButton = Adw.createButton('', { // Label is often empty
-    icon: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385C2.49 8.673 3.25 9.776 4.138 10.737MB8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/></svg>', // Example SVG
-    isCircular: true,
-    onClick: () => Adw.createToast("Circular Button Clicked")
-});
-        `;
-        const buttonsCodeDetails = createCodeSampleDetails('Show Button Code Examples', buttonCodeSample);
-
         // --- Entry ---
+        // NOTE: The Header Bar and Buttons sections are now declarative HTML above.
+        // Their JS factory calls are removed. Event listeners are attached above.
+        // The 'buttonsBox' and 'buttonCodeSample' related to JS factories are also removed.
+
         const entry = Adw.createEntry({
             placeholder: 'Enter text...',
             onInput: (e) => console.log('Input:', e.target.value),
@@ -4208,19 +4195,76 @@ const customElementExamplesBox = Adw.createBox({
         // customElementShowcaseCodeDetails will be inserted into the layout after customElementShowcaseBox by the insertDetailsAfter function.
 
 
-        // Create the window and append it to the body.
-        const windowEl = Adw.createWindow({header: headerBar, content: content});
-        document.getElementById('app').appendChild(windowEl);
+        // --- Main Content Layout ---
+        // This 'content' box will now be appended to '#legacy-js-factories-content'
+        const content = Adw.createBox({
+            orientation: 'vertical',
+            spacing: "l",
+            children: [
+                Adw.createLabel("Typography (Legacy JS Factory)", {title:1}),
+                labelsBox,
 
-        // --- DOM Manipulations to Insert Code Samples ---
-        // Helper to insert details after a specific element.
+                // Buttons section is now declarative HTML.
+                // Adw.createLabel("Buttons", {title:1}),
+                // buttonsBox,
+                // buttonsCodeDetails, // This was for JS factory buttons
+
+                Adw.createLabel("Entries (Legacy JS Factory)", {title:1}),
+                entryBox,
+                Adw.createLabel("Controls (Legacy JS Factory)", {title:1}),
+                switchBox,
+                checkBox,
+                radioBox,
+
+                Adw.createLabel("Progress Bars (Legacy JS Factory)", {title:1}),
+                progressBarBox,
+
+                bannersTitle,
+                bannerContainer,
+                bannerButtonsBox,
+
+                spinnersTitle,
+                spinnerBox,
+
+                statusPagesTitle,
+                statusPageContainer,
+
+                splitButtonsTitle,
+                splitButtonBox,
+
+                Adw.createLabel("List Boxes (Legacy JS Factory)", {title:1}),
+                listBoxContainer,
+                customListBoxDemoContainer,
+
+                Adw.createLabel("Dialog (Legacy JS Factory Trigger)", {title:1}),
+                Adw.createRow({ children: [openDialogButton] }),
+                Adw.createLabel("ViewSwitcher (Legacy JS Factory)", {title:1}),
+                viewSwitcher,
+                Adw.createLabel("Flap (Legacy JS Factory)", {title:1}),
+                flapExampleBox,
+                Adw.createLabel("Accent Color Picker (Legacy JS Factory)", {title:1}),
+                accentPickerBox, // Added accentPickerBox directly
+
+                Adw.createLabel("Avatars (Legacy JS Factory)", {title:1}),
+                avatarSection, // Added avatarSection directly
+
+                specializedRowsTitle,
+                specializedRowsListBox,
+
+                customElementShowcaseTitle, // Title for the showcase of custom elements
+                customElementShowcaseBox    // The box containing all custom element examples
+            ],
+        });
+        legacyContentTarget.appendChild(content);
+
+
+        // --- DOM Manipulations to Insert Code Samples (for legacy factory-created elements) ---
         function insertDetailsAfter(element, detailsElement) {
-            // New widget code sample insertions
-            if (element === bannerButtonsBox) { // Special handling for banner container
+            if (element === bannerButtonsBox) {
                 if (bannerButtonsBox && bannerButtonsBox.parentElement) {
                     bannerButtonsBox.parentElement.insertBefore(bannerCodeDetails, bannerButtonsBox.nextSibling);
                 }
-                return; // Avoid inserting twice if logic below also matches
+                return;
             }
             if (element === spinnerBox && spinnerBox.parentElement) {
                  spinnerBox.parentElement.insertBefore(spinnerCodeDetails, spinnerBox.nextSibling);
@@ -4235,10 +4279,10 @@ const customElementExamplesBox = Adw.createBox({
                  return;
             }
 
-            if (element && element.parentElement) {
+            if (element && element.parentElement && legacyContentTarget.contains(element)) { // Ensure element is within legacy scope
                 element.parentElement.insertBefore(detailsElement, element.nextSibling);
             } else {
-                console.warn("Could not insert details for element:", element, "Details:", detailsElement);
+                // console.warn("Could not insert legacy details for element:", element, "Details:", detailsElement);
             }
         }
 
