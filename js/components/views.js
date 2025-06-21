@@ -24,61 +24,84 @@ function _appendSVGStringToElement(svgString, parentElement) {
  */
 export function createAdwViewSwitcher(options = {}) {
     const opts = options || {};
-    const viewSwitcher = document.createElement('div');
-    viewSwitcher.classList.add('adw-view-switcher');
-    if(opts.isInline) viewSwitcher.classList.add('inline');
-    viewSwitcher.setAttribute('role', 'tablist');
-    if(opts.label) viewSwitcher.setAttribute('aria-label', opts.label);
+    const viewSwitcherRoot = document.createElement('div');
+    viewSwitcherRoot.classList.add('adw-view-switcher');
+    // Note: The SCSS also expects a .adw-view-switcher-content if it's handling content visibility.
+    // However, the AdwViewSwitcher WC handles content visibility by showing/hiding light DOM children.
+    // So, the factory will only create the bar part.
+
+    const viewSwitcherBar = document.createElement('div');
+    viewSwitcherBar.classList.add('adw-view-switcher-bar');
+    if(opts.isInline) viewSwitcherBar.classList.add('inline-switcher'); // Correctly add 'inline-switcher'
+    viewSwitcherRoot.appendChild(viewSwitcherBar);
+
+    viewSwitcherBar.setAttribute('role', 'tablist');
+    if(opts.label) viewSwitcherBar.setAttribute('aria-label', opts.label);
 
     const buttons = [];
     let currentActiveButton = null;
     let currentActiveViewName = opts.activeViewName;
 
     function setActiveButton(buttonToActivate, viewName) {
-        if (currentActiveButton) currentActiveButton.active = false;
-        buttonToActivate.active = true; // Uses AdwToggleButton's setter
+        if (currentActiveButton) currentActiveButton.active = false; // Relies on AdwToggleButton's setter
+        buttonToActivate.active = true; // Relies on AdwToggleButton's setter
         currentActiveButton = buttonToActivate;
         currentActiveViewName = viewName;
         if(typeof opts.onViewChanged === 'function') {
+            // The third argument to onViewChanged was viewName, but SCSS implies panelId.
+            // For WC usage, viewName is more direct.
             opts.onViewChanged(viewName, buttonToActivate.id, viewName);
         }
     }
 
     (opts.views || []).forEach(view => {
         const buttonId = view.buttonId || adwGenerateId('adw-view-switcher-btn');
+        // Assuming AdwToggleButton is the intended component for view switcher buttons
         const button = createAdwToggleButton(view.buttonOptions?.text || view.title || view.name, {
-            value: view.name,
+            value: view.name, // AdwToggleButton uses 'value'
             active: view.name === currentActiveViewName,
             icon: view.buttonOptions?.icon,
+            // Toggle buttons don't typically have 'flat' in this context, they are styled by group
         });
         button.id = buttonId;
         button.setAttribute('role', 'tab');
-        button.setAttribute('aria-controls', view.name);
+        button.setAttribute('aria-controls', view.name); // view.name can serve as panel ID
 
         if(view.name === currentActiveViewName) currentActiveButton = button;
 
-        button.addEventListener('click', () => {
+        // AdwToggleButton fires 'toggled' or 'change'. Let's use 'click' for simplicity here
+        // or ensure AdwToggleButton's events are handled appropriately.
+        // Using click directly on the toggle button.
+        button.addEventListener('click', () => { // Or listen to 'change' or 'toggled' from AdwToggleButton
             if (currentActiveViewName !== view.name && !button.disabled) {
                  setActiveButton(button, view.name);
+            } else if (currentActiveViewName === view.name && !button.active) {
+                // If it's already the current view but somehow the button got deactivated, reactivate.
+                // This case might not be strictly necessary if logic is sound.
+                button.active = true;
             }
         });
         buttons.push(button);
-        viewSwitcher.appendChild(button);
+        viewSwitcherBar.appendChild(button); // Append to the bar
     });
 
     if(!currentActiveButton && buttons.length > 0) {
         setActiveButton(buttons[0], buttons[0].value);
     }
 
-    viewSwitcher.setActiveView = (viewName) => {
+    // Expose setActiveView on the root element returned by the factory
+    viewSwitcherRoot.setActiveView = (viewName) => {
         const buttonToActivate = buttons.find(b => b.value === viewName);
         if(buttonToActivate && currentActiveViewName !== viewName) {
             setActiveButton(buttonToActivate, viewName);
         } else if (buttonToActivate && !buttonToActivate.active) {
+            // If called externally and button isn't active, make it so.
             buttonToActivate.active = true;
+            // If it wasn't the currentActiveViewName, it will be set by setActiveButton if different.
+            // If it WAS currentActiveViewName but button was inactive, this fixes it.
         }
     };
-    return viewSwitcher;
+    return viewSwitcherRoot; // Return the root which contains the bar
 }
 export class AdwViewSwitcher extends HTMLElement {
     static get observedAttributes() { return ['label', 'active-view', 'is-inline']; }

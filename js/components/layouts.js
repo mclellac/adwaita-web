@@ -113,12 +113,12 @@ export function createAdwFlap(options = {}) {
     flapElement.style.setProperty('--adw-flap-transition-speed', opts.transitionSpeed);
 
     const flapContentWrapper = document.createElement('div');
-    flapContentWrapper.classList.add('adw-flap-content-wrapper');
+    flapContentWrapper.classList.add('adw-flap-flap-content'); // Corrected class name
     if(opts.flapContent instanceof Node) flapContentWrapper.appendChild(opts.flapContent);
     flapElement.appendChild(flapContentWrapper);
 
     const mainContentWrapper = document.createElement('div');
-    mainContentWrapper.classList.add('adw-flap-main-content-wrapper');
+    mainContentWrapper.classList.add('adw-flap-main-content'); // Corrected class name
     if(opts.mainContent instanceof Node) mainContentWrapper.appendChild(opts.mainContent);
     flapElement.appendChild(mainContentWrapper);
 
@@ -172,24 +172,18 @@ export class AdwFlap extends HTMLElement {
         }
     }
     _render() {
-        const flapContentSlot = this.querySelector('[slot="flap"]');
-        const mainContentSlot = this.querySelector('[slot="main"]');
+        // These are the actual <slot> elements that will be placed in the Shadow DOM
+        // by the factory, allowing light DOM content to project into them.
+        const flapContentSlotElement = document.createElement('slot');
+        flapContentSlotElement.name = 'flap-content';
 
-        // Use document fragments to hold cloned content before passing to factory
-        const flapContentFragment = document.createDocumentFragment();
-        if (flapContentSlot) flapContentFragment.appendChild(flapContentSlot.cloneNode(true));
-        else { const div = document.createElement('div'); div.innerHTML = '<slot name="flap"></slot>'; flapContentFragment.appendChild(div.firstChild); }
-
-
-        const mainContentFragment = document.createDocumentFragment();
-        if (mainContentSlot) mainContentFragment.appendChild(mainContentSlot.cloneNode(true));
-        else { const div = document.createElement('div'); div.innerHTML = '<slot name="main"></slot>'; mainContentFragment.appendChild(div.firstChild); }
-
+        const mainContentSlotElement = document.createElement('slot');
+        mainContentSlotElement.name = 'main-content';
 
         const options = {
             isFolded: this.hasAttribute('folded'),
-            flapContent: flapContentFragment,
-            mainContent: mainContentFragment
+            flapContent: flapContentSlotElement, // Pass the <slot> element itself
+            mainContent: mainContentSlotElement  // Pass the <slot> element itself
         };
         if (this.hasAttribute('flap-width')) options.flapWidth = this.getAttribute('flap-width');
         if (this.hasAttribute('transition-speed')) options.transitionSpeed = this.getAttribute('transition-speed');
