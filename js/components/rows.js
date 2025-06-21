@@ -559,6 +559,4 @@ export class AdwButtonRow extends HTMLElement {
     }
 }
 
-// No customElements.define here
-
 [end of js/components/rows.js]
