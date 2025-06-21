@@ -1,0 +1,84 @@
+// SCSS for AdwNavigationSplitView
+@use "variables";
+@use "flap"; // Potentially leverage flap styles for sidebar/content separation
+
+.adw-navigation-split-view {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--adw-window-background-color);
+
+    &-sidebar {
+        // Similar to AdwFlap's flap-content or a standard sidebar
+        width: clamp(280px, 30%, 360px); // Default width, can be overridden
+        min-width: 200px; // Minimum reasonable width
+        flex-shrink: 0;
+        background-color: var(--adw-sidebar-background-color);
+        border-right: 1px solid var(--borders-color);
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto; // If sidebar content itself is scrollable
+
+        &.collapsed {
+            // Styles for when collapsed, e.g., on narrower screens
+            // This might be controlled by a breakpoint or programmatically
+            // For now, JS will handle visibility/width changes directly or via classes
+            min-width: 0;
+            width: 0;
+            border-right: none;
+            overflow: hidden; // Hide content when collapsed
+            visibility: hidden;
+        }
+    }
+
+    &-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column; // Usually contains a header and the main view
+        overflow: hidden; // Content area (e.g., AdwNavigationView) handles its own scrolling
+        background-color: var(--adw-view-background-color);
+    }
+
+    // Styles for when the sidebar is an overlay (e.g., on very narrow screens)
+    &.sidebar-overlay {
+        .adw-navigation-split-view-sidebar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: variables.$zindex-flap; // Ensure it's above content
+            box-shadow: var(--shadow-right-big); // Prominent shadow for overlay
+            transition: transform 0.25s ease-in-out, visibility 0.25s;
+            transform: translateX(-100%);
+            visibility: hidden;
+
+            &.revealed {
+                transform: translateX(0);
+                visibility: visible;
+            }
+        }
+        .adw-navigation-split-view-content {
+            // Content takes full width when sidebar is an overlay and hidden
+        }
+    }
+
+    // Backdrop for overlay sidebar
+    .adw-navigation-split-view-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--backdrop-color);
+        z-index: calc(#{variables.$zindex-flap} - 1); // Below sidebar, above content
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease-in-out, visibility 0.25s;
+
+        &.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+}
