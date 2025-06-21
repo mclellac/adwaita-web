@@ -1,59 +1,93 @@
 @use 'variables';
+@use 'mixins'; // Assuming this provides .row-base and potentially other helpers
 
 .adw-expander-row {
-  // Uses .adw-action-row as its base for the main row part
-  // So, no need to redefine title, subtitle, prefix, basic layout here.
-  // We only add styles for the expander arrow and the content area.
+  // The AdwExpanderRow element itself is a container for the header and content.
+  // It typically takes full width within a listbox.
+  // The header part (.adw-expander-row-header) is an AdwActionRow.
 
-  // Styling for the header part of the expander row (which is an action row)
-  // to ensure it's clickable and shows the arrow correctly.
-  > .adw-action-row {
+  .adw-expander-row-header.adw-action-row {
+    // This is the clickable header part. AdwActionRow styles should apply.
+    // Ensure it's clearly interactive.
     cursor: pointer;
-    position: relative; // Keep for positioning if needed, though suffix slot handles layout
+    // AdwActionRow already has padding, min-height, etc.
+    // We might want to ensure it doesn't have a bottom border if the expander row itself handles it,
+    // or if it's the last item before the content area.
+    // However, usually the ActionRow's own bottom border serves as the separator.
 
-    // Chevron icon styling (targets the AdwIcon component)
+    // Chevron icon styling (targets the AdwIcon component, slotted as suffix-widget)
+    // The AdwIcon component itself should handle its color.
     .adw-expander-row-chevron.adw-icon {
-      transition: transform 0.15s ease-in-out;
-      transform: rotate(-90deg); // Point right for LTR when collapsed
-      opacity: 0.7;
-      font-size: 0.8em; // Make chevron slightly smaller if needed
-      // margin-left: var(--spacing-s); // AdwActionRow suffix slot should handle spacing
+      transition: transform var(--animation-duration-short) var(--animation-ease-out-sine);
+      transform: rotate(-90deg); // Point right for LTR when collapsed (assuming pan-down icon)
+      opacity: var(--icon-opacity, 0.7); // Use a variable for icon opacity
+      font-size: 0.8em; // Consistent with existing style, can be adjusted
+      // Ensure it's vertically centered if AdwActionRow suffix area doesn't guarantee it.
+      display: flex;
+      align-items: center;
     }
 
+    // When the header (and thus the row) is expanded
     &.expanded {
       .adw-expander-row-chevron.adw-icon {
         transform: rotate(0deg); // Point down when expanded
       }
+      // Optionally, slightly change header background when expanded, if needed.
+      // background-color: var(--list-row-hover-bg-color);
     }
   }
 
   .adw-expander-row-content-area {
-    padding: var(--spacing-m) var(--spacing-l);
-    // Indentation logic might need review. If prefix area in action-row has fixed width, use that.
-    // Example: padding-left: calc(var(--prefix-width, 32px) + var(--spacing-l));
-    padding-left: calc(var(--spacing-l) + var(--spacing-m) + 5px); // Current logic
-    background-color: var(--expander-content-bg-color); // Use new variable
-    border-bottom: var(--border-width) solid var(--borders-color); // Use theme-aware --borders-color
-    display: none;
+    // Default Libadwaita indentation for content is often related to where text starts in the header.
+    // A common indentation is 24px (var(--spacing-xl)) or 12px (var(--spacing-m)).
+    // The existing padding was: var(--spacing-m) var(--spacing-l) with a complex left padding.
+    // Let's simplify:
+    padding: var(--spacing-m) var(--spacing-l) var(--spacing-m) var(--spacing-xl); // Top, Right, Bottom, Left
+    background-color: var(--expander-content-bg-color, var(--window-bg-color)); // Define --expander-content-bg-color or use a fallback
 
-    &.visible {
+    // Separator for the content area.
+    // Usually, there's a top border (or the header's bottom border acts as one).
+    // And a bottom border if it's not the very last thing in a list.
+    border-top: var(--border-width) solid var(--borders-color);
+    // The original had border-bottom, which is also fine.
+    // If rows inside content-area have their own separators, this might not be needed.
+    // Let's keep a bottom border for now, assuming it's a general container.
+    border-bottom: var(--border-width) solid var(--borders-color);
+
+    display: none; // Hidden by default
+
+    &.visible { // Class added by JS when expanded
       display: block;
+    }
+
+    // If the expander row is the last child in a listbox, its content area's bottom border
+    // might need to be removed or have its radius adjusted.
+    .adw-list-box > .adw-expander-row:last-child & {
+      border-bottom-left-radius: var(--list-border-radius, var(--border-radius-default));
+      border-bottom-right-radius: var(--list-border-radius, var(--border-radius-default));
+      // If the listbox itself has a border, the last row's content shouldn't double border.
+      // This depends on how .adw-list-box handles its own bottom border/padding.
+      // For now, assume the content area border is fine.
+    }
+
+    // Styles for direct children (e.g. if it contains other rows)
+    > .adw-row, > adw-action-row, > adw-entry-row { // Targeting known row types
+        // If child rows are directly inside, their default left/right padding might need adjustment
+        // if the content area's padding is meant to be the primary horizontal padding.
+        // Example: margin-left: calc(-1 * var(--spacing-l)); margin-right: calc(-1 * var(--spacing-l));
+        // However, it's often better to let child rows have their standard padding for consistency.
     }
   }
 
-   &:last-child > .adw-expander-row-content-area {
-        border-bottom-left-radius: var(--border-radius-default); // Match listbox radius
-        border-bottom-right-radius: var(--border-radius-default);
-        // If this is the very last row of a listbox, its border-bottom should be none.
-        // This might need to be handled by .adw-list-box > .adw-expander-row:last-child > .adw-expander-row-content-area
-        // if the expander row itself doesn't have a bottom border.
-   }
+  // When the whole expander row is part of a listbox and is the last child
+  // This rule was on .adw-expander-row:last-child > .adw-expander-row-content-area
+  // It's better handled by the nested selector above for specificity with .adw-list-box context.
 }
 
-// Dark theme adjustments are now handled by theme-aware variables like --borders-color and --expander-content-bg-color.
-// .dark-theme .adw-expander-row,
-// body.dark-theme .adw-expander-row {
-//   .adw-expander-row-content-area {
-//     border-bottom-color: var(--border-color-dark);
-//   }
-// }
+// Ensure AdwActionRow (used as header) styling is correctly applied.
+// This is more of a reminder that AdwActionRow's own SCSS should be solid.
+
+// Variables that should be defined (e.g., in _variables.scss):
+// --expander-content-bg-color: (e.g., var(--window-bg-color) or a slightly offset color like mix(var(--view-fg-color), var(--view-bg-color), 4%));
+// --icon-opacity: 0.7; (general icon opacity)
+// --list-border-radius: (used by listbox for its corners)

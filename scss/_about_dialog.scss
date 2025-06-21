@@ -1,157 +1,194 @@
 // scss/_about_dialog.scss
 @use 'variables';
+@use 'mixins';
 
+// AdwAboutDialog inherits from AdwDialog.
+// The .adw-dialog base styles will apply (modal, backdrop, base padding, etc.)
+// This file adds specific styles for the content structure of the About Dialog.
 .adw-about-dialog {
-  // Inherits .adw-dialog styles for the main dialog frame, backdrop, etc.
+  // Override or set specific dialog properties if needed
+  // The JS sets max-width: 600px; this is a good place for it.
+  max-width: var(--about-dialog-max-width, 600px);
 
+  // The overall content container created by createAdwAboutDialog factory
   .adw-about-dialog-content {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-l);
+    gap: var(--spacing-l); // Space between major sections
   }
 
   .adw-about-dialog-header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-l);
-    padding-bottom: var(--spacing-l);
-    border-bottom: 1px solid var(--border-color-light); /* Use theme-aware border */
-  }
+    gap: var(--spacing-m);
+    padding-bottom: var(--spacing-m); // Space before main content
+    border-bottom: var(--border-width) solid var(--borders-color); // Separator
 
-  .dark-theme .adw-about-dialog-header,
-  body.dark-theme .adw-about-dialog-header {
-    border-bottom-color: var(--border-color-dark);
-  }
+    .adw-about-dialog-logo {
+      width: var(--about-dialog-logo-size, 64px);
+      height: var(--about-dialog-logo-size, 64px);
+      object-fit: contain;
+      flex-shrink: 0;
+    }
 
+    .adw-about-dialog-app-icon {
+      // For font icons or SVG strings
+      font-size: var(--about-dialog-logo-size, 64px); // Make icon size match image logo
+      width: var(--about-dialog-logo-size, 64px);
+      height: var(--about-dialog-logo-size, 64px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-fg-color); // Or accent color if preferred
+      flex-shrink: 0;
+    }
 
-  .adw-about-dialog-logo {
-    width: 96px; // Standard size for a larger logo in about dialog
-    height: 96px;
-    object-fit: contain;
-    flex-shrink: 0;
-  }
-  .adw-about-dialog-app-icon-img {
-    width: 64px;
-    height: 64px;
-    object-fit: contain;
-    flex-shrink: 0;
-  }
-   .adw-about-dialog-app-icon { // For icon font/SVG class
-    font-size: 64px; // Adjust as needed
-    width: 64px;
-    height: 64px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-
-  .adw-about-dialog-app-info {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xxs);
-  }
-
-  .adw-about-dialog-app-name {
-    font-size: var(--font-size-h1);
-    font-weight: bold;
-    margin: 0;
-    color: var(--headerbar-fg-color); // Match headerbar text color for title
-  }
-
-  .adw-about-dialog-version {
-    font-size: var(--font-size-base);
-    opacity: 0.8;
-    margin: 0;
+    .adw-about-dialog-app-info {
+      flex-grow: 1;
+      h1 { // App Name
+        font-size: var(--font-size-h1); // Prominent app name
+        font-weight: bold;
+        margin: 0 0 var(--spacing-xxs) 0;
+        color: var(--headerbar-fg-color); // Consistent with dialog title color
+      }
+      .adw-about-dialog-version {
+        font-size: var(--font-size-base);
+        color: var(--secondary-fg-color);
+        margin: 0;
+      }
+    }
   }
 
   .adw-about-dialog-main-content {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-s);
+    gap: var(--spacing-s); // Space between paragraphs in main content
 
     p {
       margin: 0;
       line-height: 1.6;
     }
-  }
-
-  .adw-about-dialog-developer,
-  .adw-about-dialog-copyright,
-  .adw-about-dialog-website {
-    font-size: var(--font-size-small);
-    opacity: 0.9;
-  }
-  .adw-about-dialog-website a {
-    color: var(--link-color);
-    text-decoration: none;
-    &:hover {
+    .adw-about-dialog-comments {
+      // Specific styling if needed
+      color: var(--primary-fg-color); // Comments are primary content
+    }
+    .adw-about-dialog-copyright {
+      font-size: var(--font-size-small);
+      color: var(--secondary-fg-color);
+      margin-top: var(--spacing-s);
+    }
+    a {
+      color: var(--link-color);
+      text-decoration: none;
+      &:hover {
         text-decoration: underline;
+      }
     }
   }
 
-
-  .adw-about-dialog-details-content {
-    // This is the content of the expander row
-    padding-top: var(--spacing-m); // Add some space if expander content has its own padding too
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-m);
+  // Details section (inside the AdwExpanderRow)
+  .adw-expander-row { // Targeting the expander row used for "Details"
+    // The expander row itself has its own styles.
+    // Content area of the expander row:
+    .adw-expander-row-content-area {
+      // Standard expander content padding should apply.
+      // If overrides are needed:
+      // padding-left: var(--spacing-m);
+      // padding-right: var(--spacing-m);
+    }
   }
 
-  .adw-about-dialog-credits-section,
-  .adw-about-dialog-license-section {
-    h3 {
-      font-size: var(--font-size-large);
+  .adw-about-dialog-details-content { // The div placed inside the expander row
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-m); // Space between list sections (Developers, Designers etc.)
+  }
+
+  .adw-about-dialog-list-section {
+    h4 { // Section title (e.g., "Developers")
+      font-size: var(--font-size-large); // Slightly smaller than main headings
       font-weight: bold;
-      margin-bottom: var(--spacing-xs);
-      color: var(--headerbar-fg-color); // Consistent heading color
+      margin: 0 0 var(--spacing-xs) 0;
+      color: var(--primary-fg-color);
     }
     ul {
       list-style: none;
-      padding-left: 0;
+      padding-left: var(--spacing-m); // Indent list items
       margin: 0;
       li {
-        font-size: var(--font-size-small);
         margin-bottom: var(--spacing-xxs);
+        color: var(--primary-fg-color); // Credits should be primary text color
       }
     }
-    p {
-        font-size: var(--font-size-small);
-        margin-bottom: var(--spacing-xxs);
+  }
+
+  .adw-about-dialog-license-section {
+    margin-top: var(--spacing-s);
+    h4 {
+      font-size: var(--font-size-large);
+      font-weight: bold;
+      margin: 0 0 var(--spacing-xs) 0;
+      color: var(--primary-fg-color);
+    }
+    p { // License type
+      margin: 0 0 var(--spacing-xs) 0;
+      color: var(--primary-fg-color);
+    }
+    .adw-about-dialog-license-text { // Preformatted license text
+      font-family: var(--font-family-monospace);
+      font-size: var(--font-size-small);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      background-color: var(--content-view-bg-color, var(--window-bg-color));
+      padding: var(--spacing-s);
+      border-radius: var(--border-radius-small);
+      max-height: 200px;
+      overflow-y: auto;
+      color: var(--primary-fg-color); // Ensure text is readable on its bg
+      border: 1px solid var(--borders-color); // Add border to preformatted block
     }
   }
 
-  .adw-about-dialog-license-text {
-    font-family: var(--monospace-font-family);
-    font-size: var(--font-size-small);
-    white-space: pre-wrap;
-    background-color: var(--shade-color); // Subtle background for preformatted text
-    padding: var(--spacing-s);
-    border-radius: var(--border-radius-small);
-    max-height: 200px; // Prevent extremely long licenses from dominating
-    overflow-y: auto;
-    border: 1px solid var(--border-color-light);
-  }
-
-  .dark-theme .adw-about-dialog-license-text,
-  body.dark-theme .adw-about-dialog-license-text {
-    border-color: var(--border-color-dark);
-  }
-
-  // Ensure the expander row itself looks good within the dialog
-  .adw-expander-row-wrapper {
-    // The wrapper might have a border-bottom if not last child.
-    // Inside a dialog, we might not want these default listbox-like borders.
-    border-bottom: none;
-
-    .adw-expander-row { // The clickable part
-        padding: var(--spacing-s) 0; // Less padding if inside dialog
-    }
-    .adw-expander-row-content { // The collapsible part
-        padding-left: var(--spacing-m);
-        padding-right: var(--spacing-m);
-    }
-  }
+  // Buttons are handled by .adw-dialog-buttons from _dialog.scss
+  // Usually just a "Close" button.
+  // AdwAboutDialog has no specific CSS nodes for its main dialog structure beyond .dialog.about
+  // It inherits from AdwDialog.
 }
+
+// Variables for _variables.scss (defaults or ensure they exist):
+// --about-dialog-max-width: 600px;
+// --about-dialog-logo-size: 64px;
+// --content-view-bg-color (for license text background, e.g., var(--window-bg-color) or slightly off like var(--toolbar-bg-color))
+// --link-color
+// --headerbar-fg-color (used for app name for consistency with dialog title)
+// --font-size-h1 (for app name)
+// --font-size-large (for section titles like Developers)
+// --dialog-bg-color (from _dialog.scss)
+// --dialog-fg-color (from _dialog.scss)
+// --borders-color
+// --primary-fg-color
+// --secondary-fg-color
+// --font-family-monospace
+// --spacing-xxs, --spacing-xs, --spacing-s, --spacing-m, --spacing-l
+// --border-radius-small, --border-radius-default, --border-radius-large
+// --border-width
+// --accent-color (for button focus, etc.)
+// --button-*, --accent-* (for buttons if any custom ones are used)
+// --expander-content-bg-color (from _expander_row.scss if used)
+// --popover-box-shadow (used by dialog)
+// --window-radius (used by dialog)
+// --z-index-dialog, --z-index-dialog-backdrop (from _dialog.scss)
+// --dialog-backdrop-color (from _dialog.scss)
+// --font-size-h3 (from _dialog.scss for comparison)
+// --icon-size-inline (for expander row chevron)
+// --button-pill-border-radius (if round style is used in expander row)
+// --button-border-radius (used by expander row)
+// --button-border-color (used by expander row)
+// --button-bg-color (used by expander row)
+// --list-row-hover-bg-color (used by expander row)
+// --list-row-active-bg-color (used by expander row)
+// --focus-outline-offset (used by expander row)
+// --icon-opacity (used by expander row)
+// --list-border-radius (used by expander row)
+// --toast-background-color, etc. (from _toast.scss - not directly used here but listed for completeness of variables)
+// --banner-bg-color, etc. (from _banner.scss - not directly used here but listed for completeness of variables)

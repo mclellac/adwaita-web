@@ -325,4 +325,166 @@ export class AdwBreakpointBin extends HTMLElement {
     }
 }
 
+
+/**
+ * Creates an Adwaita-style ToastOverlay.
+ * A widget showing toasts above its content.
+ */
+export function createAdwToastOverlay(options = {}) {
+    const opts = options || {};
+    const overlay = document.createElement('div');
+    overlay.classList.add('adw-toast-overlay');
+
+    const childContainer = document.createElement('div');
+    childContainer.classList.add('adw-toast-overlay-child-container');
+    if (opts.child instanceof Node) {
+        childContainer.appendChild(opts.child);
+    }
+    overlay.appendChild(childContainer);
+
+    const toastContainer = document.createElement('div');
+    toastContainer.classList.add('adw-toast-container'); // For positioning toasts
+    overlay.appendChild(toastContainer);
+
+    overlay._toasts = []; // Array to manage active toasts
+
+    overlay.addToast = (toastOrOptions) => {
+        let toastElement;
+        if (toastOrOptions instanceof HTMLElement && toastOrOptions.classList.contains('adw-toast')) {
+            toastElement = toastOrOptions;
+        } else if (typeof toastOrOptions === 'object' && toastOrOptions.title) {
+            // Assuming createAdwToast is available in the global Adw scope or imported
+            const toastFactory = (typeof Adw !== 'undefined' && Adw.createToast) ? Adw.createToast : globalThis.createAdwToast;
+            if (!toastFactory) {
+                console.error("AdwToastOverlay: createAdwToast function not found.");
+                return;
+            }
+            toastElement = toastFactory(toastOrOptions.title, toastOrOptions);
+        } else {
+            console.error("AdwToastOverlay: Invalid argument for addToast. Provide a toast element or options object.", toastOrOptions);
+            return;
+        }
+
+        toastContainer.appendChild(toastElement);
+        overlay._toasts.push(toastElement);
+
+        // Trigger enter animation
+        requestAnimationFrame(() => { // Ensures element is in DOM for transition
+            toastElement.classList.add('visible');
+        });
+
+        const data = toastElement._adwToastData || {};
+        const timeoutDuration = (data.timeout || 4) * 1000; // Convert seconds to ms
+
+        const dismissFn = () => {
+            if (toastElement._adwToastData.dismissTimerId) {
+                clearTimeout(toastElement._adwToastData.dismissTimerId);
+                toastElement._adwToastData.dismissTimerId = null;
+            }
+            toastElement.classList.remove('visible');
+            toastElement.classList.add('hiding');
+            toastElement.dispatchEvent(new CustomEvent('dismissed', { bubbles: false })); // AdwToast emits this
+
+            // Remove after animation
+            setTimeout(() => {
+                if (toastElement.parentNode) {
+                    toastElement.remove();
+                }
+                overlay._toasts = overlay._toasts.filter(t => t !== toastElement);
+            }, 300); // Match hiding animation duration
+        };
+
+        toastElement.addEventListener('dismiss-requested', dismissFn);
+
+        if (data.timeout > 0) { // 0 means indefinite
+            toastElement._adwToastData.dismissTimerId = setTimeout(dismissFn, timeoutDuration);
+        }
+
+        // Handle priority - basic implementation: higher priority toasts dismiss lower ones.
+        // A more complex system might involve a queue or max number of visible toasts.
+        if (data.priority === ADW_TOAST_PRIORITY_HIGH) {
+            overlay._toasts.forEach(t => {
+                if (t !== toastElement && t._adwToastData && t._adwToastData.priority !== ADW_TOAST_PRIORITY_HIGH) {
+                    // Dispatch dismiss-requested on other lower-priority toasts
+                    t.dispatchEvent(new CustomEvent('dismiss-requested', { bubbles: true, composed: true }));
+                }
+            });
+        }
+         // Max 1 high priority, or N normal priority toasts.
+         // For simplicity, let's ensure only a few toasts are visible at a time.
+        const MAX_TOASTS = 3;
+        while(toastContainer.children.length > MAX_TOASTS && overlay._toasts.length > MAX_TOASTS) {
+            const oldestToast = overlay._toasts[0];
+            if (oldestToast && oldestToast._adwToastData.priority !== ADW_TOAST_PRIORITY_HIGH) { // Don't auto-dismiss high prio
+                 oldestToast.dispatchEvent(new CustomEvent('dismiss-requested', { bubbles: true, composed: true }));
+            } else if (overlay._toasts.length > MAX_TOASTS) { // If it's a high prio one, remove the next oldest normal one
+                 const oldestNormal = overlay._toasts.find(t => t._adwToastData.priority !== ADW_TOAST_PRIORITY_HIGH);
+                 if(oldestNormal) oldestNormal.dispatchEvent(new CustomEvent('dismiss-requested', { bubbles: true, composed: true }));
+                 else break; // Only high-priority left
+            } else {
+                break;
+            }
+        }
+
+
+        return toastElement;
+    };
+
+    overlay.dismissAll = () => {
+        [...overlay._toasts].forEach(toastElement => { // Iterate over a copy
+            toastElement.dispatchEvent(new CustomEvent('dismiss-requested', { bubbles: true, composed: true }));
+        });
+    };
+
+    return overlay;
+}
+
+export class AdwToastOverlay extends HTMLElement {
+    static get observedAttributes() { return []; } // Not attribute driven for now
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+
+        this._overlayElement = createAdwToastOverlay({ child: document.createElement('slot') });
+        this.shadowRoot.append(styleLink, this._overlayElement);
+    }
+
+    connectedCallback() {
+        // Initial render if any light DOM children exist, though child is typically set via slot
+    }
+
+    addToast(toastOrOptions) {
+        if (this._overlayElement && typeof this._overlayElement.addToast === 'function') {
+            return this._overlayElement.addToast(toastOrOptions);
+        }
+        return null;
+    }
+
+    dismissAllToasts() {
+        if (this._overlayElement && typeof this._overlayElement.dismissAll === 'function') {
+            this._overlayElement.dismissAll();
+        }
+    }
+
+    get child() {
+        const childContainer = this._overlayElement.querySelector('.adw-toast-overlay-child-container');
+        return childContainer ? childContainer.firstElementChild : null;
+    }
+
+    set child(newChild) {
+        const childContainer = this._overlayElement.querySelector('.adw-toast-overlay-child-container');
+        if (childContainer) {
+            while (childContainer.firstChild) {
+                childContainer.removeChild(childContainer.firstChild);
+            }
+            if (newChild instanceof Node) {
+                childContainer.appendChild(newChild);
+            }
+        }
+    }
+}
 // No customElements.define here

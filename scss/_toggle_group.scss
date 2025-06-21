@@ -1,20 +1,47 @@
 // SCSS for AdwToggleGroup and AdwToggleButton
 @use "variables";
 @use "button"; // Leverage existing button styles
+@use "mixins";
 
 .adw-toggle-group {
     display: inline-flex;
-    border-radius: var(--button-border-radius);
-    // overflow: hidden; // Ensures child button borders merge nicely
+    // Default appearance: like a set of individual buttons, but grouped.
+    // Adwaita often shows these with a subtle background/border for the group itself,
+    // or relies on the button's own borders.
+    // For now, let's assume individual buttons have their borders, and group provides spacing.
+    // background-color: var(--control-bg-color); // Optional: if group needs a distinct bg
+    // border: 1px solid var(--borders-color);    // Optional: if group needs a distinct border
+    border-radius: var(--button-border-radius); // Group rounding
+    // overflow: hidden; // If using the negative margin trick for linked buttons without own bg/border
 
-    // Use a class on the group to make buttons appear linked
+    // Default (not .linked, not .flat): individual buttons with their own styling
+    &:not(.linked):not(.flat) {
+        gap: 1px; // Create separation with a small gap, borders will touch or be close
+        // Each adw-toggle-button will have its own border from adw-button styles.
+        // The .adw-toggle-button.active style below handles selected state.
+        // If buttons are not flat by default (they are in current JS), need to ensure they look like standard buttons.
+    }
+
+    // Linked style (Segmented button appearance)
+    // This is the default appearance for Adw.ToggleButton in Libadwaita if not flat.
+    // In our case, AdwToggleButton is flat by default.
     &.linked {
+        // The group itself often has no border/bg, buttons form the shape.
+        // border: 1px solid var(--button-border-color); // Border around the whole linked group
+        // background-color: var(--button-bg-color); // Background for the group
+        // overflow: hidden; // Important for child border radius clipping
+
         .adw-toggle-button {
+            // AdwToggleButton is flat by default in our JS.
+            // For a linked, non-flat look, buttons would need a background and borders.
+            // If we want linked *and* flat, it's different.
+            // Assuming .linked means the "joined buttons" look, not necessarily flat.
+            border-color: var(--button-border-color);
+            border-right-width: 0; // Remove right border for all but last
             border-radius: 0;
-            margin-left: -1px; // Overlap borders
+            margin-left: 0; // No negative margin needed if group has overflow:hidden and children have borders
 
             &:first-child {
-                margin-left: 0;
                 border-top-left-radius: var(--button-border-radius);
                 border-bottom-left-radius: var(--button-border-radius);
             }
@@ -22,12 +49,98 @@
             &:last-child {
                 border-top-right-radius: var(--button-border-radius);
                 border-bottom-right-radius: var(--button-border-radius);
+                border-right-width: var(--border-width, 1px); // Last button gets its right border
             }
 
-            // Ensure borders are correctly handled for focused/active states too
-            &:focus, &:active {
-                position: relative; // To bring focused/active button above siblings for border
+            &:focus, &.focus, &:focus-visible { // Ensure focus ring is drawn correctly over adjacent buttons
+                position: relative;
                 z-index: 1;
+            }
+
+            // Active state for linked buttons
+            &.active {
+                // Already handled by .adw-toggle-button.active (accent bg)
+                // Ensure it doesn't get double borders from linked styling
+                border-color: var(--accent-bg-color); // Border matches accent bg
+            }
+        }
+    }
+
+    // Flat style
+    &.flat {
+        background-color: transparent;
+        border: none;
+        // .adw-toggle-button within a flat group are already flat by default from their own style.
+        // The active state is handled by .adw-toggle-button.active.
+        // If not linked, they might need separators or rely on spacing.
+        &:not(.linked) {
+            gap: var(--spacing-xs); // Small gap between flat, non-linked buttons
+            .adw-toggle-button {
+                // Individual flat buttons, no special group border behavior.
+                // Active state will give it a background.
+            }
+        }
+        // If .flat.linked, the .linked style needs to adapt:
+        // No internal borders, only the active button has a background.
+        &.linked .adw-toggle-button {
+            border-color: transparent; // No borders for flat linked
+            &:not(.active) {
+                 background-color: transparent; // Ensure non-active are fully transparent
+            }
+            // Active state is handled by .adw-toggle-button.active
+        }
+    }
+
+    // Round style (pill shape)
+    &.round {
+        border-radius: var(--button-pill-border-radius, 9999px);
+        .adw-toggle-button {
+            border-radius: 0; // Individual buttons lose rounding if inside a pill group
+            &:first-child {
+                border-top-left-radius: var(--button-pill-border-radius, 9999px);
+                border-bottom-left-radius: var(--button-pill-border-radius, 9999px);
+            }
+            &:last-child {
+                border-top-right-radius: var(--button-pill-border-radius, 9999px);
+                border-bottom-right-radius: var(--button-pill-border-radius, 9999px);
+            }
+        }
+        // If flat and round, the active button also gets fully rounded.
+        &.flat .adw-toggle-button.active {
+            border-radius: var(--button-pill-border-radius, 9999px);
+        }
+    }
+
+    // Vertical orientation (if supported by JS)
+    &.vertical {
+        flex-direction: column;
+        // Adjust linked styles for vertical
+        &.linked .adw-toggle-button {
+            border-right-width: var(--border-width, 1px); // All get right border
+            border-bottom-width: 0; // Remove bottom border for all but last
+            &:first-child {
+                border-top-left-radius: var(--button-border-radius);
+                border-top-right-radius: var(--button-border-radius);
+                border-bottom-left-radius: 0;
+            }
+            &:last-child {
+                border-bottom-left-radius: var(--button-border-radius);
+                border-bottom-right-radius: var(--button-border-radius);
+                border-bottom-width: var(--border-width, 1px);
+            }
+        }
+        &.round .adw-toggle-button {
+             &:first-child {
+                border-top-left-radius: var(--button-pill-border-radius, 9999px);
+                border-top-right-radius: var(--button-pill-border-radius, 9999px);
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+            &:last-child {
+                border-bottom-left-radius: var(--button-pill-border-radius, 9999px);
+                border-bottom-right-radius: var(--button-pill-border-radius, 9999px);
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
             }
         }
     }
@@ -35,18 +148,36 @@
 
 // AdwToggleButton specific styles (mostly inherits from .adw-button)
 .adw-toggle-button {
-    // Basic button styling is inherited from .adw-button through the factory.
-    // We just need to handle the 'active' state appearance more explicitly if needed,
-    // though the .active class from .adw-button might be sufficient.
+    // Basic button styling is inherited from .adw-button.
+    // AdwToggleButton instances are created with flat:true by default in the JS factory.
+    // We need to ensure the active state uses accent colors.
 
-    // Example: more pronounced active state if default .active is not enough
-    // &.active {
-    //     background-color: var(--accent-color);
-    //     color: var(--accent-fg-color);
-    //     box-shadow: inset 0 0 0 1px var(--accent-color); // Inner shadow to reinforce
-    // }
+    // When this toggle button is active (has .active class)
+    &.active {
+        // Override default .adw-button.active or .adw-button.flat.active
+        background-color: var(--accent-bg-color);
+        color: var(--accent-fg-color);
+        border-color: var(--accent-bg-color); // Border matches background for seamless look
+        box-shadow: none; // Remove inset shadow if present from default button active state
 
-    // If not using .flat buttons by default for toggle buttons,
-    // you might want to ensure they look good in a group.
-    // The factory will likely use createAdwButton with appropriate options.
+        // For flat buttons that become active, they get a background.
+        // If the base button was not flat, this still applies accent.
+        &:hover { // Keep hover distinct but on accent
+            background-color: var(--accent-bg-hover-color); // Rely on this variable to be defined by themes
+        }
+    }
+
+    // If the toggle button is part of a .flat .adw-toggle-group,
+    // and it's active, it should still use the accent color.
+    // The general .active rule above covers this.
+    // Non-active buttons in a flat group:
+    .adw-toggle-group.flat &:not(.active) {
+        background-color: transparent;
+        color: var(--button-fg-color);
+        border-color: transparent;
+        box-shadow: none;
+        &:hover {
+            background-color: var(--button-flat-hover-bg-color);
+        }
+    }
 }

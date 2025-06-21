@@ -1,0 +1,47 @@
+// scss/_toast_overlay.scss
+@use 'variables';
+
+.adw-toast-overlay {
+  display: block; // Or 'flex' if it needs to align its child container in a specific way
+  position: relative; // Establishes a containing block for absolutely positioned toasts
+  overflow: hidden; // Ensures toasts sliding in/out don't cause scrollbars on the overlay itself
+
+  // Container for the main child content of the overlay
+  .adw-toast-overlay-child-container {
+    // Typically, this would just take up the normal space of the child.
+    // If the overlay itself is a specific size, this might need height: 100%; etc.
+  }
+
+  // Container for all the toasts
+  .adw-toast-container {
+    position: absolute;
+    bottom: var(--spacing-l); // Position from the bottom of the overlay
+    left: 50%; // Center horizontally
+    transform: translateX(-50%);
+    // Alternatively, for bottom-start alignment:
+    // left: var(--spacing-l);
+    // transform: translateX(0);
+    // align-items: flex-start; // If toasts shouldn't be centered within this container
+
+    width: max-content; // Container shrinks to widest toast (up to toast's own max-width)
+    max-width: calc(100% - (2 * var(--spacing-l))); // Don't overflow overlay horizontally
+
+    display: flex;
+    flex-direction: column-reverse; // New toasts appear above older ones
+    align-items: center; // Center toasts if they have varying widths
+    gap: var(--spacing-s); // Gap between toasts
+    z-index: var(--z-index-toast, 1000); // Ensure toasts are above other content
+    pointer-events: none; // Overlay container itself shouldn't catch clicks meant for toasts
+
+    // Individual toasts will have pointer-events: auto re-enabled by their own styles when visible
+    > .adw-toast {
+      pointer-events: auto; // Re-enable pointer events for individual toasts
+    }
+  }
+}
+
+// Variables that might be relevant from _variables.scss (or defined here as defaults)
+// --z-index-toast: 1000; (Ensure it's above other elements)
+// --spacing-l
+// --spacing-s
+// AdwToast itself uses --toast-max-width, so .adw-toast-container width is mostly governed by that.
