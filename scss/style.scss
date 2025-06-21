@@ -1,6 +1,6 @@
 // SCSS (in scss/style.scss)
 @use "variables";
-@use "theme";
+// @use "theme"; // Removed as _theme.scss is deleted and its functionality is covered by _variables.scss
 @use "base";
 @use "action_row";
 @use "avatar";
