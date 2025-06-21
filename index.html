@@ -55,8 +55,294 @@
             <!-- Other widget sections will be converted progressively -->
             <!-- For now, the rest of the script that generates UI via JS factories will be kept, -->
             <!-- but it will append to this .main-content-area instead of a dynamically created window. -->
+
+            <!-- Declarative Labels -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Typography (Declarative)</adw-label>
+                <adw-row>
+                    <adw-label title-level="1">Title 1</adw-label>
+                    <adw-label is-body>This is a standard body text label.</adw-label>
+                </adw-row>
+                 <adw-row>
+                    <adw-label title-level="2">Title 2</adw-label>
+                    <adw-label title-level="3">Title 3</adw-label>
+                </adw-row>
+                <adw-row>
+                    <adw-label title-level="4">Title 4</adw-label>
+                    <adw-label is-caption>This is a caption label.</adw-label>
+                </adw-row>
+                <details>
+                    <summary>Show Label Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-label title-level="1"&gt;Title 1&lt;/adw-label&gt;
+&lt;adw-label is-body&gt;This is a standard body text label.&lt;/adw-label&gt;
+&lt;adw-label is-caption&gt;This is a caption label.&lt;/adw-label&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative Progress Bar -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Progress Bars (Declarative)</adw-label>
+                <adw-box orientation="vertical" spacing="s">
+                    <adw-row>
+                        <adw-label>Progress (50%):</adw-label>
+                        <adw-progress-bar value="50"></adw-progress-bar>
+                    </adw-row>
+                    <adw-row>
+                        <adw-label>Indeterminate:</adw-label>
+                        <adw-progress-bar indeterminate></adw-progress-bar>
+                    </adw-row>
+                </adw-box>
+                <details>
+                    <summary>Show Progress Bar Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-progress-bar value="50"&gt;&lt;/adw-progress-bar&gt;
+&lt;adw-progress-bar indeterminate&gt;&lt;/adw-progress-bar&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative Checkbox and Radio Buttons -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Controls (Declarative)</adw-label>
+                <adw-box orientation="vertical" spacing="m">
+                    <adw-row>
+                        <adw-checkbox label="Enable Feature (Declarative)" id="declarative-checkbox-event" checked></adw-checkbox>
+                        <adw-checkbox label="Disabled Checkbox" disabled></adw-checkbox>
+                    </adw-row>
+                    <adw-row>
+                        <adw-label>Radio Group:</adw-label>
+                        <adw-radio-button label="Option Alpha" name="declarative-radio-group" checked></adw-radio-button>
+                        <adw-radio-button label="Option Beta" name="declarative-radio-group"></adw-radio-button>
+                        <adw-radio-button label="Option Gamma (Disabled)" name="declarative-radio-group" disabled></adw-radio-button>
+                    </adw-row>
+                </adw-box>
+                <details>
+                    <summary>Show Checkbox/Radio Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-checkbox label="Enable Feature" checked&gt;&lt;/adw-checkbox&gt;
+&lt;adw-radio-button label="Option Alpha" name="radio-group" checked&gt;&lt;/adw-radio-button&gt;
+&lt;adw-radio-button label="Option Beta" name="radio-group"&gt;&lt;/adw-radio-button&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative ListBox -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">List Boxes (Declarative)</adw-label>
+                <adw-list-box selectable>
+                    <adw-row interactive id="declarative-listbox-interactive-row">
+                        <adw-label>List Item 1 (Interactive Declarative)</adw-label>
+                    </adw-row>
+                    <adw-row>
+                        <adw-label>List Item 2 (Not Interactive)</adw-label>
+                        <adw-switch slot="suffix"></adw-switch>
+                    </adw-row>
+                    <adw-action-row title="Declarative Action Row in List" subtitle="From ListBox section" icon="&lt;svg width='16' height='16' viewBox='0 0 16 16'&gt;&lt;path fill='currentColor' d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16ZM6.5 4.5a.5.5 0 0 1 1 0V7h2.5a.5.5 0 0 1 0 1H7.5v2.5a.5.5 0 0 1-1 0V8H4a.5.5 0 0 1 0-1h2.5V4.5Z'/&gt;&lt;/svg&gt;"></adw-action-row>
+                </adw-list-box>
+                <details>
+                    <summary>Show ListBox Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-list-box selectable&gt;
+    &lt;adw-row interactive&gt;
+        &lt;adw-label&gt;List Item 1&lt;/adw-label&gt;
+    &lt;/adw-row&gt;
+    &lt;adw-action-row title="Action Row" subtitle="Subtitle"&gt;&lt;/adw-action-row&gt;
+&lt;/adw-list-box&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Banners (Declarative Trigger and Container) -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Banners (Declarative Trigger)</adw-label>
+                <adw-box orientation="vertical" spacing="s" id="declarative-banner-container" style="padding: var(--spacing-s); border: 1px dashed var(--border-color); min-height: 50px;">
+                    <!-- Banners will appear here -->
+                </adw-box>
+                <adw-box orientation="horizontal" spacing="s" style="margin-top: var(--spacing-s);">
+                    <adw-button id="trigger-info-banner-declarative">Show Info Banner</adw-button>
+                    <adw-button id="trigger-error-banner-declarative" destructive>Show Error Banner</adw-button>
+                </adw-box>
+                 <details>
+                    <summary>Show Banner Trigger Code Examples (JS for imperative banner creation)</summary>
+                    <pre><code>
+// HTML for container and trigger button:
+// &lt;adw-box id="my-banner-container" style="min-height: 50px;"&gt;&lt;/adw-box&gt;
+// &lt;adw-button id="show-banner-btn"&gt;Show Banner&lt;/adw-button&gt;
+
+// JavaScript:
+const bannerContainer = document.getElementById('my-banner-container');
+document.getElementById('show-banner-btn').addEventListener('click', () => {
+    Adw.createAdwBanner("This is an informational message.", {
+        type: 'info', // 'info', 'warning', 'error'
+        dismissible: true,
+        container: bannerContainer // Specify the container here
+    });
+});
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative Spinners -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Spinners (Declarative)</adw-label>
+                <adw-box orientation="horizontal" spacing="m" style="align-items: center;">
+                    <adw-label>Default Spinner:</adw-label>
+                    <adw-spinner></adw-spinner>
+                    <adw-label>Small Spinner:</adw-label>
+                    <adw-spinner small></adw-spinner>
+                    <adw-label>Large Spinner:</adw-label>
+                    <adw-spinner large></adw-spinner>
+                </adw-box>
+                <details>
+                    <summary>Show Spinner Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-spinner&gt;&lt;/adw-spinner&gt;
+&lt;adw-spinner small&gt;&lt;/adw-spinner&gt;
+&lt;adw-spinner large&gt;&lt;/adw-spinner&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative Status Pages -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Status Pages (Declarative)</adw-label>
+                <adw-status-page title="No Items Found" icon="<svg width='48' height='48' viewBox='0 0 24 24'><path fill='currentColor' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/></svg>">
+                    <adw-label slot="description">There are currently no items to display in this section.</adw-label>
+                    <adw-button slot="action" suggested>Add New Item</adw-button>
+                </adw-status-page>
+                <details>
+                    <summary>Show Status Page Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-status-page title="No Items Found" icon="&lt;svg&gt;...&lt;/svg&gt;"&gt;
+    &lt;adw-label slot="description"&gt;There are currently no items to display.&lt;/adw-label&gt;
+    &lt;adw-button slot="action" suggested&gt;Add New Item&lt;/adw-button&gt;
+&lt;/adw-status-page&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative Split Buttons -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Split Buttons (Declarative)</adw-label>
+                <adw-box orientation="horizontal" spacing="m" style="align-items: center;">
+                    <adw-split-button action-text="Save" id="declarative-split-btn">
+                        <adw-menu slot="menu">
+                            <adw-menu-item label="Save As..." data-action="save-as"></adw-menu-item>
+                            <adw-menu-item label="Export..." data-action="export"></adw-menu-item>
+                        </adw-menu>
+                    </adw-split-button>
+                    <adw-split-button action-text="Open" icon="<svg width='16' height='16'><path d='M2 3h12v2H2z'/></svg>" id="declarative-split-btn-icon" suggested>
+                         <adw-menu slot="menu">
+                            <adw-menu-item label="Open Recent" data-action="open-recent"></adw-menu-item>
+                        </adw-menu>
+                    </adw-split-button>
+                </adw-box>
+                <details>
+                    <summary>Show Split Button Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-split-button action-text="Save"&gt;
+    &lt;adw-menu slot="menu"&gt;
+        &lt;adw-menu-item label="Save As..."&gt;&lt;/adw-menu-item&gt;
+    &lt;/adw-menu&gt;
+&lt;/adw-split-button&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative Avatars -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Avatars (Declarative)</adw-label>
+                <adw-box orientation="horizontal" spacing="m" style="align-items: center;">
+                    <adw-avatar text="Jules Verne" size="32"></adw-avatar>
+                    <adw-avatar image="app-demo/static/img/default_avatar.png" size="48"></adw-avatar>
+                    <adw-avatar text="Ada Lovelace" size="64" shape="rounded"></adw-avatar>
+                     <adw-avatar icon="<svg width='24' height='24' viewBox='0 0 24 24'><path fill='currentColor' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" size="40"></adw-avatar>
+                </adw-box>
+                <details>
+                    <summary>Show Avatar Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-avatar text="Jules Verne" size="32"&gt;&lt;/adw-avatar&gt;
+&lt;adw-avatar image="path/to/image.png" size="48"&gt;&lt;/adw-avatar&gt;
+&lt;adw-avatar text="Ada L" size="64" shape="rounded"&gt;&lt;/adw-avatar&gt;
+&lt;adw-avatar icon="&lt;svg&gt;...&lt;/svg&gt;" size="40"&gt;&lt;/adw-avatar&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative ViewSwitcher -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">ViewSwitcher (Declarative)</adw-label>
+                <adw-view-switcher id="declarative-view-switcher">
+                    <adw-view name="Page 1" title="Page One">
+                        <adw-box style="padding: var(--spacing-l);">
+                            <adw-label title-level="2">Content for Page One (Declarative)</adw-label>
+                            <adw-button>A button on page 1</adw-button>
+                        </adw-box>
+                    </adw-view>
+                    <adw-view name="Page 2" title="Page Two (Active)" active>
+                         <adw-box style="padding: var(--spacing-l);">
+                            <adw-label title-level="2">Content for Page Two (Declarative)</adw-label>
+                            <adw-entry placeholder="Type something on page 2"></adw-entry>
+                        </adw-box>
+                    </adw-view>
+                    <adw-view name="Page 3" title="Page Three">
+                         <adw-box style="padding: var(--spacing-l);">
+                            <adw-label title-level="2">Content for Page Three (Declarative)</adw-label>
+                        </adw-box>
+                    </adw-view>
+                </adw-view-switcher>
+                <details>
+                    <summary>Show ViewSwitcher Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-view-switcher&gt;
+    &lt;adw-view name="Page1" title="Page One"&gt;
+        &lt;!-- Content for page 1 --&gt;
+    &lt;/adw-view&gt;
+    &lt;adw-view name="Page2" title="Page Two" active&gt;
+        &lt;!-- Content for page 2 --&gt;
+    &lt;/adw-view&gt;
+&lt;/adw-view-switcher&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+            <!-- Declarative Flap -->
+            <section class="widget-showcase">
+                <adw-label title-level="1">Flap (Declarative)</adw-label>
+                <adw-button id="toggle-declarative-flap">Toggle Flap</adw-button>
+                <adw-flap id="declarative-flap-instance" style="border: 1px solid var(--border-color); margin-top: var(--spacing-s);">
+                    <adw-box slot="flap-content" style="padding: var(--spacing-m); background: var(--secondary-bg-color);" min-width="200px">
+                        <adw-label title-level="3">Flap Content</adw-label>
+                        <adw-button>Button in Flap</adw-button>
+                    </adw-box>
+                    <adw-box slot="main-content" style="padding: var(--spacing-m); min-height: 150px;">
+                        <adw-label title-level="3">Main Content Area</adw-label>
+                        <adw-entry placeholder="Entry in main content"></adw-entry>
+                    </adw-box>
+                </adw-flap>
+                 <details>
+                    <summary>Show Flap Code Examples (Declarative)</summary>
+                    <pre><code>
+&lt;adw-button id="toggle-flap-btn"&gt;Toggle Flap&lt;/adw-button&gt;
+&lt;adw-flap id="my-flap"&gt;
+    &lt;div slot="flap-content"&gt;Flap's content here.&lt;/div&gt;
+    &lt;div slot="main-content"&gt;Main content here.&lt;/div&gt;
+&lt;/adw-flap&gt;
+&lt;script&gt;
+    document.getElementById('toggle-flap-btn').addEventListener('click', () => {
+        document.getElementById('my-flap').toggle();
+    });
+&lt;/script&gt;
+                    </code></pre>
+                </details>
+            </section>
+
+
             <div id="legacy-js-factories-content">
-                <!-- JS factories will append their output here -->
+                 <adw-label title-level="1" id="legacy-js-section-title" style="display:none; margin-top: var(--spacing-xl);">Legacy JS Factory Examples</adw-label>
+                <!-- JS factories will append their output here for components NOT YET converted to declarative in this file -->
             </div>
         </div>
     </adw-application-window>
@@ -249,6 +535,50 @@
         // --- Event Listeners for NEW Declarative Sections ---
         document.getElementById('declarative-entry')?.addEventListener('input', (e) => Adw.createToast(`Declarative Entry Input: ${e.target.value}`, {timeout:1000}));
         document.getElementById('declarative-switch-1')?.addEventListener('change', (e) => Adw.createToast(`Declarative Switch 1: ${e.target.checked ? 'ON' : 'OFF'}`));
+        document.getElementById('declarative-checkbox-event')?.addEventListener('change', (e) => Adw.createToast(`Declarative Checkbox: ${e.target.checked ? 'Checked' : 'Unchecked'}`));
+        document.querySelectorAll('adw-radio-button[name="declarative-radio-group"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    Adw.createToast(`Declarative Radio selected: ${e.target.label}`);
+                }
+            });
+        });
+        document.getElementById('declarative-listbox-interactive-row')?.addEventListener('click', () => Adw.createToast("Declarative Interactive Row clicked!"));
+
+        // Declarative Banner Triggers
+        const declBannerContainer = document.getElementById('declarative-banner-container');
+        if (declBannerContainer) {
+            document.getElementById('trigger-info-banner-declarative')?.addEventListener('click', () => {
+                Adw.createAdwBanner("This is an informational message (declarative trigger).", { type: 'info', dismissible: true, container: declBannerContainer });
+            });
+            document.getElementById('trigger-error-banner-declarative')?.addEventListener('click', () => {
+                Adw.createAdwBanner("This is an error message (declarative trigger).", { type: 'error', dismissible: true, container: declBannerContainer });
+            });
+        }
+
+        // Declarative Split Button Listeners
+        const declSplitBtn = document.getElementById('declarative-split-btn');
+        declSplitBtn?.addEventListener('action', () => Adw.createToast("Split Button: Save Action clicked!"));
+        declSplitBtn?.addEventListener('menu-action', (e) => Adw.createToast(`Split Button Menu: ${e.detail.label} (${e.detail.action}) clicked!`));
+
+        const declSplitBtnIcon = document.getElementById('declarative-split-btn-icon');
+        declSplitBtnIcon?.addEventListener('action', () => Adw.createToast("Split Button (Icon): Open Action clicked!"));
+        declSplitBtnIcon?.addEventListener('menu-action', (e) => Adw.createToast(`Split Button (Icon) Menu: ${e.detail.label} (${e.detail.action}) clicked!`));
+
+        // Declarative ViewSwitcher Listener
+        document.getElementById('declarative-view-switcher')?.addEventListener('view-changed', (e) => {
+            Adw.createToast(`ViewSwitcher changed to: ${e.detail.title}`);
+        });
+
+        // Declarative Flap Listener
+        const declFlap = document.getElementById('declarative-flap-instance');
+        document.getElementById('toggle-declarative-flap')?.addEventListener('click', () => {
+            if(declFlap) declFlap.toggle();
+        });
+        declFlap?.addEventListener('flap-toggled', (e) => {
+            Adw.createToast(`Flap is now ${e.detail.isOpen ? 'open' : 'closed'}`);
+        });
+
 
         const declDialogInstance = document.getElementById('declarative-dialog-instance');
         document.getElementById('open-declarative-dialog')?.addEventListener('click', () => {
@@ -300,48 +630,16 @@
         }
 
         // --- Components to keep generating via JS factories for now (if not yet converted above) ---
-        // Labels (demonstrative)
-        const label = Adw.createLabel("This is a label (JS Factory)", {isBody: true});
-        const labelTitle1 = Adw.createLabel("Title 1 (JS Factory)", {title: 1});
-        const labelsBox = Adw.createRow({ children: [labelTitle1, label] });
-        const labelCodeSample = `
-// Body Text Label
-const bodyLabel = Adw.createLabel("This is a standard body text label.", {isBody: true});
-// Title Label
-const titleLabel = Adw.createLabel("Title 1", {title: 1});`;
-        const labelCodeDetails = createCodeSampleDetails('Show Label Code Examples (JS Factory)', labelCodeSample);
-
-        // Progress Bar (demonstrative)
-        const progressBar = Adw.createProgressBar({value: 50});
-        const progressBarBox = Adw.createBox({ orientation: 'vertical', spacing: "s", children: [ Adw.createRow({ children: [Adw.createLabel("Progress (50%): "), progressBar]})]});
-        const progressBarCodeSample = `const progressBar = Adw.createProgressBar({ value: 50 });`;
-        const progressBarCodeDetails = createCodeSampleDetails('Show Progress Bar Code Examples (JS Factory)', progressBarCodeSample);
-
-        // Checkbox (demonstrative)
-        const checkbox = Adw.createCheckbox({ label: "Enable Feature (JS)", onChanged: (e) => console.log("Checkbox:", e.target.checked) });
-        const checkBox = Adw.createBox({ orientation: 'horizontal', children: [ Adw.createRow({ children: [checkbox]})]});
-        const checkboxCodeSample = `const checkbox = Adw.createCheckbox({ label: "Enable Feature", onChanged: (e) => console.log("Checkbox state:", e.target.checked) });`;
-        const checkboxCodeDetails = createCodeSampleDetails('Show Checkbox Code Examples (JS Factory)', checkboxCodeSample);
-
-        // Radio Button (demonstrative)
-        const radio1 = Adw.createRadioButton({ label: "Option 1 (JS)", name: "radioGroupJS", checked: true });
-        const radioBox = Adw.createBox({ orientation: 'horizontal', children: [ Adw.createRow({ children: [radio1] })]});
-        const radioButtonCodeSample = `const radio1 = Adw.createRadioButton({ label: "Option A", name: "myRadioGroup", checked: true });`;
-        const radioButtonCodeDetails = createCodeSampleDetails('Show Radio Button Code Examples (JS Factory)', radioButtonCodeSample);
-
-        // ListBox (basic demonstrative)
-        const listBox = Adw.createListBox({ children: [ Adw.createRow({ interactive: true, onClick: () => Adw.createToast("Row 1 Clicked"), children: [Adw.createLabel("List Item 1 (Interactive JS)")] })]});
-        const listBoxContainer = Adw.createBox({ orientation: 'horizontal', spacing: 'm', children: [ Adw.createBox({orientation: 'vertical', spacing: 's', children: [Adw.createLabel("Default ListBox (JS)", {title:4}), listBox]})]});
-        const listBoxCodeSample = `const listBox = Adw.createListBox({ children: [ Adw.createRow({ interactive: true, children: [Adw.createLabel("List Item")] }) ] });`;
-        const listBoxCodeDetails = createCodeSampleDetails('Show ListBox Code Examples (JS Factory)', listBoxCodeSample);
-
         // Banners (imperative, so JS factory is fine)
         const bannersTitle = Adw.createLabel("Banners (JS Factory Triggered)", { title: 1 });
-        const bannerContainer = Adw.createBox({ orientation: 'vertical', spacing: 's', _meta_id: "banner-container-box" });
-        const showInfoBannerButton = Adw.createButton("Show Info Banner (JS)", { onClick: () => { Adw.createAdwBanner("This is an informational message.", { type: 'info', dismissible: true, container: bannerContainer }); }});
-        const bannerButtonsBox = Adw.createBox({ orientation: 'horizontal', spacing: 's', children: [showInfoBannerButton]});
-        const bannerCodeSample = `Adw.createAdwBanner("Message", { type: 'info', container: myContainer });`;
-        const bannerCodeDetails = createCodeSampleDetails('Show Banner Code Examples (JS Factory)', bannerCodeSample);
+        const bannerContainer = Adw.createBox({ orientation: 'vertical', spacing: 's', _meta_id: "banner-container-box" }); // This box itself will be created declaratively now.
+        const showInfoBannerButton = Adw.createButton("Show Info Banner (JS)", { onClick: () => {
+            const container = document.getElementById('declarative-banner-container'); // Target the new declarative container
+            if (container) Adw.createAdwBanner("This is an informational message.", { type: 'info', dismissible: true, container: container });
+            else console.error("Banner container not found for JS-triggered banner.");
+        }});
+        // bannerButtonsBox will be declarative, this JS button will be added to it if needed, or replaced.
+        // For now, let's assume the button to trigger JS banner is also declarative.
 
         // Spinners (imperative is fine, declarative showcase later)
         const spinnersTitle = Adw.createLabel("Spinners (JS Factory)", { title: 1 });
@@ -404,25 +702,29 @@ const titleLabel = Adw.createLabel("Title 1", {title: 1});`;
         const avatarCodeDetails = createCodeSampleDetails('Show Avatar Code Examples (JS Factory)', avatarCodeSample);
 
         // --- Main Content Layout (Legacy JS Factories) ---
-        const legacyContent = Adw.createBox({
-            orientation: 'vertical',
-            spacing: "l",
-            children: [
-                Adw.createLabel("Typography (Legacy JS Factory)", {title:1}), labelsBox, labelCodeDetails,
-                Adw.createLabel("Progress Bars (Legacy JS Factory)", {title:1}), progressBarBox, progressBarCodeDetails,
-                Adw.createLabel("Controls (Legacy JS Factory)", {title:1}), checkBox, checkboxCodeDetails, radioBox, radioButtonCodeDetails,
-                bannersTitle, bannerContainer, bannerButtonsBox, bannerCodeDetails,
-                spinnersTitle, spinnerBox, spinnerCodeDetails,
-                statusPagesTitle, statusPageContainer, statusPageCodeDetails,
-                splitButtonsTitle, splitButtonBox, splitButtonCodeDetails,
-                Adw.createLabel("List Boxes (Legacy JS Factory)", {title:1}), listBoxContainer, listBoxCodeDetails,
-                viewSwitcherTitle, viewSwitcher.element, viewSwitcherCodeDetails,
-                flapTitle, flapExampleBox, flapCodeDetails,
+        const legacyJsSectionTitle = document.getElementById('legacy-js-section-title');
+        const childrenForLegacyContent = [
+                // bannersTitle, bannerContainer, bannerButtonsBox, bannerCodeDetails, // Banner section is now declarative
+                // spinnersTitle, spinnerBox, spinnerCodeDetails, // Now declarative
+                // statusPagesTitle, statusPageContainer, statusPageCodeDetails, // Now declarative
+                // splitButtonsTitle, splitButtonBox, splitButtonCodeDetails, // Now declarative
+                // viewSwitcherTitle, viewSwitcher.element, viewSwitcherCodeDetails, // Now declarative
+                // flapTitle, flapExampleBox, flapCodeDetails, // Now declarative
                 accentPickerTitle, accentPickerBox, accentPickerCodeDetails,
-                avatarTitle, avatarSection, avatarCodeDetails,
-            ],
-        });
-        legacyContentTarget.appendChild(legacyContent);
+                // avatarTitle, avatarSection, avatarCodeDetails, // Now declarative
+        ];
+
+        if (childrenForLegacyContent.length > 0) {
+            if(legacyJsSectionTitle) legacyJsSectionTitle.style.display = 'block'; // Show title if there's content
+            const legacyContentFragment = document.createDocumentFragment();
+            childrenForLegacyContent.forEach(child => {
+                if (child) legacyContentFragment.appendChild(child);
+            });
+            legacyContentTarget.appendChild(legacyContentFragment);
+        } else {
+            if(legacyJsSectionTitle) legacyJsSectionTitle.style.display = 'none'; // Hide title if no legacy content
+        }
+
 
         // --- Custom Element Showcase (Generated by JS, but demonstrates declarative usage in code samples) ---
         const customElementShowcaseTitle = Adw.createLabel("Custom Element Showcase (Declarative Examples)", {title:1});
