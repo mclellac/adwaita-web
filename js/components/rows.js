@@ -548,8 +548,8 @@ export class AdwButtonRow extends HTMLElement {
 
         rowDiv.classList.add('adw-row', 'adw-button-row');
         containerDiv.classList.add('adw-button-row-container');
-
-        containerDiv.appendChild(slot);
+        // Intentionally re-set these lines to ensure no hidden characters
+        containerDiv.appendChild(slot); // Former error line
         rowDiv.appendChild(containerDiv);
         this.shadowRoot.appendChild(rowDiv); // Append the new content structure
 
