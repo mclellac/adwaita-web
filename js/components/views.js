@@ -238,8 +238,8 @@ export function createAdwTabView(options = {}) {
 }
 export class AdwTabView extends HTMLElement { /* ... (Same as original AdwTabView WC, ensure Adw.createTabView is local) ... */
     static get observedAttributes() { return ['active-page-name', 'show-new-tab-button']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); this._tabViewFactoryInstance = null; this._pagesSlot = document.createElement('slot'); this._slotObserver = new MutationObserver(() => this._rebuildFactoryPages()); }
-    connectedCallback() { this._renderFactoryInstance(); this.shadowRoot.appendChild(this._pagesSlot); this._slotObserver.observe(this, { childList: true, attributes: true, subtree: false }); this._rebuildFactoryPages(); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); this._tabViewFactoryInstance = null; this._pagesSlot = document.createElement('slot'); this.shadowRoot.appendChild(this._pagesSlot); /* Append slot here */ this._slotObserver = new MutationObserver(() => this._rebuildFactoryPages()); }
+    connectedCallback() { /* _pagesSlot is already in shadowRoot */ this._renderFactoryInstance(); this._slotObserver.observe(this, { childList: true, attributes: true, subtree: false }); this._rebuildFactoryPages(); }
     disconnectedCallback() { this._slotObserver.disconnect(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue === newValue || !this._tabViewFactoryInstance) return; if (name === 'active-page-name') { this._tabViewFactoryInstance.setActivePage(newValue); this._updateSlottedPageDisplay(newValue); } else if (name === 'show-new-tab-button') { this._renderFactoryInstance(); this._rebuildFactoryPages(); }}
     _updateSlottedPageDisplay(activePageName) { const slottedElements = this._pagesSlot.assignedNodes({ flatten: true }); slottedElements.forEach(node => { if (node.nodeType === Node.ELEMENT_NODE && (node.matches('adw-tab-page') || node.dataset.adwTabPage)) { const isPageActive = node.getAttribute('page-name') === activePageName; node.style.display = isPageActive ? '' : 'none'; if(isPageActive) node.setAttribute('active',''); else node.removeAttribute('active'); }});}
@@ -283,8 +283,8 @@ export function createAdwNavigationView(options = {}) {
 }
 export class AdwNavigationView extends HTMLElement { /* ... (Same as original AdwNavigationView WC, ensure createAdwNavigationView is local) ... */
     static get observedAttributes() { return []; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); this._navigationViewFactoryInstance = null; this._pagesSlot = document.createElement('slot'); this._slotObserver = new MutationObserver(() => this._rebuildFactoryPagesFromSlotted()); }
-    connectedCallback() { this._renderFactoryInstance(); this.shadowRoot.appendChild(this._pagesSlot); this._slotObserver.observe(this, { childList: true, attributes: true, subtree: true }); this._rebuildFactoryPagesFromSlotted(); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); this._navigationViewFactoryInstance = null; this._pagesSlot = document.createElement('slot'); this.shadowRoot.appendChild(this._pagesSlot); /* Append slot here */ this._slotObserver = new MutationObserver(() => this._rebuildFactoryPagesFromSlotted()); }
+    connectedCallback() { /* _pagesSlot is already in shadowRoot */ this._renderFactoryInstance(); this._slotObserver.observe(this, { childList: true, attributes: true, subtree: true }); this._rebuildFactoryPagesFromSlotted(); }
     disconnectedCallback() { this._slotObserver.disconnect(); }
     _getPageDataFromElement(element) { if (!element || !element.matches || (!element.matches('adw-navigation-page, [data-page-name]') && !element.dataset.adwNavigationPage )) return null; const pageName = element.getAttribute('data-page-name') || element.getAttribute('page-name') || adwGenerateId('nav-page'); if (!element.hasAttribute('data-page-name') && !element.hasAttribute('page-name')) element.setAttribute('data-page-name', pageName); const header = {}; const titleEl = element.querySelector('[slot="header-title"]'); if (titleEl) header.title = titleEl.textContent; const subtitleEl = element.querySelector('[slot="header-subtitle"]'); if (subtitleEl) header.subtitle = subtitleEl.textContent; const startElements = element.querySelectorAll('[slot="header-start"] > *'); if (startElements.length > 0) header.start = Array.from(startElements).map(el => el.cloneNode(true)); const endElements = element.querySelectorAll('[slot="header-end"] > *'); if (endElements.length > 0) header.end = Array.from(endElements).map(el => el.cloneNode(true)); return { name: pageName, element: element, header: Object.keys(header).length > 0 ? header : undefined }; }
     _rebuildFactoryPagesFromSlotted() { if (!this._navigationViewFactoryInstance) this._renderFactoryInstance(); const initialPagesData = []; const slottedElements = this._pagesSlot.assignedNodes({ flatten: true }); slottedElements.forEach(node => { if (node.nodeType === Node.ELEMENT_NODE) { const pageData = this._getPageDataFromElement(node); if(pageData) initialPagesData.push(pageData); }}); this._renderFactoryInstance(initialPagesData); }
@@ -293,6 +293,48 @@ export class AdwNavigationView extends HTMLElement { /* ... (Same as original Ad
     push(pageElementOrName) { if (typeof pageElementOrName === 'string') { const pageName = pageElementOrName; const element = this.querySelector(`[data-page-name="${pageName}"], [page-name="${pageName}"]`); if (element && this._navigationViewFactoryInstance) { const pageData = this._getPageDataFromElement(element); if(pageData) this._navigationViewFactoryInstance.push(pageData); } else console.error(`AdwNavigationView: Page with name "${pageName}" not found.`); } else if (pageElementOrName instanceof HTMLElement) { const pageData = this._getPageDataFromElement(pageElementOrName); if (pageData && this._navigationViewFactoryInstance) { if (!pageElementOrName.parentElement) this.appendChild(pageElementOrName); this._navigationViewFactoryInstance.push(pageData); } else if(!pageData) console.error("AdwNavigationView.push: Invalid page element.", pageElementOrName); } else console.error("AdwNavigationView.push: Argument must be page name or HTMLElement."); }
     pop() { if (this._navigationViewFactoryInstance) this._navigationViewFactoryInstance.pop(); }
     getVisiblePageName(){ if(this._navigationViewFactoryInstance) return this._navigationViewFactoryInstance.getVisiblePageName(); return null; }
+    push(pageElementOrName) {
+        if (typeof pageElementOrName === 'string') {
+            const pageName = pageElementOrName;
+            const element = this.querySelector(`[data-page-name="${pageName}"], [page-name="${pageName}"]`);
+            if (element && this._navigationViewFactoryInstance) {
+                const pageData = this._getPageDataFromElement(element);
+                if (pageData) this._navigationViewFactoryInstance.push(pageData);
+                else console.error(`AdwNavigationView: Could not derive page data for page name "${pageName}". Ensure element is valid.`);
+            } else if (!element) {
+                console.error(`AdwNavigationView: Page with name "${pageName}" not found in light DOM.`);
+            } else {
+                 // _navigationViewFactoryInstance is null, likely an issue during setup
+                console.error(`AdwNavigationView: Factory instance not available for pushing page name "${pageName}".`);
+            }
+        } else if (pageElementOrName instanceof HTMLElement) {
+            const pageData = this._getPageDataFromElement(pageElementOrName);
+            if (pageData && this._navigationViewFactoryInstance) {
+                if (!pageElementOrName.parentElement || pageElementOrName.parentElement !== this) {
+                     // Check if it's already slotted or a direct child. If not, append it to make it available for slotting.
+                    let alreadySlotted = false;
+                    const slot = this.shadowRoot.querySelector('slot');
+                    if (slot) {
+                        const assignedNodes = slot.assignedNodes({ flatten: true });
+                        if (assignedNodes.includes(pageElementOrName)) {
+                            alreadySlotted = true;
+                        }
+                    }
+                    if (!alreadySlotted && (!pageElementOrName.parentElement || pageElementOrName.parentElement !== this)) {
+                         this.appendChild(pageElementOrName);
+                    }
+                }
+                this._navigationViewFactoryInstance.push(pageData);
+            } else if (!pageData) {
+                console.error("AdwNavigationView.push: Invalid page element provided. Ensure it's a valid page container (e.g., <div data-page-name='my-page'>...</div> or an element that _getPageDataFromElement can process). Received:", pageElementOrName);
+            } else {
+                // _navigationViewFactoryInstance is null
+                 console.error("AdwNavigationView: Factory instance not available for pushing HTMLElement.", pageElementOrName);
+            }
+        } else {
+            console.error(`AdwNavigationView.push: Argument must be page name (string) or HTMLElement. Received type: ${typeof pageElementOrName}, value:`, pageElementOrName);
+        }
+    }
 }
 
 /** Creates an AdwToolbarView layout container. */
