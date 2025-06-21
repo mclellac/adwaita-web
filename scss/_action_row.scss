@@ -53,7 +53,7 @@
   .adw-action-row-title { // This is "label.title"
     font-size: var(--font-size-base);
     color: var(--primary-fg-color); // Use primary text color for titles
-    font-weight: 500; // Slightly bolder for emphasis
+    font-weight: normal; // Standard Adwaita row titles are normal weight
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -61,13 +61,11 @@
 
   .adw-action-row-subtitle { // This is "label.subtitle"
     font-size: var(--font-size-small);
-    color: var(--secondary-fg-color); // Subtitles are secondary
-    // opacity: 0.7; // Using secondary-fg-color might be enough, or keep opacity for further dimming.
-                     // Libadwaita often just uses the secondary color without extra opacity.
+    color: var(--secondary-fg-color); // Subtitles are secondary. This var likely includes opacity.
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-top: var(--spacing-xxs);
+    margin-top: var(--spacing-xxs); // Small gap between title and subtitle
   }
 
   .adw-action-row-suffix {
