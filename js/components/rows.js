@@ -522,23 +522,36 @@ export class AdwButtonRow extends HTMLElement {
     disconnectedCallback() { this._slotObserver.disconnect(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
     _render() {
-        const rowDiv = this.shadowRoot.querySelector('.adw-button-row') || document.createElement('div');
-        const containerDiv = this.shadowRoot.querySelector('.adw-button-row-container') || document.createElement('div');
-        const slot = this.shadowRoot.querySelector('slot') || document.createElement('slot');
-
-        if (!rowDiv.parentElement) {
-            const styleLinkRef = this.shadowRoot.querySelector('link'); // Keep reference to style
-            while(this.shadowRoot.firstChild) this.shadowRoot.removeChild(this.shadowRoot.firstChild); // Clear all
-            this.shadowRoot.appendChild(styleLinkRef); // Add style back
-
-            rowDiv.innerHTML = '';
-            containerDiv.innerHTML = '';
-            rowDiv.classList.add('adw-row', 'adw-button-row');
-            containerDiv.classList.add('adw-button-row-container');
-            containerDiv.appendChild(slot);
-            rowDiv.appendChild(containerDiv);
-            this.shadowRoot.appendChild(rowDiv);
+        // Ensure stylesheet is there
+        let styleLink = this.shadowRoot.querySelector('link[rel="stylesheet"]');
+        if (!styleLink) {
+            styleLink = document.createElement('link');
+            styleLink.rel = 'stylesheet';
+            styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+            // Prepend to ensure it's first, or append if preferred, but be consistent.
+            // Constructor already appends it, so this is more of a safeguard if shadowRoot was cleared externally.
+            if (!this.shadowRoot.contains(styleLink)) { // Avoid re-appending if querySelector missed it but it's there
+                 this.shadowRoot.prepend(styleLink);
+            }
         }
+
+        // Clear everything else but the stylesheet
+        Array.from(this.shadowRoot.childNodes).forEach(child => {
+            if (child !== styleLink && child.nodeName !== 'STYLE') { // Also preserve <style> if any
+                this.shadowRoot.removeChild(child);
+            }
+        });
+
+        const rowDiv = document.createElement('div');
+        const containerDiv = document.createElement('div');
+        const slot = document.createElement('slot'); // Default slot for buttons
+
+        rowDiv.classList.add('adw-row', 'adw-button-row');
+        containerDiv.classList.add('adw-button-row-container');
+
+        containerDiv.appendChild(slot);
+        rowDiv.appendChild(containerDiv);
+        this.shadowRoot.appendChild(rowDiv); // Append the new content structure
 
         const isCentered = this.hasAttribute('centered');
         rowDiv.classList.toggle('centered', isCentered);
