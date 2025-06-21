@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adwaita Web - TabView Demo</title>
+    <link rel="stylesheet" href="app-demo/static/css/adwaita-web.css">
+    <script type="module" src="app-demo/static/js/components.js" defer></script>
+    <script src="app-demo/static/js/adw-initializer.js" defer></script>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        adw-application-window { flex-grow: 1; display: flex; flex-direction: column; }
+        .content-area { padding: var(--spacing-l); overflow-y: auto; flex-grow: 1; }
+    </style>
+</head>
+<body>
+    <adw-application-window id="tab-view-window">
+        <adw-header-bar slot="header">
+            <adw-window-title slot="title" title="TabView Demo"></adw-window-title>
+            <adw-button slot="end" id="theme-toggle-button" class="flat">Toggle Theme</adw-button>
+        </adw-header-bar>
+
+        <div class="content-area">
+            <adw-label title-level="1" style="margin-bottom: var(--spacing-l);">TabView Showcase</adw-label>
+
+            <adw-tab-view id="demo-tab-view" style="min-height: 300px; border: 1px solid var(--borders-color);">
+                <adw-tab-page name="page1" title="Page One" icon-name="actions/document-open-symbolic" active>
+                    <div style="padding: var(--spacing-xl);">
+                        <adw-label title-level="2">Content of Page One</adw-label>
+                        <adw-label is-body>This is the first tab page. It has an icon.</adw-label>
+                        <adw-button suggested style="margin-top: var(--spacing-m);">A Button</adw-button>
+                    </div>
+                </adw-tab-page>
+                <adw-tab-page name="page2" title="Page Two (Longer Title)">
+                    <div style="padding: var(--spacing-xl);">
+                        <adw-label title-level="2">Content of Page Two</adw-label>
+                        <adw-label is-body>This tab page has a slightly longer title to observe text handling.</adw-label>
+                        <adw-entry placeholder="Enter something..."></adw-entry>
+                    </div>
+                </adw-tab-page>
+                <adw-tab-page name="page3" title="Closeable Tab" closeable icon-name="actions/edit-delete-symbolic">
+                    <div style="padding: var(--spacing-xl);">
+                        <adw-label title-level="2">Content of Page Three</adw-label>
+                        <adw-label is-body>This tab can be closed using the 'x' button on the tab.</adw-label>
+                    </div>
+                </adw-tab-page>
+                <adw-tab-page name="page4" title="Another Tab">
+                    <div style="padding: var(--spacing-xl); display:flex; flex-direction: column; gap: var(--spacing-m);">
+                        <adw-label title-level="2">Content of Page Four</adw-label>
+                        <adw-checkbox label="A checkbox on the fourth page"></adw-checkbox>
+                        <adw-switch></adw-switch>
+                    </div>
+                </adw-tab-page>
+            </adw-tab-view>
+
+            <adw-label title-level="3" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-s);">Controls for TabView</adw-label>
+            <adw-box orientation="horizontal" spacing="s" style="flex-wrap: wrap;">
+                <adw-button id="add-tab-button">Add New Tab</adw-button>
+                <adw-button id="remove-tab-button">Remove Current Tab</adw-button>
+                <adw-button id="select-tab2-button">Select "Page Two"</adw-button>
+            </adw-box>
+
+        </div>
+    </adw-application-window>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.Adw) {
+                console.error("Adw object not found. Aborting main script.");
+                return;
+            }
+            Adw.init(); // Initialize Adw global and theme
+
+            document.getElementById('theme-toggle-button')?.addEventListener('click', () => Adw.toggleTheme());
+
+            const tabView = document.getElementById('demo-tab-view');
+            let newTabCounter = 0;
+
+            document.getElementById('add-tab-button')?.addEventListener('click', () => {
+                newTabCounter++;
+                const newPageName = `new-page-${newTabCounter}`;
+                const newTabPage = document.createElement('adw-tab-page');
+                newTabPage.setAttribute('name', newPageName);
+                newTabPage.setAttribute('title', `New Tab ${newTabCounter}`);
+                newTabPage.setAttribute('closeable', '');
+
+                const contentDiv = document.createElement('div');
+                contentDiv.style.padding = 'var(--spacing-xl)';
+                contentDiv.innerHTML = `<adw-label title-level="2">Content of New Tab ${newTabCounter}</adw-label><p>This is dynamically added content for ${newPageName}.</p>`;
+                newTabPage.appendChild(contentDiv);
+
+                tabView?.addPage(newTabPage, true); // Add and select
+                Adw.createToast(`Added and selected: New Tab ${newTabCounter}`);
+            });
+
+            document.getElementById('remove-tab-button')?.addEventListener('click', () => {
+                const activePage = tabView?.getActivePage();
+                if (activePage) {
+                    const pageName = activePage.getAttribute('name');
+                    tabView.removePage(pageName);
+                    Adw.createToast(`Removed tab: ${pageName || 'active tab'}`);
+                } else {
+                    Adw.createToast('No active tab to remove.', {type: 'warning'});
+                }
+            });
+
+            document.getElementById('select-tab2-button')?.addEventListener('click', () => {
+                if (tabView?.selectPage('page2')) {
+                    Adw.createToast('Selected "Page Two"');
+                } else {
+                    Adw.createToast('Could not find "Page Two"', {type: 'error'});
+                }
+            });
+
+            tabView?.addEventListener('page-changed', (event) => {
+                console.log('TabView page-changed:', event.detail);
+                Adw.createToast(`Switched to tab: ${event.detail.pageName} (index: ${event.detail.pageIndex})`, {timeout: 1500});
+            });
+
+            tabView?.addEventListener('page-closed', (event) => {
+                console.log('TabView page-closed:', event.detail);
+                Adw.createToast(`Closed tab: ${event.detail.pageName}`, {timeout: 1500});
+            });
+        });
+    </script>
+</body>
+</html>

@@ -21,10 +21,10 @@
 <body>
     <adw-application-window id="main-window">
         <adw-header-bar slot="header" id="main-header-bar">
-            <adw-button slot="start" icon="<svg width='16' height='16'><path d='M2 8l6-6v4h6v4H8v4z'/></svg>" id="header-back-button" aria-label="Back"></adw-button>
+            <adw-button slot="start" icon-name="actions/go-previous-symbolic" id="header-back-button" aria-label="Back" class="icon-only flat"></adw-button> {/* Added .icon-only and .flat for typical headerbar icon button style */}
             <adw-window-title slot="title" title="Adwaita Widgets" subtitle="Declarative Demo"></adw-window-title>
-            <adw-button slot="end" id="theme-toggle-button">Toggle Theme</adw-button>
-            <adw-button slot="end" icon="<svg width='16' height='16'><path d='M2 3h12v2H2zm0 4h12v2H2zm0 4h12v2H2z'/></svg>" id="header-menu-button" aria-label="Menu"></adw-button>
+            <adw-button slot="end" id="theme-toggle-button" class="flat">Toggle Theme</adw-button> {/* Making header buttons flat by default is common */}
+            <adw-button slot="end" icon-name="actions/open-menu-symbolic" id="header-menu-button" aria-label="Menu" class="icon-only flat"></adw-button>
         </adw-header-bar>
 
         <div class="main-content-area">
@@ -247,6 +247,23 @@ if (accentPickerBox) {
   &lt;adw-toggle-button label="A" value="a"&gt;&lt;/adw-toggle-button&gt;
   &lt;adw-toggle-button label="B" value="b"&gt;&lt;/adw-toggle-button&gt;
 &lt;/adw-toggle-group&gt;</code></pre>
+                </details>
+            </section>
+
+            <!-- Links Section -->
+            <section class="widget-showcase">
+                <adw-label title-level="2">Links</adw-label>
+                <adw-box orientation="vertical" spacing="s">
+                    <adw-label is-body>Standard HTML links should inherit Adwaita styling:</adw-label>
+                    <a href="javascript:void(0);" onclick="Adw.createToast('Standard link clicked!', {timeout:1500})">This is a standard link</a>
+                    <adw-label is-body style="margin-top: var(--spacing-s);">A link within a sentence <a href="javascript:void(0);" onclick="Adw.createToast('Inline link clicked!', {timeout:1500})">like this</a> should also be styled.</adw-label>
+                    <adw-label is-body style="margin-top: var(--spacing-s);">Disabled link (via pointer-events and style):</adw-label>
+                    <a href="javascript:void(0);" style="pointer-events: none; color: var(--disabled-fg-color); text-decoration: none; cursor: default;">This is a disabled link</a>
+                </adw-box>
+                <details style="margin-top: var(--spacing-m);">
+                    <summary>Show Link Examples</summary>
+                    <pre><code>&lt;a href="#"&gt;Standard Link&lt;/a&gt;
+&lt;p&gt;Text with an &lt;a href="#"&gt;inline link&lt;/a&gt;.&lt;/p&gt;</code></pre>
                 </details>
             </section>
 
