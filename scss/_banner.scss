@@ -1,54 +1,73 @@
 @use 'variables';
+@use 'mixins';
 
 .adw-banner {
-  padding: var(--spacing-m) var(--spacing-l);
-  border-radius: var(--border-radius-default);
-  border: 1px solid transparent;
-  margin-bottom: var(--spacing-m);
+  // Banners are typically placed at the top of a view or window.
+  // They are not part of a listbox structure usually.
+  padding: var(--spacing-s) var(--spacing-m); // Slightly less vertical padding than rows
+  background-color: var(--banner-bg-color, var(--secondary-bg-color)); // A distinct but not overly loud background
+  color: var(--banner-fg-color, var(--primary-fg-color));
+  // No border-radius by default, as it usually spans full width.
+  // border-radius: var(--border-radius-default);
+  border-bottom: var(--border-width) solid var(--borders-color); // Common to have a bottom separator
+  // margin-bottom: var(--spacing-m); // Margin is context-dependent, parent should handle normally
+
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; // Pushes title and button apart
   align-items: center;
+  gap: var(--spacing-m); // Gap between title and button if both are present
+
+  // Animation for reveal/hide
   opacity: 0;
-  transform: translateY(-20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(calc(-100% - var(--border-width))); // Slide up out of view
+  transition: opacity var(--animation-duration-short) var(--animation-ease-out-sine),
+              transform var(--animation-duration-short) var(--animation-ease-out-sine);
+  // Ensure it's not clickable when hidden
+  visibility: hidden;
+  pointer-events: none;
+  position: relative; // For z-index or absolute positioning if needed by parent context (rare for banner)
 
   &.visible {
     opacity: 1;
     transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
   }
 
-  &.info {
-    background-color: var(--info-bg-color);
-    border-color: var(--info-border-color);
-    color: var(--info-fg-color);
-  }
-  &.success {
-    background-color: var(--success-bg-color);
-    border-color: var(--success-border-color);
-    color: var(--success-fg-color);
-  }
-  &.warning {
-    background-color: var(--warning-bg-color);
-    border-color: var(--warning-border-color);
-    color: var(--warning-fg-color);
-  }
-  &.error {
-    background-color: var(--error-bg-color);
-    border-color: var(--error-border-color);
-    color: var(--error-fg-color);
+  .adw-banner-title {
+    flex-grow: 1; // Title takes available space
+    font-size: var(--font-size-base);
+    font-weight: normal; // Banners usually have normal weight text
+    // Text alignment: Libadwaita centers if enough space, else left-aligns.
+    // Default to left-align for simplicity in CSS. Centering would require more complex checks or JS.
+    text-align: left;
+    min-width: 0; // For ellipsis if title is very long
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .adw-banner-message {
-    flex-grow: 1;
+  .adw-banner-button.adw-button {
+    // Styling for the AdwButton component when used inside a banner
+    flex-shrink: 0; // Button should not shrink
+    // AdwButton's own styles (default, .suggested, .flat) will apply.
+    // Ensure it aligns well with the text.
+    // Example: if button is too tall, adjust its internal padding or line-height.
   }
 
-  .adw-banner-close-button {
-    background: transparent;
-    border: none;
-    color: inherit;
-    font-size: 1.2em;
-    cursor: pointer;
-    padding: 0 var(--spacing-xs);
-    margin-left: var(--spacing-m);
-  }
+  // If a banner needs to be themed for specific contexts (e.g. error, warning)
+  // this can be done by adding classes to the AdwBanner element itself.
+  // Example:
+  // &.error {
+  //   background-color: var(--error-bg-color);
+  //   color: var(--error-fg-color);
+  //   border-color: var(--error-border-color);
+  //   .adw-banner-title { color: var(--error-fg-color); }
+  //   .adw-banner-button { /* Adjust button for error context if needed */ }
+  // }
+  // However, the core AdwBanner is neutral.
 }
+
+// Variables that should be defined (e.g., in _variables.scss):
+// --banner-bg-color: (e.g. var(--secondary-bg-color) or a custom banner color)
+// --banner-fg-color: (e.g. var(--primary-fg-color))

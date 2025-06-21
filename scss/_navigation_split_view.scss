@@ -1,84 +1,102 @@
 // SCSS for AdwNavigationSplitView
 @use "variables";
-@use "flap"; // Potentially leverage flap styles for sidebar/content separation
+@use "mixins";
 
 .adw-navigation-split-view {
     display: flex;
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background-color: var(--adw-window-background-color);
+    background-color: var(--window-bg-color);
 
-    &-sidebar {
-        // Similar to AdwFlap's flap-content or a standard sidebar
-        width: clamp(280px, 30%, 360px); // Default width, can be overridden
-        min-width: 200px; // Minimum reasonable width
+    .adw-navigation-split-view-sidebar {
+        width: var(--adw-nav-split-sidebar-width, clamp(var(--nav-sidebar-min-width, 220px), 25%, var(--nav-sidebar-max-width, 320px)));
+        min-width: var(--nav-sidebar-min-width, 220px);
+        max-width: var(--nav-sidebar-max-width, 320px);
         flex-shrink: 0;
-        background-color: var(--adw-sidebar-background-color);
-        border-right: 1px solid var(--borders-color);
+        background-color: var(--sidebar-bg-color, var(--headerbar-bg-color));
+        border-right: var(--border-width) solid var(--borders-color);
         display: flex;
         flex-direction: column;
-        overflow-y: auto; // If sidebar content itself is scrollable
+        position: relative;
+        transition: width var(--animation-duration-short) var(--animation-ease-out-sine),
+                    min-width var(--animation-duration-short) var(--animation-ease-out-sine),
+                    transform var(--animation-duration-short) var(--animation-ease-out-sine),
+                    visibility var(--animation-duration-short) step-end;
 
-        &.collapsed {
-            // Styles for when collapsed, e.g., on narrower screens
-            // This might be controlled by a breakpoint or programmatically
-            // For now, JS will handle visibility/width changes directly or via classes
-            min-width: 0;
+        &.collapsed:not(.revealed) {
             width: 0;
+            min-width: 0;
             border-right: none;
-            overflow: hidden; // Hide content when collapsed
+            overflow: hidden;
             visibility: hidden;
+             transition: width var(--animation-duration-short) var(--animation-ease-out-sine),
+                        min-width var(--animation-duration-short) var(--animation-ease-out-sine),
+                        visibility var(--animation-duration-short) step-start;
         }
     }
 
-    &-content {
+    .adw-navigation-split-view-content {
         flex-grow: 1;
         display: flex;
-        flex-direction: column; // Usually contains a header and the main view
-        overflow: hidden; // Content area (e.g., AdwNavigationView) handles its own scrolling
-        background-color: var(--adw-view-background-color);
+        flex-direction: column;
+        overflow: hidden;
+        background-color: var(--content-view-bg-color, var(--window-bg-color));
+        position: relative;
     }
 
-    // Styles for when the sidebar is an overlay (e.g., on very narrow screens)
     &.sidebar-overlay {
         .adw-navigation-split-view-sidebar {
             position: absolute;
             top: 0;
             left: 0;
             bottom: 0;
-            z-index: variables.$zindex-flap; // Ensure it's above content
-            box-shadow: var(--shadow-right-big); // Prominent shadow for overlay
-            transition: transform 0.25s ease-in-out, visibility 0.25s;
+            height: 100%;
+            z-index: var(--z-index-flap, 100);
+            box-shadow: var(--popover-box-shadow);
+            border-right-width: var(--border-width);
+
             transform: translateX(-100%);
             visibility: hidden;
+            transition: transform var(--animation-duration-short) var(--animation-ease-out-sine),
+                        visibility 0s var(--animation-duration-short);
 
             &.revealed {
                 transform: translateX(0);
                 visibility: visible;
+                transition-delay: 0s, 0s;
             }
-        }
-        .adw-navigation-split-view-content {
-            // Content takes full width when sidebar is an overlay and hidden
         }
     }
 
-    // Backdrop for overlay sidebar
     .adw-navigation-split-view-backdrop {
-        position: fixed;
+        position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         background-color: var(--backdrop-color);
-        z-index: calc(variables.$zindex-flap - 1); // Below sidebar, above content
+        z-index: calc(var(--z-index-flap, 100) - 1);
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.25s ease-in-out, visibility 0.25s;
+        transition: opacity var(--animation-duration-short) var(--animation-ease-out-sine),
+                    visibility 0s var(--animation-duration-short);
 
         &.visible {
             opacity: 1;
             visibility: visible;
+            transition-delay: 0s, 0s;
         }
     }
 }
+
+// Variables for _variables.scss
+// --nav-sidebar-min-width: 220px;
+// --nav-sidebar-max-width: 320px;
+// --sidebar-bg-color: var(--headerbar-bg-color);
+// --content-view-bg-color: var(--window-bg-color);
+// --z-index-flap
+// --backdrop-color
+// --popover-box-shadow
+// --animation-ease-out-sine (already used, but ensure it's defined)
+// --animation-duration-short (already used)

@@ -1,85 +1,163 @@
 // scss/_preferences_dialog.scss
 @use 'variables';
+@use 'mixins';
 
 .adw-preferences-dialog {
-  // Inherits .adw-dialog styles for the main dialog frame.
+  // Inherits .adw-dialog styles. Specific class .preferences might be used by themes.
+  &.adw-dialog { // Targeting the base dialog class when it's a preferences dialog
+    min-width: var(--preferences-dialog-min-width, 550px);
+    min-height: var(--preferences-dialog-min-height, 400px);
+    max-width: var(--preferences-dialog-max-width, 800px);
+  }
 
-  // The direct content wrapper of the dialog (created by AdwDialog factory)
-  // might need specific padding if the preferences content is edge-to-edge.
+  // The direct content element from AdwDialog factory.
   > .adw-dialog-content {
-    padding: 0; // Remove default dialog content padding
-                 // if the view switcher or pages handle their own.
-    display: flex; // Allow content to fill height
-    flex-direction: column;
-  }
-
-  .adw-preferences-dialog-content {
+    padding: 0;
     display: flex;
     flex-direction: column;
-    flex-grow: 1; // Ensure it tries to fill the dialog height
-    overflow: hidden; // Contained scrolling within view switcher content
+    overflow: hidden;
   }
 
-  .adw-preferences-dialog-view-switcher {
-    flex-grow: 1; // Allow the view switcher to take up space
+  // This is the custom content wrapper for AdwPreferencesDialog, holding the ViewSwitcher
+  .adw-preferences-dialog-content { // This is the content of the AdwDialog (opts.content)
     display: flex;
-    flex-direction: column; // Stack bar and content vertically
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+  }
 
-    // Styling for the ViewSwitcherBar within a PreferencesDialog
-    .adw-view-switcher-bar {
-      background-color: var(--headerbar-bg-color); // Or a slightly different shade
-      padding: var(--spacing-xs) var(--spacing-m);
-      // Potentially remove bottom border if it's inside the dialog frame
-      border-bottom: 1px solid var(--headerbar-border-color);
-
-      .adw-button {
-        // Preferences tabs are often less prominent than main view switcher tabs
-        padding: var(--spacing-xs) var(--spacing-s);
-        font-size: var(--font-size-small);
-        color: var(--secondary-text-color);
-
-        &.active {
-          color: var(--accent-color);
-          font-weight: bold; // Keep bold for active
-          background-color: transparent; // Active tab bg usually transparent on headerbar-like bg
-          border-bottom-color: var(--accent-color); // Use accent for underline
-          margin-bottom: -1px; // Overlap border if using underline style
-        }
-         &:hover:not(.active) {
-            background-color: var(--button-flat-hover-bg-color);
-            color: var(--headerbar-fg-color);
-        }
-      }
-    }
-
-    // Styling for the ViewSwitcherContent within a PreferencesDialog
+  // AdwViewSwitcher used inside PreferencesDialog
+  .adw-preferences-dialog-view-switcher.adw-view-switcher {
+    flex-grow: 1;
+    // AdwViewSwitcher's own SCSS (_view_switcher.scss) should handle its internal layout.
+    // We ensure the content area (where pages go) is correctly styled.
     .adw-view-switcher-content {
-      flex-grow: 1; // Allow content to fill remaining space
-      // The AdwPreferencesPage itself should handle its internal padding & scrolling
-      padding: 0; // Remove default viewswitcher content padding
-      border: none; // Remove default border, dialog frame provides it
-      background-color: var(--window-bg-color); // Match window bg
-      overflow-y: auto; // Allow individual pages to scroll if they become too long
+      background-color: var(--window-bg-color); // Pages sit on window background
+      padding: 0; // AdwPreferencesPage will have its own padding
+      overflow-y: auto; // Allow scrolling of the active page content
     }
-  }
-
-  // Ensure AdwPreferencesPage and its children look correct
-  adw-preferences-page, .adw-preferences-page {
-    // background-color: var(--window-bg-color); // Already on view-switcher-content
-    // padding: var(--spacing-l); // AdwPreferencesPage component should handle its own padding
   }
 }
 
-// Dark theme adjustments for specific parts if not covered by variables
-.dark-theme .adw-preferences-dialog,
-body.dark-theme .adw-preferences-dialog {
-  .adw-preferences-dialog-view-switcher {
-    .adw-view-switcher-bar {
-      // background-color: var(--headerbar-bg-color);
-      // border-bottom-color: var(--headerbar-border-color);
+// AdwPreferencesPage styles (targets the class inside the component's shadow DOM)
+// The web component is <adw-preferences-page>, its shadow root contains <div class="adw-preferences-page">
+.adw-preferences-page {
+  display: block;
+  padding: var(--spacing-l);
+  box-sizing: border-box;
+
+  // Optional banner at the top of the page
+  // The slot name is 'banner'.
+  ::slotted(adw-banner) {
+    margin-bottom: var(--spacing-l);
+  }
+
+  .adw-preferences-page-description {
+    color: var(--secondary-fg-color);
+    margin-bottom: var(--spacing-l);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    &.centered {
+      text-align: center;
+      max-width: var(--preferences-page-description-max-width, 60ch);
+      margin-left: auto;
+      margin-right: auto;
     }
-    .adw-view-switcher-content {
-      // background-color: var(--window-bg-color);
+  }
+
+  .adw-preferences-page-actual-title { // The H1 inside the page's shadow DOM
+      display: none; // Usually hidden when page is in a ViewSwitcher context
+  }
+
+  // Spacing between groups on a page. Slot projects AdwPreferencesGroup elements.
+  ::slotted(adw-preferences-group) {
+    margin-bottom: var(--spacing-xl);
+    &:last-child {
+      margin-bottom: 0;
     }
   }
 }
+
+// AdwPreferencesGroup styles (targets the class inside the component's shadow DOM)
+// The web component is <adw-preferences-group>, its shadow root contains <section class="adw-preferences-group">
+.adw-preferences-group {
+  display: block;
+
+  .adw-preferences-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-s);
+    gap: var(--spacing-m);
+
+    .adw-preferences-group-title-description-container {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .adw-preferences-group-title { // This is an H2 in JS
+      font-size: var(--font-size-h3);
+      font-weight: bold;
+      color: var(--primary-fg-color);
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    .adw-preferences-group-description { // This is a P in JS
+      font-size: var(--font-size-small);
+      color: var(--secondary-fg-color);
+      margin-top: var(--spacing-xxs);
+      max-width: var(--preferences-group-description-max-width, 70ch);
+      line-height: 1.5;
+    }
+
+    // Slot for header suffix widgets
+    ::slotted([slot="header-suffix"]) {
+        flex-shrink: 0;
+        margin-left: var(--spacing-s);
+    }
+  }
+
+  .adw-preferences-group-rows {
+    background-color: var(--card-bg-color);
+    border-radius: var(--card-border-radius, var(--border-radius-default));
+    border: var(--border-width) solid var(--card-border-color, var(--borders-color));
+
+    // Default: rows are flush, like a standard .boxed-list
+    @include mixins.apply-list-separators(false, 'adw-row'); // Specify target for direct children
+
+    // If .separate-rows class is present (toggled by JS via attribute)
+    &.separate-rows {
+      @include mixins.apply-list-separators(true, 'adw-row');
+    }
+  }
+}
+
+// Variables that should be defined (e.g., in _variables.scss):
+// --preferences-dialog-min-width, --preferences-dialog-max-width, --preferences-dialog-min-height
+// --preferences-page-description-max-width
+// --preferences-group-description-max-width
+// --window-bg-color, --card-bg-color, --card-border-radius, --card-border-color, --borders-color
+// --primary-fg-color, --secondary-fg-color
+// --font-size-h2, --font-size-h3 (used for group title, page title is h1 but hidden)
+// --spacing-xxs, --spacing-xs, --spacing-s, --spacing-m, --spacing-l, --spacing-xl
+// --border-radius-default
+// --border-width
+// Other variables from _dialog.scss, _view_switcher.scss etc. are also implicitly used.
+// --link-color (if descriptions contain links)
+// --font-family-monospace (if any content uses it)
+// --accent-color (for view switcher active states, button focus)
+// --headerbar-bg-color, --headerbar-border-color, --headerbar-fg-color (for view switcher bar)
+// --button-flat-hover-bg-color (for view switcher tab hover)
+// --sidebar-bg-color (if view switcher uses sidebar mode)
+// --toast-*, --banner-* (not directly used here, but for completeness of theme)
+// --control-bg-color, --expander-content-bg-color, --icon-opacity, --list-border-radius,
+// --focus-outline-offset, --popover-box-shadow, --dialog-backdrop-color,
+// --list-row-hover-bg-color, --list-row-active-bg-color,
+// --info-*, --success-*, --warning-*, --error-* (status colors)
+// --button-pill-border-radius
+// --icon-size-inline
+// --alert-dialog-text-max-width
+// --about-dialog-max-width, --about-dialog-logo-size, --content-view-bg-color
+// --animation-duration-short, --animation-duration-xs
+// --animation-ease-out-sine, --animation-ease-out-quadTool output for `overwrite_file_with_block`:

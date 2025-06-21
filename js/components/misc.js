@@ -281,90 +281,378 @@ export class AdwProgressBar extends HTMLElement {
     }
 }
 
+const ADW_TOAST_PRIORITY_NORMAL = 0;
+const ADW_TOAST_PRIORITY_HIGH = 1;
+
 /**
- * Creates and displays an Adwaita-style toast notification.
+ * Creates an Adwaita-style toast element.
+ * This function creates the DOM structure for a toast but does not manage its display lifecycle (timeouts, dismissal).
+ * That responsibility lies with a toast manager or overlay.
  */
-export function createAdwToast(text, options = {}) {
-  const opts = options || {};
-  const toast = document.createElement("div");
-  toast.classList.add("adw-toast");
-  toast.textContent = text;
-  if (opts.type && typeof opts.type === 'string') toast.classList.add(`adw-toast-${opts.type.toLowerCase()}`);
-  toast.setAttribute("role", "status"); toast.setAttribute("aria-live", "assertive"); toast.setAttribute("aria-atomic", "true");
-  if (opts.button instanceof Node) toast.appendChild(opts.button);
-  if (opts.timeout !== 0) { const effectiveTimeout = typeof opts.timeout === 'number' ? opts.timeout : 4000; setTimeout(() => { toast.classList.add("fade-out"); setTimeout(() => { if(toast.parentNode) toast.remove(); }, 200); }, effectiveTimeout); } // Check parentNode before remove
-  document.body.appendChild(toast);
-  setTimeout(() => { toast.classList.add("visible"); }, 10);
-  return toast;
+export function createAdwToast(title, options = {}) {
+    const opts = options || {};
+    const toastElement = document.createElement("div");
+    toastElement.classList.add("adw-toast");
+    toastElement.setAttribute("role", "status");
+    toastElement.setAttribute("aria-live", opts.priority === ADW_TOAST_PRIORITY_HIGH ? "assertive" : "polite");
+    toastElement.setAttribute("aria-atomic", "true");
+
+    // Store data on the element for the overlay to use
+    toastElement._adwToastData = {
+        timeout: typeof opts.timeout === 'number' ? opts.timeout : (opts.buttonLabel ? 0 : 4), // seconds, 0 for indefinite (e.g., if button)
+        priority: opts.priority || ADW_TOAST_PRIORITY_NORMAL,
+        actionName: opts.actionName,
+        actionTarget: opts.actionTarget,
+        buttonLabel: opts.buttonLabel,
+        title: title, // Keep original title for potential updates
+        dismissTimerId: null // Will be managed by ToastOverlay
+    };
+
+    const contentWrapper = document.createElement('div');
+    contentWrapper.classList.add('adw-toast-content-wrapper');
+
+    if (opts.customTitle instanceof Node) {
+        contentWrapper.appendChild(opts.customTitle);
+    } else {
+        const titleSpan = document.createElement('span');
+        titleSpan.classList.add('adw-toast-title');
+        if (opts.useMarkup) {
+            titleSpan.innerHTML = title; // Assumes sanitized
+        } else {
+            titleSpan.textContent = title;
+        }
+        contentWrapper.appendChild(titleSpan);
+    }
+    toastElement.appendChild(contentWrapper);
+
+    if (opts.buttonLabel) {
+        const actionButton = createAdwButton(opts.buttonLabel, {
+            flat: true, // Toasts often use flat buttons
+            onClick: (event) => {
+                toastElement.dispatchEvent(new CustomEvent('button-clicked', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { actionName: opts.actionName, actionTarget: opts.actionTarget, originalEvent: event }
+                }));
+            }
+        });
+        actionButton.classList.add('adw-toast-action-button');
+        toastElement.appendChild(actionButton);
+    }
+
+    // Always add a close button per Libadwaita spec for AdwToast
+    const closeButton = createAdwButton('', {
+        icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>',
+        flat: true,
+        isCircular: true,
+        ariaLabel: 'Dismiss toast', // TODO: Localize this
+        onClick: () => {
+            // This event signals intent; the overlay will handle actual removal and 'dismissed' event.
+            toastElement.dispatchEvent(new CustomEvent('dismiss-requested', { bubbles: true, composed: true }));
+        }
+    });
+    closeButton.classList.add('adw-toast-close-button');
+    toastElement.appendChild(closeButton);
+
+    toastElement.updateTitle = (newTitle, useMarkup = false) => {
+        toastElement._adwToastData.title = newTitle;
+        const titleHolder = toastElement.querySelector('.adw-toast-title');
+        if (titleHolder) {
+            if (useMarkup) titleHolder.innerHTML = newTitle;
+            else titleHolder.textContent = newTitle;
+        } else if (opts.customTitle && opts.customTitle.textContent !== undefined) {
+            opts.customTitle.textContent = newTitle;
+        }
+    };
+
+    return toastElement;
 }
+
 export class AdwToast extends HTMLElement {
-    static get observedAttributes() { return ['message', 'type', 'timeout', 'show']; }
-    constructor() { super(); this._toastInstance = null; }
-    connectedCallback() { if (this.hasAttribute('show')) this.show(); }
-    attributeChangedCallback(name, oldValue, newValue) { if (name === 'show' && oldValue !== newValue) { if (newValue !== null) this.show(); else this.hide(); }}
-    show() {
-        let message = this.getAttribute('message');
-        if (!message) { // Try to get message from light DOM if attribute is missing
-            const messageSlot = this.querySelector(':not([slot])'); // Default slot content
-            if (messageSlot) message = messageSlot.textContent.trim();
-        }
-        if (!message) { console.warn('AdwToast: Message empty.'); return; }
-
-        if (this._toastInstance && this._toastInstance.isConnected) this._toastInstance.remove();
-        const options = { type: this.getAttribute('type') || undefined, timeout: this.hasAttribute('timeout') ? parseInt(this.getAttribute('timeout'), 10) : 4000 };
-        const buttonSlot = this.querySelector('[slot="button"]'); if (buttonSlot) options.button = buttonSlot.cloneNode(true);
-        const factory = (typeof Adw !== 'undefined' && Adw.createToast) ? Adw.createToast : createAdwToast;
-        this._toastInstance = factory(message, options);
-        if (!this.hasAttribute('show')) this.setAttribute('show', '');
-        if (this._toastInstance && this._toastInstance.parentNode) { const observer = new MutationObserver(() => { if (!this._toastInstance || !this._toastInstance.isConnected) { this.removeAttribute('show'); observer.disconnect(); }}); observer.observe(this._toastInstance.parentNode, { childList: true });}
+    static get observedAttributes() {
+        return ['title', 'use-markup', 'button-label', 'action-name', 'action-target', 'timeout', 'priority', 'custom-title-selector'];
     }
-    hide() { if (this._toastInstance && this._toastInstance.isConnected) { this._toastInstance.classList.add("fade-out"); setTimeout(() => { if(this._toastInstance && this._toastInstance.parentNode) this._toastInstance.remove(); this._toastInstance = null; }, 200); } else { this._toastInstance = null; } this.removeAttribute('show'); }
+
+    constructor() {
+        super();
+        // This component itself does not render a shadow DOM. It's a data provider.
+    }
+
+    getToastOptions() {
+        const options = {};
+        options.title = this.getAttribute('title') || this.textContent.trim() || '';
+        if (this.hasAttribute('use-markup')) options.useMarkup = true;
+        if (this.hasAttribute('button-label')) options.buttonLabel = this.getAttribute('button-label');
+        if (this.hasAttribute('action-name')) options.actionName = this.getAttribute('action-name');
+        if (this.hasAttribute('action-target')) {
+            try { options.actionTarget = JSON.parse(this.getAttribute('action-target')); }
+            catch (e) { options.actionTarget = this.getAttribute('action-target'); }
+        }
+        if (this.hasAttribute('timeout')) {
+            const timeoutVal = parseInt(this.getAttribute('timeout'), 10);
+            if (!isNaN(timeoutVal)) options.timeout = timeoutVal;
+        }
+        if (this.hasAttribute('priority')) {
+            options.priority = this.getAttribute('priority').toLowerCase() === 'high' ? ADW_TOAST_PRIORITY_HIGH : ADW_TOAST_PRIORITY_NORMAL;
+        }
+
+        const customTitleSelector = this.getAttribute('custom-title-selector');
+        if (customTitleSelector) {
+            const customTitleElement = document.querySelector(customTitleSelector);
+            if (customTitleElement) options.customTitle = customTitleElement.cloneNode(true);
+        } else {
+            const slot = this.querySelector('[slot="custom-title"]');
+            if (slot) { // Check if there's any element in the slot
+                const firstSlottedElement = Array.from(slot.children).find(child => child.nodeType === Node.ELEMENT_NODE);
+                if (firstSlottedElement) options.customTitle = firstSlottedElement.cloneNode(true);
+            }
+        }
+        return options;
+    }
 }
 
 /**
- * Creates and displays an Adwaita-style banner notification.
+ * Creates an Adwaita-style Banner.
+ * A bar with contextual information. Banners are hidden by default.
  */
-export function createAdwBanner(message, options = {}) {
-  const opts = options || {};
-  const banner = document.createElement('div'); banner.classList.add('adw-banner'); banner.setAttribute('role', 'alert'); if (opts.id) banner.id = opts.id;
-  const type = opts.type || 'info'; banner.classList.add(type);
-  const messageSpan = document.createElement('span'); messageSpan.classList.add('adw-banner-message'); messageSpan.textContent = message; banner.appendChild(messageSpan);
-  if (opts.dismissible !== false) {
-    const closeButton = createAdwButton('', { icon: '<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>', flat: true, isCircular: true, onClick: () => { banner.classList.remove('visible'); setTimeout(() => { if (banner.parentNode) banner.parentNode.removeChild(banner); }, 300); }});
-    closeButton.classList.add('adw-banner-close-button'); closeButton.setAttribute('aria-label', 'Close banner');
-    banner.appendChild(closeButton);
-  }
-  const container = opts.container instanceof HTMLElement ? opts.container : document.body;
-  if (container.firstChild) container.insertBefore(banner, container.firstChild); else container.appendChild(banner);
-  setTimeout(() => { banner.classList.add('visible'); }, 10);
-  return banner;
-}
-export class AdwBanner extends HTMLElement {
-    static get observedAttributes() { return ['message', 'type', 'dismissible', 'show']; }
-    constructor() { super(); this._bannerInstance = null; }
-    connectedCallback() { if (this.hasAttribute('show')) this.show(); }
-    attributeChangedCallback(name, oldValue, newValue) { if (name === 'show' && oldValue !== newValue) { if (newValue !== null) this.show(); else this.hide(); }}
-    show() {
-        let message = this.getAttribute('message');
-        if (!message) { // Try to get message from light DOM if attribute is missing
-            const messageSlot = this.querySelector(':not([slot])'); // Default slot content
-            if (messageSlot) message = messageSlot.textContent.trim();
-        }
-        if (!message) { console.warn('AdwBanner: Message empty.'); return; }
+export function createAdwBanner(title, options = {}) {
+    const opts = options || {};
+    const banner = document.createElement('div');
+    banner.classList.add('adw-banner');
+    banner.setAttribute('role', 'status'); // Or 'alert' if it's for important dynamic changes
+    if (opts.id) banner.id = opts.id;
 
-        if (this._bannerInstance && this._bannerInstance.isConnected) this._bannerInstance.remove();
-        const options = { type: this.getAttribute('type') || 'info', dismissible: this.hasAttribute('dismissible') ? (this.getAttribute('dismissible') !== 'false') : true, id: this.id ? `${this.id}-instance` : undefined };
-        const factory = (typeof Adw !== 'undefined' && Adw.createBanner) ? Adw.createBanner : createAdwBanner;
-        this._bannerInstance = factory(message, options);
-        if (!this.hasAttribute('show')) this.setAttribute('show', '');
-        if (this._bannerInstance && this._bannerInstance.parentNode) { const observer = new MutationObserver(() => { if (!this._bannerInstance || !this._bannerInstance.isConnected) { this.removeAttribute('show'); observer.disconnect(); }}); observer.observe(this._bannerInstance.parentNode, { childList: true });}
+    const titleSpan = document.createElement('span');
+    titleSpan.classList.add('adw-banner-title');
+    if (opts.useMarkup) {
+        titleSpan.innerHTML = title; // Assumes sanitized HTML if markup is used
+    } else {
+        titleSpan.textContent = title;
     }
-    hide() { if (this._bannerInstance && this._bannerInstance.isConnected) { const closeBtn = this._bannerInstance.querySelector('.adw-banner-close-button'); if (closeBtn) closeBtn.click(); else this._bannerInstance.remove(); } this._bannerInstance = null; this.removeAttribute('show'); }
+    banner.appendChild(titleSpan);
+
+    if (opts.buttonLabel) {
+        const buttonOptions = {
+            label: opts.buttonLabel,
+            onClick: (event) => {
+                // Dispatch a custom event from the banner itself
+                banner.dispatchEvent(new CustomEvent('button-clicked', { bubbles: true, composed: true, detail: { originalEvent: event } }));
+            }
+        };
+        if (opts.buttonStyle === 'suggested') {
+            buttonOptions.suggested = true;
+        } else if (opts.buttonStyle === 'destructive') {
+            buttonOptions.destructive = true;
+        }
+        // Libadwaita banners usually have flat buttons or default styled ones.
+        // For now, let's use default AdwButton styling.
+        // buttonOptions.flat = true; // Optional: if buttons should be flat
+
+        const button = createAdwButton(opts.buttonLabel, buttonOptions);
+        button.classList.add('adw-banner-button');
+        banner.appendChild(button);
+    }
+
+    // Revealed state handling (hidden by default via CSS)
+    if (opts.revealed) {
+        banner.classList.add('visible');
+    }
+
+    // The banner is usually placed by the parent component into the layout.
+    // This factory won't auto-append it to document.body.
+    return banner;
 }
 
-export class AdwPreferencesView extends HTMLElement { constructor() { super(); this.attachShadow({mode:'open'}); const styleLink = document.createElement('link'); styleLink.rel='stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; const slot = document.createElement('slot'); this.shadowRoot.append(styleLink, slot); this.classList.add('adw-preferences-view');}}
-export class AdwPreferencesPage extends HTMLElement { static get observedAttributes() { return ['title']; } constructor() { super(); this.attachShadow({mode:'open'}); const styleLink = document.createElement('link'); styleLink.rel='stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this._wrapper = document.createElement('div'); this._wrapper.classList.add('adw-preferences-page'); this._titleEl = document.createElement('h1'); this._titleEl.classList.add('adw-preferences-page-title'); this._wrapper.append(this._titleEl, document.createElement('slot')); this.shadowRoot.append(styleLink, this._wrapper); } connectedCallback(){this._renderTitle();} attributeChangedCallback(n,ov,nv){if(n==='title'&&ov!==nv)this._renderTitle();} _renderTitle(){this._titleEl.textContent = this.getAttribute('title')||'Page';}}
-export class AdwPreferencesGroup extends HTMLElement { static get observedAttributes() { return ['title']; } constructor() { super(); this.attachShadow({mode:'open'}); const styleLink = document.createElement('link'); styleLink.rel='stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this._wrapper = document.createElement('div'); this._wrapper.classList.add('adw-preferences-group'); this._titleEl = document.createElement('div'); this._titleEl.classList.add('adw-preferences-group-title'); this._wrapper.append(this._titleEl, document.createElement('slot')); this.shadowRoot.append(styleLink, this._wrapper); } connectedCallback(){this._renderTitle();} attributeChangedCallback(n,ov,nv){if(n==='title'&&ov!==nv)this._renderTitle();} _renderTitle(){const t=this.getAttribute('title'); this._titleEl.textContent=t||''; this._titleEl.style.display=t?'':'none';}}
+export class AdwBanner extends HTMLElement {
+    static get observedAttributes() { return ['title', 'use-markup', 'button-label', 'button-style', 'revealed']; }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+        this._bannerElement = null; // To hold the div.adw-banner
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue === newValue) return;
+        this._render();
+    }
+
+    _render() {
+        const title = this.getAttribute('title') || '';
+        const useMarkup = this.hasAttribute('use-markup');
+        const buttonLabel = this.getAttribute('button-label');
+        const buttonStyle = this.getAttribute('button-style'); // e.g., "suggested"
+        const revealed = this.hasAttribute('revealed');
+
+        // Clear previous banner element if exists
+        if (this._bannerElement) {
+            this._bannerElement.remove();
+        }
+
+        const factory = (typeof Adw !== 'undefined' && Adw.createBanner) ? Adw.createBanner : createAdwBanner;
+        this._bannerElement = factory(title, {
+            useMarkup,
+            buttonLabel,
+            buttonStyle,
+            revealed // Pass revealed state to factory for initial class
+        });
+
+        // Listen to button-clicked from the created banner and re-dispatch from the web component host
+        if (buttonLabel) {
+            this._bannerElement.addEventListener('button-clicked', (e) => {
+                this.dispatchEvent(new CustomEvent('button-clicked', {
+                    bubbles: e.bubbles,
+                    composed: e.composed,
+                    detail: e.detail
+                }));
+            });
+        }
+        this.shadowRoot.appendChild(this._bannerElement);
+
+        // CSS transitions handle the animation based on .visible class
+        // The 'revealed' attribute directly controls the .visible class in the factory/render.
+    }
+
+    // Public properties/methods if needed, e.g., to programmatically reveal/hide
+    get revealed() {
+        return this.hasAttribute('revealed');
+    }
+
+    set revealed(value) {
+        if (Boolean(value)) {
+            this.setAttribute('revealed', '');
+        } else {
+            this.removeAttribute('revealed');
+        }
+        // _render will be called by attributeChangedCallback
+    }
+}
+
+
+export class AdwPreferencesView extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({mode:'open'});
+        const styleLink = document.createElement('link');
+        styleLink.rel='stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        const slot = document.createElement('slot'); // This will project AdwPreferencesPage children
+        this.shadowRoot.append(styleLink, slot);
+        // AdwPreferencesView itself is a simple container.
+    }
+}
+
+export class AdwPreferencesPage extends HTMLElement {
+    static get observedAttributes() { return ['title', 'description', 'description-centered', 'icon-name', 'name']; }
+    constructor() {
+        super();
+        this.attachShadow({mode:'open'});
+        const styleLink = document.createElement('link'); styleLink.rel='stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+
+        this._wrapper = document.createElement('div');
+        this._wrapper.classList.add('adw-preferences-page');
+
+        this._bannerSlot = document.createElement('slot');
+        this._bannerSlot.name = 'banner';
+
+        this._descriptionEl = document.createElement('p');
+        this._descriptionEl.classList.add('adw-preferences-page-description');
+        this._descriptionEl.style.display = 'none';
+
+        this._pageTitleEl = document.createElement('h1');
+        this._pageTitleEl.classList.add('adw-preferences-page-actual-title');
+        this._pageTitleEl.style.display = 'none';
+
+        this._contentSlot = document.createElement('slot');
+
+        this._wrapper.append(this._bannerSlot, this._descriptionEl, this._pageTitleEl, this._contentSlot);
+        this.shadowRoot.append(styleLink, this._wrapper);
+    }
+    connectedCallback(){ this._renderAttributes(); }
+    attributeChangedCallback(n,ov,nv){ if(ov!==nv) this._renderAttributes(); }
+
+    _renderAttributes(){
+        const title = this.getAttribute('title') || '';
+        this._pageTitleEl.textContent = title;
+
+        const description = this.getAttribute('description');
+        if (description) {
+            this._descriptionEl.textContent = description;
+            this._descriptionEl.style.display = '';
+            this._descriptionEl.classList.toggle('centered', this.hasAttribute('description-centered'));
+        } else {
+            this._descriptionEl.style.display = 'none';
+        }
+    }
+}
+
+export class AdwPreferencesGroup extends HTMLElement {
+    static get observedAttributes() { return ['title', 'description', 'separate-rows']; }
+    constructor() {
+        super();
+        this.attachShadow({mode:'open'});
+        const styleLink = document.createElement('link'); styleLink.rel='stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+
+        this._wrapper = document.createElement('section');
+        this._wrapper.classList.add('adw-preferences-group');
+
+        this._header = document.createElement('header');
+        this._header.classList.add('adw-preferences-group-header');
+
+        this._titleDescContainer = document.createElement('div');
+        this._titleDescContainer.classList.add('adw-preferences-group-title-description-container');
+
+        this._titleEl = document.createElement('h2');
+        this._titleEl.classList.add('adw-preferences-group-title');
+
+        this._descriptionEl = document.createElement('p');
+        this._descriptionEl.classList.add('adw-preferences-group-description');
+
+        this._titleDescContainer.append(this._titleEl, this._descriptionEl);
+
+        this._headerSuffixSlot = document.createElement('slot');
+        this._headerSuffixSlot.name = 'header-suffix';
+
+        this._header.append(this._titleDescContainer, this._headerSuffixSlot);
+
+        this._rowsContainer = document.createElement('div');
+        this._rowsContainer.classList.add('adw-preferences-group-rows');
+        this._rowsSlot = document.createElement('slot');
+        this._rowsContainer.appendChild(this._rowsSlot);
+
+        this._wrapper.append(this._header, this._rowsContainer);
+        this.shadowRoot.append(styleLink, this._wrapper);
+    }
+    connectedCallback(){ this._renderAttributes(); }
+    attributeChangedCallback(n,ov,nv){ if(ov!==nv) this._renderAttributes(); }
+
+    _renderAttributes(){
+        const title = this.getAttribute('title');
+        this._titleEl.textContent = title || '';
+        this._titleEl.style.display = title ? '' : 'none';
+
+        const description = this.getAttribute('description');
+        if (description) {
+            this._descriptionEl.textContent = description;
+            this._descriptionEl.style.display = '';
+        } else {
+            this._descriptionEl.style.display = 'none';
+        }
+
+        const hasSuffixSlotContent = this.querySelector('[slot="header-suffix"]');
+        this._header.style.display = (title || description || hasSuffixSlotContent) ? '' : 'none';
+
+        this._rowsContainer.classList.toggle('separate-rows', this.hasAttribute('separate-rows'));
+    }
+}
 
 // No customElements.define here
 
