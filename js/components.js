@@ -2977,7 +2977,7 @@ window.Adw = {
   createAdwToggleButton: createAdwToggleButton,
   createAdwToggleGroup: createAdwToggleGroup,
   createAdwNavigationSplitView: createAdwNavigationSplitView,
-  createAdwOverlaySplitView: createAdwOverlaySplitView
+  createAdwOverlaySplitView: createAdwOverlaySplitView,
 };
 
 window.addEventListener("DOMContentLoaded", loadSavedTheme);
