@@ -3856,7 +3856,6 @@ class AdwPreferencesGroup extends HTMLElement {
 }
 customElements.define('adw-preferences-group', AdwPreferencesGroup);
 
-
 // AdwSwitchRow Component
 class AdwSwitchRow extends HTMLElement {
     static get observedAttributes() {
@@ -3871,38 +3870,39 @@ class AdwSwitchRow extends HTMLElement {
         styleLink.href = '/static/css/adwaita-web.css';
 
         this._wrapper = document.createElement('div');
-        this._wrapper.classList.add('adw-row', 'adw-switch-row'); // Mimics AdwRow structure
+        this._wrapper.classList.add('adw-row', 'adw-switch-row');
 
         this._textContent = document.createElement('div');
-        this._textContent.classList.add('adw-action-row-text-content'); // Borrow class for layout
+        this._textContent.classList.add('adw-action-row-text-content');
 
         this._titleElement = document.createElement('span');
-        this._titleElement.classList.add('adw-action-row-title'); // Borrow class for layout
+        this._titleElement.classList.add('adw-action-row-title');
 
         this._subtitleElement = document.createElement('span');
-        this._subtitleElement.classList.add('adw-action-row-subtitle'); // Borrow class for layout
+        this._subtitleElement.classList.add('adw-action-row-subtitle');
 
-        this._switchElement = new AdwSwitch(); // Using the AdwSwitch web component
+        this._switchElement = new AdwSwitch(); // Uses the existing AdwSwitch web component
 
         this._textContent.append(this._titleElement, this._subtitleElement);
         this._wrapper.append(this._textContent, this._switchElement);
         this.shadowRoot.append(styleLink, this._wrapper);
 
         this._switchElement.addEventListener('change', (e) => {
-            // Reflect internal switch's checked state to 'active' attribute and property
-            this.active = this._switchElement.checked;
-            // Re-dispatch the change event from the host element
-            this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+            this.active = this._switchElement.checked; // this.active setter will update attribute
+            // The AdwSwitch component already dispatches a 'change' event that bubbles.
+            // No need to re-dispatch unless event details need modification.
         });
     }
 
-    connectedCallback() {
-        this._render();
-    }
-
+    connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue !== newValue) {
-            this._render();
+             this._render();
+             if (name === 'active') { // Ensure property reflects attribute change
+                this.active = this.hasAttribute('active');
+             } else if (name === 'disabled') {
+                this.disabled = this.hasAttribute('disabled');
+             }
         }
     }
 
@@ -3916,50 +3916,34 @@ class AdwSwitchRow extends HTMLElement {
             this._subtitleElement.textContent = '';
             this._subtitleElement.style.display = 'none';
         }
-
-        const isActive = this.hasAttribute('active');
-        if (this._switchElement.checked !== isActive) {
-            this._switchElement.checked = isActive;
-        }
-
-        const isDisabled = this.hasAttribute('disabled');
-        if (this._switchElement.disabled !== isDisabled) {
-            this._switchElement.disabled = isDisabled;
-        }
-        this._wrapper.classList.toggle('disabled', isDisabled);
+        // Set initial state of the internal switch based on attributes
+        // Use setters to ensure attributes are also updated if not already.
+        this.active = this.hasAttribute('active');
+        this.disabled = this.hasAttribute('disabled');
     }
 
-    get active() {
-        return this._switchElement.checked;
-    }
-
+    get active() { return this._switchElement.checked; }
     set active(value) {
         const isActive = Boolean(value);
         if (this._switchElement.checked !== isActive) {
             this._switchElement.checked = isActive;
         }
-        if (isActive) {
-            this.setAttribute('active', '');
-        } else {
-            this.removeAttribute('active');
-        }
+        if (isActive) this.setAttribute('active', '');
+        else this.removeAttribute('active');
     }
 
-    get disabled() {
-        return this.hasAttribute('disabled');
-    }
-
+    get disabled() { return this._switchElement.disabled; }
     set disabled(value) {
         const isDisabled = Boolean(value);
-        if (isDisabled) {
-            this.setAttribute('disabled', '');
-        } else {
-            this.removeAttribute('disabled');
+        if (this._switchElement.disabled !== isDisabled) {
+            this._switchElement.disabled = isDisabled;
         }
+        if (isDisabled) this.setAttribute('disabled', '');
+        else this.removeAttribute('disabled');
+        this._wrapper.classList.toggle('disabled', isDisabled);
     }
 }
 customElements.define('adw-switch-row', AdwSwitchRow);
-
 
 // AdwComboRow Component
 class AdwComboRow extends HTMLElement {
@@ -3978,7 +3962,7 @@ class AdwComboRow extends HTMLElement {
         this._wrapper.classList.add('adw-row', 'adw-combo-row');
 
         this._textContent = document.createElement('div');
-        this._textContent.classList.add('adw-combo-row-text-content'); // Similar to action row for layout
+        this._textContent.classList.add('adw-combo-row-text-content');
 
         this._titleElement = document.createElement('span');
         this._titleElement.classList.add('adw-combo-row-title');
@@ -4001,15 +3985,16 @@ class AdwComboRow extends HTMLElement {
                 detail: { value: this._selectElement.value }
             }));
         });
-
         this._options = [];
     }
 
-    connectedCallback() {
-        this._render();
-    }
-
+    connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) {
+        // If 'value' attribute changes externally, update internal select
+        if (name === 'value' && this._selectElement && this._selectElement.value !== newValue) {
+             this._selectElement.value = newValue;
+        }
+        // Always re-render for other attribute changes or to ensure consistency
         if (oldValue !== newValue) {
             this._render();
         }
@@ -4025,83 +4010,54 @@ class AdwComboRow extends HTMLElement {
             this._subtitleElement.textContent = '';
             this._subtitleElement.style.display = 'none';
         }
+        this.disabled = this.hasAttribute('disabled'); // Use setter to update internal and attribute
 
-        this._selectElement.disabled = this.hasAttribute('disabled');
-        this._wrapper.classList.toggle('disabled', this.hasAttribute('disabled'));
-
-        // Value might be set before options are populated, so re-apply if select has options
-        if (this._selectElement.options.length > 0) {
-             const valueAttr = this.getAttribute('value');
-             if (this._selectElement.value !== valueAttr) {
+        // If selectOptions have been set and value attribute exists, ensure select reflects it
+        if (this._options.length > 0 && this.hasAttribute('value')) {
+            const valueAttr = this.getAttribute('value');
+            if (this._selectElement.value !== valueAttr) {
                 this._selectElement.value = valueAttr;
-             }
-        }
-    }
-
-    get value() {
-        return this._selectElement.value;
-    }
-
-    set value(val) {
-        if (this._selectElement.value !== val) {
-            this._selectElement.value = val;
-        }
-        // Reflect to attribute, using 'selected-value' as used in settings.js logic
-        if (val) {
-            this.setAttribute('value', val);
-        } else {
-            this.removeAttribute('value');
-        }
-    }
-
-    get selectOptions() {
-        return this._options;
-    }
-
-    set selectOptions(optionsArray) {
-        if (!Array.isArray(optionsArray)) {
-            this._options = [];
-            console.error('AdwComboRow: selectOptions must be an array.');
-        } else {
-            this._options = optionsArray;
-        }
-
-        this._selectElement.innerHTML = ''; // Clear existing options
-        this._options.forEach(opt => {
-            const optionElement = document.createElement('option');
-            if (typeof opt === 'object' && opt !== null && opt.hasOwnProperty('value') && opt.hasOwnProperty('label')) {
-                optionElement.value = opt.value;
-                optionElement.textContent = opt.label;
-            } else {
-                // Fallback if items are just strings, though spec is {value, label}
-                optionElement.value = opt;
-                optionElement.textContent = opt;
             }
-            this._selectElement.appendChild(optionElement);
-        });
+        }
+    }
 
-        // After populating, try to set the current value attribute if it exists
+    get value() { return this._selectElement.value; }
+    set value(val) {
+        const currentValStr = String(val);
+        if (this._selectElement.value !== currentValStr) {
+             this._selectElement.value = currentValStr;
+        }
+        // Reflect to 'value' attribute
+        if (val !== null && val !== undefined) this.setAttribute('value', currentValStr);
+        else this.removeAttribute('value');
+    }
+
+    get selectOptions() { return this._options; }
+    set selectOptions(optionsArray) {
+        this._options = Array.isArray(optionsArray) ? optionsArray : [];
+        this._selectElement.innerHTML = ''; // Clear existing
+        this._options.forEach(opt => {
+            const optionEl = document.createElement('option');
+            optionEl.value = opt.value;
+            optionEl.textContent = opt.label;
+            this._selectElement.appendChild(optionEl);
+        });
+        // After populating, try to set the current value from attribute
         const currentValue = this.getAttribute('value');
         if (currentValue !== null) {
-            this.value = currentValue;
+            this.value = currentValue; // Use setter to update select and ensure consistency
         } else if (this._selectElement.options.length > 0) {
-             // If no value is set, default to the first option's value
-            this.value = this._selectElement.options[0].value;
+            this.value = this._selectElement.options[0].value; // Default to first option
         }
     }
 
-    get disabled() {
-        return this.hasAttribute('disabled');
-    }
-
+    get disabled() { return this._selectElement.disabled; }
     set disabled(value) {
         const isDisabled = Boolean(value);
-        if (isDisabled) {
-            this.setAttribute('disabled', '');
-        } else {
-            this.removeAttribute('disabled');
-        }
-        this._render(); // Re-render to apply disabled state
+        this._selectElement.disabled = isDisabled;
+        this._wrapper.classList.toggle('disabled', isDisabled);
+        if (isDisabled) this.setAttribute('disabled', '');
+        else this.removeAttribute('disabled');
     }
 }
 customElements.define('adw-combo-row', AdwComboRow);
