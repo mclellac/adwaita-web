@@ -176,12 +176,37 @@ export class AdwActionRow extends HTMLElement {
         prefix.classList.add('adw-action-row-prefix');
         let iconAddedToPrefix = false;
 
-        if (iconName && window.Adw && Adw.Icon) { // Adw.Icon is the web component class
-            const iconElement = new Adw.Icon();
+        if (iconName) {
+            // Prefer creating the adw-icon custom element.
+            // It will be an HTMLUnknownElement if not yet defined, and upgrade later.
+            const iconElement = document.createElement('adw-icon');
             iconElement.setAttribute('icon-name', iconName);
             prefix.appendChild(iconElement);
             iconAddedToPrefix = true;
-        } else if (iconHTML) { // Fallback to iconHTML
+
+            // Fallback to iconHTML only if iconName failed to produce a valid element or Adw.Icon is missing.
+            // This specific fallback condition might be redundant if createAdwIcon handles its own errors well,
+            // but kept if direct SVG/class string is a desired alternative path.
+            // However, the primary path is now document.createElement('adw-icon').
+            if (!(iconElement instanceof HTMLElement && iconElement.constructor !== HTMLElement) && iconHTML) {
+                 // This condition means iconElement is likely an HTMLUnknownElement or Adw.Icon is not on Adw
+                 // If iconHTML is provided as a backup, use it.
+                console.warn('AdwActionRow: adw-icon for iconName might not be defined or Adw.Icon missing, attempting iconHTML fallback.');
+                prefix.innerHTML = ''; // Clear the potentially unknown adw-icon
+                const iconSpan = document.createElement('span');
+                if (iconHTML.trim().startsWith("<svg")) {
+                    _appendSVGStringToElement(iconHTML, iconSpan);
+                } else if (iconHTML.trim() !== '') {
+                    iconSpan.classList.add(...iconHTML.split(' '));
+                }
+                if (iconSpan.hasChildNodes() || iconSpan.classList.length > 0) {
+                    prefix.appendChild(iconSpan);
+                    // iconAddedToPrefix is already true
+                } else {
+                    iconAddedToPrefix = false; // Failed to add icon via iconHTML too
+                }
+            }
+        } else if (iconHTML) { // Only iconHTML is provided
             const iconSpan = document.createElement('span');
             if (iconHTML.trim().startsWith("<svg")) {
                 _appendSVGStringToElement(iconHTML, iconSpan);
@@ -464,11 +489,20 @@ export class AdwExpanderRow extends HTMLElement {
         this._headerActionRow.setAttribute('activatable', '');
         this._headerActionRow.setAttribute('role', 'button'); // Explicit role
 
-        if (window.Adw && Adw.Icon) { // Check if Adw.Icon (web component) is available
-            this._chevronIcon = new Adw.Icon();
-            this._chevronIcon.setAttribute('icon-name', 'ui/pan-down-symbolic');
-            this._chevronIcon.classList.add('adw-expander-row-chevron');
-        } else { // Fallback if Adw.Icon is not available (e.g. during initial Adw object build)
+        // Always try to create the custom element first.
+        // If Adw.Icon (the class) is available and 'adw-icon' is defined, this will work.
+        // If 'adw-icon' is not yet defined, it will create an HTMLUnknownElement,
+        // which will upgrade when 'adw-icon' is defined.
+        this._chevronIcon = document.createElement('adw-icon');
+        this._chevronIcon.setAttribute('icon-name', 'ui/pan-down-symbolic');
+        this._chevronIcon.classList.add('adw-expander-row-chevron');
+
+        // Fallback if customElements are not supported or if Adw.Icon class itself isn't even on Adw object
+        // This check is more for older environments or incomplete Adw setup.
+        if (!(window.Adw && Adw.Icon) && !(this._chevronIcon instanceof HTMLElement && this._chevronIcon.constructor !== HTMLElement)) {
+             // If not a proper custom element instance (e.g. HTMLUnknownElement because not defined yet, or Adw.Icon missing)
+             // and we want an immediate visual fallback rather than waiting for upgrade:
+            console.warn('AdwExpanderRow: adw-icon custom element not fully available or Adw.Icon not defined. Using fallback span for chevron.');
             this._chevronIcon = document.createElement('span');
             this._chevronIcon.classList.add('adw-expander-row-chevron');
             this._chevronIcon.textContent = '>'; // Basic fallback
