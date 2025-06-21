@@ -558,5 +558,3 @@ export class AdwButtonRow extends HTMLElement {
         containerDiv.style.justifyContent = isCentered ? 'center' : 'flex-end';
     }
 }
-
-[end of js/components/rows.js]
