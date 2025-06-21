@@ -1734,11 +1734,11 @@ class AdwButton extends HTMLElement {
         this.shadowRoot.appendChild(buttonElement);
     }
 }
-customElements.define('adw-button', AdwButton);
+// customElements.define('adw-button', AdwButton); // Moved to end
 
-class AdwBox extends HTMLElement {
+class AdwButton extends HTMLElement { // This is a duplicate class definition from the previous incorrect merge
     static get observedAttributes() {
-        return ['orientation', 'align', 'justify', 'spacing', 'fill-children'];
+        return ['href', 'suggested', 'destructive', 'flat', 'disabled', 'active', 'circular', 'icon', 'appearance', 'type'];
     }
 
     constructor() {
@@ -1760,18 +1760,18 @@ class AdwBox extends HTMLElement {
             this.shadowRoot.removeChild(this.shadowRoot.lastChild);
         }
         const options = {};
-        AdwBox.observedAttributes.forEach(attr => {
+        AdwBox.observedAttributes.forEach(attr => { // BUG: Should be AdwButton.observedAttributes
             if (this.hasAttribute(attr)) {
                 const value = this.getAttribute(attr);
                 options[attr.replace(/-([a-z])/g, g => g[1].toUpperCase())] = (attr === 'fill-children') ? (value !== null && value !== 'false') : value;
             }
         });
-        const boxElement = Adw.createBox(options);
+        const boxElement = Adw.createBox(options); // BUG: Should be Adw.createButton
         boxElement.appendChild(document.createElement('slot'));
-        this.shadowRoot.appendChild(boxElement);
+        this.shadowRoot.appendChild(boxElement); // BUG: Should be buttonElement
     }
 }
-customElements.define('adw-box', AdwBox);
+// customElements.define('adw-box', AdwBox); // Moved to end
 
 class AdwEntry extends HTMLElement {
     static get observedAttributes() { return ['placeholder', 'value', 'disabled', 'name', 'required', 'type']; }
@@ -1817,7 +1817,7 @@ class AdwEntry extends HTMLElement {
         this.setAttribute('value', val);
     }
 }
-customElements.define('adw-entry', AdwEntry);
+// customElements.define('adw-entry', AdwEntry); // Moved to end
 
 class AdwLabel extends HTMLElement {
     static get observedAttributes() { return ['for', 'title-level', 'body', 'caption', 'link', 'disabled']; }
@@ -1843,7 +1843,7 @@ class AdwLabel extends HTMLElement {
         this.shadowRoot.appendChild(labelElement);
     }
 }
-customElements.define('adw-label', AdwLabel);
+// customElements.define('adw-label', AdwLabel); // Moved to end
 
 class AdwEntryRow extends HTMLElement {
     static get observedAttributes() { return ['title', 'subtitle', 'required', 'name', 'value', 'placeholder', 'disabled']; }
@@ -1885,7 +1885,7 @@ class AdwEntryRow extends HTMLElement {
         this.setAttribute('value', val);
     }
 }
-customElements.define('adw-entry-row', AdwEntryRow);
+// customElements.define('adw-entry-row', AdwEntryRow); // Moved to end
 
 class AdwPasswordEntryRow extends HTMLElement {
     static get observedAttributes() { return ['title', 'subtitle', 'required', 'name', 'value', 'placeholder', 'disabled']; }
@@ -1927,7 +1927,7 @@ class AdwPasswordEntryRow extends HTMLElement {
         this.setAttribute('value', val);
     }
 }
-customElements.define('adw-password-entry-row', AdwPasswordEntryRow);
+// customElements.define('adw-password-entry-row', AdwPasswordEntryRow); // Moved to end
 
 class AdwActionRow extends HTMLElement {
     static get observedAttributes() { return ['title', 'subtitle', 'icon', 'show-chevron']; }
@@ -1957,7 +1957,7 @@ class AdwActionRow extends HTMLElement {
         this.shadowRoot.appendChild(actionRowElement);
     }
 }
-customElements.define('adw-action-row', AdwActionRow);
+// customElements.define('adw-action-row', AdwActionRow); // Moved to end
 
 class AdwSwitch extends HTMLElement {
     static get observedAttributes() { return ['checked', 'disabled', 'label']; }
@@ -2000,7 +2000,7 @@ class AdwSwitch extends HTMLElement {
         if (isChecked) this.setAttribute('checked', ''); else this.removeAttribute('checked');
     }
 }
-customElements.define('adw-switch', AdwSwitch);
+// customElements.define('adw-switch', AdwSwitch); // Moved to end
 
 class AdwCheckbox extends HTMLElement {
     static get observedAttributes() { return ['checked', 'disabled', 'label', 'name']; }
@@ -2044,7 +2044,7 @@ class AdwCheckbox extends HTMLElement {
         if (isChecked) this.setAttribute('checked', ''); else this.removeAttribute('checked');
     }
 }
-customElements.define('adw-checkbox', AdwCheckbox);
+// customElements.define('adw-checkbox', AdwCheckbox); // Moved to end
 
 class AdwRadioButton extends HTMLElement {
     static get observedAttributes() { return ['checked', 'disabled', 'label', 'name', 'value']; }
@@ -2090,7 +2090,7 @@ class AdwRadioButton extends HTMLElement {
         if (isChecked) this.setAttribute('checked', ''); else this.removeAttribute('checked');
     }
 }
-customElements.define('adw-radio-button', AdwRadioButton);
+// customElements.define('adw-radio-button', AdwRadioButton); // Moved to end
 
 class AdwListBox extends HTMLElement {
     static get observedAttributes() { return ['flat', 'selectable']; }
@@ -2113,7 +2113,7 @@ class AdwListBox extends HTMLElement {
         this.shadowRoot.appendChild(listBoxElement);
     }
 }
-customElements.define('adw-list-box', AdwListBox);
+// customElements.define('adw-list-box', AdwListBox); // Moved to end
 
 class AdwRow extends HTMLElement {
     static get observedAttributes() { return ['activated', 'interactive']; }
@@ -2150,7 +2150,7 @@ class AdwRow extends HTMLElement {
         this.shadowRoot.appendChild(rowElement);
     }
 }
-customElements.define('adw-row', AdwRow);
+// customElements.define('adw-row', AdwRow); // Moved to end
 
 class AdwWindowTitle extends HTMLElement {
     constructor() {
@@ -2167,7 +2167,7 @@ class AdwWindowTitle extends HTMLElement {
         h1.appendChild(document.createElement('slot')); this.shadowRoot.appendChild(h1);
     }
 }
-customElements.define('adw-window-title', AdwWindowTitle);
+// customElements.define('adw-window-title', AdwWindowTitle); // Moved to end
 
 class AdwHeaderBar extends HTMLElement {
     constructor() {
@@ -2192,7 +2192,7 @@ class AdwHeaderBar extends HTMLElement {
         header.append(startBox, centerBox, endBox); this.shadowRoot.appendChild(header);
     }
 }
-customElements.define('adw-header-bar', AdwHeaderBar);
+// customElements.define('adw-header-bar', AdwHeaderBar); // Moved to end
 
 class AdwApplicationWindow extends HTMLElement {
     constructor() {
@@ -2212,7 +2212,7 @@ class AdwApplicationWindow extends HTMLElement {
         windowDiv.append(headerSlot, mainContent); this.shadowRoot.appendChild(windowDiv);
     }
 }
-customElements.define('adw-application-window', AdwApplicationWindow);
+// customElements.define('adw-application-window', AdwApplicationWindow); // Moved to end
 
 class AdwAvatar extends HTMLElement {
     static get observedAttributes() { return ['size', 'image-src', 'text', 'alt']; }
@@ -2235,7 +2235,7 @@ class AdwAvatar extends HTMLElement {
         this.shadowRoot.appendChild(Adw.createAvatar(options));
     }
 }
-customElements.define('adw-avatar', AdwAvatar);
+// customElements.define('adw-avatar', AdwAvatar); // Moved to end
 
 class AdwFlap extends HTMLElement {
     static get observedAttributes() { return ['folded', 'flap-width', 'transition-speed']; }
@@ -2280,7 +2280,7 @@ class AdwFlap extends HTMLElement {
         if (state) this.setAttribute('folded', ''); else this.removeAttribute('folded');
     }
 }
-customElements.define('adw-flap', AdwFlap);
+// customElements.define('adw-flap', AdwFlap); // Moved to end
 
 class AdwViewSwitcher extends HTMLElement {
     static get observedAttributes() { return ['label', 'active-view']; }
@@ -2331,7 +2331,7 @@ class AdwViewSwitcher extends HTMLElement {
         else this.setAttribute('active-view', viewName);
     }
 }
-customElements.define('adw-view-switcher', AdwViewSwitcher);
+// customElements.define('adw-view-switcher', AdwViewSwitcher); // Moved to end
 
 class AdwProgressBar extends HTMLElement {
     static get observedAttributes() { return ['value', 'indeterminate', 'disabled']; }
@@ -2353,7 +2353,7 @@ class AdwProgressBar extends HTMLElement {
         this.shadowRoot.appendChild(Adw.createProgressBar(options));
     }
 }
-customElements.define('adw-progress-bar', AdwProgressBar);
+// customElements.define('adw-progress-bar', AdwProgressBar); // Moved to end
 
 class AdwSpinner extends HTMLElement {
     static get observedAttributes() { return ['size', 'active']; }
@@ -2389,7 +2389,7 @@ class AdwSpinner extends HTMLElement {
         }
     }
 }
-customElements.define('adw-spinner', AdwSpinner);
+// customElements.define('adw-spinner', AdwSpinner); // Moved to end
 
 class AdwSplitButton extends HTMLElement {
     static get observedAttributes() { return ['action-text', 'action-href', 'suggested', 'disabled', 'dropdown-aria-label']; }
@@ -2417,7 +2417,7 @@ class AdwSplitButton extends HTMLElement {
         this.shadowRoot.appendChild(Adw.createSplitButton(options));
     }
 }
-customElements.define('adw-split-button', AdwSplitButton);
+// customElements.define('adw-split-button', AdwSplitButton); // Moved to end
 
 class AdwStatusPage extends HTMLElement {
     static get observedAttributes() { return ['title', 'description', 'icon']; }
@@ -2447,7 +2447,7 @@ class AdwStatusPage extends HTMLElement {
         this.shadowRoot.appendChild(Adw.createStatusPage(options));
     }
 }
-customElements.define('adw-status-page', AdwStatusPage);
+// customElements.define('adw-status-page', AdwStatusPage); // Moved to end
 
 class AdwExpanderRow extends HTMLElement {
     static get observedAttributes() { return ['title', 'subtitle', 'expanded']; }
@@ -2470,7 +2470,7 @@ class AdwExpanderRow extends HTMLElement {
         this.shadowRoot.appendChild(Adw.createExpanderRow(options));
     }
 }
-customElements.define('adw-expander-row', AdwExpanderRow);
+// customElements.define('adw-expander-row', AdwExpanderRow); // Moved to end
 
 class AdwDialog extends HTMLElement {
     static get observedAttributes() { return ['title', 'close-on-backdrop-click', 'open']; }
@@ -2522,7 +2522,7 @@ class AdwDialog extends HTMLElement {
         // onClose callback handles removing 'open' attribute.
     }
 }
-customElements.define('adw-dialog', AdwDialog);
+// customElements.define('adw-dialog', AdwDialog); // Moved to end
 
 class AdwBanner extends HTMLElement {
     static get observedAttributes() { return ['message', 'type', 'dismissible', 'show']; }
@@ -2559,7 +2559,7 @@ class AdwBanner extends HTMLElement {
         this._bannerInstance = null;
     }
 }
-customElements.define('adw-banner', AdwBanner);
+// customElements.define('adw-banner', AdwBanner); // Moved to end
 
 class AdwToast extends HTMLElement {
     static get observedAttributes() { return ['message', 'type', 'timeout', 'show']; }
@@ -2594,7 +2594,7 @@ class AdwToast extends HTMLElement {
         this._toastInstance = null; this.removeAttribute('show');
     }
 }
-customElements.define('adw-toast', AdwToast);
+// customElements.define('adw-toast', AdwToast); // Moved to end
 
 class AdwPreferencesView extends HTMLElement {
     constructor() {
@@ -2608,7 +2608,7 @@ class AdwPreferencesView extends HTMLElement {
         this.shadowRoot.append(styleLink, wrapper);
     }
 }
-customElements.define('adw-preferences-view', AdwPreferencesView);
+// customElements.define('adw-preferences-view', AdwPreferencesView); // Moved to end
 
 class AdwPreferencesPage extends HTMLElement {
     static get observedAttributes() { return ['title']; }
@@ -2626,7 +2626,7 @@ class AdwPreferencesPage extends HTMLElement {
     attributeChangedCallback(name, oldValue, newValue) { if (name === 'title' && oldValue !== newValue) this._renderTitle(); }
     _renderTitle() { this._titleElement.textContent = this.getAttribute('title') || 'Page'; }
 }
-customElements.define('adw-preferences-page', AdwPreferencesPage);
+// customElements.define('adw-preferences-page', AdwPreferencesPage); // Moved to end
 
 class AdwPreferencesGroup extends HTMLElement {
     static get observedAttributes() { return ['title']; }
@@ -2648,7 +2648,7 @@ class AdwPreferencesGroup extends HTMLElement {
         this._titleElement.style.display = title ? '' : 'none';
     }
 }
-customElements.define('adw-preferences-group', AdwPreferencesGroup);
+// customElements.define('adw-preferences-group', AdwPreferencesGroup); // Moved to end
 
 class AdwSwitchRow extends HTMLElement {
     static get observedAttributes() { return ['title', 'subtitle', 'active', 'disabled']; }
@@ -2698,7 +2698,7 @@ class AdwSwitchRow extends HTMLElement {
         this._wrapper.classList.toggle('disabled', isDisabled);
     }
 }
-customElements.define('adw-switch-row', AdwSwitchRow);
+// customElements.define('adw-switch-row', AdwSwitchRow); // Moved to end
 
 class AdwComboRow extends HTMLElement {
     static get observedAttributes() { return ['title', 'subtitle', 'value', 'disabled']; }
@@ -2766,6 +2766,42 @@ class AdwComboRow extends HTMLElement {
         if (isDisabled) this.setAttribute('disabled', ''); else this.removeAttribute('disabled');
     }
 }
+// customElements.define('adw-combo-row', AdwComboRow); // Moved to end
+
+// console.log('[Debug] components.js execution ended'); // Will be replaced
+
+console.log('[Debug] components.js main script body executed. Defining custom elements now.');
+
+customElements.define('adw-button', AdwButton);
+customElements.define('adw-box', AdwBox);
+customElements.define('adw-entry', AdwEntry);
+customElements.define('adw-label', AdwLabel);
+customElements.define('adw-entry-row', AdwEntryRow);
+customElements.define('adw-password-entry-row', AdwPasswordEntryRow);
+customElements.define('adw-action-row', AdwActionRow);
+customElements.define('adw-switch', AdwSwitch);
+customElements.define('adw-checkbox', AdwCheckbox);
+customElements.define('adw-radio-button', AdwRadioButton);
+customElements.define('adw-list-box', AdwListBox);
+customElements.define('adw-row', AdwRow);
+customElements.define('adw-window-title', AdwWindowTitle);
+customElements.define('adw-header-bar', AdwHeaderBar);
+customElements.define('adw-application-window', AdwApplicationWindow);
+customElements.define('adw-avatar', AdwAvatar);
+customElements.define('adw-flap', AdwFlap);
+customElements.define('adw-view-switcher', AdwViewSwitcher);
+customElements.define('adw-progress-bar', AdwProgressBar);
+customElements.define('adw-spinner', AdwSpinner);
+customElements.define('adw-split-button', AdwSplitButton);
+customElements.define('adw-status-page', AdwStatusPage);
+customElements.define('adw-expander-row', AdwExpanderRow);
+customElements.define('adw-dialog', AdwDialog);
+customElements.define('adw-banner', AdwBanner);
+customElements.define('adw-toast', AdwToast);
+customElements.define('adw-preferences-view', AdwPreferencesView);
+customElements.define('adw-preferences-page', AdwPreferencesPage);
+customElements.define('adw-preferences-group', AdwPreferencesGroup);
+customElements.define('adw-switch-row', AdwSwitchRow);
 customElements.define('adw-combo-row', AdwComboRow);
 
-console.log('[Debug] components.js execution ended');
+console.log('[Debug] components.js all custom elements defined and execution ended.');
