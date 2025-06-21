@@ -77,7 +77,19 @@ fi
 # ... (rest of the script remains the same)
 echo "--- JavaScript Copying Step ---"
 echo "Copying JavaScript files from ${JS_INPUT_DIR} to ${JS_OUTPUT_DIR}"
+# Copy main JS files
 cp "${JS_INPUT_DIR}/components.js" "${JS_OUTPUT_DIR}/components.js"
 cp "${JS_INPUT_DIR}/adw-initializer.js" "${JS_OUTPUT_DIR}/adw-initializer.js"
+
+# Copy the components subdirectory
+JS_COMPONENTS_SUBDIR_SOURCE="${JS_INPUT_DIR}/components"
+JS_COMPONENTS_SUBDIR_DEST="${JS_OUTPUT_DIR}/components"
+if [ -d "${JS_COMPONENTS_SUBDIR_SOURCE}" ]; then
+    echo "Copying JavaScript components subdirectory from ${JS_COMPONENTS_SUBDIR_SOURCE} to ${JS_COMPONENTS_SUBDIR_DEST}"
+    mkdir -p "${JS_COMPONENTS_SUBDIR_DEST}"
+    cp -r "${JS_COMPONENTS_SUBDIR_SOURCE}/." "${JS_COMPONENTS_SUBDIR_DEST}/"
+else
+    echo "WARNING: JavaScript components subdirectory ${JS_COMPONENTS_SUBDIR_SOURCE} not found. Skipping copy."
+fi
 
 echo "--- Build complete. Adwaita-Web assets are updated in app-demo. ---"

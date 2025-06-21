@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adwaita Web - Declarative Demo</title>
     <link rel="stylesheet" href="app-demo/static/css/adwaita-web.css">
+    <!-- components.js must be loaded as a module because it uses ES6 import/export -->
+    <script type="module" src="app-demo/static/js/components.js" defer></script>
+    <!-- adw-initializer.js depends on Adw global from components.js, defer ensures it runs after HTML parsing -->
     <script src="app-demo/static/js/adw-initializer.js" defer></script>
-    <script src="app-demo/static/js/components.js" defer></script>
     <style>
         body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         adw-application-window { flex-grow: 1; display: flex; flex-direction: column; }
@@ -514,7 +516,7 @@ document.getElementById('show-banner-btn').addEventListener('click', () => {
              <!-- The "Custom Element Showcase" from the script will be appended here -->
         </div>
     </adw-application-window>
-
+    <!-- Ensure all HTML content is defined before this main script block -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Adw.js should be initialized by adw-initializer.js
