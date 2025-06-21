@@ -503,6 +503,13 @@ body.light-theme {
   // to standard CSS usage. If an application needs oklab, it can define it.
 }
 
+// Z-indexes
+$zindex-flap: 100;
+$zindex-dialog: 1000;
+$zindex-toast: 1500;
+// Add more z-index variables as needed for other components like popovers, tooltips etc.
+
+
 :root {
   @include define-gtk-colors();
 }
