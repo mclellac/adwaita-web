@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adwaita Web - ViewSwitcher Demo</title>
+    <link rel="stylesheet" href="app-demo/static/css/adwaita-web.css">
+    <script type="module" src="app-demo/static/js/components.js" defer></script>
+    <script src="app-demo/static/js/adw-initializer.js" defer></script>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        adw-application-window { flex-grow: 1; display: flex; flex-direction: column; }
+        .content-area { padding: var(--spacing-l); overflow-y: auto; flex-grow: 1; }
+        .view-content-display {
+            padding: var(--spacing-l);
+            border: 1px solid var(--borders-color);
+            border-top: none; /* ViewSwitcher bar acts as top border */
+            min-height: 150px;
+            border-bottom-left-radius: var(--border-radius-default);
+            border-bottom-right-radius: var(--border-radius-default);
+        }
+        .inline-view-content-display {
+            padding: var(--spacing-l);
+            border: 1px solid var(--borders-color);
+            min-height: 100px;
+            margin-top: var(--spacing-s);
+            border-radius: var(--border-radius-default);
+        }
+    </style>
+</head>
+<body>
+    <adw-application-window id="viewswitcher-window">
+        <adw-header-bar slot="header">
+            <adw-window-title slot="title" title="ViewSwitcher Demo"></adw-window-title>
+            <adw-button slot="end" id="theme-toggle-button" class="flat">Toggle Theme</adw-button>
+        </adw-header-bar>
+
+        <div class="content-area">
+            <adw-label title-level="1" style="margin-bottom: var(--spacing-l);">ViewSwitcher Showcase</adw-label>
+
+            <!-- Standard ViewSwitcher -->
+            <adw-label title-level="2" style="margin-bottom: var(--spacing-s);">Standard ViewSwitcher</adw-label>
+            <adw-view-switcher id="standard-switcher" active-view="viewA">
+                <div view-name="viewA" view-title="General Settings" data-view-icon="actions/document-properties-symbolic"></div>
+                <div view-name="viewB" view-title="User Profile" data-view-icon="avatars/avatar-default-symbolic"></div>
+                <div view-name="viewC" view-title="Notifications" data-view-icon="status/notification-symbolic"></div>
+            </adw-view-switcher>
+            <div id="standard-switcher-content" class="view-content-display">
+                <!-- Content will be injected by JS -->
+            </div>
+
+            <!-- Inline ViewSwitcher -->
+            <adw-label title-level="2" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-s);">Inline ViewSwitcher</adw-label>
+            <adw-box orientation="horizontal" spacing="m" style="align-items: center;">
+                <adw-label>Select Mode:</adw-label>
+                <adw-view-switcher id="inline-switcher" active-view="mode1" is-inline>
+                    <div view-name="mode1" view-title="Mode Alpha" data-view-icon="actions/media-playback-start-symbolic"></div>
+                    <div view-name="mode2" view-title="Mode Beta" data-view-icon="actions/media-record-symbolic"></div>
+                    <div view-name="mode3" view-title="Mode Gamma" data-view-icon="actions/media-eject-symbolic"></div>
+                </adw-view-switcher>
+            </adw-box>
+            <div id="inline-switcher-content" class="inline-view-content-display">
+                <!-- Content will be injected by JS -->
+            </div>
+        </div>
+    </adw-application-window>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.Adw) {
+                console.error("Adw object not found. Aborting main script.");
+                return;
+            }
+            Adw.init();
+
+            document.getElementById('theme-toggle-button')?.addEventListener('click', () => Adw.toggleTheme());
+
+            // Standard ViewSwitcher Logic
+            const standardSwitcher = document.getElementById('standard-switcher');
+            const standardSwitcherContent = document.getElementById('standard-switcher-content');
+
+            const standardViewContents = {
+                viewA: "<adw-label title-level='3'>General Settings Panel</adw-label><p>Configure your application's general settings here.</p><adw-switch label='Enable Feature X'></adw-switch>",
+                viewB: "<adw-label title-level='3'>User Profile Details</adw-label><p>View and edit your profile information.</p><adw-entry-row title='Username' value='exampleUser'></adw-entry-row>",
+                viewC: "<adw-label title-level='3'>Notification Preferences</adw-label><p>Manage how you receive notifications.</p><adw-checkbox label='Email Notifications' checked></adw-checkbox>"
+            };
+
+            function updateStandardView(viewName) {
+                if (standardSwitcherContent && standardViewContents[viewName]) {
+                    standardSwitcherContent.innerHTML = standardViewContents[viewName];
+                } else if (standardSwitcherContent) {
+                    standardSwitcherContent.innerHTML = "<p>Content not found for this view.</p>";
+                }
+            }
+
+            standardSwitcher?.addEventListener('view-changed', (event) => {
+                updateStandardView(event.detail.viewName);
+                Adw.createToast(`Standard view changed to: ${event.detail.viewTitle || event.detail.viewName}`, { timeout: 1500 });
+            });
+            // Initial content for standard switcher
+            if (standardSwitcher) {
+                updateStandardView(standardSwitcher.getAttribute('active-view'));
+            }
+
+
+            // Inline ViewSwitcher Logic
+            const inlineSwitcher = document.getElementById('inline-switcher');
+            const inlineSwitcherContent = document.getElementById('inline-switcher-content');
+            const inlineViewContents = {
+                mode1: "<adw-status-page title='Mode Alpha Active' icon-name='emoji/face-smile-symbolic'><adw-label slot='description'>Alpha mode specific settings and information.</adw-label></adw-status-page>",
+                mode2: "<adw-status-page title='Mode Beta Engaged' icon-name='emoji/face-glasses-symbolic'><adw-label slot='description'>Beta mode is now running. Watch out for dragons.</adw-label></adw-status-page>",
+                mode3: "<adw-status-page title='Mode Gamma Selected' icon-name='emoji/face-surprise-symbolic'><adw-label slot='description'>Gamma mode offers experimental features.</adw-label></adw-status-page>"
+            };
+
+            function updateInlineView(viewName) {
+                if (inlineSwitcherContent && inlineViewContents[viewName]) {
+                    inlineSwitcherContent.innerHTML = inlineViewContents[viewName];
+                } else if (inlineSwitcherContent) {
+                    inlineSwitcherContent.innerHTML = "<p>Content not found for this mode.</p>";
+                }
+            }
+
+            inlineSwitcher?.addEventListener('view-changed', (event) => {
+                updateInlineView(event.detail.viewName);
+                Adw.createToast(`Inline view changed to: ${event.detail.viewTitle || event.detail.viewName}`, { timeout: 1500 });
+            });
+            // Initial content for inline switcher
+             if (inlineSwitcher) {
+                updateInlineView(inlineSwitcher.getAttribute('active-view'));
+            }
+        });
+    </script>
+</body>
+</html>

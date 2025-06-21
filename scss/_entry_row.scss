@@ -26,7 +26,7 @@
   .adw-entry-row-title {
     font-size: var(--font-size-base);
     font-weight: normal; // Standard weight for preference row titles
-    color: var(--secondary-fg-color); // Titles in preferences rows are often secondary
+    color: var(--view-fg-color); // Changed from secondary-fg-color to view-fg-color for better contrast
     // Libadwaita uses placeholder color for EntryRow titles that are also placeholders for the input
     // but here the title is distinct from the input's placeholder.
     // If it should act as a placeholder when entry is empty, JS would hide it.

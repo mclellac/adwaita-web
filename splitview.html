@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adwaita Web - SplitView Demo</title>
+    <link rel="stylesheet" href="app-demo/static/css/adwaita-web.css">
+    <script type="module" src="app-demo/static/js/components.js" defer></script>
+    <script src="app-demo/static/js/adw-initializer.js" defer></script>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        adw-application-window { flex-grow: 1; display: flex; flex-direction: column; }
+        .content-area { padding: var(--spacing-l); overflow-y: auto; flex-grow: 1; }
+        .split-view-demo-container {
+            border: 1px solid var(--borders-color);
+            min-height: 300px; /* Ensure visibility */
+            margin-bottom: var(--spacing-s);
+        }
+        .sidebar-content { /* Common style for sidebar/flap areas */
+            padding: var(--spacing-m);
+            min-width: 200px; /* Ensure flap/sidebar has some width */
+        }
+        .main-view-content { /* Common style for main content areas */
+            padding: var(--spacing-l);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <adw-application-window id="splitview-window">
+        <adw-header-bar slot="header">
+            <adw-window-title slot="title" title="SplitView Components Demo"></adw-window-title>
+            <adw-button slot="end" id="theme-toggle-button" class="flat">Toggle Theme</adw-button>
+        </adw-header-bar>
+
+        <div class="content-area">
+            <adw-label title-level="1" style="margin-bottom: var(--spacing-l);">SplitView Components</adw-label>
+
+            <!-- Flap Demo -->
+            <section class="widget-showcase">
+                <adw-label title-level="2">Flap (adw-flap)</adw-label>
+                <adw-flap id="demo-flap" class="split-view-demo-container">
+                    <adw-box slot="flap-content" class="sidebar-content" style="background-color: var(--sidebar-bg-color);">
+                        <adw-label title-level="3">Flap Area</adw-label>
+                        <adw-action-row title="Option 1" activatable></adw-action-row>
+                        <adw-action-row title="Option 2" activatable></adw-action-row>
+                    </adw-box>
+                    <adw-box slot="main-content" class="main-view-content">
+                        <adw-status-page title="Main Content (Flap)" icon-name="actions/document-properties-symbolic"></adw-status-page>
+                    </adw-box>
+                </adw-flap>
+                <adw-button id="toggle-flap-button">Toggle Flap</adw-button>
+            </section>
+
+            <!-- NavigationSplitView Demo -->
+            <section class="widget-showcase" style="margin-top: var(--spacing-xl);">
+                <adw-label title-level="2">NavigationSplitView (adw-navigation-split-view)</adw-label>
+                <adw-navigation-split-view id="demo-nav-split" class="split-view-demo-container" show-sidebar>
+                    <adw-list-box slot="sidebar" class="sidebar-content" style="background-color: var(--sidebar-bg-color);" id="nav-split-sidebar-list">
+                        <adw-action-row title="Mail" activatable data-content-id="mail-content"></adw-action-row>
+                        <adw-action-row title="Calendar" activatable data-content-id="calendar-content"></adw-action-row>
+                        <adw-action-row title="Tasks" activatable data-content-id="tasks-content"></adw-action-row>
+                    </adw-list-box>
+                    <div slot="content" id="nav-split-main-content" class="main-view-content">
+                        <adw-status-page title="Select an item from the sidebar" icon-name="actions/edit-select-all-symbolic"></adw-status-page>
+                    </div>
+                </adw-navigation-split-view>
+                <adw-button id="toggle-nav-split-sidebar-button">Toggle Navigation Sidebar</adw-button>
+            </section>
+
+            <!-- OverlaySplitView Demo -->
+            <section class="widget-showcase" style="margin-top: var(--spacing-xl);">
+                <adw-label title-level="2">OverlaySplitView (adw-overlay-split-view)</adw-label>
+                <adw-overlay-split-view id="demo-overlay-split" class="split-view-demo-container" sidebar-position="end">
+                     <adw-list-box slot="sidebar" class="sidebar-content" style="background-color: var(--secondary-sidebar-bg-color);" id="overlay-split-sidebar-list">
+                        <adw-action-row title="Details" activatable data-content-id="details-overlay"></adw-action-row>
+                        <adw-action-row title="Settings" activatable data-content-id="settings-overlay"></adw-action-row>
+                    </adw-list-box>
+                    <div slot="content" id="overlay-split-main-content" class="main-view-content">
+                        <adw-status-page title="Main Content Area" icon-name="emoji/face-plain-symbolic"></adw-status-page>
+                    </div>
+                </adw-overlay-split-view>
+                <adw-button id="toggle-overlay-split-sidebar-button">Toggle Overlay Sidebar</adw-button>
+            </section>
+        </div>
+    </adw-application-window>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.Adw) {
+                console.error("Adw object not found. Aborting main script.");
+                return;
+            }
+            Adw.init();
+
+            document.getElementById('theme-toggle-button')?.addEventListener('click', () => Adw.toggleTheme());
+
+            // Flap
+            const flap = document.getElementById('demo-flap');
+            document.getElementById('toggle-flap-button')?.addEventListener('click', () => flap?.toggleFlap());
+            flap?.addEventListener('fold-changed', (e) => Adw.createToast(`Flap is now ${e.detail.isFolded ? 'closed' : 'open'}. Overlay: ${e.detail.isOverlayMode}`));
+
+            // NavigationSplitView
+            const navSplitView = document.getElementById('demo-nav-split');
+            const navSplitMainContent = document.getElementById('nav-split-main-content');
+            document.getElementById('toggle-nav-split-sidebar-button')?.addEventListener('click', () => navSplitView?.toggleSidebar());
+
+            document.querySelectorAll('#nav-split-sidebar-list adw-action-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    const contentId = e.currentTarget.dataset.contentId;
+                    if (navSplitMainContent) {
+                        navSplitMainContent.innerHTML = ''; // Clear
+                        let newContentHTML = '';
+                        if (contentId === 'mail-content') {
+                            newContentHTML = '<adw-status-page title="Mail View" icon-name="apps/internet-mail-symbolic"><adw-label slot="description">Your inbox is empty!</adw-label></adw-status-page>';
+                        } else if (contentId === 'calendar-content') {
+                            newContentHTML = '<adw-status-page title="Calendar View" icon-name="apps/office-calendar-symbolic"><adw-label slot="description">No events today.</adw-label></adw-status-page>';
+                        } else if (contentId === 'tasks-content') {
+                            newContentHTML = '<adw-status-page title="Tasks View" icon-name="apps/accessories-text-editor-symbolic"><adw-label slot="description">All tasks completed!</adw-label></adw-status-page>';
+                        }
+                        navSplitMainContent.innerHTML = newContentHTML;
+                    }
+                    Adw.createToast(`NavSplitView showing: ${contentId}`);
+                    if (navSplitView?.isOverlayMode() && navSplitView?.isSidebarVisible()) {
+                        navSplitView.hideSidebar();
+                    }
+                });
+            });
+             navSplitView?.addEventListener('sidebar-toggled', (e) => Adw.createToast(`NavSplitView sidebar ${e.detail.isVisible ? 'shown' : 'hidden'}. Overlay: ${e.detail.isOverlay}`));
+
+
+            // OverlaySplitView
+            const overlaySplitView = document.getElementById('demo-overlay-split');
+            const overlaySplitMainContent = document.getElementById('overlay-split-main-content'); // Not changing this for demo simplicity
+            document.getElementById('toggle-overlay-split-sidebar-button')?.addEventListener('click', () => overlaySplitView?.toggleSidebar());
+
+            document.querySelectorAll('#overlay-split-sidebar-list adw-action-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    const contentId = e.currentTarget.dataset.contentId;
+                     Adw.createToast(`OverlaySplitView item clicked: ${contentId}`);
+                    if (overlaySplitView?.isSidebarVisible()) {
+                        overlaySplitView.hideSidebar();
+                    }
+                });
+            });
+            overlaySplitView?.addEventListener('sidebar-toggled', (e) => Adw.createToast(`OverlaySplitView sidebar ${e.detail.isVisible ? 'shown' : 'hidden'}`));
+
+        });
+    </script>
+</body>
+</html>

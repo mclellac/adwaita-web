@@ -13,7 +13,7 @@
     height: 0;
 
     &:checked + .adw-switch-slider {
-      background-color: var(--accent-color); // Use main accent color for "on" state
+      background-color: var(--accent-bg-color); // Use accent-bg-color for the track's "on" state
     }
 
     &:checked + .adw-switch-slider:before {
@@ -23,31 +23,31 @@
     // Disabled state - OFF
     &:disabled:not(:checked) + .adw-switch-slider {
       background-color: var(--switch-slider-disabled-off-bg-color);
-      opacity: var(--opacity-disabled); // Apply overall opacity to disabled switch
+      // opacity: var(--opacity-disabled); // Let's control opacity on knob/slider more directly if needed
       cursor: not-allowed;
 
       &:before {
         background-color: var(--switch-knob-disabled-bg-color);
-        opacity: 1; // Opacity is on the parent slider
+        // opacity: 1;
       }
     }
 
     // Disabled state - ON
     &:disabled:checked + .adw-switch-slider {
-      background-color: var(--accent-color); // Keep accent for ON disabled, but apply opacity
-      opacity: var(--opacity-disabled);
+      background-color: var(--accent-bg-color);
+      opacity: var(--opacity-disabled); // Apply opacity to the whole slider for disabled "on" state
       cursor: not-allowed;
 
        &:before {
-        background-color: var(--switch-knob-bg-color); // Knob remains its standard color for ON disabled
-        opacity: 1; // Opacity is on the parent slider
+        background-color: var(--switch-knob-bg-color); // Knob standard color
+        // Opacity is on the parent slider, so knob doesn't need separate opacity here.
       }
     }
 
     &:focus-visible + .adw-switch-slider {
-      outline: 2px solid var(--accent-color); // Use main accent color
-      outline-offset: 2px; // Standard offset
-      border-radius: 14px; // Slightly larger than slider to encompass it
+      outline: 2px solid var(--accent-color); // Focus ring uses the standalone accent color
+      outline-offset: 2px;
+      border-radius: 14px;
     }
   }
 

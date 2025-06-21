@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adwaita Web - Carousel Demo</title>
+    <link rel="stylesheet" href="app-demo/static/css/adwaita-web.css">
+    <script type="module" src="app-demo/static/js/components.js" defer></script>
+    <script src="app-demo/static/js/adw-initializer.js" defer></script>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        adw-application-window { flex-grow: 1; display: flex; flex-direction: column; }
+        .content-area { padding: var(--spacing-l); overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; align-items: center;}
+        adw-carousel {
+            width: 100%;
+            max-width: 600px; /* Limit width for better demo */
+            min-height: 350px;
+            border: 1px solid var(--borders-color);
+            margin-bottom: var(--spacing-l);
+        }
+        .slide-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xl);
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .slide-image { width: 100%; height: 100%; object-fit: cover; }
+    </style>
+</head>
+<body>
+    <adw-application-window id="carousel-window">
+        <adw-header-bar slot="header">
+            <adw-window-title slot="title" title="Carousel Demo"></adw-window-title>
+            <adw-button slot="end" id="theme-toggle-button" class="flat">Toggle Theme</adw-button>
+        </adw-header-bar>
+
+        <div class="content-area">
+            <adw-label title-level="1" style="margin-bottom: var(--spacing-l);">Carousel Showcase</adw-label>
+
+            <adw-carousel id="demo-carousel" show-nav-buttons show-indicators="dots" loop autoplay="5000">
+                <img src="https://source.unsplash.com/random/600x350?nature,1" alt="Random Nature Image 1" class="slide-image" data-thumbnail-src="https://source.unsplash.com/random/120x80?nature,1">
+                <div class="slide-content" style="background-color: var(--adw-teal-1);">
+                    <adw-label title-level="2" style="color: var(--adw-teal-5);">Slide 2: Custom Content</adw-label>
+                    <adw-label is-body style="color: var(--adw-teal-5);">This slide has various Adwaita components.</adw-label>
+                    <adw-button suggested style="margin-top: var(--spacing-m);">Hello!</adw-button>
+                </div>
+                <adw-status-page title="Slide 3: Status Page" icon-name="status/weather-showers-symbolic" class="slide-content" style="background-color: var(--card-bg-color);">
+                    <adw-label slot="description">You can embed complex components like a status page within a slide.</adw-label>
+                </adw-status-page>
+                <img src="https://source.unsplash.com/random/600x350?city,1" alt="Random City Image 1" class="slide-image" data-thumbnail-src="https://source.unsplash.com/random/120x80?city,1">
+                <div class="slide-content" style="background-color: var(--adw-purple-1);">
+                    <adw-label title-level="2" style="color: var(--adw-purple-5);">Slide 5: Another Custom Slide</adw-label>
+                    <adw-spinner active></adw-spinner>
+                </div>
+            </adw-carousel>
+
+            <adw-label title-level="3" style="margin-bottom: var(--spacing-s);">Carousel Controls</adw-label>
+            <adw-box orientation="horizontal" spacing="s" style="flex-wrap: wrap; justify-content: center; margin-bottom: var(--spacing-m);">
+                <adw-button id="carousel-prev">Previous</adw-button>
+                <adw-button id="carousel-next">Next</adw-button>
+                <adw-spin-button id="carousel-goto-slide" min="0" max="4" value="0"></adw-spin-button>
+                <adw-button id="carousel-goto-btn">Go to Slide</adw-button>
+            </adw-box>
+            <adw-box orientation="horizontal" spacing="s" style="flex-wrap: wrap; justify-content: center;">
+                <adw-checkbox id="toggle-autoplay" label="Autoplay" checked></adw-checkbox>
+                <adw-checkbox id="toggle-loop" label="Loop" checked></adw-checkbox>
+                <adw-checkbox id="toggle-nav-buttons" label="Nav Buttons" checked></adw-checkbox>
+                <adw-combo-box id="indicator-style-select" label="Indicator Style:">
+                    <option value="dots" selected>Dots</option>
+                    <option value="thumbnails">Thumbnails</option>
+                    <option value="none">None</option>
+                </adw-combo-box>
+            </adw-box>
+
+        </div>
+    </adw-application-window>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.Adw) {
+                console.error("Adw object not found. Aborting main script.");
+                return;
+            }
+            Adw.init();
+
+            document.getElementById('theme-toggle-button')?.addEventListener('click', () => Adw.toggleTheme());
+
+            const carousel = document.getElementById('demo-carousel');
+            const gotoSpinButton = document.getElementById('carousel-goto-slide');
+
+            document.getElementById('carousel-prev')?.addEventListener('click', () => carousel?.prev());
+            document.getElementById('carousel-next')?.addEventListener('click', () => carousel?.next());
+            document.getElementById('carousel-goto-btn')?.addEventListener('click', () => {
+                const slideNum = parseInt(gotoSpinButton.value, 10);
+                carousel?.goTo(slideNum);
+            });
+
+            carousel?.addEventListener('slide-changed', (e) => {
+                Adw.createToast(`Carousel slide changed to index: ${e.detail.currentIndex}`, { timeout: 1000 });
+                if (gotoSpinButton) gotoSpinButton.value = e.detail.currentIndex;
+            });
+
+            // Update max for spin button based on actual slides
+            if (carousel && gotoSpinButton) {
+                gotoSpinButton.setAttribute('max', carousel.getSlideCount() - 1);
+            }
+
+            // Controls for carousel properties
+            document.getElementById('toggle-autoplay')?.addEventListener('change', (e) => {
+                carousel.autoplay = e.target.checked ? 5000 : 0;
+            });
+            document.getElementById('toggle-loop')?.addEventListener('change', (e) => {
+                carousel.loop = e.target.checked;
+            });
+            document.getElementById('toggle-nav-buttons')?.addEventListener('change', (e) => {
+                carousel.showNavButtons = e.target.checked;
+            });
+            document.getElementById('indicator-style-select')?.addEventListener('change', (e) => {
+                carousel.showIndicators = e.target.value;
+            });
+
+        });
+    </script>
+</body>
+</html>
