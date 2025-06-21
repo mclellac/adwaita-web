@@ -1,4 +1,4 @@
-// import { adwGenerateId } from './utils.js'; // Not directly used here, but good practice if other utils were needed
+import { sanitizeHref } from './utils.js'; // Import sanitizeHref
 
 /**
  * Creates an Adwaita-style button.
@@ -28,7 +28,7 @@ export function createAdwButton(text, options = {}) {
   }
 
   if (isLink) {
-    const safeHref = utils.sanitizeHref(opts.href); // Use utility for sanitization
+    const safeHref = sanitizeHref(opts.href);
     if (safeHref) {
         button.href = safeHref;
     } else {
@@ -188,7 +188,7 @@ export class AdwButton extends HTMLElement {
 
 
         if (isLink) {
-            const safeHref = utils.sanitizeHref(href);
+            const safeHref = sanitizeHref(href);
             if (safeHref) {
                 internalButton.href = safeHref;
             } else {

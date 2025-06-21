@@ -389,38 +389,53 @@ export class AdwAlertDialog extends HTMLElement {
         if (name === 'open') { if (newValue !== null) this.open(); else this.close(); }
         else {
             const wasOpen = this.hasAttribute('open');
-            if (this._alertDialogInstance && wasОpen) this._alertDialogInstance.close();
+            if (this._alertDialogInstance && wasOpen) this._alertDialogInstance.close(); // wasОpen
             this._parseChoices(); this._render();
             if (wasOpen) this.open();
         }
     }
-    _parseChoices() { /* ... (same as in original components.js) ... */ }
-    _render() { /* ... (similar to AdwDialog._render, using createAdwAlertDialog) ... */
+    _parseChoices() {
+        this._choices = [];
+        const choiceElements = this.querySelectorAll('adw-alert-choice');
+        choiceElements.forEach(el => {
+            this._choices.push({
+                label: el.getAttribute('label') || el.textContent.trim(),
+                value: el.getAttribute('value') || el.getAttribute('label') || el.textContent.trim(),
+                style: el.getAttribute('style') || undefined // 'suggested' or 'destructive'
+            });
+        });
+    }
+    _render() {
         const bodyContent = this.querySelector('[slot="body-content"]');
         let bodyStr = this.getAttribute('body');
         if (!bodyContent && !bodyStr) {
-            const nonChoiceSlots = Array.from(this.childNodes).filter(node => node.nodeType === Node.TEXT_NODE || (node.nodeType === Node.ELEMENT_NODE && !node.hasAttribute('slot'))).map(n => n.textContent.trim()).join(' ');
+            const nonChoiceSlots = Array.from(this.childNodes).filter(node => node.nodeType === Node.TEXT_NODE || (node.nodeType === Node.ELEMENT_NODE && !node.hasAttribute('slot') && node.tagName.toLowerCase() !== 'adw-alert-choice')).map(n => n.textContent.trim()).join('\n');
             if(nonChoiceSlots.trim()) bodyStr = nonChoiceSlots.trim();
         }
 
         const options = {
             heading: this.getAttribute('heading') || undefined,
             customContent: bodyContent ? bodyContent.cloneNode(true) : undefined,
+            body: bodyStr, // Pass body string to factory
             choices: this._choices.length > 0 ? this._choices : undefined,
             closeOnBackdropClick: this.hasAttribute('close-on-backdrop-click') ? (this.getAttribute('close-on-backdrop-click') !== 'false') : false,
             onResponse: (value) => {
                 this.dispatchEvent(new CustomEvent('response', { detail: { value } }));
-                if (this.hasAttribute('open')) this.removeAttribute('open');
+                if (this.hasAttribute('open')) this.removeAttribute('open'); // Ensure close is reflected
             },
-            onDialogClosed: () => { // From factory's onClose
+            onDialogClosed: () => {
                  if (this.hasAttribute('open')) this.removeAttribute('open');
                  this.dispatchEvent(new CustomEvent('close'));
             }
         };
+        // If there's an existing instance and it's open, close it before creating a new one.
+        if (this._alertDialogInstance && this._alertDialogInstance.dialog.isConnected) {
+            this._alertDialogInstance.close();
+        }
         this._alertDialogInstance = createAdwAlertDialog(bodyStr || '', options);
     }
-    open() { if (!this._alertDialogInstance) this._render(); this._alertDialogInstance.open(); if (!this.hasAttribute('open')) this.setAttribute('open', ''); }
-    close() { if (this._alertDialogInstance) this._alertDialogInstance.close(); }
+    open() { if (!this._alertDialogInstance || !this._alertDialogInstance.dialog.isConnected) this._render(); this._alertDialogInstance.open(); if (!this.hasAttribute('open')) this.setAttribute('open', ''); }
+    close() { if (this._alertDialogInstance) this._alertDialogInstance.close(); else if (this.hasAttribute('open')) this.removeAttribute('open');}
 }
 
 
@@ -429,33 +444,91 @@ export class AdwAlertDialog extends HTMLElement {
  */
 export function createAdwAboutDialog(options = {}) {
   const opts = options || {};
-  // const dialogId = adwGenerateId('adw-about-dialog'); // ID not used
 
   const aboutDialogContent = document.createElement('div');
   aboutDialogContent.classList.add('adw-about-dialog-content');
 
   const headerSection = document.createElement('header');
   headerSection.classList.add('adw-about-dialog-header');
-  // ... (rest of header section logic from original) ...
-  if (opts.logo) { /* ... */ } else if (opts.appIcon) { /* ... */ }
+
+  if (opts.logo) {
+      const logoImg = document.createElement('img');
+      logoImg.src = opts.logo;
+      logoImg.alt = `${opts.appName || 'Application'} Logo`;
+      logoImg.classList.add('adw-about-dialog-logo');
+      headerSection.appendChild(logoImg);
+  } else if (opts.appIcon) { // Assuming appIcon is a class name for an icon font or an SVG string
+      const iconSpan = document.createElement('span');
+      iconSpan.classList.add('adw-about-dialog-app-icon');
+      if (typeof opts.appIcon === 'string' && opts.appIcon.trim().startsWith('<svg')) {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(opts.appIcon, "image/svg+xml");
+          const svgElement = doc.querySelector("svg");
+          if (svgElement) iconSpan.appendChild(svgElement);
+      } else {
+          iconSpan.classList.add(opts.appIcon);
+      }
+      headerSection.appendChild(iconSpan);
+  }
+
   const appInfoDiv = document.createElement('div');
   appInfoDiv.classList.add('adw-about-dialog-app-info');
-  if (opts.appName) { /* ... */ } if (opts.version) { /* ... */ }
+  if (opts.appName) {
+      const appNameEl = document.createElement('h1');
+      appNameEl.textContent = opts.appName;
+      appInfoDiv.appendChild(appNameEl);
+  }
+  if (opts.version) {
+      const versionEl = document.createElement('p');
+      versionEl.classList.add('adw-about-dialog-version');
+      versionEl.textContent = `Version ${opts.version}`;
+      appInfoDiv.appendChild(versionEl);
+  }
   headerSection.appendChild(appInfoDiv);
   aboutDialogContent.appendChild(headerSection);
 
   const mainContentSection = document.createElement('div');
   mainContentSection.classList.add('adw-about-dialog-main-content');
-  // ... (rest of main content section logic) ...
-  if (opts.comments) { /* ... */ } if (opts.developerName) { /* ... */ }
-  if (opts.copyright) { /* ... */ } if (opts.website) { /* ... */ }
+  if (opts.comments) {
+      const commentsEl = document.createElement('p');
+      commentsEl.classList.add('adw-about-dialog-comments');
+      if(typeof opts.comments === 'string' && (opts.comments.includes('<') || opts.comments.includes('&'))) {
+        // If comments might be HTML, set as innerHTML (risky if not trusted)
+        // For safety, assume textContent unless explicitly handled.
+        // This example will stick to textContent for safety unless changed.
+        commentsEl.textContent = opts.comments; // Or handle HTML if necessary
+      } else {
+        commentsEl.textContent = opts.comments;
+      }
+      mainContentSection.appendChild(commentsEl);
+  }
+  if (opts.developerName) {
+      const devNameEl = document.createElement('p');
+      devNameEl.innerHTML = `Developed by: <strong>${opts.developerName}</strong>`; // Safely assuming dev name is not HTML
+      mainContentSection.appendChild(devNameEl);
+  }
+  if (opts.copyright) {
+      const copyrightEl = document.createElement('p');
+      copyrightEl.classList.add('adw-about-dialog-copyright');
+      copyrightEl.textContent = opts.copyright;
+      mainContentSection.appendChild(copyrightEl);
+  }
+  if (opts.website) {
+      const websiteLink = document.createElement('a');
+      websiteLink.href = opts.website;
+      websiteLink.textContent = opts.websiteLabel || opts.website;
+      websiteLink.target = "_blank";
+      websiteLink.rel = "noopener noreferrer";
+      const websiteP = document.createElement('p');
+      websiteP.appendChild(websiteLink);
+      mainContentSection.appendChild(websiteP);
+  }
   aboutDialogContent.appendChild(mainContentSection);
+
 
   const detailsContent = document.createElement('div');
   detailsContent.classList.add('adw-about-dialog-details-content');
   let hasDetails = false;
-  // ... (createListSection and its usage from original - needs Adw.createExpanderRow or similar) ...
-  // Refactored to use document.createElement for adw-expander-row
 
   function createListSection(title, items) {
     if (!items || items.length === 0) return null;
@@ -471,15 +544,20 @@ export function createAdwAboutDialog(options = {}) {
       ul.appendChild(li);
     });
     sectionDiv.appendChild(ul);
-    hasDetails = true; // Mark that details exist
+    hasDetails = true;
     return sectionDiv;
   }
 
-  const devList = createListSection("Developers", opts.developers); if (devList) detailsContent.appendChild(devList);
-  const docList = createListSection("Documenters", opts.documenters); if (docList) detailsContent.appendChild(docList);
-  const designerList = createListSection("Designers", opts.designers); if (designerList) detailsContent.appendChild(designerList);
-  const artistList = createListSection("Artists", opts.artists); if (artistList) detailsContent.appendChild(artistList);
-  const translatorList = createListSection("Translators", opts.translators); if (translatorList) detailsContent.appendChild(translatorList);
+  if(opts.customDetailsContent instanceof Node) {
+      detailsContent.appendChild(opts.customDetailsContent);
+      hasDetails = true;
+  } else {
+      const devList = createListSection("Developers", opts.developers); if (devList) detailsContent.appendChild(devList);
+      const docList = createListSection("Documenters", opts.documenters); if (docList) detailsContent.appendChild(docList);
+      const designerList = createListSection("Designers", opts.designers); if (designerList) detailsContent.appendChild(designerList);
+      const artistList = createListSection("Artists", opts.artists); if (artistList) detailsContent.appendChild(artistList);
+      const translatorList = createListSection("Translators", opts.translators); if (translatorList) detailsContent.appendChild(translatorList);
+  }
 
 
   if (opts.licenseType || opts.licenseText) {
@@ -487,10 +565,10 @@ export function createAdwAboutDialog(options = {}) {
     licenseSection.classList.add('adw-about-dialog-license-section');
     if (opts.licenseType) {
         const licenseTypeEl = document.createElement('h4');
-        licenseTypeEl.textContent = "License"; // Or opts.licenseType as title if preferred
+        licenseTypeEl.textContent = "License";
         licenseSection.appendChild(licenseTypeEl);
         const licenseP = document.createElement('p');
-        licenseP.textContent = opts.licenseType; // E.g. "GNU GPL v3"
+        licenseP.textContent = opts.licenseType;
         licenseSection.appendChild(licenseP);
     }
     if (opts.licenseText) {
@@ -505,23 +583,16 @@ export function createAdwAboutDialog(options = {}) {
 
 
   if (hasDetails) {
-    // const expander = AdwGlobal.createExpanderRow({ title: "Details", content: detailsContent, expanded: false });
     const expander = document.createElement('adw-expander-row');
-    expander.title = "Details";
-    // expander.subtitle = "View credits and license information"; // Optional subtitle
-    expander.expanded = false; // Default to not expanded
-    // The content of an <adw-expander-row> is typically slotted or added directly.
-    // Since detailsContent is already populated, we can append it.
-    // AdwExpanderRow's implementation needs to handle this, perhaps by looking for a specific slot.
-    // For now, let's assume it appends children to its content area or uses a default slot.
-    expander.appendChild(detailsContent);
+    expander.setAttribute('title', "Details");
+    expander.appendChild(detailsContent); // Content for expander row
     aboutDialogContent.appendChild(expander);
   }
 
-  const dialog = createAdwDialog({ // Use imported createAdwDialog
+  const dialog = createAdwDialog({
     title: `About ${opts.appName || ''}`,
     content: aboutDialogContent,
-    buttons: [createAdwButton("Close", { suggested: true, onClick: () => dialog.close() })], // Use imported createAdwButton
+    buttons: [createAdwButton("Close", { suggested: true, onClick: () => dialog.close() })],
     closeOnBackdropClick: true
   });
 
@@ -530,18 +601,16 @@ export function createAdwAboutDialog(options = {}) {
   return dialog;
 }
 
-export class AdwAboutDialog extends HTMLElement { /* ... (Similar structure to AdwAlertDialog WC) ... */
-    static get observedAttributes() { return ['app-name', 'open']; } // Simplified
+export class AdwAboutDialog extends HTMLElement {
+    static get observedAttributes() { return ['app-name', 'open', /* other attributes from _gatherOptions */ 'app-icon', 'logo', 'version', 'copyright', 'developer-name', 'website', 'website-label', 'license-type', 'comments', 'developers', 'documenters', 'designers', 'artists', 'translators']; }
     constructor() {
         super();
-        this._dialogInstance = null; // This will hold the dialog factory instance {dialog, backdrop, open, close}
+        this._dialogInstance = null;
         this._slotObserver = new MutationObserver(() => this._reRenderIfOpen());
-        // No shadow DOM for modal dialogs. Content is built into a separate dialog structure.
     }
 
     connectedCallback() {
         this._slotObserver.observe(this, { childList: true, subtree: true, characterData: true, attributes: true });
-        // Initial render is deferred to first open() or if 'open' attribute is present.
         if (this.hasAttribute('open')) {
             this.open();
         }
@@ -550,21 +619,18 @@ export class AdwAboutDialog extends HTMLElement { /* ... (Similar structure to A
     disconnectedCallback() {
         this._slotObserver.disconnect();
         if (this._dialogInstance) {
-            this._dialogInstance.close(); // Ensure cleanup of the factory-created dialog
+            this._dialogInstance.close();
         }
     }
 
     _reRenderIfOpen() {
-        // If the dialog is open and DOM/attributes change, close, rebuild, and reopen.
         if (this.hasAttribute('open') && this._dialogInstance) {
-            this._dialogInstance.close(); // Close existing instance
-            this._dialogInstance = null; // Clear it
-            this.open(); // Re-open, which will trigger _buildDialogInstance
+            this._dialogInstance.close();
+            this._dialogInstance = null;
+            this.open();
         } else if (!this._dialogInstance && this.hasAttribute('open')) {
-            // If open attribute is set but no instance (e.g. on initial load with open attr)
             this.open();
         }
-        // If not open, changes will be picked up on next open() call.
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -573,7 +639,6 @@ export class AdwAboutDialog extends HTMLElement { /* ... (Similar structure to A
             if (newValue !== null) this.open();
             else this.close();
         } else {
-            // For other attribute changes, trigger a re-render if the dialog is currently open.
             this._reRenderIfOpen();
         }
     }
@@ -583,7 +648,6 @@ export class AdwAboutDialog extends HTMLElement { /* ... (Similar structure to A
         const attributesToGather = [
             'appName', 'appIcon', 'logo', 'version', 'copyright',
             'developerName', 'website', 'websiteLabel', 'licenseType', 'comments',
-            // For list sections
             'developers', 'documenters', 'designers', 'artists', 'translators'
         ];
 
@@ -591,7 +655,6 @@ export class AdwAboutDialog extends HTMLElement { /* ... (Similar structure to A
             const attrName = key.replace(/([A-Z])/g, '-$1').toLowerCase();
             if (this.hasAttribute(attrName)) {
                 if (['developers', 'documenters', 'designers', 'artists', 'translators'].includes(key)) {
-                    // These are expected to be comma-separated strings
                     options[key] = this.getAttribute(attrName).split(',').map(s => s.trim()).filter(s => s);
                 } else {
                     options[key] = this.getAttribute(attrName);
@@ -599,10 +662,9 @@ export class AdwAboutDialog extends HTMLElement { /* ... (Similar structure to A
             }
         });
 
-        // Slot support for specific sections
         const commentsSlot = this.querySelector('[slot="comments"]');
-        if (commentsSlot) options.comments = commentsSlot.innerHTML; // Use innerHTML to preserve formatting
-        else if (!options.comments) { // Fallback to text content if no slot and no attribute
+        if (commentsSlot) options.comments = commentsSlot.innerHTML;
+        else if (!options.comments) {
              const nonSlottedText = Array.from(this.childNodes).filter(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim()).map(node => node.textContent.trim()).join('\n');
             if (nonSlottedText) options.comments = nonSlottedText;
         }
@@ -610,43 +672,25 @@ export class AdwAboutDialog extends HTMLElement { /* ... (Similar structure to A
         const licenseTextSlot = this.querySelector('[slot="license-text"]');
         if (licenseTextSlot) options.licenseText = licenseTextSlot.textContent.trim();
 
-        // Example for slotted developers list (could be extended for others)
         const developersSlot = this.querySelector('ul[slot="developers"]');
         if (developersSlot) {
             options.developers = Array.from(developersSlot.querySelectorAll('li')).map(li => li.textContent.trim());
         }
-
-
-        // Check for a general "details" slot that might contain pre-formatted sections
         const detailsSlot = this.querySelector('[slot="details"]');
         if (detailsSlot) {
             options.customDetailsContent = detailsSlot.cloneNode(true);
         }
-
-
         return options;
     }
 
     _buildDialogInstance() {
-        // This method will now call the refactored createAdwAboutDialog factory.
-        // The factory itself is responsible for creating the dialog DOM using web components where appropriate.
         const options = this._gatherOptions();
         this._dialogInstance = createAdwAboutDialog(options);
-
-        // Add event listener to the factory-created dialog's close mechanism
-        // to sync the 'open' attribute of this web component.
-        // This assumes the factory's dialog object has a 'dialog' property which is the actual dialog DOM element,
-        // and that it might emit a 'close' event or the factory's close() method handles it.
-        // For createAdwDialog, the close function is part of the returned object.
-        // We need to ensure the web component's state reflects the factory dialog's state.
-
-        // Hook into the factory's close mechanism.
-        // The factory returns { dialog, backdrop, open, close }. We override its close.
         const originalFactoryClose = this._dialogInstance.close.bind(this._dialogInstance);
         this._dialogInstance.close = () => {
             originalFactoryClose();
             if (this.hasAttribute('open')) {
-                this.removeAttribute('open'); // Sync attribute
+                this.removeAttribute('open');
             }
             this.dispatchEvent(new CustomEvent('close', {bubbles: true, composed: true}));
         };
@@ -654,21 +698,19 @@ export class AdwAboutDialog extends HTMLElement { /* ... (Similar structure to A
 
     open() {
         if (!this._dialogInstance || !this._dialogInstance.dialog.isConnected) {
-            // If no instance, or if the dialog was closed and removed from DOM, rebuild.
             this._buildDialogInstance();
         }
         this._dialogInstance.open();
         if (!this.hasAttribute('open')) {
-            this.setAttribute('open', ''); // Sync attribute
+            this.setAttribute('open', '');
         }
         this.dispatchEvent(new CustomEvent('open', {bubbles: true, composed: true}));
     }
 
     close() {
         if (this._dialogInstance && this._dialogInstance.dialog.isConnected) {
-            this._dialogInstance.close(); // This will also trigger attribute removal and event
+            this._dialogInstance.close();
         } else if (this.hasAttribute('open')) {
-            // If instance is gone but attribute is still there
             this.removeAttribute('open');
              this.dispatchEvent(new CustomEvent('close', {bubbles: true, composed: true}));
         }
@@ -685,9 +727,6 @@ export function createAdwPreferencesDialog(options = {}) {
   const preferencesDialogContent = document.createElement('div');
   preferencesDialogContent.classList.add('adw-preferences-dialog-content');
 
-  // Refactored to use document.createElement for adw-view-switcher
-  // const AdwGlobal = (typeof Adw !== 'undefined') ? Adw : { createViewSwitcher: (o) => document.createElement('div') };
-
   const pages = opts.pages || [];
 
   if (pages.length === 0) {
@@ -698,37 +737,45 @@ export function createAdwPreferencesDialog(options = {}) {
     preferencesDialogContent.appendChild(emptyState);
   } else {
     const viewSwitcher = document.createElement('adw-view-switcher');
-    viewSwitcher.setAttribute('label', "Preference Pages"); // For accessibility, though might not be directly visible
+    viewSwitcher.setAttribute('label', "Preference Pages");
 
     pages.forEach(pageData => {
-      const view = document.createElement('adw-view');
-      view.setAttribute('name', pageData.name);
-      view.setAttribute('title', pageData.title); // Used by adw-view-switcher for its tabs/buttons
-
+      // The content for adw-view-switcher's views should be the pageElement itself.
+      // AdwViewSwitcher will handle displaying it when the tab is active.
+      // We create a wrapper for the page content to be slotted into AdwViewSwitcher's model.
+      // Or, if AdwViewSwitcher can take direct elements:
       if (pageData.pageElement instanceof Node) {
-        view.appendChild(pageData.pageElement); // pageData.pageElement is the content for the view
+        // AdwViewSwitcher expects children with 'view-name' and 'view-title' for its tabs
+        // and uses the child element itself as the content for that view.
+        const viewPageContainer = pageData.pageElement.matches('adw-tab-page') || pageData.pageElement.matches('adw-navigation-page') || pageData.pageElement.matches('adw-view') ? pageData.pageElement : document.createElement('div');
+        if(viewPageContainer !== pageData.pageElement) viewPageContainer.appendChild(pageData.pageElement);
+
+        viewPageContainer.setAttribute('view-name', pageData.name);
+        viewPageContainer.setAttribute('view-title', pageData.title);
+        viewSwitcher.appendChild(viewPageContainer);
       } else {
         console.warn(`AdwPreferencesDialog: pageElement for "${pageData.name}" is not a valid Node.`);
-        const errLabel = document.createElement('adw-label');
-        errLabel.textContent = `Error loading page: ${pageData.title}`;
-        view.appendChild(errLabel);
+        const errDiv = document.createElement('div');
+        errDiv.setAttribute('view-name', pageData.name);
+        errDiv.setAttribute('view-title', pageData.title);
+        errDiv.textContent = `Error loading page: ${pageData.title}`;
+        viewSwitcher.appendChild(errDiv);
       }
-      viewSwitcher.appendChild(view);
     });
 
     const initialPage = opts.initialPageName || (pages[0] ? pages[0].name : undefined);
     if (initialPage) {
-        viewSwitcher.setAttribute('active-view-name', initialPage);
+        viewSwitcher.setAttribute('active-view', initialPage); // For AdwViewSwitcher
     }
 
     viewSwitcher.classList.add('adw-preferences-dialog-view-switcher');
     preferencesDialogContent.appendChild(viewSwitcher);
   }
 
-  const dialog = createAdwDialog({ // Use imported createAdwDialog
+  const dialog = createAdwDialog({
     title: dialogTitle,
     content: preferencesDialogContent,
-    buttons: [createAdwButton("Close", { onClick: () => dialog.close(), suggested: true })], // Use imported createAdwButton
+    buttons: [createAdwButton("Close", { onClick: () => dialog.close(), suggested: true })],
     closeOnBackdropClick: true,
     onClose: opts.onClose
   });
@@ -751,8 +798,7 @@ export class AdwPreferencesDialog extends HTMLElement {
     }
 
     connectedCallback() {
-        // Observe direct children for <adw-preferences-page> additions/removals
-        this._slotObserver.observe(this, { childList: true, subtree: false });
+        this._slotObserver.observe(this, { childList: true, subtree: false }); // Observe light DOM for adw-preferences-page
         if (this.hasAttribute('open')) {
             this.open();
         }
@@ -768,7 +814,7 @@ export class AdwPreferencesDialog extends HTMLElement {
     _reRenderIfOpen() {
         if (this.hasAttribute('open') && this._dialogInstance) {
             this._dialogInstance.close();
-            this._dialogInstance = null; // Force rebuild
+            this._dialogInstance = null;
             this.open();
         } else if (!this._dialogInstance && this.hasAttribute('open')) {
             this.open();
@@ -781,23 +827,18 @@ export class AdwPreferencesDialog extends HTMLElement {
             if (newValue !== null) this.open();
             else this.close();
         } else {
-            this._reRenderIfOpen();
+            this._reRenderIfOpen(); // Rebuild if title or initial-page-name changes while open
         }
     }
 
     _gatherPages() {
         const pages = [];
         Array.from(this.children).forEach((child, index) => {
-            // Check if the child is an AdwPreferencesPage element or has the class
             if (child.matches('adw-preferences-page') || child.classList.contains('adw-preferences-page')) {
-                // We need to pass the actual element to the factory, not a clone,
-                // if the factory is expected to append it directly.
-                // However, dialogs are often rebuilt. Cloning is safer if the original elements are to be preserved in the light DOM.
-                // The factory was updated to append pageElement directly.
                 pages.push({
                     name: child.getAttribute('name') || `page-${index}`,
                     title: child.getAttribute('title') || `Page ${index + 1}`,
-                    pageElement: child // Pass the live element. The factory will use it.
+                    pageElement: child // Pass the live element
                 });
             }
         });
@@ -810,7 +851,6 @@ export class AdwPreferencesDialog extends HTMLElement {
             title: this.getAttribute('title') || "Preferences",
             pages: pages,
             initialPageName: this.getAttribute('initial-page-name') || undefined,
-            // onClose handled by wrapping the factory's close method
         };
         this._dialogInstance = createAdwPreferencesDialog(options);
 
@@ -844,8 +884,4 @@ export class AdwPreferencesDialog extends HTMLElement {
         }
     }
 }
-
-// Define other dialog-related web components if they exist (e.g. AdwAlertDialog)
-// Placeholder for actual Web Component class definitions for these dialogs, similar to AdwDialog.
-// For brevity in this step, only AdwDialog WC is fully fleshed out.
-// The factories are exported and can be used by their respective WCs.
+// No customElements.define here as it's done in the main components.js file.

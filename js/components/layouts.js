@@ -10,6 +10,8 @@ export function createAdwBox(options = {}) {
 
   if (opts.orientation === "vertical") {
     box.classList.add("adw-box-vertical");
+  } else { // Default to horizontal or if orientation is explicitly horizontal
+    box.classList.add("adw-box-horizontal");
   }
   if (opts.align) {
     box.classList.add(`align-${opts.align}`);
@@ -29,17 +31,34 @@ export function createAdwBox(options = {}) {
   return box;
 }
 
-export class AdwBox extends HTMLElement { /* ... (Same as original AdwBox WC) ... */
+export class AdwBox extends HTMLElement {
     static get observedAttributes() { return ['orientation', 'spacing', 'align', 'justify', 'fill-children']; }
     constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); }
     connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
     _render() {
-        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        // Clear previous box element if it exists, keep the stylesheet
+        const existingBox = this.shadowRoot.querySelector('.adw-box');
+        if (existingBox) {
+            existingBox.remove();
+        }
+
         const options = {};
-        AdwBox.observedAttributes.forEach(attr => { if (this.hasAttribute(attr)) { const value = this.getAttribute(attr); const camelCaseAttr = attr.replace(/-([a-z])/g, g => g[1].toUpperCase()); if (attr === 'fill-children') { options[camelCaseAttr] = value !== null && value !== 'false'; } else { options[camelCaseAttr] = value; }}});
+        AdwBox.observedAttributes.forEach(attr => {
+            if (this.hasAttribute(attr)) {
+                const value = this.getAttribute(attr);
+                const camelCaseAttr = attr.replace(/-([a-z])/g, g => g[1].toUpperCase());
+                if (attr === 'fill-children') {
+                    options[camelCaseAttr] = value !== null && value !== 'false';
+                } else {
+                    options[camelCaseAttr] = value;
+                }
+            }
+        });
         const factory = (typeof Adw !== 'undefined' && Adw.createBox) ? Adw.createBox : createAdwBox;
-        const boxElement = factory(options); boxElement.appendChild(document.createElement('slot')); this.shadowRoot.appendChild(boxElement);
+        const boxElement = factory(options); // Factory returns the .adw-box div
+        boxElement.appendChild(document.createElement('slot')); // Add slot for children
+        this.shadowRoot.appendChild(boxElement);
     }
 }
 
@@ -65,12 +84,15 @@ export function createAdwWindow(options = {}) {
   return windowEl;
 }
 
-export class AdwApplicationWindow extends HTMLElement { /* ... (Same as original AdwApplicationWindow WC) ... */
+export class AdwApplicationWindow extends HTMLElement {
     constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); }
     connectedCallback() { this._render(); }
     _render() {
         while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) this.shadowRoot.removeChild(this.shadowRoot.lastChild);
-        const windowDiv = document.createElement('div'); windowDiv.classList.add('adw-window');
+        const windowDiv = document.createElement('div'); windowDiv.classList.add('adw-window'); // This is the main container for AdwApplicationWindow
+        // It should probably have a more specific class if it's distinct from a generic adw-window from the factory
+        // For now, sticking to 'adw-window' as per original.
+
         const headerSlot = document.createElement('slot'); headerSlot.name = 'header';
         const mainContent = document.createElement('main'); mainContent.classList.add('adw-window-content');
         mainContent.appendChild(document.createElement('slot')); // Default slot for main content
@@ -101,18 +123,19 @@ export function createAdwFlap(options = {}) {
     flapElement.appendChild(mainContentWrapper);
 
     let _isFolded = opts.isFolded;
-    // Set initial ARIA states
     flapElement.setAttribute('aria-expanded', String(!_isFolded));
     flapContentWrapper.setAttribute('aria-hidden', String(_isFolded));
 
 
     flapElement.isFolded = () => _isFolded;
-    flapElement.setFolded = (folded) => {
+    flapElement.setFolded = (folded, fireEvent = true) => { // Added fireEvent default
         _isFolded = !!folded;
         flapElement.classList.toggle('folded', _isFolded);
         flapElement.setAttribute('aria-expanded', String(!_isFolded));
         flapContentWrapper.setAttribute('aria-hidden', String(_isFolded));
-        flapElement.dispatchEvent(new CustomEvent('fold-changed', {detail: {isFolded: _isFolded}}));
+        if (fireEvent) {
+            flapElement.dispatchEvent(new CustomEvent('fold-changed', {detail: {isFolded: _isFolded}}));
+        }
     };
     flapElement.toggleFlap = (explicitState) => { flapElement.setFolded(typeof explicitState === 'boolean' ? explicitState : !_isFolded);};
 
@@ -125,21 +148,26 @@ export class AdwFlap extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
-        this._flapInstance = null;
-        this._flapElement = null; // Direct reference to the .adw-flap div
-        this._flapContentWrapper = null;
+        this._factoryInstance = null; // Will hold the {element, methods} from factory
     }
     connectedCallback() {
         this._render();
-        // Initial ARIA state sync after render
-        this.setFolded(this.hasAttribute('folded'), false); // false to not fire event on init
+        // Initial state sync after render, do not fire event
+        if (this._factoryInstance) {
+            this._factoryInstance.setFolded(this.hasAttribute('folded'), false);
+        }
     }
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue !== newValue) {
             if (name === 'folded') {
-                this.setFolded(this.hasAttribute('folded'));
+                if (this._factoryInstance) {
+                    this._factoryInstance.setFolded(this.hasAttribute('folded')); // Factory method will dispatch event
+                }
             } else {
                  this._render(); // Re-render for flap-width or transition-speed
+                 if (this._factoryInstance) { // Re-apply folded state after re-render
+                    this._factoryInstance.setFolded(this.hasAttribute('folded'), false);
+                 }
             }
         }
     }
@@ -147,103 +175,92 @@ export class AdwFlap extends HTMLElement {
         const flapContentSlot = this.querySelector('[slot="flap"]');
         const mainContentSlot = this.querySelector('[slot="main"]');
 
-        const flapContentElement = flapContentSlot ? flapContentSlot.cloneNode(true) : document.createElement('div');
-        const mainContentElement = mainContentSlot ? mainContentSlot.cloneNode(true) : document.createElement('div');
+        // Use document fragments to hold cloned content before passing to factory
+        const flapContentFragment = document.createDocumentFragment();
+        if (flapContentSlot) flapContentFragment.appendChild(flapContentSlot.cloneNode(true));
+        else { const div = document.createElement('div'); div.innerHTML = '<slot name="flap"></slot>'; flapContentFragment.appendChild(div.firstChild); }
 
-        // If re-rendering, preserve the instance for its methods, but update its element's content/style
+
+        const mainContentFragment = document.createDocumentFragment();
+        if (mainContentSlot) mainContentFragment.appendChild(mainContentSlot.cloneNode(true));
+        else { const div = document.createElement('div'); div.innerHTML = '<slot name="main"></slot>'; mainContentFragment.appendChild(div.firstChild); }
+
+
         const options = {
             isFolded: this.hasAttribute('folded'),
-            flapContent: flapContentElement,
-            mainContent: mainContentElement
+            flapContent: flapContentFragment,
+            mainContent: mainContentFragment
         };
         if (this.hasAttribute('flap-width')) options.flapWidth = this.getAttribute('flap-width');
         if (this.hasAttribute('transition-speed')) options.transitionSpeed = this.getAttribute('transition-speed');
 
-        // The factory createAdwFlap returns an object {element, ...methods}
-        // We need to manage the element within the shadow DOM
-        const factoryOutput = createAdwFlap(options);
+        this._factoryInstance = createAdwFlap(options);
 
-        if (this._flapElement && this._flapElement.parentElement === this.shadowRoot) {
-            this.shadowRoot.removeChild(this._flapElement);
-        }
-        this._flapElement = factoryOutput.element;
-        this._flapContentWrapper = this._flapElement.querySelector('.adw-flap-content-wrapper');
+        // Clear previous element if any
+        const existingFlapElement = this.shadowRoot.querySelector('.adw-flap');
+        if (existingFlapElement) existingFlapElement.remove();
 
-        // Wire up instance methods to WC methods
-        this._flapInstance = { // Keep a reference to methods if needed, element is primary
-            isFolded: factoryOutput.isFolded,
-            setFolded: factoryOutput.setFolded, // This will now update ARIA on the element from factory
-            toggleFlap: factoryOutput.toggleFlap
-        };
+        this.shadowRoot.appendChild(this._factoryInstance.element);
 
-        this.shadowRoot.appendChild(this._flapElement);
+        // Wire up the factory's event to the component's event
+        this._factoryInstance.element.addEventListener('fold-changed', (e) => {
+            // Sync attribute on host
+            if (e.detail.isFolded) this.setAttribute('folded', '');
+            else this.removeAttribute('folded');
+            // Re-dispatch from the custom element
+            this.dispatchEvent(new CustomEvent('fold-changed', {detail: e.detail}));
+        });
     }
 
     toggleFlap(explicitState) {
-        if (this._flapInstance) {
-            this._flapInstance.toggleFlap(explicitState);
-            // Factory's setFolded will dispatch event and update class/ARIA
-            // Sync attribute on host
-            if (this._flapInstance.isFolded()) this.setAttribute('folded', '');
-            else this.removeAttribute('folded');
+        if (this._factoryInstance) {
+            this._factoryInstance.toggleFlap(explicitState);
         }
     }
-    isFolded() {
+    get isFolded() { // Getter for consistency
         return this.hasAttribute('folded');
     }
-    setFolded(state, fireEvent = true) { // Added fireEvent param for internal control
+    set isFolded(state) { // Setter for programmatic control
         const shouldFold = Boolean(state);
-        const currentFolded = this.hasAttribute('folded');
-        if (currentFolded === shouldFold) return;
-
+        if (this.isFolded === shouldFold) return;
         if (shouldFold) this.setAttribute('folded', '');
         else this.removeAttribute('folded');
-
-        if (this._flapElement) { // Update internal DOM directly
-            this._flapElement.classList.toggle('folded', shouldFold);
-            this._flapElement.setAttribute('aria-expanded', String(!shouldFold));
-            if (this._flapContentWrapper) {
-                this._flapContentWrapper.setAttribute('aria-hidden', String(shouldFold));
-            }
-        }
-        if (fireEvent) {
-            this.dispatchEvent(new CustomEvent('fold-changed', {detail: {isFolded: shouldFold}}));
-        }
+        // attributeChangedCallback will handle the rest
     }
 }
 
 /** Creates an AdwBin container. */
-export function createAdwBin(options = {}) { /* ... (Same as original createAdwBin) ... */
+export function createAdwBin(options = {}) {
     const opts = options || {}; const bin = document.createElement('div'); bin.classList.add('adw-bin');
     if (opts.child instanceof Node) bin.appendChild(opts.child);
     else if (opts.child) console.warn("AdwBin: options.child was provided but is not a valid DOM Node.");
     return bin;
 }
-export class AdwBin extends HTMLElement { /* ... (Same as original AdwBin WC) ... */
+export class AdwBin extends HTMLElement {
     constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; const binDiv = document.createElement('div'); binDiv.classList.add('adw-bin'); const slot = document.createElement('slot'); binDiv.appendChild(slot); this.shadowRoot.append(styleLink, binDiv); }
 }
 
 /** Creates an AdwWrapBox container. */
-export function createAdwWrapBox(options = {}) { /* ... (Same as original createAdwWrapBox) ... */
+export function createAdwWrapBox(options = {}) {
     const opts = options || {}; const wrapBox = document.createElement('div'); wrapBox.classList.add('adw-wrap-box'); wrapBox.style.display = 'flex'; wrapBox.style.flexWrap = 'wrap';
     if (opts.orientation === 'vertical') wrapBox.style.flexDirection = 'column'; else wrapBox.style.flexDirection = 'row';
     let gapValue = "var(--spacing-m)"; if (typeof opts.spacing === 'number') gapValue = `${opts.spacing}px`; else if (typeof opts.spacing === 'string') gapValue = opts.spacing;
     let rowGapValue = gapValue; if (typeof opts.lineSpacing === 'number') rowGapValue = `${opts.lineSpacing}px`; else if (typeof opts.lineSpacing === 'string') rowGapValue = opts.lineSpacing;
     if (rowGapValue !== gapValue) { wrapBox.style.rowGap = rowGapValue; wrapBox.style.columnGap = gapValue; } else wrapBox.style.gap = gapValue;
-    const flexAlignMap = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch' }; wrapBox.style.alignItems = flexAlignMap[opts.align] || flexAlignMap.start;
+    const flexAlignMap = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch', baseline: 'baseline' }; wrapBox.style.alignItems = flexAlignMap[opts.align] || flexAlignMap.start;
     const flexJustifyMap = { start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between', around: 'space-around', evenly: 'space-evenly' }; wrapBox.style.justifyContent = flexJustifyMap[opts.justify] || flexJustifyMap.start;
     (opts.children || []).forEach(child => { if (child instanceof Node) wrapBox.appendChild(child); }); return wrapBox;
 }
-export class AdwWrapBox extends HTMLElement { /* ... (Same as original AdwWrapBox WC) ... */
+export class AdwWrapBox extends HTMLElement {
     static get observedAttributes() { return ['orientation', 'spacing', 'line-spacing', 'align', 'justify']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css'; this._wrapBoxElement = document.createElement('div'); this._wrapBoxElement.classList.add('adw-wrap-box'); const slot = document.createElement('slot'); this._wrapBoxElement.appendChild(slot); this.shadowRoot.append(styleLink, this._wrapBoxElement); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this._wrapBoxElement = document.createElement('div'); this._wrapBoxElement.classList.add('adw-wrap-box'); const slot = document.createElement('slot'); this._wrapBoxElement.appendChild(slot); this.shadowRoot.append(styleLink, this._wrapBoxElement); }
     connectedCallback() { this._updateStyles(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._updateStyles(); }
-    _updateStyles() { const opts = {}; if (this.hasAttribute('orientation')) opts.orientation = this.getAttribute('orientation'); if (this.hasAttribute('spacing')) opts.spacing = this.getAttribute('spacing'); if (this.hasAttribute('line-spacing')) opts.lineSpacing = this.getAttribute('line-spacing'); if (this.hasAttribute('align')) opts.align = this.getAttribute('align'); if (this.hasAttribute('justify')) opts.justify = this.getAttribute('justify'); this._wrapBoxElement.style.display = 'flex'; this._wrapBoxElement.style.flexWrap = 'wrap'; if (opts.orientation === 'vertical') this._wrapBoxElement.style.flexDirection = 'column'; else this._wrapBoxElement.style.flexDirection = 'row'; let gapValue = "var(--spacing-m)"; if (opts.spacing) gapValue = isNaN(parseFloat(opts.spacing)) ? opts.spacing : `${opts.spacing}px`; let rowGapValue = gapValue; if (opts.lineSpacing) rowGapValue = isNaN(parseFloat(opts.lineSpacing)) ? opts.lineSpacing : `${opts.lineSpacing}px`; if (rowGapValue !== gapValue) { this._wrapBoxElement.style.rowGap = rowGapValue; this._wrapBoxElement.style.columnGap = gapValue; } else this._wrapBoxElement.style.gap = gapValue; const flexAlignMap = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch' }; this._wrapBoxElement.style.alignItems = flexAlignMap[opts.align] || flexAlignMap.start; const flexJustifyMap = { start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between', around: 'space-around', evenly: 'space-evenly' }; this._wrapBoxElement.style.justifyContent = flexJustifyMap[opts.justify] || flexJustifyMap.start; }
+    _updateStyles() { const opts = {}; if (this.hasAttribute('orientation')) opts.orientation = this.getAttribute('orientation'); if (this.hasAttribute('spacing')) opts.spacing = this.getAttribute('spacing'); if (this.hasAttribute('line-spacing')) opts.lineSpacing = this.getAttribute('line-spacing'); if (this.hasAttribute('align')) opts.align = this.getAttribute('align'); if (this.hasAttribute('justify')) opts.justify = this.getAttribute('justify'); this._wrapBoxElement.style.display = 'flex'; this._wrapBoxElement.style.flexWrap = 'wrap'; if (opts.orientation === 'vertical') this._wrapBoxElement.style.flexDirection = 'column'; else this._wrapBoxElement.style.flexDirection = 'row'; let gapValue = "var(--spacing-m)"; if (opts.spacing) gapValue = isNaN(parseFloat(opts.spacing)) ? opts.spacing : `${parseFloat(opts.spacing)}px`; let rowGapValue = gapValue; if (opts.lineSpacing) rowGapValue = isNaN(parseFloat(opts.lineSpacing)) ? opts.lineSpacing : `${parseFloat(opts.lineSpacing)}px`; if (rowGapValue !== gapValue) { this._wrapBoxElement.style.rowGap = rowGapValue; this._wrapBoxElement.style.columnGap = gapValue; } else { this._wrapBoxElement.style.gap = gapValue; delete this._wrapBoxElement.style.rowGap; delete this._wrapBoxElement.style.columnGap;} const flexAlignMap = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch', baseline: 'baseline' }; this._wrapBoxElement.style.alignItems = flexAlignMap[opts.align] || flexAlignMap.start; const flexJustifyMap = { start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between', around: 'space-around', evenly: 'space-evenly' }; this._wrapBoxElement.style.justifyContent = flexJustifyMap[opts.justify] || flexJustifyMap.start; }
 }
 
 /** Creates an AdwClamp container. */
-export function createAdwClamp(options = {}) { /* ... (Same as original createAdwClamp) ... */
+export function createAdwClamp(options = {}) {
     const opts = options || {}; const clamp = document.createElement('div'); clamp.classList.add('adw-clamp');
     const innerWrapper = document.createElement('div'); innerWrapper.classList.add('adw-clamp-child-wrapper'); innerWrapper.style.maxWidth = opts.maximumSize || '80ch';
     clamp.style.display = 'flex'; clamp.style.justifyContent = 'center';
@@ -252,55 +269,56 @@ export function createAdwClamp(options = {}) { /* ... (Same as original createAd
     if (opts.isScrollable) { clamp.classList.add('scrollable'); clamp.style.overflowX = 'hidden'; clamp.style.overflowY = 'auto'; innerWrapper.style.width = '100%'; }
     return clamp;
 }
-export class AdwClamp extends HTMLElement { /* ... (Same as original AdwClamp WC) ... */
+export class AdwClamp extends HTMLElement {
     static get observedAttributes() { return ['maximum-size', 'scrollable']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css'; this._clampElement = document.createElement('div'); this._clampElement.classList.add('adw-clamp'); this._childWrapper = document.createElement('div'); this._childWrapper.classList.add('adw-clamp-child-wrapper'); const slot = document.createElement('slot'); this._childWrapper.appendChild(slot); this._clampElement.appendChild(this._childWrapper); this.shadowRoot.append(styleLink, this._clampElement); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this._clampElement = document.createElement('div'); this._clampElement.classList.add('adw-clamp'); this._childWrapper = document.createElement('div'); this._childWrapper.classList.add('adw-clamp-child-wrapper'); const slot = document.createElement('slot'); this._childWrapper.appendChild(slot); this._clampElement.appendChild(this._childWrapper); this.shadowRoot.append(styleLink, this._clampElement); }
     connectedCallback() { this._updateStyles(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._updateStyles(); }
-    _updateStyles() { this._childWrapper.style.maxWidth = this.getAttribute('maximum-size') || '80ch'; this._clampElement.style.display = 'flex'; this._clampElement.style.justifyContent = 'center'; if (this.hasAttribute('scrollable')) { this._clampElement.classList.add('scrollable'); this._clampElement.style.overflowX = 'hidden'; this._clampElement.style.overflowY = 'auto'; this._childWrapper.style.width = '100%'; } else { this._clampElement.classList.remove('scrollable'); this._clampElement.style.overflowX = ''; this._clampElement.style.overflowY = '';}}
+    _updateStyles() { this._childWrapper.style.maxWidth = this.getAttribute('maximum-size') || '80ch'; this._clampElement.style.display = 'flex'; this._clampElement.style.justifyContent = 'center'; if (this.hasAttribute('scrollable')) { this._clampElement.classList.add('scrollable'); this._clampElement.style.overflowX = 'hidden'; this._clampElement.style.overflowY = 'auto'; this._childWrapper.style.width = '100%'; } else { this._clampElement.classList.remove('scrollable'); this._clampElement.style.overflowX = ''; this._clampElement.style.overflowY = ''; this._childWrapper.style.width = '';}}
 }
 
 /** Creates an AdwBreakpointBin container. */
-export function createAdwBreakpointBin(options = {}) { /* ... (Same as original createAdwBreakpointBin, ensure adwGenerateId is available) ... */
+export function createAdwBreakpointBin(options = {}) {
     const opts = options || {}; const breakpointBin = document.createElement('div'); breakpointBin.classList.add('adw-breakpoint-bin');
     let sortedChildren = []; if (Array.isArray(opts.children)) { sortedChildren = opts.children.map(c => { let minWidth = 0; if (typeof c.condition === 'number') minWidth = c.condition; else if (typeof c.condition === 'string') { const match = c.condition.match(/min-width:\s*(\d+)(px)?/i); if (match && match[1]) minWidth = parseInt(match[1], 10); else console.warn(`AdwBreakpointBin: Could not parse condition "${c.condition}" for child "${c.name}". Treating as 0.`);} return { ...c, _minWidth: minWidth }; }).sort((a, b) => a._minWidth - b._minWidth); }
     let defaultChild = null; if(opts.defaultChildName) defaultChild = sortedChildren.find(c => c.name === opts.defaultChildName)?.element; if(!defaultChild && sortedChildren.length > 0) defaultChild = sortedChildren[0].element;
-    sortedChildren.forEach(childData => { if (childData.element instanceof Node) { childData.element.style.display = 'none'; breakpointBin.appendChild(childData.element); }}); if(defaultChild) defaultChild.style.display = '';
+    sortedChildren.forEach(childData => { if (childData.element instanceof Node) { childData.element.style.display = 'none'; breakpointBin.appendChild(childData.element); }}); if(defaultChild && defaultChild.style) defaultChild.style.display = ''; // Check if defaultChild has style property
     let currentVisibleChild = defaultChild;
-    breakpointBin.updateVisibility = () => { /* ... (same logic) ... */
+    breakpointBin.updateVisibility = () => {
         const containerWidth = breakpointBin.offsetWidth; let newVisibleChild = defaultChild;
         for (let i = sortedChildren.length - 1; i >= 0; i--) { const childData = sortedChildren[i]; if (containerWidth >= childData._minWidth) { newVisibleChild = childData.element; break; }}
-        if (currentVisibleChild !== newVisibleChild) { if (currentVisibleChild) currentVisibleChild.style.display = 'none'; if (newVisibleChild) newVisibleChild.style.display = ''; currentVisibleChild = newVisibleChild; }
+        if (currentVisibleChild !== newVisibleChild) { if (currentVisibleChild && currentVisibleChild.style) currentVisibleChild.style.display = 'none'; if (newVisibleChild && newVisibleChild.style) newVisibleChild.style.display = ''; currentVisibleChild = newVisibleChild; }
     };
     let resizeObserver = null; if (typeof ResizeObserver !== 'undefined') { resizeObserver = new ResizeObserver(() => { breakpointBin.updateVisibility(); }); } else console.warn("AdwBreakpointBin: ResizeObserver not supported.");
-    breakpointBin.startObserving = () => { if (resizeObserver && !breakpointBin._isObserving) { resizeObserver.observe(breakpointBin); breakpointBin._isObserving = true; breakpointBin.updateVisibility(); }}; // Update on start
+    breakpointBin._isObserving = false; // Keep track of observation state
+    breakpointBin.startObserving = () => { if (resizeObserver && !breakpointBin._isObserving) { resizeObserver.observe(breakpointBin); breakpointBin._isObserving = true; breakpointBin.updateVisibility(); }};
     breakpointBin.stopObserving = () => { if (resizeObserver && breakpointBin._isObserving) { resizeObserver.unobserve(breakpointBin); breakpointBin._isObserving = false; }};
     return breakpointBin;
 }
-export class AdwBreakpointBin extends HTMLElement { /* ... (Same as original AdwBreakpointBin WC, ensure createAdwBreakpointBin is local and adwGenerateId is imported/available) ... */
+export class AdwBreakpointBin extends HTMLElement {
     static get observedAttributes() { return ['default-child-name']; }
-    constructor() { super(); this._breakpointBinInstance = null; this._slotObserver = new MutationObserver(() => this._rebuildChildren()); }
-    connectedCallback() { this._rebuildChildren(); if(this._breakpointBinInstance && typeof this._breakpointBinInstance.startObserving === 'function') this._breakpointBinInstance.startObserving(); } // For factory based
-    disconnectedCallback() { if (this._breakpointBinInstance && typeof this._breakpointBinInstance.stopObserving === 'function') this._breakpointBinInstance.stopObserving(); this._slotObserver.disconnect(); if(this._resizeObserver) this._resizeObserver.disconnect(); } // For WC based
+    constructor() { super(); this._slotObserver = new MutationObserver(() => this._rebuildChildren()); this._resizeObserver = null; this._sortedChildrenConfig = []; this._defaultChildElement = null; this._currentVisibleElement = null; }
+    connectedCallback() { this.attachShadow({mode: 'open'}); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); const slot = document.createElement('slot'); this.shadowRoot.appendChild(slot); slot.addEventListener('slotchange', () => this._rebuildChildren()); this._rebuildChildren(); }
+    disconnectedCallback() { if (this._resizeObserver) this._resizeObserver.disconnect(); this._slotObserver.disconnect(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue === newValue) return; if (name === 'default-child-name') this._rebuildChildren(); }
     _rebuildChildren() {
-        this._slotObserver.disconnect(); // Avoid loops
+        this._slotObserver.disconnect();
         const childrenData = [];
         Array.from(this.children).forEach(child => { if (child.nodeType === Node.ELEMENT_NODE) { const condition = child.dataset.condition || child.getAttribute('condition'); const name = child.dataset.name || child.getAttribute('name') || adwGenerateId('bp-child'); if(!child.dataset.name && !child.getAttribute('name')) child.setAttribute('data-name', name); if (condition) childrenData.push({ name: name, element: child, condition: isNaN(parseFloat(condition)) ? condition : parseFloat(condition) }); else console.warn("AdwBreakpointBin WC: Child element missing 'data-condition' or 'condition'.", child); }});
-        this._initializeBreakpointLogic(childrenData); // WC handles its own logic now
+        this._initializeBreakpointLogic(childrenData);
         this._slotObserver.observe(this, { childList: true, attributes: true, subtree: false, attributeFilter: ['data-condition', 'condition', 'name', 'data-name'] });
     }
-    _initializeBreakpointLogic(childrenData) { /* ... (Same as WC logic from original components.js) ... */
+    _initializeBreakpointLogic(childrenData) {
         this._sortedChildrenConfig = childrenData.map(c => { let minWidth = 0; if (typeof c.condition === 'number') minWidth = c.condition; else if (typeof c.condition === 'string') { const match = c.condition.match(/min-width:\s*(\d+)(px)?/i); if (match && match[1]) minWidth = parseInt(match[1], 10); } return { ...c, _minWidth: minWidth }; }).sort((a,b) => a._minWidth - b._minWidth);
         let defaultChildName = this.getAttribute('default-child-name'); this._defaultChildElement = null;
         if (defaultChildName) { const found = this._sortedChildrenConfig.find(c => c.name === defaultChildName); if (found) this._defaultChildElement = found.element; }
         if (!this._defaultChildElement && this._sortedChildrenConfig.length > 0) this._defaultChildElement = this._sortedChildrenConfig[0].element;
         this._currentVisibleElement = null;
         if (typeof ResizeObserver !== 'undefined') { if (this._resizeObserver) this._resizeObserver.disconnect(); this._resizeObserver = new ResizeObserver(() => this.updateVisibility()); this._resizeObserver.observe(this); }
-        else window.addEventListener('resize', () => this.updateVisibility()); // Fallback
+        else { console.warn("AdwBreakpointBin: ResizeObserver not supported, falling back to window resize (less efficient)."); window.addEventListener('resize', () => this.updateVisibility()); }
         this.updateVisibility();
     }
-    updateVisibility() { /* ... (Same as WC logic from original components.js) ... */
+    updateVisibility() {
         const containerWidth = this.offsetWidth; let newVisibleElement = this._defaultChildElement;
         for (let i = this._sortedChildrenConfig.length - 1; i >= 0; i--) { const childConfig = this._sortedChildrenConfig[i]; if (containerWidth >= childConfig._minWidth) { newVisibleElement = childConfig.element; break; }}
         if (this._currentVisibleElement !== newVisibleElement) { Array.from(this.children).forEach(child => { if(child.style) child.style.display = 'none'; }); if (newVisibleElement && newVisibleElement.style) newVisibleElement.style.display = ''; this._currentVisibleElement = newVisibleElement; this.dispatchEvent(new CustomEvent('child-changed', { detail: { visibleChildName: newVisibleElement ? (newVisibleElement.dataset.name || newVisibleElement.getAttribute('name')) : null }}));}
@@ -308,5 +326,3 @@ export class AdwBreakpointBin extends HTMLElement { /* ... (Same as original Adw
 }
 
 // No customElements.define here
-
-[end of js/components/layouts.js]

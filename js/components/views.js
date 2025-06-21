@@ -366,11 +366,57 @@ export function createAdwNavigationSplitView(options = {}) {
 export class AdwNavigationSplitView extends HTMLElement {
     static get observedAttributes() { return ['show-sidebar', 'can-collapse', 'collapse-threshold', 'sidebar-width']; }
     constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); this._splitViewInstance = null; this._slotObserver = null; }
-    connectedCallback() { this._render(); if (this.isConnected && this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') requestAnimationFrame(() => { if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') this._splitViewInstance.connectObserver(); }); this._observer = new MutationObserver((mutations) => { let needsReRender = false; for (const mutation of mutations) if (mutation.type === 'childList') { const relevantNodes = [...Array.from(mutation.addedNodes), ...Array.from(mutation.removedNodes)]; if (relevantNodes.some(node => (node.nodeType === Node.ELEMENT_NODE && (node.slot === 'sidebar' || node.slot === 'content')) || !node.slot)) { needsReRender = true; break; }} if (needsReRender) { this._render(); if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') requestAnimationFrame(() => { if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') this._splitViewInstance.connectObserver(); }); }}); this._observer.observe(this, { childList: true, subtree: false }); }
+    connectedCallback() {
+        this._render();
+        if (this.isConnected && this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') requestAnimationFrame(() => {
+            if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') this._splitViewInstance.connectObserver();
+        });
+        this._observer = new MutationObserver((mutations) => {
+            let needsReRender = false;
+            for (const mutation of mutations)
+                if (mutation.type === 'childList') {
+                    const relevantNodes = [...Array.from(mutation.addedNodes), ...Array.from(mutation.removedNodes)];
+                    if (relevantNodes.some(node => (node.nodeType === Node.ELEMENT_NODE && (node.slot === 'sidebar' || node.slot === 'content')) || !node.slot)) {
+                        needsReRender = true; break;
+                    }
+                }
+            if (needsReRender) {
+                this._render();
+                if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') requestAnimationFrame(() => {
+                    if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') this._splitViewInstance.connectObserver();
+                });
+            }
+        });
+        this._observer.observe(this, { childList: true, subtree: false });
+    }
     disconnectedCallback() { if (this._splitViewInstance && typeof this._splitViewInstance.disconnectObserver === 'function') this._splitViewInstance.disconnectObserver(); if(this._observer) this._observer.disconnect(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) { this._render(); if (this.isConnected && this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') requestAnimationFrame(() => { if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') this._splitViewInstance.connectObserver(); }); }}
     _getSlottedContent(slotName) { const slotted = this.querySelector(`:scope > [slot="${slotName}"]`); return slotted ? slotted.cloneNode(true) : document.createElement('div'); }
-    _render() { if (this._splitViewInstance && typeof this._splitViewInstance.disconnectObserver === 'function') this._splitViewInstance.disconnectObserver(); while (this.shadowRoot.lastChild && this.shadowRoot.lastChild.nodeName !== 'LINK') this.shadowRoot.removeChild(this.shadowRoot.lastChild); const sidebarContent = this._getSlottedContent('sidebar'); const mainContent = this._getSlottedContent('content'); const options = { sidebar: sidebarContent, content: mainContent, showSidebar: !this.hasAttribute('show-sidebar') || this.getAttribute('show-sidebar') !== 'false', canCollapse: !this.hasAttribute('can-collapse') || this.getAttribute('can-collapse') !== 'false', collapseThreshold: this.hasAttribute('collapse-threshold') ? parseInt(this.getAttribute('collapse-threshold'), 10) : 768, sidebarWidth: this.getAttribute('sidebar-width') || "300px", }; const factory = (typeof Adw !== 'undefined' && Adw.createNavigationSplitView) ? Adw.createNavigationSplitView : createAdwNavigationSplitView; this._splitViewInstance = factory(options); this.shadowRoot.appendChild(this._splitViewInstance); if (this.isConnected && this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') requestAnimationFrame(() => { if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') this._splitViewInstance.connectObserver(); }); this._splitViewInstance.addEventListener('sidebar-toggled', (e) => { this.dispatchEvent(new CustomEvent('sidebar-toggled', { detail: e.detail, bubbles: true, composed: true })); if (e.detail.isVisible) this.setAttribute('show-sidebar', ''); else this.removeAttribute('show-sidebar'); }); }
+    _render() {
+        if (this._splitViewInstance && typeof this._splitViewInstance.disconnectObserver === 'function') this._splitViewInstance.disconnectObserver();
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild.nodeName !== 'LINK') this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        const sidebarContent = this._getSlottedContent('sidebar');
+        const mainContent = this._getSlottedContent('content');
+        const options = {
+            sidebar: sidebarContent,
+            content: mainContent,
+            showSidebar: !this.hasAttribute('show-sidebar') || this.getAttribute('show-sidebar') !== 'false',
+            canCollapse: !this.hasAttribute('can-collapse') || this.getAttribute('can-collapse') !== 'false',
+            collapseThreshold: this.hasAttribute('collapse-threshold') ? parseInt(this.getAttribute('collapse-threshold'), 10) : 768,
+            sidebarWidth: this.getAttribute('sidebar-width') || "300px",
+        };
+        const factory = (typeof Adw !== 'undefined' && Adw.createNavigationSplitView) ? Adw.createNavigationSplitView : createAdwNavigationSplitView;
+        this._splitViewInstance = factory(options);
+        this.shadowRoot.appendChild(this._splitViewInstance);
+        if (this.isConnected && this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') requestAnimationFrame(() => {
+            if (this._splitViewInstance && typeof this._splitViewInstance.connectObserver === 'function') this._splitViewInstance.connectObserver();
+        });
+        this._splitViewInstance.addEventListener('sidebar-toggled', (e) => {
+            this.dispatchEvent(new CustomEvent('sidebar-toggled', { detail: e.detail, bubbles: true, composed: true }));
+            if (e.detail.isVisible) this.setAttribute('show-sidebar', '');
+            else this.removeAttribute('show-sidebar');
+        });
+    }
     showSidebar() { if (this._splitViewInstance) this._splitViewInstance.showSidebar(); } hideSidebar() { if (this._splitViewInstance) this._splitViewInstance.hideSidebar(); } toggleSidebar() { if (this._splitViewInstance) this._splitViewInstance.toggleSidebar(); } isSidebarVisible() { return this._splitViewInstance ? this._splitViewInstance.isSidebarVisible() : (this.hasAttribute('show-sidebar') ? this.getAttribute('show-sidebar') !== 'false' : true); } isOverlayMode() { return this._splitViewInstance ? this._splitViewInstance.isOverlayMode() : false; }
 }
 
@@ -401,5 +447,3 @@ export class AdwOverlaySplitView extends HTMLElement {
 }
 
 // No customElements.define here
-
-[end of js/components/views.js]
