@@ -9,33 +9,23 @@
   // to ensure it's clickable and shows the arrow correctly.
   > .adw-action-row {
     cursor: pointer;
-    position: relative;
+    position: relative; // Keep for positioning if needed, though suffix slot handles layout
 
-    // Arrow styling (simple CSS triangle)
-    .adw-expander-row-arrow {
-      width: 0;
-      height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 5px solid var(--view-fg-color); // Use view-fg-color for arrow, or a more specific control-icon-color
+    // Chevron icon styling (targets the AdwIcon component)
+    .adw-expander-row-chevron.adw-icon {
       transition: transform 0.15s ease-in-out;
-      margin-left: var(--spacing-s); // This margin might be adjusted if suffix uses gap
+      transform: rotate(-90deg); // Point right for LTR when collapsed
       opacity: 0.7;
+      font-size: 0.8em; // Make chevron slightly smaller if needed
+      // margin-left: var(--spacing-s); // AdwActionRow suffix slot should handle spacing
     }
 
-    &.expanded .adw-expander-row-arrow {
-      transform: rotate(90deg); // Standard rotation for expanded state
+    &.expanded {
+      .adw-expander-row-chevron.adw-icon {
+        transform: rotate(0deg); // Point down when expanded
+      }
     }
   }
-
-  // If the arrow is part of the suffix in the action row:
-  // The parent .adw-action-row now uses 'gap', so direct margin on arrow might not be needed
-  // or might need adjustment based on how adw-action-row-suffix children are structured.
-  // For now, this specific override is kept but commented for review if suffix layout is changed.
-  // > .adw-action-row .adw-action-row-suffix .adw-expander-row-arrow {
-  //    margin-left: 0;
-  // }
-
 
   .adw-expander-row-content-area {
     padding: var(--spacing-m) var(--spacing-l);

@@ -1,12 +1,29 @@
-@mixin light-theme {
-  // Default Accent (Blue)
-  --accent-color: #1c71d8; // @accent_color Light
-  --accent-bg-color: #3584e4; // @accent_bg_color Light
-  --accent-fg-color: #ffffff; // @accent_fg_color Light
-  --accent-bg-hover-color: var(--accent-blue-light-bg-hover); // Custom, derived
-  --accent-bg-active-color: var(--accent-blue-light-bg-active); // Custom, derived
+:root {
+  // These are the "chosen" accent variables that themes will use.
+  // JS will update these to point to the currently selected accent's specific shades.
+  // Defaulting to blue here.
+  --chosen-accent-light-bg: var(--accent-blue-light-bg);
+  --chosen-accent-light-fg: var(--accent-blue-light-fg);
+  --chosen-accent-light-standalone: var(--accent-blue-standalone);
+  --chosen-accent-light-hover-bg: var(--accent-blue-light-bg-hover);
+  --chosen-accent-light-active-bg: var(--accent-blue-light-bg-active);
 
-  // Destructive State
+  --chosen-accent-dark-bg: var(--accent-blue-dark-bg);
+  --chosen-accent-dark-fg: var(--accent-blue-dark-fg);
+  --chosen-accent-dark-standalone: var(--accent-blue-dark-standalone);
+  --chosen-accent-dark-hover-bg: var(--accent-blue-dark-bg-hover);
+  --chosen-accent-dark-active-bg: var(--accent-blue-dark-bg-active);
+}
+
+@mixin light-theme {
+  // Default Accent - now points to the "chosen" accent variables for light theme
+  --accent-color: var(--chosen-accent-light-standalone);
+  --accent-bg-color: var(--chosen-accent-light-bg);
+  --accent-fg-color: var(--chosen-accent-light-fg);
+  --accent-bg-hover-color: var(--chosen-accent-light-hover-bg);
+  --accent-bg-active-color: var(--chosen-accent-light-active-bg);
+
+  // Destructive State - these are fixed, not affected by accent choice for light theme
   --destructive-color: #c01c28;         // @destructive_color Light
   --destructive-bg-color: #e01b24;      // @destructive_bg_color Light
   --destructive-fg-color: #ffffff;      // @destructive_fg_color Light
@@ -116,14 +133,14 @@
 }
 
 @mixin dark-theme {
-  // Default Accent (Blue)
-  --accent-color: #78aeed;             // @accent_color Dark
-  --accent-bg-color: #3584e4;          // @accent_bg_color Dark
-  --accent-fg-color: #ffffff;          // @accent_fg_color Dark
-  --accent-bg-hover-color: var(--accent-blue-dark-bg-hover); // Custom, derived
-  --accent-bg-active-color: var(--accent-blue-dark-bg-active); // Custom, derived
+  // Default Accent - now points to the "chosen" accent variables for dark theme
+  --accent-color: var(--chosen-accent-dark-standalone);
+  --accent-bg-color: var(--chosen-accent-dark-bg);
+  --accent-fg-color: var(--chosen-accent-dark-fg);
+  --accent-bg-hover-color: var(--chosen-accent-dark-hover-bg);
+  --accent-bg-active-color: var(--chosen-accent-dark-active-bg);
 
-  // Destructive State
+  // Destructive State - these are fixed, not affected by accent choice for dark theme
   --destructive-color: #ff7b63;         // @destructive_color Dark
   --destructive-bg-color: #c01c28;      // @destructive_bg_color Dark
   --destructive-fg-color: #ffffff;      // @destructive_fg_color Dark
@@ -448,17 +465,48 @@
 
   // Hover/Active states for default accents (Blue, Red)
   // Light Theme
-  --accent-blue-light-bg-hover: #2a70c9; // Darker than #3584e4 (adw-blue-3)
+  --accent-blue-light-bg-hover: #2a70c9; // Darker than adw-blue-3
   --accent-blue-light-bg-active: #1c58a1; // Even darker
-  --accent-red-light-bg-hover: #d0121b; // Darker than #e01b24 (adw-red-3)
-  --accent-red-light-bg-active: #b00912; // Even darker
+  --accent-red-light-bg-hover: #d0121b;   // Darker than adw-red-3
+  --accent-red-light-bg-active: #b00912;  // Even darker
+  --accent-green-light-bg-hover: var(--adw-green-5); // #26a269
+  --accent-green-light-bg-active: #1f8a5f; // Darker shade
+  --accent-yellow-light-bg-hover: #d99809; // Darker than adw-yellow-5 (#e5a50a)
+  --accent-yellow-light-bg-active: #c08008; // Even darker
+  --accent-orange-light-bg-hover: var(--adw-orange-4); // #e66100
+  --accent-orange-light-bg-active: #c64600; // var(--adw-orange-5)
+  --accent-purple-light-bg-hover: var(--adw-purple-4); // #813d9c
+  --accent-purple-light-bg-active: #70288a; // Darker shade
+  --accent-teal-light-bg-hover: var(--adw-teal-4);
+  --accent-teal-light-bg-active: var(--adw-teal-5);
+  --accent-pink-light-bg-hover: var(--adw-pink-4);
+  --accent-pink-light-bg-active: var(--adw-pink-5);
+  --accent-brown-light-bg-hover: var(--adw-brown-4);
+  --accent-brown-light-bg-active: var(--adw-brown-5);
 
   // Dark Theme
-  --accent-blue-dark-bg-hover: #4a90e2; // Lighter than #3584e4 (adw-blue-3)
-  --accent-blue-dark-bg-active: #5f9ee5; // Even lighter
-  --accent-red-dark-bg-hover: #d02832; // Lighter than #c01c28 (adw-red-4)
-  --accent-red-dark-bg-active: #e03f49; // Even lighter
+  --accent-blue-dark-bg-hover: #4a90e2;   // Lighter than adw-blue-3
+  --accent-blue-dark-bg-active: #5f9ee5;  // Even lighter
+  --accent-red-dark-bg-hover: #d02832;     // Lighter than adw-red-4
+  --accent-red-dark-bg-active: #e03f49;   // Even lighter
+  --accent-green-dark-bg-hover: var(--adw-green-4); // #2ec27e (Lighter than current dark bg adw-green-5)
+  --accent-green-dark-bg-active: var(--adw-green-3); // #33d17a
+  --accent-yellow-dark-bg-hover: #dab009; // Lighter than adw-yellow-5 (#cd9309 is current dark bg)
+  --accent-yellow-dark-bg-active: #e5c00a; // Even lighter
+  --accent-orange-dark-bg-hover: var(--adw-orange-2); // #ffa348 (Lighter than current dark bg adw-orange-3)
+  --accent-orange-dark-bg-active: var(--adw-orange-1); // #ffbe6f
+  --accent-purple-dark-bg-hover: var(--adw-purple-2); // #c061cb (Lighter than current dark bg adw-purple-3)
+  --accent-purple-dark-bg-active: var(--adw-purple-1); // #dc8add
+  --accent-teal-dark-bg-hover: var(--adw-teal-2);
+  --accent-teal-dark-bg-active: var(--adw-teal-1);
+  --accent-pink-dark-bg-hover: var(--adw-pink-2);
+  --accent-pink-dark-bg-active: var(--adw-pink-1);
+  --accent-brown-dark-bg-hover: var(--adw-brown-2);
+  --accent-brown-dark-bg-active: var(--adw-brown-1);
 }
+
+// :root (Helper Variables) is above the mixins
+// :root { ... } contains the GNOME Palette and Definitive Accent Color Variables
 
 :root {
   // Default to DARK theme directly in :root.

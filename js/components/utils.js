@@ -4,61 +4,110 @@ export function adwGenerateId(prefix = 'adw-id') {
 }
 
 // Theme related functions
-export const DEFAULT_ACCENT_COLOR = { name: "Default (Blue)", primary: "#3584e4", standalone: "#1c71d8" };
 
-export function getAccentColors() {
-    return [
-        DEFAULT_ACCENT_COLOR,
-        { name: "Green", primary: "#2ec27e", standalone: "#1b8553" },
-        { name: "Yellow", primary: "#e5a50a", standalone: "#9c6e03" },
-        { name: "Orange", primary: "#ff7800", standalone: "#e66100" },
-        { name: "Purple", primary: "#9141ac", standalone: "#813d9c" },
-        { name: "Red", primary: "#e01b24", standalone: "#c01c28" }
-    ];
+// These will map to the CSS variables defined in :root in _variables.scss
+// e.g., name 'blue' will use var(--accent-blue-light-bg), var(--accent-blue-dark-standalone) etc.
+export const ACCENT_COLOR_DEFINITIONS = {
+    blue: {
+        name: "Default (Blue)",
+        light: { bg: 'var(--accent-blue-light-bg)', fg: 'var(--accent-blue-light-fg)', standalone: 'var(--accent-blue-standalone)', hover: 'var(--accent-blue-light-bg-hover)', active: 'var(--accent-blue-light-bg-active)' },
+        dark:  { bg: 'var(--accent-blue-dark-bg)',  fg: 'var(--accent-blue-dark-fg)',  standalone: 'var(--accent-blue-dark-standalone)',  hover: 'var(--accent-blue-dark-bg-hover)',  active: 'var(--accent-blue-dark-bg-active)'  }
+    },
+    green: {
+        name: "Green",
+        light: { bg: 'var(--accent-green-light-bg)', fg: 'var(--accent-green-light-fg)', standalone: 'var(--accent-green-standalone)', hover: 'var(--accent-green-light-bg-hover)', active: 'var(--accent-green-light-bg-active)' },
+        dark:  { bg: 'var(--accent-green-dark-bg)',  fg: 'var(--accent-green-dark-fg)',  standalone: 'var(--accent-green-dark-standalone)',  hover: 'var(--accent-green-dark-bg-hover)',  active: 'var(--accent-green-dark-bg-active)'  }
+    },
+    yellow: {
+        name: "Yellow",
+        light: { bg: 'var(--accent-yellow-light-bg)', fg: 'var(--accent-yellow-light-fg)', standalone: 'var(--accent-yellow-standalone)', hover: 'var(--accent-yellow-light-bg-hover)', active: 'var(--accent-yellow-light-bg-active)' },
+        dark:  { bg: 'var(--accent-yellow-dark-bg)',  fg: 'var(--accent-yellow-dark-fg)',  standalone: 'var(--accent-yellow-dark-standalone)',  hover: 'var(--accent-yellow-dark-bg-hover)',  active: 'var(--accent-yellow-dark-bg-active)'  }
+    },
+    orange: {
+        name: "Orange",
+        light: { bg: 'var(--accent-orange-light-bg)', fg: 'var(--accent-orange-light-fg)', standalone: 'var(--accent-orange-standalone)', hover: 'var(--accent-orange-light-bg-hover)', active: 'var(--accent-orange-light-bg-active)' },
+        dark:  { bg: 'var(--accent-orange-dark-bg)',  fg: 'var(--accent-orange-dark-fg)',  standalone: 'var(--accent-orange-dark-standalone)',  hover: 'var(--accent-orange-dark-bg-hover)',  active: 'var(--accent-orange-dark-bg-active)'  }
+    },
+    purple: {
+        name: "Purple",
+        light: { bg: 'var(--accent-purple-light-bg)', fg: 'var(--accent-purple-light-fg)', standalone: 'var(--accent-purple-standalone)', hover: 'var(--accent-purple-light-bg-hover)', active: 'var(--accent-purple-light-bg-active)' },
+        dark:  { bg: 'var(--accent-purple-dark-bg)',  fg: 'var(--accent-purple-dark-fg)',  standalone: 'var(--accent-purple-dark-standalone)',  hover: 'var(--accent-purple-dark-bg-hover)',  active: 'var(--accent-purple-dark-bg-active)'  }
+    },
+    red: {
+        name: "Red",
+        light: { bg: 'var(--accent-red-light-bg)', fg: 'var(--accent-red-light-fg)', standalone: 'var(--accent-red-standalone)', hover: 'var(--accent-red-light-bg-hover)', active: 'var(--accent-red-light-bg-active)' },
+        dark:  { bg: 'var(--accent-red-dark-bg)',  fg: 'var(--accent-red-dark-fg)',  standalone: 'var(--accent-red-dark-standalone)',  hover: 'var(--accent-red-dark-bg-hover)',  active: 'var(--accent-red-dark-bg-active)'  }
+    },
+    teal: {
+        name: "Teal",
+        light: { bg: 'var(--accent-teal-light-bg)', fg: 'var(--accent-teal-light-fg)', standalone: 'var(--accent-teal-standalone)', hover: 'var(--accent-teal-light-bg-hover)', active: 'var(--accent-teal-light-bg-active)' },
+        dark:  { bg: 'var(--accent-teal-dark-bg)',  fg: 'var(--accent-teal-dark-fg)',  standalone: 'var(--accent-teal-dark-standalone)',  hover: 'var(--accent-teal-dark-bg-hover)',  active: 'var(--accent-teal-dark-bg-active)'  }
+    },
+    pink: {
+        name: "Pink",
+        light: { bg: 'var(--accent-pink-light-bg)', fg: 'var(--accent-pink-light-fg)', standalone: 'var(--accent-pink-standalone)', hover: 'var(--accent-pink-light-bg-hover)', active: 'var(--accent-pink-light-bg-active)' },
+        dark:  { bg: 'var(--accent-pink-dark-bg)',  fg: 'var(--accent-pink-dark-fg)',  standalone: 'var(--accent-pink-dark-standalone)',  hover: 'var(--accent-pink-dark-bg-hover)',  active: 'var(--accent-pink-dark-bg-active)'  }
+    },
+    brown: { // For "Slate"
+        name: "Brown",
+        light: { bg: 'var(--accent-brown-light-bg)', fg: 'var(--accent-brown-light-fg)', standalone: 'var(--accent-brown-standalone)', hover: 'var(--accent-brown-light-bg-hover)', active: 'var(--accent-brown-light-bg-active)' },
+        dark:  { bg: 'var(--accent-brown-dark-bg)',  fg: 'var(--accent-brown-dark-fg)',  standalone: 'var(--accent-brown-dark-standalone)',  hover: 'var(--accent-brown-dark-bg-hover)',  active: 'var(--accent-brown-dark-bg-active)'  }
+    }
+};
+
+export const DEFAULT_ACCENT_COLOR_NAME = 'blue';
+
+export function getAccentColors() { // Returns simplified list for UI pickers
+    return Object.entries(ACCENT_COLOR_DEFINITIONS).map(([key, value]) => ({
+        id: key, // e.g., 'blue', 'green'
+        name: value.name // e.g., 'Default (Blue)'
+    }));
 }
 
-export function setAccentColor(primaryColor, standaloneColor) {
+export function setAccentColor(accentName = DEFAULT_ACCENT_COLOR_NAME) {
     const root = document.documentElement;
-    if (primaryColor) {
-        root.style.setProperty('--accent-bg-color', primaryColor);
-    }
-    if (standaloneColor) {
-        root.style.setProperty('--accent-color', standaloneColor);
-    }
-    try { // localStorage can fail in some environments (e.g. sandboxed iframes)
-        localStorage.setItem('accentColor', JSON.stringify({ primary: primaryColor, standalone: standaloneColor }));
+    const accent = ACCENT_COLOR_DEFINITIONS[accentName] || ACCENT_COLOR_DEFINITIONS[DEFAULT_ACCENT_COLOR_NAME];
+
+    root.style.setProperty('--chosen-accent-light-bg', accent.light.bg);
+    root.style.setProperty('--chosen-accent-light-fg', accent.light.fg);
+    root.style.setProperty('--chosen-accent-light-standalone', accent.light.standalone);
+    root.style.setProperty('--chosen-accent-light-hover-bg', accent.light.hover || accent.light.bg); // Fallback for hover/active
+    root.style.setProperty('--chosen-accent-light-active-bg', accent.light.active || accent.light.bg);
+
+    root.style.setProperty('--chosen-accent-dark-bg', accent.dark.bg);
+    root.style.setProperty('--chosen-accent-dark-fg', accent.dark.fg);
+    root.style.setProperty('--chosen-accent-dark-standalone', accent.dark.standalone);
+    root.style.setProperty('--chosen-accent-dark-hover-bg', accent.dark.hover || accent.dark.bg);
+    root.style.setProperty('--chosen-accent-dark-active-bg', accent.dark.active || accent.dark.bg);
+
+    try {
+        localStorage.setItem('accentColorName', accentName);
     } catch (e) {
-        console.warn("Could not save accent color to localStorage:", e);
+        console.warn("Could not save accent color name to localStorage:", e);
     }
 }
 
 export function loadSavedTheme() {
     try {
         const savedTheme = localStorage.getItem('theme');
-        const savedAccent = JSON.parse(localStorage.getItem('accentColor'));
+        const savedAccentName = localStorage.getItem('accentColorName');
 
         if (savedTheme === 'light') {
             document.body.classList.add('light-theme');
         } else if (savedTheme === 'dark') {
-            document.body.classList.remove('light-theme'); // Ensure it's removed if explicitly dark
+            document.body.classList.remove('light-theme');
         } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches && !document.body.classList.contains('light-theme') && savedTheme !== 'dark') {
-            // Apply light theme if OS prefers light AND no theme is set OR theme is not explicitly dark
             document.body.classList.add('light-theme');
         }
 
+        setAccentColor(savedAccentName || DEFAULT_ACCENT_COLOR_NAME);
 
-        if (savedAccent && savedAccent.primary) {
-            setAccentColor(savedAccent.primary, savedAccent.standalone);
-        } else {
-            setAccentColor(DEFAULT_ACCENT_COLOR.primary, DEFAULT_ACCENT_COLOR.standalone);
-        }
     } catch (e) {
         console.warn("Could not load theme from localStorage:", e);
-        // Fallback to default if localStorage fails
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
             document.body.classList.add('light-theme');
         }
-        setAccentColor(DEFAULT_ACCENT_COLOR.primary, DEFAULT_ACCENT_COLOR.standalone);
+        setAccentColor(DEFAULT_ACCENT_COLOR_NAME); // Fallback to default blue
     }
 }
 

@@ -47,12 +47,13 @@
     transition: background-color 0.1s ease-out;
     color: inherit;
 
-    .adw-split-button-arrow {
-      width: 0;
-      height: 0;
-      border-left: 4px solid transparent;
-      border-right: 4px solid transparent;
-      border-top: 4px solid currentColor;
+    // .adw-split-button-arrow removed as icon is now SVG
+
+    // Ensure the icon itself is styled correctly within the dropdown part
+    .adw-icon {
+      width: 1em; // Or a fixed small size e.g. 12px or 14px
+      height: 1em;
+      // fill: currentColor; // AdwIcon component should handle this
     }
 
     &:hover {
@@ -88,9 +89,8 @@
       &:active {
         background-color: rgba(255,255,255, 0.2); // Assuming accent-fg-color is white
       }
-      .adw-split-button-arrow{
-         border-top-color: var(--accent-fg-color); // This should work as it's a color property
-      }
+      // .adw-split-button-arrow rule removed
+      // Icon color will be handled by .adw-icon and currentColor if accent-fg-color is set on parent
     }
   }
 
