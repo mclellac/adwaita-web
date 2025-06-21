@@ -1,0 +1,24 @@
+// scss/_alert_dialog.scss
+@use 'variables';
+
+.adw-alert-dialog {
+  // Inherits most styles from .adw-dialog
+
+  // Specific styling for the body text within an alert dialog
+  .adw-alert-dialog-body {
+    font-size: var(--font-size-base); // Ensure consistent font size
+    line-height: 1.6; // Slightly more line height for readability of alert messages
+    // No specific color needed if it inherits from .adw-dialog-content's color
+  }
+
+  // If the heading (title) of an alert dialog needs specific styling
+  // distinct from a generic dialog title.
+  // .adw-dialog-title (when part of .adw-alert-dialog) {
+  //   // Example: Maybe alert dialog titles are less prominent
+  //   // font-size: var(--font-size-large);
+  // }
+}
+
+// Dark theme adjustments are typically handled by the base .adw-dialog styles
+// and the variables they use. If .adw-alert-dialog had unique background/foreground
+// that differed from .adw-dialog, dark theme overrides would go here.

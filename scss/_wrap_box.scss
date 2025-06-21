@@ -1,0 +1,39 @@
+// scss/_wrap_box.scss
+@use 'variables';
+
+.adw-wrap-box {
+  // display: flex; // Set by JS factory/WC directly for now
+  // flex-wrap: wrap; // Set by JS factory/WC directly
+
+  // Default spacing if not overridden by JS (though JS sets gap directly)
+  // gap: var(--spacing-m);
+
+  // If specific utility classes were to be used instead of direct style manipulation by JS:
+  // &.horizontal { flex-direction: row; }
+  // &.vertical { flex-direction: column; }
+
+  // &.spacing-xs { gap: var(--spacing-xs); }
+  // &.spacing-s { gap: var(--spacing-s); }
+  // &.spacing-m { gap: var(--spacing-m); }
+  // &.spacing-l { gap: var(--spacing-l); }
+  // &.spacing-xl { gap: var(--spacing-xl); }
+
+  // &.align-start { align-items: flex-start; }
+  // &.align-center { align-items: center; }
+  // &.align-end { align-items: flex-end; }
+  // &.align-stretch { align-items: stretch; }
+
+  // &.justify-start { justify-content: flex-start; }
+  // &.justify-center { justify-content: center; }
+  // &.justify-end { justify-content: flex-end; }
+  // &.justify-between { justify-content: space-between; }
+  // &.justify-around { justify-content: space-around; }
+  // &.justify-evenly { justify-content: space-evenly; }
+}
+
+// No dark theme specific styles usually needed if it's a simple wrapper
+// and children handle their own theming.
+// .dark-theme .adw-wrap-box,
+// body.dark-theme .adw-wrap-box {
+//   // ...
+// }

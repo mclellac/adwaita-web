@@ -1,0 +1,85 @@
+// scss/_preferences_dialog.scss
+@use 'variables';
+
+.adw-preferences-dialog {
+  // Inherits .adw-dialog styles for the main dialog frame.
+
+  // The direct content wrapper of the dialog (created by AdwDialog factory)
+  // might need specific padding if the preferences content is edge-to-edge.
+  > .adw-dialog-content {
+    padding: 0; // Remove default dialog content padding
+                 // if the view switcher or pages handle their own.
+    display: flex; // Allow content to fill height
+    flex-direction: column;
+  }
+
+  .adw-preferences-dialog-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; // Ensure it tries to fill the dialog height
+    overflow: hidden; // Contained scrolling within view switcher content
+  }
+
+  .adw-preferences-dialog-view-switcher {
+    flex-grow: 1; // Allow the view switcher to take up space
+    display: flex;
+    flex-direction: column; // Stack bar and content vertically
+
+    // Styling for the ViewSwitcherBar within a PreferencesDialog
+    .adw-view-switcher-bar {
+      background-color: var(--headerbar-bg-color); // Or a slightly different shade
+      padding: var(--spacing-xs) var(--spacing-m);
+      // Potentially remove bottom border if it's inside the dialog frame
+      border-bottom: 1px solid var(--headerbar-border-color);
+
+      .adw-button {
+        // Preferences tabs are often less prominent than main view switcher tabs
+        padding: var(--spacing-xs) var(--spacing-s);
+        font-size: var(--font-size-small);
+        color: var(--secondary-text-color);
+
+        &.active {
+          color: var(--accent-color);
+          font-weight: bold; // Keep bold for active
+          background-color: transparent; // Active tab bg usually transparent on headerbar-like bg
+          border-bottom-color: var(--accent-color); // Use accent for underline
+          margin-bottom: -1px; // Overlap border if using underline style
+        }
+         &:hover:not(.active) {
+            background-color: var(--button-flat-hover-bg-color);
+            color: var(--headerbar-fg-color);
+        }
+      }
+    }
+
+    // Styling for the ViewSwitcherContent within a PreferencesDialog
+    .adw-view-switcher-content {
+      flex-grow: 1; // Allow content to fill remaining space
+      // The AdwPreferencesPage itself should handle its internal padding & scrolling
+      padding: 0; // Remove default viewswitcher content padding
+      border: none; // Remove default border, dialog frame provides it
+      background-color: var(--window-bg-color); // Match window bg
+      overflow-y: auto; // Allow individual pages to scroll if they become too long
+    }
+  }
+
+  // Ensure AdwPreferencesPage and its children look correct
+  adw-preferences-page, .adw-preferences-page {
+    // background-color: var(--window-bg-color); // Already on view-switcher-content
+    // padding: var(--spacing-l); // AdwPreferencesPage component should handle its own padding
+  }
+}
+
+// Dark theme adjustments for specific parts if not covered by variables
+.dark-theme .adw-preferences-dialog,
+body.dark-theme .adw-preferences-dialog {
+  .adw-preferences-dialog-view-switcher {
+    .adw-view-switcher-bar {
+      // background-color: var(--headerbar-bg-color);
+      // border-bottom-color: var(--headerbar-border-color);
+    }
+    .adw-view-switcher-content {
+      // background-color: var(--window-bg-color);
+    }
+  }
+}

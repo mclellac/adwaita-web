@@ -1,0 +1,22 @@
+// scss/_bin.scss
+@use 'variables';
+
+.adw-bin {
+  display: block; // Or inline-block, depending on desired default flow
+  // No specific padding or border by default, it's a minimal container.
+  // Its child will dictate its size, or the bin itself can be sized by parent/CSS.
+
+  // If alignment properties were added to the factory/WC for the child:
+  // &.align-child-start { align-items: flex-start; } // If display:flex on .adw-bin
+  // &.justify-child-center { justify-content: center; } // If display:flex on .adw-bin
+
+  // Generally, AdwBin itself is simple. The child it contains, or the context
+  // the AdwBin is placed in, will determine more complex layout.
+}
+
+// No dark theme specific styles usually needed for a simple bin,
+// unless it had its own background or border that needed to adapt.
+// .dark-theme .adw-bin,
+// body.dark-theme .adw-bin {
+//   // ...
+// }

@@ -1,0 +1,27 @@
+// scss/_breakpoint_bin.scss
+@use 'variables';
+
+.adw-breakpoint-bin {
+  display: block; // Or 'grid' or 'flex' if it needs to manage layout beyond showing/hiding.
+                  // For now, JS handles display of children.
+  position: relative; // If children were to be absolutely positioned within it.
+  width: 100%; // Usually takes up available width.
+  // height: 100%; // Or available height.
+
+  // Direct children (the pages/views to be swapped)
+  // The JS will set display: none or display: '' on these.
+  // No general styling needed for children from the bin's perspective usually,
+  // as they are arbitrary content.
+  // > ::slotted(*) {
+  //   display: none; // Initially hide all slotted children if WC manages display
+  // }
+  // > ::slotted(*.visible-breakpoint-child) {
+  //   display: block; // Or whatever their natural display type is
+  // }
+}
+
+// No dark theme specific styles usually needed for AdwBreakpointBin itself.
+// .dark-theme .adw-breakpoint-bin,
+// body.dark-theme .adw-breakpoint-bin {
+//   // ...
+// }

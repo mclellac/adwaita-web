@@ -1,0 +1,45 @@
+// scss/_spin_row.scss
+@use 'variables';
+@use 'row_types'; // For common row text content styling if applicable
+
+.adw-spin-row {
+  // Inherits .adw-row styles by default if created using Adw.createRow
+  // display: flex; (from .adw-row)
+  // align-items: center; (from .adw-row)
+  gap: var(--spacing-m); // Standard gap for row items
+
+  .adw-spin-row-text-content {
+    flex-grow: 1; // Allow text content to take available space
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden; // For text ellipsis
+  }
+
+  .adw-spin-row-title {
+    // Uses AdwLabel, so inherits its styles.
+    // Specific overrides if needed:
+    // font-weight: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .adw-spin-row-subtitle {
+    // Uses AdwLabel, so inherits its styles (font-size-small, opacity).
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .adw-spin-row-spin-button {
+    // This class is on the adw-spin-button component itself (the wrapper div)
+    flex-shrink: 0; // Don't allow the spin button to shrink
+  }
+}
+
+// No specific dark theme overrides needed here if child components and variables handle it.
+// .dark-theme .adw-spin-row,
+// body.dark-theme .adw-spin-row {
+//   // ...
+// }
