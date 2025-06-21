@@ -54,7 +54,7 @@ export function createAdwHeaderBar(options = {}) {
       if (subtitleEl) {
           subtitleEl.textContent = subtitle || '';
           subtitleEl.style.display = subtitle ? '' : 'none';
-      } else if (subtitle) { // Create subtitle if it doesn't exist
+      } else if (subtitle && centerBox) { // Create subtitle if it doesn't exist and centerBox exists
           const newSubtitleEl = document.createElement("h2");
           newSubtitleEl.classList.add("adw-header-bar-subtitle");
           newSubtitleEl.textContent = subtitle;
@@ -63,11 +63,11 @@ export function createAdwHeaderBar(options = {}) {
   };
   headerBar.setStartWidgets = (widgets) => {
       while (startBox.firstChild) startBox.removeChild(startBox.firstChild); // Clear
-      widgets.forEach(w => startBox.appendChild(w));
+      widgets.forEach(w => { if (w instanceof Node) startBox.appendChild(w); });
   };
   headerBar.setEndWidgets = (widgets) => {
       while (endBox.firstChild) endBox.removeChild(endBox.firstChild); // Clear
-      widgets.forEach(w => endBox.appendChild(w));
+      widgets.forEach(w => { if (w instanceof Node) endBox.appendChild(w); });
   };
 
   return headerBar;

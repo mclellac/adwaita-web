@@ -12,6 +12,7 @@ import * as rows from './components/rows.js';
 import * as misc from './components/misc.js';
 import * as controls from './components/controls.js';
 import * as views from './components/views.js'; // This includes Tab, Navigation, Toolbar views etc.
+import * as layouts from './components/layouts.js'; // Added import for layouts
 
 // Theme and Accent functions are in utils, already exported from there.
 // adwGenerateId is also in utils.
@@ -64,13 +65,13 @@ const Adw = {
     createToggleButton: controls.createAdwToggleButton,
     createToggleGroup: controls.createAdwToggleGroup,
     // Layouts & Views (from layouts.js and views.js)
-    createBox: views.createAdwBox, // Assuming createAdwBox was moved to views.js or layouts.js
-    createWindow: views.createAdwWindow,
-    createFlap: views.createAdwFlap,
-    createBin: views.createAdwBin,
-    createWrapBox: views.createAdwWrapBox,
-    createClamp: views.createAdwClamp,
-    createBreakpointBin: views.createAdwBreakpointBin,
+    createBox: layouts.createAdwBox, // Corrected: from layouts.js
+    createWindow: layouts.createAdwWindow, // Corrected: from layouts.js
+    createFlap: layouts.createAdwFlap, // Corrected: from layouts.js
+    createBin: layouts.createAdwBin, // Corrected: from layouts.js
+    createWrapBox: layouts.createAdwWrapBox, // Corrected: from layouts.js
+    createClamp: layouts.createAdwClamp, // Corrected: from layouts.js
+    createBreakpointBin: layouts.createAdwBreakpointBin, // Corrected: from layouts.js
     createViewSwitcher: views.createAdwViewSwitcher,
     createToolbarView: views.createAdwToolbarView,
     createCarousel: views.createAdwCarousel, // Renamed createAdwCarousel to createCarousel
@@ -80,7 +81,7 @@ const Adw = {
     createTabBar: views.createAdwTabBar, // If these were separate in original Adw obj
     createTabPage: views.createAdwTabPage,
     createNavigationView: views.createAdwNavigationView,
-    createBottomSheet: views.createAdwBottomSheet,
+    // createBottomSheet: views.createAdwBottomSheet, // Commented out: Not found in views.js
 
 
     // Web Component Classes (for direct use or inspection if needed)
@@ -117,13 +118,15 @@ const Adw = {
     SplitButton: controls.AdwSplitButton,
     ToggleButton: controls.AdwToggleButton,
     ToggleGroup: controls.AdwToggleGroup,
-    Box: views.AdwBox, // Assuming AdwBox was moved to views.js or layouts.js
-    ApplicationWindow: views.AdwApplicationWindow,
-    Flap: views.AdwFlap,
-    Bin: views.AdwBin,
-    WrapBox: views.AdwWrapBox,
-    Clamp: views.AdwClamp,
-    BreakpointBin: views.AdwBreakpointBin,
+    // Layouts from layouts.js
+    Box: layouts.AdwBox,
+    ApplicationWindow: layouts.AdwApplicationWindow,
+    Flap: layouts.AdwFlap,
+    Bin: layouts.AdwBin,
+    WrapBox: layouts.AdwWrapBox,
+    Clamp: layouts.AdwClamp,
+    BreakpointBin: layouts.AdwBreakpointBin,
+    // Views from views.js
     ViewSwitcher: views.AdwViewSwitcher,
     ToolbarView: views.AdwToolbarView,
     Carousel: views.AdwCarousel, // Renamed AdwCarousel to Carousel
@@ -133,7 +136,7 @@ const Adw = {
     TabBar: views.AdwTabBar,
     TabPage: views.AdwTabPage,
     NavigationView: views.AdwNavigationView,
-    BottomSheet: views.AdwBottomSheet,
+    // BottomSheet: views.AdwBottomSheet, // Commented out: Not found in views.js
 };
 
 // Make Adw global for now, for compatibility with existing HTML and adw-initializer.js
@@ -181,7 +184,7 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-split-button')) customElements.define('adw-split-button', Adw.SplitButton);
     if (!customElements.get('adw-toggle-button')) customElements.define('adw-toggle-button', Adw.ToggleButton);
     if (!customElements.get('adw-toggle-group')) customElements.define('adw-toggle-group', Adw.ToggleGroup);
-    // From views.js (or layouts.js)
+    // From layouts.js
     if (!customElements.get('adw-box')) customElements.define('adw-box', Adw.Box);
     if (!customElements.get('adw-application-window')) customElements.define('adw-application-window', Adw.ApplicationWindow);
     if (!customElements.get('adw-flap')) customElements.define('adw-flap', Adw.Flap);
@@ -189,6 +192,7 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-wrap-box')) customElements.define('adw-wrap-box', Adw.WrapBox);
     if (!customElements.get('adw-clamp')) customElements.define('adw-clamp', Adw.Clamp);
     if (!customElements.get('adw-breakpoint-bin')) customElements.define('adw-breakpoint-bin', Adw.BreakpointBin);
+    // From views.js
     if (!customElements.get('adw-view-switcher')) customElements.define('adw-view-switcher', Adw.ViewSwitcher);
     if (!customElements.get('adw-toolbar-view')) customElements.define('adw-toolbar-view', Adw.ToolbarView);
     if (!customElements.get('adw-carousel')) customElements.define('adw-carousel', Adw.Carousel);
@@ -198,7 +202,7 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-tab-bar')) customElements.define('adw-tab-bar', Adw.TabBar);
     if (!customElements.get('adw-tab-page')) customElements.define('adw-tab-page', Adw.TabPage);
     if (!customElements.get('adw-navigation-view')) customElements.define('adw-navigation-view', Adw.NavigationView);
-    if (!customElements.get('adw-bottom-sheet')) customElements.define('adw-bottom-sheet', Adw.BottomSheet);
+    // if (!customElements.get('adw-bottom-sheet')) customElements.define('adw-bottom-sheet', Adw.BottomSheet); // Commented out: Adw.BottomSheet is not defined
 }
 
 console.log('[Debug] Adw object populated and custom elements defined.');

@@ -50,26 +50,45 @@ export class AdwEntry extends HTMLElement {
     }
     connectedCallback() {
         this._render();
-        // No, value should be set by _render based on attribute for initial consistency.
-        // if (this._inputElement) {
-        //     if (this.hasAttribute('value')) this._inputElement.value = this.getAttribute('value');
-        // }
-        // Event listener for internal input to update the component's value property/attribute
         if(this._inputElement) {
             this._inputElement.addEventListener('input', (e) => {
-                this.value = e.target.value; // Use setter to update attribute and dispatch event
+                // Update the internal state and attribute, but let the setter dispatch 'change'
+                const newValue = e.target.value;
+                if (this.getAttribute('value') !== newValue) {
+                    this.setAttribute('value', newValue); // This will trigger attributeChangedCallback
+                }
+                // Dispatch 'input' event from the custom element itself
+                this.dispatchEvent(new CustomEvent('input', { detail: { value: newValue }, bubbles: true, composed: true }));
+            });
+            // Add a change event listener to mirror native input's change
+            this._inputElement.addEventListener('change', (e) => {
+                this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
             });
         }
     }
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue !== newValue) {
-            // If only value changes, update internal input. Otherwise, full re-render.
-            if (name === 'value' && this._inputElement && this._inputElement.value !== newValue) {
-                 this._inputElement.value = newValue;
-            } else if (name === 'disabled' && this._inputElement) {
-                 this._inputElement.disabled = this.hasAttribute('disabled');
-            }
-            else {
+            if (this._inputElement) { // Ensure _inputElement exists before trying to update it
+                if (name === 'value') {
+                     if (this._inputElement.value !== newValue) this._inputElement.value = newValue === null ? '' : newValue;
+                } else if (name === 'disabled') {
+                     this._inputElement.disabled = this.hasAttribute('disabled');
+                } else if (name === 'placeholder') {
+                    this._inputElement.placeholder = newValue || '';
+                } else if (name === 'name') {
+                    if (newValue === null) this._inputElement.removeAttribute('name'); else this._inputElement.name = newValue;
+                } else if (name === 'required') {
+                    this._inputElement.required = newValue !== null;
+                } else if (name === 'type') {
+                    this._inputElement.type = newValue || 'text';
+                } else {
+                    // For other attributes, or if _inputElement wasn't ready, a full _render might be needed
+                    // but often specific handlers are better. For now, this is okay.
+                    this._render(); // Fallback to re-render for unhandled attribute changes
+                }
+            } else {
+                // If _inputElement isn't there yet (e.g., initial attributes setting before _render in some lifecycle),
+                // _render will pick them up.
                 this._render();
             }
         }
@@ -86,7 +105,10 @@ export class AdwEntry extends HTMLElement {
         }
 
         this._inputElement.placeholder = this.getAttribute('placeholder') || '';
-        this._inputElement.value = this.getAttribute('value') || '';
+        // Set value ensuring it's not null, which input.value doesn't like
+        const valueAttr = this.getAttribute('value');
+        this._inputElement.value = valueAttr === null ? '' : valueAttr;
+
         this._inputElement.disabled = this.hasAttribute('disabled');
         if (this.hasAttribute('name')) this._inputElement.name = this.getAttribute('name'); else this._inputElement.removeAttribute('name');
         if (this.hasAttribute('required')) this._inputElement.required = true; else this._inputElement.required = false;
@@ -94,11 +116,15 @@ export class AdwEntry extends HTMLElement {
     }
     get value() { return this._inputElement ? this._inputElement.value : (this.getAttribute('value') || ''); }
     set value(val) {
-        const oldValue = this.value;
-        if (this._inputElement) this._inputElement.value = val;
-        this.setAttribute('value', val);
-        if (oldValue !== val) { // Dispatch change event if value actually changed
-            this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+        const strVal = (val === null || val === undefined) ? '' : String(val);
+        const oldValue = this.getAttribute('value'); // Get attribute value for comparison
+        if (oldValue !== strVal) {
+            this.setAttribute('value', strVal);
+            // No need to dispatch 'change' here, attributeChangedCallback will handle it
+            // and the native input's 'change' event will be the source of truth for user-interactions.
+        } else if (this._inputElement && this._inputElement.value !== strVal) {
+            // If attribute is same but internal input is different (e.g. programmatic set after user input)
+            this._inputElement.value = strVal;
         }
     }
     get disabled() { return this.hasAttribute('disabled'); }
@@ -106,7 +132,7 @@ export class AdwEntry extends HTMLElement {
         const isDisabled = Boolean(val);
         if (isDisabled) this.setAttribute('disabled', '');
         else this.removeAttribute('disabled');
-        if (this._inputElement) this._inputElement.disabled = isDisabled;
+        // attributeChangedCallback will update _inputElement.disabled
     }
     focus(options) { if(this._inputElement) this._inputElement.focus(options); }
     blur() { if(this._inputElement) this._inputElement.blur(); }
@@ -130,29 +156,27 @@ export function createAdwSpinButton(options = {}) {
 
   currentValue = Math.max(min, Math.min(max, currentValue)); // Clamp initial value
 
-  const entry = createAdwEntry({ // Use direct call
+  const entry = createAdwEntry({
     value: currentValue.toString(),
     disabled: opts.disabled,
   });
   entry.classList.add('adw-spin-button-entry');
-  entry.style.maxWidth = '80px'; // Consider making this configurable or CSS-driven
+  entry.style.maxWidth = '80px';
   entry.setAttribute('role', 'spinbutton');
   entry.setAttribute('aria-valuenow', currentValue);
   if (typeof opts.min === 'number') entry.setAttribute('aria-valuemin', min);
   if (typeof opts.max === 'number') entry.setAttribute('aria-valuemax', max);
 
   entry.addEventListener('input', (event) => {
-      let numValue = parseFloat(event.target.value);
-      // Basic validation: if not a number, or out of pure text input, what to do?
-      // For now, let it be, focus on button interaction for value change.
-      // A more robust solution might parse and clamp here too.
+      // Defer validation to change event for better UX during typing
   });
-   entry.addEventListener('change', (event) => { // When focus lost or Enter pressed
+   entry.addEventListener('change', (event) => {
       let numValue = parseFloat(event.target.value);
-      if (isNaN(numValue)) numValue = currentValue; // Revert if invalid
+      if (isNaN(numValue)) numValue = currentValue;
       numValue = Math.max(min, Math.min(max, numValue));
+      // TODO: Implement step alignment if necessary
       currentValue = numValue;
-      event.target.value = currentValue;
+      event.target.value = currentValue; // Update input field with clamped/stepped value
       updateButtonsState(currentValue);
       entry.setAttribute('aria-valuenow', currentValue);
       if (typeof opts.onValueChanged === 'function') {
@@ -201,13 +225,13 @@ export function createAdwSpinButton(options = {}) {
   upButton.setAttribute('aria-label', 'Increment');
 
   function updateButtonsState(val) {
-    downButton.disabled = opts.disabled || val <= min;
-    upButton.disabled = opts.disabled || val >= max;
-    entry.disabled = opts.disabled; // Ensure entry disabled state also updates
+    downButton.disabled = !!opts.disabled || val <= min; // Ensure opts.disabled takes precedence
+    upButton.disabled = !!opts.disabled || val >= max;
+    entry.disabled = !!opts.disabled;
     spinButtonWrapper.classList.toggle('disabled', !!opts.disabled);
   }
 
-  updateButtonsState(currentValue); // Initial state
+  updateButtonsState(currentValue);
 
   btnContainer.appendChild(upButton);
   btnContainer.appendChild(downButton);
@@ -219,16 +243,16 @@ export function createAdwSpinButton(options = {}) {
     else if (e.key === 'ArrowDown') { e.preventDefault(); if(!downButton.disabled) downButton.click(); }
   });
 
-  // Expose a method to set value programmatically for the factory-created instance
   spinButtonWrapper.setValue = (newValue) => {
     let numValue = parseFloat(newValue);
-    if (isNaN(numValue)) return;
+    if (isNaN(numValue)) return; // Or handle error
     numValue = Math.max(min, Math.min(max, numValue));
+    // TODO: Step alignment
     currentValue = numValue;
     entry.value = currentValue;
     updateButtonsState(currentValue);
     entry.setAttribute('aria-valuenow', currentValue);
-    if (typeof opts.onValueChanged === 'function') {
+    if (typeof opts.onValueChanged === 'function') { // Fire callback on programmatic change too
         opts.onValueChanged(currentValue);
     }
   };
@@ -247,19 +271,18 @@ export class AdwSpinButton extends HTMLElement {
         styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
 
-        this._spinButtonElement = null; // Wrapper div
-        this._entryElement = null;      // Internal AdwEntry or input
+        this._spinButtonElement = null;
+        this._entryElement = null;
         this._upButton = null;
         this._downButton = null;
     }
     connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue !== newValue) {
-            // If only value or disabled changes, update internal elements. Otherwise, full re-render.
-            if ((name === 'value' || name === 'disabled' || name === 'min' || name === 'max') && this._spinButtonElement) {
+            if (this._spinButtonElement) { // Check if rendered
                  this._updateInternalElementStates();
             } else {
-                this._render();
+                this._render(); // If not rendered, a full render is needed
             }
         }
     }
@@ -271,16 +294,17 @@ export class AdwSpinButton extends HTMLElement {
         this._spinButtonElement = document.createElement('div');
         this._spinButtonElement.classList.add('adw-spin-button');
 
-        this._entryElement = new AdwEntry(); // Using AdwEntry WC
+        this._entryElement = new AdwEntry();
         this._entryElement.classList.add('adw-spin-button-entry');
-        this._entryElement.style.maxWidth = '80px'; // TODO: Make CSS based
+        this._entryElement.style.maxWidth = '80px';
         this._entryElement.setAttribute('role', 'spinbutton');
 
-        this._entryElement.addEventListener('change', (e) => { // Listen to 'change' not 'input' for final value
+        this._entryElement.addEventListener('change', (e) => {
             let numValue = parseFloat(this._entryElement.value);
-            if (isNaN(numValue)) numValue = this.min; // Revert or clamp
+            if (isNaN(numValue)) numValue = this.min;
             numValue = Math.max(this.min, Math.min(this.max, numValue));
-            this.value = numValue; // Use setter to update attribute and dispatch event
+            // TODO: Step alignment
+            this.value = numValue; // This will trigger attributeChangedCallback and update everything
         });
         this._entryElement.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowUp') { e.preventDefault(); if (!this._upButton.disabled) this._upButton.click(); }
@@ -293,12 +317,12 @@ export class AdwSpinButton extends HTMLElement {
         this._downButton = createAdwButton('', { icon: '<svg viewBox="0 0 16 16" fill="currentColor" style="width:1em;height:1em;"><path d="M4 6h8L8 11z"/></svg>', flat: true });
         this._downButton.classList.add('adw-spin-button-down');
         this._downButton.setAttribute('aria-label', 'Decrement');
-        this._downButton.addEventListener('click', () => { this.value -= this.step; });
+        this._downButton.addEventListener('click', () => { if(!this.disabled) this.value -= this.step; });
 
         this._upButton = createAdwButton('', { icon: '<svg viewBox="0 0 16 16" fill="currentColor" style="width:1em;height:1em;"><path d="M4 10h8L8 5z"/></svg>', flat: true });
         this._upButton.classList.add('adw-spin-button-up');
         this._upButton.setAttribute('aria-label', 'Increment');
-        this._upButton.addEventListener('click', () => { this.value += this.step; });
+        this._upButton.addEventListener('click', () => { if(!this.disabled) this.value += this.step; });
 
         btnContainer.appendChild(this._upButton);
         btnContainer.appendChild(this._downButton);
@@ -306,18 +330,18 @@ export class AdwSpinButton extends HTMLElement {
         this._spinButtonElement.appendChild(btnContainer);
         this.shadowRoot.appendChild(this._spinButtonElement);
 
-        this._updateInternalElementStates(); // Apply initial attributes
+        this._updateInternalElementStates();
     }
 
     _updateInternalElementStates() {
         if (!this._spinButtonElement || !this._entryElement || !this._upButton || !this._downButton) return;
 
-        const value = this.value; // Use getter
+        const value = this.value;
         const min = this.min;
         const max = this.max;
         const disabled = this.disabled;
 
-        this._entryElement.value = value;
+        if (this._entryElement.value !== String(value)) this._entryElement.value = value;
         this._entryElement.setAttribute('aria-valuenow', value);
         this._entryElement.setAttribute('aria-valuemin', min);
         this._entryElement.setAttribute('aria-valuemax', max);
@@ -333,20 +357,23 @@ export class AdwSpinButton extends HTMLElement {
         const numVal = parseFloat(val);
         const min = this.min;
         const max = this.max;
-        const step = this.step; // Not directly used in clamping here, but good to have
-        let clampedVal = Math.max(min, Math.min(max, numVal));
+        // const step = this.step; // Step alignment logic could be added here
 
-        // Ensure value aligns with step if needed (more complex, often handled by native input type=number)
-        // For now, just clamp to min/max
+        let clampedVal = numVal;
+        if (isNaN(clampedVal)) clampedVal = min; // Default to min if NaN
+        clampedVal = Math.max(min, Math.min(max, clampedVal));
 
-        const oldValue = this.value;
-        this.setAttribute('value', clampedVal);
-        if (this._entryElement && this._entryElement.value !== String(clampedVal)) { // Avoid infinite loop if entry fires change
-            this._entryElement.value = clampedVal;
-        }
-        this._updateInternalElementStates(); // Update buttons etc.
-        if (oldValue !== clampedVal) {
+        // Optional: Align to nearest step. Example:
+        // if (step > 0) clampedVal = min + Math.round((clampedVal - min) / step) * step;
+        // clampedVal = Math.max(min, Math.min(max, clampedVal)); // Re-clamp after stepping
+
+        const oldValue = this.hasAttribute('value') ? parseFloat(this.getAttribute('value')) : null; // Get pre-set attribute value
+        if (oldValue !== clampedVal || !this.hasAttribute('value')) {
+            this.setAttribute('value', clampedVal);
+            // attributeChangedCallback will call _updateInternalElementStates
             this.dispatchEvent(new CustomEvent('value-changed', { detail: { value: clampedVal } }));
+        } else { // If value is the same, still ensure internal elements are consistent
+            this._updateInternalElementStates();
         }
     }
 
@@ -355,17 +382,17 @@ export class AdwSpinButton extends HTMLElement {
         const isDisabled = Boolean(val);
         if (isDisabled) this.setAttribute('disabled', '');
         else this.removeAttribute('disabled');
-        this._updateInternalElementStates();
+        // attributeChangedCallback will call _updateInternalElementStates
     }
 
     get min() { return this.hasAttribute('min') ? parseFloat(this.getAttribute('min')) : 0; }
-    set min(val) { this.setAttribute('min', parseFloat(val)); this._render(); }
+    set min(val) { this.setAttribute('min', parseFloat(val)); /* _updateInternalElementStates via attrChange */ }
 
     get max() { return this.hasAttribute('max') ? parseFloat(this.getAttribute('max')) : 100; }
-    set max(val) { this.setAttribute('max', parseFloat(val)); this._render(); }
+    set max(val) { this.setAttribute('max', parseFloat(val)); /* _updateInternalElementStates via attrChange */ }
 
     get step() { return this.hasAttribute('step') ? parseFloat(this.getAttribute('step')) : 1; }
-    set step(val) { this.setAttribute('step', parseFloat(val)); }
+    set step(val) { this.setAttribute('step', parseFloat(val)); /* No direct visual update needed from step alone */ }
 }
 
 // No customElements.define here, will be done in main aggregator.
