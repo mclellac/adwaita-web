@@ -94,16 +94,28 @@ export function createAdwActionRow(options = {}) {
     row.classList.add("adw-action-row");
     if(opts.onClick) row.classList.add("activatable");
 
-    if(opts.iconHTML) {
-        const prefix = document.createElement('div');
-        prefix.classList.add('adw-action-row-prefix');
+    const prefix = document.createElement('div');
+    prefix.classList.add('adw-action-row-prefix');
+    let iconAddedToPrefix = false;
+
+    if (opts.iconName && window.Adw && Adw.createIcon) {
+        const iconElement = Adw.createIcon(opts.iconName);
+        prefix.appendChild(iconElement);
+        iconAddedToPrefix = true;
+    } else if (opts.iconHTML) { // Fallback to iconHTML
         const iconSpan = document.createElement('span');
+        // iconSpan.classList.add('icon'); // AdwIcon already has adw-icon class
         if (typeof opts.iconHTML === 'string' && opts.iconHTML.trim().startsWith("<svg")) {
             _appendSVGStringToElement(opts.iconHTML, iconSpan);
         } else if (typeof opts.iconHTML === 'string' && opts.iconHTML.trim() !== '') {
             iconSpan.classList.add(...opts.iconHTML.split(' '));
         }
-        if (iconSpan.hasChildNodes() || iconSpan.classList.length > 1) prefix.appendChild(iconSpan); // Changed from >0 to >1 for classList
+        if (iconSpan.hasChildNodes() || iconSpan.classList.length > 0) { // Check if any class or child was added
+             prefix.appendChild(iconSpan);
+             iconAddedToPrefix = true;
+        }
+    }
+    if(iconAddedToPrefix) {
         row.appendChild(prefix);
     }
 
@@ -135,7 +147,7 @@ export function createAdwActionRow(options = {}) {
     return row;
 }
 export class AdwActionRow extends HTMLElement {
-    static get observedAttributes() { return ['title', 'subtitle', 'icon', 'show-chevron', 'activatable']; }
+    static get observedAttributes() { return ['title', 'subtitle', 'icon-name', 'icon', 'show-chevron', 'activatable']; }
     constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); this._onClick = null;}
     connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
@@ -146,8 +158,11 @@ export class AdwActionRow extends HTMLElement {
             this.shadowRoot.removeChild(this.shadowRoot.lastChild);
         }
         const row = document.createElement("div"); row.classList.add("adw-action-row");
-        const titleText = this.getAttribute('title') || ''; const subtitleText = this.getAttribute('subtitle');
-        const iconHTML = this.getAttribute('icon'); const showChevron = this.hasAttribute('show-chevron');
+        const titleText = this.getAttribute('title') || '';
+        const subtitleText = this.getAttribute('subtitle');
+        const iconName = this.getAttribute('icon-name');
+        const iconHTML = this.getAttribute('icon'); // Fallback
+        const showChevron = this.hasAttribute('show-chevron');
         const isActivatable = this.hasAttribute('activatable') || this._onClick;
 
         if (isActivatable) {
@@ -156,15 +171,32 @@ export class AdwActionRow extends HTMLElement {
             row.addEventListener('click', clickHandler);
             row.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') clickHandler(e); });
         }
-        if (iconHTML) {
-            const prefix = document.createElement('div'); prefix.classList.add('adw-action-row-prefix');
+
+        const prefix = document.createElement('div');
+        prefix.classList.add('adw-action-row-prefix');
+        let iconAddedToPrefix = false;
+
+        if (iconName && window.Adw && Adw.Icon) { // Adw.Icon is the web component class
+            const iconElement = new Adw.Icon();
+            iconElement.setAttribute('icon-name', iconName);
+            prefix.appendChild(iconElement);
+            iconAddedToPrefix = true;
+        } else if (iconHTML) { // Fallback to iconHTML
             const iconSpan = document.createElement('span');
             if (iconHTML.trim().startsWith("<svg")) {
                 _appendSVGStringToElement(iconHTML, iconSpan);
-            } else if (iconHTML.trim() !== '') iconSpan.classList.add(...iconHTML.split(' '));
-            if (iconSpan.hasChildNodes() || iconSpan.classList.length > 1) prefix.appendChild(iconSpan);
+            } else if (iconHTML.trim() !== '') {
+                iconSpan.classList.add(...iconHTML.split(' '));
+            }
+            if (iconSpan.hasChildNodes() || iconSpan.classList.length > 0) {
+                prefix.appendChild(iconSpan);
+                iconAddedToPrefix = true;
+            }
+        }
+        if(iconAddedToPrefix) {
             row.appendChild(prefix);
         }
+
         const contentDiv = document.createElement('div'); contentDiv.classList.add('adw-action-row-content');
         const titleLabel = createAdwLabel(titleText, {htmlTag: 'span'}); titleLabel.classList.add('adw-action-row-title');
         const titleSlot = document.createElement('slot'); titleSlot.name = 'title-override'; titleLabel.appendChild(titleSlot);
@@ -325,37 +357,42 @@ export function createAdwExpanderRow(options = {}) {
     const expanderRow = document.createElement("div");
     expanderRow.classList.add("adw-expander-row");
     if(opts.expanded) expanderRow.classList.add("expanded");
+    expanderRow.setAttribute('aria-expanded', opts.expanded ? 'true' : 'false');
+
+    const contentAreaId = adwGenerateId('expander-content');
+
+    let chevronIcon;
+    if (window.Adw && Adw.createIcon) {
+        chevronIcon = Adw.createIcon('ui/pan-down-symbolic', { cssClass: 'adw-expander-row-chevron' });
+    } else {
+        chevronIcon = document.createElement('span'); // Fallback
+        chevronIcon.classList.add('adw-expander-row-chevron');
+        chevronIcon.textContent = '>'; // Simple fallback
+    }
 
     const actionRowOptions = {
         title: opts.title,
         subtitle: opts.subtitle,
-        onClick: () => {
-            const isExpanded = expanderRow.classList.toggle("expanded");
-            contentArea.style.display = isExpanded ? "block" : "none";
-            const header = expanderRow.querySelector('.adw-expander-row-header');
-            if(header) header.classList.toggle('expanded', isExpanded);
-
-            if (typeof opts.onToggled === "function") {
-                opts.onToggled(isExpanded);
-            }
-        }
+        // The AdwActionRow itself will handle click if activatable.
+        // We make the entire header clickable.
     };
     const headerActionRow = createAdwActionRow(actionRowOptions);
     headerActionRow.classList.add('adw-expander-row-header');
+    headerActionRow.setAttribute('role', 'button'); // Make the header itself a button
+    headerActionRow.setAttribute('tabindex', '0');
+    headerActionRow.setAttribute('aria-controls', contentAreaId);
+
     if(opts.expanded) headerActionRow.classList.add("expanded");
 
-
-    const arrow = document.createElement('span');
-    arrow.classList.add('adw-expander-row-arrow');
-
+    // Add chevron to the suffix slot of the action row
     const suffixSlotElement = document.createElement('div');
     suffixSlotElement.setAttribute('slot','suffix-widget');
-    suffixSlotElement.appendChild(arrow);
+    suffixSlotElement.appendChild(chevronIcon);
     headerActionRow.appendChild(suffixSlotElement);
-
 
     const contentArea = document.createElement("div");
     contentArea.classList.add("adw-expander-row-content-area");
+    contentArea.id = contentAreaId;
     if (opts.content instanceof Node) {
         contentArea.appendChild(opts.content);
     }
@@ -363,63 +400,133 @@ export function createAdwExpanderRow(options = {}) {
 
     expanderRow.appendChild(headerActionRow);
     expanderRow.appendChild(contentArea);
+
+    // Click listener for the header to toggle expansion
+    const toggleFunction = () => {
+        const isCurrentlyExpanded = expanderRow.classList.toggle("expanded");
+        headerActionRow.classList.toggle("expanded", isCurrentlyExpanded); // Sync header class
+        chevronIcon.classList.toggle("expanded", isCurrentlyExpanded); // For CSS rotation based on icon's class
+        expanderRow.setAttribute('aria-expanded', isCurrentlyExpanded ? 'true' : 'false');
+        contentArea.style.display = isCurrentlyExpanded ? "block" : "none";
+        if (typeof opts.onToggled === "function") {
+            opts.onToggled(isCurrentlyExpanded);
+        }
+    };
+
+    headerActionRow.addEventListener("click", toggleFunction);
+    headerActionRow.addEventListener("keydown", (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleFunction();
+        }
+    });
+
     return expanderRow;
 }
 export class AdwExpanderRow extends HTMLElement {
     static get observedAttributes() { return ['title', 'subtitle', 'expanded']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); }
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; // Use config path
+        this.shadowRoot.appendChild(styleLink);
+        this._headerActionRow = null;
+        this._contentArea = null;
+        this._chevronIcon = null;
+    }
     connectedCallback() { this._render(); }
-    attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue === newValue) return;
+        if (name === 'expanded') {
+            this.expanded = this.hasAttribute('expanded'); // Calls setter
+        } else {
+            this._render(); // Re-render for title/subtitle changes
+        }
+    }
     _render() {
-        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+        // Clear previous content except for the style link
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link[rel="stylesheet"]')) {
             this.shadowRoot.removeChild(this.shadowRoot.lastChild);
         }
-        const expanderRow = document.createElement("div");
-        expanderRow.classList.add("adw-expander-row");
 
-        this._headerActionRow = new AdwActionRow();
+        const expanderRowWrapper = document.createElement("div");
+        expanderRowWrapper.classList.add("adw-expander-row");
+
+        this._headerActionRow = new AdwActionRow(); // Use the AdwActionRow web component
         this._headerActionRow.classList.add('adw-expander-row-header');
         this._headerActionRow.setAttribute('title', this.getAttribute('title') || '');
         if (this.hasAttribute('subtitle')) {
             this._headerActionRow.setAttribute('subtitle', this.getAttribute('subtitle'));
         }
+        // Make the header itself activatable for click events
+        this._headerActionRow.setAttribute('activatable', '');
+        this._headerActionRow.setAttribute('role', 'button'); // Explicit role
 
-        this._arrow = document.createElement('span');
-        this._arrow.classList.add('adw-expander-row-arrow');
-        this._arrow.setAttribute('slot', 'suffix-widget');
-        this._headerActionRow.appendChild(this._arrow);
+        if (window.Adw && Adw.Icon) { // Check if Adw.Icon (web component) is available
+            this._chevronIcon = new Adw.Icon();
+            this._chevronIcon.setAttribute('icon-name', 'ui/pan-down-symbolic');
+            this._chevronIcon.classList.add('adw-expander-row-chevron');
+        } else { // Fallback if Adw.Icon is not available (e.g. during initial Adw object build)
+            this._chevronIcon = document.createElement('span');
+            this._chevronIcon.classList.add('adw-expander-row-chevron');
+            this._chevronIcon.textContent = '>'; // Basic fallback
+        }
+        this._chevronIcon.setAttribute('slot', 'suffix-widget');
+        this._headerActionRow.appendChild(this._chevronIcon);
 
         this._headerActionRow.addEventListener('click', () => this.toggle());
-        this._headerActionRow.setAttribute('aria-expanded', this.hasAttribute('expanded').toString());
 
-        const contentId = adwGenerateId('adw-expander-content');
+        const contentId = this.id ? `${this.id}-content` : adwGenerateId('adw-expander-content');
         this._headerActionRow.setAttribute('aria-controls', contentId);
 
         this._contentArea = document.createElement("div");
         this._contentArea.classList.add("adw-expander-row-content-area");
         this._contentArea.id = contentId;
         const contentSlot = document.createElement('slot');
-        contentSlot.name = 'content';
+        // Default slot for content, no name needed unless multiple slots for content
         this._contentArea.appendChild(contentSlot);
 
-        expanderRow.appendChild(this._headerActionRow);
-        expanderRow.appendChild(this._contentArea);
-        this.shadowRoot.appendChild(expanderRow);
+        expanderRowWrapper.appendChild(this._headerActionRow);
+        expanderRowWrapper.appendChild(this._contentArea);
+        this.shadowRoot.appendChild(expanderRowWrapper);
 
+        // Set initial expanded state based on attribute
         this.expanded = this.hasAttribute('expanded');
     }
     get expanded() { return this.hasAttribute('expanded'); }
     set expanded(isExpanded) {
         const shouldExpand = Boolean(isExpanded);
-        if (this.expanded === shouldExpand) return;
-        if (shouldExpand) this.setAttribute('expanded', '');
-        else this.removeAttribute('expanded');
-        if (this._headerActionRow) this._headerActionRow.classList.toggle("expanded", shouldExpand);
-        if (this.shadowRoot.querySelector('.adw-expander-row')) this.shadowRoot.querySelector('.adw-expander-row').classList.toggle("expanded", shouldExpand); // For main class
-        if (this._contentArea) this._contentArea.style.display = shouldExpand ? "block" : "none";
-        this.dispatchEvent(new CustomEvent('toggled', { detail: { expanded: shouldExpand } }));
+        const currentlyExpanded = this.hasAttribute('expanded');
+
+        if (currentlyExpanded === shouldExpand) return;
+
+        if (shouldExpand) {
+            this.setAttribute('expanded', '');
+        } else {
+            this.removeAttribute('expanded');
+        }
+
+        const mainWrapper = this.shadowRoot.querySelector('.adw-expander-row');
+        if (mainWrapper) mainWrapper.classList.toggle("expanded", shouldExpand);
+
+        if (this._headerActionRow) {
+            this._headerActionRow.classList.toggle("expanded", shouldExpand);
+            this._headerActionRow.setAttribute('aria-expanded', shouldExpand.toString());
+        }
+        if (this._chevronIcon) { // Also toggle class on chevron for direct styling if needed
+            this._chevronIcon.classList.toggle("expanded", shouldExpand);
+        }
+        if (this._contentArea) {
+            this._contentArea.style.display = shouldExpand ? "block" : "none";
+            // Optionally manage aria-hidden for content as well
+            // this._contentArea.setAttribute('aria-hidden', String(!shouldExpand));
+        }
+
+        this.dispatchEvent(new CustomEvent('toggled', { detail: { expanded: shouldExpand }, bubbles: true, composed: true }));
     }
-    toggle() { this.expanded = !this.expanded; }
+    toggle() { this.expanded = !this.expanded; } // This will call the setter
 }
 
 

@@ -136,12 +136,23 @@ export class AdwRadioButton extends HTMLElement {
  */
 export function createAdwSplitButton(options = {}) {
     const opts = options || {}; const wrapper = document.createElement('div'); wrapper.classList.add('adw-split-button'); if(opts.suggested) wrapper.classList.add('suggested-action'); if(opts.disabled) wrapper.classList.add('disabled');
-    const actionButton = createAdwButton(opts.actionText || '', { href: opts.actionHref, onClick: opts.onActionClick, suggested: opts.suggested, disabled: opts.disabled }); actionButton.classList.add('adw-split-button-action');
-    const dropdownButton = createAdwButton('', { icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 6h8L8 11z"/></svg>', onClick: opts.onDropdownClick, disabled: opts.disabled }); dropdownButton.classList.add('adw-split-button-dropdown'); dropdownButton.setAttribute('aria-label', opts.dropdownAriaLabel || 'More options'); dropdownButton.setAttribute('aria-haspopup', 'true');
+    const actionButton = createAdwButton(opts.actionText || '', { href: opts.actionHref, onClick: opts.onActionClick, suggested: opts.suggested, disabled: opts.disabled, cssClass: 'adw-split-button-action-part' });
+    actionButton.classList.add('adw-split-button-action'); // Keep this for SCSS compatibility for now
+
+    const dropdownButton = createAdwButton('', {
+        iconName: 'ui/pan-down-symbolic', // Use AdwIcon
+        onClick: opts.onDropdownClick,
+        disabled: opts.disabled,
+        cssClass: 'adw-split-button-dropdown-part'
+    });
+    dropdownButton.classList.add('adw-split-button-dropdown'); // Keep this for SCSS compatibility
+    dropdownButton.setAttribute('aria-label', opts.dropdownAriaLabel || 'More options');
+    dropdownButton.setAttribute('aria-haspopup', 'true');
+
     wrapper.appendChild(actionButton); wrapper.appendChild(dropdownButton); return wrapper;
 }
 export class AdwSplitButton extends HTMLElement {
-    static get observedAttributes() { return ['action-text', 'action-href', 'suggested', 'disabled', 'dropdown-aria-label']; }
+    static get observedAttributes() { return ['action-text', 'action-href', 'suggested', 'disabled', 'dropdown-aria-label', 'action-icon-name']; }
     constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); }
     connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
@@ -151,9 +162,31 @@ export class AdwSplitButton extends HTMLElement {
         const actionText = this.getAttribute('action-text') || this.textContent.trim(); const actionHref = this.getAttribute('action-href');
         const isSuggested = this.hasAttribute('suggested'); const isDisabled = this.hasAttribute('disabled');
         const dropdownAriaLabel = this.getAttribute('dropdown-aria-label') || 'More options';
-        if (isSuggested) wrapper.classList.add('suggested-action'); if (isDisabled) wrapper.classList.add('disabled');
-        const actionButton = createAdwButton(actionText, { href: actionHref, suggested: isSuggested, disabled: isDisabled, onClick: (e) => this.dispatchEvent(new CustomEvent('action-click', {bubbles: true, composed: true, detail: {originalEvent: e}})) }); actionButton.classList.add('adw-split-button-action');
-        const dropdownButton = createAdwButton('', { icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 6h8L8 11z"/></svg>', disabled: isDisabled, onClick: (e) => this.dispatchEvent(new CustomEvent('dropdown-click', {bubbles: true, composed: true, detail: {originalEvent: e}})) }); dropdownButton.classList.add('adw-split-button-dropdown'); dropdownButton.setAttribute('aria-label', dropdownAriaLabel); dropdownButton.setAttribute('aria-haspopup', 'true');
+        const actionIconName = this.getAttribute('action-icon-name');
+
+        if (isSuggested) wrapper.classList.add('suggested-action');
+        if (isDisabled) wrapper.classList.add('disabled');
+
+        const actionButton = createAdwButton(actionText, {
+            href: actionHref,
+            iconName: actionIconName || undefined,
+            suggested: isSuggested,
+            disabled: isDisabled,
+            cssClass: 'adw-split-button-action-part',
+            onClick: (e) => this.dispatchEvent(new CustomEvent('action-click', {bubbles: true, composed: true, detail: {originalEvent: e}}))
+        });
+        actionButton.classList.add('adw-split-button-action');
+
+        const dropdownButton = createAdwButton('', {
+            iconName: 'ui/pan-down-symbolic',
+            disabled: isDisabled,
+            cssClass: 'adw-split-button-dropdown-part',
+            onClick: (e) => this.dispatchEvent(new CustomEvent('dropdown-click', {bubbles: true, composed: true, detail: {originalEvent: e}}))
+        });
+        dropdownButton.classList.add('adw-split-button-dropdown');
+        dropdownButton.setAttribute('aria-label', dropdownAriaLabel);
+        dropdownButton.setAttribute('aria-haspopup', 'true');
+
         wrapper.appendChild(actionButton); wrapper.appendChild(dropdownButton); this.shadowRoot.appendChild(wrapper);
     }
 }

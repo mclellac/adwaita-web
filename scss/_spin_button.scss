@@ -34,18 +34,21 @@
   .adw-spin-button-buttons {
     display: flex;
     flex-direction: column;
-    height: 100%; // Match entry height
+    // height: 100%; // Let content define height, align with entry via flex align-items on parent
+    // align-self: stretch; // Make button container take full height of flex parent
 
-    .adw-button { // Up and Down buttons
+    .adw-spin-button-control.adw-button { // Target the specific buttons
       background-color: var(--button-bg-color);
       border: none;
       border-radius: 0;
-      padding: 0 var(--spacing-xs); // Minimal padding for small buttons
-      min-height: 0; // Allow them to be very short
-      height: 50%; // Each button takes half the height
-      line-height: 0; // Try to center icon if it's line-height sensitive
+      padding: var(--spacing-xxs) var(--spacing-xs); // Very minimal padding
+      min-height: 0;
+      height: 1.5em; // Adjust height to be small, relative to font or fixed
+      line-height: 1; // For better icon centering
       box-shadow: none;
-
+      display: flex; // Ensure icon inside is centered
+      align-items: center;
+      justify-content: center;
 
       &:hover {
         background-color: var(--button-hover-bg-color);
@@ -54,24 +57,26 @@
         background-color: var(--button-active-bg-color);
       }
       &:disabled {
-        background-color: var(--button-bg-color); // Keep bg, opacity handles disable
-        opacity: 0.3; // More opacity for disabled internal buttons
+        background-color: var(--button-bg-color);
+        opacity: 0.4; // Slightly more opacity for disabled internal buttons
       }
 
-      .icon svg {
-        width: 12px; // Smaller icons for spin buttons
+      .adw-icon { // Target the adw-icon wrapper
+        width: 12px; // Explicit small size for these icons
         height: 12px;
+        margin-right: 0; // Override default icon margin if any
       }
     }
     .adw-spin-button-up {
+        // Separator line between up and down buttons
         border-bottom: 1px solid var(--button-border-color);
     }
   }
 
   &:focus-within { // Focus indication on the wrapper
-    outline: 2px solid var(--accent-bg-color);
+    outline: 2px solid var(--accent-color); // Use standalone accent for outline
     outline-offset: 1px;
-    border-color: var(--accent-bg-color);
+    border-color: var(--accent-color); // Change border to standalone accent on focus
   }
 }
 
