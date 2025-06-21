@@ -29,8 +29,9 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--accent-bg-color);
+    outline: 2px solid var(--accent-color); // Consistent with base link focus, uses standalone accent
     outline-offset: 2px;
+    border-radius: var(--border-radius-default); // Match button's own border-radius for the outline
   }
 
   &.suggested-action {
@@ -39,11 +40,11 @@
     border-color: transparent;
 
     &:hover {
-      filter: brightness(95%);
+      background-color: var(--accent-bg-hover-color);
     }
     &:active, &.active {
-      filter: brightness(90%);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+      background-color: var(--accent-bg-active-color);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); // Keep existing inner shadow for active state
     }
   }
 
@@ -58,8 +59,12 @@
     }
     &:active, &.active {
       background-color: var(--button-flat-active-bg-color);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); // Keep existing inner shadow for active state
     }
+    // Note: Flat buttons usually don't have a separate focus outline style if their bg changes on focus.
+    // However, the global :focus-visible will still apply if not overridden.
+    // Adwaita often makes the focus ring more subtle or integrated for flat buttons.
+    // For now, the default outline is acceptable.
   }
 
   // Renamed from .destructive to .destructive-action for consistency
@@ -69,11 +74,11 @@
     border-color: transparent;
 
     &:hover {
-      filter: brightness(95%);
+      background-color: var(--destructive-bg-hover-color);
     }
     &:active, &.active {
-      filter: brightness(90%);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+      background-color: var(--destructive-bg-active-color);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); // Keep existing inner shadow for active state
     }
   }
 

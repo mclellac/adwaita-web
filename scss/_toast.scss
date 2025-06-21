@@ -1,18 +1,18 @@
 @use 'variables';
 
 .adw-toast {
-  background-color: var(--toast-bg-color, #303030); // Fallback if variables not loaded
-  color: var(--toast-fg-color, #ffffff); // Fallback
+  background-color: var(--toast-bg-color);
+  color: var(--toast-fg-color);
   border-radius: var(--border-radius-default);
   padding: var(--spacing-m);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--toast-box-shadow); // Use new theme-aware variable
   min-width: 288px;
   max-width: 568px;
   position: fixed;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  z-index: 1000;
+  z-index: #{$zindex-toast}; // Use SCSS z-index variable
   opacity: 0;
   transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
 
