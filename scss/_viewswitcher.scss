@@ -10,6 +10,47 @@
   justify-content: flex-start;
   background-color: transparent;
   border-bottom: var(--border-width, 1px) solid var(--border-color, var(--headerbar-border-color));
+  // Default gap for non-inline buttons in the bar
+  gap: var(--spacing-xs);
+
+
+  // Inline variant styling
+  &.inline-switcher {
+    border: 1px solid var(--button-border-color); // Group border
+    border-radius: var(--border-radius-default);
+    padding: var(--spacing-xxs); // Small internal padding for the bar
+    width: max-content; // Shrink to content
+    gap: 0; // No gap between inline buttons
+    background-color: var(--button-bg-color); // Bar itself gets a background
+
+    .adw-button {
+      border: none !important; // Override individual button borders
+      border-radius: var(--border-radius-small) !important; // Slightly less rounding for inner segments
+      padding: var(--spacing-xs) var(--spacing-s); // Adjust padding for inline
+      margin-bottom: 0; // No negative margin needed
+      background-color: transparent; // Default transparent background for buttons
+      color: var(--button-fg-color); // Standard button text color
+      opacity: 1;
+      box-shadow: none !important; // No individual shadows
+
+      &:not(:last-child) {
+        // Could add a very subtle separator if desired:
+        // border-right: 1px solid var(--button-border-color) !important;
+      }
+
+      &:hover {
+        background-color: var(--button-flat-hover-bg-color) !important; // Subtle hover
+        color: var(--button-fg-color) !important;
+      }
+
+      &.active {
+        background-color: var(--accent-bg-color) !important; // Active button gets accent
+        color: var(--accent-fg-color) !important;
+        font-weight: 500; // Slightly bolder active tab
+        // No special border needed for active if bg is distinct
+      }
+    }
+  }
 
   .adw-button {
     background-color: transparent;

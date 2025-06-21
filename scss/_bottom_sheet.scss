@@ -1,0 +1,78 @@
+// scss/_bottom_sheet.scss
+@use 'variables';
+
+.adw-bottom-sheet-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.25); // Similar to dialog backdrop
+  z-index: var(--z-index-modal-backdrop, 400);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  visibility: hidden;
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.adw-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--popover-bg-color); // Popover bg is often good for transient surfaces
+  color: var(--popover-fg-color);
+  border-top-left-radius: var(--border-radius-large);
+  border-top-right-radius: var(--border-radius-large);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+  z-index: var(--z-index-modal, 401); // Above backdrop
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+  visibility: hidden;
+  max-height: 80vh; // Prevent full screen takeover on large content
+  display: flex;
+  flex-direction: column;
+
+  // Optional: Handle for dragging/swiping (visual cue)
+  // &::before {
+  //   content: "";
+  //   display: block;
+  //   width: 40px;
+  //   height: 4px;
+  //   background-color: var(--border-color-light); // Or a specific handle color
+  //   border-radius: 2px;
+  //   margin: var(--spacing-s) auto;
+  //   opacity: 0.5;
+  // }
+
+  &.visible {
+    transform: translateY(0);
+    visibility: visible;
+  }
+
+  // The content passed to the factory is directly appended.
+  // If that content needs scrolling, it should handle it internally or have a wrapper.
+  // For example, if the factory wraps opts.content in a div:
+  // > div { // Assuming the factory wraps content in a direct child div
+  //   overflow-y: auto;
+  //   padding: var(--spacing-l); // Padding for the content area
+  // }
+  // If opts.content itself is expected to be the scrollable area:
+  > *:first-child { // Assuming the passed content is the first child
+    overflow-y: auto;
+    padding: var(--spacing-l); // Common padding
+    // Potentially add padding-bottom to account for device navigation bars if needed (hard to do universally)
+  }
+}
+
+.dark-theme .adw-bottom-sheet,
+body.dark-theme .adw-bottom-sheet {
+  // box-shadow: 0 -2px 10px rgba(0,0,0, 0.3); // Darker shadow for dark theme
+  // &::before {
+  //   background-color: var(--border-color-dark);
+  // }
+}

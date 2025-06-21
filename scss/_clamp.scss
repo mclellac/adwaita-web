@@ -1,0 +1,31 @@
+// scss/_clamp.scss
+@use 'variables';
+
+.adw-clamp {
+  // display: flex; // Set by JS factory/WC
+  // justify-content: center; // Set by JS factory/WC
+  width: 100%; // Clamp itself should take available width to center its child.
+
+  .adw-clamp-child-wrapper {
+    width: 100%; // Takes full width up to its own max-width.
+                 // If clamp is scrollable, this ensures it uses the scrollable area.
+    // max-width is set by JS.
+    // margin-left: auto; // Set by JS if using margin auto centering
+    // margin-right: auto; // Set by JS if using margin auto centering
+  }
+
+  // &.scrollable { // Class added by JS
+  //   overflow-x: hidden; // Set by JS
+  //   overflow-y: auto;   // Set by JS
+  //   // Ensure it has a height to make scrolling meaningful, e.g.,
+  //   // height: 100%;
+  //   // or parent needs to constrain its height.
+  // }
+}
+
+// No specific dark theme styles usually needed for AdwClamp itself,
+// as it's a transparent container. Child content handles its own theme.
+// .dark-theme .adw-clamp,
+// body.dark-theme .adw-clamp {
+//   // ...
+// }

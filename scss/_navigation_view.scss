@@ -1,0 +1,89 @@
+// scss/_navigation_view.scss
+@use 'variables';
+
+.adw-navigation-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%; // Assume it fills its container
+  overflow: hidden; // Important for transitions
+  position: relative; // For positioning pages
+
+  > .adw-header-bar {
+    // Standard header bar styling applies
+    flex-shrink: 0; // Header bar should not shrink
+  }
+
+  .adw-navigation-view-pages-container {
+    flex-grow: 1;
+    position: relative; // Child pages will be absolute/relative to this
+    overflow: hidden; // Clip page transitions
+    background-color: var(--window-bg-color); // Default background
+  }
+
+  .adw-navigation-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    // background-color: var(--window-bg-color); // Pages have their own bg or inherit
+    overflow-y: auto; // Allow individual pages to scroll
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    // visibility: hidden; // Controlled by display initially
+
+    // &.adw-navigation-page-active {
+    //   visibility: visible;
+    //   z-index: 1;
+    // }
+  }
+
+  // Slide from right for push
+  .adw-navigation-page-entering-right {
+    transform: translateX(100%);
+    opacity: 0.8;
+    z-index: 2; // Ensure entering page is on top
+  }
+  .adw-navigation-page-active.adw-navigation-page-entering-right { // Target active page during its enter phase
+     transform: translateX(0);
+     opacity: 1;
+  }
+
+
+  // Slide out to left for push
+  .adw-navigation-page-exiting-left {
+    transform: translateX(-30%); // Libadwaita uses a smaller slide out for previous page
+    opacity: 0.5;
+    z-index: 0;
+  }
+
+  // Slide in from left for pop
+  .adw-navigation-page-entering-left {
+      transform: translateX(-30%);
+      opacity: 0.5;
+      z-index: 2;
+  }
+   .adw-navigation-page-active.adw-navigation-page-entering-left {
+     transform: translateX(0);
+     opacity: 1;
+  }
+
+  // Slide out to right for pop
+  .adw-navigation-page-exiting-right {
+    transform: translateX(100%);
+    opacity: 0.8;
+    z-index: 0;
+  }
+
+}
+
+// Dark theme adjustments (mostly handled by variables, but if specific overrides needed)
+// .dark-theme .adw-navigation-view,
+// body.dark-theme .adw-navigation-view {
+//   .adw-navigation-view-pages-container {
+//     background-color: var(--window-bg-color);
+//   }
+//   .adw-navigation-page {
+//     // background-color: var(--window-bg-color);
+//   }
+// }

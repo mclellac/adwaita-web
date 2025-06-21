@@ -1,0 +1,189 @@
+// scss/_tabs.scss
+@use 'variables';
+
+// --- AdwTabButton ---
+.adw-tab-button {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-s) var(--spacing-m);
+  border: 1px solid transparent; // Usually border comes from TabBar or active state
+  border-radius: var(--border-radius-default) var(--border-radius-default) 0 0; // Rounded top corners
+  cursor: pointer;
+  user-select: none;
+  background-color: var(--button-flat-bg-color); // Start flat
+  color: var(--secondary-text-color);
+  margin-right: var(--spacing-xxs); // Small gap between tabs
+  margin-bottom: -1px; // Overlap TabBar's bottom border
+  position: relative;
+  max-width: 200px; // Prevent tabs from getting too wide
+
+  &:hover {
+    background-color: var(--button-flat-hover-bg-color);
+    color: var(--window-fg-color);
+  }
+
+  &.active {
+    background-color: var(--window-bg-color); // Active tab matches content area bg
+    color: var(--accent-color); // Active tab text is accented
+    font-weight: bold;
+    border-color: var(--headerbar-border-color); // Use a defined border color
+    border-bottom-color: var(--window-bg-color); // "Merge" with content area
+    z-index: 1; // Ensure active tab border overlaps inactive ones
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-bg-color);
+    outline-offset: -2px; // Outline inside
+    z-index: 2; // Ensure focus outline is visible
+  }
+
+  .adw-tab-button-content-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    overflow: hidden; // For label ellipsis
+  }
+
+  .adw-tab-button-icon {
+    flex-shrink: 0;
+    // SVG/font icon styling here if needed
+    svg { width: 1em; height: 1em; }
+  }
+
+  .adw-tab-button-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .adw-tab-button-close {
+    // AdwButton styling will apply. Specific tweaks:
+    padding: var(--spacing-xxs) !important; // Make close button smaller
+    margin-left: var(--spacing-xs);
+    opacity: 0.7;
+    &:hover { opacity: 1; }
+    .icon svg {
+        width: 0.7em; // Smaller 'x' icon
+        height: 0.7em;
+    }
+  }
+}
+
+// --- AdwTabBar ---
+.adw-tab-bar {
+  display: flex;
+  align-items: flex-end; // Align buttons to the bottom border
+  background-color: var(--headerbar-bg-color); // Or a specific tab bar background
+  padding: 0 var(--spacing-xs); // Padding for the bar itself
+  border-bottom: 1px solid var(--headerbar-border-color); // Main line under the tabs
+  overflow-x: auto; // Allow horizontal scrolling if many tabs
+  scrollbar-width: thin;
+
+  .adw-tab-bar-button-container {
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .adw-tab-bar-new-tab-button {
+    // AdwButton styling will apply.
+    margin-left: var(--spacing-s);
+    margin-bottom: var(--spacing-xs); // Align with tab buttons before their bottom border
+    align-self: center; // Center it vertically if other tabs make bar taller
+  }
+}
+
+// --- AdwTabPage ---
+// This is the web component's wrapper for slotted content
+adw-tab-page {
+    display: block; // Default, can be changed by AdwTabView
+    & > .adw-tab-page { // The inner div created by AdwTabPage WC
+        padding: var(--spacing-l); // Standard content padding
+        background-color: var(--window-bg-color);
+        height: 100%; // Try to fill parent if sized
+        box-sizing: border-box;
+    }
+}
+
+
+// --- AdwTabView ---
+.adw-tab-view {
+  display: flex;
+  flex-direction: column;
+  // height: 100%; // If it should fill its parent
+  background-color: var(--window-bg-color);
+  border: 1px solid var(--headerbar-border-color); // Outer border for the whole view
+  border-radius: var(--border-radius-default); // Overall rounding
+  overflow: hidden; // Clip content to rounded corners
+
+  // The AdwTabBar is the first child from the factory
+  > .adw-tab-bar {
+    border-top-left-radius: var(--border-radius-default);
+    border-top-right-radius: var(--border-radius-default);
+    border-bottom-width: 0; // TabView provides the lower border usually
+    // If tab bar is inside the tab view's border, remove its own:
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    padding-left: var(--spacing-s); // Match typical headerbar padding
+    padding-right: var(--spacing-s);
+  }
+
+  // The pages container from the factory
+  > .adw-tab-view-pages-container {
+    flex-grow: 1;
+    position: relative; // For absolute positioning of pages if needed, or just overflow
+    overflow: auto; // If pages themselves don't scroll
+    // The AdwTabPage elements are direct children here from the factory
+    > .adw-tab-page {
+        // These are the pages created by createAdwTabPage factory
+        // They will have their own padding.
+        background-color: var(--window-bg-color);
+        // Ensure they fill the container when active
+        &[style*="display: block"], &:not([style*="display: none"]) { // Crude check for active
+             width: 100%;
+             height: 100%;
+        }
+    }
+  }
+
+  // The slot for web component usage
+  ::slotted(adw-tab-page) {
+    // These are the light DOM elements passed to adw-tab-view WC
+    // Their display is controlled by the AdwTabView JS.
+    // They should also take up full space when active.
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+}
+
+
+// Dark Theme Adjustments
+.dark-theme, body.dark-theme {
+  .adw-tab-button {
+    &.active {
+      background-color: var(--window-bg-color);
+      border-color: var(--headerbar-border-color);
+      border-bottom-color: var(--window-bg-color);
+      color: var(--accent-color);
+    }
+     &:hover:not(.active) {
+        background-color: var(--button-flat-hover-bg-color);
+        color: var(--window-fg-color);
+    }
+  }
+  .adw-tab-bar {
+    background-color: var(--headerbar-bg-color);
+    border-bottom-color: var(--headerbar-border-color);
+  }
+  .adw-tab-view {
+     background-color: var(--window-bg-color);
+     border-color: var(--headerbar-border-color);
+     > .adw-tab-view-pages-container > .adw-tab-page {
+        background-color: var(--window-bg-color);
+     }
+  }
+  adw-tab-page > .adw-tab-page { // Inner div of WC
+    background-color: var(--window-bg-color);
+  }
+}

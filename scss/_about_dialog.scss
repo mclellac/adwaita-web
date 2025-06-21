@@ -1,0 +1,157 @@
+// scss/_about_dialog.scss
+@use 'variables';
+
+.adw-about-dialog {
+  // Inherits .adw-dialog styles for the main dialog frame, backdrop, etc.
+
+  .adw-about-dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-l);
+  }
+
+  .adw-about-dialog-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-l);
+    padding-bottom: var(--spacing-l);
+    border-bottom: 1px solid var(--border-color-light); /* Use theme-aware border */
+  }
+
+  .dark-theme .adw-about-dialog-header,
+  body.dark-theme .adw-about-dialog-header {
+    border-bottom-color: var(--border-color-dark);
+  }
+
+
+  .adw-about-dialog-logo {
+    width: 96px; // Standard size for a larger logo in about dialog
+    height: 96px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+  .adw-about-dialog-app-icon-img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+   .adw-about-dialog-app-icon { // For icon font/SVG class
+    font-size: 64px; // Adjust as needed
+    width: 64px;
+    height: 64px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+
+  .adw-about-dialog-app-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xxs);
+  }
+
+  .adw-about-dialog-app-name {
+    font-size: var(--font-size-h1);
+    font-weight: bold;
+    margin: 0;
+    color: var(--headerbar-fg-color); // Match headerbar text color for title
+  }
+
+  .adw-about-dialog-version {
+    font-size: var(--font-size-base);
+    opacity: 0.8;
+    margin: 0;
+  }
+
+  .adw-about-dialog-main-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-s);
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+    }
+  }
+
+  .adw-about-dialog-developer,
+  .adw-about-dialog-copyright,
+  .adw-about-dialog-website {
+    font-size: var(--font-size-small);
+    opacity: 0.9;
+  }
+  .adw-about-dialog-website a {
+    color: var(--link-color);
+    text-decoration: none;
+    &:hover {
+        text-decoration: underline;
+    }
+  }
+
+
+  .adw-about-dialog-details-content {
+    // This is the content of the expander row
+    padding-top: var(--spacing-m); // Add some space if expander content has its own padding too
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-m);
+  }
+
+  .adw-about-dialog-credits-section,
+  .adw-about-dialog-license-section {
+    h3 {
+      font-size: var(--font-size-large);
+      font-weight: bold;
+      margin-bottom: var(--spacing-xs);
+      color: var(--headerbar-fg-color); // Consistent heading color
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      li {
+        font-size: var(--font-size-small);
+        margin-bottom: var(--spacing-xxs);
+      }
+    }
+    p {
+        font-size: var(--font-size-small);
+        margin-bottom: var(--spacing-xxs);
+    }
+  }
+
+  .adw-about-dialog-license-text {
+    font-family: var(--monospace-font-family);
+    font-size: var(--font-size-small);
+    white-space: pre-wrap;
+    background-color: var(--shade-color); // Subtle background for preformatted text
+    padding: var(--spacing-s);
+    border-radius: var(--border-radius-small);
+    max-height: 200px; // Prevent extremely long licenses from dominating
+    overflow-y: auto;
+    border: 1px solid var(--border-color-light);
+  }
+
+  .dark-theme .adw-about-dialog-license-text,
+  body.dark-theme .adw-about-dialog-license-text {
+    border-color: var(--border-color-dark);
+  }
+
+  // Ensure the expander row itself looks good within the dialog
+  .adw-expander-row-wrapper {
+    // The wrapper might have a border-bottom if not last child.
+    // Inside a dialog, we might not want these default listbox-like borders.
+    border-bottom: none;
+
+    .adw-expander-row { // The clickable part
+        padding: var(--spacing-s) 0; // Less padding if inside dialog
+    }
+    .adw-expander-row-content { // The collapsible part
+        padding-left: var(--spacing-m);
+        padding-right: var(--spacing-m);
+    }
+  }
+}
