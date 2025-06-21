@@ -1,29 +1,68 @@
 @use "variables";
 
 .adw-entry {
-  padding: var(--spacing-xs) var(--spacing-s); // 6px 9px
-  border-width: var(--border-width, 1px);
+  // Define default values for overridable properties using new local CSS variables
+  --_entry-padding-vertical: var(--entry-padding-vertical, var(--spacing-xs));
+  --_entry-padding-horizontal: var(--entry-padding-horizontal, var(--spacing-s));
+  --_entry-border-width: var(--entry-border-width, var(--border-width, 1px));
+  --_entry-border-color: var(--entry-border-color, var(--borders-color)); // Default to general borders-color
+  --_entry-background-color: var(--entry-background-color, var(--view-bg-color));
+  --_entry-box-shadow: var(--entry-box-shadow, inset 0 1px 1px var(--entry-inset-shadow-light));
+  --_entry-focus-border-color: var(--entry-focus-border-color, var(--accent-color));
+  --_entry-focus-box-shadow: var(--entry-focus-box-shadow, 0 0 0 1px var(--accent-color));
+
+
+  padding: var(--_entry-padding-vertical) var(--_entry-padding-horizontal);
+  border-width: var(--_entry-border-width);
   border-style: solid;
-  border-color: var(--entry-border-color);
+  border-color: var(--_entry-border-color);
   border-radius: var(--border-radius-medium); // 4px
-  background-color: var(--view-bg-color);
+  background-color: var(--_entry-background-color);
   color: var(--view-fg-color);
   font-size: var(--font-size-base);
-  transition: border-color 0.1s ease-out, box-shadow 0.1s ease-out; // shorter transition
-  box-shadow: inset 0 1px 1px var(--entry-inset-shadow-light);
+  transition: border-color 0.1s ease-out, box-shadow 0.1s ease-out;
+  box-shadow: var(--_entry-box-shadow);
 
   body.dark-theme & {
-    box-shadow: inset 0 1px 1px var(--entry-inset-shadow-dark);
+    --_entry-box-shadow: var(--entry-box-shadow, inset 0 1px 1px var(--entry-inset-shadow-dark));
+    // Re-apply because the default above is light-theme specific due to var(--entry-inset-shadow-light)
+    box-shadow: var(--_entry-box-shadow);
   }
 
   &:focus,
   &:focus-within {
     outline: none;
-    border-color: var(--accent-color);
-    // The 2px effective focus ring: 1px border (already set by border-color) + 1px outer shadow
-    box-shadow: inset 0 1px 1px var(--entry-inset-shadow-light), 0 0 0 1px var(--accent-color);
+    border-color: var(--_entry-focus-border-color);
+    box-shadow: var(--_entry-focus-box-shadow);
+    // Special handling for combined inset shadow + focus shadow for standalone entries
+    // If --_entry-focus-box-shadow is the accent ring, and --_entry-box-shadow is the inset, they combine.
+    // This logic might need refinement if --entry-focus-box-shadow completely replaces the inset.
+    // For EntryRow, --_entry-box-shadow will be 'none', and focus border width changes.
+    // Let's assume for standalone, the focus shadow is *in addition* to the inset shadow if not overridden.
+    // The definition of --_entry-focus-box-shadow needs to be robust.
+    // The original was: inset 0 1px 1px var(--entry-inset-shadow-light), 0 0 0 1px var(--accent-color);
+    // So, let's make --_entry-focus-box-shadow default to that.
+    // And --_entry-box-shadow is just the inset part.
+    // Defaulting --_entry-focus-box-shadow to:
+    //   `var(--entry-focus-box-shadow, #{var(--_entry-box-shadow)}, 0 0 0 1px var(--accent-color))`
+    // This requires SASS interpolation if var(--_entry-box-shadow) should be part of the default.
+    // Simpler: Define --_entry-focus-box-shadow in _variables or let it be set completely.
+    // For now, the definition in _entry_row.scss will fully override these for the flat look.
+    // The default focus shadow for standalone entry will be:
+    // inset (from --_entry-box-shadow) + accent ring (from --_entry-focus-box-shadow if it's just the ring)
+    // Re-evaluating:
+    // Standalone focus: border turns accent, outer ring appears. Inset shadow remains.
+    // So, border-color: var(--_entry-focus-border-color) is correct.
+    // box-shadow should be: var(--_entry-box-shadow), var(--_entry-focus-box-shadow-ring); (if ring is separate)
+    // Original: box-shadow: inset ..., 0 0 0 1px var(--accent-color);
+    // Let's refine the default focus shadow variable to be just the ring part.
+    --_entry-focus-box-shadow-ring: var(--entry-focus-box-shadow-ring, 0 0 0 1px var(--accent-color));
+    box-shadow: var(--_entry-box-shadow), var(--_entry-focus-box-shadow-ring);
+
     body.dark-theme & {
-      box-shadow: inset 0 1px 1px var(--entry-inset-shadow-dark), 0 0 0 1px var(--accent-color);
+       // Ensure dark theme inset shadow is used along with the focus ring
+      --_entry-box-shadow: var(--entry-box-shadow, inset 0 1px 1px var(--entry-inset-shadow-dark));
+      box-shadow: var(--_entry-box-shadow), var(--_entry-focus-box-shadow-ring);
     }
   }
 
