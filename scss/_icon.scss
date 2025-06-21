@@ -1,0 +1,22 @@
+// scss/_icon.scss
+@use 'variables';
+
+.adw-icon {
+  display: inline-flex; // Use inline-flex for better alignment control
+  align-items: center;
+  justify-content: center;
+  width: 1em; // Default size, can be overridden by context
+  height: 1em; // Default size, can be overridden by context
+  vertical-align: middle; // Align with surrounding text
+
+  > svg {
+    width: 100%; // SVG should fill the container
+    height: 100%;
+    // fill: currentColor; // Already set by JS, but can be reinforced here if needed
+  }
+
+  &.adw-icon-error {
+    color: var(--destructive-color, red); // Use destructive color for error state
+    font-weight: bold;
+  }
+}
