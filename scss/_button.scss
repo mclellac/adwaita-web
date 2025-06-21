@@ -94,15 +94,31 @@
   }
 
   // Icon support within buttons (common in libadwaita)
-  .icon {
+  // Targets the .adw-icon span created by Adw.createIcon
+  > .adw-icon {
     margin-right: var(--spacing-xs);
+    // Icons are typically 16x16 or 1em. Ensure they align well.
+    width: 1em; // Or a fixed size like 16px
+    height: 1em; // Or a fixed size like 16px
+    display: inline-flex; // Helps with alignment
+    align-items: center;
+    justify-content: center;
   }
 
+  // If button has only an icon and no text, remove text-specific padding adjustments
+  // This is tricky without JS, but for circular buttons it's handled.
+  // For non-circular icon-only buttons, the padding might need to be adjusted if text is empty.
+  // Example: .adw-button:not(.circular):has(> .adw-icon:only-child) { padding: var(--spacing-s); }
+
   &.circular { // For icon-only circular buttons
-    padding: var(--spacing-s);
+    padding: var(--spacing-s); // Adjust padding for circular icon buttons
     border-radius: 50%;
-    .icon {
-      margin-right: 0;
+    > .adw-icon {
+      margin-right: 0; // No margin if it's the only child in a circular button
     }
   }
+
+  // When icon is present and there's text, ensure text doesn't hug the icon too much.
+  // The default margin-right on .adw-icon handles this for icon-first.
+  // If icon can be trailing, specific styles would be needed.
 }

@@ -14,8 +14,8 @@ import { sanitizeHref } from './utils.js'; // Import sanitizeHref
  * @param {boolean} [options.disabled=false] - If true, disables the button.
  * @param {boolean} [options.active=false] - If true, applies the 'active' class.
  * @param {boolean} [options.isCircular=false] - If true, applies the 'circular' class (for icon-only buttons).
- * @param {string} [options.icon] - HTML string for an SVG icon, or a class name for an icon font.
- *                                  SECURITY: If providing an HTML string for an icon, ensure it's from a trusted source or sanitized.
+ * @param {string} [options.iconName] - Name of the Adwaita icon (e.g., 'actions/document-save-symbolic'). Takes precedence over `icon`.
+ * @param {string} [options.icon] - Deprecated: HTML string for an SVG icon, or a class name for an icon font. Use `iconName` instead.
  * @returns {HTMLButtonElement|HTMLAnchorElement} The created button element.
  */
 export function createAdwButton(text, options = {}) {
@@ -65,27 +65,32 @@ export function createAdwButton(text, options = {}) {
   if (opts.isCircular) {
     button.classList.add("circular");
   }
-  if (opts.icon) {
+
+  // New iconName handling
+  if (opts.iconName) {
+    if (window.Adw && Adw.createIcon) {
+      const iconElement = Adw.createIcon(opts.iconName, { alt: text ? undefined : (opts.isCircular ? 'icon' : '') });
+      // iconElement is already a span with .adw-icon
+      button.insertBefore(iconElement, button.firstChild);
+    } else {
+      console.warn("AdwButton: Adw.createIcon is not available to create icon:", opts.iconName);
+    }
+  } else if (opts.icon) { // Fallback to old icon logic (deprecated)
     const iconSpan = document.createElement("span");
-    iconSpan.classList.add("icon");
+    iconSpan.classList.add("icon"); // Generic class for styling
     if (typeof opts.icon === 'string' && opts.icon.trim().startsWith("<svg")) {
-        // Use DOMParser for safer SVG string parsing
         const parser = new DOMParser();
         const doc = parser.parseFromString(opts.icon, "image/svg+xml");
         const svgElement = doc.querySelector("svg");
         if (svgElement) {
-            // Check for parsing errors or script injection if stricter handling is needed
-            // For now, assuming valid, non-malicious SVG from trusted sources.
             iconSpan.appendChild(svgElement);
         } else {
-            console.warn("AdwButton: Invalid SVG string provided for icon.", opts.icon);
-            // Fallback or error display could go here
+            console.warn("AdwButton: Invalid SVG string provided for (deprecated) icon option.", opts.icon);
         }
-    } else if (typeof opts.icon === 'string' && opts.icon.trim() !== '') { // Also check for non-empty string
-        iconSpan.classList.add(opts.icon); // Assume it's a class name
+    } else if (typeof opts.icon === 'string' && opts.icon.trim() !== '') {
+        iconSpan.classList.add(opts.icon);
     }
-    // Only insert iconSpan if it has content (either an SVG or classes)
-    if (iconSpan.hasChildNodes() || iconSpan.classList.length > 1) { // length > 1 because it always has 'icon'
+    if (iconSpan.hasChildNodes() || iconSpan.classList.length > 1) {
         button.insertBefore(iconSpan, button.firstChild);
     }
   }
@@ -94,7 +99,7 @@ export function createAdwButton(text, options = {}) {
 
 export class AdwButton extends HTMLElement {
     static get observedAttributes() {
-        return ['href', 'suggested', 'destructive', 'flat', 'disabled', 'active', 'circular', 'icon', 'appearance', 'type'];
+        return ['href', 'suggested', 'destructive', 'flat', 'disabled', 'active', 'circular', 'icon-name', 'icon', 'appearance', 'type'];
     }
 
     constructor() {
@@ -158,27 +163,40 @@ export class AdwButton extends HTMLElement {
             }
         });
 
-        // Icon handling
-        const iconAttr = this.getAttribute('icon');
-        if (iconAttr) {
+        // Icon handling - New 'icon-name' attribute takes precedence
+        const iconNameAttr = this.getAttribute('icon-name');
+        const iconAttr = this.getAttribute('icon'); // Deprecated
+
+        if (iconNameAttr && window.Adw && Adw.createIcon) {
+            const isCircular = this.hasAttribute('circular');
+            // Determine if button has text content by checking slotted nodes
+            const hasTextContent = Array.from(this.childNodes).some(node =>
+                (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '') ||
+                (node.nodeType === Node.ELEMENT_NODE && !node.hasAttribute('slot')) // Element not in a named slot
+            );
+
+            const iconElement = Adw.createIcon(iconNameAttr, {
+                alt: hasTextContent ? undefined : (isCircular ? 'icon' : this.textContent.trim() || 'icon')
+            });
+            internalButton.insertBefore(iconElement, internalButton.firstChild);
+        } else if (iconAttr) { // Fallback to old icon logic (deprecated)
             const iconSpan = document.createElement("span");
-            iconSpan.classList.add("icon");
+            iconSpan.classList.add("icon"); // Generic class for styling
             if (iconAttr.trim().startsWith("<svg")) {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(iconAttr, "image/svg+xml");
                 const svgElement = doc.querySelector("svg");
                 if (svgElement) {
-                    // Basic check: remove <script> elements from parsed SVG
                     Array.from(svgElement.querySelectorAll('script')).forEach(script => script.remove());
                     iconSpan.appendChild(svgElement);
                 } else {
-                     console.warn("AdwButton WC: Invalid SVG string provided for icon attribute.", iconAttr);
+                     console.warn("AdwButton WC: Invalid SVG string for (deprecated) icon attribute.", iconAttr);
                 }
             } else if (iconAttr.trim() !== '') {
-                iconSpan.classList.add(iconAttr); // Assume it's a class name
+                iconSpan.classList.add(iconAttr);
             }
             if (iconSpan.hasChildNodes() || iconSpan.classList.length > 1) {
-                 internalButton.appendChild(iconSpan); // Append icon first
+                 internalButton.insertBefore(iconSpan, internalButton.firstChild);
             }
         }
 

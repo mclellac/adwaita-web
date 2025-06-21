@@ -13,6 +13,7 @@ import * as misc from './components/misc.js';
 import * as controls from './components/controls.js';
 import * as views from './components/views.js'; // This includes Tab, Navigation, Toolbar views etc.
 import * as layouts from './components/layouts.js'; // Added import for layouts
+import * as listbox from './components/listbox.js'; // Import AdwListBox
 
 // Theme and Accent functions are in utils, already exported from there.
 // adwGenerateId is also in utils.
@@ -57,6 +58,7 @@ const Adw = {
     createProgressBar: misc.createAdwProgressBar,
     createToast: misc.createAdwToast,
     createBanner: misc.createAdwBanner, // Renamed from createAdwBanner in original global
+    createIcon: misc.createAdwIcon, // Add Icon factory
     // Controls
     createSwitch: controls.createAdwSwitch,
     createCheckbox: controls.createAdwCheckbox,
@@ -72,6 +74,7 @@ const Adw = {
     createWrapBox: layouts.createAdwWrapBox, // Corrected: from layouts.js
     createClamp: layouts.createAdwClamp, // Corrected: from layouts.js
     createBreakpointBin: layouts.createAdwBreakpointBin, // Corrected: from layouts.js
+    createListBox: listbox.createAdwListBox, // Add ListBox factory
     createViewSwitcher: views.createAdwViewSwitcher,
     createToolbarView: views.createAdwToolbarView,
     createCarousel: views.createAdwCarousel, // Renamed createAdwCarousel to createCarousel
@@ -109,6 +112,7 @@ const Adw = {
     ProgressBar: misc.AdwProgressBar,
     Toast: misc.AdwToast, // Web component might not be necessary if always imperative
     Banner: misc.AdwBanner, // Web component might not be necessary
+    Icon: misc.AdwIcon, // Add Icon Web Component Class
     PreferencesView: misc.AdwPreferencesView,
     PreferencesPage: misc.AdwPreferencesPage,
     PreferencesGroup: misc.AdwPreferencesGroup,
@@ -126,6 +130,7 @@ const Adw = {
     WrapBox: layouts.AdwWrapBox,
     Clamp: layouts.AdwClamp,
     BreakpointBin: layouts.AdwBreakpointBin,
+    ListBox: listbox.AdwListBox, // Add ListBox Web Component Class
     // Views from views.js
     ViewSwitcher: views.AdwViewSwitcher,
     ToolbarView: views.AdwToolbarView,
@@ -177,6 +182,7 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-preferences-view')) customElements.define('adw-preferences-view', Adw.PreferencesView);
     if (!customElements.get('adw-preferences-page')) customElements.define('adw-preferences-page', Adw.PreferencesPage);
     if (!customElements.get('adw-preferences-group')) customElements.define('adw-preferences-group', Adw.PreferencesGroup);
+    if (!customElements.get('adw-icon')) customElements.define('adw-icon', Adw.Icon); // Register AdwIcon
     // From controls.js
     if (!customElements.get('adw-switch')) customElements.define('adw-switch', Adw.Switch);
     if (!customElements.get('adw-checkbox')) customElements.define('adw-checkbox', Adw.Checkbox);
@@ -192,6 +198,8 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-wrap-box')) customElements.define('adw-wrap-box', Adw.WrapBox);
     if (!customElements.get('adw-clamp')) customElements.define('adw-clamp', Adw.Clamp);
     if (!customElements.get('adw-breakpoint-bin')) customElements.define('adw-breakpoint-bin', Adw.BreakpointBin);
+    // From listbox.js
+    if (!customElements.get('adw-list-box')) customElements.define('adw-list-box', Adw.ListBox);
     // From views.js
     if (!customElements.get('adw-view-switcher')) customElements.define('adw-view-switcher', Adw.ViewSwitcher);
     if (!customElements.get('adw-toolbar-view')) customElements.define('adw-toolbar-view', Adw.ToolbarView);

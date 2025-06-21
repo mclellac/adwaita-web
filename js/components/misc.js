@@ -367,3 +367,138 @@ export class AdwPreferencesPage extends HTMLElement { static get observedAttribu
 export class AdwPreferencesGroup extends HTMLElement { static get observedAttributes() { return ['title']; } constructor() { super(); this.attachShadow({mode:'open'}); const styleLink = document.createElement('link'); styleLink.rel='stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this._wrapper = document.createElement('div'); this._wrapper.classList.add('adw-preferences-group'); this._titleEl = document.createElement('div'); this._titleEl.classList.add('adw-preferences-group-title'); this._wrapper.append(this._titleEl, document.createElement('slot')); this.shadowRoot.append(styleLink, this._wrapper); } connectedCallback(){this._renderTitle();} attributeChangedCallback(n,ov,nv){if(n==='title'&&ov!==nv)this._renderTitle();} _renderTitle(){const t=this.getAttribute('title'); this._titleEl.textContent=t||''; this._titleEl.style.display=t?'':'none';}}
 
 // No customElements.define here
+
+// --- AdwIcon ---
+const svgIconCache = new Map();
+const ICON_BASE_PATH = 'data/icons/symbolic/'; // Relative to web root
+
+/**
+ * Creates an Adwaita-style icon element by fetching and embedding an SVG.
+ *
+ * @param {string} iconName - The name of the icon (e.g., 'actions/document-new-symbolic').
+ *                            The .svg extension is appended automatically.
+ * @param {object} [options={}] - Configuration options.
+ * @param {string} [options.alt] - Alt text for accessibility. If provided, role="img" is added.
+ *                                 If not, aria-hidden="true" is added.
+ * @param {string} [options.cssClass] - Additional CSS class(es) for the icon container.
+ * @param {string} [options.id] - Specific ID for the icon container.
+ * @returns {HTMLSpanElement} The created <span> element containing the SVG icon.
+ */
+export function createAdwIcon(iconName, options = {}) {
+    const { alt, cssClass, id } = options;
+
+    const iconContainer = document.createElement('span');
+    iconContainer.classList.add('adw-icon');
+    if (cssClass) {
+        iconContainer.classList.add(...(Array.isArray(cssClass) ? cssClass : cssClass.split(' ')));
+    }
+    if (id) {
+        iconContainer.id = id;
+    }
+
+    if (alt) {
+        iconContainer.setAttribute('role', 'img');
+        iconContainer.setAttribute('aria-label', alt);
+    } else {
+        iconContainer.setAttribute('aria-hidden', 'true');
+    }
+
+    const iconPath = `${ICON_BASE_PATH}${iconName}.svg`;
+
+    if (svgIconCache.has(iconPath)) {
+        iconContainer.innerHTML = svgIconCache.get(iconPath);
+    } else {
+        fetch(iconPath)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to load icon: ${iconName} (status: ${response.status})`);
+                }
+                return response.text();
+            })
+            .then(svgText => {
+                // Sanitize SVG text slightly - remove script tags for basic safety
+                // A more robust sanitizer would be needed for untrusted SVGs, but these are internal.
+                const sanitizedSvgText = svgText.replace(/<script.*?<\/script>/gs, '');
+                svgIconCache.set(iconPath, sanitizedSvgText);
+                iconContainer.innerHTML = sanitizedSvgText;
+
+                // Ensure SVG inherits color - might need to set fill="currentColor" on the SVG root
+                // or ensure paths don't have their own fill.
+                const svgElement = iconContainer.querySelector('svg');
+                if (svgElement) {
+                    svgElement.setAttribute('fill', 'currentColor'); // Good default for symbolic
+                    // Consider width/height if not set, or let CSS handle it
+                    // svgElement.setAttribute('width', '1em');
+                    // svgElement.setAttribute('height', '1em');
+                }
+            })
+            .catch(error => {
+                console.error(`AdwIcon: ${error.message}`);
+                iconContainer.textContent = '⚠️'; // Fallback character
+                iconContainer.setAttribute('aria-label', `Error loading icon: ${iconName}`);
+                iconContainer.classList.add('adw-icon-error');
+            });
+    }
+    return iconContainer;
+}
+
+export class AdwIcon extends HTMLElement {
+    static get observedAttributes() { return ['icon-name', 'alt', 'css-class']; }
+
+    constructor() {
+        super();
+        this._iconContainer = null;
+        // No Shadow DOM for simple icon wrapper, to allow easier CSS targeting if needed by context.
+    }
+
+    connectedCallback() {
+        this._render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue === newValue) return;
+        this._render();
+    }
+
+    _render() {
+        const iconName = this.getAttribute('icon-name');
+        if (!iconName) {
+            if (this._iconContainer) this._iconContainer.remove();
+            this._iconContainer = null;
+            return;
+        }
+
+        const options = {
+            alt: this.getAttribute('alt') || undefined,
+            cssClass: this.getAttribute('css-class') || undefined
+        };
+
+        // If called multiple times (e.g. attribute change), reuse or replace existing container
+        if (!this._iconContainer || this._iconContainer.parentElement !== this) {
+            if (this._iconContainer) this._iconContainer.remove(); // remove if detached
+            this._iconContainer = createAdwIcon(iconName, options);
+            this.appendChild(this._iconContainer);
+        } else {
+            // Update existing icon container
+            this._iconContainer.className = 'adw-icon'; // Reset classes
+            if (options.cssClass) {
+                 this._iconContainer.classList.add(...(Array.isArray(options.cssClass) ? options.cssClass : options.cssClass.split(' ')));
+            }
+            if (options.alt) {
+                this._iconContainer.setAttribute('role', 'img');
+                this._iconContainer.setAttribute('aria-label', options.alt);
+            } else {
+                this._iconContainer.setAttribute('aria-hidden', 'true');
+                this._iconContainer.removeAttribute('aria-label');
+            }
+            // Re-fetch/re-render SVG content (createAdwIcon handles cache)
+            const newContent = createAdwIcon(iconName, options);
+            this._iconContainer.innerHTML = newContent.innerHTML; // Replace content
+             if (newContent.classList.contains('adw-icon-error')) {
+                this._iconContainer.classList.add('adw-icon-error');
+            } else {
+                this._iconContainer.classList.remove('adw-icon-error');
+            }
+        }
+    }
+}

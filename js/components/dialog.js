@@ -396,12 +396,14 @@ export class AdwAlertDialog extends HTMLElement {
     }
     _parseChoices() {
         this._choices = [];
-        const choiceElements = this.querySelectorAll('adw-alert-choice');
+        // Query for elements assigned to the 'choice' slot.
+        // This handles both <button slot="choice"> and <adw-button slot="choice">
+        const choiceElements = this.querySelectorAll('[slot="choice"]');
         choiceElements.forEach(el => {
             this._choices.push({
-                label: el.getAttribute('label') || el.textContent.trim(),
-                value: el.getAttribute('value') || el.getAttribute('label') || el.textContent.trim(),
-                style: el.getAttribute('style') || undefined // 'suggested' or 'destructive'
+                label: el.textContent.trim(), // Get label from text content of the button
+                value: el.getAttribute('value') || el.textContent.trim(), // Value from 'value' attr or fallback to label
+                style: el.dataset.style || el.getAttribute('data-style') || undefined // 'suggested' or 'destructive' from data-style
             });
         });
     }
@@ -409,8 +411,25 @@ export class AdwAlertDialog extends HTMLElement {
         const bodyContent = this.querySelector('[slot="body-content"]');
         let bodyStr = this.getAttribute('body');
         if (!bodyContent && !bodyStr) {
-            const nonChoiceSlots = Array.from(this.childNodes).filter(node => node.nodeType === Node.TEXT_NODE || (node.nodeType === Node.ELEMENT_NODE && !node.hasAttribute('slot') && node.tagName.toLowerCase() !== 'adw-alert-choice')).map(n => n.textContent.trim()).join('\n');
-            if(nonChoiceSlots.trim()) bodyStr = nonChoiceSlots.trim();
+            // Gather text from default slot if body attribute and body-content slot are not used
+            const nonSlottedTextNodes = Array.from(this.childNodes).filter(node =>
+                node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+            );
+            const nonSlottedElements = Array.from(this.childNodes).filter(node =>
+                node.nodeType === Node.ELEMENT_NODE && !node.hasAttribute('slot')
+            );
+
+            if (nonSlottedTextNodes.length > 0) {
+                bodyStr = nonSlottedTextNodes.map(n => n.textContent.trim()).join('\n');
+            } else if (nonSlottedElements.length > 0) {
+                // If there are non-slotted elements, this might indicate complex content.
+                // For simplicity, we'll take their text content. A more robust solution
+                // might involve moving these to a dynamically created body-content slot.
+                // For now, this is a basic fallback.
+                const tempDiv = document.createElement('div');
+                nonSlottedElements.forEach(el => tempDiv.appendChild(el.cloneNode(true)));
+                bodyStr = tempDiv.textContent.trim(); // Or use innerHTML if structure is important (but riskier)
+            }
         }
 
         const options = {

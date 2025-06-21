@@ -3,6 +3,7 @@
 // @use "theme"; // Removed as _theme.scss is deleted and its functionality is covered by _variables.scss
 @use "base";
 @use "mixins";
+@use "icon"; // Add icon styles
 @use "action_row";
 @use "avatar";
 @use "banner";
