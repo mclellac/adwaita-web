@@ -144,12 +144,6 @@ export class AdwButton extends HTMLElement {
         const internalButton = document.createElement(isLink ? "a" : "button");
         internalButton.classList.add("adw-button");
 
-        ['aria-label', 'aria-labelledby', 'aria-describedby', 'aria-pressed', 'aria-expanded', 'aria-haspopup'].forEach(ariaAttr => {
-            if (this.hasAttribute(ariaAttr)) {
-                internalButton.setAttribute(ariaAttr, this.getAttribute(ariaAttr));
-            }
-        });
-
         // Icon handling - New 'icon-name' attribute takes precedence
         const iconNameAttr = this.getAttribute('icon-name');
         const iconAttr = this.getAttribute('icon'); // Deprecated
@@ -191,6 +185,43 @@ export class AdwButton extends HTMLElement {
         const slot = document.createElement('slot');
         internalButton.appendChild(slot);
 
+        // Accessibility: Transfer relevant ARIA attributes from host to internal button.
+        // Specific label handling for icon-only buttons will be done after icon processing.
+        ['aria-labelledby', 'aria-describedby', 'aria-pressed', 'aria-expanded', 'aria-haspopup'].forEach(ariaAttr => {
+            if (this.hasAttribute(ariaAttr)) {
+                internalButton.setAttribute(ariaAttr, this.getAttribute(ariaAttr));
+            }
+        });
+
+        // Determine if button is effectively icon-only to guide aria-label setting
+        const hasSlottedText = Array.from(this.childNodes).some(node =>
+            (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '') ||
+            (node.nodeType === Node.ELEMENT_NODE && !node.hasAttribute('slot'))
+        );
+        const hostAriaLabel = this.getAttribute('aria-label');
+        const hostTitle = this.getAttribute('title'); // Title can also provide accessible name
+        let isEffectivelyIconOnly = false;
+
+        if (iconNameAttr) { // iconNameAttr already defined above
+            isEffectivelyIconOnly = !hasSlottedText;
+        } else if (iconAttr) { // iconAttr already defined above
+            isEffectivelyIconOnly = !hasSlottedText;
+        } else {
+            isEffectivelyIconOnly = false; // No icon, so not icon-only
+        }
+
+        if (isEffectivelyIconOnly) {
+            if (hostAriaLabel) {
+                internalButton.setAttribute('aria-label', hostAriaLabel);
+            } else if (hostTitle) {
+                internalButton.setAttribute('aria-label', hostTitle);
+            }
+            // If neither, the warning below will catch it.
+        } else if (hostAriaLabel) {
+            // If it has text AND an aria-label, apply it.
+            internalButton.setAttribute('aria-label', hostAriaLabel);
+        }
+        // If it has text and no hostAriaLabel, the text itself is the accessible name.
 
         if (isLink) {
             const safeHref = sanitizeHref(href);
