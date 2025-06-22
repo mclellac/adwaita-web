@@ -70,38 +70,53 @@ export class AdwDialog extends HTMLElement {
     static get observedAttributes() { return ['title', 'close-on-backdrop-click', 'open']; }
     constructor() {
         super();
-        // No shadow DOM for dialogs that are modal and globally positioned.
-        this._dialogInstance = null;
+        this._dialogElement = null; // The main dialog div
+        this._backdropElement = null; // The backdrop div
+        this._isOpen = false; // Internal state
+        this._isOpeningOrClosing = false; // Re-entrancy guard for open/close
     }
     connectedCallback() {
-        this._render(); // Build the dialog instance
-        if (this.hasAttribute('open')) {
+        // DOM is built on first open.
+        if (this.hasAttribute('open') && !this._isOpen) {
             this.open();
         }
     }
     disconnectedCallback() {
-        if (this._dialogInstance) {
-            this._dialogInstance.close(); // Ensure cleanup
+        if (this._isOpen) { // If connected, and then removed from DOM while open, ensure cleanup.
+            this.close();
         }
     }
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
 
         if (name === 'open') {
-            if (newValue !== null) this.open();
-            else this.close();
-        } else {
-            // Re-render if other attributes change
-            // This might involve closing and reopening if the dialog is already open
-            const wasOpen = this.hasAttribute('open');
-            if (this._dialogInstance && wasOpen) this._dialogInstance.close();
-            this._render();
-            if (wasOpen) this.open();
+            const shouldBeOpen = newValue !== null;
+            if (shouldBeOpen && !this._isOpen) {
+                this.open();
+            } else if (!shouldBeOpen && this._isOpen) {
+                this.close();
+            }
+        } else { // title, close-on-backdrop-click
+            if (this._isOpen) {
+                const currentOpenAttr = this.hasAttribute('open');
+                // Setting _isOpen to false temporarily to allow close() to proceed if it checks _isOpen
+                // This is a bit tricky; ideally close() should always perform cleanup if elements exist.
+                // Let's ensure close() can run even if about to re-open.
+                this.close();
+                this._dialogElement = null;
+                this._backdropElement = null;
+                if (currentOpenAttr) {
+                    this.open();
+                }
+            } else {
+                this._dialogElement = null;
+                this._backdropElement = null;
+            }
         }
     }
 
     _buildDialogDOM() {
-        // This method encapsulates the DOM creation logic previously in createAdwDialog factory
+        // This method (re)creates the dialog DOM elements.
         // It doesn't append to body here, open() method does that.
         this._backdropElement = document.createElement('div');
         this._backdropElement.classList.add('adw-dialog-backdrop');
@@ -166,65 +181,100 @@ export class AdwDialog extends HTMLElement {
         }
     }
 
-    _render() {
-        // _render is now mostly for initial setup if needed, or if attributes change that don't require full DOM rebuild.
-        // For AdwDialog, the main DOM building happens in _buildDialogDOM, called by open().
-        // If attributes like 'title' change while dialog is closed, _buildDialogDOM will pick them up when next opened.
-        // If attributes change while *open*, it's more complex. For now, we assume changes apply on next open,
-        // or a more sophisticated update mechanism would be needed.
-        // This simplifies _render to mainly ensure the instance knows its state.
-        if (!this._dialogElement) { // If DOM hasn't been built yet by a call to open()
-            // It's fine, open() will build it.
-        }
-    }
+    // _render() method is removed as its functionality is merged into attributeChangedCallback or handled by _buildDialogDOM.
 
     open() {
-        if (this.hasAttribute('open') && this._dialogElement && this._dialogElement.isConnected) {
-            return; // Already open and in DOM
+        if (this._isOpen || this._isOpeningOrClosing) {
+            return;
         }
+        this._isOpeningOrClosing = true;
 
-        // Build or Rebuild DOM if necessary (e.g. if attributes changed significantly)
-        // For this version, always rebuild on open if not already built.
         if (!this._dialogElement || !this._backdropElement) {
             this._buildDialogDOM();
         }
 
         document.body.appendChild(this._backdropElement);
-        this._backdropElement.appendChild(this._dialogElement); // Dialog is child of backdrop
+        // Dialog is child of backdrop, already handled in _buildDialogDOM if it appends there,
+        // or ensure it's appended if _buildDialogDOM only creates them.
+        // Assuming _buildDialogDOM creates them but doesn't append _dialogElement to _backdropElement,
+        // or if it does, this line is redundant.
+        // Let's assume _buildDialogDOM only creates them.
+        if (this._dialogElement && !this._dialogElement.parentElement) {
+             this._backdropElement.appendChild(this._dialogElement);
+        }
+
 
         const firstFocusable = this._dialogElement.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
         if (firstFocusable) firstFocusable.focus();
         else { this._dialogElement.setAttribute('tabindex', '-1'); this._dialogElement.focus(); }
 
-        setTimeout(() => {
-            if(this._backdropElement) this._backdropElement.classList.add('open');
-            if(this._dialogElement) this._dialogElement.classList.add('open');
-        }, 10);
+        // Force reflow before adding 'open' class for transition
+        void this._backdropElement.offsetWidth;
 
-        if (!this.hasAttribute('open')) this.setAttribute('open', '');
-        this.dispatchEvent(new CustomEvent('open', {bubbles: true, composed: true}));
+        this._backdropElement.classList.add('open');
+        this._dialogElement.classList.add('open');
+
+        this._isOpen = true;
+        if (!this.hasAttribute('open')) {
+            this.setAttribute('open', '');
+        }
+        this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }));
+        this._isOpeningOrClosing = false;
     }
 
     close() {
-        if (!this.hasAttribute('open') || !this._dialogElement || !this._dialogElement.isConnected) {
-            return; // Already closed or not in DOM
+        if (!this._isOpen || this._isOpeningOrClosing) {
+            return;
+        }
+        this._isOpeningOrClosing = true;
+
+        if (this._backdropElement && this._dialogElement) {
+            this._backdropElement.classList.remove('open');
+            this._dialogElement.classList.remove('open');
+
+            const onTransitionEnd = () => {
+                if (this._backdropElement) { // Check if still exists
+                    this._backdropElement.removeEventListener('transitionend', onTransitionEnd);
+                    if (this._backdropElement.parentNode) {
+                        this._backdropElement.remove();
+                    }
+                }
+                // Nullify elements only if we are truly done closing.
+                if (!this._isOpen) {
+                     this._dialogElement = null;
+                     this._backdropElement = null;
+                }
+                this._isOpeningOrClosing = false;
+            };
+
+            // Listen to transitionend on the backdrop.
+            // Fallback to timeout if no transition is detected or takes too long.
+            let transitionDetected = false;
+            const transitionHandler = () => {
+                transitionDetected = true;
+                onTransitionEnd();
+            };
+            this._backdropElement.addEventListener('transitionend', transitionHandler, {once: true});
+
+            setTimeout(() => {
+                if (!transitionDetected) {
+                    console.warn("AdwDialog: Backdrop transitionend not detected, falling back to timeout for cleanup.");
+                    onTransitionEnd();
+                }
+                if (this._backdropElement) { // Cleanup listener if timeout fired first
+                     this._backdropElement.removeEventListener('transitionend', transitionHandler);
+                }
+            }, 300); // Increased timeout slightly beyond typical transition
+
+        } else {
+             this._isOpeningOrClosing = false;
         }
 
-        if(this._backdropElement) this._backdropElement.classList.remove('open');
-        if(this._dialogElement) this._dialogElement.classList.remove('open');
-
-        setTimeout(() => {
-            if (this._backdropElement && this._backdropElement.parentNode) {
-                this._backdropElement.remove();
-            }
-            // The dialog element is a child of backdrop, so it's removed with backdrop.
-            // Nullify them so they are rebuilt on next open, picking up any attribute changes.
-            this._dialogElement = null;
-            this._backdropElement = null;
-        }, 160); // Match CSS transition (0.15s = 150ms, add a little buffer)
-
-        if (this.hasAttribute('open')) this.removeAttribute('open');
-        this.dispatchEvent(new CustomEvent('close', {bubbles: true, composed: true}));
+        this._isOpen = false;
+        if (this.hasAttribute('open')) {
+            this.removeAttribute('open');
+        }
+        this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
     }
 }
 
@@ -296,31 +346,49 @@ export class AdwAlertDialog extends HTMLElement {
 
     constructor() {
         super();
-        this._alertDialogInstance = null;
+        this._internalDialog = null;
         this._choices = [];
+        this._isOpen = false;
+        this._isProcessingOpenClose = false;
     }
-    connectedCallback() { /* Removed this._parseChoices(); and this._render(); */ if (this.hasAttribute('open')) this.open(); }
-    disconnectedCallback() { if (this._internalDialog) this.close(); } // Use this.close() which handles _internalDialog
+    connectedCallback() {
+        if (this.hasAttribute('open') && !this._isOpen) {
+            this.open();
+        }
+    }
+    disconnectedCallback() {
+        if (this._isOpen) {
+            this.close();
+        }
+    }
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
+
         if (name === 'open') {
-            if (newValue !== null) this.open();
-            else this.close();
-        } else {
-            // For other attributes, if the dialog is open, close and reopen to reflect changes.
-            // A more sophisticated approach might update the live dialog.
-            if (this.hasAttribute('open')) {
-                this.close(); // This will nullify _internalDialog
-                this.open(); // This will rebuild and open
+            const shouldBeOpen = newValue !== null;
+            if (shouldBeOpen && !this._isOpen) {
+                this.open();
+            } else if (!shouldBeOpen && this._isOpen) {
+                this.close();
+            }
+        } else { // heading, body, close-on-backdrop-click
+            if (this._isOpen) {
+                const currentOpenAttr = this.hasAttribute('open');
+                this.close();
+                this._internalDialog = null;
+                if (currentOpenAttr) {
+                    this.open();
+                }
+            } else {
+                this._internalDialog = null; // Mark for rebuild on next open
             }
         }
     }
 
     _buildInternalDialog() {
-        if (this._internalDialog) { // Clean up previous instance if any
-             if (this._internalDialog.hasAttribute('open')) this._internalDialog.close();
-             this._internalDialog = null;
-        }
+        // Ensure this._internalDialog is fresh if we are rebuilding.
+        // The attributeChangedCallback handles nullifying it before calling open->build.
+        // if (this._internalDialog) { ... } // This check might be redundant here if open() ensures it's null before build.
 
         this._internalDialog = document.createElement('adw-dialog');
         this._internalDialog.classList.add('adw-alert-dialog-base'); // For specific styling hook if needed
@@ -410,39 +478,54 @@ export class AdwAlertDialog extends HTMLElement {
 
         // Forward the 'close' event from the internal dialog
         this._internalDialog.addEventListener('close', () => {
-            if (this.hasAttribute('open')) { // Ensure we don't remove if already removed by this.close()
-                this.removeAttribute('open'); // Sync attribute
+            // This event comes from the inner AdwDialog.
+            // If AdwAlertDialog (this) still thinks it's open, sync its state.
+            if (this._isOpen) {
+                this._isOpen = false; // Update internal state FIRST
+                if (this.hasAttribute('open')) {
+                    this.removeAttribute('open'); // Sync attribute
+                }
+                this.dispatchEvent(new CustomEvent('close')); // Dispatch our own close event
             }
-            this.dispatchEvent(new CustomEvent('close')); // Bubble up our own close event
         });
     }
 
     open() {
-        if (!this._internalDialog || !this._internalDialog.isConnected) {
+        if (this._isOpen || this._isProcessingOpenClose) return;
+        this._isProcessingOpenClose = true;
+
+        if (!this._internalDialog) { // Only build if it doesn't exist (or was nullified)
             this._buildInternalDialog();
         }
-        // Append the internal dialog to the body if it's not already there (AdwDialog handles its own body append)
-        // This is tricky. AdwDialog itself appends its _dialogElement to body.
-        // AdwAlertDialog should just call open() on its _internalDialog.
+
         if (this._internalDialog) {
-            this._internalDialog.setAttribute('open', ''); // Triggers AdwDialog's open logic
+            this._internalDialog.open(); // Call method on internal AdwDialog
         }
+
+        this._isOpen = true;
         if (!this.hasAttribute('open')) {
             this.setAttribute('open', '');
         }
+        // AdwAlertDialog might dispatch its own 'open' event if needed,
+        // but often the internal dialog's event is sufficient if it bubbles or is handled.
+        this._isProcessingOpenClose = false;
     }
 
     close() {
-        if (this._internalDialog && this._internalDialog.hasAttribute('open')) {
-            this._internalDialog.removeAttribute('open'); // Triggers AdwDialog's close logic
+        if (!this._isOpen || this._isProcessingOpenClose) return;
+        this._isProcessingOpenClose = true;
+
+        if (this._internalDialog) { // Check if _internalDialog exists
+            this._internalDialog.close(); // Call method on internal AdwDialog
         }
-        // The internal dialog's 'close' event handler will remove our 'open' attribute.
-        // No need to explicitly remove it here again if event forwarding is correct.
-        // However, ensure cleanup if internal dialog was never fully opened or attached.
-        if (this.hasAttribute('open') && (!this._internalDialog || !this._internalDialog.isConnected)) {
+
+        this._isOpen = false;
+        if (this.hasAttribute('open')) {
             this.removeAttribute('open');
         }
-        // _internalDialog will be cleared on next open or if attribute changed
+        // The event listener on _internalDialog's 'close' event handles dispatching
+        // this AdwAlertDialog's 'close' event.
+        this._isProcessingOpenClose = false;
     }
 }
 
@@ -515,9 +598,11 @@ export class AdwAboutDialog extends HTMLElement {
     static get observedAttributes() { return ['app-name', 'open', /* other attributes from _gatherOptions */ 'app-icon', 'logo', 'version', 'copyright', 'developer-name', 'website', 'website-label', 'license-type', 'comments', 'developers', 'documenters', 'designers', 'artists', 'translators']; }
     constructor() {
         super();
-        this._dialogInstance = null;
-        this._slotObserver = new MutationObserver(() => this._rebuildOnSlotChange()); // More targeted rebuild
-        this._internalDialog = null; // Will hold the <adw-dialog> instance
+        // Removed _dialogInstance, using _internalDialog
+        this._slotObserver = new MutationObserver(() => this._rebuildOnSlotChange());
+        this._internalDialog = null;
+        this._isOpen = false;
+        this._isProcessingOpenClose = false;
     }
 
     connectedCallback() {
@@ -557,15 +642,24 @@ export class AdwAboutDialog extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
+
         if (name === 'open') {
-            if (newValue !== null) this.open();
-            else this.close();
-        } else {
-            // For other attributes, if the dialog is open, trigger a rebuild.
-            if (this.hasAttribute('open')) {
-                 this._rebuildOnSlotChange(); // Rebuilds if open
-            } else {
-                this._internalDialog = null; // Mark for rebuild on next open
+            const shouldBeOpen = newValue !== null;
+            if (shouldBeOpen && !this._isOpen) {
+                this.open();
+            } else if (!shouldBeOpen && this._isOpen) {
+                this.close();
+            }
+        } else { // For other attributes
+            if (this._isOpen) { // If open, rebuild immediately
+                const currentOpenAttr = this.hasAttribute('open');
+                this.close(); // This sets _isOpen = false, removes 'open' attr
+                this._internalDialog = null; // Mark for rebuild
+                if (currentOpenAttr) { // If it was meant to stay open
+                    this.open();
+                }
+            } else { // If closed, just mark for rebuild on next open
+                this._internalDialog = null;
             }
         }
     }
@@ -761,25 +855,40 @@ export class AdwAboutDialog extends HTMLElement {
     }
 
     open() {
-        if (!this._internalDialog) { // Build if not already built (e.g. first open, or after attribute change)
+        if (this._isOpen || this._isProcessingOpenClose) return;
+        this._isProcessingOpenClose = true;
+
+        if (!this._internalDialog) {
             this._buildInternalDialogDOM();
         }
-        this._openInternalDialog();
+        if (this._internalDialog) {
+            this._internalDialog.open(); // Call method on internal AdwDialog
+        }
+
+        this._isOpen = true;
         if (!this.hasAttribute('open')) {
             this.setAttribute('open', '');
         }
-        // AdwDialog's open method dispatches its own 'open' event. No need to dispatch again here.
+        // AdwDialog's open event will bubble if this._internalDialog dispatches it.
+        // Or, AdwAboutDialog can dispatch its own 'open' event if distinct behavior is needed.
+        this._isProcessingOpenClose = false;
     }
 
-    close(dispatchHostEvt = true) { // Added param for internal control
-        this._closeInternalDialog();
+    close() {
+        if (!this._isOpen || this._isProcessingOpenClose) return;
+        this._isProcessingOpenClose = true;
+
+        if (this._internalDialog) {
+            this._internalDialog.close(); // Call method on internal AdwDialog
+        }
+
+        this._isOpen = false;
         if (this.hasAttribute('open')) {
             this.removeAttribute('open');
         }
-        // The internal dialog's 'close' event listener already dispatches our host 'close' event.
-        // So, only dispatch if specifically asked and not already handled by the forwarded event.
-        // This logic might need refinement if event forwarding causes double events.
-        // For now, assuming the forwarded event is the primary one.
+        // The event listener on _internalDialog's 'close' event (added in _buildInternalDialogDOM)
+        // should handle dispatching AdwAboutDialog's own 'close' event.
+        this._isProcessingOpenClose = false;
     }
 }
 
@@ -841,9 +950,11 @@ export class AdwPreferencesDialog extends HTMLElement {
 
     constructor() {
         super();
-        this._dialogInstance = null;
+        // Removed _dialogInstance
         this._slotObserver = new MutationObserver(() => this._rebuildOnSlotChange());
-        this._internalDialog = null; // Will hold the <adw-dialog> instance
+        this._internalDialog = null;
+        this._isOpen = false;
+        this._isProcessingOpenClose = false;
     }
 
     connectedCallback() {
@@ -873,16 +984,25 @@ export class AdwPreferencesDialog extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
+
         if (name === 'open') {
-            if (newValue !== null) this.open();
-            else this.close();
-        } else {
-            // For title or initial-page-name changes
-             if (this.hasAttribute('open')) {
-                 this._rebuildOnSlotChange();
-             } else {
+            const shouldBeOpen = newValue !== null;
+            if (shouldBeOpen && !this._isOpen) {
+                this.open();
+            } else if (!shouldBeOpen && this._isOpen) {
+                this.close();
+            }
+        } else { // title, initial-page-name
+            if (this._isOpen) {
+                const currentOpenAttr = this.hasAttribute('open');
+                this.close();
                 this._internalDialog = null; // Mark for rebuild
-             }
+                if (currentOpenAttr) {
+                    this.open();
+                }
+            } else {
+                this._internalDialog = null; // Mark for rebuild on next open
+            }
         }
     }
 
@@ -969,23 +1089,37 @@ export class AdwPreferencesDialog extends HTMLElement {
 
 
     open() {
+        if (this._isOpen || this._isProcessingOpenClose) return;
+        this._isProcessingOpenClose = true;
+
         if (!this._internalDialog) {
             this._buildInternalDialogDOM();
         }
-        if (this._internalDialog) this._internalDialog.setAttribute('open', '');
+        if (this._internalDialog) {
+            this._internalDialog.open(); // Call method
+        }
+
+        this._isOpen = true;
         if (!this.hasAttribute('open')) {
             this.setAttribute('open', '');
         }
+        this._isProcessingOpenClose = false;
     }
 
     close() {
-        if (this._internalDialog && this._internalDialog.hasAttribute('open')) {
-            this._internalDialog.removeAttribute('open');
+        if (!this._isOpen || this._isProcessingOpenClose) return;
+        this._isProcessingOpenClose = true;
+
+        if (this._internalDialog) {
+            this._internalDialog.close(); // Call method
         }
+
+        this._isOpen = false;
         if (this.hasAttribute('open')) {
             this.removeAttribute('open');
         }
-        // Internal dialog's close event listener handles dispatching our 'close' event.
+        // Event listener on _internalDialog's 'close' handles AdwPreferencesDialog's 'close' event.
+        this._isProcessingOpenClose = false;
     }
 }
 // No customElements.define here as it's done in the main components.js file.
