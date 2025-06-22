@@ -28,8 +28,8 @@ def app_instance(): # Renamed from test_client_setup to reflect it yields the ap
     }
     _app = create_app(config_overrides=test_config)
 
-    # db.create_all() is called within create_app's app_context.
-    # So, no need to call it again here.
+    with _app.app_context():
+        db.create_all()
 
     yield _app # Provide the app instance
 

@@ -52,10 +52,12 @@
             </adw-entry-row>
         </adw-list-box>
 
-        <div style="display: flex; justify-content: flex-end; gap: var(--spacing-s);">
-            <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button">Cancel</a>
-            {{ form.submit(class_='adw-button suggested-action', value='Update Post') }}
-        </div>
+        <adw-action-row>
+            <div slot="suffix" style="display: flex; gap: var(--spacing-s);">
+                <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button">Cancel</a>
+                {{ form.submit(class_='adw-button suggested-action', label='Update Post') }}
+            </div>
+        </adw-action-row>
     </form>
 </div>
 {% endblock %}

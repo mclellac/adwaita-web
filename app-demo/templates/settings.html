@@ -7,8 +7,15 @@
     <adw-preferences-page title="Settings">
       <adw-preferences-group title="Appearance">
         <adw-list-box>
-          <adw-switch-row title="Enable Dark Mode" subtitle="Toggle between light and dark themes" id="theme-switch"></adw-switch-row>
-          <adw-combo-row title="Accent Color" subtitle="Choose a site-wide accent color" id="accent-color-combo">
+          <adw-switch-row title="Enable Dark Mode"
+                          subtitle="Toggle between light (off) and dark (on) themes"
+                          id="theme-switch"
+                          data-current-theme="{{ current_user.theme or 'system' }}">
+          </adw-switch-row>
+          <adw-combo-row title="Accent Color"
+                         subtitle="Choose a site-wide accent color"
+                         id="accent-color-combo"
+                         data-current-accent="{{ current_user.accent_color or 'default' }}">
             <!-- Options will be populated by JavaScript.
                  Example:
                  <option value="default" selected>Default (Blue)</option>
@@ -25,6 +32,7 @@
       <adw-preferences-group title="Account">
         <adw-list-box>
           <adw-action-row title="Change Password" subtitle="Update your account password" clickable href="{{ url_for('change_password_page') }}"></adw-action-row>
+          <adw-action-row title="Logout" subtitle="Sign out of your account" clickable href="{{ url_for('logout') }}" class="destructive-action"></adw-action-row>
         </adw-list-box>
       </adw-preferences-group>
 

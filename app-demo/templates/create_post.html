@@ -58,9 +58,11 @@
             </adw-entry-row>
         </adw-list-box>
 
-        <div style="display: flex; justify-content: flex-end; gap: var(--spacing-s);">
-            {{ form.submit(class_='adw-button suggested-action') }}
-        </div>
+        <adw-action-row>
+            <div slot="suffix" style="display: flex; justify-content: flex-end; gap: var(--spacing-s);">
+                {{ form.submit(class_='adw-button suggested-action') }}
+            </div>
+        </adw-action-row>
     </form>
 </div>
 {% endblock %}
