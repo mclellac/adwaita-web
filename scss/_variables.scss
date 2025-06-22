@@ -123,12 +123,12 @@
   --dialog-box-shadow: var(--dialog-box-shadow-light);
   --dialog-backdrop-color: rgba(0, 0, 0, 0.25);
 
-  --list-row-hover-bg-color: rgba(0,0,0,0.04);
-  --list-row-active-bg-color: rgba(0,0,0,0.08);
+  --list-row-hover-bg-color: rgba(0,0,0,0.06); // Aligned with Libadwaita 1.7 @list_row_hovered_bg_color (light)
+  --list-row-active-bg-color: rgba(0,0,0,0.08); // Kept as slightly more prominent than hover
   --list-row-selected-bg-color: var(--adw-blue-1); // #99c1f1
   --list-row-selected-fg-color: var(--adw-blue-5); // #1a5fb4
   --expander-content-bg-color: rgba(0,0,0,0.03);
-  --list-separator-color: rgba(0,0,0,0.07); // Subtle separator for light theme
+  --list-separator-color: rgba(0,0,0,0.12); // Aligned with Libadwaita 1.7 @list_row_separator_color (light)
 
   --entry-border-color: var(--adw-light-4, #c0bfbc); // Default border for standalone entries
   --entry-disabled-bg-color: rgba(0,0,0,0.04);
@@ -251,12 +251,12 @@
   --dialog-box-shadow: var(--dialog-box-shadow-dark);
   --dialog-backdrop-color: rgba(0, 0, 0, 0.4);
 
-  --list-row-hover-bg-color: rgba(255,255,255,0.06);
-  --list-row-active-bg-color: rgba(255,255,255,0.1);
+  --list-row-hover-bg-color: rgba(255,255,255,0.08); // Aligned with Libadwaita 1.7 @list_row_hovered_bg_color (dark)
+  --list-row-active-bg-color: rgba(255,255,255,0.1);  // Kept as slightly more prominent than hover
   --list-row-selected-bg-color: var(--adw-blue-5); // #1a5fb4
   --list-row-selected-fg-color: var(--adw-blue-1); // #99c1f1
   --expander-content-bg-color: rgba(255,255,255,0.03);
-  --list-separator-color: rgba(255,255,255,0.08); // Subtle separator for dark theme
+  --list-separator-color: rgba(255,255,255,0.12); // Aligned with Libadwaita 1.7 @list_row_separator_color (dark)
 
   --entry-border-color: var(--borders-color); // Default border for standalone entries (uses general dark border color)
   --entry-disabled-bg-color: rgba(255,255,255,0.04);
@@ -300,7 +300,12 @@
   --spacing-xl: 24px;
   --spacing-xxl: 36px;
 
+  // Default row paddings
+  --row-padding-vertical-default: var(--spacing-m); // Typically 12px
+  --row-padding-horizontal-default: var(--spacing-m); // Typically 12px
+
   --opacity-disabled: 0.5;
+  --icon-opacity: 0.6; // Default opacity for secondary icons like chevrons
   --opacity-hover: 0.8;
   --opacity-active: 0.6;
 
