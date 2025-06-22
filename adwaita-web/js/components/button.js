@@ -95,7 +95,7 @@ export class AdwButton extends HTMLElement {
         const styleLink = document.createElement('link');
         styleLink.rel = 'stylesheet';
         // Assuming Adw object will be available globally for config path
-        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
         this.shadowRoot.appendChild(styleLink);
     }
 

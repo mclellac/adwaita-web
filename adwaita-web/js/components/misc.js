@@ -53,7 +53,7 @@ export function createAdwLabel(text, options = {}) {
 
 export class AdwLabel extends HTMLElement {
     static get observedAttributes() { return ['for', 'title-level', 'body', 'caption', 'link', 'disabled']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); }
     connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
     _render() {
@@ -102,7 +102,7 @@ export function createAdwAvatar(options = {}) {
 }
 export class AdwAvatar extends HTMLElement {
     static get observedAttributes() { return ['size', 'image-src', 'text', 'alt']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); }
     connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
     _render() {
@@ -141,7 +141,7 @@ export function createAdwSpinner(options = {}) {
 }
 export class AdwSpinner extends HTMLElement {
     static get observedAttributes() { return ['size', 'active']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); this._spinnerElement = null; }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._spinnerElement = null; }
     connectedCallback() {
         // Default to active if not specified
         if (!this.hasAttribute('active')) {
@@ -223,7 +223,7 @@ export function createAdwStatusPage(options = {}) {
 }
 export class AdwStatusPage extends HTMLElement {
     static get observedAttributes() { return ['title', 'description', 'icon']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); }
     connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
     _render() {
@@ -264,7 +264,7 @@ export function createAdwProgressBar(options = {}) {
 }
 export class AdwProgressBar extends HTMLElement {
     static get observedAttributes() { return ['value', 'indeterminate', 'disabled']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); }
     connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
     _render() {
@@ -494,7 +494,7 @@ export class AdwBanner extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
         styleLink.rel = 'stylesheet';
-        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
         this.shadowRoot.appendChild(styleLink);
         this._bannerElement = null; // To hold the div.adw-banner
     }
@@ -570,7 +570,7 @@ export class AdwPreferencesView extends HTMLElement {
         this.attachShadow({mode:'open'});
         const styleLink = document.createElement('link');
         styleLink.rel='stylesheet';
-        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
         const slot = document.createElement('slot'); // This will project AdwPreferencesPage children
         this.shadowRoot.append(styleLink, slot);
         // AdwPreferencesView itself is a simple container.
@@ -582,7 +582,7 @@ export class AdwPreferencesPage extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({mode:'open'});
-        const styleLink = document.createElement('link'); styleLink.rel='stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        const styleLink = document.createElement('link'); styleLink.rel='stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
 
         this._wrapper = document.createElement('div');
         this._wrapper.classList.add('adw-preferences-page');
@@ -626,7 +626,7 @@ export class AdwPreferencesGroup extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({mode:'open'});
-        const styleLink = document.createElement('link'); styleLink.rel='stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        const styleLink = document.createElement('link'); styleLink.rel='stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
 
         this._wrapper = document.createElement('section');
         this._wrapper.classList.add('adw-preferences-group');
@@ -685,9 +685,25 @@ export class AdwPreferencesGroup extends HTMLElement {
 
 // --- AdwIcon ---
 const svgIconCache = new Map();
-// Path should be absolute from the web server root.
-// Assumes icons will be moved to app-demo/static/data/icons/
-const ICON_BASE_PATH = '/data/icons/symbolic/'; // Changed from /static/data/icons/symbolic/
+// Base path for icons. Configurable via Adw.config.iconBasePath.
+// Defaults to a path relative to where the main components.js might be (e.g., build/js/ -> ../data/icons/).
+// This allows it to work for index.html if Adw.config.iconBasePath is not set.
+function getIconBasePath() {
+    if (typeof Adw !== 'undefined' && Adw.config && Adw.config.iconBasePath) {
+        return Adw.config.iconBasePath.endsWith('/') ? Adw.config.iconBasePath : Adw.config.iconBasePath + '/';
+    }
+    // Default for when components.js is in build/js/ and icons in build/data/icons/
+    // Or if running from adwaita-web/js/ and icons in adwaita-web/data/icons/
+    // This might need adjustment based on actual script location vs icon location.
+    // A common pattern is assets (like icons) being one level up from JS, then into a data/icons dir.
+    // For the root index.html, if components.js is at 'build/js/components.js',
+    // then '../data/icons/symbolic/' would resolve to 'build/data/icons/symbolic/' from the HTML page's perspective.
+    // However, fetch is relative to the *document's URL* if the path doesn't start with '/'.
+    // If iconBasePath is not absolute, it should be relative to the HTML file.
+    // Let's default to a path that would work if index.html sets it.
+    // If not set, it will likely fail for complex setups, pushing users to configure it.
+    return 'build/data/icons/symbolic/'; // Default for root index.html if not configured
+}
 
 /**
  * Creates an Adwaita-style icon element by fetching and embedding an SVG.
@@ -720,10 +736,22 @@ export function createAdwIcon(iconName, options = {}) {
         iconContainer.setAttribute('aria-hidden', 'true');
     }
 
-    const iconPath = `${ICON_BASE_PATH}${iconName}.svg`;
+    const basePath = getIconBasePath();
+    const iconPath = `${basePath}${iconName}.svg`;
 
     if (svgIconCache.has(iconPath)) {
-        iconContainer.innerHTML = svgIconCache.get(iconPath);
+        const cachedSvg = svgIconCache.get(iconPath);
+        if (cachedSvg === 'error') { // Handle previously failed fetches
+            iconContainer.textContent = '⚠️';
+            iconContainer.setAttribute('aria-label', `Error loading icon: ${iconName}`);
+            iconContainer.classList.add('adw-icon-error');
+        } else {
+            iconContainer.innerHTML = cachedSvg;
+            const svgElement = iconContainer.querySelector('svg');
+            if (svgElement) {
+                svgElement.setAttribute('fill', 'currentColor');
+            }
+        }
     } else {
         fetch(iconPath)
             .then(response => {
@@ -743,14 +771,12 @@ export function createAdwIcon(iconName, options = {}) {
                 // or ensure paths don't have their own fill.
                 const svgElement = iconContainer.querySelector('svg');
                 if (svgElement) {
-                    svgElement.setAttribute('fill', 'currentColor'); // Good default for symbolic
-                    // Consider width/height if not set, or let CSS handle it
-                    // svgElement.setAttribute('width', '1em');
-                    // svgElement.setAttribute('height', '1em');
+                    svgElement.setAttribute('fill', 'currentColor');
                 }
             })
             .catch(error => {
-                console.error(`AdwIcon: ${error.message}`);
+                console.error(`AdwIcon: Fetching ${iconPath} - ${error.message}`);
+                svgIconCache.set(iconPath, 'error'); // Cache failure to avoid retrying constantly
                 iconContainer.textContent = '⚠️'; // Fallback character
                 iconContainer.setAttribute('aria-label', `Error loading icon: ${iconName}`);
                 iconContainer.classList.add('adw-icon-error');
