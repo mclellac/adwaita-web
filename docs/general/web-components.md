@@ -50,7 +50,7 @@ This means:
 
 Attributes on Web Components map to the options of their factory function counterparts. For example:
 
-*   `<adw-button suggested destructive text="Delete"></adw-button>`
+*   `<adw-button suggested destructive>Delete</adw-button>` (text is slotted content)
     corresponds to
     `Adw.createButton("Delete", { suggested: true, destructive: true })`.
 
@@ -103,9 +103,9 @@ Slots are a standard Web Component feature used for content projection. Adwaita-
 
 ```html
 <adw-header-bar>
-  <adw-button slot="start" icon="go-previous-symbolic"></adw-button>
+  <adw-button slot="start" icon-name="go-previous-symbolic" aria-label="Back"></adw-button>
   <h1 slot="title">My Application</h1>
-  <adw-button slot="end" icon="open-menu-symbolic"></adw-button>
+  <adw-button slot="end" icon-name="open-menu-symbolic" aria-label="Menu"></adw-button>
 </adw-header-bar>
 ```
 

@@ -25,18 +25,19 @@
     font-size: var(--font-size-h3);
     margin-bottom: var(--spacing-m);
     font-weight: bold;
-    color: var(--headerbar-fg-color);
+    color: var(--dialog-fg-color); // Changed to dialog's fg color
   }
 
   .adw-dialog-content {
     margin-bottom: var(--spacing-l);
-    // Consider line-height for readability if content is text-heavy
+    line-height: 1.6; // Added for better readability of text content
+    // Consider other typography improvements if needed globally
   }
 
   .adw-dialog-buttons {
     display: flex;
     justify-content: flex-end;
-    gap: var(--spacing-s);
+    gap: var(--spacing-m); // Increased gap for buttons
 
     .adw-button {
       margin-left: 0;

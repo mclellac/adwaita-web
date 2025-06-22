@@ -94,16 +94,20 @@
 
 // --- AdwExpanderRow ---
 .adw-expander-row-wrapper {
-  // This wrapper contains the clickable row and the collapsible content
-  // It might need listbox styling if used outside a listbox (e.g. border-bottom)
+  // This wrapper contains the clickable row and the collapsible content.
+  // If AdwExpanderRow is used as a direct child of AdwListBox (i.e., it *is* an AdwRow),
+  // this wrapper's border is redundant as AdwListBox handles row separation.
+  // If AdwExpanderRow can be a standalone component, this border is appropriate for that context.
   &:not(:last-child) {
-    border-bottom: var(--border-width, 1px) solid var(--border-color-light);
+    // This border is for standalone usage. Inside AdwListBox, it should not apply or be overridden.
+    border-bottom: var(--border-width, 1px) solid var(--borders-color);
   }
 }
-.dark-theme .adw-expander-row-wrapper:not(:last-child),
-body.dark-theme .adw-expander-row-wrapper:not(:last-child) {
-    border-bottom-color: var(--border-color-dark);
-}
+// Dark theme border for wrapper is handled by --borders-color if it's made theme-aware.
+// .dark-theme .adw-expander-row-wrapper:not(:last-child),
+// body.dark-theme .adw-expander-row-wrapper:not(:last-child) {
+//    border-bottom-color: var(--border-color-dark); // Should use --borders-color
+// }
 
 
 .adw-expander-row {
@@ -132,6 +136,8 @@ body.dark-theme .adw-expander-row-wrapper:not(:last-child) {
     transition: transform 0.15s ease-in-out;
     font-size: var(--font-size-large);
     opacity: 0.7;
+    // Consider using an SVG icon (e.g., 'pan-end-symbolic' or 'go-next-symbolic' rotated)
+    // for better Adwaita fidelity instead of a text chevron.
     &::after {
       content: "❯"; // Default: collapsed state
     }
@@ -197,6 +203,9 @@ body.dark-theme .adw-expander-row-content.expanded {
     background-color: var(--button-bg-color);
     color: var(--button-fg-color);
     min-width: 150px; // Ensure select has some width
+    // For true Adwaita look, this <select> would need significant custom styling
+    // to hide the native dropdown and mimic a GtkDropDown appearance (button-like with an arrow).
+    // The current styling provides basic theming for the native select.
 
     &:hover {
       background-color: var(--button-hover-bg-color);
@@ -208,17 +217,19 @@ body.dark-theme .adw-expander-row-content.expanded {
     &:disabled {
         opacity: var(--opacity-disabled, 0.5);
         cursor: not-allowed;
+        background-color: var(--button-disabled-bg-light); // Use disabled button bg
+        color: var(--button-disabled-fg-light); // Use disabled button fg
+        border-color: transparent; // Or a disabled border color
+        body.dark-theme & {
+            background-color: var(--button-disabled-bg-dark);
+            color: var(--button-disabled-fg-dark);
+        }
     }
   }
 }
 
-// Dark theme for ComboRow select (if not covered by button variables)
-.dark-theme .adw-combo-row .adw-combo-row-select,
-body.dark-theme .adw-combo-row .adw-combo-row-select {
-    border-color: var(--button-border-color);
-    background-color: var(--button-bg-color);
-    color: var(--button-fg-color);
-     &:hover {
-      background-color: var(--button-hover-bg-color);
-    }
-}
+// Dark theme for ComboRow select specific properties are handled by the variables now.
+// .dark-theme .adw-combo-row .adw-combo-row-select,
+// body.dark-theme .adw-combo-row .adw-combo-row-select {
+//    // Variables like --button-border-color, --button-bg-color should correctly switch
+// }

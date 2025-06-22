@@ -51,48 +51,48 @@
   --info-fg-color: var(--accent-blue-light-fg); // White fg
 
   // Base UI Colors from Libadwaita 1.5
-  --window-bg-color: var(--adw-light-1);          // #fafafa; @window_bg_color Light (Libadwaita uses #fafafa, adw-light-1 is #ffffff. Using #fafafa directly)
   --window-bg-color: #fafafa;                     // @window_bg_color Light
   --window-fg-color: rgba(0, 0, 0, 0.8);         // @window_fg_color Light
-  --view-bg-color: var(--adw-light-1);                       // #ffffff; @view_bg_color Light
+  --view-bg-color: #ffffff;                       // @view_bg_color Light
   --view-fg-color: rgba(0, 0, 0, 0.8);           // @view_fg_color Light
 
-  --headerbar-bg-color: var(--adw-light-2);       // #f6f5f4; @headerbar_bg_color Light
+  --headerbar-bg-color: #ffffff;                  // @headerbar_bg_color Light (Libadwaita 1.5)
   --headerbar-fg-color: rgba(0, 0, 0, 0.8);       // @headerbar_fg_color Light
-  --headerbar-border-color: var(--adw-light-4);   // #c0bfbc; @headerbar_border_color Light
+  --headerbar-border-color: rgba(0, 0, 0, 0.8);   // @headerbar_border_color Light (Libadwaita 1.5)
   --headerbar-backdrop-color: #fafafa;            // @headerbar_backdrop_color Light (alias of window_bg_color)
-  --headerbar-shade-color: rgba(0, 0, 0, 0.08);   // @headerbar_shade_color Light
+  --headerbar-shade-color: rgba(0, 0, 0, 0.12);   // @headerbar_shade_color Light (Libadwaita 1.5)
   --headerbar-darker-shade-color: rgba(0, 0, 0, 0.12); // @headerbar_darker_shade_color Light
 
-  --sidebar-bg-color: var(--adw-light-3);         // #deddda; @sidebar_bg_color Light
+  --sidebar-bg-color: #ebebeb;                    // @sidebar_bg_color Light (Libadwaita 1.5)
   --sidebar-fg-color: rgba(0, 0, 0, 0.8);         // @sidebar_fg_color Light
-  --sidebar-backdrop-color: var(--adw-light-2);   // #f6f5f4; @sidebar_backdrop_color Light
-  --sidebar-border-color: rgba(0, 0, 0, 0.1);     // @sidebar_border_color Light
-  --sidebar-shade-color: rgba(0, 0, 0, 0.08);     // @sidebar_shade_color Light
+  --sidebar-backdrop-color: #f2f2f2;              // @sidebar_backdrop_color Light (Libadwaita 1.5)
+  --sidebar-border-color: rgba(0, 0, 0, 0.07);    // @sidebar_border_color Light (Libadwaita 1.5)
+  --sidebar-shade-color: rgba(0, 0, 0, 0.07);     // @sidebar_shade_color Light (Libadwaita 1.5)
 
-  --secondary-sidebar-bg-color: var(--adw-light-2); // #f3f3f3 is close to #f6f5f4 (adw-light-2) / @sidebar_backdrop_color
+  --secondary-sidebar-bg-color: #f3f3f3;          // @secondary_sidebar_bg_color Light (Libadwaita 1.5)
   --secondary-sidebar-fg-color: rgba(0, 0, 0, 0.8); // @secondary_sidebar_fg_color Light
-  --secondary-sidebar-backdrop-color: var(--adw-light-2); // Was #f6f6f6, aligned to adw-light-2
+  --secondary-sidebar-backdrop-color: #f6f6f6;    // @secondary_sidebar_backdrop_color Light (Libadwaita 1.5)
   --secondary-sidebar-border-color: rgba(0, 0, 0, 0.07); // @secondary_sidebar_border_color Light
   --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.07);  // @secondary_sidebar_shade_color Light
 
-  --card-bg-color: var(--adw-light-1);            // #ffffff; @card_bg_color Light
+  --card-bg-color: #ffffff;                       // @card_bg_color Light
   --card-fg-color: rgba(0, 0, 0, 0.8);           // @card_fg_color Light
-  --card-shade-color: rgba(0, 0, 0, 0.06);        // @card_shade_color Light
+  --card-shade-color: rgba(0, 0, 0, 0.07);        // @card_shade_color Light (Libadwaita 1.5)
 
-  --popover-bg-color: var(--adw-light-1);         // #ffffff; @popover_bg_color Light
+  --popover-bg-color: #ffffff;                    // @popover_bg_color Light
   --popover-fg-color: rgba(0, 0, 0, 0.8);        // @popover_fg_color Light
-  --popover-shade-color: rgba(0, 0, 0, 0.06);     // @popover_shade_color Light
+  --popover-shade-color: rgba(0, 0, 0, 0.07);     // @popover_shade_color Light (Libadwaita 1.5)
 
   --dialog-bg-color: #fafafa;                     // @dialog_bg_color Light (same as window_bg_color)
   --dialog-fg-color: rgba(0, 0, 0, 0.8);         // @dialog_fg_color Light
 
-  --thumbnail-bg-color: var(--adw-light-1);       // #ffffff; @thumbnail_bg_color Light
+  --thumbnail-bg-color: #ffffff;                  // @thumbnail_bg_color Light
   --thumbnail-fg-color: rgba(0, 0, 0, 0.8);      // @thumbnail_fg_color Light
 
-  --borders-color: var(--adw-light-4);            // #c0bfbc; @borders Light
-  --shade-color: rgba(0, 0, 0, 0.06);             // @shade_color Light
-  --scrollbar-outline-color: var(--adw-light-1);  // #ffffff; @scrollbar_outline_color Light
+  // --borders-color: var(--adw-light-4); // #c0bfbc; @borders Light - Libadwaita uses alpha(currentColor, 0.15). Consider if fixed color is acceptable.
+  --borders-color: rgba(0,0,0,0.15); // Tentative: Using black with alpha, closer to Libadwaita's currentColor concept for light theme.
+  --shade-color: rgba(0, 0, 0, 0.07);             // @shade_color Light (Libadwaita 1.5)
+  --scrollbar-outline-color: #ffffff;  // @scrollbar_outline_color Light
 
   // Component-specific, kept from original if not directly covered by Libadwaita general colors
   --button-bg-color: var(--adw-light-2);
@@ -166,7 +166,7 @@
 
   // Warning State
   --warning-color: var(--adw-yellow-2);           // #f8e45c; @warning_color Dark
-  --warning-bg-color: var(--adw-yellow-5);        // #e5a50a; @warning_bg_color Dark (Libadwaita uses #e5a50a for dark warning bg)
+  --warning-bg-color: #cd9309;                    // @warning_bg_color Dark (Libadwaita 1.5)
   --warning-fg-color: rgba(0, 0, 0, 0.8);       // @warning_fg_color Dark
 
   // Error State
@@ -187,30 +187,30 @@
 
   --headerbar-bg-color: #303030;                  // @headerbar_bg_color Dark
   --headerbar-fg-color: var(--adw-light-1);       // #ffffff; @headerbar_fg_color Dark
-  --headerbar-border-color: rgba(255, 255, 255, 0.1); // @headerbar_border_color Dark
+  --headerbar-border-color: #ffffff;              // @headerbar_border_color Dark (Libadwaita 1.5)
   --headerbar-backdrop-color: var(--window-bg-color); // @headerbar_backdrop_color Dark (alias of window_bg_color)
-  --headerbar-shade-color: rgba(0, 0, 0, 0.3);    // @headerbar_shade_color Dark
-  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.6); // @headerbar_darker_shade_color Dark
+  --headerbar-shade-color: rgba(0, 0, 0, 0.36);   // @headerbar_shade_color Dark (Libadwaita 1.5)
+  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.9); // @headerbar_darker_shade_color Dark (Libadwaita 1.5)
 
-  --sidebar-bg-color: #2a2a2a;                    // @sidebar_bg_color Dark
+  --sidebar-bg-color: #303030;                    // @sidebar_bg_color Dark (Libadwaita 1.5)
   --sidebar-fg-color: var(--adw-light-1);         // #ffffff; @sidebar_fg_color Dark
-  --sidebar-backdrop-color: #242424;              // @sidebar_backdrop_color Dark
-  --sidebar-border-color: rgba(0, 0, 0, 0.25);    // @sidebar_border_color Dark
-  --sidebar-shade-color: rgba(0, 0, 0, 0.2);      // @sidebar_shade_color Dark
+  --sidebar-backdrop-color: #2a2a2a;              // @sidebar_backdrop_color Dark (Libadwaita 1.5)
+  --sidebar-border-color: rgba(0, 0, 0, 0.36);    // @sidebar_border_color Dark (Libadwaita 1.5)
+  --sidebar-shade-color: rgba(0, 0, 0, 0.25);     // @sidebar_shade_color Dark (Libadwaita 1.5)
 
-  --secondary-sidebar-bg-color: #242424;          // @secondary_sidebar_bg_color Dark (Same as @window_bg_color Dark)
+  --secondary-sidebar-bg-color: #2a2a2a;          // @secondary_sidebar_bg_color Dark (Libadwaita 1.5)
   --secondary-sidebar-fg-color: var(--adw-light-1); // #ffffff; @secondary_sidebar_fg_color Dark
-  --secondary-sidebar-backdrop-color: #1e1e1e;    // @secondary_sidebar_backdrop_color Dark (Same as @view_bg_color Dark)
-  --secondary-sidebar-border-color: rgba(0, 0, 0, 0.25); // @secondary_sidebar_border_color Dark
-  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.2);  // @secondary_sidebar_shade_color Dark
+  --secondary-sidebar-backdrop-color: #272727;    // @secondary_sidebar_backdrop_color Dark (Libadwaita 1.5)
+  --secondary-sidebar-border-color: rgba(0, 0, 0, 0.36); // @secondary_sidebar_border_color Dark (Libadwaita 1.5)
+  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.25);  // @secondary_sidebar_shade_color Dark (Libadwaita 1.5)
 
-  --card-bg-color: rgba(255, 255, 255, 0.05);     // @card_bg_color Dark
+  --card-bg-color: rgba(255, 255, 255, 0.08);     // @card_bg_color Dark (Libadwaita 1.5)
   --card-fg-color: var(--adw-light-1);            // #ffffff; @card_fg_color Dark
-  --card-shade-color: rgba(0, 0, 0, 0.3);         // @card_shade_color Dark
+  --card-shade-color: rgba(0, 0, 0, 0.36);        // @card_shade_color Dark (Libadwaita 1.5)
 
   --popover-bg-color: #383838;                    // @popover_bg_color Dark
   --popover-fg-color: var(--adw-light-1);         // #ffffff; @popover_fg_color Dark
-  --popover-shade-color: rgba(0, 0, 0, 0.2);      // @popover_shade_color Dark
+  --popover-shade-color: rgba(0, 0, 0, 0.25);     // @popover_shade_color Dark (Libadwaita 1.5)
 
   --dialog-bg-color: #383838;                     // @dialog_bg_color Dark
   --dialog-fg-color: var(--adw-light-1);          // #ffffff; @dialog_fg_color Dark
@@ -218,9 +218,10 @@
   --thumbnail-bg-color: #383838;                  // @thumbnail_bg_color Dark (Using popover/dialog bg as base)
   --thumbnail-fg-color: var(--adw-light-1);       // #ffffff; @thumbnail_fg_color Dark
 
-  --borders-color: rgba(255, 255, 255, 0.12);      // @borders Dark
-  --shade-color: rgba(0, 0, 0, 0.2);              // @shade_color Dark
-  --scrollbar-outline-color: rgba(0, 0, 0, 0.4);  // @scrollbar_outline_color Dark
+  // --borders-color: rgba(255, 255, 255, 0.12); // @borders Dark - Libadwaita uses alpha(currentColor, 0.15) or 0.5 for high contrast.
+  --borders-color: rgba(255,255,255,0.15); // Tentative: Using white with alpha for dark theme.
+  --shade-color: rgba(0, 0, 0, 0.25);             // @shade_color Dark (Libadwaita 1.5)
+  --scrollbar-outline-color: rgba(0, 0, 0, 0.5);  // @scrollbar_outline_color Dark (Libadwaita 1.5)
 
   // Component-specific, kept from original
   --button-bg-color: var(--adw-dark-2);           // #4a4a4a; Standard button background

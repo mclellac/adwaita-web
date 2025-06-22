@@ -3,7 +3,7 @@
 @use 'variables';
 
 .adw-list-box {
-  background-color: var(--view-bg-color); // Or --card-bg-color if used as a card
+  background-color: var(--card-bg-color); // Changed to --card-bg-color for boxed list appearance
   border: var(--border-width) solid var(--borders-color); // Use theme-aware --borders-color
   border-radius: var(--border-radius-default);
   overflow: hidden; // Ensures rows inside respect the border radius
@@ -12,7 +12,7 @@
     display: flex;
     align-items: center;
     padding: var(--spacing-m);
-    border-bottom: var(--border-width) solid var(--list-separator-color); // Use new variable
+    border-bottom: var(--border-width) solid var(--card-shade-color); // Changed to --card-shade-color for separators
     transition: background-color 0.1s ease-out, color 0.1s ease-out, outline-offset 0.1s ease-out;
     cursor: default; // Default cursor, change if rows are interactive
     outline-offset: -2px; // For focus outline to be inset
