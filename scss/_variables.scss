@@ -59,10 +59,10 @@
 
   --headerbar-bg-color: #ffffff;                  // @headerbar_bg_color Light (Libadwaita 1.5)
   --headerbar-fg-color: rgba(0, 0, 0, 0.8);       // @headerbar_fg_color Light
-  --headerbar-border-color: rgba(0, 0, 0, 0.8);   // @headerbar_border_color Light (Libadwaita 1.5)
+  --headerbar-border-color: var(--headerbar-shade-color);   // Default border uses shade color
   --headerbar-backdrop-color: #fafafa;            // @headerbar_backdrop_color Light (alias of window_bg_color)
-  --headerbar-shade-color: rgba(0, 0, 0, 0.12);   // @headerbar_shade_color Light (Libadwaita 1.5)
-  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.12); // @headerbar_darker_shade_color Light
+  --headerbar-shade-color: rgba(0, 0, 0, 0.12);   // @headerbar_shade_color Light (for default border)
+  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.20); // @headerbar_darker_shade_color Light (for scrolled border)
 
   --sidebar-bg-color: #ebebeb;                    // @sidebar_bg_color Light (Libadwaita 1.5)
   --sidebar-fg-color: rgba(0, 0, 0, 0.8);         // @sidebar_fg_color Light
@@ -140,9 +140,9 @@
   --disabled-fg-color: rgba(0,0,0,0.35); // General disabled foreground
 
   --switch-knob-bg-color: #ffffff;
-  --switch-slider-off-bg-color: rgba(0,0,0,0.15);
-  --switch-knob-disabled-bg-color: rgba(0,0,0,0.2);
-  --switch-slider-disabled-off-bg-color: rgba(0,0,0,0.1);
+  --switch-slider-off-bg-color: rgba(0,0,0,0.1); // Libadwaita: alpha(currentColor, 0.08)
+  --switch-knob-disabled-bg-color: var(--adw-light-2); // Whiter, flatter knob
+  --switch-slider-disabled-off-bg-color: rgba(0,0,0,0.06); // Slightly more subtle disabled slider
 }
 
 @mixin dark-theme {
@@ -189,10 +189,10 @@
 
   --headerbar-bg-color: #303030;                  // @headerbar_bg_color Dark
   --headerbar-fg-color: var(--adw-light-1);       // #ffffff; @headerbar_fg_color Dark
-  --headerbar-border-color: #ffffff;              // @headerbar_border_color Dark (Libadwaita 1.5)
+  --headerbar-border-color: var(--headerbar-shade-color);              // Default border uses shade color
   --headerbar-backdrop-color: var(--window-bg-color); // @headerbar_backdrop_color Dark (alias of window_bg_color)
-  --headerbar-shade-color: rgba(0, 0, 0, 0.36);   // @headerbar_shade_color Dark (Libadwaita 1.5)
-  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.9); // @headerbar_darker_shade_color Dark (Libadwaita 1.5)
+  --headerbar-shade-color: rgba(0, 0, 0, 0.25);   // @headerbar_shade_color Dark (for default border, aligned with general shade)
+  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.35); // @headerbar_darker_shade_color Dark (for scrolled border)
 
   --sidebar-bg-color: #303030;                    // @sidebar_bg_color Dark (Libadwaita 1.5)
   --sidebar-fg-color: var(--adw-light-1);         // #ffffff; @sidebar_fg_color Dark
@@ -272,9 +272,9 @@
   --disabled-fg-color: rgba(255,255,255,0.35); // General disabled foreground
 
   --switch-knob-bg-color: #ffffff;
-  --switch-slider-off-bg-color: rgba(255,255,255,0.15);
-  --switch-knob-disabled-bg-color: rgba(255,255,255,0.2);
-  --switch-slider-disabled-off-bg-color: rgba(255,255,255,0.1);
+  --switch-slider-off-bg-color: rgba(255,255,255,0.1); // Libadwaita: alpha(currentColor, 0.12)
+  --switch-knob-disabled-bg-color: var(--adw-dark-1); // Darker grey knob
+  --switch-slider-disabled-off-bg-color: rgba(255,255,255,0.08); // Slightly more subtle disabled slider
 }
 
 // Helper Variables (inspired by libadwaita, but not direct libadwaita variables)
@@ -320,6 +320,16 @@
   --popover-box-shadow-dark: 0 1px 2px 0 rgba(0,0,0,0.25), 0 2px 8px 0 rgba(0,0,0,0.25);
   --dialog-box-shadow-light: 0 4px 8px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.1);
   --dialog-box-shadow-dark: 0 3px 9px rgba(0,0,0,0.5); // A bit more pronounced for dark themes
+
+  // Alert Dialog specific
+  --alert-dialog-text-max-width: 40ch; // Max width for body text in alert dialogs
+
+  // Preferences Dialog specific
+  --preferences-dialog-min-width: 600px;
+  --preferences-dialog-min-height: 450px;
+  --preferences-dialog-max-width: 800px;
+  --preferences-page-description-max-width: 60ch;
+  --preferences-group-description-max-width: 70ch;
 
   // Border Color (general fallback if not specified by component)
   --border-color-light: rgba(0, 0, 0, 0.12);

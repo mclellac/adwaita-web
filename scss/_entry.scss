@@ -8,15 +8,15 @@
   --_entry-border-color: var(--entry-border-color, var(--borders-color)); // Default to general borders-color
   --_entry-background-color: var(--entry-background-color, var(--view-bg-color));
   --_entry-box-shadow: var(--entry-box-shadow, inset 0 1px 1px var(--entry-inset-shadow-light));
-  --_entry-focus-border-color: var(--entry-focus-border-color, var(--accent-color));
-  --_entry-focus-box-shadow: var(--entry-focus-box-shadow, 0 0 0 1px var(--accent-color));
+  --_entry-focus-border-color: var(--entry-focus-border-color, var(--accent-color)); // Color of border on focus
+  --_entry-focus-box-shadow-ring: var(--entry-focus-box-shadow-ring, 0 0 0 2px var(--accent-color)); // Default 2px accent ring
 
 
   padding: var(--_entry-padding-vertical) var(--_entry-padding-horizontal);
   border-width: var(--_entry-border-width);
   border-style: solid;
   border-color: var(--_entry-border-color);
-  border-radius: var(--border-radius-default); // Changed to 6px default
+  border-radius: var(--border-radius-medium); // Default to 4px, common for entries
   background-color: var(--_entry-background-color);
   color: var(--view-fg-color);
   font-size: var(--font-size-base);
@@ -33,7 +33,6 @@
   &:focus-within {
     outline: none;
     border-color: var(--_entry-focus-border-color);
-    box-shadow: var(--_entry-focus-box-shadow);
     // Special handling for combined inset shadow + focus shadow for standalone entries
     // If --_entry-focus-box-shadow is the accent ring, and --_entry-box-shadow is the inset, they combine.
     // This logic might need refinement if --entry-focus-box-shadow completely replaces the inset.
@@ -56,7 +55,6 @@
     // box-shadow should be: var(--_entry-box-shadow), var(--_entry-focus-box-shadow-ring); (if ring is separate)
     // Original: box-shadow: inset ..., 0 0 0 1px var(--accent-color);
     // Let's refine the default focus shadow variable to be just the ring part.
-    --_entry-focus-box-shadow-ring: var(--entry-focus-box-shadow-ring, 0 0 0 1px var(--accent-color));
     box-shadow: var(--_entry-box-shadow), var(--_entry-focus-box-shadow-ring);
 
     body.dark-theme & {

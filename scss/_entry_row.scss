@@ -12,6 +12,8 @@
   // The JS for AdwEntryRow creates a div with .adw-row and .adw-entry-row
   @include mixins.row-base; // Applies common row styles like min-height, padding
   gap: var(--spacing-m); // Standard gap between elements in a row
+  padding-top: var(--spacing-s);    // Override default vertical padding from row-base (9px)
+  padding-bottom: var(--spacing-s); // Override default vertical padding from row-base (9px)
 
   // Container for title and optional subtitle (matches JS structure: .adw-entry-row-text-content)
   .adw-entry-row-text-content {
@@ -61,8 +63,8 @@
     &:focus-within { // If AdwEntry has internal input
       // Standard Adwaita focus for entries in rows: accent colored bottom border
       --entry-border-color: var(--accent-color); // This will be used by --_entry-focus-border-color in _entry.scss
-      --entry-border-width: 0 0 2px 0; // Bottom border only for the main border
-      --entry-background-color: var(--view-bg-color); // Slight background change on focus (or keep transparent if preferred)
+      --entry-border-width: 0 0 2px 0;           // Bottom border only for the main border (2px is standard for focus)
+      --entry-background-color: transparent;     // Keep transparent background on focus for integrated look
       --entry-box-shadow: none; // Ensure no other shadows are present
       --entry-focus-box-shadow-ring: none; // Explicitly disable the outer focus ring for integrated entries
     }

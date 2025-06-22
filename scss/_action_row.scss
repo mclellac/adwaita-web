@@ -7,6 +7,8 @@
   // The AdwActionRow web component's shadow DOM root has .adw-action-row,
   // so we apply row-base styles here.
   @include mixins.row-base; // Applies common row styles like min-height, padding, border-bottom
+  padding-top: var(--spacing-s);    // Override default vertical padding from row-base for ActionRow (9px)
+  padding-bottom: var(--spacing-s); // Override default vertical padding from row-base for ActionRow (9px)
   // background-color: var(--card-bg-color); // This was in old version. Rows usually take listbox bg.
                                          // If used standalone on a card, card provides bg.
                                          // If within a listbox on a card, listbox provides bg.
@@ -73,7 +75,7 @@
 
   .adw-action-row-title { // This is "label.title"
     font-size: var(--font-size-base);
-    color: var(--primary-fg-color); // Use primary text color for titles
+    color: var(--window-fg-color); // Use window/view foreground color for titles
     font-weight: normal; // Standard Adwaita row titles are normal weight
     white-space: nowrap;
     overflow: hidden;
