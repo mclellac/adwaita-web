@@ -483,26 +483,19 @@ def create_app(config_overrides=None):
             current_user.full_name = form.full_name.data
             current_user.location = form.location.data
             current_user.website_url = form.website_url.data
-            _app.logger.info(f"User {current_user.username} updating profile_info, full_name, location, website_url.")
+            current_user.is_profile_public = form.is_profile_public.data
+            _app.logger.info(f"User {current_user.username} updating profile_info, full_name, location, website_url, is_profile_public.")
 
-            file = form.profile_photo.data # This is a FileStorage object
+            file = form.profile_photo.data
             _app.logger.info(f"Profile edit: form.profile_photo.data is of type: {type(file)}")
 
-            if file is not None: # Check if FileStorage object exists
-                _app.logger.info(f"Profile edit: FileStorage object received: {file}")
-                _app.logger.info(f"Profile edit: FileStorage object's filename attribute: '{file.filename}'") # This is key
-            else:
-                # This case should ideally not happen if the field is in the form,
-                # even if no file is selected, 'file' should be a FileStorage obj with empty filename.
-                # But good to log if it's truly None.
-                _app.logger.warning("Profile edit: form.profile_photo.data is None. This is unexpected.")
+            photo_update_attempted = False
+            photo_saved_successfully = False
 
-
-            if file and file.filename: # This is the crucial check: FileStorage exists AND has a non-empty filename
+            if file and file.filename:
+                photo_update_attempted = True
                 _app.logger.info(f"Profile edit: Proceeding to process file: '{file.filename}'")
-                is_allowed = allowed_file(file.filename)
-                _app.logger.info(f"Profile edit: File '{file.filename}' allowed: {is_allowed}")
-                if is_allowed:
+                if allowed_file(file.filename):
                     try:
                         original_filename = secure_filename(file.filename)
                         ext = original_filename.rsplit('.', 1)[-1].lower()
@@ -510,16 +503,45 @@ def create_app(config_overrides=None):
                         upload_folder_path = _app.config['UPLOAD_FOLDER']
                         save_path = os.path.join(upload_folder_path, unique_filename)
                         os.makedirs(upload_folder_path, exist_ok=True)
+
                         img = Image.open(file.stream)
+
+                        # --- Cropping Logic ---
+                        crop_x_str = request.form.get('crop_x')
+                        crop_y_str = request.form.get('crop_y')
+                        crop_width_str = request.form.get('crop_width')
+                        crop_height_str = request.form.get('crop_height')
+
+                        if crop_x_str and crop_y_str and crop_width_str and crop_height_str:
+                            try:
+                                # Convert to float first for flexibility, then int for Pillow
+                                crop_x = int(float(crop_x_str))
+                                crop_y = int(float(crop_y_str))
+                                crop_width = int(float(crop_width_str))
+                                crop_height = int(float(crop_height_str))
+
+                                # Ensure crop dimensions are positive
+                                if crop_width > 0 and crop_height > 0:
+                                    _app.logger.info(f"Attempting to crop image with coords: X={crop_x}, Y={crop_y}, W={crop_width}, H={crop_height}")
+                                    img = img.crop((crop_x, crop_y, crop_x + crop_width, crop_y + crop_height))
+                                else:
+                                    _app.logger.warning("Invalid crop dimensions (width/height <=0). Skipping crop.")
+                            except ValueError:
+                                _app.logger.warning("Could not parse crop coordinates. Skipping crop.")
+                        else:
+                            _app.logger.info("Crop coordinates not provided or incomplete. Skipping crop.")
+                        # --- End Cropping Logic ---
+
                         img.thumbnail((200, 200))
                         img.save(save_path)
+
                         relative_path = os.path.join('uploads/profile_pics', unique_filename)
                         current_user.profile_photo_url = relative_path
+                        photo_saved_successfully = True
                         _app.logger.info(f"Resized and saved image to '{save_path}' for user {current_user.username}. Relative path: {relative_path}")
-                        flash('Profile photo updated successfully!', 'success')
                     except Exception as e:
-                        _app.logger.error(f"Error uploading profile photo for user {current_user.username}: {e}", exc_info=True)
-                        flash(f'Error uploading profile photo: {e}', 'danger')
+                        _app.logger.error(f"Error processing profile photo for user {current_user.username}: {e}", exc_info=True)
+                        flash(f'Error processing profile photo: {e}', 'danger')
                 else:
                     _app.logger.warning(f"Profile photo upload failed for user {current_user.username}: File type not allowed. Filename: '{file.filename}'")
                     flash('Invalid file type for photo. Allowed types are png, jpg, jpeg, gif.', 'warning')
@@ -527,22 +549,18 @@ def create_app(config_overrides=None):
             try:
                 db.session.commit()
                 _app.logger.info(f"Profile changes for {current_user.username} committed to DB.")
-                # Simplified flash logic:
-                if file and file.filename:
-                    if current_user.profile_photo_url and allowed_file(file.filename): # Photo was processed and URL is likely set
+                if photo_update_attempted:
+                    if photo_saved_successfully:
                         flash('Profile and photo updated successfully!', 'success')
-                    elif not allowed_file(file.filename):
-                        # This case is already handled by a flash message when checking allowed_file earlier
-                        # but as a fallback or if logic changes, it's here.
-                        flash('Profile updated, but photo was not saved (invalid file type).', 'warning')
-                    else: # Photo was provided, but URL wasn't set for some other reason
-                        flash('Profile updated, but there was an issue saving the photo.', 'warning')
-                else: # No file uploaded or filename was empty
+                    else:
+                        flash('Profile information updated, but there was an issue with the photo upload.', 'warning')
+                else:
                     flash('Profile updated successfully!', 'success')
             except Exception as e:
                 db.session.rollback()
                 _app.logger.error(f"Error committing profile changes for user {current_user.username}: {e}", exc_info=True)
                 flash(f'Error saving profile changes: {e}', 'danger')
+
             return redirect(url_for('profile', username=current_user.username))
 
         elif request.method == 'POST':
