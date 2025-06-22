@@ -129,8 +129,8 @@ export class AdwEntry extends HTMLElement {
 
         this._inputElement.placeholder = this.getAttribute('placeholder') || '';
         const valueAttr = this.getAttribute('value');
-        // Use _initialValue for the very first render if value attribute not set, then valueAttr
-        const initialRenderValue = (valueAttr === null && oldValue === null) ? this._initialValue : (valueAttr === null ? '' : valueAttr);
+        // If value attribute is explicitly set, use it. Otherwise, use the stored _initialValue.
+        const initialRenderValue = (valueAttr !== null) ? valueAttr : this._initialValue;
 
         if (this._inputElement.value !== initialRenderValue) {
             this._inputElement.value = initialRenderValue;
