@@ -964,11 +964,11 @@ if (accentPickerBox) {
                 navViewPopButton?.addEventListener('click', () => navView.pop());
 
                 navView.addEventListener('pushed', (e) => {
-                    Adw.createToast(\`Pushed: \${e.detail.pageName}\`);
+                    Adw.createToast('Pushed: ' + e.detail.pageName);
                     updateNavViewPopButtonState();
                 });
                 navView.addEventListener('popped', (e) => {
-                    Adw.createToast(\`Popped: \${e.detail.pageName}\`);
+                    Adw.createToast('Popped: ' + e.detail.pageName);
                     updateNavViewPopButtonState();
                 });
                 updateNavViewPopButtonState(); // Initial state
