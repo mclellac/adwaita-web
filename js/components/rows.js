@@ -289,8 +289,14 @@ export class AdwEntryRow extends HTMLElement {
         // If _internalEntry exists, update it or the row's elements directly
         switch (name) {
             case 'value':
-                if (this._internalEntry.value !== newValue) {
-                    this._internalEntry.value = newValue === null ? '' : newValue;
+                // Ensure the internal AdwEntry's 'value' attribute is updated,
+                // which will then trigger AdwEntry's own logic to call setFormValue.
+                if (this._internalEntry.getAttribute('value') !== newValue) {
+                    if (newValue === null) {
+                        this._internalEntry.removeAttribute('value');
+                    } else {
+                        this._internalEntry.setAttribute('value', newValue);
+                    }
                 }
                 break;
             case 'placeholder':
