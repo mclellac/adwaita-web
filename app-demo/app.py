@@ -441,8 +441,17 @@ def create_app(config_overrides=None):
             _app.logger.info(f"User {current_user.username} updating profile_info, full_name, location, website_url.")
 
             file = form.profile_photo.data
+            _app.logger.info(f"Profile edit: form.profile_photo.data object: {type(file)}")
+            if file:
+                 _app.logger.info(f"Profile edit: file object received: {file}, filename: '{file.filename}'")
+            else:
+                _app.logger.info("Profile edit: No file object received in form.profile_photo.data.")
+
             if file and file.filename:
-                if allowed_file(file.filename):
+                _app.logger.info(f"Profile edit: Attempting to process file: '{file.filename}'")
+                is_allowed = allowed_file(file.filename)
+                _app.logger.info(f"Profile edit: File '{file.filename}' allowed: {is_allowed}")
+                if is_allowed:
                     try:
                         original_filename = secure_filename(file.filename)
                         ext = original_filename.rsplit('.', 1)[-1].lower()
