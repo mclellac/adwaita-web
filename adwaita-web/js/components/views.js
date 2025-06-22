@@ -401,7 +401,7 @@ export function createAdwCarousel(options = {}) {
             onClick: () => { goToSlide(currentIndex - 1); resetAutoplay(); },
             isCircular: true,
             flat: true,
-            ariaLabel: 'Previous slide'
+            ariaLabel: 'Previous slide' // This was already correct
         });
         prevButton.classList.add('adw-carousel-nav-button', 'prev');
         carousel.appendChild(prevButton);
@@ -411,7 +411,7 @@ export function createAdwCarousel(options = {}) {
             onClick: () => { goToSlide(currentIndex + 1); resetAutoplay(); },
             isCircular: true,
             flat: true,
-            ariaLabel: 'Next slide'
+            ariaLabel: 'Next slide' // This was also already correct
         });
         nextButton.classList.add('adw-carousel-nav-button', 'next');
         carousel.appendChild(nextButton);
