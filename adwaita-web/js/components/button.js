@@ -236,24 +236,25 @@ export class AdwButton extends HTMLElement {
                 internalButton.href = safeHref;
             } else {
                 console.warn(`AdwButton WC: Blocked potentially unsafe href: ${href}`);
-                internalButton.href = "#";
+                internalButton.href = "#"; // Fallback to a safe href
             }
             if (this.hasAttribute('disabled')) {
-                internalButton.classList.add("disabled");
+                internalButton.classList.add("disabled"); // Visual styling for disabled link
                 internalButton.setAttribute("aria-disabled", "true");
-                internalButton.removeAttribute("href");
+                internalButton.removeAttribute("href"); // Links cannot be truly disabled by attribute alone
+                internalButton.addEventListener('click', e => e.preventDefault()); // Prevent navigation
             }
         } else { // It's a <button>
             if (this.hasAttribute('disabled')) {
                 internalButton.setAttribute("disabled", "");
+                // aria-disabled is implicit for button[disabled], but explicit doesn't hurt.
                 internalButton.setAttribute("aria-disabled", "true");
             }
-            // Handle button type (submit, reset, button)
             const buttonType = this.getAttribute('type');
             if (buttonType && ['submit', 'reset', 'button'].includes(buttonType)) {
                  internalButton.setAttribute('type', buttonType);
             } else {
-                 internalButton.setAttribute('type', 'button'); // Default for <button>
+                 internalButton.setAttribute('type', 'button');
             }
         }
 
@@ -264,9 +265,6 @@ export class AdwButton extends HTMLElement {
         if (this.hasAttribute('active')) internalButton.classList.add("active");
         if (this.hasAttribute('circular')) {
             internalButton.classList.add("circular");
-            // If circular, and icon is present, and slot is empty (no text), remove slot for better centering.
-            // This check requires knowing if the default slot has assigned nodes.
-            // For simplicity, we assume if 'circular' and 'icon' are present, text is usually omitted by user.
         }
 
         const appearance = this.getAttribute('appearance');
@@ -274,21 +272,21 @@ export class AdwButton extends HTMLElement {
             internalButton.classList.add(appearance);
         }
 
-        if (internalButton.classList.contains('circular') &&
-            !internalButton.getAttribute('aria-label') &&
-            !internalButton.getAttribute('aria-labelledby') &&
-            !this.getAttribute('title')) {
+        // Warning check: uses hostAriaLabel and hostTitle which were read from this (host) attributes.
+        if (isEffectivelyIconOnly &&
+            !hostAriaLabel &&
+            !this.getAttribute('aria-labelledby') && // Still check host for labelledby
+            !hostTitle) {
 
             let iconInfo = 'unspecified icon';
-            const iconNameAttr = this.getAttribute('icon-name'); // Re-fetch for message
-            const iconAttr = this.getAttribute('icon'); // Re-fetch for message
-
+            // iconNameAttr and iconAttr are already defined earlier in this function.
             if (iconNameAttr) {
                 iconInfo = `icon-name: "${iconNameAttr}"`;
             } else if (iconAttr) {
                 iconInfo = `icon attribute (deprecated): "${iconAttr.substring(0,30)}"`;
             }
-            console.warn(`AdwButton WC: Circular (icon-only) button created without an accessible name (aria-label, aria-labelledby, or title). ${iconInfo}`, this);
+            // The warning is about the host <adw-button> lacking an accessible name.
+            console.warn(`AdwButton WC: Icon-only button created without an accessible name on the host element (aria-label, aria-labelledby, or title). ${iconInfo}`, this);
         }
 
         this.shadowRoot.appendChild(internalButton);
