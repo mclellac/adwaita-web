@@ -498,7 +498,7 @@ export class AdwNavigationSplitView extends HTMLElement {
             showSidebar: !this.hasAttribute('show-sidebar') || this.getAttribute('show-sidebar') !== 'false',
             canCollapse: !this.hasAttribute('can-collapse') || this.getAttribute('can-collapse') !== 'false',
             collapseThreshold: this.hasAttribute('collapse-threshold') ? parseInt(this.getAttribute('collapse-threshold'), 10) : 768,
-            sidebarWidth: this.getAttribute('sidebar-width') || "300px",
+            sidebarWidth: this.getAttribute('sidebar-width') || "300px" // Removed trailing comma
         };
         const factory = (typeof Adw !== 'undefined' && Adw.createNavigationSplitView) ? Adw.createNavigationSplitView : createAdwNavigationSplitView;
         this._splitViewInstance = factory(options);
@@ -533,7 +533,7 @@ export function createAdwOverlaySplitView(options = {}) {
 export class AdwOverlaySplitView extends HTMLElement {
     static get observedAttributes() { return ['show-sidebar', 'can-collapse', 'sidebar-position', 'sidebar-width']; }
     constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._splitViewInstance = null; this._slotObserver = null; }
-    connectedCallback() { this._render(); this._observer = new MutationObserver((mutations) => { let needsReRender = false; for (const mutation of mutations) if (mutation.type === 'childList') { const relevantNodes = [...Array.from(mutation.addedNodes), ...Array.from(mutation.removedNodes)]; if (relevantNodes.some(node => (node.nodeType === Node.ELEMENT_NODE && (node.slot === 'sidebar' || node.slot === 'content')) || !node.slot)) { needsReRender = true; break; }} if (needsReRender) this._render(); }); this._observer.observe(this, { childList: true, subtree: false });}
+    connectedCallback() { this._render(); this._observer = new MutationObserver((mutations) => { let needsReRender = false; for (const mutation of mutations) if (mutation.type === 'childList') { const relevantNodes = Array.from(mutation.addedNodes).concat(Array.from(mutation.removedNodes)); if (relevantNodes.some(node => (node.nodeType === Node.ELEMENT_NODE && (node.slot === 'sidebar' || node.slot === 'content')) || !node.slot)) { needsReRender = true; break; }} if (needsReRender) this._render(); }); this._observer.observe(this, { childList: true, subtree: false });}
     disconnectedCallback() { if(this._observer) this._observer.disconnect(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
     _getSlottedContent(slotName) { const slotted = this.querySelector(`:scope > [slot="${slotName}"]`); return slotted ? slotted.cloneNode(true) : document.createElement('div'); }
