@@ -19,10 +19,23 @@ import * as bottomSheet from './components/bottom_sheet.js'; // Import AdwBottom
 // Theme and Accent functions are in utils, already exported from there.
 // adwGenerateId is also in utils.
 
-const Adw = {
-    config: {
-        cssPath: '/static/css/adwaita-web.css' // Default path, can be overridden by user
-    },
+// Ensure Adw and Adw.config objects exist, then merge in defaults.
+window.Adw = window.Adw || {};
+window.Adw.config = window.Adw.config || {};
+
+const defaultConfig = {
+    cssPath: '/static/css/adwaita-web.css', // This will only be used if not set by user HTML
+    iconBasePath: '/data/icons/symbolic/' // Default for icons if not set by user.
+};
+
+// Merge defaults without overwriting existing values provided by user (e.g., in index.html)
+for (const key in defaultConfig) {
+    if (window.Adw.config[key] === undefined) {
+        window.Adw.config[key] = defaultConfig[key];
+    }
+}
+
+const AdwProperties = { // Renamed to avoid conflict with global Adw during construction
     // Utilities
     adwGenerateId: utils.adwGenerateId,
     toggleTheme: utils.toggleTheme,
@@ -145,73 +158,86 @@ const Adw = {
     BottomSheet: bottomSheet.AdwBottomSheet,
 };
 
-// Make Adw global for now, for compatibility with existing HTML and adw-initializer.js
-window.Adw = Adw;
+// Merge other Adw properties into window.Adw, being careful not to overwrite config again
+for (const key in AdwProperties) {
+    // No need to check for 'config' here as AdwProperties doesn't have it.
+    window.Adw[key] = AdwProperties[key];
+}
+
+// Ensure Adw.config is part of the final window.Adw if it somehow got detached.
+// This is belt-and-suspenders; the initial window.Adw.config setup should be sufficient.
+if (!window.Adw.config) {
+    // This case should ideally not be hit if index.html and the top part of this script run correctly.
+    console.warn("Adw.config was unexpectedly missing, re-applying defaults.");
+    window.Adw.config = defaultConfig;
+}
+
 
 // Define all custom elements
+// Use window.Adw directly now as it's fully populated.
 if (typeof customElements !== 'undefined') {
     // From button.js
-    if (!customElements.get('adw-button')) customElements.define('adw-button', Adw.Button);
+    if (!customElements.get('adw-button')) customElements.define('adw-button', window.Adw.Button);
     // From header_bar.js
-    if (!customElements.get('adw-header-bar')) customElements.define('adw-header-bar', Adw.HeaderBar);
-    if (!customElements.get('adw-window-title')) customElements.define('adw-window-title', Adw.WindowTitle);
+    if (!customElements.get('adw-header-bar')) customElements.define('adw-header-bar', window.Adw.HeaderBar);
+    if (!customElements.get('adw-window-title')) customElements.define('adw-window-title', window.Adw.WindowTitle);
     // From dialog.js
-    if (!customElements.get('adw-dialog')) customElements.define('adw-dialog', Adw.Dialog);
-    if (!customElements.get('adw-alert-dialog')) customElements.define('adw-alert-dialog', Adw.AlertDialog);
-    if (!customElements.get('adw-about-dialog')) customElements.define('adw-about-dialog', Adw.AboutDialog);
-    if (!customElements.get('adw-preferences-dialog')) customElements.define('adw-preferences-dialog', Adw.PreferencesDialog);
+    if (!customElements.get('adw-dialog')) customElements.define('adw-dialog', window.Adw.Dialog);
+    if (!customElements.get('adw-alert-dialog')) customElements.define('adw-alert-dialog', window.Adw.AlertDialog);
+    if (!customElements.get('adw-about-dialog')) customElements.define('adw-about-dialog', window.Adw.AboutDialog);
+    if (!customElements.get('adw-preferences-dialog')) customElements.define('adw-preferences-dialog', window.Adw.PreferencesDialog);
     // From forms.js
-    if (!customElements.get('adw-entry')) customElements.define('adw-entry', Adw.Entry);
-    if (!customElements.get('adw-spin-button')) customElements.define('adw-spin-button', Adw.SpinButton);
+    if (!customElements.get('adw-entry')) customElements.define('adw-entry', window.Adw.Entry);
+    if (!customElements.get('adw-spin-button')) customElements.define('adw-spin-button', window.Adw.SpinButton);
     // From rows.js
-    if (!customElements.get('adw-row')) customElements.define('adw-row', Adw.Row);
-    if (!customElements.get('adw-action-row')) customElements.define('adw-action-row', Adw.ActionRow);
-    if (!customElements.get('adw-entry-row')) customElements.define('adw-entry-row', Adw.EntryRow);
-    if (!customElements.get('adw-password-entry-row')) customElements.define('adw-password-entry-row', Adw.PasswordEntryRow);
-    if (!customElements.get('adw-expander-row')) customElements.define('adw-expander-row', Adw.ExpanderRow);
-    if (!customElements.get('adw-combo-row')) customElements.define('adw-combo-row', Adw.ComboRow);
-    if (!customElements.get('adw-spin-row')) customElements.define('adw-spin-row', Adw.SpinRow);
-    if (!customElements.get('adw-button-row')) customElements.define('adw-button-row', Adw.ButtonRow);
+    if (!customElements.get('adw-row')) customElements.define('adw-row', window.Adw.Row);
+    if (!customElements.get('adw-action-row')) customElements.define('adw-action-row', window.Adw.ActionRow);
+    if (!customElements.get('adw-entry-row')) customElements.define('adw-entry-row', window.Adw.EntryRow);
+    if (!customElements.get('adw-password-entry-row')) customElements.define('adw-password-entry-row', window.Adw.PasswordEntryRow);
+    if (!customElements.get('adw-expander-row')) customElements.define('adw-expander-row', window.Adw.ExpanderRow);
+    if (!customElements.get('adw-combo-row')) customElements.define('adw-combo-row', window.Adw.ComboRow);
+    if (!customElements.get('adw-spin-row')) customElements.define('adw-spin-row', window.Adw.SpinRow);
+    if (!customElements.get('adw-button-row')) customElements.define('adw-button-row', window.Adw.ButtonRow);
     // From misc.js
-    if (!customElements.get('adw-label')) customElements.define('adw-label', Adw.Label);
-    if (!customElements.get('adw-avatar')) customElements.define('adw-avatar', Adw.Avatar);
-    if (!customElements.get('adw-spinner')) customElements.define('adw-spinner', Adw.Spinner);
-    if (!customElements.get('adw-status-page')) customElements.define('adw-status-page', Adw.StatusPage);
-    if (!customElements.get('adw-progress-bar')) customElements.define('adw-progress-bar', Adw.ProgressBar);
-    if (!customElements.get('adw-toast')) customElements.define('adw-toast', Adw.Toast);
-    if (!customElements.get('adw-banner')) customElements.define('adw-banner', Adw.Banner);
-    if (!customElements.get('adw-preferences-view')) customElements.define('adw-preferences-view', Adw.PreferencesView);
-    if (!customElements.get('adw-preferences-page')) customElements.define('adw-preferences-page', Adw.PreferencesPage);
-    if (!customElements.get('adw-preferences-group')) customElements.define('adw-preferences-group', Adw.PreferencesGroup);
-    if (!customElements.get('adw-icon')) customElements.define('adw-icon', Adw.Icon); // Register AdwIcon
+    if (!customElements.get('adw-label')) customElements.define('adw-label', window.Adw.Label);
+    if (!customElements.get('adw-avatar')) customElements.define('adw-avatar', window.Adw.Avatar);
+    if (!customElements.get('adw-spinner')) customElements.define('adw-spinner', window.Adw.Spinner);
+    if (!customElements.get('adw-status-page')) customElements.define('adw-status-page', window.Adw.StatusPage);
+    if (!customElements.get('adw-progress-bar')) customElements.define('adw-progress-bar', window.Adw.ProgressBar);
+    if (!customElements.get('adw-toast')) customElements.define('adw-toast', window.Adw.Toast);
+    if (!customElements.get('adw-banner')) customElements.define('adw-banner', window.Adw.Banner);
+    if (!customElements.get('adw-preferences-view')) customElements.define('adw-preferences-view', window.Adw.PreferencesView);
+    if (!customElements.get('adw-preferences-page')) customElements.define('adw-preferences-page', window.Adw.PreferencesPage);
+    if (!customElements.get('adw-preferences-group')) customElements.define('adw-preferences-group', window.Adw.PreferencesGroup);
+    if (!customElements.get('adw-icon')) customElements.define('adw-icon', window.Adw.Icon); // Register AdwIcon
     // From controls.js
-    if (!customElements.get('adw-switch')) customElements.define('adw-switch', Adw.Switch);
-    if (!customElements.get('adw-checkbox')) customElements.define('adw-checkbox', Adw.Checkbox);
-    if (!customElements.get('adw-radio-button')) customElements.define('adw-radio-button', Adw.RadioButton);
-    if (!customElements.get('adw-split-button')) customElements.define('adw-split-button', Adw.SplitButton);
-    if (!customElements.get('adw-toggle-button')) customElements.define('adw-toggle-button', Adw.ToggleButton);
-    if (!customElements.get('adw-toggle-group')) customElements.define('adw-toggle-group', Adw.ToggleGroup);
+    if (!customElements.get('adw-switch')) customElements.define('adw-switch', window.Adw.Switch);
+    if (!customElements.get('adw-checkbox')) customElements.define('adw-checkbox', window.Adw.Checkbox);
+    if (!customElements.get('adw-radio-button')) customElements.define('adw-radio-button', window.Adw.RadioButton);
+    if (!customElements.get('adw-split-button')) customElements.define('adw-split-button', window.Adw.SplitButton);
+    if (!customElements.get('adw-toggle-button')) customElements.define('adw-toggle-button', window.Adw.ToggleButton);
+    if (!customElements.get('adw-toggle-group')) customElements.define('adw-toggle-group', window.Adw.ToggleGroup);
     // From layouts.js
-    if (!customElements.get('adw-box')) customElements.define('adw-box', Adw.Box);
-    if (!customElements.get('adw-application-window')) customElements.define('adw-application-window', Adw.ApplicationWindow);
-    if (!customElements.get('adw-flap')) customElements.define('adw-flap', Adw.Flap);
-    if (!customElements.get('adw-bin')) customElements.define('adw-bin', Adw.Bin);
-    if (!customElements.get('adw-wrap-box')) customElements.define('adw-wrap-box', Adw.WrapBox);
-    if (!customElements.get('adw-clamp')) customElements.define('adw-clamp', Adw.Clamp);
-    if (!customElements.get('adw-breakpoint-bin')) customElements.define('adw-breakpoint-bin', Adw.BreakpointBin);
+    if (!customElements.get('adw-box')) customElements.define('adw-box', window.Adw.Box);
+    if (!customElements.get('adw-application-window')) customElements.define('adw-application-window', window.Adw.ApplicationWindow);
+    if (!customElements.get('adw-flap')) customElements.define('adw-flap', window.Adw.Flap);
+    if (!customElements.get('adw-bin')) customElements.define('adw-bin', window.Adw.Bin);
+    if (!customElements.get('adw-wrap-box')) customElements.define('adw-wrap-box', window.Adw.WrapBox);
+    if (!customElements.get('adw-clamp')) customElements.define('adw-clamp', window.Adw.Clamp);
+    if (!customElements.get('adw-breakpoint-bin')) customElements.define('adw-breakpoint-bin', window.Adw.BreakpointBin);
     // From listbox.js
-    if (!customElements.get('adw-list-box')) customElements.define('adw-list-box', Adw.ListBox);
+    if (!customElements.get('adw-list-box')) customElements.define('adw-list-box', window.Adw.ListBox);
     // From views.js
-    if (!customElements.get('adw-view-switcher')) customElements.define('adw-view-switcher', Adw.ViewSwitcher);
-    if (!customElements.get('adw-toolbar-view')) customElements.define('adw-toolbar-view', Adw.ToolbarView);
-    if (!customElements.get('adw-carousel')) customElements.define('adw-carousel', Adw.Carousel);
-    if (!customElements.get('adw-navigation-split-view')) customElements.define('adw-navigation-split-view', Adw.NavigationSplitView);
-    if (!customElements.get('adw-overlay-split-view')) customElements.define('adw-overlay-split-view', Adw.OverlaySplitView);
-    if (!customElements.get('adw-tab-view')) customElements.define('adw-tab-view', Adw.TabView);
-    if (!customElements.get('adw-tab-bar')) customElements.define('adw-tab-bar', Adw.TabBar);
-    if (!customElements.get('adw-tab-page')) customElements.define('adw-tab-page', Adw.TabPage);
-    if (!customElements.get('adw-navigation-view')) customElements.define('adw-navigation-view', Adw.NavigationView);
-    if (!customElements.get('adw-bottom-sheet')) customElements.define('adw-bottom-sheet', Adw.BottomSheet);
+    if (!customElements.get('adw-view-switcher')) customElements.define('adw-view-switcher', window.Adw.ViewSwitcher);
+    if (!customElements.get('adw-toolbar-view')) customElements.define('adw-toolbar-view', window.Adw.ToolbarView);
+    if (!customElements.get('adw-carousel')) customElements.define('adw-carousel', window.Adw.Carousel);
+    if (!customElements.get('adw-navigation-split-view')) customElements.define('adw-navigation-split-view', window.Adw.NavigationSplitView);
+    if (!customElements.get('adw-overlay-split-view')) customElements.define('adw-overlay-split-view', window.Adw.OverlaySplitView);
+    if (!customElements.get('adw-tab-view')) customElements.define('adw-tab-view', window.Adw.TabView);
+    if (!customElements.get('adw-tab-bar')) customElements.define('adw-tab-bar', window.Adw.TabBar);
+    if (!customElements.get('adw-tab-page')) customElements.define('adw-tab-page', window.Adw.TabPage);
+    if (!customElements.get('adw-navigation-view')) customElements.define('adw-navigation-view', window.Adw.NavigationView);
+    if (!customElements.get('adw-bottom-sheet')) customElements.define('adw-bottom-sheet', window.Adw.BottomSheet);
 }
 
 console.log('[Debug] Adw object populated and custom elements defined.');
