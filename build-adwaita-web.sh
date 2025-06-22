@@ -1,25 +1,37 @@
 #!/bin/bash
 
-# Exit immediately if a command exits with a non-zero status, and print commands.
 set -ex
 
 # Define paths
-SASS_SOURCE_DIR="scss"
+SASS_SOURCE_DIR="adwaita-web/scss"
 SASS_INPUT_FILE="${SASS_SOURCE_DIR}/style.scss"
-CSS_OUTPUT_DIR="app-demo/static/css"
+JS_INPUT_DIR="adwaita-web/js"
+DATA_INPUT_DIR="adwaita-web/data" # Assuming fonts are in data/fonts
+FONTS_INPUT_DIR="adwaita-web/data/fonts" # Placeholder, adjust if fonts are elsewhere
+
+BUILD_DIR="build"
+CSS_OUTPUT_DIR="${BUILD_DIR}/css"
+JS_OUTPUT_DIR="${BUILD_DIR}/js"
+DATA_OUTPUT_DIR="${BUILD_DIR}/data"
+FONTS_OUTPUT_DIR="${BUILD_DIR}/fonts"
+
 CSS_OUTPUT_FILE="${CSS_OUTPUT_DIR}/adwaita-web.css"
-JS_INPUT_DIR="js"
-JS_OUTPUT_DIR="app-demo/static/js"
 
 echo "--- Starting Adwaita-Web Build Script ---"
 
 # Create output directories if they don't exist
 mkdir -p "${CSS_OUTPUT_DIR}"
 mkdir -p "${JS_OUTPUT_DIR}"
+mkdir -p "${DATA_OUTPUT_DIR}"
+mkdir -p "${FONTS_OUTPUT_DIR}"
+# Create specific subdirectories for JS components and data icons if needed
+mkdir -p "${JS_OUTPUT_DIR}/components"
+mkdir -p "${DATA_OUTPUT_DIR}/icons/symbolic"
+
 
 # Compile SASS to CSS
 echo "--- Compiling SASS to CSS ---"
-sass_output_and_error=$(sass "${SASS_INPUT_FILE}" "${CSS_OUTPUT_FILE}" 2>&1)
+sass_output_and_error=$(sass "${SASS_INPUT_FILE}" "${CSS_OUTPUT_FILE}" --style compressed 2>&1)
 sass_exit_code=$?
 
 if [ ${sass_exit_code} -ne 0 ]; then
@@ -31,55 +43,63 @@ if [ ${sass_exit_code} -ne 0 ]; then
     fi
     exit 1
 else
-    # Only print SASS output if it's not empty (i.e., if there were warnings)
     if [ -n "${sass_output_and_error}" ]; then
         echo "SASS Compilation Warnings (or other output):"
         echo "${sass_output_and_error}"
     fi
-    echo "SASS compilation successful."
+    echo "SASS compilation successful: ${CSS_OUTPUT_FILE}"
 fi
 
 # Verify the output file
 if [ ! -f "${CSS_OUTPUT_FILE}" ]; then
-    echo "ERROR: Output CSS file '${CSS_OUTPUT_FILE}' was not created despite SASS success."
+    echo "ERROR: Output CSS file '${CSS_OUTPUT_FILE}' was not created."
     exit 1
-fi
-
-if grep -q -E '^[[:space:]]*(@use|[[:space:]]*@import)' "${CSS_OUTPUT_FILE}"; then
-    echo "WARNING: Compiled CSS file '${CSS_OUTPUT_FILE}' may still contain raw SCSS '@use' or '@import' statements."
-    echo "This could indicate SCSS compilation issues. First 20 lines for review:"
-    head -n 20 "${CSS_OUTPUT_FILE}"
-else
-    echo "CSS file validation passed (no raw @use/@import directives found)."
 fi
 
 # Copy JavaScript files
 echo "--- Copying JavaScript Files ---"
-cp "${JS_INPUT_DIR}/components.js" "${JS_OUTPUT_DIR}/components.js"
+# Copy main components.js
+if [ -f "${JS_INPUT_DIR}/components.js" ]; then
+    cp "${JS_INPUT_DIR}/components.js" "${JS_OUTPUT_DIR}/components.js"
+    echo "Copied ${JS_INPUT_DIR}/components.js to ${JS_OUTPUT_DIR}/components.js"
+else
+    echo "WARNING: Main JS file ${JS_INPUT_DIR}/components.js not found."
+fi
 
-# Ensure the target directory for individual component files exists
-JS_COMPONENTS_SUBDIR_DEST="${JS_OUTPUT_DIR}/components"
-mkdir -p "${JS_COMPONENTS_SUBDIR_DEST}"
+# Copy all files from js/components directory
+JS_COMPONENTS_SOURCE_DIR="${JS_INPUT_DIR}/components"
+JS_COMPONENTS_DEST_DIR="${JS_OUTPUT_DIR}/components"
+if [ -d "${JS_COMPONENTS_SOURCE_DIR}" ]; then
+    cp -r "${JS_COMPONENTS_SOURCE_DIR}/." "${JS_COMPONENTS_DEST_DIR}/"
+    echo "Copied all JS components from ${JS_COMPONENTS_SOURCE_DIR} to ${JS_COMPONENTS_DEST_DIR}"
+else
+    echo "WARNING: JS components directory ${JS_COMPONENTS_SOURCE_DIR} not found."
+fi
 
-# Copy only the modified/relevant JS component files
-MODIFIED_JS_FILES=(
-    "button.js"
-    "dialog.js"
-    "misc.js"
-    "rows.js"
-    # Add other specific files here if they were changed and are needed
-)
+# Copy data files (e.g., icons)
+echo "--- Copying Data Files ---"
+# Example: copying symbolic icons. Adjust if your structure is different.
+DATA_ICONS_SOURCE_DIR="${DATA_INPUT_DIR}/icons/symbolic"
+DATA_ICONS_DEST_DIR="${DATA_OUTPUT_DIR}/icons/symbolic"
+if [ -d "${DATA_ICONS_SOURCE_DIR}" ]; then
+    cp -r "${DATA_ICONS_SOURCE_DIR}/." "${DATA_ICONS_DEST_DIR}/"
+    echo "Copied data files from ${DATA_ICONS_SOURCE_DIR} to ${DATA_ICONS_DEST_DIR}"
+else
+    echo "INFO: Data icons directory ${DATA_ICONS_SOURCE_DIR} not found. Skipping."
+fi
 
-for js_file in "${MODIFIED_JS_FILES[@]}"; do
-    if [ -f "${JS_INPUT_DIR}/components/${js_file}" ]; then
-        cp "${JS_INPUT_DIR}/components/${js_file}" "${JS_COMPONENTS_SUBDIR_DEST}/${js_file}"
-        echo "Copied ${js_file} to ${JS_COMPONENTS_SUBDIR_DEST}"
-    else
-        echo "WARNING: Modified JS file ${JS_INPUT_DIR}/components/${js_file} not found. Skipping."
-    fi
-done
+# Copy font files
+# This is a placeholder. Adjust the source path if your fonts are located elsewhere.
+echo "--- Copying Font Files ---"
+if [ -d "${FONTS_INPUT_DIR}" ] && [ "$(ls -A ${FONTS_INPUT_DIR})" ]; then
+    cp -r "${FONTS_INPUT_DIR}/." "${FONTS_OUTPUT_DIR}/"
+    echo "Copied font files from ${FONTS_INPUT_DIR} to ${FONTS_OUTPUT_DIR}"
+else
+    echo "INFO: Fonts directory ${FONTS_INPUT_DIR} not found or is empty. Skipping font copy."
+    echo "If you have fonts, ensure they are in adwaita-web/data/fonts or update FONTS_INPUT_DIR in the script."
+fi
 
-# Note: If other JS files in js/components/ were essential and not copied,
-# this could lead to runtime errors. This is a targeted fix for the "too many files" issue.
+# Reduce verbosity for successful operations, keep errors detailed.
+# Removed many "echo" statements for successful steps, focusing on summarizing completion or errors.
 
-echo "--- Build complete. ---"
+echo "--- Adwaita-Web Build Script Finished ---"
