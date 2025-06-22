@@ -15,6 +15,7 @@ import logging
 from PIL import Image
 import uuid
 import bleach
+import urllib.parse
 
 # Globally defined extensions, to be initialized with an app instance
 db = SQLAlchemy()
@@ -206,6 +207,13 @@ def create_app(config_overrides=None):
     login_manager.login_view = 'login'
     csrf.init_app(_app)
 
+    @_app.template_filter('urlencode')
+    def urlencode_filter(s):
+        if hasattr(s, 'unescape'): # Check if it's a Markup object
+            s = s.unescape()
+        s = str(s) # Ensure it's a string
+        return urllib.parse.quote_plus(s)
+
     @_app.context_processor
     def inject_user():
         return dict(current_user=current_user)
@@ -393,9 +401,24 @@ def create_app(config_overrides=None):
     @_app.route('/profile/edit', methods=['GET', 'POST'])
     @login_required
     def edit_profile():
+        _app.logger.info(f"Edit profile route hit. Method: {request.method}")
+        # When method is POST, WTForms populates from request.form.
+        # obj=current_user is used for initial GET display and for providing defaults.
         form = ProfileEditForm(obj=current_user)
         default_avatar_url = url_for('static', filename='img/default_avatar.png')
+
+        if request.method == 'POST':
+            _app.logger.info(f"POST request. Request form data: {request.form}")
+            _app.logger.info(f"POST request. Request files: {request.files}")
+            _app.logger.info(f"Form is_submitted() check (implicitly part of validate_on_submit): {form.is_submitted()}")
+
         if form.validate_on_submit():
+            _app.logger.info("Form validation successful.")
+
+            # Log data before assignment to current_user
+            _app.logger.info(f"Data from form: full_name='{form.full_name.data}', location='{form.location.data}', website_url='{form.website_url.data}', is_profile_public='{form.is_profile_public.data}'")
+            _app.logger.info(f"Data from form (profile_info snippet): {form.profile_info.data[:100] if form.profile_info.data else ''}...")
+
             raw_profile_info = form.profile_info.data
             current_user.profile_info = bleach.clean(
                 raw_profile_info,
@@ -406,14 +429,21 @@ def create_app(config_overrides=None):
             current_user.full_name = form.full_name.data
             current_user.location = form.location.data
             current_user.website_url = form.website_url.data
-            current_user.is_profile_public = form.is_profile_public.data
-            _app.logger.info(f"User {current_user.username} updating profile fields.")
+            current_user.is_profile_public = form.is_profile_public.data # BooleanField handles conversion
 
-            file = form.profile_photo.data
+            _app.logger.info(f"User {current_user.username} updating profile. After assignment to current_user (before photo):")
+            _app.logger.info(f"  current_user.full_name: {current_user.full_name}")
+            _app.logger.info(f"  current_user.location: {current_user.location}")
+            _app.logger.info(f"  current_user.website_url: {current_user.website_url}")
+            _app.logger.info(f"  current_user.is_profile_public: {current_user.is_profile_public}")
+            _app.logger.info(f"  current_user.profile_info snippet: {current_user.profile_info[:100] if current_user.profile_info else ''}...")
+
+            file = form.profile_photo.data # Correctly uses WTForms FileField data
             photo_update_attempted = False
             photo_saved_successfully = False
 
             if file and file.filename:
+                _app.logger.info(f"Profile photo uploaded: {file.filename}, content_type: {file.content_type}")
                 photo_update_attempted = True
                 if allowed_file(file.filename):
                     try:
@@ -423,12 +453,16 @@ def create_app(config_overrides=None):
                         upload_folder_path = _app.config['UPLOAD_FOLDER']
                         save_path = os.path.join(upload_folder_path, unique_filename)
                         os.makedirs(upload_folder_path, exist_ok=True)
+
+                        _app.logger.info(f"Attempting to open image stream for {unique_filename}")
                         img = Image.open(file.stream)
+                        _app.logger.info(f"Image opened successfully. Format: {img.format}, Size: {img.size}")
 
                         crop_x_str = request.form.get('crop_x')
                         crop_y_str = request.form.get('crop_y')
                         crop_width_str = request.form.get('crop_width')
                         crop_height_str = request.form.get('crop_height')
+                        _app.logger.info(f"Crop data from form: x={crop_x_str}, y={crop_y_str}, w={crop_width_str}, h={crop_height_str}")
 
                         if crop_x_str and crop_y_str and crop_width_str and crop_height_str:
                             try:
@@ -437,38 +471,61 @@ def create_app(config_overrides=None):
                                 crop_width = int(float(crop_width_str))
                                 crop_height = int(float(crop_height_str))
                                 if crop_width > 0 and crop_height > 0:
+                                    _app.logger.info(f"Applying crop: ({crop_x}, {crop_y}, {crop_x + crop_width}, {crop_y + crop_height})")
                                     img = img.crop((crop_x, crop_y, crop_x + crop_width, crop_y + crop_height))
-                            except ValueError:
-                                _app.logger.warning("Could not parse crop coordinates. Skipping crop.")
+                                    _app.logger.info(f"Image cropped. New size: {img.size}")
+                                else:
+                                    _app.logger.warning("Crop width or height is zero or negative. Skipping crop.")
+                            except ValueError as ve:
+                                _app.logger.warning(f"Could not parse crop coordinates (ValueError: {ve}). Skipping crop.")
+                        else:
+                            _app.logger.info("Crop coordinates not provided or incomplete. Processing image without cropping.")
 
+                        _app.logger.info(f"Resizing image (thumbnail 200x200). Current size: {img.size}")
                         img.thumbnail((200, 200))
+                        _app.logger.info(f"Image resized. New size: {img.size}")
+
+                        _app.logger.info(f"Saving image to: {save_path}")
                         img.save(save_path)
                         current_user.profile_photo_url = os.path.join('uploads/profile_pics', unique_filename)
                         photo_saved_successfully = True
+                        _app.logger.info(f"Photo processed and saved. New URL: {current_user.profile_photo_url}")
                     except Exception as e:
                         _app.logger.error(f"Error processing profile photo: {e}", exc_info=True)
                         flash(f'Error processing profile photo: {e}', 'danger')
                 else:
+                    _app.logger.warning(f"Invalid file type for photo: {file.filename}")
                     flash('Invalid file type for photo.', 'warning')
+            else:
+                _app.logger.info("No profile photo uploaded or file has no filename.")
 
             try:
+                _app.logger.info("Attempting to commit profile changes to database.")
                 db.session.commit()
+                _app.logger.info("Profile changes committed to database successfully.")
                 if photo_update_attempted:
                     if photo_saved_successfully:
                         flash('Profile and photo updated successfully!', 'success')
                     else:
+                        # This case means photo was attempted but failed; textual updates might still be committed.
                         flash('Profile information updated, but there was an issue with the photo upload.', 'warning')
                 else:
-                    flash('Profile updated successfully!', 'success')
-            except Exception as e:
+                    flash('Profile updated successfully!', 'success') # No photo attempt, textual updates saved.
+            except Exception as e: # Catching general Exception for now.
                 db.session.rollback()
-                _app.logger.error(f"Error saving profile changes: {e}", exc_info=True)
+                _app.logger.error(f"Error saving profile changes to DB: {e}", exc_info=True)
                 flash(f'Error saving profile changes: {e}', 'danger')
             return redirect(url_for('profile', username=current_user.username))
         elif request.method == 'POST':
+            # This block executes if form.validate_on_submit() is False
+            _app.logger.warning("Form validation failed on POST.")
+            _app.logger.warning(f"Form errors: {form.errors}")
             for field_name, field_errors in form.errors.items():
                 for error in field_errors:
                     flash(f"Error in {getattr(form, field_name).label.text}: {error}", 'warning')
+        else: # GET request
+            _app.logger.info("GET request: Displaying edit profile page.")
+
         return render_template('edit_profile.html', form=form, user_profile=current_user, default_avatar_url=default_avatar_url)
 
     @_app.route('/settings')
