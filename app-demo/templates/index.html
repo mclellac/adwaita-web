@@ -52,7 +52,7 @@
         <adw-status-page title="No Posts Yet" description="Be the first to create a post and share your thoughts!">
             <div slot="icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">📄</div> {# Using an emoji as a placeholder icon #}
             <div slot="actions">
-                <adw-button href="{{ url_for('create_post') }}" appearance="suggested">Create a Post</adw-button>
+                <adw-button href="{{ url_for('create_post') }}" suggested>Create a Post</adw-button>
             </div>
         </adw-status-page>
     {% endif %}
@@ -73,7 +73,7 @@
         {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
             {% if page_num %}
                 {% if page_num == pagination.page %}
-                    <adw-button class="active" appearance="suggested" aria-current="page">{{ page_num }}</adw-button>
+                    <adw-button class="active" suggested aria-current="page">{{ page_num }}</adw-button>
                 {% else %}
                     <a href="{{ url_for('index', page=page_num) }}" class="adw-button">{{ page_num }}</a>
                 {% endif %}

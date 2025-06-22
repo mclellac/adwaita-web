@@ -62,7 +62,6 @@
     <title>{% block title %}My Libadwaita Blog{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-web.css') }}">
         <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/adw-initializer.js') }}" defer></script>
 </head>
 <body
   {% if current_user and current_user.is_authenticated %}
@@ -81,13 +80,13 @@
             <a href="{{ url_for('contact_page') }}" class="adw-button" slot="start">Contact</a>
             <form action="{{ url_for('search_results') }}" method="GET" slot="start" style="display: flex; align-items: center; gap: var(--spacing-xs); margin-left: var(--spacing-s);">
                 <adw-entry name="q" placeholder="Search posts..." value="{{ request.args.get('q', '') }}" style="min-width: 150px;"></adw-entry> {# Added min-width for better appearance #}
-                <adw-button type="submit" appearance="flat" aria-label="Search">
+                <adw-button type="submit" flat aria-label="Search">
                     Search
                 </adw-button>
             </form>
 
         {% if current_user.is_authenticated %}
-            <a href="{{ url_for('profile', username=current_user.username) }}" slot="start" class="adw-button flat circular" title="View Profile" style="padding: var(--spacing-xxs); margin-right: var(--spacing-xs);">
+            <adw-button href="{{ url_for('profile', username=current_user.username) }}" slot="start" flat circular title="View Profile" style="padding: var(--spacing-xxs); margin-right: var(--spacing-xs);">
                 {% if current_user.profile_photo_url %}
                     <span class="adw-avatar size-small"> <!-- 24px -->
                         <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Avatar" class="avatar-image">
