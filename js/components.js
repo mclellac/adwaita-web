@@ -20,7 +20,7 @@ import * as listbox from './components/listbox.js'; // Import AdwListBox
 
 const Adw = {
     config: {
-        cssPath: 'app-demo/static/css/adwaita-web.css' // Default path, can be overridden by user
+        cssPath: '/static/css/adwaita-web.css' // Default path, can be overridden by user
     },
     // Utilities
     adwGenerateId: utils.adwGenerateId,
