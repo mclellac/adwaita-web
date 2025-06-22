@@ -208,8 +208,23 @@ def create_app(config_overrides=None):
     def index():
         page = request.args.get('page', 1, type=int)
         per_page = 5
-        pagination = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
-        posts = pagination.items
+        _app.logger.info(f"Fetching posts for index page. Page: {page}, Per Page: {per_page}")
+        try:
+            all_posts_count = Post.query.count()
+            _app.logger.info(f"Total posts in DB before pagination: {all_posts_count}")
+
+            pagination = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+            posts = pagination.items
+            _app.logger.info(f"Posts fetched for page {page}: {len(posts)} posts. Pagination items: {[p.id for p in posts]}")
+            if not posts and all_posts_count > 0:
+                _app.logger.warning("No posts found for the current page, but posts exist in the database. Check pagination logic or page number.")
+            elif not posts and all_posts_count == 0:
+                _app.logger.info("No posts found in the database at all.")
+
+        except Exception as e:
+            _app.logger.error(f"Error fetching posts for index: {e}", exc_info=True)
+            posts = []
+            pagination = None # Or handle error appropriately
         return render_template('index.html', posts=posts, pagination=pagination)
 
     @_app.route('/posts/<int:post_id>', methods=['GET', 'POST'])

@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
       if (!csrfToken) {
         console.error('CSRF token not found. Cannot save preference.');
-        // Adw.createAdwToast('Error: CSRF token missing.', { type: 'error' });
+        if (window.Adw && Adw.createToast) Adw.createToast('Error: CSRF token missing. Cannot save settings.', { type: 'error' });
         return;
       }
 
@@ -77,15 +77,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `Request failed with status: ${response.status}` }));
         console.error('Failed to save preference to server:', errorData.message || response.statusText);
-        // Example: Adw.createAdwToast(`Failed to save: ${errorData.message || response.statusText}`, { type: 'error' });
+        if (window.Adw && Adw.createToast) Adw.createToast(`Failed to save: ${errorData.message || response.statusText}`, { type: 'error' });
       } else {
         const result = await response.json();
         console.log('Preference saved to server:', result.message, data);
-        // Example: Adw.createAdwToast('Settings saved to server!', { type: 'success' });
+        if (window.Adw && Adw.createToast) Adw.createToast('Settings saved to server!', { type: 'success' });
       }
     } catch (error) {
       console.error('Error saving preference to server:', error);
-      // Example: Adw.createAdwToast(`Client-side error: ${error.message}`, { type: 'error' });
+      if (window.Adw && Adw.createToast) Adw.createToast(`Client-side error: ${error.message}`, { type: 'error' });
     }
   }
 
