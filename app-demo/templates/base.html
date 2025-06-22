@@ -62,6 +62,16 @@
     <title>{% block title %}My Libadwaita Blog{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-web.css') }}">
         <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
+    <script>
+        // Configure Adw library for app-demo
+        if (window.Adw) {
+            window.Adw.config.cssPath = "{{ url_for('static', filename='css/adwaita-web.css') }}";
+        } else {
+            // This case should ideally not happen if components.js loads first and defines Adw.
+            // However, as a fallback, components will try to load 'adwaita-web.css' relatively.
+            console.warn("Adw object not found before attempting to set cssPath. Ensure components.js loads and executes before this script block.");
+        }
+    </script>
     <script src="{{ url_for('static', filename='js/adw-initializer.js') }}" defer></script>
 </head>
 <body

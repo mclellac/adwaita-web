@@ -44,7 +44,7 @@ export class AdwEntry extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : 'adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._inputElement = null;
     }
@@ -298,7 +298,7 @@ export class AdwSpinButton extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : 'adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
 
         this._spinButtonElement = null;

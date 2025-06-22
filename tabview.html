@@ -65,6 +65,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Configure Adw library for this demo page
+            if (window.Adw) {
+                window.Adw.config.cssPath = 'app-demo/static/css/adwaita-web.css';
+            } else {
+                console.error("Adw object not found when trying to set cssPath for tabview.html. Ensure components.js loads first.");
+            }
+
             if (!window.Adw) {
                 console.error("Adw object not found. Aborting main script.");
                 return;
