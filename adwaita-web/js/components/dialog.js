@@ -299,7 +299,7 @@ export class AdwAlertDialog extends HTMLElement {
         this._alertDialogInstance = null;
         this._choices = [];
     }
-    connectedCallback() { this._parseChoices(); this._render(); if (this.hasAttribute('open')) this.open(); }
+    connectedCallback() { /* Removed this._parseChoices(); and this._render(); */ if (this.hasAttribute('open')) this.open(); }
     disconnectedCallback() { if (this._internalDialog) this.close(); } // Use this.close() which handles _internalDialog
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;

@@ -293,46 +293,62 @@ export class AdwNavigationView extends HTMLElement { /* ... (Same as original Ad
     push(pageElementOrName) { if (typeof pageElementOrName === 'string') { const pageName = pageElementOrName; const element = this.querySelector(`[data-page-name="${pageName}"], [page-name="${pageName}"]`); if (element && this._navigationViewFactoryInstance) { const pageData = this._getPageDataFromElement(element); if(pageData) this._navigationViewFactoryInstance.push(pageData); } else console.error(`AdwNavigationView: Page with name "${pageName}" not found.`); } else if (pageElementOrName instanceof HTMLElement) { const pageData = this._getPageDataFromElement(pageElementOrName); if (pageData && this._navigationViewFactoryInstance) { if (!pageElementOrName.parentElement) this.appendChild(pageElementOrName); this._navigationViewFactoryInstance.push(pageData); } else if(!pageData) console.error("AdwNavigationView.push: Invalid page element.", pageElementOrName); } else console.error("AdwNavigationView.push: Argument must be page name or HTMLElement."); }
     pop() { if (this._navigationViewFactoryInstance) this._navigationViewFactoryInstance.pop(); }
     getVisiblePageName(){ if(this._navigationViewFactoryInstance) return this._navigationViewFactoryInstance.getVisiblePageName(); return null; }
-    push(pageElementOrName) {
-        if (typeof pageElementOrName === 'string') {
-            const pageName = pageElementOrName;
+    push(pageArg) {
+        let pageDataToPush = null;
+        if (typeof pageArg === 'string') {
+            const pageName = pageArg;
+            // Querying light DOM for the page element
             const element = this.querySelector(`[data-page-name="${pageName}"], [page-name="${pageName}"]`);
-            if (element && this._navigationViewFactoryInstance) {
-                const pageData = this._getPageDataFromElement(element);
-                if (pageData) this._navigationViewFactoryInstance.push(pageData);
-                else console.error(`AdwNavigationView: Could not derive page data for page name "${pageName}". Ensure element is valid.`);
-            } else if (!element) {
-                console.error(`AdwNavigationView: Page with name "${pageName}" not found in light DOM.`);
+            if (element) {
+                pageDataToPush = this._getPageDataFromElement(element);
             } else {
-                 // _navigationViewFactoryInstance is null, likely an issue during setup
-                console.error(`AdwNavigationView: Factory instance not available for pushing page name "${pageName}".`);
+                console.error(`AdwNavigationView: Page with name "${pageName}" not found in light DOM.`);
+                return;
             }
-        } else if (pageElementOrName instanceof HTMLElement) {
-            const pageData = this._getPageDataFromElement(pageElementOrName);
-            if (pageData && this._navigationViewFactoryInstance) {
-                if (!pageElementOrName.parentElement || pageElementOrName.parentElement !== this) {
-                     // Check if it's already slotted or a direct child. If not, append it to make it available for slotting.
-                    let alreadySlotted = false;
-                    const slot = this.shadowRoot.querySelector('slot');
-                    if (slot) {
-                        const assignedNodes = slot.assignedNodes({ flatten: true });
-                        if (assignedNodes.includes(pageElementOrName)) {
-                            alreadySlotted = true;
-                        }
-                    }
-                    if (!alreadySlotted && (!pageElementOrName.parentElement || pageElementOrName.parentElement !== this)) {
-                         this.appendChild(pageElementOrName);
+        } else if (pageArg instanceof HTMLElement) {
+            pageDataToPush = this._getPageDataFromElement(pageArg);
+            // If element is not already a child of this (for slotting), append it.
+            if (pageDataToPush && (!pageArg.parentElement || pageArg.parentElement !== this)) {
+                let alreadySlotted = false;
+                const slot = this.shadowRoot.querySelector('slot');
+                if (slot) {
+                    const assignedNodes = slot.assignedNodes({ flatten: true });
+                    if (assignedNodes.includes(pageArg)) {
+                        alreadySlotted = true;
                     }
                 }
-                this._navigationViewFactoryInstance.push(pageData);
-            } else if (!pageData) {
-                console.error("AdwNavigationView.push: Invalid page element provided. Ensure it's a valid page container (e.g., <div data-page-name='my-page'>...</div> or an element that _getPageDataFromElement can process). Received:", pageElementOrName);
-            } else {
-                // _navigationViewFactoryInstance is null
-                 console.error("AdwNavigationView: Factory instance not available for pushing HTMLElement.", pageElementOrName);
+                if (!alreadySlotted) {
+                    this.appendChild(pageArg);
+                }
+            }
+        } else if (typeof pageArg === 'object' && pageArg !== null && pageArg.name && pageArg.element instanceof HTMLElement) {
+            pageDataToPush = pageArg;
+            // If element from pageData object is not already a child of this, append it.
+            if (!pageDataToPush.element.parentElement || pageDataToPush.element.parentElement !== this) {
+                 let alreadySlotted = false;
+                 const slot = this.shadowRoot.querySelector('slot');
+                 if (slot) {
+                     const assignedNodes = slot.assignedNodes({ flatten: true });
+                     if (assignedNodes.includes(pageDataToPush.element)) {
+                         alreadySlotted = true;
+                     }
+                 }
+                 if (!alreadySlotted) {
+                    this.appendChild(pageDataToPush.element);
+                 }
             }
         } else {
-            console.error(`AdwNavigationView.push: Argument must be page name (string) or HTMLElement. Received type: ${typeof pageElementOrName}, value:`, pageElementOrName);
+            console.error(`AdwNavigationView.push: Argument must be page name (string), HTMLElement, or a pageData object {name, element, header?}. Received type: ${typeof pageArg}, value:`, pageArg);
+            return;
+        }
+
+        if (pageDataToPush && this._navigationViewFactoryInstance) {
+            this._navigationViewFactoryInstance.push(pageDataToPush);
+        } else if (!pageDataToPush) {
+            // This condition might be redundant if the checks above are comprehensive
+            console.error("AdwNavigationView.push: Could not derive valid page data from argument.", pageArg);
+        } else if (!this._navigationViewFactoryInstance) {
+            console.error("AdwNavigationView.push: Factory instance not available.");
         }
     }
 }
