@@ -4,7 +4,7 @@ from flask import request, url_for, session # Added for request.path and url_for
 from io import BytesIO # Added for file upload simulation
 import time # Added for time.sleep in edit_post test
 from unittest.mock import patch, MagicMock # Added for mocking
-from app import create_app, db, User, Post # Import create_app and extensions
+from app import create_app, db, User, Post, Tag, Comment # Import create_app and extensions
 from datetime import datetime, timezone, timedelta # Added for post creation timestamps
 
 
@@ -156,6 +156,99 @@ def test_settings_page_redirects_unauthenticated(app_instance, client):
     assert query_params['next'][0] == expected_settings_path_for_next_param
 
 
+# --- Settings API Tests ---
+def test_save_theme_preference_authenticated(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    with app_instance.app_context():
+        response = client.post(url_for('save_theme_preference'), json={'theme': 'dark'})
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert json_data['status'] == 'success'
+
+    with app_instance.app_context():
+        # Fetch user by username from user_data to ensure it's session-bound
+        user_to_check = User.query.filter_by(username=user_data['username']).first()
+        assert user_to_check is not None
+        assert user_to_check.theme == 'dark'
+
+    with app_instance.app_context():
+        response = client.post(url_for('save_theme_preference'), json={'theme': 'light'})
+    assert response.status_code == 200
+    with app_instance.app_context():
+        user_to_check = User.query.filter_by(username=user_data['username']).first()
+        assert user_to_check is not None
+        assert user_to_check.theme == 'light'
+
+def test_save_accent_color_preference_authenticated(app_instance, client, new_user, new_user_data_factory): # new_user fixture provides the user in DB
+    user_data = new_user_data_factory() # To get username/password for login
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    with app_instance.app_context():
+        response = client.post(url_for('save_accent_color_preference'), json={'accent_color': 'green'})
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert json_data['status'] == 'success'
+
+    with app_instance.app_context():
+        user_to_check = User.query.filter_by(username=user_data['username']).first()
+        assert user_to_check is not None
+        assert user_to_check.accent_color == 'green'
+
+    with app_instance.app_context():
+        response = client.post(url_for('save_accent_color_preference'), json={'accent_color': 'orange'})
+    assert response.status_code == 200
+    with app_instance.app_context():
+        user_to_check = User.query.filter_by(username=user_data['username']).first()
+        assert user_to_check is not None
+        assert user_to_check.accent_color == 'orange'
+
+def test_save_theme_preference_unauthenticated(app_instance, client):
+    with app_instance.app_context():
+        response = client.post(url_for('save_theme_preference'), json={'theme': 'dark'})
+    assert response.status_code == 302 # Redirects to login
+
+def test_save_accent_color_preference_unauthenticated(app_instance, client):
+    with app_instance.app_context():
+        response = client.post(url_for('save_accent_color_preference'), json={'accent_color': 'blue'})
+    assert response.status_code == 302 # Redirects to login
+
+def test_save_theme_preference_invalid_data(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    with app_instance.app_context():
+        # Missing 'theme' key
+        response = client.post(url_for('save_theme_preference'), json={'other_key': 'dark'})
+    assert response.status_code == 400
+    json_data = response.get_json()
+    assert json_data['status'] == 'error'
+    assert 'Missing theme data' in json_data['message']
+
+    with app_instance.app_context():
+        # Invalid theme value
+        response = client.post(url_for('save_theme_preference'), json={'theme': 'invalid_theme_value'})
+    assert response.status_code == 400
+    json_data = response.get_json()
+    assert json_data['status'] == 'error'
+    assert 'Invalid theme value' in json_data['message']
+
+def test_save_accent_color_preference_invalid_data(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    with app_instance.app_context():
+        # Missing 'accent_color' key
+        response = client.post(url_for('save_accent_color_preference'), json={'other_key': 'blue'})
+    assert response.status_code == 400
+    json_data = response.get_json()
+    assert json_data['status'] == 'error'
+    assert 'Missing accent_color data' in json_data['message']
+    # Note: The current app.py route for accent_color doesn't validate the *value* of accent_color,
+    # so we don't test for an invalid value here. If validation is added, a test should be too.
+
+
 # --- Blog Post Creation Tests ---
 
 def test_create_post_success(app_instance, client, new_user, new_user_data_factory):
@@ -256,11 +349,14 @@ def test_profile_edit_get(app_instance, client, new_user, new_user_data_factory)
         response = client.get(url_for('edit_profile'))
     assert response.status_code == 200
     assert b"Edit Profile" in response.data
-    if new_user.profile_info:
-        assert new_user.profile_info.encode('utf-8') in response.data
+    # Use user_data for initial info, as new_user object might be detached
+    # or fetch the user fresh if needed.
+    initial_profile_info = user_data.get('profile_info', 'Test profile') # Default from factory
+    if initial_profile_info: # Check against the data used to create the user
+        assert initial_profile_info.encode('utf-8') in response.data
 
-def test_profile_edit_post(app_instance, client, new_user, new_user_data_factory):
-    user_data = new_user_data_factory()
+def test_profile_edit_post(app_instance, client, new_user, new_user_data_factory): # new_user fixture ensures user exists
+    user_data = new_user_data_factory() # Use for login and username
     login_user_helper(client, user_data['username'], user_data['password'])
     new_info = "This is updated profile information."
 
@@ -269,17 +365,20 @@ def test_profile_edit_post(app_instance, client, new_user, new_user_data_factory
 
     assert response.status_code == 200
     with app_instance.app_context():
-        expected_path = url_for('profile', username=new_user.username, _external=False)
+        expected_path = url_for('profile', username=user_data['username'], _external=False) # Use username from user_data
     assert response.request.path == expected_path
     assert new_info.encode('utf-8') in response.data
+    assert b"Profile updated successfully!" in response.data # Check for flash message
 
     with app_instance.app_context():
-        updated_user = db.session.get(User, new_user.id)
-        assert updated_user.profile_info == new_info
+        # Fetch user by a stable identifier (username from user_data)
+        user_to_check = User.query.filter_by(username=user_data['username']).first()
+        assert user_to_check is not None
+        assert user_to_check.profile_info == new_info
 
 
-def test_profile_photo_upload_integration(app_instance, client, new_user, new_user_data_factory):
-    user_data = new_user_data_factory()
+def test_profile_photo_upload_integration(app_instance, client, new_user, new_user_data_factory): # new_user ensures user exists
+    user_data = new_user_data_factory() # Use for login and username
     login_user_helper(client, user_data['username'], user_data['password'])
 
     data = {'profile_info': 'Updated info during photo upload test.'}
@@ -290,22 +389,20 @@ def test_profile_photo_upload_integration(app_instance, client, new_user, new_us
     with app_instance.app_context():
         response = client.post(url_for('edit_profile'), data=data, content_type='multipart/form-data', follow_redirects=True)
     assert response.status_code == 200
+    assert b"Profile and photo updated successfully!" in response.data # Check for flash message
 
     with app_instance.app_context():
-        expected_path = url_for('profile', username=new_user.username, _external=False)
+        expected_path = url_for('profile', username=user_data['username'], _external=False) # Use username from user_data
     assert response.request.path == expected_path
 
     with app_instance.app_context():
-        updated_user = db.session.get(User, new_user.id)
+        updated_user = User.query.filter_by(username=user_data['username']).first() # Fetch by username
         assert updated_user is not None
         assert updated_user.profile_photo_url is not None
         assert updated_user.profile_photo_url.startswith('uploads/profile_pics/')
         assert updated_user.profile_photo_url.endswith('.png')
-    assert updated_user.profile_info == 'Updated info during photo upload test.'
-
-    with app_instance.app_context():
-        fresh_user_for_check = db.session.get(User, new_user.id)
-        assert fresh_user_for_check.profile_photo_url.encode('utf-8') in response.data
+        assert updated_user.profile_info == 'Updated info during photo upload test.' # Verify other fields still update
+        assert updated_user.profile_photo_url.encode('utf-8') in response.data # Check new photo URL is in the response
 
 
 # --- Unit Tests for Profile Photo Upload with Mocking ---
@@ -334,11 +431,15 @@ def test_edit_profile_photo_upload_success(mock_secure_filename, mock_makedirs, 
 
     assert response.status_code == 302
     with app_instance.app_context():
-        expected_redirect_url = url_for('profile', username=new_user.username, _external=False)
+        expected_redirect_url = url_for('profile', username=user_data['username'], _external=False) # Use username from user_data
     assert response.location == expected_redirect_url
 
     response_redirect = client.get(response.location)
-    assert b"Profile photo updated successfully!" in response_redirect.data
+    # The flash message was changed in app.py, this test is for mocked success
+    # The actual flash message is "Profile and photo updated successfully!" if photo is processed.
+    # Let's check for the more specific one.
+    assert b"Profile and photo updated successfully!" in response_redirect.data
+
 
     mock_secure_filename.assert_called_once_with('test_image.png')
     mock_image_open.assert_called_once()
@@ -351,22 +452,22 @@ def test_edit_profile_photo_upload_success(mock_secure_filename, mock_makedirs, 
     mock_makedirs.assert_called_once_with(app_instance.config['UPLOAD_FOLDER'], exist_ok=True) # Check against app_instance config
 
     with app_instance.app_context():
-        updated_user = db.session.get(User, new_user.id)
+        updated_user = User.query.filter_by(username=user_data['username']).first() # Fetch by username
         assert updated_user.profile_photo_url.startswith("uploads/profile_pics/")
         assert updated_user.profile_photo_url.endswith(".png")
         assert updated_user.profile_info == 'Info during mocked photo upload.'
 
-def test_edit_profile_additional_fields(app_instance, client, new_user, new_user_data_factory):
-    user_data = new_user_data_factory()
+def test_edit_profile_additional_fields(app_instance, client, new_user, new_user_data_factory): # new_user ensures user exists
+    user_data = new_user_data_factory() # Use for login and username
     login_user_helper(client, user_data['username'], user_data['password'])
 
     # Store the user_id while new_user is attached
+    # This is fine as user_id is just an integer, not a detached object problem.
+    # However, for consistency and robustness, fetching by username from user_data is better.
     with app_instance.app_context():
-        # It's safer to fetch the user by a stable identifier from user_data
-        # to get its ID for later checks.
         live_user = User.query.filter_by(username=user_data['username']).first()
         assert live_user is not None
-        user_id = live_user.id
+        user_id = live_user.id # Keep user_id for direct fetching if preferred, but username is more robust for cross-context
 
     profile_data = {
         'full_name': 'Test User Full Name',
@@ -399,10 +500,13 @@ def test_edit_profile_additional_fields(app_instance, client, new_user, new_user
 
 
 def test_edit_profile_photo_upload_invalid_file_type(app_instance, client, new_user, new_user_data_factory):
-    user_data = new_user_data_factory()
+    user_data = new_user_data_factory() # Use for login and username
     login_user_helper(client, user_data['username'], user_data['password'])
 
-    original_photo_url = new_user.profile_photo_url
+    with app_instance.app_context(): # Fetch original_photo_url in a context
+        user_for_setup = User.query.filter_by(username=user_data['username']).first()
+        assert user_for_setup is not None
+        original_photo_url = user_for_setup.profile_photo_url
 
     file_data = (BytesIO(b"dummytextbytes"), 'test_document.txt')
     data = {'profile_photo': file_data}
@@ -412,13 +516,14 @@ def test_edit_profile_photo_upload_invalid_file_type(app_instance, client, new_u
 
     assert response.status_code == 200
     with app_instance.app_context():
-        expected_path = url_for('profile', username=new_user.username, _external=False)
+        expected_path = url_for('profile', username=user_data['username'], _external=False) # Use username from user_data
     assert response.request.path == expected_path
 
     assert b"Invalid file type for photo." in response.data
 
     with app_instance.app_context():
-        user_after_attempt = db.session.get(User, new_user.id)
+        user_after_attempt = User.query.filter_by(username=user_data['username']).first() # Fetch by username
+        assert user_after_attempt is not None
         assert user_after_attempt.profile_photo_url == original_photo_url
 
 
@@ -667,7 +772,9 @@ def test_create_comment_on_post(app_instance, client, new_user, new_user_data_fa
         comments = Comment.query.filter_by(post_id=post_id).all()
         assert len(comments) == 1
         assert comments[0].text == comment_text
-        assert comments[0].author_id == new_user.id
+        user_to_check = User.query.filter_by(username=user_data['username']).first() # Fetch user to get ID safely
+        assert user_to_check is not None
+        assert comments[0].user_id == user_to_check.id
         assert comments[0].post_id == post_id
 
         # Also check through relationship
@@ -707,7 +814,9 @@ class TestChangePassword:
         with app_instance.app_context():
             response = client.get(url_for('change_password_page'))
         assert response.status_code == 302 # Should redirect to login
-        assert url_for('login') in response.location
+        from urllib.parse import urlparse
+        with app_instance.app_context():
+            assert urlparse(response.location).path == url_for('login', _external=False)
 
     def test_change_password_page_post_unauthenticated(self, app_instance, client):
         with app_instance.app_context():
@@ -717,7 +826,9 @@ class TestChangePassword:
                 'confirm_new_password': 'new_secure_password'
             })
         assert response.status_code == 302 # Should redirect to login
-        assert url_for('login') in response.location
+        from urllib.parse import urlparse
+        with app_instance.app_context():
+            assert urlparse(response.location).path == url_for('login', _external=False)
 
     def test_change_password_page_get_authenticated(self, app_instance, client, new_user, new_user_data_factory):
         user_data = new_user_data_factory()
@@ -743,7 +854,8 @@ class TestChangePassword:
             }, follow_redirects=True)
 
         assert response.status_code == 200
-        assert url_for('settings_page') in response.request.path # Check final URL after redirect
+        with app_instance.app_context():
+            assert response.request.path == url_for('settings_page', _external=False) # Check final URL after redirect
         assert b"Your password has been updated successfully!" in response.data
 
         # Verify new password works

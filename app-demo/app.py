@@ -482,10 +482,18 @@ def create_app(config_overrides=None):
             try:
                 db.session.commit()
                 _app.logger.info(f"Profile changes for {current_user.username} committed to DB.")
-                if not (file and file.filename):
-                     flash('Profile updated successfully!', 'success')
-                elif file and file.filename and allowed_file(file.filename) and not current_user.profile_photo_url:
-                    flash('Profile updated successfully! (Photo could not be saved).', 'warning')
+                # Simplified flash logic:
+                if file and file.filename:
+                    if current_user.profile_photo_url and allowed_file(file.filename): # Photo was processed and URL is likely set
+                        flash('Profile and photo updated successfully!', 'success')
+                    elif not allowed_file(file.filename):
+                        # This case is already handled by a flash message when checking allowed_file earlier
+                        # but as a fallback or if logic changes, it's here.
+                        flash('Profile updated, but photo was not saved (invalid file type).', 'warning')
+                    else: # Photo was provided, but URL wasn't set for some other reason
+                        flash('Profile updated, but there was an issue saving the photo.', 'warning')
+                else: # No file uploaded or filename was empty
+                    flash('Profile updated successfully!', 'success')
             except Exception as e:
                 db.session.rollback()
                 _app.logger.error(f"Error committing profile changes for user {current_user.username}: {e}", exc_info=True)
