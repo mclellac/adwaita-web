@@ -12,7 +12,7 @@
     display: flex;
     align-items: center;
     padding: var(--spacing-m);
-    border-bottom: var(--border-width) solid var(--card-shade-color); // Changed to --card-shade-color for separators
+    border-bottom: var(--border-width) solid var(--list-separator-color); // Use standard list separator color
     transition: background-color 0.1s ease-out, color 0.1s ease-out, outline-offset 0.1s ease-out;
     cursor: default; // Default cursor, change if rows are interactive
     outline-offset: -2px; // For focus outline to be inset

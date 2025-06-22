@@ -3,11 +3,11 @@
 .adw-header-bar {
   background-color: var(--headerbar-bg-color);
   color: var(--headerbar-fg-color);
-  // border-bottom: var(--border-width, 1px) solid var(--headerbar-border-color); // Removed default border
-  padding: var(--spacing-xs) var(--spacing-m);
+  border-bottom: var(--border-width, 1px) solid var(--headerbar-shade-color); // Default bottom border
+  padding: var(--spacing-xs) var(--spacing-m); // 6px 12px
   display: flex;
   align-items: center;
-  min-height: 48px; // Typical Adwaita headerbar height
+  min-height: 56px; // Adjusted min-height for typical Adwaita headerbar
   position: relative; // For pseudo-elements or absolute positioning if needed
 
   .adw-header-bar-start,
@@ -15,19 +15,25 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-xs); // 6px gap
 
     > * {
       color: var(--headerbar-fg-color); // Ensure children inherit text color
-      // Child buttons should be flat by default in a headerbar
-      &.adw-button:not(.flat):not([suggested]):not([destructive]) {
-        // This rule is very specific. Better to ensure buttons added to headerbar are explicitly flat.
-        // For now, we assume users will add .flat to buttons or use adw-header-bar specific button variants if any.
+    }
+
+    // Default styling for buttons within headerbar start/end areas to be flat
+    // Exclude suggested/destructive actions which have their own look.
+    .adw-button:not(.suggested-action):not(.destructive-action) {
+      background-color: transparent;
+      border-color: transparent;
+      box-shadow: none;
+      color: var(--headerbar-fg-color); // Ensure correct fg color
+
+      &:hover {
+        background-color: var(--button-flat-hover-bg-color); // Use flat button hover
       }
-      &.adw-button.circular {
-        // Removing specific padding override: let adw-button default circular padding apply.
-        // If smaller buttons are needed, a .compact class or similar should be used on the button.
-        // padding: var(--spacing-xxs);
+      &:active, &.active {
+        background-color: var(--button-flat-active-bg-color); // Use flat button active
       }
     }
   }
@@ -75,13 +81,10 @@
 
   // When content is scrolled underneath
   &.scrolled {
-    border-bottom: var(--border-width, 1px) solid var(--headerbar-shade-color);
-    box-shadow: none; // Explicitly remove any other box-shadow if scrolled border is preferred
+    // Optionally make border darker or add shadow
+    border-bottom-color: var(--headerbar-darker-shade-color); // Example: use darker shade color
+    // box-shadow: 0 1px 2px -1px var(--headerbar-shade-color); // Alternative shadow
   }
-  // Alternative: use a shadow when scrolled
-  // &.scrolled {
-  //   box-shadow: 0 1px 2px -1px var(--headerbar-shade-color);
-  // }
 
 
   // Ensure links and adw-buttons within the headerbar inherit the correct color

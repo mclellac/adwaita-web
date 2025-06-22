@@ -96,9 +96,9 @@
     }
 
     .adw-preferences-group-title { // This is an H2 in JS
-      font-size: var(--font-size-h3);
+      font-size: var(--font-size-h2); // Changed to H2 for more prominence
       font-weight: bold;
-      color: var(--primary-fg-color);
+      color: var(--window-fg-color); // Use standard window foreground color
       margin: 0;
       line-height: 1.3;
     }
