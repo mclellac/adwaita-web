@@ -39,36 +39,43 @@ export function createAdwEntry(options = {}) {
 }
 
 export class AdwEntry extends HTMLElement {
+    static formAssociated = true; // Crucial for form participation
     static get observedAttributes() { return ['placeholder', 'value', 'disabled', 'name', 'required', 'type']; }
+
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
+        this.internals_ = this.attachInternals(); // Needed for setFormValue
+
         const styleLink = document.createElement('link');
         styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
         this.shadowRoot.appendChild(styleLink);
         this._inputElement = null;
+        this._initialValue = this.getAttribute('value') || ''; // Store initial value for form reset
     }
+
     connectedCallback() {
-        if (!this._inputElement) { // Ensure _render is called if not already
+        if (!this._inputElement) {
             this._render();
         }
-        // Event listeners are attached in _render to ensure they are on the correct _inputElement
+        // Set initial form value if one is present from attributes
+        this.internals_.setFormValue(this.value, this.value);
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
 
         if (!this._inputElement) {
-            this._render(); // Ensures _inputElement exists before proceeding
+            this._render(); // Ensures _inputElement exists
         }
 
-        // Now that _inputElement is guaranteed to exist (or was just created by _render),
-        // apply specific attribute changes.
         switch (name) {
             case 'value':
                 if (this._inputElement.value !== newValue) {
                     this._inputElement.value = newValue === null ? '' : newValue;
                 }
+                // Always update form value when 'value' attribute changes
+                this.internals_.setFormValue(this.value, this.value);
                 break;
             case 'disabled':
                 this._inputElement.disabled = this.hasAttribute('disabled');
@@ -77,8 +84,10 @@ export class AdwEntry extends HTMLElement {
                 this._inputElement.placeholder = newValue || '';
                 break;
             case 'name':
-                if (newValue === null) this._inputElement.removeAttribute('name');
-                else this._inputElement.name = newValue;
+                // The 'name' attribute on the custom element itself is used by the form.
+                // The internal input's name is not strictly necessary for ElementInternals.
+                if (newValue === null) this._inputElement.removeAttribute('name'); // Optional: keep internal name in sync
+                else this._inputElement.name = newValue; // Optional: keep internal name in sync
                 break;
             case 'required':
                 this._inputElement.required = newValue !== null;
@@ -86,78 +95,115 @@ export class AdwEntry extends HTMLElement {
             case 'type':
                 this._inputElement.type = newValue || 'text';
                 break;
-            // default:
-                // If an attribute changes that is not handled above and requires a full re-render
-                // (e.g. one that changes the fundamental structure, though AdwEntry is simple),
-                // then a call to this._render() might be needed here.
-                // For AdwEntry, most attributes are directly mapped, so this is often not needed.
-                // Consider if any other attributes would necessitate a full structural rebuild.
-                // If not, this default case can be omitted or log a warning for unhandled attrs.
         }
     }
 
     _render() {
-        // Idempotent render: only create the input element once.
         if (!this._inputElement) {
-            // Clear any existing non-stylesheet elements if we are re-doing the base structure
-             while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
                 this.shadowRoot.removeChild(this.shadowRoot.lastChild);
             }
             this._inputElement = document.createElement("input");
             this._inputElement.classList.add("adw-entry");
             this.shadowRoot.appendChild(this._inputElement);
 
-            // Attach event listeners only once, when the element is created
             this._inputElement.addEventListener('input', (e) => {
-                const newValue = e.target.value;
-                // Update the component's 'value' attribute if it differs.
-                // This ensures consistency and allows attributeChangedCallback to handle side effects if any.
-                if (this.getAttribute('value') !== newValue) {
-                    this.setAttribute('value', newValue);
+                const val = e.target.value;
+                if (this.getAttribute('value') !== val) {
+                    // Temporarily disable internal setFormValue for this specific attribute change
+                    // to avoid potential loops if setAttribute itself triggers another input event somehow.
+                    // More robustly, manage value updates carefully.
+                    this.setAttribute('value', val);
+                } else {
+                    // If attribute is already same (e.g. user types, then programmatic set to same value via attribute)
+                    // still ensure form value is updated if internal state was different.
+                    this.internals_.setFormValue(val, val);
                 }
-                // Dispatch 'input' event from the custom element itself for external listeners.
-                this.dispatchEvent(new CustomEvent('input', { detail: { value: newValue }, bubbles: true, composed: true }));
+                this.dispatchEvent(new CustomEvent('input', { detail: { value: val }, bubbles: true, composed: true }));
             });
+
             this._inputElement.addEventListener('change', (e) => {
-                // Propagate the 'change' event from the native input.
                 this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
             });
         }
 
-        // Apply all current attribute values to the input element's properties.
-        // This ensures that if _render is called (e.g. from connectedCallback or an attribute change
-        // that wasn't handled by a specific case in attributeChangedCallback), the state is synced.
         this._inputElement.placeholder = this.getAttribute('placeholder') || '';
         const valueAttr = this.getAttribute('value');
-        if (this._inputElement.value !== valueAttr) { // Avoid resetting cursor if value is already correct
-            this._inputElement.value = valueAttr === null ? '' : valueAttr;
+        // Use _initialValue for the very first render if value attribute not set, then valueAttr
+        const initialRenderValue = (valueAttr === null && oldValue === null) ? this._initialValue : (valueAttr === null ? '' : valueAttr);
+
+        if (this._inputElement.value !== initialRenderValue) {
+            this._inputElement.value = initialRenderValue;
         }
         this._inputElement.disabled = this.hasAttribute('disabled');
+        // The 'name' of the internal input isn't strictly needed for ElementInternals to work,
+        // as the form uses the name of the custom element itself.
+        // However, keeping it can be useful for direct DOM inspection or non-ElementInternals fallbacks.
         if (this.hasAttribute('name')) this._inputElement.name = this.getAttribute('name'); else this._inputElement.removeAttribute('name');
         this._inputElement.required = this.hasAttribute('required');
         this._inputElement.type = this.getAttribute('type') || 'text';
+
+        // Set initial form value after rendering the input and applying attributes
+        this.internals_.setFormValue(this._inputElement.value, this._inputElement.value);
     }
 
-    get value() { return this._inputElement ? this._inputElement.value : (this.getAttribute('value') || ''); }
-    set value(val) {
-        const strVal = (val === null || val === undefined) ? '' : String(val);
-        const oldValue = this.getAttribute('value'); // Get attribute value for comparison
-        if (oldValue !== strVal) {
-            this.setAttribute('value', strVal);
-            // No need to dispatch 'change' here, attributeChangedCallback will handle it
-            // and the native input's 'change' event will be the source of truth for user-interactions.
-        } else if (this._inputElement && this._inputElement.value !== strVal) {
-            // If attribute is same but internal input is different (e.g. programmatic set after user input)
-            this._inputElement.value = strVal;
+    // Form Lifecycle Callbacks
+    formAssociatedCallback(form) {
+        // console.log('AdwEntry associated with form:', form);
+    }
+
+    formDisabledCallback(disabled) {
+        if (this._inputElement) {
+            this._inputElement.disabled = disabled;
         }
     }
+
+    formResetCallback() {
+        this.value = this._initialValue; // Reset to initial value
+        this.internals_.setFormValue(this.value, this.value);
+    }
+
+    formStateRestoreCallback(state, mode) {
+        this.value = state;
+        this.internals_.setFormValue(this.value, this.value);
+    }
+
+    // Properties
+    get value() {
+        return this._inputElement ? this._inputElement.value : (this.getAttribute('value') || '');
+    }
+
+    set value(val) {
+        const strVal = (val === null || val === undefined) ? '' : String(val);
+        const oldValueAttr = this.getAttribute('value');
+        if (oldValueAttr !== strVal) {
+            this.setAttribute('value', strVal); // This will trigger attributeChangedCallback
+        } else if (this._inputElement && this._inputElement.value !== strVal) {
+            // If attribute is same, but internal input is different (e.g., programmatic direct set)
+            this._inputElement.value = strVal;
+            this.internals_.setFormValue(strVal, strVal); // Ensure form value is also updated
+        }
+    }
+
     get disabled() { return this.hasAttribute('disabled'); }
     set disabled(val) {
         const isDisabled = Boolean(val);
         if (isDisabled) this.setAttribute('disabled', '');
         else this.removeAttribute('disabled');
-        // attributeChangedCallback will update _inputElement.disabled
     }
+
+    get name() { return this.getAttribute('name'); }
+    set name(val) { this.setAttribute('name', val); }
+
+
+    // Validity (delegating to internal input for now)
+    get validity() { return this._inputElement ? this._inputElement.validity : Object.create(ValidityState.prototype); }
+    get validationMessage() { return this._inputElement ? this._inputElement.validationMessage : ""; }
+    get willValidate() { return this._inputElement ? this._inputElement.willValidate : false; }
+    checkValidity() { return this._inputElement ? this._inputElement.checkValidity() : true; }
+    reportValidity() { return this._inputElement ? this._inputElement.reportValidity() : true; }
+
+
     focus(options) { if(this._inputElement) this._inputElement.focus(options); }
     blur() { if(this._inputElement) this._inputElement.blur(); }
 }
