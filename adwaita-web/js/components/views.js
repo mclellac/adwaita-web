@@ -394,7 +394,32 @@ export function createAdwCarousel(options = {}) {
     if (indicatorsContainer) { indicatorsContainer.classList.add('adw-carousel-indicators'); carousel.appendChild(indicatorsContainer); }
     function updateIndicators() { if (!indicatorsContainer) return; while(indicatorsContainer.firstChild) indicatorsContainer.removeChild(indicatorsContainer.firstChild); slideElements.forEach((slideEl, i) => { const indicator = document.createElement('button'); indicator.classList.add('adw-carousel-indicator'); indicator.setAttribute('aria-label', `Go to slide ${i + 1}`); if (i === currentIndex) { indicator.classList.add('active'); indicator.setAttribute('aria-current', 'true'); } if (opts.indicatorStyle === 'thumbnails' && slideThumbnails[i]) { indicator.style.backgroundImage = `url('${slideThumbnails[i]}')`; } indicator.addEventListener('click', () => { goToSlide(i); resetAutoplay(); }); indicatorsContainer.appendChild(indicator); });}
     function goToSlide(index, isAutoplayNext = false) { if (!opts.loop && !isAutoplayNext) { if (index < 0 || index >= slideElements.length) { if (index < 0) index = 0; if (index >= slideElements.length) index = slideElements.length -1; }} if (opts.loop) { if (index < 0) index = slideElements.length - 1; else if (index >= slideElements.length) index = 0; } else { index = Math.max(0, Math.min(index, slideElements.length - 1)); } currentIndex = index; const offset = -currentIndex * 100; contentArea.style.transform = `translateX(${offset}%)`; updateIndicators(); if(opts.showNavButtons && !opts.loop){ prevButton.disabled = currentIndex === 0; nextButton.disabled = currentIndex === slideElements.length - 1; } carousel.dispatchEvent(new CustomEvent('slide-changed', { detail: { currentIndex } })); }
-    let prevButton, nextButton; if (opts.showNavButtons) { prevButton = createAdwButton('', { icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.78 12.78a.75.75 0 0 1-1.06 0L4.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 1.06L6.06 8l3.72 3.72a.75.75 0 0 1 0 1.06z"/></svg>', onClick: () => { goToSlide(currentIndex - 1); resetAutoplay(); }, isCircular: true, flat: true }); prevButton.classList.add('adw-carousel-nav-button', 'prev'); prevButton.setAttribute('aria-label', 'Previous slide'); carousel.appendChild(prevButton); nextButton = createAdwButton('', { icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z"/></svg>', onClick: () => { goToSlide(currentIndex + 1); resetAutoplay(); }, isCircular: true, flat: true }); nextButton.classList.add('adw-carousel-nav-button', 'next'); nextButton.setAttribute('aria-label', 'Next slide'); carousel.appendChild(nextButton); if(!opts.loop){ prevButton.disabled = currentIndex === 0; nextButton.disabled = currentIndex === slideElements.length - 1; }}
+    let prevButton, nextButton;
+    if (opts.showNavButtons) {
+        prevButton = createAdwButton('', {
+            icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.78 12.78a.75.75 0 0 1-1.06 0L4.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 1.06L6.06 8l3.72 3.72a.75.75 0 0 1 0 1.06z"/></svg>',
+            onClick: () => { goToSlide(currentIndex - 1); resetAutoplay(); },
+            isCircular: true,
+            flat: true,
+            ariaLabel: 'Previous slide'
+        });
+        prevButton.classList.add('adw-carousel-nav-button', 'prev');
+        carousel.appendChild(prevButton);
+
+        nextButton = createAdwButton('', {
+            icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z"/></svg>',
+            onClick: () => { goToSlide(currentIndex + 1); resetAutoplay(); },
+            isCircular: true,
+            flat: true,
+            ariaLabel: 'Next slide'
+        });
+        nextButton.classList.add('adw-carousel-nav-button', 'next');
+        carousel.appendChild(nextButton);
+        if(!opts.loop){
+            prevButton.disabled = currentIndex === 0;
+            nextButton.disabled = currentIndex === slideElements.length - 1;
+        }
+    }
     function startAutoplay() { if (!opts.autoplay || slideElements.length <= 1) return; stopAutoplay(); autoplayTimer = setInterval(() => { goToSlide(currentIndex + 1, true); }, opts.autoplayInterval); }
     function stopAutoplay() { clearInterval(autoplayTimer); autoplayTimer = null; }
     function resetAutoplay() { if (opts.autoplay) { stopAutoplay(); startAutoplay(); }}
@@ -517,6 +542,10 @@ export class AdwOverlaySplitView extends HTMLElement {
 }
 
 // No customElements.define here
+
+[end of adwaita-web/js/components/views.js]
+
+[end of adwaita-web/js/components/views.js]
 
 [end of adwaita-web/js/components/views.js]
 
