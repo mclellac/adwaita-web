@@ -601,11 +601,21 @@ export class AdwPasswordEntryRow extends HTMLElement {
             });
             this._inputArea.appendChild(this._internalEntry);
 
-            this._visibilityToggle = createAdwButton('', { icon: EYE_ICON_SVG, flat: true, isCircular: true });
+            const initialAriaLabel = "Show password"; // Initial state is password hidden
+            this._visibilityToggle = createAdwButton('', {
+                icon: EYE_ICON_SVG,
+                flat: true,
+                isCircular: true,
+                ariaLabel: initialAriaLabel // Add initial aria-label
+            });
             this._visibilityToggle.classList.add('adw-password-entry-row-toggle');
             this._visibilityToggle.addEventListener('click', () => {
                 const isPassword = this._internalEntry.type === 'password';
                 this._internalEntry.type = isPassword ? 'text' : 'password';
+
+                // Update ARIA label
+                this._visibilityToggle.setAttribute('aria-label', isPassword ? "Hide password" : "Show password");
+
                 const iconSpan = this._visibilityToggle.querySelector('.icon'); // AdwButton creates a span.icon
                 if (iconSpan) {
                     iconSpan.innerHTML = ''; // Clear existing SVG

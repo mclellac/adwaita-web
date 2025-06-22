@@ -57,14 +57,29 @@ fi
 echo "--- Copying JavaScript Files ---"
 cp "${JS_INPUT_DIR}/components.js" "${JS_OUTPUT_DIR}/components.js"
 
-JS_COMPONENTS_SUBDIR_SOURCE="${JS_INPUT_DIR}/components"
+# Ensure the target directory for individual component files exists
 JS_COMPONENTS_SUBDIR_DEST="${JS_OUTPUT_DIR}/components"
-if [ -d "${JS_COMPONENTS_SUBDIR_SOURCE}" ]; then
-    mkdir -p "${JS_COMPONENTS_SUBDIR_DEST}"
-    cp -r "${JS_COMPONENTS_SUBDIR_SOURCE}/." "${JS_COMPONENTS_SUBDIR_DEST}/"
-    echo "JavaScript components subdirectory copied."
-else
-    echo "WARNING: JavaScript components subdirectory ${JS_COMPONENTS_SUBDIR_SOURCE} not found. Skipping copy."
-fi
+mkdir -p "${JS_COMPONENTS_SUBDIR_DEST}"
+
+# Copy only the modified/relevant JS component files
+MODIFIED_JS_FILES=(
+    "button.js"
+    "dialog.js"
+    "misc.js"
+    "rows.js"
+    # Add other specific files here if they were changed and are needed
+)
+
+for js_file in "${MODIFIED_JS_FILES[@]}"; do
+    if [ -f "${JS_INPUT_DIR}/components/${js_file}" ]; then
+        cp "${JS_INPUT_DIR}/components/${js_file}" "${JS_COMPONENTS_SUBDIR_DEST}/${js_file}"
+        echo "Copied ${js_file} to ${JS_COMPONENTS_SUBDIR_DEST}"
+    else
+        echo "WARNING: Modified JS file ${JS_INPUT_DIR}/components/${js_file} not found. Skipping."
+    fi
+done
+
+# Note: If other JS files in js/components/ were essential and not copied,
+# this could lead to runtime errors. This is a targeted fix for the "too many files" issue.
 
 echo "--- Build complete. ---"
