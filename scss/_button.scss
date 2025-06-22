@@ -5,10 +5,10 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-xs) var(--spacing-m); // 6px 12px
-  border-width: 0; // No explicit border, rely on box-shadow for depth
-  border-style: solid; // Keep for consistency, but width is 0
-  border-color: transparent; // Explicitly transparent
-  border-radius: var(--border-radius-medium); // 4px
+  border-width: var(--border-width, 1px); // Use variable, default 1px
+  border-style: solid;
+  border-color: var(--borders-color); // Use general border color for default buttons
+  border-radius: var(--border-radius-default); // Changed to 6px default
   background-color: var(--button-bg-color);
   color: var(--button-fg-color);
   cursor: pointer;

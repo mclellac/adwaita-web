@@ -20,29 +20,19 @@ Vanilla JavaScript UI framework that mimics the look and feel of GNOME's GTK4 an
 1. **Clone or Download:** Get the code from the repository (or copy the code files directly):
 
    ```
-   gtk-web-framework/
-   ├── test.html
+   adwaita-web/
    ├── js/
-       └── components.js
-   ├── style.css           (Generated from scss/style.scss)
+   │   ├── components.js  (Main script, includes all component logic)
+   │   └── components/    (Individual component JS modules)
+   │       ├── button.js
+   │       └── ...
    ├── scss/
-       ├── style.scss
-       ├── _variables.scss
-       ├── _base.scss
-       ├── _button.scss
-       ├── _entry.scss
-       ├── _switch.scss
-       ├── _label.scss
-       ├── _headerbar.scss
-       ├── _window.scss
-       ├── _box.scss
-       ├── _toast.scss
-       ├── _dialog.scss
-       ├── _progress-bar.scss
-       ├── _checkbox.scss
-       ├── _radio.scss
-       └── _list-box.scss
-
+   │   ├── style.scss     (Main SCSS file, imports all component styles)
+   │   ├── _variables.scss
+   │   ├── _base.scss
+   │   └── _*.scss        (Individual component SCSS partials)
+   ├── style.css          (Generated CSS output)
+   └── ... (docs/, examples/, etc.)
    ```
 
 2. **Install Sass:** You need a Sass compiler to convert the SCSS files into CSS. The recommended method is the Dart Sass command-line tool:
@@ -127,15 +117,15 @@ Creates a button.
 -   **HTML Example:**
     ```html
     <adw-button id="save-btn" suggested>Save</adw-button>
-    <adw-button id="icon-btn" icon="<svg><!-- icon --></svg>" circular></adw-button>
+    <adw-button id="icon-btn" icon-name="document-new-symbolic" circular aria-label="New Document"></adw-button>
     <adw-button flat>Flat</adw-button>
     ```
-    Common attributes: `suggested`, `destructive`, `flat`, `disabled`, `icon`, `circular`. Text content goes inside the tags.
+    Common attributes: `suggested`, `destructive`, `flat`, `disabled`, `icon-name`, `circular`. Text content goes inside the tags.
 -   **JS Factory:** `Adw.createButton(text, options = {})`
     - `text`: `string` - Text displayed on the button.
     - `options`: `object` (corresponds to HTML attributes)
         - `onClick`: `function` - Callback for click events.
-        - `suggested`, `destructive`, `flat`, `disabled`, `icon`, `isCircular` (maps to `circular`), `href`.
+        - `suggested`, `destructive`, `flat`, `disabled`, `iconName`, `isCircular` (maps to `circular`), `href`. (Note: `icon` option is deprecated).
 
 ### Entries (`<adw-entry>` / `Adw.createEntry()`)
 
@@ -297,8 +287,8 @@ Creates a modal dialog. Declarative dialogs are defined in HTML and opened/close
     Attributes for `<adw-dialog>`: `title`, `open`, `close-on-backdrop-click`. Content and buttons are slotted.
 -   **JS Factory (Imperative Dialog):** `Adw.createDialog(options = {})`
     - `options`: `title`, `content` (HTMLElement/string), `buttons` (HTMLElement[]), `onClose`, `closeOnBackdropClick`.
-    - Returns: `{ dialog, open, close }`. Useful for quick, dynamic dialogs.
-    - **Specialized Dialog Factories:** `Adw.createAlertDialog()`, `Adw.createAboutDialog()`, `Adw.createPreferencesDialog()` are also available for common dialog patterns.
+    - Returns: The created `<adw-dialog>` Web Component instance. Call `dialogInstance.open()` and `dialogInstance.close()` on it.
+    - **Specialized Dialog Factories:** `Adw.createAlertDialog()`, `Adw.createAboutDialog()`, `Adw.createPreferencesDialog()` are also available and return their respective Web Component instances.
 
 ### Toasts (`Adw.createToast()`)
 
@@ -368,7 +358,7 @@ Creates a two-pane layout with a collapsible "flap" panel.
     Attributes: `folded`, `reveal-duration`, `sidebar-position` ('start'/'end'), `swipe-to-open`, `swipe-to-close`. Content is slotted.
 -   **JS Factory:** `Adw.createFlap(options = {})`
     - `options`: `flapContent`, `mainContent`, `isFolded` (maps to `folded`), etc.
-    - Returns `{ element, toggleFlap, isFolded, setFolded }`.
+    - Returns: The created `<adw-flap>` Web Component instance. Call methods like `toggle()` on the instance.
   ```
 
 ### Specialized ListBox Rows

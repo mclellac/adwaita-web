@@ -163,7 +163,7 @@ export class AdwButton extends HTMLElement {
             );
 
             const iconElement = Adw.createIcon(iconNameAttr, {
-                alt: hasTextContent ? undefined : (isCircular ? 'icon' : this.textContent.trim() || 'icon')
+                alt: hasTextContent ? undefined : (this.getAttribute('aria-label') || this.textContent.trim() || (isCircular ? 'icon' : 'button icon'))
             });
             internalButton.insertBefore(iconElement, internalButton.firstChild);
         } else if (iconAttr) { // Fallback to old icon logic (deprecated)

@@ -221,7 +221,7 @@ export class AdwDialog extends HTMLElement {
             // Nullify them so they are rebuilt on next open, picking up any attribute changes.
             this._dialogElement = null;
             this._backdropElement = null;
-        }, 300); // Match CSS transition
+        }, 160); // Match CSS transition (0.15s = 150ms, add a little buffer)
 
         if (this.hasAttribute('open')) this.removeAttribute('open');
         this.dispatchEvent(new CustomEvent('close', {bubbles: true, composed: true}));

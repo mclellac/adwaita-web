@@ -27,7 +27,7 @@ Adw.Dialog.factory(options = {}) -> AdwDialogElement
 
 **Returns:**
 
-*   `(AdwDialogElement)`: The created `<adw-dialog>` Web Component instance.
+*   `(AdwDialogElement)`: The created `<adw-dialog>` Web Component instance. Call methods like `open()` and `close()` on this instance.
 
 **Example:**
 
