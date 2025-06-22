@@ -8,15 +8,21 @@
     <form method="POST" action="{{ url_for('create_post') }}" novalidate>
         {{ form.hidden_tag() }} {# CSRF token #}
         <adw-list-box style="margin-bottom: var(--spacing-l);">
-            <adw-entry-row
-                title="{{ form.title.label.text }}"
-                name="{{ form.title.name }}"
-                id="{{ form.title.id or 'title_field' }}"
-                placeholder="Enter post title"
-                value="{{ form.title.data or '' }}"
-                {% if form.title.flags.required %}required{% endif %}
-                subtitle="{{ form.title.errors[0] if form.title.errors else '' }}">
-            </adw-entry-row>
+            {# Replace adw-entry-row with direct form field rendering for title #}
+            <div class="adw-preferences-row" style="padding: var(--spacing-s) var(--spacing-m);">
+                <div class="adw-preferences-row__title-area">
+                    {{ form.title.label(class_="adw-label") }}
+                </div>
+                <div class="adw-preferences-row__control-area" style="flex-grow: 1;">
+                    {{ form.title(class_="adw-entry", style="width: 100%;", placeholder="Enter post title", required=form.title.flags.required) }}
+                </div>
+                {% if form.title.errors %}
+                <div class="adw-preferences-row__title-area"></div> {# Spacer for alignment #}
+                <div class="adw-preferences-row__control-area errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xxs);">
+                    {% for error in form.title.errors %}{{ error }}<br>{% endfor %}
+                </div>
+                {% endif %}
+            </div>
 
             {# Content Field - using a generic row structure inside list-box #}
             <div class="adw-row" style="padding: var(--spacing-s) var(--spacing-m); display: flex; flex-direction: column;">

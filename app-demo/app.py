@@ -440,15 +440,21 @@ def create_app(config_overrides=None):
             current_user.website_url = form.website_url.data
             _app.logger.info(f"User {current_user.username} updating profile_info, full_name, location, website_url.")
 
-            file = form.profile_photo.data
-            _app.logger.info(f"Profile edit: form.profile_photo.data object: {type(file)}")
-            if file:
-                 _app.logger.info(f"Profile edit: file object received: {file}, filename: '{file.filename}'")
-            else:
-                _app.logger.info("Profile edit: No file object received in form.profile_photo.data.")
+            file = form.profile_photo.data # This is a FileStorage object
+            _app.logger.info(f"Profile edit: form.profile_photo.data is of type: {type(file)}")
 
-            if file and file.filename:
-                _app.logger.info(f"Profile edit: Attempting to process file: '{file.filename}'")
+            if file is not None: # Check if FileStorage object exists
+                _app.logger.info(f"Profile edit: FileStorage object received: {file}")
+                _app.logger.info(f"Profile edit: FileStorage object's filename attribute: '{file.filename}'") # This is key
+            else:
+                # This case should ideally not happen if the field is in the form,
+                // even if no file is selected, 'file' should be a FileStorage obj with empty filename.
+                # But good to log if it's truly None.
+                _app.logger.warning("Profile edit: form.profile_photo.data is None. This is unexpected.")
+
+
+            if file and file.filename: # This is the crucial check: FileStorage exists AND has a non-empty filename
+                _app.logger.info(f"Profile edit: Proceeding to process file: '{file.filename}'")
                 is_allowed = allowed_file(file.filename)
                 _app.logger.info(f"Profile edit: File '{file.filename}' allowed: {is_allowed}")
                 if is_allowed:
