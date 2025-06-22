@@ -35,7 +35,7 @@ export function createAdwBox(options = {}) {
 
 export class AdwBox extends HTMLElement {
     static get observedAttributes() { return ['orientation', 'spacing', 'align', 'justify', 'fill-children']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); }
     connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
     _render() {
@@ -108,7 +108,7 @@ export function createAdwWindow(options = {}) {
 }
 
 export class AdwApplicationWindow extends HTMLElement {
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); }
     connectedCallback() { this._render(); }
     _render() {
         while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) this.shadowRoot.removeChild(this.shadowRoot.lastChild);
@@ -169,7 +169,7 @@ export class AdwFlap extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
         this.shadowRoot.appendChild(styleLink);
         this._factoryInstance = null; // Will hold the {element, methods} from factory
     }
@@ -254,7 +254,7 @@ export function createAdwBin(options = {}) {
     return bin;
 }
 export class AdwBin extends HTMLElement {
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; const binDiv = document.createElement('div'); binDiv.classList.add('adw-bin'); const slot = document.createElement('slot'); binDiv.appendChild(slot); this.shadowRoot.append(styleLink, binDiv); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ const binDiv = document.createElement('div'); binDiv.classList.add('adw-bin'); const slot = document.createElement('slot'); binDiv.appendChild(slot); this.shadowRoot.append(styleLink, binDiv); }
 }
 
 /** Creates an AdwWrapBox container. */
@@ -270,7 +270,7 @@ export function createAdwWrapBox(options = {}) {
 }
 export class AdwWrapBox extends HTMLElement {
     static get observedAttributes() { return ['orientation', 'spacing', 'line-spacing', 'align', 'justify']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this._wrapBoxElement = document.createElement('div'); this._wrapBoxElement.classList.add('adw-wrap-box'); const slot = document.createElement('slot'); this._wrapBoxElement.appendChild(slot); this.shadowRoot.append(styleLink, this._wrapBoxElement); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this._wrapBoxElement = document.createElement('div'); this._wrapBoxElement.classList.add('adw-wrap-box'); const slot = document.createElement('slot'); this._wrapBoxElement.appendChild(slot); this.shadowRoot.append(styleLink, this._wrapBoxElement); }
     connectedCallback() { this._updateStyles(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._updateStyles(); }
     _updateStyles() { const opts = {}; if (this.hasAttribute('orientation')) opts.orientation = this.getAttribute('orientation'); if (this.hasAttribute('spacing')) opts.spacing = this.getAttribute('spacing'); if (this.hasAttribute('line-spacing')) opts.lineSpacing = this.getAttribute('line-spacing'); if (this.hasAttribute('align')) opts.align = this.getAttribute('align'); if (this.hasAttribute('justify')) opts.justify = this.getAttribute('justify'); this._wrapBoxElement.style.display = 'flex'; this._wrapBoxElement.style.flexWrap = 'wrap'; if (opts.orientation === 'vertical') this._wrapBoxElement.style.flexDirection = 'column'; else this._wrapBoxElement.style.flexDirection = 'row'; let gapValue = "var(--spacing-m)"; if (opts.spacing) gapValue = isNaN(parseFloat(opts.spacing)) ? opts.spacing : `${parseFloat(opts.spacing)}px`; let rowGapValue = gapValue; if (opts.lineSpacing) rowGapValue = isNaN(parseFloat(opts.lineSpacing)) ? opts.lineSpacing : `${parseFloat(opts.lineSpacing)}px`; if (rowGapValue !== gapValue) { this._wrapBoxElement.style.rowGap = rowGapValue; this._wrapBoxElement.style.columnGap = gapValue; } else { this._wrapBoxElement.style.gap = gapValue; delete this._wrapBoxElement.style.rowGap; delete this._wrapBoxElement.style.columnGap;} const flexAlignMap = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch', baseline: 'baseline' }; this._wrapBoxElement.style.alignItems = flexAlignMap[opts.align] || flexAlignMap.start; const flexJustifyMap = { start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between', around: 'space-around', evenly: 'space-evenly' }; this._wrapBoxElement.style.justifyContent = flexJustifyMap[opts.justify] || flexJustifyMap.start; }
@@ -288,7 +288,7 @@ export function createAdwClamp(options = {}) {
 }
 export class AdwClamp extends HTMLElement {
     static get observedAttributes() { return ['maximum-size', 'scrollable']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this._clampElement = document.createElement('div'); this._clampElement.classList.add('adw-clamp'); this._childWrapper = document.createElement('div'); this._childWrapper.classList.add('adw-clamp-child-wrapper'); const slot = document.createElement('slot'); this._childWrapper.appendChild(slot); this._clampElement.appendChild(this._childWrapper); this.shadowRoot.append(styleLink, this._clampElement); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this._clampElement = document.createElement('div'); this._clampElement.classList.add('adw-clamp'); this._childWrapper = document.createElement('div'); this._childWrapper.classList.add('adw-clamp-child-wrapper'); const slot = document.createElement('slot'); this._childWrapper.appendChild(slot); this._clampElement.appendChild(this._childWrapper); this.shadowRoot.append(styleLink, this._clampElement); }
     connectedCallback() { this._updateStyles(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._updateStyles(); }
     _updateStyles() { this._childWrapper.style.maxWidth = this.getAttribute('maximum-size') || '80ch'; this._clampElement.style.display = 'flex'; this._clampElement.style.justifyContent = 'center'; if (this.hasAttribute('scrollable')) { this._clampElement.classList.add('scrollable'); this._clampElement.style.overflowX = 'hidden'; this._clampElement.style.overflowY = 'auto'; this._childWrapper.style.width = '100%'; } else { this._clampElement.classList.remove('scrollable'); this._clampElement.style.overflowX = ''; this._clampElement.style.overflowY = ''; this._childWrapper.style.width = '';}}
@@ -315,7 +315,7 @@ export function createAdwBreakpointBin(options = {}) {
 export class AdwBreakpointBin extends HTMLElement {
     static get observedAttributes() { return ['default-child-name']; }
     constructor() { super(); this._slotObserver = new MutationObserver(() => this._rebuildChildren()); this._resizeObserver = null; this._sortedChildrenConfig = []; this._defaultChildElement = null; this._currentVisibleElement = null; }
-    connectedCallback() { this.attachShadow({mode: 'open'}); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); const slot = document.createElement('slot'); this.shadowRoot.appendChild(slot); slot.addEventListener('slotchange', () => this._rebuildChildren()); this._rebuildChildren(); }
+    connectedCallback() { this.attachShadow({mode: 'open'}); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); const slot = document.createElement('slot'); this.shadowRoot.appendChild(slot); slot.addEventListener('slotchange', () => this._rebuildChildren()); this._rebuildChildren(); }
     disconnectedCallback() { if (this._resizeObserver) this._resizeObserver.disconnect(); this._slotObserver.disconnect(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue === newValue) return; if (name === 'default-child-name') this._rebuildChildren(); }
     _rebuildChildren() {
@@ -464,7 +464,7 @@ export class AdwToastOverlay extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
         styleLink.rel = 'stylesheet';
-        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
 
         this._overlayElement = createAdwToastOverlay({ child: document.createElement('slot') });
         this.shadowRoot.append(styleLink, this._overlayElement);

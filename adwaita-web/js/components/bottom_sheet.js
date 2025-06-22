@@ -30,7 +30,7 @@ export class AdwBottomSheet extends HTMLElement {
         styleLink.rel = 'stylesheet';
         styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath)
             ? Adw.config.cssPath
-            : '/static/css/adwaita-web.css'; // Fallback for when Adw path is not set
+            : ''; /* Expect Adw.config.cssPath to be set */
 
         this._backdropElement = document.createElement('div');
         this._backdropElement.classList.add('backdrop');

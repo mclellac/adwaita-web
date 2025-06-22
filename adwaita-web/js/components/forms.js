@@ -48,7 +48,7 @@ export class AdwEntry extends HTMLElement {
         this.internals_ = this.attachInternals(); // Needed for setFormValue
 
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
         this.shadowRoot.appendChild(styleLink);
         this._inputElement = null;
         this._initialValue = this.getAttribute('value') || ''; // Store initial value for form reset
@@ -344,7 +344,7 @@ export class AdwSpinButton extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
         this.shadowRoot.appendChild(styleLink);
 
         this._spinButtonElement = null;

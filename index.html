@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adwaita Web - Declarative Demo</title>
+    <script>
+        // Initialize Adw.config for components
+        window.Adw = window.Adw || {};
+        window.Adw.config = {
+            cssPath: 'build/css/adwaita-web.css', // Relative to this HTML file
+            iconBasePath: 'build/data/icons/symbolic/' // Relative to this HTML file
+        };
+    </script>
     <link rel="stylesheet" href="build/css/adwaita-web.css">
     <script type="module" src="build/js/components.js" defer></script>
     <style>
