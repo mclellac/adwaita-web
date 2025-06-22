@@ -1,78 +1,176 @@
-// scss/_bottom_sheet.scss
-@use 'variables';
+@use "variables";
+@use "mixins";
 
-.adw-bottom-sheet-backdrop {
+:host {
+  display: block;
+  position: relative;
+  // overflow: hidden; // Can hide transitions if not careful, manage overflow on specific inner elements.
+}
+
+.backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.25); // Similar to dialog backdrop
-  z-index: var(--z-index-modal-backdrop, 400);
+  background-color: rgba(0, 0, 0, 0.3);
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
   visibility: hidden;
-
-  &.visible {
-    opacity: 1;
-    visibility: visible;
-  }
+  transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s; // Delay visibility change until end of opacity
+  z-index: calc(var(--z-index-dialog) - 1);
 }
 
-.adw-bottom-sheet {
-  position: fixed;
+:host(.is-modal.is-open) .backdrop {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+// Main content slot (default slot) - this is the persistent content of the page where bottom sheet is used
+// ::slotted(*) {} // No specific style needed for the default slot wrapper itself from here. Host styling applies.
+
+.bottom-bar-area {
+  position: sticky; // Sticky to the bottom of the host, or fixed if host is full viewport
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: var(--popover-bg-color); // Popover bg is often good for transient surfaces
-  color: var(--popover-fg-color);
-  border-top-left-radius: var(--border-radius-large);
-  border-top-right-radius: var(--border-radius-large);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
-  z-index: var(--z-index-modal, 401); // Above backdrop
-  transform: translateY(100%);
-  transition: transform 0.3s ease-in-out;
-  visibility: hidden;
-  max-height: 80vh; // Prevent full screen takeover on large content
+  background-color: var(--popover-bg-color, var(--window-bg-color));
+  border-top: 1px solid var(--borders-color);
+  box-shadow: var(--popover-box-shadow);
+  z-index: 2;
+  transition: transform 0.25s ease-in-out, visibility 0.25s ease-in-out;
+  transform: translateY(0%);
+  visibility: visible;
+
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-s);
+  gap: var(--spacing-s);
+  min-height: var(--adw-bottom-bar-min-height, 48px);
+}
+
+:host([reveal-bottom-bar="false"]) .bottom-bar-area,
+:host(.is-open) .bottom-bar-area {
+    transform: translateY(100%);
+    visibility: hidden;
+}
+
+.sheet-area {
+  position: fixed;
+  bottom: 0;
+  // Alignment and width are handled by JS based on full-width and align attributes
+  // Default to full-width behavior here, JS will add inline styles for other cases if needed or classes.
+  left: 0;
+  right: 0;
+  width: 100%;
+
+  background-color: var(--popover-bg-color, var(--window-bg-color));
+  border-top-left-radius: var(--popover-border-radius, var(--border-radius-lg));
+  border-top-right-radius: var(--popover-border-radius, var(--border-radius-lg));
+  box-shadow: var(--popover-box-shadow);
+
   display: flex;
   flex-direction: column;
+  max-height: var(--adw-bottom-sheet-max-height, 80vh);
+  overflow: hidden; // Children will handle their own scroll
 
-  // Optional: Handle for dragging/swiping (visual cue)
-  // &::before {
-  //   content: "";
-  //   display: block;
-  //   width: 40px;
-  //   height: 4px;
-  //   background-color: var(--border-color-light); // Or a specific handle color
-  //   border-radius: 2px;
-  //   margin: var(--spacing-s) auto;
-  //   opacity: 0.5;
-  // }
+  transform: translateY(100%);
+  transition: transform 0.25s ease-in-out, visibility 0s linear 0.25s;
+  visibility: hidden;
+  z-index: var(--z-index-dialog);
 
-  &.visible {
-    transform: translateY(0);
-    visibility: visible;
+  // Styles for non-full-width will be applied by JS by modifying classes/styles on .sheet-area
+  // e.g. :host(:not([full-width])) .sheet-area { width: var(--adw-bottom-sheet-width, 500px); ... }
+  // :host([align="start"]:not([full-width])) .sheet-area { left: var(--spacing-m); right: auto; transform: translateX(0) translateY(100%);}
+  // :host([align="center"]:not([full-width])) .sheet-area { left: 50%; right: auto; transform: translateX(-50%) translateY(100%);}
+  // :host([align="end"]:not([full-width])) .sheet-area { left: auto; right: var(--spacing-m); transform: translateX(0) translateY(100%);}
+}
+
+:host(.is-open) .sheet-area { // .visible class removed, rely on :host(.is-open)
+  transform: translateY(0);
+  visibility: visible;
+  transition-delay: 0s;
+}
+// :host(.is-open[align="start"]:not([full-width])) .sheet-area { transform: translateX(0) translateY(0); }
+// :host(.is-open[align="center"]:not([full-width])) .sheet-area { transform: translateX(-50%) translateY(0); }
+// :host(.is-open[align="end"]:not([full-width])) .sheet-area { transform: translateX(0) translateY(0); }
+
+
+.drag-handle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-s) 0;
+  cursor: grab;
+  flex-shrink: 0; // Prevent shrinking
+
+  &::before {
+    content: "";
+    display: block;
+    width: 32px;
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--secondary-text-color);
+    opacity: 0.6;
   }
 
-  // The content passed to the factory is directly appended.
-  // If that content needs scrolling, it should handle it internally or have a wrapper.
-  // For example, if the factory wraps opts.content in a div:
-  // > div { // Assuming the factory wraps content in a direct child div
-  //   overflow-y: auto;
-  //   padding: var(--spacing-l); // Padding for the content area
-  // }
-  // If opts.content itself is expected to be the scrollable area:
-  > *:first-child { // Assuming the passed content is the first child
-    overflow-y: auto;
-    padding: var(--spacing-l); // Common padding
-    // Potentially add padding-bottom to account for device navigation bars if needed (hard to do universally)
+  &:active {
+    cursor: grabbing;
   }
 }
 
-.dark-theme .adw-bottom-sheet,
-body.dark-theme .adw-bottom-sheet {
-  // box-shadow: 0 -2px 10px rgba(0,0,0, 0.3); // Darker shadow for dark theme
-  // &::before {
-  //   background-color: var(--border-color-dark);
-  // }
+:host([show-drag-handle="false"]) .drag-handle {
+    display: none;
+}
+
+// Slot for sheet content
+::slotted([slot="sheet"]) {
+  padding: var(--spacing-s) var(--spacing-m) var(--spacing-m);
+  flex-grow: 1;
+  overflow-y: auto; // The content itself should scroll if it's too long
+}
+
+// Slot for bottom-bar content
+::slotted([slot="bottom-bar"]) {
+    display: contents; // Allow slotted items to participate in flex layout of .bottom-bar-area
+}
+
+// Adjustments when not full-width (can be driven by attributes via JS or more complex CSS)
+:host(:not([full-width])) .sheet-area {
+    width: var(--adw-bottom-sheet-width, 500px); // Example width
+    max-width: 90vw;
+    // Alignment will be tricky with fixed position and transform.
+    // JS might be better to calculate left/right for center/end.
+    // For now, CSS attempts:
+    &[data-align="center"] {
+        left: 50%;
+        transform: translateX(-50%) translateY(100%); // Initial pos
+    }
+     &[data-align="end"] {
+        left: auto;
+        right: var(--spacing-m, 12px);
+         transform: translateY(100%); // Initial pos
+    }
+     &[data-align="start"] {
+        left: var(--spacing-m, 12px);
+        right: auto;
+         transform: translateY(100%); // Initial pos
+    }
+}
+:host(.is-open:not([full-width])) .sheet-area {
+    &[data-align="center"] { transform: translateX(-50%) translateY(0); }
+    &[data-align="end"] { transform: translateY(0); }
+    &[data-align="start"] { transform: translateY(0); }
+}
+
+// Hide bottom bar area if reveal-bottom-bar is false
+:host([reveal-bottom-bar="false"]) .bottom-bar-area {
+    display: none;
 }

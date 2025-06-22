@@ -2,71 +2,62 @@
 
 A Box is a fundamental layout container that arranges its child elements in a single line, either horizontally or vertically. It's based on CSS Flexbox. Adwaita-Web provides `Adw.createBox()` and the `<adw-box>` Web Component.
 
-## JavaScript Factory: `Adw.createBox()`
+## JavaScript Factory: `Adw.Box.factory()` or `createAdwBox()`
 
-Creates an Adwaita-styled box container.
+Creates an `<adw-box>` Web Component instance.
 
 **Signature:**
 
 ```javascript
-Adw.createBox(options = {}) -> HTMLDivElement
+Adw.Box.factory(options = {}) -> AdwBoxElement // Assuming AdwBoxElement is the class for <adw-box>
+// or createAdwBox(options = {}) -> AdwBoxElement
 ```
 
 **Parameters:**
 
-*   `options` (Object, optional): Configuration options:
-    *   `orientation` (String, optional): Flex direction. Can be `"horizontal"`
-        (default) or `"vertical"`.
-    *   `align` (String, optional): `align-items` value. Common values: `"start"`,
-        `"center"`, `"end"`, `"stretch"`, `"baseline"`.
-    *   `justify` (String, optional): `justify-content` value. Common values:
-        `"start"`, `"center"`, `"end"`, `"between"` (space-between),
-        `"around"` (space-around), `"evenly"` (space-evenly).
-    *   `spacing` (String, optional): Gap spacing between children. Maps to Adwaita
-        spacing variables (e.g., `"xs"`, `"s"`, `"m"`, `"l"`, `"xl"`) or a direct
-        CSS value like `"10px"`. If using predefined spacing like "m", it
-        typically maps to a CSS variable like `var(--spacing-m)`.
-    *   `fillChildren` (Boolean, optional): If `true`, children will grow to fill
-        available space along the main axis (applies `flex-grow: 1` to children
-        via a class). Defaults to `false`.
-    *   `children` (Array<HTMLElement>, optional): An array of HTML elements to
-        append as children to the box. *Security: Ensure children are trusted or
-        sanitized if user-generated.*
+*   `options` (Object, optional): Configuration options, mapped to attributes of the `<adw-box>`:
+    *   `orientation` (String, optional): Sets the `orientation` attribute (`"horizontal"` or `"vertical"`).
+    *   `align` (String, optional): Sets the `align` attribute (e.g., `"start"`, `"center"`, `"end"`).
+    *   `justify` (String, optional): Sets the `justify` attribute (e.g., `"start"`, `"center"`, `"between"`).
+    *   `spacing` (String, optional): Sets the `spacing` attribute (e.g., `"s"`, `"m"`, or a CSS value).
+    *   `fillChildren` (Boolean, optional): If `true`, sets the `fill-children` attribute.
+    *   `children` (Array<Node>, optional): An array of DOM nodes to append as children to the created `<adw-box>` element. These will be handled by the default slot.
 
 **Returns:**
 
-*   `(HTMLDivElement)`: The created `<div>` element representing the box.
+*   `(AdwBoxElement)`: The created `<adw-box>` Web Component instance.
 
 **Example:**
 
 ```html
 <div id="js-box-container"></div>
 <script>
+  // Assuming createAdwBox is globally available or Adw.Box.factory
   const container = document.getElementById('js-box-container');
 
   // Horizontal box with spacing and centered alignment
-  const hbox = Adw.createBox({
+  const hbox = createAdwBox({
     orientation: "horizontal",
-    spacing: "m", // uses var(--spacing-m)
-    align: "center",
-    children: [
-      Adw.createButton("Button 1"),
-      Adw.createLabel("Some Text"),
-      Adw.createEntry({ placeholder: "Input..." })
-    ]
+    spacing: "m",
+    align: "center"
   });
+  // Append children (which are now also Web Components or standard elements)
+  hbox.appendChild(createAdwButton("Button 1")); // Assuming createAdwButton exists
+  const label = document.createElement('adw-label'); // Example: createAdwLabel might not exist yet
+  label.textContent = "Some Text";
+  hbox.appendChild(label);
+  // hbox.appendChild(createAdwEntry({ placeholder: "Input..." })); // If createAdwEntry exists
   container.appendChild(hbox);
 
   // Vertical box
-  const vbox = Adw.createBox({
+  const vbox = createAdwBox({
     orientation: "vertical",
     spacing: "s",
-    fillChildren: true, // Children will try to expand vertically
-    children: [
-      Adw.createButton("Top Button (fills)"),
-      Adw.createButton("Bottom Button (fills)")
-    ]
+    fillChildren: true // Sets the fill-children attribute
   });
+  vbox.appendChild(createAdwButton("Top Button (fills)"));
+  vbox.appendChild(createAdwButton("Bottom Button (fills)"));
+
   vbox.style.height = "150px"; // Give vbox a height to see fillChildren effect
   vbox.style.border = "1px solid var(--borders-color)";
   container.appendChild(vbox);

@@ -2,48 +2,47 @@
 
 An AdwToggleButton is a button that maintains an active (pressed) or inactive state. It's often used for options that can be turned on or off, or as part of an `AdwToggleGroup` where only one button can be active at a time.
 
-## JavaScript Factory: `Adw.createAdwToggleButton()`
+## JavaScript Factory: `Adw.ToggleButton.factory()` or `createAdwToggleButton()`
 
-Creates an Adwaita-styled toggle button.
+Creates an `<adw-toggle-button>` Web Component instance.
 
 **Signature:**
 
 ```javascript
-Adw.createAdwToggleButton(text, options = {}) -> HTMLButtonElement (with methods)
+Adw.ToggleButton.factory(text, options = {}) -> AdwToggleButtonElement
+// or createAdwToggleButton(text, options = {}) -> AdwToggleButtonElement
 ```
 
 **Parameters:**
 
-*   `text` (String): The text content of the button.
-*   `options` (Object, optional): Configuration options, extending
-    `Adw.createButton` options:
-    *   `active` (Boolean, optional): Initial active state. Defaults to `false`.
-    *   `onToggled` (Function, optional): Callback when the button is toggled by
-        user interaction or programmatically if `fireCallback` is true in
-        `setActive`. Receives `(isActive: boolean, value?: string)`.
-    *   `value` (String, optional): A value associated with the button, useful when
-        part of a group.
-    *   Other `Adw.createButton` options like `icon`, `flat` (defaults to `true`),
-        `suggested`, `destructive`, `disabled`, `isCircular` are also applicable.
+*   `text` (String, optional): Text content for the button. Sets the `label` attribute if provided, otherwise the component uses its textContent.
+*   `options` (Object, optional): Configuration options, mapped to attributes of the `<adw-toggle-button>`:
+    *   `active` (Boolean, optional): Sets the `active` attribute. Defaults to `false`.
+    *   `onToggled` (Function, optional): Callback function for the `toggled` event. Receives an event with `event.detail = { isActive: boolean, value?: string }`.
+    *   `value` (String, optional): Sets the `value` attribute.
+    *   `iconName` (String, optional): Name of an Adwaita icon. Sets the `icon-name` attribute.
+    *   `icon` (String, optional): **Deprecated.** Use `iconName`.
+    *   `flat` (Boolean, optional): If `false`, sets `flat="false"`. Otherwise, it's flat by default.
+    *   `suggested`, `destructive`, `disabled`, `circular`: Boolean attributes.
 
 **Returns:**
 
-*   `(HTMLButtonElement)`: The created toggle button element. It's augmented with methods:
-    *   `setActive(state: boolean, fireCallback?: boolean)`: Programmatically sets the active state. `fireCallback` defaults to `true`.
-    *   `isActive() -> boolean`: Returns the current active state.
+*   `(AdwToggleButtonElement)`: The created `<adw-toggle-button>` Web Component instance.
 
 **Example:**
 
 ```html
 <div id="js-togglebutton-container" style="display: flex; gap: 10px; padding: 10px;"></div>
 <script>
+  // Assuming createAdwToggleButton is globally available
   const container = document.getElementById('js-togglebutton-container');
 
   // Standalone ToggleButton
-  const boldToggle = Adw.createAdwToggleButton("B", {
-    // icon: "format-text-bold-symbolic", // Example if using icon font
+  const boldToggle = createAdwToggleButton("B", {
+    iconName: "format-text-bold-symbolic",
     value: "bold",
-    onToggled: (isActive, value) => {
+    onToggled: (event) => { // Event listener for 'toggled'
+      const { isActive, value } = event.detail;
       const state = isActive ? 'ON' : 'OFF';
       Adw.createToast(`Bold is now ${state} (Value: ${value})`);
       document.body.style.fontWeight = isActive ? 'bold' : 'normal'; // Demo effect
@@ -52,16 +51,16 @@ Adw.createAdwToggleButton(text, options = {}) -> HTMLButtonElement (with methods
   container.appendChild(boldToggle);
 
   // Another toggle, initially active
-  const italicToggle = Adw.createAdwToggleButton("I", {
-    active: true,
+  const italicToggle = createAdwToggleButton("I", {
+    active: true, // Sets the 'active' attribute
     value: "italic",
-    onToggled: (isActive) => Adw.createToast(`Italic is ${isActive ? 'ON' : 'OFF'}`)
+    onToggled: (event) => Adw.createToast(`Italic is ${event.detail.isActive ? 'ON' : 'OFF'}`)
   });
   container.appendChild(italicToggle);
 
-  // Programmatically toggle after a delay
+  // Programmatically toggle after a delay by setting the 'active' attribute/property
   setTimeout(() => {
-    if (boldToggle.setActive) boldToggle.setActive(true); // Programmatically activate bold
+    boldToggle.active = true; // Or boldToggle.setAttribute('active', '');
   }, 2000);
 </script>
 ```
@@ -74,37 +73,38 @@ A declarative way to define Adwaita toggle buttons.
 
 **Attributes:**
 
-*   `label` (String, optional): Text for the button. If not provided, uses text content.
-*   `active` (Boolean, optional): Initial active state.
-*   `disabled` (Boolean, optional): Disables the button.
+*   `label` (String, optional): Text for the button. If not provided, the component uses its textContent (default slot).
+*   `active` (Boolean attribute): Presence indicates the active/pressed state.
+*   `disabled` (Boolean attribute): Presence disables the button.
 *   `value` (String, optional): A value associated with the button.
-*   `icon` (String, optional): HTML for an icon.
-*   `flat` (Boolean, optional): Default `true`. Set to `"false"` for a non-flat toggle button.
-*   `suggested`, `destructive`, `circular`: Standard button styling attributes.
+*   `icon-name` (String, optional): Name of an Adwaita icon (e.g., `format-text-bold-symbolic`).
+*   `icon` (String, optional): **Deprecated.** Use `icon-name`.
+*   `flat` (String, optional): Defaults to being flat. Set `flat="false"` for a non-flat (raised) toggle button.
+*   `suggested`, `destructive`, `circular`: Standard boolean button styling attributes.
 
 **Properties:**
 
-*   `active` (Boolean): Gets or sets the active state.
-*   `value` (String): Gets or sets the button's value.
+*   `active` (Boolean): Gets or sets the active state (reflects the `active` attribute).
+*   `value` (String): Gets or sets the button's value (reflects the `value` attribute).
 
 **Events:**
 
-*   `toggled`: Fired when the button's active state changes due to user
-    interaction or programmatic change that fires callbacks. `event.detail`
-    contains `{ isActive: boolean, value?: string }`.
-*   `adw-toggle-button-clicked`: (Internal) Fired on click, primarily for
-    `AdwToggleGroup` to manage state. `event.detail` contains
-    `{ value?: string, currentState: boolean }`.
+*   `toggled`: Fired when the button's `active` state changes. `event.detail` contains `{ isActive: boolean, value?: string }`.
+*   `toggle-intent`: Fired on click before the state changes. This event is `cancelable`. If `event.preventDefault()` is called by a listener (e.g., an `adw-toggle-group`), the button will not toggle its own state. `event.detail` contains `{ value?: string, currentState: boolean }`.
+
+**Slots:**
+
+*   Default slot: Content for the button, typically text. Takes precedence over the `label` attribute.
 
 **Example:**
 
 ```html
 <div style="display: flex; gap: 10px; padding: 10px;">
-  <adw-toggle-button label="Mute" value="mute" id="mute-toggle">
-    <!-- Icon could be slotted or via attribute -->
+  <adw-toggle-button value="mute" id="mute-toggle" icon-name="audio-volume-muted-symbolic">
+    Mute
   </adw-toggle-button>
 
-  <adw-toggle-button active value="notifications" icon="<svg viewBox='0 0 16 16'><!-- Bell icon --><path d='M8 16a2 2 0 001.92-1.45L8 12.9l-1.92 1.65A2 2 0 008 16zm6-4.77V8.5a6 6 0 00-4.78-5.95L9 2a1 1 0 00-2 0l-.22.55A6 6 0 002 8.5v2.73L.5 13.5V14h15v-.5L14 11.23zM4 8.5A4 4 0 018 4.5a4 4 0 014 4V11H4V8.5z'/></svg>">
+  <adw-toggle-button active value="notifications" icon-name="appointment-soon-symbolic">
     Notifications
   </adw-toggle-button>
 </div>

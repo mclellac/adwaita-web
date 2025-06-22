@@ -2,97 +2,84 @@
 
 A PreferencesDialog is used to present application settings or preferences to the user, typically organized into multiple pages or sections. It often uses a ViewSwitcher internally to navigate between these pages.
 
-## JavaScript Factory: `Adw.createPreferencesDialog()`
+## JavaScript Factory: `Adw.PreferencesDialog.factory()` or `createAdwPreferencesDialog()`
 
-Creates and manages an Adwaita-styled preferences dialog.
+Creates an `<adw-preferences-dialog>` Web Component instance.
 
 **Signature:**
 
 ```javascript
-Adw.createPreferencesDialog(options = {}) -> { dialog: HTMLDivElement, open: function, close: function }
+Adw.PreferencesDialog.factory(options = {}) -> AdwPreferencesDialogElement
+// or createAdwPreferencesDialog(options = {}) -> AdwPreferencesDialogElement
 ```
 
 **Parameters:**
 
 *   `options` (Object, optional): Configuration options:
-    *   `title` (String, optional): Title for the dialog window. Defaults to
-        "Preferences".
-    *   `pages` (Array<Object>, required): An array of page objects. Each object
-        defines a page in the preferences dialog:
-        *   `name` (String, required): A unique internal name for the page.
-        *   `title` (String, required): The display title for the page (used in
-            the ViewSwitcher button).
-        *   `pageElement` (HTMLElement, required): The HTML element that
-            constitutes the content of this preference page. This element should
-            be structured like an `AdwPreferencesPage` (see below or
-            `adw-preferences-page` Web Component).
-    *   `initialPageName` (String, optional): The `name` of the page to show
-        initially. Defaults to the first page in the `pages` array.
-    *   `onClose` (Function, optional): Callback function executed when the dialog
-        is closed.
+    *   `title` (String, optional): Sets the `title` attribute on the `<adw-preferences-dialog>`. Defaults to "Preferences".
+    *   `pages` (Array<Object>, required): An array of page objects. Each object defines a page:
+        *   `name` (String, required): Unique name for the page. Used for `initial-page-name` and for the internal view switcher.
+        *   `title` (String, required): Display title for the page tab/button.
+        *   `pageElement` (Node, required): The DOM Node representing the content of this preference page. This element should be structured appropriately (e.g., an `<adw-preferences-page>` or a `<div>` containing groups and rows). The factory will set `name` and `title` attributes on this `pageElement` if not already present and assign `slot="page"` before appending it to the `<adw-preferences-dialog>`.
+    *   `initialPageName` (String, optional): Sets the `initial-page-name` attribute.
+    *   `onClose` (Function, optional): Attached as a `close` event listener to the WC.
 
 **Returns:**
 
-*   An `Object` with the dialog instance (`dialog`), `open()` and `close()` methods.
-
-**Structure of `pageElement` (e.g., an `AdwPreferencesPage`):**
-A typical `pageElement` would be a `div` with class `adw-preferences-page` (or an `<adw-preferences-page>` element). Inside, it might contain:
-*   An `<h1>` with class `adw-preferences-page-title` (though the dialog's ViewSwitcher often handles showing the title).
-*   One or more `AdwPreferencesGroup` elements (divs with class `adw-preferences-group`), each with a title and containing rows like `AdwEntryRow`, `AdwSwitchRow`, `AdwComboRow`.
+*   `(AdwPreferencesDialogElement)`: The created `<adw-preferences-dialog>` Web Component instance.
 
 **Example:**
 
 ```html
 <div id="js-prefsdialog-trigger"></div>
 <script>
+  // Assuming createAdwPreferencesDialog and other Adwaita WCs/factories are available
   const triggerContainer = document.getElementById('js-prefsdialog-trigger');
 
   // --- Page 1: General Preferences ---
-  const generalPage = document.createElement('div'); // Simulates AdwPreferencesPage
-  generalPage.classList.add('adw-preferences-page');
-  // Group 1.1
-  const appearanceGroup = document.createElement('div'); // Simulates AdwPreferencesGroup
-  appearanceGroup.classList.add('adw-preferences-group');
-  const appearanceTitle = document.createElement('h2'); // Simulates group title
-  appearanceTitle.classList.add('adw-preferences-group-title');
-  appearanceTitle.textContent = "Appearance";
-  appearanceGroup.appendChild(appearanceTitle);
-  const switchRowOpts = { title: "Use Dark Theme", active: true,
-                          onChanged: (val) => Adw.toggleTheme(val ? 'dark' : 'light')};
-  appearanceGroup.appendChild(Adw.createSwitchRow(switchRowOpts));
-  const comboOpts = { title: "Accent Color", value: "blue",
-                      selectOptions: [{label: "Blue", value: "blue"},
-                                      {label: "Green", value: "green"}]};
-  appearanceGroup.appendChild(Adw.createComboRow(comboOpts));
+  const generalPage = document.createElement('adw-preferences-page');
+  // 'name' and 'title' will be set by the factory from pageData if not set here
+  // generalPage.setAttribute('name', 'general');
+  // generalPage.setAttribute('title', 'General');
+
+  const appearanceGroup = document.createElement('adw-preferences-group');
+  appearanceGroup.title = "Appearance"; // Assuming title property or attribute
+
+  const switchRow = document.createElement('adw-switch-row');
+  switchRow.title = "Use Dark Theme";
+  switchRow.active = true;
+  switchRow.addEventListener('change', (e) => Adw.toggleTheme(e.target.active ? 'dark' : 'light'));
+  appearanceGroup.appendChild(switchRow);
+
+  const comboRow = document.createElement('adw-combo-row');
+  comboRow.title = "Accent Color";
+  comboRow.selectOptions = [{label: "Blue", value: "blue"}, {label: "Green", value: "green"}];
+  comboRow.value = "blue";
+  appearanceGroup.appendChild(comboRow);
   generalPage.appendChild(appearanceGroup);
 
   // --- Page 2: Advanced Preferences ---
-  const advancedPage = document.createElement('div');
-  advancedPage.classList.add('adw-preferences-page');
-  const networkGroup = document.createElement('div');
-  networkGroup.classList.add('adw-preferences-group');
-  const networkTitle = document.createElement('h2');
-  networkTitle.classList.add('adw-preferences-group-title');
-  networkTitle.textContent = "Network Settings";
-  networkGroup.appendChild(networkTitle);
-  networkGroup.appendChild(
-    Adw.createEntryRow({ title: "Proxy Server", entryOptions: { placeholder: "e.g., 127.0.0.1:8080"} })
-  );
+  const advancedPage = document.createElement('adw-preferences-page');
+  const networkGroup = document.createElement('adw-preferences-group');
+  networkGroup.title = "Network Settings";
+  const entryRow = document.createElement('adw-entry-row');
+  entryRow.title = "Proxy Server";
+  entryRow.placeholder = "e.g., 127.0.0.1:8080";
+  networkGroup.appendChild(entryRow);
   advancedPage.appendChild(networkGroup);
 
-
-  const showPrefsBtn = Adw.createButton("Open Preferences (JS)", {
+  const showPrefsBtn = createAdwButton("Open Preferences (JS)", {
     onClick: () => {
-      const prefsDialog = Adw.createPreferencesDialog({
+      const prefsDialogWC = createAdwPreferencesDialog({
         title: "Application Settings",
         pages: [
           { name: "general", title: "General", pageElement: generalPage },
           { name: "advanced", title: "Advanced", pageElement: advancedPage }
         ],
         initialPageName: "general",
-        onClose: () => console.log("Preferences dialog closed.")
+        onClose: () => console.log("Preferences dialog (WC) closed.")
       });
-      prefsDialog.open();
+      prefsDialogWC.open();
     }
   });
   triggerContainer.appendChild(showPrefsBtn);
@@ -101,25 +88,27 @@ A typical `pageElement` would be a `div` with class `adw-preferences-page` (or a
 
 ## Web Component: `<adw-preferences-dialog>`
 
-A declarative way to define Adwaita preferences dialogs.
+A declarative way to define Adwaita preferences dialogs. This component internally uses an `<adw-dialog>` and an `<adw-view-switcher>`.
 
 **HTML Tag:** `<adw-preferences-dialog>`
 
 **Attributes:**
 
 *   `title` (String, optional): Title for the dialog window. Defaults to "Preferences".
-*   `open` (Boolean, optional): Controls visibility. Add to open, remove to close.
-*   `initial-page-name` (String, optional): The `name` of the page to show initially.
+*   `open` (Boolean attribute): Controls visibility.
+*   `initial-page-name` (String, optional): The `name` of the page (child element) to show initially.
 
 **Slots:**
 
-*   Default slot: This is where you place `<adw-preferences-page>` elements. Each `<adw-preferences-page>` should have a `name` attribute (unique) and a `title` attribute (for the switcher button).
+*   Default slot: This is where you place preference page elements (e.g., `<adw-preferences-page>`). Each child element intended as a page should have:
+    *   A `name` attribute (or `view-name`): Unique identifier for the page.
+    *   A `title` attribute (or `view-title`): Text for the navigation tab/button in the view switcher.
 
 **Events:**
 
-*   `open`: Fired when the dialog opens.
-*   `close`: Fired when the dialog closes.
-*   `page-changed`: Fired when the visible preference page changes. `event.detail` might contain `{ pageName: String }`.
+*   `open`: Fired when the dialog begins to open.
+*   `close`: Fired when the dialog has closed.
+*   `page-changed`: Fired by the internal `<adw-view-switcher>` when the visible preference page changes. `event.detail` typically contains `{ viewName: String }` (from `adw-view-switcher`). `AdwPreferencesDialog` may re-dispatch or allow this to bubble.
 
 **Methods:**
 
