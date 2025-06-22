@@ -3,3 +3,4 @@ Pillow
 Flask-Login
 Flask-SQLAlchemy
 Flask-WTF
+psycopg2-binary
