@@ -12,7 +12,7 @@
     {% if posts %}
         <div class="blog-posts-container"> {# More semantic container name #}
             {% for post in posts %}
-            <adw-box orientation="vertical" class="blog-post-card" style="margin-bottom: var(--spacing-l); padding: var(--spacing-m); border-radius: var(--border-radius-md); border: 1px solid var(--border-color); box-shadow: var(--box-shadow-sm);">
+            <adw-box orientation="vertical" class="blog-post-card" style="margin-bottom: var(--spacing-l); padding: var(--spacing-m); border-radius: var(--border-radius-md); border: 1px solid var(--border-color);">
                 <h3><a href="{{ url_for('view_post', post_id=post.id) }}" class="post-title">{{ post.title }}</a></h3>
                 <p class="post-meta" style="font-size: var(--font-size-small); color: var(--secondary-text-color);">
                     By: {{ post.author.username if post.author else 'Unknown Author' }}

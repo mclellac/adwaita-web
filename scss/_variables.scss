@@ -24,26 +24,26 @@
   --accent-bg-active-color: var(--chosen-accent-light-active-bg);
 
   // Destructive State - these are fixed, not affected by accent choice for light theme
-  --destructive-color: #c01c28;         // @destructive_color Light
-  --destructive-bg-color: #e01b24;      // @destructive_bg_color Light
-  --destructive-fg-color: #ffffff;      // @destructive_fg_color Light
+  --destructive-color: var(--adw-red-4);         // #c01c28; @destructive_color Light
+  --destructive-bg-color: var(--adw-red-3);      // #e01b24; @destructive_bg_color Light
+  --destructive-fg-color: var(--adw-light-1);      // #ffffff; @destructive_fg_color Light
   --destructive-bg-hover-color: var(--accent-red-light-bg-hover); // Custom, derived from red accent
   --destructive-bg-active-color: var(--accent-red-light-bg-active); // Custom, derived from red accent
 
   // Success State
-  --success-color: #1b8553;           // @success_color Light
-  --success-bg-color: #2ec27e;        // @success_bg_color Light
-  --success-fg-color: #ffffff;        // @success_fg_color Light
+  --success-color: #1b8553;           // @success_color Light (No direct adw-green-X match for this specific shade, use official value)
+  --success-bg-color: var(--adw-green-4);        // #2ec27e; @success_bg_color Light
+  --success-fg-color: var(--adw-light-1);        // #ffffff; @success_fg_color Light
 
   // Warning State
-  --warning-color: #9c6e03;           // @warning_color Light
-  --warning-bg-color: #e5a50a;        // @warning_bg_color Light
+  --warning-color: #9c6e03;           // @warning_color Light (No direct adw-yellow-X match, use official value)
+  --warning-bg-color: var(--adw-yellow-5);        // #e5a50a; @warning_bg_color Light
   --warning-fg-color: rgba(0, 0, 0, 0.8); // @warning_fg_color Light
 
   // Error State
-  --error-color: #c01c28;             // @error_color Light (same as destructive)
-  --error-bg-color: #e01b24;          // @error_bg_color Light (same as destructive)
-  --error-fg-color: #ffffff;          // @error_fg_color Light (same as destructive)
+  --error-color: var(--adw-red-4);             // #c01c28; @error_color Light (same as destructive)
+  --error-bg-color: var(--adw-red-3);          // #e01b24; @error_bg_color Light (same as destructive)
+  --error-fg-color: var(--adw-light-1);          // #ffffff; @error_fg_color Light (same as destructive)
 
   // Info colors (using blue accent as per common practice, though Libadwaita doesn't define specific "info" state colors)
   --info-color: var(--accent-blue-standalone); // Standalone blue
@@ -51,73 +51,74 @@
   --info-fg-color: var(--accent-blue-light-fg); // White fg
 
   // Base UI Colors from Libadwaita 1.5
+  --window-bg-color: var(--adw-light-1);          // #fafafa; @window_bg_color Light (Libadwaita uses #fafafa, adw-light-1 is #ffffff. Using #fafafa directly)
   --window-bg-color: #fafafa;                     // @window_bg_color Light
   --window-fg-color: rgba(0, 0, 0, 0.8);         // @window_fg_color Light
-  --view-bg-color: #ffffff;                       // @view_bg_color Light
+  --view-bg-color: var(--adw-light-1);                       // #ffffff; @view_bg_color Light
   --view-fg-color: rgba(0, 0, 0, 0.8);           // @view_fg_color Light
 
-  --headerbar-bg-color: var(--adw-light-2, #f6f5f4); // @headerbar_bg_color Light - slightly darker than view
+  --headerbar-bg-color: var(--adw-light-2);       // #f6f5f4; @headerbar_bg_color Light
   --headerbar-fg-color: rgba(0, 0, 0, 0.8);       // @headerbar_fg_color Light
-  --headerbar-border-color: var(--adw-light-4, #c0bfbc);   // @headerbar_border_color Light (was same as fg, now a grey)
+  --headerbar-border-color: var(--adw-light-4);   // #c0bfbc; @headerbar_border_color Light
   --headerbar-backdrop-color: #fafafa;            // @headerbar_backdrop_color Light (alias of window_bg_color)
-  --headerbar-shade-color: rgba(0, 0, 0, 0.08);   // @headerbar_shade_color Light (slightly less than 0.12)
+  --headerbar-shade-color: rgba(0, 0, 0, 0.08);   // @headerbar_shade_color Light
   --headerbar-darker-shade-color: rgba(0, 0, 0, 0.12); // @headerbar_darker_shade_color Light
 
-  --sidebar-bg-color: var(--adw-light-3, #deddda); // @sidebar_bg_color Light (was #ebebeb)
+  --sidebar-bg-color: var(--adw-light-3);         // #deddda; @sidebar_bg_color Light
   --sidebar-fg-color: rgba(0, 0, 0, 0.8);         // @sidebar_fg_color Light
-  --sidebar-backdrop-color: var(--adw-light-2, #f6f5f4); // @sidebar_backdrop_color Light (was #f2f2f2)
-  --sidebar-border-color: rgba(0, 0, 0, 0.1);     // @sidebar_border_color Light (was 0.07)
-  --sidebar-shade-color: rgba(0, 0, 0, 0.08);     // @sidebar_shade_color Light (was 0.07)
+  --sidebar-backdrop-color: var(--adw-light-2);   // #f6f5f4; @sidebar_backdrop_color Light
+  --sidebar-border-color: rgba(0, 0, 0, 0.1);     // @sidebar_border_color Light
+  --sidebar-shade-color: rgba(0, 0, 0, 0.08);     // @sidebar_shade_color Light
 
-  --secondary-sidebar-bg-color: #f3f3f3;          // @secondary_sidebar_bg_color Light (keep for now)
+  --secondary-sidebar-bg-color: var(--adw-light-2); // #f3f3f3 is close to #f6f5f4 (adw-light-2) / @sidebar_backdrop_color
   --secondary-sidebar-fg-color: rgba(0, 0, 0, 0.8); // @secondary_sidebar_fg_color Light
-  --secondary-sidebar-backdrop-color: #f6f6f6;    // @secondary_sidebar_backdrop_color Light
+  --secondary-sidebar-backdrop-color: var(--adw-light-2); // Was #f6f6f6, aligned to adw-light-2
   --secondary-sidebar-border-color: rgba(0, 0, 0, 0.07); // @secondary_sidebar_border_color Light
   --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.07);  // @secondary_sidebar_shade_color Light
 
-  --card-bg-color: #ffffff;                       // @card_bg_color Light
+  --card-bg-color: var(--adw-light-1);            // #ffffff; @card_bg_color Light
   --card-fg-color: rgba(0, 0, 0, 0.8);           // @card_fg_color Light
-  --card-shade-color: rgba(0, 0, 0, 0.06);        // @card_shade_color Light (was 0.07)
+  --card-shade-color: rgba(0, 0, 0, 0.06);        // @card_shade_color Light
 
-  --popover-bg-color: var(--adw-light-1, #ffffff); // @popover_bg_color Light
+  --popover-bg-color: var(--adw-light-1);         // #ffffff; @popover_bg_color Light
   --popover-fg-color: rgba(0, 0, 0, 0.8);        // @popover_fg_color Light
-  --popover-shade-color: rgba(0, 0, 0, 0.06);     // @popover_shade_color Light (was 0.07)
+  --popover-shade-color: rgba(0, 0, 0, 0.06);     // @popover_shade_color Light
 
-  --dialog-bg-color: #fafafa;                     // @dialog_bg_color Light
+  --dialog-bg-color: #fafafa;                     // @dialog_bg_color Light (same as window_bg_color)
   --dialog-fg-color: rgba(0, 0, 0, 0.8);         // @dialog_fg_color Light
 
-  --thumbnail-bg-color: #ffffff;                  // @thumbnail_bg_color Light
+  --thumbnail-bg-color: var(--adw-light-1);       // #ffffff; @thumbnail_bg_color Light
   --thumbnail-fg-color: rgba(0, 0, 0, 0.8);      // @thumbnail_fg_color Light
 
-  --borders-color: var(--adw-light-4, #c0bfbc);     // @borders Light (was alpha(currentColor, 0.15), now specific grey)
-  --shade-color: rgba(0, 0, 0, 0.06);             // @shade_color Light (was 0.07)
-  --scrollbar-outline-color: #ffffff;             // @scrollbar_outline_color Light
+  --borders-color: var(--adw-light-4);            // #c0bfbc; @borders Light
+  --shade-color: rgba(0, 0, 0, 0.06);             // @shade_color Light
+  --scrollbar-outline-color: var(--adw-light-1);  // #ffffff; @scrollbar_outline_color Light
 
   // Component-specific, kept from original if not directly covered by Libadwaita general colors
-  --button-bg-color: var(--adw-light-2, #f6f5f4); // Standard button background
+  --button-bg-color: var(--adw-light-2);
   --button-fg-color: rgba(0, 0, 0, 0.8);
-  --button-border-color: var(--adw-light-4, #c0bfbc); // Standard button border (was rgba(0,0,0,0.12))
-  --button-hover-bg-color: var(--adw-light-3, #deddda); // Slightly darker hover
-  --button-active-bg-color: var(--adw-light-4, #c0bfbc); // Slightly darker active
+  --button-border-color: var(--adw-light-4);
+  --button-hover-bg-color: var(--adw-light-3);
+  --button-active-bg-color: var(--adw-light-4);
 
-  --button-highlight-light: rgba(255, 255, 255, 0.7); // Subtle top highlight
-  --button-shadow-light: rgba(0, 0, 0, 0.1);       // Subtle bottom shadow line
-  --button-dropshadow-light: rgba(0, 0, 0, 0.08);   // Very subtle drop shadow
-  --button-disabled-bg-light: var(--adw-light-3, #deddda);
-  --button-disabled-fg-light: var(--adw-light-5, #9a9996);
+  --button-highlight-light: rgba(255, 255, 255, 0.7);
+  --button-shadow-light: rgba(0, 0, 0, 0.1);
+  --button-dropshadow-light: rgba(0, 0, 0, 0.08);
+  --button-disabled-bg-light: var(--adw-light-3);
+  --button-disabled-fg-light: var(--adw-light-5);
 
   --button-flat-bg-color: transparent;
   --button-flat-hover-bg-color: rgba(0, 0, 0, 0.05);
   --button-flat-active-bg-color: rgba(0, 0, 0, 0.1);
 
   --link-color: var(--accent-bg-color);
-  --link-visited-color: #5a5a5a; // Keep existing, or use a purple from palette e.g. var(--adw-purple-4)
+  --link-visited-color: var(--adw-dark-2); // #5a5a5a is adw-dark-2
 
   --progress-bar-track-color: var(--shade-color);
   --progress-bar-fill-color: var(--accent-bg-color);
 
-  --toast-bg-color: #303030;
-  --toast-fg-color: #ffffff;
+  --toast-bg-color: #303030; // Adwaita @toast_bg_color (dark surface by default)
+  --toast-fg-color: var(--adw-light-1); // #ffffff; Adwaita @toast_fg_color
   --toast-box-shadow: var(--popover-box-shadow-light);
   --secondary-text-color: rgba(0,0,0,0.7);
   --dialog-box-shadow: var(--dialog-box-shadow-light);
@@ -152,26 +153,26 @@
   --accent-bg-active-color: var(--chosen-accent-dark-active-bg);
 
   // Destructive State - these are fixed, not affected by accent choice for dark theme
-  --destructive-color: #ff7b63;         // @destructive_color Dark
-  --destructive-bg-color: #c01c28;      // @destructive_bg_color Dark
-  --destructive-fg-color: #ffffff;      // @destructive_fg_color Dark
+  --destructive-color: #ff7b63;         // @destructive_color Dark (Official value, adw-red-1 is #f66151)
+  --destructive-bg-color: var(--adw-red-4);      // #c01c28; @destructive_bg_color Dark
+  --destructive-fg-color: var(--adw-light-1);      // #ffffff; @destructive_fg_color Dark
   --destructive-bg-hover-color: var(--accent-red-dark-bg-hover); // Custom, derived from red accent
   --destructive-bg-active-color: var(--accent-red-dark-bg-active); // Custom, derived from red accent
 
   // Success State
-  --success-color: #8ff0a4;           // @success_color Dark
-  --success-bg-color: #26a269;        // @success_bg_color Dark
-  --success-fg-color: #ffffff;        // @success_fg_color Dark (Note: Libadwaita doc has #ffffff, current has #000000. Using doc.)
+  --success-color: var(--adw-green-1);           // #8ff0a4; @success_color Dark
+  --success-bg-color: var(--adw-green-5);        // #26a269; @success_bg_color Dark
+  --success-fg-color: var(--adw-light-1);        // #ffffff; @success_fg_color Dark
 
   // Warning State
-  --warning-color: #f8e45c;           // @warning_color Dark
-  --warning-bg-color: #cd9309;        // @warning_bg_color Dark
-  --warning-fg-color: rgba(0, 0, 0, 0.8); // @warning_fg_color Dark
+  --warning-color: var(--adw-yellow-2);           // #f8e45c; @warning_color Dark
+  --warning-bg-color: var(--adw-yellow-5);        // #e5a50a; @warning_bg_color Dark (Libadwaita uses #e5a50a for dark warning bg)
+  --warning-fg-color: rgba(0, 0, 0, 0.8);       // @warning_fg_color Dark
 
   // Error State
   --error-color: #ff7b63;             // @error_color Dark (same as destructive)
-  --error-bg-color: #c01c28;          // @error_bg_color Dark (same as destructive)
-  --error-fg-color: #ffffff;          // @error_fg_color Dark (same as destructive)
+  --error-bg-color: var(--adw-red-4);          // #c01c28; @error_bg_color Dark (same as destructive)
+  --error-fg-color: var(--adw-light-1);          // #ffffff; @error_fg_color Dark (same as destructive)
 
   // Info colors (using blue accent as per common practice)
   --info-color: var(--accent-blue-dark-standalone);
@@ -179,73 +180,75 @@
   --info-fg-color: var(--accent-blue-dark-fg);
 
   // Base UI Colors from Libadwaita 1.5 / Visual inspection for 1.7
-  --window-bg-color: #2b2b2b; // @window_bg_color Dark (was #242424, gallery is darker)
-  --window-fg-color: #ffffff;                     // @window_fg_color Dark
-  --view-bg-color: #222222;                       // @view_bg_color Dark (was #1e1e1e, gallery is very dark)
-  --view-fg-color: #ffffff;                       // @view_fg_color Dark
+  --window-bg-color: #242424;                     // @window_bg_color Dark
+  --window-fg-color: var(--adw-light-1);          // #ffffff; @window_fg_color Dark
+  --view-bg-color: #1e1e1e;                       // @view_bg_color Dark
+  --view-fg-color: var(--adw-light-1);            // #ffffff; @view_fg_color Dark
 
-  --headerbar-bg-color: #1f1f1f; // @headerbar_bg_color Dark (darker than typical dark Adwaita header, matches gallery more)
-  --headerbar-fg-color: #ffffff;                  // @headerbar_fg_color Dark
-  --headerbar-border-color: rgba(255, 255, 255, 0.1); // @headerbar_border_color Dark (was #ffffff, now subtle)
+  --headerbar-bg-color: #303030;                  // @headerbar_bg_color Dark
+  --headerbar-fg-color: var(--adw-light-1);       // #ffffff; @headerbar_fg_color Dark
+  --headerbar-border-color: rgba(255, 255, 255, 0.1); // @headerbar_border_color Dark
   --headerbar-backdrop-color: var(--window-bg-color); // @headerbar_backdrop_color Dark (alias of window_bg_color)
-  --headerbar-shade-color: rgba(0, 0, 0, 0.3);   // @headerbar_shade_color Dark (was 0.36)
-  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.6); // @headerbar_darker_shade_color Dark (was 0.9, softer)
+  --headerbar-shade-color: rgba(0, 0, 0, 0.3);    // @headerbar_shade_color Dark
+  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.6); // @headerbar_darker_shade_color Dark
 
-  --sidebar-bg-color: #292929; // @sidebar_bg_color Dark (was #303030)
-  --sidebar-fg-color: #ffffff;                     // @sidebar_fg_color Dark
-  --sidebar-backdrop-color: #242424;              // @sidebar_backdrop_color Dark (was #2a2a2a)
-  --sidebar-border-color: rgba(0, 0, 0, 0.25);    // @sidebar_border_color Dark (was 0.36)
-  --sidebar-shade-color: rgba(0, 0, 0, 0.2);     // @sidebar_shade_color Dark (was 0.25)
+  --sidebar-bg-color: #2a2a2a;                    // @sidebar_bg_color Dark
+  --sidebar-fg-color: var(--adw-light-1);         // #ffffff; @sidebar_fg_color Dark
+  --sidebar-backdrop-color: #242424;              // @sidebar_backdrop_color Dark
+  --sidebar-border-color: rgba(0, 0, 0, 0.25);    // @sidebar_border_color Dark
+  --sidebar-shade-color: rgba(0, 0, 0, 0.2);      // @sidebar_shade_color Dark
 
-  --secondary-sidebar-bg-color: #242424;          // @secondary_sidebar_bg_color Dark (was #2a2a2a)
-  --secondary-sidebar-fg-color: #ffffff;          // @secondary_sidebar_fg_color Dark
-  --secondary-sidebar-backdrop-color: #202020;    // @secondary_sidebar_backdrop_color Dark (was #272727)
+  --secondary-sidebar-bg-color: #242424;          // @secondary_sidebar_bg_color Dark (Same as @window_bg_color Dark)
+  --secondary-sidebar-fg-color: var(--adw-light-1); // #ffffff; @secondary_sidebar_fg_color Dark
+  --secondary-sidebar-backdrop-color: #1e1e1e;    // @secondary_sidebar_backdrop_color Dark (Same as @view_bg_color Dark)
   --secondary-sidebar-border-color: rgba(0, 0, 0, 0.25); // @secondary_sidebar_border_color Dark
   --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.2);  // @secondary_sidebar_shade_color Dark
 
-  --card-bg-color: rgba(255, 255, 255, 0.05);     // @card_bg_color Dark (was 0.08, more subtle)
-  --card-fg-color: #ffffff;                       // @card_fg_color Dark
-  --card-shade-color: rgba(0, 0, 0, 0.3);        // @card_shade_color Dark (was 0.36)
+  --card-bg-color: rgba(255, 255, 255, 0.05);     // @card_bg_color Dark
+  --card-fg-color: var(--adw-light-1);            // #ffffff; @card_fg_color Dark
+  --card-shade-color: rgba(0, 0, 0, 0.3);         // @card_shade_color Dark
 
-  --popover-bg-color: #363636;                    // @popover_bg_color Dark (was #383838)
-  --popover-fg-color: #ffffff;                    // @popover_fg_color Dark
-  --popover-shade-color: rgba(0, 0, 0, 0.2);     // @popover_shade_color Dark (was 0.25)
+  --popover-bg-color: #383838;                    // @popover_bg_color Dark
+  --popover-fg-color: var(--adw-light-1);         // #ffffff; @popover_fg_color Dark
+  --popover-shade-color: rgba(0, 0, 0, 0.2);      // @popover_shade_color Dark
 
-  --dialog-bg-color: #363636;                     // @dialog_bg_color Dark (was #383838, same as popover)
-  --dialog-fg-color: #ffffff;                     // @dialog_fg_color Dark
+  --dialog-bg-color: #383838;                     // @dialog_bg_color Dark
+  --dialog-fg-color: var(--adw-light-1);          // #ffffff; @dialog_fg_color Dark
 
-  --thumbnail-bg-color: #363636;                  // @thumbnail_bg_color Dark
-  --thumbnail-fg-color: #ffffff;                  // @thumbnail_fg_color Dark
+  --thumbnail-bg-color: #383838;                  // @thumbnail_bg_color Dark (Using popover/dialog bg as base)
+  --thumbnail-fg-color: var(--adw-light-1);       // #ffffff; @thumbnail_fg_color Dark
 
-  --borders-color: rgba(255, 255, 255, 0.12);      // @borders Dark (was alpha(currentColor, 0.5), now specific lighter grey)
-  --shade-color: rgba(0, 0, 0, 0.2);             // @shade_color Dark (was 0.25)
-  --scrollbar-outline-color: rgba(0, 0, 0, 0.4);  // @scrollbar_outline_color Dark (was 0.5)
+  --borders-color: rgba(255, 255, 255, 0.12);      // @borders Dark
+  --shade-color: rgba(0, 0, 0, 0.2);              // @shade_color Dark
+  --scrollbar-outline-color: rgba(0, 0, 0, 0.4);  // @scrollbar_outline_color Dark
 
   // Component-specific, kept from original
-  --button-bg-color: var(--adw-dark-2, #4a4a4a); // Standard button background (was #4d4d4d, using palette color)
-  --button-fg-color: #ffffff;
-  --button-border-color: rgba(255, 255, 255, 0.1); // Standard button border (was 0.07, slightly more visible)
-  --button-hover-bg-color: var(--adw-dark-1, #5a5a5a); // Slightly lighter hover
-  --button-active-bg-color: #676767; // Slightly lighter active (kept original)
+  --button-bg-color: var(--adw-dark-2);           // #4a4a4a; Standard button background
+  --button-fg-color: var(--adw-light-1);
+  --button-border-color: rgba(255, 255, 255, 0.1);
+  --button-hover-bg-color: var(--adw-dark-1);     // #5a5a5a; Slightly lighter hover
+  --button-active-bg-color: #676767;              // Custom grey, close to var(--adw-dark-1) / var(--adw-dark-2) mid-point
+                                                  // Could be var(--adw-dark-1) or a slightly lighter custom shade if necessary.
+                                                  // For now, keeping #676767 as it might be intentional.
 
-  --button-highlight-dark: rgba(255, 255, 255, 0.07); // Subtle top highlight for dark
-  --button-shadow-dark: rgba(0, 0, 0, 0.3);          // Subtle bottom shadow line for dark
-  --button-dropshadow-dark: rgba(0, 0, 0, 0.25);      // Subtle drop shadow for dark
-  --button-disabled-bg-dark: var(--adw-dark-3, #3d3846);
-  --button-disabled-fg-dark: var(--adw-dark-1, #77767b);
+  --button-highlight-dark: rgba(255, 255, 255, 0.07);
+  --button-shadow-dark: rgba(0, 0, 0, 0.3);
+  --button-dropshadow-dark: rgba(0, 0, 0, 0.25);
+  --button-disabled-bg-dark: var(--adw-dark-3);
+  --button-disabled-fg-dark: var(--adw-dark-1);
 
   --button-flat-bg-color: transparent;
   --button-flat-hover-bg-color: rgba(255, 255, 255, 0.08);
   --button-flat-active-bg-color: rgba(255, 255, 255, 0.12);
 
   --link-color: var(--accent-bg-color);
-  --link-visited-color: #c0c0c0; // Keep existing, or use a purple from palette e.g. var(--adw-purple-1)
+  --link-visited-color: var(--adw-light-4); // #c0c0c0 is adw-light-4
 
   --progress-bar-track-color: var(--shade-color);
   --progress-bar-fill-color: var(--accent-bg-color);
 
-  --toast-bg-color: #424242;
-  --toast-fg-color: #ffffff;
+  --toast-bg-color: #303030;                      // @toast_bg_color Dark
+  --toast-fg-color: var(--adw-light-1);           // #ffffff; @toast_fg_color Dark
   --toast-box-shadow: var(--popover-box-shadow-dark);
   --secondary-text-color: rgba(255,255,255,0.7);
   --dialog-box-shadow: var(--dialog-box-shadow-dark);

@@ -8,7 +8,7 @@
             if (!errorBanner) {
                 errorBanner = document.createElement('div');
                 errorBanner.id = 'js-error-banner';
-                errorBanner.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:red;color:white;padding:10px;z-index:9999;font-family:monospace;font-size:14px;';
+                errorBanner.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:var(--error-bg-color, #d32f2f);color:var(--error-fg-color, white);padding:10px;z-index:9999;font-family:monospace;font-size:14px;';
                 // Prepend to body if body exists, otherwise wait for DOMContentLoaded
                 if (document.body) {
                     document.body.prepend(errorBanner);
@@ -32,7 +32,7 @@
              if (!rejectionBanner) {
                 rejectionBanner = document.createElement('div');
                 rejectionBanner.id = 'js-rejection-banner';
-                rejectionBanner.style.cssText = 'position:fixed;top:100px;left:0;width:100%;background:orange;color:black;padding:10px;z-index:9998;font-family:monospace;font-size:14px;';
+                rejectionBanner.style.cssText = 'position:fixed;top:100px;left:0;width:100%;background:var(--warning-bg-color, #ffa000);color:var(--warning-fg-color, black);padding:10px;z-index:9998;font-family:monospace;font-size:14px;';
                  if (document.body) {
                     document.body.prepend(rejectionBanner);
                 } else {
