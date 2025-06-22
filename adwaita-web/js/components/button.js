@@ -65,8 +65,15 @@ export function createAdwButton(text, options = {}) {
   // Pass through ARIA attributes if provided in options
   for (const key in opts) {
     if (key.startsWith('aria-')) {
+      let attrName = key;
+      // Normalize common camelCase ARIA properties to kebab-case for attributes
+      if (key === 'ariaLabel') attrName = 'aria-label';
+      else if (key === 'ariaLabelledby') attrName = 'aria-labelledby';
+      else if (key === 'ariaDescribedby') attrName = 'aria-describedby';
+      // Add more normalizations if other aria-* properties are expected in camelCase
+
       if (opts[key] !== null && opts[key] !== undefined) {
-        button.setAttribute(key, opts[key]);
+        button.setAttribute(attrName, opts[key]);
       }
     }
   }

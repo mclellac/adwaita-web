@@ -96,7 +96,7 @@ export class AdwHeaderBar extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
         styleLink.rel = 'stylesheet';
-        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
         this.shadowRoot.appendChild(styleLink);
     }
     connectedCallback() { this._render(); }
