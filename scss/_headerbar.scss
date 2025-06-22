@@ -3,37 +3,42 @@
 .adw-header-bar {
   background-color: var(--headerbar-bg-color);
   color: var(--headerbar-fg-color);
-  border-bottom: var(--border-width, 1px) solid var(--headerbar-border-color);
+  // border-bottom: var(--border-width, 1px) solid var(--headerbar-border-color); // Removed default border
   padding: var(--spacing-xs) var(--spacing-m);
   display: flex;
   align-items: center;
-  min-height: 48px;
+  min-height: 48px; // Typical Adwaita headerbar height
+  position: relative; // For pseudo-elements or absolute positioning if needed
 
   .adw-header-bar-start,
   .adw-header-bar-end {
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    gap: var(--spacing-xs); // Use gap for spacing children
+    gap: var(--spacing-xs);
 
-    > * { // Style direct children. Assumes adw-button and a are direct children.
-      color: var(--headerbar-fg-color);
-
-      &.adw-button.circular { // Specific styling for circular buttons
-        padding: var(--spacing-xxs); // This could be too small, ensure it's intended.
-                                     // Default circular button padding is var(--spacing-s)
+    > * {
+      color: var(--headerbar-fg-color); // Ensure children inherit text color
+      // Child buttons should be flat by default in a headerbar
+      &.adw-button:not(.flat):not([suggested]):not([destructive]) {
+        // This rule is very specific. Better to ensure buttons added to headerbar are explicitly flat.
+        // For now, we assume users will add .flat to buttons or use adw-header-bar specific button variants if any.
       }
-      // .adw-avatar styling or other specific child component styling here
+      &.adw-button.circular {
+        // Removing specific padding override: let adw-button default circular padding apply.
+        // If smaller buttons are needed, a .compact class or similar should be used on the button.
+        // padding: var(--spacing-xxs);
+      }
     }
   }
 
   .adw-header-bar-start {
-    // Margins are now handled by gap
+    // No specific margin needed if using gap
   }
 
   .adw-header-bar-end {
-    margin-left: auto; // Keep this to push to the right
-    // Margins are now handled by gap
+    margin-left: auto; // Pushes to the right
+    // No specific margin needed if using gap
   }
 
   .adw-header-bar-center-box {
@@ -43,38 +48,44 @@
     justify-content: center;
     flex-grow: 1;
     flex-shrink: 1;
-    min-width: 0; // Essential for text-overflow ellipsis
+    min-width: 0;
     text-align: center;
-    margin: 0 var(--spacing-m);
+    margin: 0 var(--spacing-m); // Horizontal margin to separate from start/end items
   }
 
   .adw-header-bar-title {
-    font-size: var(--font-size-large);
-    font-weight: bold;
+    font-size: var(--font-size-large); // Typically 12pt or equivalent
+    font-weight: bold; // Adwaita titles are often bold
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.2;
+    line-height: 1.2; // Ensure single line doesn't take too much vertical space
   }
 
   .adw-header-bar-subtitle {
-    font-size: var(--font-size-small);
+    font-size: var(--font-size-small); // Typically 8pt or equivalent
     color: var(--headerbar-fg-color);
-    opacity: 0.7;
+    opacity: 0.7; // Subtitles are de-emphasized
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2;
-    margin-top: var(--spacing-xxs); // Use spacing variable
+    margin-top: var(--spacing-xxs); // Small space between title and subtitle
   }
 
+  // When content is scrolled underneath
   &.scrolled {
-    // Libadwaita uses --headerbar-shade-color for this shadow
-    box-shadow: 0 1px 2px -1px var(--headerbar-shade-color), 0 1px 1px var(--headerbar-shade-color);
-    // A more common shadow might be:
-    // box-shadow: 0 2px 4px -2px var(--headerbar-shade-color); // Original
+    border-bottom: var(--border-width, 1px) solid var(--headerbar-shade-color);
+    box-shadow: none; // Explicitly remove any other box-shadow if scrolled border is preferred
   }
+  // Alternative: use a shadow when scrolled
+  // &.scrolled {
+  //   box-shadow: 0 1px 2px -1px var(--headerbar-shade-color);
+  // }
 
+
+  // Ensure links and adw-buttons within the headerbar inherit the correct color
+  // and have appropriate default styling if not overridden by button's own classes.
   a,
   adw-button,
   .adw-button {

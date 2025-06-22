@@ -55,6 +55,7 @@
   --window-fg-color: rgba(0, 0, 0, 0.8);         // @window_fg_color Light
   --view-bg-color: #ffffff;                       // @view_bg_color Light
   --view-fg-color: rgba(0, 0, 0, 0.8);           // @view_fg_color Light
+  --body-fg-color-rgb: 0, 0, 0;                  // For use in rgba(var(--body-fg-color-rgb), alpha)
 
   --headerbar-bg-color: #ffffff;                  // @headerbar_bg_color Light (Libadwaita 1.5)
   --headerbar-fg-color: rgba(0, 0, 0, 0.8);       // @headerbar_fg_color Light
@@ -184,6 +185,7 @@
   --window-fg-color: var(--adw-light-1);          // #ffffff; @window_fg_color Dark
   --view-bg-color: #1e1e1e;                       // @view_bg_color Dark
   --view-fg-color: var(--adw-light-1);            // #ffffff; @view_fg_color Dark
+  --body-fg-color-rgb: 255, 255, 255;            // For use in rgba(var(--body-fg-color-rgb), alpha)
 
   --headerbar-bg-color: #303030;                  // @headerbar_bg_color Dark
   --headerbar-fg-color: var(--adw-light-1);       // #ffffff; @headerbar_fg_color Dark
