@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adwaita Web - Declarative Demo</title>
-    <link rel="stylesheet" href="app-demo/static/css/adwaita-web.css">
-    <!-- components.js must be loaded as a module because it uses ES6 import/export -->
-    <script type="module" src="app-demo/static/js/components.js" defer></script>
-    <!-- <script src="app-demo/static/js/adw-initializer.js" defer></script> adw-initializer.js is missing -->
+    <link rel="stylesheet" href="build/css/adwaita-web.css">
+    <script type="module" src="build/js/components.js" defer></script>
     <style>
         body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         adw-application-window { flex-grow: 1; display: flex; flex-direction: column; }
@@ -323,7 +321,7 @@ if (accentPickerBox) {
                 </adw-alert-dialog>
 
                 <adw-about-dialog id="about-dialog-example" app-name="Adwaita Web" version="0.1.0"
-                    logo="app-demo/static/img/default_avatar.png"
+                    logo="build/img/default_avatar.png"
                     developer-name="Jules the AI Agent"
                     copyright="© 2024 The Adwaita Web Authors"
                     comments="A demonstration of Adwaita styling for the web."
