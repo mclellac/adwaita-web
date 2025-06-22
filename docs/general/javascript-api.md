@@ -6,6 +6,34 @@ Adwaita-Web provides a global JavaScript object named `Adw` that serves as the e
 
 After including the `js/components.js` (or a bundled `adwaita-web.js`) script in your page, the `Adw` object will be available in the global scope.
 
+It also includes a `config` object for library-wide settings.
+
+### `Adw.config.cssPath`
+
+Some Adwaita web components (particularly those using Shadow DOM) may attempt to dynamically load the `adwaita-web.css` stylesheet if they detect it hasn't been loaded globally. The `Adw.config.cssPath` property tells these components where to find this CSS file.
+
+*   **Default Value**: `'/static/css/adwaita-web.css'`
+    *   This default works well for applications (like the provided `app-demo`) that serve the CSS file from a `/static/css/` directory relative to the web server's root.
+
+*   **Configuration**: If your project structure places `adwaita-web.css` at a different path, you should override this configuration value *before* any Adwaita components are initialized or rendered. Set it early in your JavaScript execution, ideally right after including the Adwaita-Web library script.
+
+    ```javascript
+    // Example: If your CSS is at '/assets/styles/adwaita-web.css'
+    Adw.config.cssPath = '/assets/styles/adwaita-web.css';
+
+    // Example: If your CSS is in a directory relative to your main JS bundle
+    // and your JS bundle is at, say, '/js/main.js', and CSS is at '/css/adwaita-web.css'
+    // You might set it to a path relative to the web root if known, or ensure
+    // your server resolves it correctly.
+    // Adw.config.cssPath = '../css/adwaita-web.css'; // If JS is in /js/ and CSS in /css/ at same level
+    ```
+
+    **Note**: In most applications, you will include the `adwaita-web.css` file globally using a `<link>` tag in your HTML's `<head>` section. For example:
+    ```html
+    <link rel="stylesheet" href="/your/path/to/adwaita-web.css">
+    ```
+    If the CSS is loaded globally this way, the `Adw.config.cssPath` setting becomes less critical as components will likely detect the styles already applied. However, it's good practice to set it correctly if your path differs from the default, to ensure robust behavior for all components under all circumstances.
+
 ```javascript
 console.log(Adw);
 // Output might look like:
