@@ -61,7 +61,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}My Libadwaita Blog{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-web.css') }}">
-        <script src="{{ url_for('static', filename='js/components.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
     <script src="{{ url_for('static', filename='js/adw-initializer.js') }}" defer></script>
 </head>
 <body

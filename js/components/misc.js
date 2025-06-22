@@ -422,6 +422,9 @@ export function createAdwBanner(title, options = {}) {
     banner.setAttribute('role', 'status'); // Or 'alert' if it's for important dynamic changes
     if (opts.id) banner.id = opts.id;
 
+    const contentWrapper = document.createElement('div'); // Wrapper for title and button
+    contentWrapper.classList.add('adw-banner-content-wrapper');
+
     const titleSpan = document.createElement('span');
     titleSpan.classList.add('adw-banner-title');
     if (opts.useMarkup) {
@@ -429,11 +432,11 @@ export function createAdwBanner(title, options = {}) {
     } else {
         titleSpan.textContent = title;
     }
-    banner.appendChild(titleSpan);
+    contentWrapper.appendChild(titleSpan); // Add title to wrapper
 
     if (opts.buttonLabel) {
         const buttonOptions = {
-            label: opts.buttonLabel,
+            // label: opts.buttonLabel, // Label is passed directly to createAdwButton
             onClick: (event) => {
                 // Dispatch a custom event from the banner itself
                 banner.dispatchEvent(new CustomEvent('button-clicked', { bubbles: true, composed: true, detail: { originalEvent: event } }));
@@ -444,13 +447,33 @@ export function createAdwBanner(title, options = {}) {
         } else if (opts.buttonStyle === 'destructive') {
             buttonOptions.destructive = true;
         }
-        // Libadwaita banners usually have flat buttons or default styled ones.
-        // For now, let's use default AdwButton styling.
-        // buttonOptions.flat = true; // Optional: if buttons should be flat
+        // buttonOptions.flat = true; // Banners typically have non-flat action buttons
 
         const button = createAdwButton(opts.buttonLabel, buttonOptions);
         button.classList.add('adw-banner-button');
-        banner.appendChild(button);
+        contentWrapper.appendChild(button); // Add action button to wrapper
+    }
+    banner.appendChild(contentWrapper); // Add content wrapper to banner
+
+    if (opts.dismissible) {
+        const dismissButton = createAdwButton('', {
+            icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>',
+            flat: true,
+            isCircular: true,
+            ariaLabel: 'Dismiss banner', // TODO: Localize this
+            onClick: () => {
+                banner.remove();
+                // Optionally, dispatch a 'dismissed' event
+                banner.dispatchEvent(new CustomEvent('dismissed', { bubbles: true, composed: true }));
+            }
+        });
+        dismissButton.classList.add('adw-banner-dismiss-button');
+        banner.appendChild(dismissButton);
+    }
+
+    // Set type class for styling (e.g., adw-banner-warning)
+    if (opts.type) {
+        banner.classList.add(`adw-banner-${opts.type}`);
     }
 
     // Revealed state handling (hidden by default via CSS)
@@ -464,7 +487,7 @@ export function createAdwBanner(title, options = {}) {
 }
 
 export class AdwBanner extends HTMLElement {
-    static get observedAttributes() { return ['title', 'use-markup', 'button-label', 'button-style', 'revealed']; }
+    static get observedAttributes() { return ['title', 'use-markup', 'button-label', 'button-style', 'revealed', 'type', 'dismissible']; }
 
     constructor() {
         super();
@@ -491,6 +514,8 @@ export class AdwBanner extends HTMLElement {
         const buttonLabel = this.getAttribute('button-label');
         const buttonStyle = this.getAttribute('button-style'); // e.g., "suggested"
         const revealed = this.hasAttribute('revealed');
+        const type = this.getAttribute('type');
+        const dismissible = this.hasAttribute('dismissible');
 
         // Clear previous banner element if exists
         if (this._bannerElement) {
@@ -502,7 +527,9 @@ export class AdwBanner extends HTMLElement {
             useMarkup,
             buttonLabel,
             buttonStyle,
-            revealed // Pass revealed state to factory for initial class
+            revealed, // Pass revealed state to factory for initial class
+            type,
+            dismissible
         });
 
         // Listen to button-clicked from the created banner and re-dispatch from the web component host
