@@ -370,14 +370,29 @@ def create_app(config_overrides=None):
         if form.validate_on_submit():
             username = form.username.data
             password = form.password.data
+            _app.logger.info(f"DEBUG: Login attempt for username: '{username}' with password: '{'*' * len(password)}'") # Don't log actual password
+
             user = User.query.filter_by(username=username).first()
-            if user and user.check_password(password):
-                login_user(user)
-                flash('Logged in successfully.', 'success')
-                next_page = request.args.get('next')
-                return redirect(next_page or url_for('index'))
+
+            if user:
+                _app.logger.info(f"DEBUG: User '{username}' found in database. Stored hash: '{user.password_hash}'")
+                password_match = user.check_password(password)
+                _app.logger.info(f"DEBUG: Password check for user '{username}' result: {password_match}")
+                if password_match:
+                    login_user(user)
+                    flash('Logged in successfully.', 'success')
+                    _app.logger.info(f"DEBUG: User '{username}' logged in successfully.")
+                    next_page = request.args.get('next')
+                    return redirect(next_page or url_for('index'))
+                else:
+                    flash('Invalid username or password.', 'danger')
+                    _app.logger.warning(f"DEBUG: Invalid password for user '{username}'.")
             else:
                 flash('Invalid username or password.', 'danger')
+                _app.logger.warning(f"DEBUG: User '{username}' not found in database.")
+        elif request.method == 'POST': # Form validation failed
+            _app.logger.warning(f"DEBUG: Login form validation failed. Errors: {form.errors}")
+
         return render_template('login.html', form=form)
 
     @_app.route('/logout')
@@ -595,15 +610,17 @@ def create_app(config_overrides=None):
             default_username = "admin"
             default_password = "password"  # Hardcoding for demo purposes
             admin_user = User(username=default_username)
-            admin_user.set_password(default_password)
+            admin_user.set_password(default_password) # This calls generate_password_hash
+            _app.logger.info(f"DEBUG: Default admin user '{default_username}' attempting to be created. Password to hash: '{default_password}'. Hash to be stored: '{admin_user.password_hash}'") # Temporary debug log
             db.session.add(admin_user)
             try:
                 db.session.commit()
-                _app.logger.info(f"Default admin user '{default_username}' with password '{default_password}' created successfully.")
+                _app.logger.info(f"Default admin user '{default_username}' with password '{default_password}' created successfully. Stored hash: {admin_user.password_hash}")
                 print(f"INFO: Default admin user '{default_username}' (password: '{default_password}') created.") # Also print to console
             except Exception as e:
                 db.session.rollback()
                 _app.logger.error(f"Error creating default admin user: {e}", exc_info=True)
+                print(f"ERROR: Failed to create default admin user: {e}") # Print error to console too
         # pass # Ensure the with block is not empty # No longer needed
 
     return _app
