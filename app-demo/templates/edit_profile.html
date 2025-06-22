@@ -35,51 +35,63 @@
       <adw-preferences-group title="Public Information">
         <adw-list-box>
           {# Full Name Entry Row #}
-          {{ form.full_name(
-            class="adw-entry-row" + (" has-error" if form.full_name.errors else ""),
-            title=form.full_name.label.text,
-            placeholder="Your full name or display name",
-            subtitle=(form.full_name.errors[0] if form.full_name.errors else None)
-          ) }}
+          <adw-entry-row
+            title="{{ form.full_name.label.text }}"
+            name="{{ form.full_name.name }}"
+            value="{{ form.full_name.data or '' }}"
+            placeholder="Your full name or display name"
+            subtitle="{{ form.full_name.errors[0] if form.full_name.errors else '' }}"
+            class="{{ 'has-error' if form.full_name.errors else '' }}">
+          </adw-entry-row>
+          {# The hidden CSRF token input is still needed by form.hidden_tag() #}
+          {# Also, ensure form.full_name.id is available if labels need to point to it, though adw-entry-row handles its own title #}
 
           {# Bio/Profile Info - Custom Row for Text Area #}
           <adw-action-row
             title="{{ form.profile_info.label.text }}"
             subtitle="Tell us a bit about yourself. Supports basic HTML.">
             <div style="width: 100%;" slot="suffix">
-              {{ form.profile_info(rows="6", class="adw-entry", style="width: 100%; min-height: 120px;", id=(form.profile_info.id or 'profile_info_field')) }}
+              {# WTForms TextareaField, styled as adw-entry #}
+              {{ form.profile_info(rows="6", class="adw-entry", style="width: 100%; min-height: 120px;", id=form.profile_info.id) }}
             </div>
           </adw-action-row>
           {% if form.profile_info.errors %}
           <adw-action-row subtitle="{{ form.profile_info.errors|join(' ') }}" class="error-row"></adw-action-row>
           {% endif %}
 
-
           {# Location Entry Row #}
-          {{ form.location(
-            class="adw-entry-row" + (" has-error" if form.location.errors else ""),
-            title=form.location.label.text,
-            placeholder="e.g., City, Country",
-            subtitle=(form.location.errors[0] if form.location.errors else None)
-          ) }}
+          <adw-entry-row
+            title="{{ form.location.label.text }}"
+            name="{{ form.location.name }}"
+            value="{{ form.location.data or '' }}"
+            placeholder="e.g., City, Country"
+            subtitle="{{ form.location.errors[0] if form.location.errors else '' }}"
+            class="{{ 'has-error' if form.location.errors else '' }}">
+          </adw-entry-row>
 
           {# Website URL Entry Row #}
-          {{ form.website_url(
-            class="adw-entry-row" + (" has-error" if form.website_url.errors else ""),
-            type="url",
-            title=form.website_url.label.text,
-            placeholder="https://example.com",
-            subtitle=(form.website_url.errors[0] if form.website_url.errors else None)
-          ) }}
+          <adw-entry-row
+            title="{{ form.website_url.label.text }}"
+            name="{{ form.website_url.name }}"
+            type="url" {# adw-entry-row should support type attribute if its internal input does #}
+            value="{{ form.website_url.data or '' }}"
+            placeholder="https://example.com"
+            subtitle="{{ form.website_url.errors[0] if form.website_url.errors else '' }}"
+            class="{{ 'has-error' if form.website_url.errors else '' }}">
+          </adw-entry-row>
 
           {# is_profile_public Switch Row #}
-          {{ form.is_profile_public(
-              class="adw-switch-row",
-              title=form.is_profile_public.label.text,
-              subtitle="Allow others to see your profile page.",
-              checked=form.is_profile_public.data
-          ) }}
+          <adw-switch-row
+            title="{{ form.is_profile_public.label.text }}"
+            subtitle="Allow others to see your profile page."
+            name="{{ form.is_profile_public.name }}"
+            id="{{ form.is_profile_public.id }}"
+            {% if form.is_profile_public.data %}checked{% endif %}
+            class="{{ 'has-error' if form.is_profile_public.errors else '' }}">
+          </adw-switch-row>
+          {# No explicit error display here, assuming subtitle on has-error is enough or consistent with others #}
           {% if form.is_profile_public.errors %}
+          {# This is a fallback, ideally the subtitle on the switch-row itself would show the error #}
           <adw-action-row subtitle="{{ form.is_profile_public.errors|join(' ') }}" class="error-row"></adw-action-row>
           {% endif %}
 
@@ -92,10 +104,10 @@
             title="{{ form.profile_photo.label.text }}"
             subtitle="Upload a new photo. Max 2MB. Recommended: Square aspect ratio.">
             <div slot="suffix" style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-s);">
-              {# Custom button to trigger file input #}
               <adw-button appearance="outline" id="upload-photo-button">
                 <span slot="label">Choose Photo</span>
               </adw-button>
+              {# The actual file input, hidden. WTForms handles its name and id. #}
               {{ form.profile_photo(id=(form.profile_photo.id or 'profile_photo_field'), style="display: none;") }}
 
               <div class="cropper-container-wrapper" id="cropper-wrapper" style="display: none;">
@@ -121,12 +133,13 @@
         </adw-list-box>
       </adw-preferences-group>
 
-      <adw-action-row>
-        <div slot="suffix" style="display: flex; gap: var(--spacing-s); justify-content: flex-end;">
-            <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button">Cancel</a>
-            {{ form.submit(class="adw-button suggested-action", label="Update Profile") }}
+      <adw-action-row> {# This was adw-box before, adw-action-row is more standard for buttons at the bottom of a preferences page group/list #}
+        <div slot="suffix" style="display: flex; gap: var(--spacing-s); justify-content: flex-end; width: 100%;">
+            <adw-button type="link" href="{{ url_for('profile', username=current_user.username) }}">Cancel</adw-button>
+            <adw-button type="submit" class="suggested-action" label="{{ form.submit.label.text if form.submit.label else 'Update Profile' }}"></adw-button>
+            {# {{ form.submit() }} is no longer needed if we use adw-button for submit #}
         </div>
-      </adw-box>
+      </adw-action-row>
     </form>
   </adw-preferences-page>
 </adw-clamp>
@@ -151,66 +164,109 @@
 
     if (uploadPhotoButton && photoInput) {
       uploadPhotoButton.addEventListener('click', function() {
-        photoInput.click(); // Trigger the hidden file input
+        try {
+          photoInput.click(); // Trigger the hidden file input
+        } catch (e) {
+          console.error("Error triggering photo input click:", e);
+          // Optionally, display a user-friendly message here
+        }
       });
     }
 
-    photoInput.addEventListener('change', function(event) {
-      const files = event.target.files;
-      if (files && files.length > 0) {
-        const file = files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          imageToCrop.src = e.target.result;
-          cropperWrapper.style.display = 'block';
-          if (cropper) {
-            cropper.destroy();
+    if (photoInput) {
+      photoInput.addEventListener('change', function(event) {
+        try {
+          const files = event.target.files;
+          if (files && files.length > 0) {
+            const file = files[0];
+            // Client-side file type check for early feedback
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+              console.warn("Invalid file type selected:", file.type);
+              photoInput.value = ''; // Reset file input
+              if (cropper) {
+                  cropper.destroy();
+                  cropper = null;
+              }
+              if(imageToCrop) imageToCrop.src = '#';
+              if(cropperWrapper) cropperWrapper.style.display = 'none';
+              if(cropXField) cropXField.value = '';
+              if(cropYField) cropYField.value = '';
+              if(cropWidthField) cropWidthField.value = '';
+              if(cropHeightField) cropHeightField.value = '';
+              alert("Invalid file type. Please select a PNG, JPG, or GIF image."); // Simple alert for now
+              return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              try {
+                if(imageToCrop) imageToCrop.src = e.target.result;
+                if(cropperWrapper) cropperWrapper.style.display = 'block';
+                if (cropper) {
+                  cropper.destroy();
+                }
+                if(imageToCrop){
+                  cropper = new Cropper(imageToCrop, {
+                    aspectRatio: 1 / 1, // For a square avatar
+                    viewMode: 1,        // Restrict crop box to canvas
+                    responsive: true,
+                  });
+                } else {
+                   console.error("imageToCrop element not found for Cropper.");
+                }
+              } catch (cropperError) {
+                console.error("Error initializing Cropper:", cropperError);
+                if(cropperWrapper) cropperWrapper.style.display = 'none';
+              }
+            };
+            reader.onerror = function() {
+              console.error("FileReader error:", reader.error);
+            };
+            reader.readAsDataURL(file);
+          } else {
+            // No file selected, or selection cancelled
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            if(imageToCrop) imageToCrop.src = '#';
+            if(cropperWrapper) cropperWrapper.style.display = 'none';
+            if(cropXField) cropXField.value = '';
+            if(cropYField) cropYField.value = '';
+            if(cropWidthField) cropWidthField.value = '';
+            if(cropHeightField) cropHeightField.value = '';
           }
-          cropper = new Cropper(imageToCrop, {
-            aspectRatio: 1 / 1, // For a square avatar
-            viewMode: 1,        // Restrict crop box to canvas
-            // autoCropArea: 0.8,
-            responsive: true,
-            // ready: function () {
-            //   // Example: Set initial crop box if needed
-            //   // this.cropper.setData({ width: 200, height: 200 });
-            // }
-          });
-        };
-        reader.readAsDataURL(file);
-      } else {
-        // No file selected, or selection cancelled
-        if (cropper) {
-            cropper.destroy();
-            cropper = null;
+        } catch (e) {
+          console.error("Error in photoInput change event:", e);
         }
-        imageToCrop.src = '#'; // Clear previous image
-        cropperWrapper.style.display = 'none';
-        // Clear crop fields if no image is selected
-        cropXField.value = '';
-        cropYField.value = '';
-        cropWidthField.value = '';
-        cropHeightField.value = '';
-      }
-    });
+      });
+    } else {
+        console.warn("Profile photo input field not found.");
+    }
+
 
     if (form) {
       form.addEventListener('submit', function(event) {
-        if (cropper && photoInput.files && photoInput.files.length > 0) {
-          const cropData = cropper.getData(true); // Get rounded data
-          cropXField.value = cropData.x;
-          cropYField.value = cropData.y;
-          cropWidthField.value = cropData.width;
-          cropHeightField.value = cropData.height;
-        } else {
-          // No active cropper or no file selected, ensure crop fields are empty
-          // so server doesn't try to use old/stale crop data if user deselects image.
-          cropXField.value = '';
-          cropYField.value = '';
-          cropWidthField.value = '';
-          cropHeightField.value = '';
+        try {
+          if (cropper && photoInput && photoInput.files && photoInput.files.length > 0) {
+            const cropData = cropper.getData(true); // Get rounded data
+            if(cropXField) cropXField.value = cropData.x;
+            if(cropYField) cropYField.value = cropData.y;
+            if(cropWidthField) cropWidthField.value = cropData.width;
+            if(cropHeightField) cropHeightField.value = cropData.height;
+          } else {
+            if(cropXField) cropXField.value = '';
+            if(cropYField) cropYField.value = '';
+            if(cropWidthField) cropWidthField.value = '';
+            if(cropHeightField) cropHeightField.value = '';
+          }
+        } catch (e) {
+          console.error("Error in form submit event for cropper data:", e);
         }
       });
+    } else {
+        console.warn("Edit profile form not found.");
     }
   });
 </script>

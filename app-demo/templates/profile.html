@@ -62,8 +62,8 @@
 
         {# Edit Profile Button #}
         {% if current_user == user_profile %}
-        <adw-box orientation="horizontal" justify="start" style="margin-top: var(--spacing-m);">
-            <a href="{{ url_for('edit_profile') }}" class="adw-button suggested-action">Edit Profile</a>
+        <adw-box orientation="horizontal" justify="start" style="margin-top: var(--spacing-m); margin-bottom: var(--spacing-l);">
+            <adw-button href="{{ url_for('edit_profile') }}" class="suggested-action">Edit Profile</adw-button>
         </adw-box>
         {% endif %}
 
@@ -76,28 +76,39 @@
                             title="{{ post.title }}"
                             subtitle="Posted on: {{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else 'N/A' }} UTC"
                             href="{{ url_for('view_post', post_id=post.id) }}"
-                            show-chevron="true">
+                            show-chevron="true"
+                            clickable> {# Explicitly make it clickable if href is present #}
                         </adw-action-row>
                     {% endfor %}
                 </adw-list-box>
 
-                {# Pagination Controls #}
+                {# Pagination Controls - Standardized to match index.html #}
                 {% if posts_pagination.pages > 1 %}
-                <div class="pagination-controls adw-box adw-box-horizontal align-center justify-center" style="margin-top: var(--spacing-m); gap: var(--spacing-s);">
+                <nav aria-label="User posts page navigation" class="pagination-nav" style="margin-top: var(--spacing-l); display: flex; justify-content: center; align-items: center; gap: var(--spacing-xs);">
                     {% if posts_pagination.has_prev %}
-                        <a href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.prev_num) }}" class="adw-button">Previous</a>
+                        <adw-button href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.prev_num) }}">&laquo; Previous</adw-button>
                     {% else %}
-                        <adw-button disabled>Previous</adw-button>
+                        <adw-button disabled>&laquo; Previous</adw-button>
                     {% endif %}
 
-                    <span class="adw-label" style="font-size: var(--font-size-small);">Page {{ posts_pagination.page }} of {{ posts_pagination.pages }}.</span>
+                    {% for page_num in posts_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            {% if page_num == posts_pagination.page %}
+                                <adw-button class="suggested-action" aria-current="page">{{ page_num }}</adw-button>
+                            {% else %}
+                                <adw-button href="{{ url_for('profile', username=user_profile.username, page=page_num) }}">{{ page_num }}</adw-button>
+                            {% endif %}
+                        {% else %}
+                            <adw-button disabled class="flat" style="cursor: default; min-width: auto; padding: var(--spacing-xs);">&hellip;</adw-button>
+                        {% endif %}
+                    {% endfor %}
 
                     {% if posts_pagination.has_next %}
-                         <a href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.next_num) }}" class="adw-button">Next</a>
+                         <adw-button href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.next_num) }}">Next &raquo;</adw-button>
                     {% else %}
-                        <adw-button disabled>Next</adw-button>
+                        <adw-button disabled>Next &raquo;</adw-button>
                     {% endif %}
-                </div>
+                </nav>
                 {% endif %}
             {% else %}
                 <adw-status-page title="No Posts Yet" description="{{ user_profile.username }} has not made any posts." style="padding: var(--spacing-xl) 0;">

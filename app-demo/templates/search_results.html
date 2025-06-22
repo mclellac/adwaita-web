@@ -5,73 +5,106 @@
 {% endblock %}
 
 {% block content %}
-<div class="main-content-clamped">
+<adw-clamp max-width="900px" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
     {% if query %}
-        <h1 style="margin-bottom: var(--spacing-l);">Search Results for '{{ query }}'</h1>
+        <h1 class="page-title" style="text-align: center; margin-bottom: var(--spacing-l); font-size: var(--font-size-xxl, 1.5rem);">
+            Search Results for <mark>"{{ query }}"</mark>
+        </h1>
     {% else %}
-        <h1 style="margin-bottom: var(--spacing-l);">Search Posts</h1>
+        <h1 class="page-title" style="text-align: center; margin-bottom: var(--spacing-l); font-size: var(--font-size-xxl, 1.5rem);">
+            Search Posts
+        </h1>
     {% endif %}
 
+    <div style="text-align: center; margin-bottom: var(--spacing-m);">
+      <adw-spinner size="large" id="search-loading-spinner" style="display: none;"></adw-spinner>
+    </div>
+
     {% if posts %}
-        <div class="posts-list" style="display: flex; flex-direction: column; gap: var(--spacing-l);">
+        <adw-list-box class="blog-posts-list">
             {% for post in posts %}
-            <adw-box class="post-card" orientation="vertical" style="padding: var(--spacing-l); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-md);">
-                <a href="{{ url_for('view_post', post_id=post.id) }}" class="post-title-link" style="text-decoration: none;">
-                    <h2 class="adw-heading" style="font-size: var(--font-size-xl); margin-bottom: var(--spacing-s);">{{ post.title }}</h2>
-                </a>
-                <p class="post-meta" style="font-size: var(--font-size-small); color: var(--secondary-text-color); margin-bottom: var(--spacing-m);">
-                    By {{ post.author.username if post.author else 'Unknown Author' }} on {{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'N/A' }}
+            <adw-box orientation="vertical" class="blog-post-card" style="margin-bottom: var(--spacing-l); padding: var(--spacing-m); border-radius: var(--border-radius-md); border: 1px solid var(--border-color); list-style-type: none;">
+                <h3 style="margin-top:0; margin-bottom: var(--spacing-xs);"><a href="{{ url_for('view_post', post_id=post.id) }}" class="post-title" style="text-decoration: none; color: var(--text-color);">{{ post.title }}</a></h3>
+                <p class="post-meta" style="font-size: var(--font-size-small); color: var(--secondary-text-color); margin-bottom: var(--spacing-s);">
+                    By: <a href="{{ url_for('profile', username=post.author.username) }}">{{ post.author.username if post.author else 'Unknown Author' }}</a>
+                    on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
                 </p>
-                <div class="post-excerpt" style="margin-bottom: var(--spacing-m); white-space: pre-wrap; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-                    {{ post.content | striptags | truncate(150, True) if post.content else 'No content preview available.' }}
+                {% if post.content %}
+                <p class="post-excerpt" style="margin-bottom: var(--spacing-s);">
+                    {{ post.content | striptags | truncate(200, True) }}
+                </p>
+                {% endif %}
+
+                {% if post.categories %}
+                <div class="post-categories-list" style="margin-bottom: var(--spacing-xs); display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs);">
+                    <adw-label is_caption="true" style="font-weight: bold;">Categories:</adw-label>
+                    {% for category in post.categories %}
+                        <adw-button type="link" class="flat small" href="{{ url_for('posts_by_category', category_slug=category.slug) }}">{{ category.name }}</adw-button>
+                    {% endfor %}
                 </div>
-                <div class="post-actions" style="display: flex; justify-content: flex-start;">
-                    <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button">Read More</a>
+                {% endif %}
+
+                {% if post.tags %}
+                <div class="tags-summary" style="margin-bottom: var(--spacing-m); display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs);">
+                    <adw-label is_caption="true" style="font-weight: bold;">Tags:</adw-label>
+                    {% for tag_item in post.tags %}
+                      <adw-button type="link" class="flat small" href="{{ url_for('posts_by_tag', tag_slug=tag_item.slug) }}">{{ tag_item.name }}</adw-button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div style="margin-top: auto; padding-top: var(--spacing-s); display: flex; justify-content: flex-end;">
+                    <adw-button type="link" class="flat" href="{{ url_for('view_post', post_id=post.id) }}">Read More &raquo;</adw-button>
                 </div>
             </adw-box>
             {% endfor %}
-        </div>
+        </adw-list-box>
 
-        {% if pagination %}
-        <div class="pagination-controls adw-box justify-center" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
+        {% if pagination and pagination.pages > 1 %}
+        <nav aria-label="Page navigation" class="pagination-nav" style="margin-top: var(--spacing-xl); display: flex; justify-content: center; align-items: center; gap: var(--spacing-xs);">
             {% if pagination.has_prev %}
-                <a href="{{ url_for('search_results', q=query, page=pagination.prev_num) }}" class="adw-button">Previous</a>
+                <adw-button href="{{ url_for('search_results', q=query, page=pagination.prev_num) }}">&laquo; Previous</adw-button>
+            {% else %}
+                <adw-button disabled>&laquo; Previous</adw-button>
             {% endif %}
             {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
                 {% if page_num %}
-                    {% if pagination.page == page_num %}
-                    <adw-button suggested class="active" style="pointer-events: none;">{{ page_num }}</adw-button>
+                    {% if page_num == pagination.page %}
+                        <adw-button class="suggested-action" aria-current="page">{{ page_num }}</adw-button>
                     {% else %}
-                        <a href="{{ url_for('search_results', q=query, page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                        <adw-button href="{{ url_for('search_results', q=query, page=page_num) }}">{{ page_num }}</adw-button>
                     {% endif %}
                 {% else %}
-                    <span class="adw-button flat disabled" style="pointer-events: none;">&hellip;</span>
+                    <adw-button disabled class="flat" style="cursor: default; min-width: auto; padding: var(--spacing-xs);">&hellip;</adw-button>
                 {% endif %}
             {% endfor %}
             {% if pagination.has_next %}
-                <a href="{{ url_for('search_results', q=query, page=pagination.next_num) }}" class="adw-button">Next</a>
+                <adw-button href="{{ url_for('search_results', q=query, page=pagination.next_num) }}">Next &raquo;</adw-button>
+            {% else %}
+                <adw-button disabled>Next &raquo;</adw-button>
             {% endif %}
-        </div>
+        </nav>
         {% endif %}
     {% elif query %}
         <adw-status-page
-            icon-name="system-search-symbolic"
+            icon-name="system-search-symbolic" {# Or a more suitable Adwaita icon name #}
             title="No Results Found"
             description="Sorry, no posts matched your search for '{{ query }}'. Try using different keywords or browse all posts."
-            style="min-height: 50vh;">
-            <a href="{{ url_for('index') }}" class="adw-button suggested-action">Browse All Posts</a>
+            style="min-height: 50vh;"> {# Adjust styling as needed #}
+            <div slot="actions">
+                <adw-button href="{{ url_for('index') }}" class="suggested-action">Browse All Posts</adw-button>
+            </div>
         </adw-status-page>
     {% else %}
-        {# Case: No query provided, /search was hit directly #}
         <adw-status-page
-            icon-name="edit-find-symbolic"
+            icon-name="edit-find-symbolic" {# Or a more suitable Adwaita icon name #}
             title="Search Posts"
             description="Please enter a term in the search bar above to find posts."
             style="min-height: 50vh;">
-             {# The search bar is in base.html, so no need to repeat it here.
-                A link to home might be nice or just let them use the global search. #}
-            <a href="{{ url_for('index') }}" class="adw-button">Back to Home</a>
+            <div slot="actions">
+                <adw-button href="{{ url_for('index') }}">Back to All Posts</adw-button>
+            </div>
         </adw-status-page>
     {% endif %}
-</div>
+</adw-clamp>
 {% endblock %}
