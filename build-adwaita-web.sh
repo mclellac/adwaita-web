@@ -1,12 +1,12 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 # Define paths
 SASS_SOURCE_DIR="adwaita-web/scss"
 SASS_INPUT_FILE="${SASS_SOURCE_DIR}/style.scss"
 JS_INPUT_DIR="adwaita-web/js"
-DATA_INPUT_DIR="adwaita-web/data" # Assuming fonts are in data/fonts
+DATA_INPUT_DIR="adwaita-web/data"        # Assuming fonts are in data/fonts
 FONTS_INPUT_DIR="adwaita-web/data/fonts" # Placeholder, adjust if fonts are elsewhere
 
 BUILD_DIR="build"
@@ -27,7 +27,6 @@ mkdir -p "${FONTS_OUTPUT_DIR}"
 # Create specific subdirectories for JS components and data icons if needed
 mkdir -p "${JS_OUTPUT_DIR}/components"
 mkdir -p "${DATA_OUTPUT_DIR}/icons/symbolic"
-
 
 # Compile SASS to CSS
 echo "--- Compiling SASS to CSS ---"
