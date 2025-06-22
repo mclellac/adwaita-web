@@ -49,71 +49,95 @@ export class AdwEntry extends HTMLElement {
         this._inputElement = null;
     }
     connectedCallback() {
-        this._render();
-        if(this._inputElement) {
-            this._inputElement.addEventListener('input', (e) => {
-                // Update the internal state and attribute, but let the setter dispatch 'change'
-                const newValue = e.target.value;
-                if (this.getAttribute('value') !== newValue) {
-                    this.setAttribute('value', newValue); // This will trigger attributeChangedCallback
-                }
-                // Dispatch 'input' event from the custom element itself
-                this.dispatchEvent(new CustomEvent('input', { detail: { value: newValue }, bubbles: true, composed: true }));
-            });
-            // Add a change event listener to mirror native input's change
-            this._inputElement.addEventListener('change', (e) => {
-                this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
-            });
+        if (!this._inputElement) { // Ensure _render is called if not already
+            this._render();
         }
+        // Event listeners are attached in _render to ensure they are on the correct _inputElement
     }
+
     attributeChangedCallback(name, oldValue, newValue) {
-        if (oldValue !== newValue) {
-            if (this._inputElement) { // Ensure _inputElement exists before trying to update it
-                if (name === 'value') {
-                     if (this._inputElement.value !== newValue) this._inputElement.value = newValue === null ? '' : newValue;
-                } else if (name === 'disabled') {
-                     this._inputElement.disabled = this.hasAttribute('disabled');
-                } else if (name === 'placeholder') {
-                    this._inputElement.placeholder = newValue || '';
-                } else if (name === 'name') {
-                    if (newValue === null) this._inputElement.removeAttribute('name'); else this._inputElement.name = newValue;
-                } else if (name === 'required') {
-                    this._inputElement.required = newValue !== null;
-                } else if (name === 'type') {
-                    this._inputElement.type = newValue || 'text';
-                } else {
-                    // For other attributes, or if _inputElement wasn't ready, a full _render might be needed
-                    // but often specific handlers are better. For now, this is okay.
-                    this._render(); // Fallback to re-render for unhandled attribute changes
+        if (oldValue === newValue) return;
+
+        if (!this._inputElement) {
+            this._render(); // Ensures _inputElement exists before proceeding
+        }
+
+        // Now that _inputElement is guaranteed to exist (or was just created by _render),
+        // apply specific attribute changes.
+        switch (name) {
+            case 'value':
+                if (this._inputElement.value !== newValue) {
+                    this._inputElement.value = newValue === null ? '' : newValue;
                 }
-            } else {
-                // If _inputElement isn't there yet (e.g., initial attributes setting before _render in some lifecycle),
-                // _render will pick them up.
-                this._render();
-            }
+                break;
+            case 'disabled':
+                this._inputElement.disabled = this.hasAttribute('disabled');
+                break;
+            case 'placeholder':
+                this._inputElement.placeholder = newValue || '';
+                break;
+            case 'name':
+                if (newValue === null) this._inputElement.removeAttribute('name');
+                else this._inputElement.name = newValue;
+                break;
+            case 'required':
+                this._inputElement.required = newValue !== null;
+                break;
+            case 'type':
+                this._inputElement.type = newValue || 'text';
+                break;
+            // default:
+                // If an attribute changes that is not handled above and requires a full re-render
+                // (e.g. one that changes the fundamental structure, though AdwEntry is simple),
+                // then a call to this._render() might be needed here.
+                // For AdwEntry, most attributes are directly mapped, so this is often not needed.
+                // Consider if any other attributes would necessitate a full structural rebuild.
+                // If not, this default case can be omitted or log a warning for unhandled attrs.
         }
     }
+
     _render() {
-        const alreadyRendered = !!this._inputElement;
-        if (!alreadyRendered) {
+        // Idempotent render: only create the input element once.
+        if (!this._inputElement) {
+            // Clear any existing non-stylesheet elements if we are re-doing the base structure
              while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
                 this.shadowRoot.removeChild(this.shadowRoot.lastChild);
             }
             this._inputElement = document.createElement("input");
             this._inputElement.classList.add("adw-entry");
             this.shadowRoot.appendChild(this._inputElement);
+
+            // Attach event listeners only once, when the element is created
+            this._inputElement.addEventListener('input', (e) => {
+                const newValue = e.target.value;
+                // Update the component's 'value' attribute if it differs.
+                // This ensures consistency and allows attributeChangedCallback to handle side effects if any.
+                if (this.getAttribute('value') !== newValue) {
+                    this.setAttribute('value', newValue);
+                }
+                // Dispatch 'input' event from the custom element itself for external listeners.
+                this.dispatchEvent(new CustomEvent('input', { detail: { value: newValue }, bubbles: true, composed: true }));
+            });
+            this._inputElement.addEventListener('change', (e) => {
+                // Propagate the 'change' event from the native input.
+                this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+            });
         }
 
+        // Apply all current attribute values to the input element's properties.
+        // This ensures that if _render is called (e.g. from connectedCallback or an attribute change
+        // that wasn't handled by a specific case in attributeChangedCallback), the state is synced.
         this._inputElement.placeholder = this.getAttribute('placeholder') || '';
-        // Set value ensuring it's not null, which input.value doesn't like
         const valueAttr = this.getAttribute('value');
-        this._inputElement.value = valueAttr === null ? '' : valueAttr;
-
+        if (this._inputElement.value !== valueAttr) { // Avoid resetting cursor if value is already correct
+            this._inputElement.value = valueAttr === null ? '' : valueAttr;
+        }
         this._inputElement.disabled = this.hasAttribute('disabled');
         if (this.hasAttribute('name')) this._inputElement.name = this.getAttribute('name'); else this._inputElement.removeAttribute('name');
-        if (this.hasAttribute('required')) this._inputElement.required = true; else this._inputElement.required = false;
-        this._inputElement.type = this.hasAttribute('type') ? this.getAttribute('type') : 'text';
+        this._inputElement.required = this.hasAttribute('required');
+        this._inputElement.type = this.getAttribute('type') || 'text';
     }
+
     get value() { return this._inputElement ? this._inputElement.value : (this.getAttribute('value') || ''); }
     set value(val) {
         const strVal = (val === null || val === undefined) ? '' : String(val);
