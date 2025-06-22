@@ -373,7 +373,7 @@ export class AdwToolbarView extends HTMLElement {
 
 /** Creates an AdwCarousel widget. */
 export function createAdwCarousel(options = {}) {
-    const opts = { showIndicators: true, showNavButtons: false, loop: true, autoplay: false, autoplayInterval: 5000, indicatorStyle: 'dots', ...options };
+    const opts = Object.assign({ showIndicators: true, showNavButtons: false, loop: true, autoplay: false, autoplayInterval: 5000, indicatorStyle: 'dots' }, options);
     const carousel = document.createElement('div'); carousel.classList.add('adw-carousel');
     carousel.setAttribute('role', 'region'); carousel.setAttribute('aria-roledescription', 'carousel');
     if (opts.loop) carousel.classList.add('looping'); if (opts.autoplay) carousel.classList.add('autoplay'); if (opts.indicatorStyle === 'thumbnails') carousel.classList.add('thumbnail-indicators');
