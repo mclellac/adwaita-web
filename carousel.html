@@ -86,7 +86,8 @@
                 console.error("Adw object not found. Aborting main script.");
                 return;
             }
-            Adw.init();
+            // Adw.init(); // adw-initializer.js is missing, and Adw.init() is not defined in components.js
+                         // Theme loading is handled by loadSavedTheme() in utils.js, called on DOMContentLoaded.
 
             document.getElementById('theme-toggle-button')?.addEventListener('click', () => Adw.toggleTheme());
 
