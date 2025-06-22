@@ -1,5 +1,5 @@
 import { adwGenerateId } from './utils.js';
-import { createAdwButton } from './button.js'; // For SplitButton
+import { createAdwButton } from './button.js';
 
 /**
  * Creates an Adwaita-style switch.
@@ -140,11 +140,6 @@ export function createAdwSplitButton(options = {}) {
 
     if (opts.actionText) {
         splitButton.setAttribute('action-text', opts.actionText);
-        // For factory usage, setting textContent is often more direct if not using slots from the caller.
-        // However, the WC is designed with slots in mind.
-        // If actionText is the primary way from factory, we can set its textContent.
-        // Let's assume factory users might provide simple text for actionText.
-        // The WC's render logic gives precedence to slots. If action-text is set AND no slots are used, it should pick it up.
     }
     if (opts.actionHref) {
         splitButton.setAttribute('action-href', opts.actionHref);
@@ -155,28 +150,22 @@ export function createAdwSplitButton(options = {}) {
     if (opts.disabled) {
         splitButton.setAttribute('disabled', '');
     }
-    if (opts.dropdownAriaLabel) {
+    if (opts.dropdownAriaLabel) { // Pass this through
         splitButton.setAttribute('dropdown-aria-label', opts.dropdownAriaLabel);
     }
     if (opts.actionIconName) {
         splitButton.setAttribute('action-icon-name', opts.actionIconName);
     }
 
-    // Event listeners
     if (typeof opts.onActionClick === 'function') {
         splitButton.addEventListener('action-click', opts.onActionClick);
     }
     if (typeof opts.onDropdownClick === 'function') {
         splitButton.addEventListener('dropdown-click', opts.onDropdownClick);
     }
-
-    // If opts.children are provided, they would be slotted.
-    // Example: if options included a child for the 'action-label' slot.
-    // opts.children?.forEach(child => splitButton.appendChild(child));
-    // For now, assuming simple text via actionText or content set by caller after creation.
-
     return splitButton;
 }
+
 export class AdwSplitButton extends HTMLElement {
     static get observedAttributes() { return ['action-text', 'action-href', 'suggested', 'disabled', 'dropdown-aria-label', 'action-icon-name']; }
     constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); }
@@ -192,7 +181,6 @@ export class AdwSplitButton extends HTMLElement {
         const isInitialRender = !this._wrapper;
 
         if (isInitialRender) {
-            // Clear everything except the style link
             const styleLink = this.shadowRoot.querySelector('link[rel="stylesheet"]');
             while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== styleLink) {
                 this.shadowRoot.removeChild(this.shadowRoot.lastChild);
@@ -203,18 +191,20 @@ export class AdwSplitButton extends HTMLElement {
 
             this._actionButton = document.createElement('adw-button');
             this._actionButton.classList.add('adw-split-button-action');
-            // Use a slot for the action button's text content primarily
             const actionSlot = document.createElement('slot');
-            actionSlot.name = 'action-label'; // Named slot for explicit label
-            const defaultSlot = document.createElement('slot'); // Default slot for simple text node or other elements
+            actionSlot.name = 'action-label';
+            const defaultSlot = document.createElement('slot');
             this._actionButton.appendChild(actionSlot);
             this._actionButton.appendChild(defaultSlot);
-
 
             this._dropdownButton = document.createElement('adw-button');
             this._dropdownButton.classList.add('adw-split-button-dropdown');
             this._dropdownButton.setAttribute('icon-name', 'ui/pan-down-symbolic');
             this._dropdownButton.setAttribute('aria-haspopup', 'true');
+            // MODIFIED: Set initial aria-label for dropdown button
+            const initialDropdownAriaLabel = this.getAttribute('dropdown-aria-label') || 'More options';
+            this._dropdownButton.setAttribute('aria-label', initialDropdownAriaLabel);
+
 
             this._actionButton.addEventListener('click', (e) => {
                 if (this.hasAttribute('disabled')) { e.stopImmediatePropagation(); return; }
@@ -230,8 +220,7 @@ export class AdwSplitButton extends HTMLElement {
             this.shadowRoot.appendChild(this._wrapper);
         }
 
-        // Update attributes and classes
-        const actionText = this.getAttribute('action-text'); // Can be used as fallback or direct set if no slot used
+        const actionText = this.getAttribute('action-text');
         const actionHref = this.getAttribute('action-href');
         const isSuggested = this.hasAttribute('suggested');
         const isDisabled = this.hasAttribute('disabled');
@@ -239,31 +228,17 @@ export class AdwSplitButton extends HTMLElement {
         const actionIconName = this.getAttribute('action-icon-name');
 
         this._wrapper.classList.toggle('suggested-action', isSuggested);
-        this._wrapper.classList.toggle('disabled', isDisabled); // Main wrapper class for overall state
+        this._wrapper.classList.toggle('disabled', isDisabled);
 
-        // Configure Action Button
-        if (actionText && !this.querySelector('[slot="action-label"]') && !this.textContent.trim()) {
-             // If no slotted content for label and no default slot text, use action-text attribute.
-             // This is tricky with slots. Preferring slots.
-             // For simplicity, let's assume slotted content takes precedence.
-             // If action-text is meant to be the primary way, then slotting might be secondary.
-             // AdwButton itself handles its textContent or slot.
-             // We might need to decide if AdwSplitButton's action-text directly sets textContent of internal adw-button
-             // or if it's just an alternative to using slots.
-             // Let's set textContent if attribute is present and no slot="action-label" exists.
-             const defaultSlottedContent = Array.from(this.childNodes).filter(node => !node.slot || node.slot === "");
-             const actionLabelSlottedContent = this.querySelector('[slot="action-label"]');
+        const defaultSlottedContent = Array.from(this.childNodes).filter(node => !node.slot || node.slot === "");
+        const actionLabelSlottedContent = this.querySelector('[slot="action-label"]');
 
-             if (!actionLabelSlottedContent && defaultSlottedContent.every(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim() === '')) {
-                 this._actionButton.textContent = actionText; // Fallback to attribute if slot is empty
-             } else if (!actionLabelSlottedContent && !defaultSlottedContent.length) {
-                 this._actionButton.textContent = actionText; // Fallback if no slots at all
-             }
-        } else if (!actionText && this._actionButton.textContent) {
-            // Clear if attribute removed and text was from attribute
-            // This logic is getting complex due to interaction of attribute and slot.
-            // A simpler model for WC: attributes for config, slot for content.
-            // Let's primarily rely on slots for text, `action-text` as a potential override/initial value.
+        if (actionText && !actionLabelSlottedContent && defaultSlottedContent.every(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim() === '')) {
+            this._actionButton.textContent = actionText;
+        } else if (!actionLabelSlottedContent && !defaultSlottedContent.length && actionText) {
+            this._actionButton.textContent = actionText;
+        } else if (!actionText && !actionLabelSlottedContent && !defaultSlottedContent.length) {
+            this._actionButton.textContent = '';
         }
 
 
@@ -272,11 +247,9 @@ export class AdwSplitButton extends HTMLElement {
         this._actionButton.toggleAttribute('suggested', isSuggested);
         this._actionButton.toggleAttribute('disabled', isDisabled);
 
-
-        // Configure Dropdown Button
+        // Ensure dropdown button's aria-label is up-to-date
         this._dropdownButton.setAttribute('aria-label', dropdownAriaLabel);
         this._dropdownButton.toggleAttribute('disabled', isDisabled);
-        // Dropdown button should not typically be 'suggested' itself, the wrapper handles it.
     }
 }
 
@@ -286,8 +259,6 @@ export function createAdwToggleButton(text, options = {}) {
     const toggleButtonWC = document.createElement('adw-toggle-button');
 
     if (text) {
-        // AdwToggleButton uses a slot for text, or 'label' attribute as fallback.
-        // For factory, setting label attribute is more straightforward.
         toggleButtonWC.setAttribute('label', text);
     }
     if (opts.value !== undefined) {
@@ -299,64 +270,49 @@ export function createAdwToggleButton(text, options = {}) {
     if (opts.disabled) {
         toggleButtonWC.setAttribute('disabled', '');
     }
-    if (opts.icon) { // AdwToggleButton maps 'icon' to 'icon-name' for its internal adw-button
+    if (opts.icon) {
         toggleButtonWC.setAttribute('icon', opts.icon);
     }
-    if (opts.iconName) { // Prefer iconName if provided
+    if (opts.iconName) {
         toggleButtonWC.setAttribute('icon-name', opts.iconName);
     }
+    if (opts.ariaLabel) {
+        toggleButtonWC.setAttribute('aria-label', opts.ariaLabel);
+    }
 
-    // Flat is default true for AdwToggleButton's internal button.
-    // Only set if explicitly false.
     if (opts.flat === false) {
         toggleButtonWC.setAttribute('flat', 'false');
     }
-    // Other boolean attributes for styling
     if (opts.suggested) toggleButtonWC.setAttribute('suggested', '');
     if (opts.destructive) toggleButtonWC.setAttribute('destructive', '');
-    if (opts.isCircular) toggleButtonWC.setAttribute('circular', ''); // Map from opts.isCircular
+    if (opts.isCircular) toggleButtonWC.setAttribute('circular', '');
 
     if (typeof opts.onToggled === 'function') {
         toggleButtonWC.addEventListener('toggled', (e) => {
-            // The event detail should be { isActive, value }
             opts.onToggled(e.detail.isActive, e.detail.value);
         });
     }
-
-    // The old factory had setActive and isActive methods.
-    // The WC equivalent is setting the 'active' attribute/property.
-    // Consumers of the factory who used these methods would need to adapt.
-    // For now, the factory returns the WC instance directly.
-
     return toggleButtonWC;
 }
 
 export class AdwToggleButton extends HTMLElement {
-    static get observedAttributes() { return ['label', 'active', 'disabled', 'value', 'icon', 'flat', 'suggested', 'destructive', 'circular']; }
+    static get observedAttributes() { return ['label', 'active', 'disabled', 'value', 'icon', 'icon-name', 'flat', 'suggested', 'destructive', 'circular', 'aria-label']; }
     constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._internalButtonElement = null; }
     connectedCallback() {
         this._internalButtonElement = null;
         this._render();
-        // Set initial aria-pressed based on active state
         this.setAttribute('aria-pressed', String(this.active));
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue !== newValue) {
-            // The 'active' attribute change directly triggers the 'active' setter,
-            // which calls _updateInternalButtonActiveState and dispatches 'toggled'.
-            // So, we don't need a specific 'active' case here to call this.active = ...
-            // For other attributes, a re-render or specific update is needed.
             if (name === 'disabled') {
-                this.disabled = this.hasAttribute('disabled'); // Sync property and internal button
+                this.disabled = this.hasAttribute('disabled');
             } else if (name === 'active') {
-                // This will be handled by the active setter if changed programmatically,
-                // or if attribute is changed directly, the setter should reflect it.
-                // We need to ensure aria-pressed on host is updated.
                 this.setAttribute('aria-pressed', String(this.hasAttribute('active')));
-                this._updateInternalButtonActiveState(); // Ensure internal button also reflects
+                this._updateInternalButtonActiveState();
             } else {
-                this._render(); // Re-render for label, icon, style attributes etc.
+                this._render();
             }
         }
     }
@@ -370,53 +326,47 @@ export class AdwToggleButton extends HTMLElement {
                 this.shadowRoot.removeChild(this.shadowRoot.lastChild);
             }
             this._internalButtonElement = document.createElement('adw-button');
-            this._internalButtonElement.classList.add('adw-toggle-button'); // For specific toggle styling if any
+            this._internalButtonElement.classList.add('adw-toggle-button');
 
-            // Slot for label/content
             const defaultSlot = document.createElement('slot');
             this._internalButtonElement.appendChild(defaultSlot);
 
             this._internalButtonElement.addEventListener('click', (event) => {
                 if (this.disabled) {
-                    event.stopImmediatePropagation(); // Prevent further action
+                    event.stopImmediatePropagation();
                     return;
                 }
-                // Dispatch a pre-toggle event. Could be made cancellable.
-                this.dispatchEvent(new CustomEvent('toggle-intent', { // Renamed from 'adw-toggle-button-clicked' for clarity
+                this.dispatchEvent(new CustomEvent('toggle-intent', {
                     detail: { value: this.value, currentState: this.active },
                     bubbles: true, composed: true, cancelable: true
                 }));
-
-                // Toggle logic: if not part of a group that manages its state (e.g. adw-toggle-group)
-                // AdwToggleGroup listens to 'toggle-intent' or similar and calls preventDefault if it handles it.
-                // For now, assume direct toggle if not prevented by a parent.
-                // The old logic: if (!this.closest('adw-toggle-group'))
-                // This check is better done by the group itself by cancelling the event.
-                // Here, we just toggle if the event was not cancelled.
                 if (!event.defaultPrevented) {
-                     this.active = !this.active; // This will trigger the setter
+                     this.active = !this.active;
                 }
             });
             this.shadowRoot.appendChild(this._internalButtonElement);
         }
 
-        // Update internal adw-button attributes from adw-toggle-button attributes
-        const labelText = this.getAttribute('label'); // Fallback if no slot used
-        const iconName = this.getAttribute('icon-name') || this.getAttribute('icon'); // Prefer icon-name
+        const labelText = this.getAttribute('label');
+        const iconName = this.getAttribute('icon-name') || this.getAttribute('icon');
+        const hostAriaLabel = this.getAttribute('aria-label');
 
         if (labelText && !this.textContent.trim() && !this.querySelector('slot')) {
-            // If label attribute is present and no slotted content, set it on internal button
              this._internalButtonElement.textContent = labelText;
-        } else if (!labelText && this.textContent.trim()) {
-            // If no label attribute but host has text content, it will be slotted.
-            // If both, slot wins. If neither, button is textless (e.g. icon only)
+        } else if (!labelText && !this.textContent.trim() && !this.querySelector('slot') && iconName && hostAriaLabel) {
+            // AdwButton's own logic should handle this if hostAriaLabel is set on it
+        } else if (!labelText && !iconName && !this.textContent.trim() && !this.querySelector('slot')) {
+            // Truly empty
+        }
+
+        if (hostAriaLabel) {
+            this._internalButtonElement.setAttribute('aria-label', hostAriaLabel);
         }
 
 
         if (iconName) this._internalButtonElement.setAttribute('icon-name', iconName);
         else this._internalButtonElement.removeAttribute('icon-name');
 
-        // Default to flat, unless flat="false"
         if (this.getAttribute('flat') === 'false') this._internalButtonElement.removeAttribute('flat');
         else this._internalButtonElement.setAttribute('flat', '');
 
@@ -426,17 +376,14 @@ export class AdwToggleButton extends HTMLElement {
         });
 
         this._internalButtonElement.toggleAttribute('disabled', this.disabled);
-        this._updateInternalButtonActiveState(); // Sync active state too
-        // Value attribute is directly on the host, not the internal button's dataset.
+        this._updateInternalButtonActiveState();
     }
 
     _updateInternalButtonActiveState() {
         if (this._internalButtonElement) {
             const isActive = this.active;
-            this._internalButtonElement.classList.toggle('active', isActive); // Visual cue via class
-            this._internalButtonElement.toggleAttribute('active', isActive); // For adw-button's own state if it uses it
-            // aria-pressed should be on the host AdwToggleButton, not the internal adw-button.
-            // The host's attributeChangedCallback for 'active' handles setting aria-pressed on the host.
+            this._internalButtonElement.classList.toggle('active', isActive);
+            this._internalButtonElement.toggleAttribute('active', isActive);
         }
     }
 
@@ -448,9 +395,6 @@ export class AdwToggleButton extends HTMLElement {
 
         if (isActive) this.setAttribute('active', '');
         else this.removeAttribute('active');
-        // attributeChangedCallback for 'active' will handle:
-        // - setting aria-pressed on host
-        // - calling _updateInternalButtonActiveState
         this.dispatchEvent(new CustomEvent('toggled', { detail: { isActive, value: this.value } , bubbles: true, composed: true}));
     }
 
@@ -475,11 +419,148 @@ export class AdwToggleButton extends HTMLElement {
         else this.removeAttribute('disabled');
 
         if (this._internalButtonElement) {
-            this._internalButtonElement.disabled = isDisabled; // adw-button should have a disabled setter or handle attribute
-            this._internalButtonElement.toggleAttribute('disabled', isDisabled); // Ensure attribute for styling/WC behavior
+            this._internalButtonElement.disabled = isDisabled;
+            this._internalButtonElement.toggleAttribute('disabled', isDisabled);
         }
     }
 }
+
+export class AdwSpinButton extends HTMLElement {
+    static get observedAttributes() { return ['value', 'min', 'max', 'step', 'disabled']; }
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
+        this.shadowRoot.appendChild(styleLink);
+
+        this._spinButtonElement = null;
+        this._entryElement = null;
+        this._upButton = null;
+        this._downButton = null;
+    }
+    connectedCallback() { this._render(); }
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            if (this._spinButtonElement) { // Check if rendered
+                 this._updateInternalElementStates();
+            } else {
+                this._render(); // If not rendered, a full render is needed
+            }
+        }
+    }
+    _render() {
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
+        this._spinButtonElement = document.createElement('div');
+        this._spinButtonElement.classList.add('adw-spin-button');
+
+        this._entryElement = new AdwEntry(); // Assuming AdwEntry is defined and imported
+        this._entryElement.classList.add('adw-spin-button-entry');
+        this._entryElement.style.maxWidth = '80px'; // Example style
+        this._entryElement.setAttribute('role', 'spinbutton');
+
+        this._entryElement.addEventListener('change', (e) => {
+            let numValue = parseFloat(this._entryElement.value);
+            if (isNaN(numValue)) numValue = this.min; // Use current min if NaN
+            numValue = Math.max(this.min, Math.min(this.max, numValue));
+            // TODO: Step alignment logic if desired
+            this.value = numValue; // This will trigger attributeChangedCallback and update everything
+        });
+        this._entryElement.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') { e.preventDefault(); if (!this._upButton.disabled) this._upButton.click(); }
+            else if (e.key === 'ArrowDown') { e.preventDefault(); if (!this._downButton.disabled) this._downButton.click(); }
+        });
+
+        const btnContainer = document.createElement('div');
+        btnContainer.classList.add('adw-spin-button-buttons');
+
+        this._downButton = createAdwButton('', {
+            iconName: 'ui/pan-down-symbolic',
+            flat: true,
+            isCircular: false,
+            cssClass: 'adw-spin-button-control',
+            ariaLabel: 'Decrement'
+        });
+        this._downButton.classList.add('adw-spin-button-down');
+        this._downButton.addEventListener('click', () => { if(!this.disabled) this.value -= this.step; });
+
+        this._upButton = createAdwButton('', {
+            iconName: 'ui/pan-up-symbolic',
+            flat: true,
+            isCircular: false,
+            cssClass: 'adw-spin-button-control',
+            ariaLabel: 'Increment'
+        });
+        this._upButton.classList.add('adw-spin-button-up');
+        this._upButton.addEventListener('click', () => { if(!this.disabled) this.value += this.step; });
+
+        btnContainer.appendChild(this._upButton);
+        btnContainer.appendChild(this._downButton);
+        this._spinButtonElement.appendChild(this._entryElement);
+        this._spinButtonElement.appendChild(btnContainer);
+        this.shadowRoot.appendChild(this._spinButtonElement);
+
+        this._updateInternalElementStates();
+    }
+
+    _updateInternalElementStates() {
+        if (!this._spinButtonElement || !this._entryElement || !this._upButton || !this._downButton) return;
+
+        const value = this.value;
+        const min = this.min;
+        const max = this.max;
+        const disabled = this.disabled;
+
+        if (this._entryElement.value !== String(value)) this._entryElement.value = value;
+        this._entryElement.setAttribute('aria-valuenow', value);
+        this._entryElement.setAttribute('aria-valuemin', min);
+        this._entryElement.setAttribute('aria-valuemax', max);
+        this._entryElement.disabled = disabled;
+
+        this._upButton.disabled = disabled || value >= max;
+        this._downButton.disabled = disabled || value <= min;
+        this._spinButtonElement.classList.toggle('disabled', disabled);
+    }
+
+    get value() { return this.hasAttribute('value') ? parseFloat(this.getAttribute('value')) : 0; }
+    set value(val) {
+        const numVal = parseFloat(val);
+        const min = this.min;
+        const max = this.max;
+
+        let clampedVal = numVal;
+        if (isNaN(clampedVal)) clampedVal = min;
+        clampedVal = Math.max(min, Math.min(max, clampedVal));
+
+        const oldValue = this.hasAttribute('value') ? parseFloat(this.getAttribute('value')) : null;
+        if (oldValue !== clampedVal || !this.hasAttribute('value')) {
+            this.setAttribute('value', clampedVal);
+            this.dispatchEvent(new CustomEvent('value-changed', { detail: { value: clampedVal } }));
+        } else {
+            this._updateInternalElementStates();
+        }
+    }
+
+    get disabled() { return this.hasAttribute('disabled'); }
+    set disabled(val) {
+        const isDisabled = Boolean(val);
+        if (isDisabled) this.setAttribute('disabled', '');
+        else this.removeAttribute('disabled');
+    }
+
+    get min() { return this.hasAttribute('min') ? parseFloat(this.getAttribute('min')) : 0; }
+    set min(val) { this.setAttribute('min', parseFloat(val)); }
+
+    get max() { return this.hasAttribute('max') ? parseFloat(this.getAttribute('max')) : 100; }
+    set max(val) { this.setAttribute('max', parseFloat(val)); }
+
+    get step() { return this.hasAttribute('step') ? parseFloat(this.getAttribute('step')) : 1; }
+    set step(val) { this.setAttribute('step', parseFloat(val)); }
+}
+
 
 /** Creates an AdwToggleGroup. */
 export function createAdwToggleGroup(options = {}) {
@@ -517,7 +598,7 @@ export class AdwToggleGroup extends HTMLElement {
         this._updateButtonStatesAndListeners(); // Initial setup
     }
     disconnectedCallback() {
-        this._slotObserver.disconnect(); // Should be observing light DOM children, not slot itself for this logic
+        this._slotObserver.disconnect();
         this._getSlottedButtons().forEach(button => {
             button.removeEventListener('adw-toggle-button-clicked', this._boundButtonClickHandler);
         });
@@ -530,7 +611,6 @@ export class AdwToggleGroup extends HTMLElement {
     }
 
     _getSlottedButtons() {
-        // Query assigned nodes of the slot, or direct children if slot is not yet fully initialized
         return (this._slotElement ? this._slotElement.assignedNodes({ flatten: true }) : Array.from(this.children))
             .filter(node => node.nodeType === Node.ELEMENT_NODE && node.matches('adw-toggle-button'));
     }
@@ -541,41 +621,36 @@ export class AdwToggleGroup extends HTMLElement {
         let newActiveButtonFound = false;
 
         buttons.forEach(button => {
-            // Ensure each button is a radio role within this group
             button.setAttribute('role', 'radio');
-
-            // Remove old listener before adding new one to prevent duplicates
             button.removeEventListener('adw-toggle-button-clicked', this._boundButtonClickHandler);
             button.addEventListener('adw-toggle-button-clicked', this._boundButtonClickHandler);
 
-            const buttonValue = button.value; // Use AdwToggleButton's value property
+            const buttonValue = button.value;
             const shouldBeActive = (buttonValue === activeValue);
 
             if (button.active !== shouldBeActive) {
-                button.active = shouldBeActive; // Use AdwToggleButton's active setter
+                button.active = shouldBeActive;
             }
             if (shouldBeActive) {
                 newActiveButtonFound = true;
             }
         });
 
-        // If activeValue was set but no button matched, clear it
         if (activeValue && !newActiveButtonFound) {
-            this.removeAttribute('active-value'); // This will trigger attributeChangedCallback -> _render -> _updateButtonStates
+            this.removeAttribute('active-value');
         }
     }
 
     _handleSlottedButtonClick(event) {
-        const clickedButton = event.target; // The AdwToggleButton itself
+        const clickedButton = event.target;
         if (clickedButton.disabled || !clickedButton.matches('adw-toggle-button')) return;
-
-        this.value = clickedButton.value; // Use setter, it will update attribute & call _updateButtonStates
+        this.value = clickedButton.value;
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue !== newValue) {
             if (name === 'active-value') {
-                this._updateButtonStatesAndListeners(); // Ensure correct button is active
+                this._updateButtonStatesAndListeners();
                 this.dispatchEvent(new CustomEvent('active-changed', { detail: { value: newValue }, bubbles: true, composed: true }));
             } else if (name === 'linked') {
                 this._updateStyling();
@@ -591,8 +666,7 @@ export class AdwToggleGroup extends HTMLElement {
         } else {
             this.setAttribute('active-value', newValue);
         }
-        // attributeChangedCallback handles the rest if value actually changed
-        if (oldValue === newValue && newValue !== null) { // Force update if value set to same but internal state might be off
+        if (oldValue === newValue && newValue !== null) {
              this._updateButtonStatesAndListeners();
         }
     }

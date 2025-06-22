@@ -26,13 +26,10 @@ export function createAdwViewSwitcher(options = {}) {
     const opts = options || {};
     const viewSwitcherRoot = document.createElement('div');
     viewSwitcherRoot.classList.add('adw-view-switcher');
-    // Note: The SCSS also expects a .adw-view-switcher-content if it's handling content visibility.
-    // However, the AdwViewSwitcher WC handles content visibility by showing/hiding light DOM children.
-    // So, the factory will only create the bar part.
 
     const viewSwitcherBar = document.createElement('div');
     viewSwitcherBar.classList.add('adw-view-switcher-bar');
-    if(opts.isInline) viewSwitcherBar.classList.add('inline-switcher'); // Correctly add 'inline-switcher'
+    if(opts.isInline) viewSwitcherBar.classList.add('inline-switcher');
     viewSwitcherRoot.appendChild(viewSwitcherBar);
 
     viewSwitcherBar.setAttribute('role', 'tablist');
@@ -43,65 +40,52 @@ export function createAdwViewSwitcher(options = {}) {
     let currentActiveViewName = opts.activeViewName;
 
     function setActiveButton(buttonToActivate, viewName) {
-        if (currentActiveButton) currentActiveButton.active = false; // Relies on AdwToggleButton's setter
-        buttonToActivate.active = true; // Relies on AdwToggleButton's setter
+        if (currentActiveButton) currentActiveButton.active = false;
+        buttonToActivate.active = true;
         currentActiveButton = buttonToActivate;
         currentActiveViewName = viewName;
         if(typeof opts.onViewChanged === 'function') {
-            // The third argument to onViewChanged was viewName, but SCSS implies panelId.
-            // For WC usage, viewName is more direct.
             opts.onViewChanged(viewName, buttonToActivate.id, viewName);
         }
     }
 
     (opts.views || []).forEach(view => {
         const buttonId = view.buttonId || adwGenerateId('adw-view-switcher-btn');
-        // Assuming AdwToggleButton is the intended component for view switcher buttons
         const button = createAdwToggleButton(view.buttonOptions?.text || view.title || view.name, {
-            value: view.name, // AdwToggleButton uses 'value'
+            value: view.name,
             active: view.name === currentActiveViewName,
             icon: view.buttonOptions?.icon,
-            // Toggle buttons don't typically have 'flat' in this context, they are styled by group
         });
         button.id = buttonId;
         button.setAttribute('role', 'tab');
-        button.setAttribute('aria-controls', view.name); // view.name can serve as panel ID
+        button.setAttribute('aria-controls', view.name);
 
         if(view.name === currentActiveViewName) currentActiveButton = button;
 
-        // AdwToggleButton fires 'toggled' or 'change'. Let's use 'click' for simplicity here
-        // or ensure AdwToggleButton's events are handled appropriately.
-        // Using click directly on the toggle button.
-        button.addEventListener('click', () => { // Or listen to 'change' or 'toggled' from AdwToggleButton
+        button.addEventListener('click', () => {
             if (currentActiveViewName !== view.name && !button.disabled) {
                  setActiveButton(button, view.name);
             } else if (currentActiveViewName === view.name && !button.active) {
-                // If it's already the current view but somehow the button got deactivated, reactivate.
-                // This case might not be strictly necessary if logic is sound.
                 button.active = true;
             }
         });
         buttons.push(button);
-        viewSwitcherBar.appendChild(button); // Append to the bar
+        viewSwitcherBar.appendChild(button);
     });
 
     if(!currentActiveButton && buttons.length > 0) {
         setActiveButton(buttons[0], buttons[0].value);
     }
 
-    // Expose setActiveView on the root element returned by the factory
     viewSwitcherRoot.setActiveView = (viewName) => {
         const buttonToActivate = buttons.find(b => b.value === viewName);
         if(buttonToActivate && currentActiveViewName !== viewName) {
             setActiveButton(buttonToActivate, viewName);
         } else if (buttonToActivate && !buttonToActivate.active) {
-            // If called externally and button isn't active, make it so.
             buttonToActivate.active = true;
-            // If it wasn't the currentActiveViewName, it will be set by setActiveButton if different.
-            // If it WAS currentActiveViewName but button was inactive, this fixes it.
         }
     };
-    return viewSwitcherRoot; // Return the root which contains the bar
+    return viewSwitcherRoot;
 }
 export class AdwViewSwitcher extends HTMLElement {
     static get observedAttributes() { return ['label', 'active-view', 'is-inline']; }
@@ -136,7 +120,17 @@ export function createAdwTabButton(options = {}) {
         contentWrapper.appendChild(iconSpan);
     }
     const labelSpan = document.createElement('span'); labelSpan.classList.add('adw-tab-button-label'); labelSpan.textContent = opts.label || 'Tab'; contentWrapper.appendChild(labelSpan); tabButton.appendChild(contentWrapper);
-    if (opts.isClosable !== false) { const closeButton = createAdwButton('', { icon: '<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>', flat: true, isCircular: true, onClick: (e) => { e.stopPropagation(); if (typeof opts.onClose === 'function') opts.onClose(opts.pageName); }}); closeButton.classList.add('adw-tab-button-close'); closeButton.setAttribute('aria-label', `Close tab ${opts.label || ''}`); tabButton.appendChild(closeButton); }
+    if (opts.isClosable !== false) {
+        const closeButton = createAdwButton('', {
+            icon: '<svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>',
+            flat: true,
+            isCircular: true,
+            ariaLabel: \`Close tab \${opts.label || opts.pageName || 'unnamed tab'}\`,
+            onClick: (e) => { e.stopPropagation(); if (typeof opts.onClose === 'function') opts.onClose(opts.pageName); }
+        });
+        closeButton.classList.add('adw-tab-button-close');
+        tabButton.appendChild(closeButton);
+    }
     tabButton.addEventListener('click', () => { if (typeof opts.onSelect === 'function') opts.onSelect(opts.pageName); });
     tabButton.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (typeof opts.onSelect === 'function') opts.onSelect(opts.pageName); }});
     return tabButton;
@@ -150,7 +144,7 @@ export class AdwTabButton extends HTMLElement {
         while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) this.shadowRoot.removeChild(this.shadowRoot.lastChild);
         const iconSlot = this.querySelector('[slot="icon"]');
         let iconHTMLContent = this.getAttribute('icon');
-        if (iconSlot && iconSlot.innerHTML.trim() !== '') { // Prioritize slotted SVG if present
+        if (iconSlot && iconSlot.innerHTML.trim() !== '') {
             iconHTMLContent = iconSlot.innerHTML.trim();
         }
         const options = { label: this.getAttribute('label') || this.textContent.trim() || 'Tab', pageName: this.pageName, isActive: this.active, isClosable: this.closable, iconHTML: iconHTMLContent, };
@@ -176,7 +170,7 @@ export function createAdwTabBar(options = {}) {
     tabBar.setActiveTab = (pageName) => { _updateTabStates(pageName); };
     (opts.tabsData || []).forEach(tabData => { tabBar.addTab(tabData, tabData.pageName === currentActiveTabName); });
     if(currentActiveTabName && tabButtonContainer.children.length > 0) _updateTabStates(currentActiveTabName); else if (!currentActiveTabName && tabButtonContainer.children.length > 0) { const firstTabName = tabButtonContainer.children[0].dataset.pageName; _updateTabStates(firstTabName); }
-    if (opts.showNewTabButton) { const newTabButton = createAdwButton('', { icon: '<svg viewBox="0 0 16 16" fill="currentColor" style="width:1em;height:1em;"><path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/></svg>', flat: true, isCircular: true, onClick: () => { if (typeof opts.onNewTabRequested === 'function') opts.onNewTabRequested(); }}); newTabButton.classList.add('adw-tab-bar-new-tab-button'); newTabButton.setAttribute('aria-label', 'New tab'); tabBar.appendChild(newTabButton); }
+    if (opts.showNewTabButton) { const newTabButton = createAdwButton('', { icon: '<svg viewBox="0 0 16 16" fill="currentColor" style="width:1em;height:1em;"><path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/></svg>', flat: true, isCircular: true, ariaLabel: 'New tab', onClick: () => { if (typeof opts.onNewTabRequested === 'function') opts.onNewTabRequested(); }}); newTabButton.classList.add('adw-tab-bar-new-tab-button'); tabBar.appendChild(newTabButton); }
     tabBar.addEventListener('keydown', (e) => { /* ... (keyboard nav) ... */ });
     return tabBar;
 }
@@ -209,7 +203,7 @@ export function createAdwTabPage(options = {}) {
     if (opts.content instanceof Node) {
         tabPage.appendChild(opts.content);
     } else if (typeof opts.content === 'string') {
-        tabPage.textContent = opts.content; // Was: contentWrapper.innerHTML = opts.content;
+        tabPage.textContent = opts.content;
     } else if (opts.content) {
         console.warn("AdwTabPage: options.content should be a Node or string.");
     }
@@ -236,10 +230,10 @@ export function createAdwTabView(options = {}) {
     if (currentActivePageName && !pageMap.has(currentActivePageName) && pageMap.size > 0) currentActivePageName = pageMap.keys().next().value; if (!currentActivePageName && pageMap.size > 0) currentActivePageName = pageMap.keys().next().value; if (currentActivePageName) tabView.setActivePage(currentActivePageName, true);
     return tabView;
 }
-export class AdwTabView extends HTMLElement { /* ... (Same as original AdwTabView WC, ensure Adw.createTabView is local) ... */
+export class AdwTabView extends HTMLElement {
     static get observedAttributes() { return ['active-page-name', 'show-new-tab-button']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._tabViewFactoryInstance = null; this._pagesSlot = document.createElement('slot'); this.shadowRoot.appendChild(this._pagesSlot); /* Append slot here */ this._slotObserver = new MutationObserver(() => this._rebuildFactoryPages()); }
-    connectedCallback() { /* _pagesSlot is already in shadowRoot */ this._renderFactoryInstance(); this._slotObserver.observe(this, { childList: true, attributes: true, subtree: false }); this._rebuildFactoryPages(); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._tabViewFactoryInstance = null; this._pagesSlot = document.createElement('slot'); this.shadowRoot.appendChild(this._pagesSlot);  this._slotObserver = new MutationObserver(() => this._rebuildFactoryPages()); }
+    connectedCallback() {  this._renderFactoryInstance(); this._slotObserver.observe(this, { childList: true, attributes: true, subtree: false }); this._rebuildFactoryPages(); }
     disconnectedCallback() { this._slotObserver.disconnect(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue === newValue || !this._tabViewFactoryInstance) return; if (name === 'active-page-name') { this._tabViewFactoryInstance.setActivePage(newValue); this._updateSlottedPageDisplay(newValue); } else if (name === 'show-new-tab-button') { this._renderFactoryInstance(); this._rebuildFactoryPages(); }}
     _updateSlottedPageDisplay(activePageName) { const slottedElements = this._pagesSlot.assignedNodes({ flatten: true }); slottedElements.forEach(node => { if (node.nodeType === Node.ELEMENT_NODE && (node.matches('adw-tab-page') || node.dataset.adwTabPage)) { const isPageActive = node.getAttribute('page-name') === activePageName; node.style.display = isPageActive ? '' : 'none'; if(isPageActive) node.setAttribute('active',''); else node.removeAttribute('active'); }});}
@@ -260,7 +254,7 @@ export function createAdwNavigationView(options = {}) {
     function _updateHeaderBar() {
         if (pageStack.length === 0) { headerBar.updateTitleSubtitle(); headerBar.setStartWidgets([]); headerBar.setEndWidgets([]); return; }
         const currentPageData = pageStack[pageStack.length - 1]; const headerData = currentPageData.header || {}; headerBar.updateTitleSubtitle(headerData.title || currentPageData.name, headerData.subtitle);
-        const startWidgets = []; if (pageStack.length > 1) { const backButton = createAdwButton('', { icon: '<svg viewBox="0 0 16 16" fill="currentColor" style="width:1em;height:1em;"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"/></svg>', flat: true, onClick: () => navigationView.pop() }); backButton.setAttribute('aria-label', 'Back'); startWidgets.push(backButton); }
+        const startWidgets = []; if (pageStack.length > 1) { const backButton = createAdwButton('', { iconName: 'actions/go-previous-symbolic', flat: true, ariaLabel: 'Back', onClick: () => navigationView.pop() }); startWidgets.push(backButton); } // Using iconName and ariaLabel
         if (headerData.start && Array.isArray(headerData.start)) startWidgets.push(...headerData.start);
         const startBox = headerBar.querySelector('.adw-header-bar-start'); if(startBox) { while(startBox.firstChild) startBox.removeChild(startBox.firstChild); startWidgets.forEach(w => startBox.appendChild(w)); }
         const endBox = headerBar.querySelector('.adw-header-bar-end'); if(endBox) { while(endBox.firstChild) endBox.removeChild(endBox.firstChild); (headerData.end || []).forEach(w => endBox.appendChild(w)); }
@@ -281,23 +275,21 @@ export function createAdwNavigationView(options = {}) {
     (opts.initialPages || []).forEach((pageData, index) => { pageData.element.classList.add('adw-navigation-page'); pagesContainer.appendChild(pageData.element); pageStack.push(pageData); if (index === 0) { pageData.element.classList.add('adw-navigation-page-active'); pageData.element.style.display = ''; } else pageData.element.style.display = 'none'; }); if(pageStack.length > 0) _updateHeaderBar();
     return navigationView;
 }
-export class AdwNavigationView extends HTMLElement { /* ... (Same as original AdwNavigationView WC, ensure createAdwNavigationView is local) ... */
+export class AdwNavigationView extends HTMLElement {
     static get observedAttributes() { return []; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._navigationViewFactoryInstance = null; this._pagesSlot = document.createElement('slot'); this.shadowRoot.appendChild(this._pagesSlot); /* Append slot here */ this._slotObserver = new MutationObserver(() => this._rebuildFactoryPagesFromSlotted()); }
-    connectedCallback() { /* _pagesSlot is already in shadowRoot */ this._renderFactoryInstance(); this._slotObserver.observe(this, { childList: true, attributes: true, subtree: true }); this._rebuildFactoryPagesFromSlotted(); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._navigationViewFactoryInstance = null; this._pagesSlot = document.createElement('slot'); this.shadowRoot.appendChild(this._pagesSlot);  this._slotObserver = new MutationObserver(() => this._rebuildFactoryPagesFromSlotted()); }
+    connectedCallback() {  this._renderFactoryInstance(); this._slotObserver.observe(this, { childList: true, attributes: true, subtree: true }); this._rebuildFactoryPagesFromSlotted(); }
     disconnectedCallback() { this._slotObserver.disconnect(); }
     _getPageDataFromElement(element) { if (!element || !element.matches || (!element.matches('adw-navigation-page, [data-page-name]') && !element.dataset.adwNavigationPage )) return null; const pageName = element.getAttribute('data-page-name') || element.getAttribute('page-name') || adwGenerateId('nav-page'); if (!element.hasAttribute('data-page-name') && !element.hasAttribute('page-name')) element.setAttribute('data-page-name', pageName); const header = {}; const titleEl = element.querySelector('[slot="header-title"]'); if (titleEl) header.title = titleEl.textContent; const subtitleEl = element.querySelector('[slot="header-subtitle"]'); if (subtitleEl) header.subtitle = subtitleEl.textContent; const startElements = element.querySelectorAll('[slot="header-start"] > *'); if (startElements.length > 0) header.start = Array.from(startElements).map(el => el.cloneNode(true)); const endElements = element.querySelectorAll('[slot="header-end"] > *'); if (endElements.length > 0) header.end = Array.from(endElements).map(el => el.cloneNode(true)); return { name: pageName, element: element, header: Object.keys(header).length > 0 ? header : undefined }; }
     _rebuildFactoryPagesFromSlotted() { if (!this._navigationViewFactoryInstance) this._renderFactoryInstance(); const initialPagesData = []; const slottedElements = this._pagesSlot.assignedNodes({ flatten: true }); slottedElements.forEach(node => { if (node.nodeType === Node.ELEMENT_NODE) { const pageData = this._getPageDataFromElement(node); if(pageData) initialPagesData.push(pageData); }}); this._renderFactoryInstance(initialPagesData); }
     _renderFactoryInstance(initialPagesData = []) { if (this._navigationViewFactoryInstance && this._navigationViewFactoryInstance.parentElement) this._navigationViewFactoryInstance.remove(); const options = { initialPages: initialPagesData, }; const factory = (typeof Adw !== 'undefined' && Adw.createNavigationView) ? Adw.createNavigationView : createAdwNavigationView; this._navigationViewFactoryInstance = factory(options); this.shadowRoot.insertBefore(this._navigationViewFactoryInstance, this._pagesSlot); this._navigationViewFactoryInstance.addEventListener('pushed', (e) => { this.dispatchEvent(new CustomEvent('pushed', { detail: e.detail })); this._updateSlottedPageDisplay(); }); this._navigationViewFactoryInstance.addEventListener('popped', (e) => { this.dispatchEvent(new CustomEvent('popped', { detail: e.detail })); this._updateSlottedPageDisplay(); }); this._updateSlottedPageDisplay(); }
     _updateSlottedPageDisplay() { if(!this._navigationViewFactoryInstance) return; const visiblePageName = this._navigationViewFactoryInstance.getVisiblePageName(); const slottedElements = this._pagesSlot.assignedNodes({ flatten: true }); slottedElements.forEach(node => { if (node.nodeType === Node.ELEMENT_NODE && (node.matches('adw-navigation-page, [data-page-name]') || node.dataset.adwNavigationPage)) { if (node.getAttribute('data-page-name') === visiblePageName || node.getAttribute('page-name') === visiblePageName) { /* factory handles display */ } else { /* factory handles display */ }}});}
-    push(pageElementOrName) { if (typeof pageElementOrName === 'string') { const pageName = pageElementOrName; const element = this.querySelector(`[data-page-name="${pageName}"], [page-name="${pageName}"]`); if (element && this._navigationViewFactoryInstance) { const pageData = this._getPageDataFromElement(element); if(pageData) this._navigationViewFactoryInstance.push(pageData); } else console.error(`AdwNavigationView: Page with name "${pageName}" not found.`); } else if (pageElementOrName instanceof HTMLElement) { const pageData = this._getPageDataFromElement(pageElementOrName); if (pageData && this._navigationViewFactoryInstance) { if (!pageElementOrName.parentElement) this.appendChild(pageElementOrName); this._navigationViewFactoryInstance.push(pageData); } else if(!pageData) console.error("AdwNavigationView.push: Invalid page element.", pageElementOrName); } else console.error("AdwNavigationView.push: Argument must be page name or HTMLElement."); }
     pop() { if (this._navigationViewFactoryInstance) this._navigationViewFactoryInstance.pop(); }
     getVisiblePageName(){ if(this._navigationViewFactoryInstance) return this._navigationViewFactoryInstance.getVisiblePageName(); return null; }
     push(pageArg) {
         let pageDataToPush = null;
         if (typeof pageArg === 'string') {
             const pageName = pageArg;
-            // Querying light DOM for the page element
             const element = this.querySelector(`[data-page-name="${pageName}"], [page-name="${pageName}"]`);
             if (element) {
                 pageDataToPush = this._getPageDataFromElement(element);
@@ -307,7 +299,6 @@ export class AdwNavigationView extends HTMLElement { /* ... (Same as original Ad
             }
         } else if (pageArg instanceof HTMLElement) {
             pageDataToPush = this._getPageDataFromElement(pageArg);
-            // If element is not already a child of this (for slotting), append it.
             if (pageDataToPush && (!pageArg.parentElement || pageArg.parentElement !== this)) {
                 let alreadySlotted = false;
                 const slot = this.shadowRoot.querySelector('slot');
@@ -323,7 +314,6 @@ export class AdwNavigationView extends HTMLElement { /* ... (Same as original Ad
             }
         } else if (typeof pageArg === 'object' && pageArg !== null && pageArg.name && pageArg.element instanceof HTMLElement) {
             pageDataToPush = pageArg;
-            // If element from pageData object is not already a child of this, append it.
             if (!pageDataToPush.element.parentElement || pageDataToPush.element.parentElement !== this) {
                  let alreadySlotted = false;
                  const slot = this.shadowRoot.querySelector('slot');
@@ -345,7 +335,6 @@ export class AdwNavigationView extends HTMLElement { /* ... (Same as original Ad
         if (pageDataToPush && this._navigationViewFactoryInstance) {
             this._navigationViewFactoryInstance.push(pageDataToPush);
         } else if (!pageDataToPush) {
-            // This condition might be redundant if the checks above are comprehensive
             console.error("AdwNavigationView.push: Could not derive valid page data from argument.", pageArg);
         } else if (!this._navigationViewFactoryInstance) {
             console.error("AdwNavigationView.push: Factory instance not available.");
@@ -405,7 +394,32 @@ export function createAdwCarousel(options = {}) {
     if (indicatorsContainer) { indicatorsContainer.classList.add('adw-carousel-indicators'); carousel.appendChild(indicatorsContainer); }
     function updateIndicators() { if (!indicatorsContainer) return; while(indicatorsContainer.firstChild) indicatorsContainer.removeChild(indicatorsContainer.firstChild); slideElements.forEach((slideEl, i) => { const indicator = document.createElement('button'); indicator.classList.add('adw-carousel-indicator'); indicator.setAttribute('aria-label', `Go to slide ${i + 1}`); if (i === currentIndex) { indicator.classList.add('active'); indicator.setAttribute('aria-current', 'true'); } if (opts.indicatorStyle === 'thumbnails' && slideThumbnails[i]) { indicator.style.backgroundImage = `url('${slideThumbnails[i]}')`; } indicator.addEventListener('click', () => { goToSlide(i); resetAutoplay(); }); indicatorsContainer.appendChild(indicator); });}
     function goToSlide(index, isAutoplayNext = false) { if (!opts.loop && !isAutoplayNext) { if (index < 0 || index >= slideElements.length) { if (index < 0) index = 0; if (index >= slideElements.length) index = slideElements.length -1; }} if (opts.loop) { if (index < 0) index = slideElements.length - 1; else if (index >= slideElements.length) index = 0; } else { index = Math.max(0, Math.min(index, slideElements.length - 1)); } currentIndex = index; const offset = -currentIndex * 100; contentArea.style.transform = `translateX(${offset}%)`; updateIndicators(); if(opts.showNavButtons && !opts.loop){ prevButton.disabled = currentIndex === 0; nextButton.disabled = currentIndex === slideElements.length - 1; } carousel.dispatchEvent(new CustomEvent('slide-changed', { detail: { currentIndex } })); }
-    let prevButton, nextButton; if (opts.showNavButtons) { prevButton = createAdwButton('', { icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.78 12.78a.75.75 0 0 1-1.06 0L4.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 1.06L6.06 8l3.72 3.72a.75.75 0 0 1 0 1.06z"/></svg>', onClick: () => { goToSlide(currentIndex - 1); resetAutoplay(); }, isCircular: true, flat: true }); prevButton.classList.add('adw-carousel-nav-button', 'prev'); prevButton.setAttribute('aria-label', 'Previous slide'); carousel.appendChild(prevButton); nextButton = createAdwButton('', { icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z"/></svg>', onClick: () => { goToSlide(currentIndex + 1); resetAutoplay(); }, isCircular: true, flat: true }); nextButton.classList.add('adw-carousel-nav-button', 'next'); nextButton.setAttribute('aria-label', 'Next slide'); carousel.appendChild(nextButton); if(!opts.loop){ prevButton.disabled = currentIndex === 0; nextButton.disabled = currentIndex === slideElements.length - 1; }}
+    let prevButton, nextButton;
+    if (opts.showNavButtons) {
+        prevButton = createAdwButton('', {
+            icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M9.78 12.78a.75.75 0 0 1-1.06 0L4.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 1.06L6.06 8l3.72 3.72a.75.75 0 0 1 0 1.06z"/></svg>',
+            onClick: () => { goToSlide(currentIndex - 1); resetAutoplay(); },
+            isCircular: true,
+            flat: true,
+            ariaLabel: 'Previous slide'
+        });
+        prevButton.classList.add('adw-carousel-nav-button', 'prev');
+        carousel.appendChild(prevButton);
+
+        nextButton = createAdwButton('', {
+            icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06z"/></svg>',
+            onClick: () => { goToSlide(currentIndex + 1); resetAutoplay(); },
+            isCircular: true,
+            flat: true,
+            ariaLabel: 'Next slide'
+        });
+        nextButton.classList.add('adw-carousel-nav-button', 'next');
+        carousel.appendChild(nextButton);
+        if(!opts.loop){
+            prevButton.disabled = currentIndex === 0;
+            nextButton.disabled = currentIndex === slideElements.length - 1;
+        }
+    }
     function startAutoplay() { if (!opts.autoplay || slideElements.length <= 1) return; stopAutoplay(); autoplayTimer = setInterval(() => { goToSlide(currentIndex + 1, true); }, opts.autoplayInterval); }
     function stopAutoplay() { clearInterval(autoplayTimer); autoplayTimer = null; }
     function resetAutoplay() { if (opts.autoplay) { stopAutoplay(); startAutoplay(); }}
@@ -528,3 +542,11 @@ export class AdwOverlaySplitView extends HTMLElement {
 }
 
 // No customElements.define here
+
+[end of adwaita-web/js/components/views.js]
+
+[end of adwaita-web/js/components/views.js]
+
+[end of adwaita-web/js/components/views.js]
+
+[end of adwaita-web/js/components/views.js]
