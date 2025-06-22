@@ -448,7 +448,7 @@ def create_app(config_overrides=None):
                 _app.logger.info(f"Profile edit: FileStorage object's filename attribute: '{file.filename}'") # This is key
             else:
                 # This case should ideally not happen if the field is in the form,
-                // even if no file is selected, 'file' should be a FileStorage obj with empty filename.
+                # even if no file is selected, 'file' should be a FileStorage obj with empty filename.
                 # But good to log if it's truly None.
                 _app.logger.warning("Profile edit: form.profile_photo.data is None. This is unexpected.")
 
