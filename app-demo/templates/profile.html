@@ -27,7 +27,7 @@
         <adw-preferences-group title="About {{user_profile.username}}">
             {% if user_profile.profile_info %}
             <adw-expander-row title="Bio" subtitle="View user's biography">
-                <div slot="content" style="padding: var(--spacing-m); color: var(--text-color); white-space: pre-wrap;">
+                <div slot="content" style="padding: var(--spacing-m); color: var(--view-fg-color); white-space: pre-wrap;">
                     {{ user_profile.profile_info | safe }}
                 </div>
             </adw-expander-row>
