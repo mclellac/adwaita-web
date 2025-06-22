@@ -21,8 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Load and apply saved accent color
       // Adw.loadSavedTheme() already calls Adw.setAccentColor with localStorage or default.
       // We just need to set the combo box's initial value.
-      const currentAccentName = localStorage.getItem('accentColorName') || body.dataset.serverAccentColor || Adw.DEFAULT_ACCENT_COLOR_NAME;
-      accentColorCombo.value = currentAccentName;
+      // Adw.DEFAULT_ACCENT_COLOR (from utils.js) stores the ID of the default accent (e.g., 'default')
+      const currentAccentId = localStorage.getItem('accentColorName') || body.dataset.serverAccentColor || Adw.DEFAULT_ACCENT_COLOR;
+      accentColorCombo.value = currentAccentId;
     }
 
     // Load and apply saved theme
