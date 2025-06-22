@@ -904,74 +904,76 @@ if (accentPickerBox) {
         }
 
         // --- NavigationView Example ---
-        const navView = document.getElementById('my-navigation-view');
-        const navViewPopButton = document.getElementById('nav-view-pop');
+        customElements.whenDefined('adw-navigation-view').then(() => {
+            const navView = document.getElementById('my-navigation-view');
+            const navViewPopButton = document.getElementById('nav-view-pop');
 
-        function updateNavViewPopButtonState() {
-            if (navView && navViewPopButton) {
-                // The AdwNavigationView's pageStack is internal to the factory.
-                // We can infer stack depth by checking if getVisiblePageName returns the first page name,
-                // or by keeping our own counter, or by checking if a back button is present in its header.
-                // For simplicity, let's assume page names are unique and 'page1' is root.
-                const currentVisiblePage = navView.getVisiblePageName();
-                navViewPopButton.disabled = !currentVisiblePage || currentVisiblePage === 'page1';
+            function updateNavViewPopButtonState() {
+                if (navView && navViewPopButton) {
+                    // The AdwNavigationView's pageStack is internal to the factory.
+                    // We can infer stack depth by checking if getVisiblePageName returns the first page name,
+                    // or by keeping our own counter, or by checking if a back button is present in its header.
+                    // For simplicity, let's assume page names are unique and 'page1' is root.
+                    const currentVisiblePage = navView.getVisiblePageName();
+                    navViewPopButton.disabled = !currentVisiblePage || currentVisiblePage === 'page1';
+                }
             }
-        }
 
-        if (navView) {
-            const createNavPage = (name, title, contentHTML, headerOptions = {}) => {
-                const pageElement = document.createElement('div'); // This is the element to be given to navView.push
-                pageElement.dataset.pageName = name; // Used by AdwNavigationView to identify the page
-                pageElement.style.cssText = "display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--spacing-xl); height: 100%; box-sizing: border-box;";
-                pageElement.innerHTML = contentHTML;
+            if (navView) {
+                const createNavPage = (name, title, contentHTML, headerOptions = {}) => {
+                    const pageElement = document.createElement('div'); // This is the element to be given to navView.push
+                    pageElement.dataset.pageName = name; // Used by AdwNavigationView to identify the page
+                    pageElement.style.cssText = "display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--spacing-xl); height: 100%; box-sizing: border-box;";
+                    pageElement.innerHTML = contentHTML;
 
-                // For AdwNavigationView, header options are part of the object passed to push()
-                return {
-                    name: name,
-                    element: pageElement,
-                    header: { title: title, ...headerOptions } // subtitle, start/end widgets
+                    // For AdwNavigationView, header options are part of the object passed to push()
+                    return {
+                        name: name,
+                        element: pageElement,
+                        header: { title: title, ...headerOptions } // subtitle, start/end widgets
+                    };
                 };
-            };
 
-            const page1Data = createNavPage('page1', 'Initial Page', '<adw-label title-level="1">Welcome to Page 1</adw-label><adw-label is-body>This is the first page in the NavigationView.</adw-label>');
-            navView.push(page1Data); // Push initial page
+                const page1Data = createNavPage('page1', 'Initial Page', '<adw-label title-level="1">Welcome to Page 1</adw-label><adw-label is-body>This is the first page in the NavigationView.</adw-label>');
+                navView.push(page1Data); // Push initial page
 
-            document.getElementById('nav-view-push-page2')?.addEventListener('click', () => {
-                const page2Data = createNavPage('page2', 'Page Two', '<adw-label title-level="1">Details - Page 2</adw-label><adw-button id=\'nav-view-goto-page1\'>Go to Page 1 (will pop)</adw-button>');
-                navView.push(page2Data);
-                // Add listener for the button inside page 2 after it's potentially pushed
-                setTimeout(() => { // Ensure element is in DOM if navView.push is async in rendering
-                    const btn = page2Data.element.querySelector('#nav-view-goto-page1');
-                    btn?.addEventListener('click', () => navView.pop());
-                }, 0);
-            });
+                document.getElementById('nav-view-push-page2')?.addEventListener('click', () => {
+                    const page2Data = createNavPage('page2', 'Page Two', '<adw-label title-level="1">Details - Page 2</adw-label><adw-button id=\'nav-view-goto-page1\'>Go to Page 1 (will pop)</adw-button>');
+                    navView.push(page2Data);
+                    // Add listener for the button inside page 2 after it's potentially pushed
+                    setTimeout(() => { // Ensure element is in DOM if navView.push is async in rendering
+                        const btn = page2Data.element.querySelector('#nav-view-goto-page1');
+                        btn?.addEventListener('click', () => navView.pop());
+                    }, 0);
+                });
 
-            document.getElementById('nav-view-push-page3')?.addEventListener('click', () => {
-                const endButton = document.createElement('adw-button');
-                endButton.iconName = "actions/document-save-symbolic";
-                endButton.addEventListener('click', () => Adw.createToast("Save clicked on Page 3 header"));
+                document.getElementById('nav-view-push-page3')?.addEventListener('click', () => {
+                    const endButton = document.createElement('adw-button');
+                    endButton.iconName = "actions/document-save-symbolic";
+                    endButton.addEventListener('click', () => Adw.createToast("Save clicked on Page 3 header"));
 
-                const page3Data = createNavPage(
-                    'page3',
-                    'Page Three',
-                    '<adw-label title-level="1">Advanced Page 3</adw-label><adw-label is-body>This page has a custom header item.</adw-label>',
-                    { subtitle: "With a subtitle", end: [endButton] }
-                );
-                navView.push(page3Data);
-            });
+                    const page3Data = createNavPage(
+                        'page3',
+                        'Page Three',
+                        '<adw-label title-level="1">Advanced Page 3</adw-label><adw-label is-body>This page has a custom header item.</adw-label>',
+                        { subtitle: "With a subtitle", end: [endButton] }
+                    );
+                    navView.push(page3Data);
+                });
 
-            navViewPopButton?.addEventListener('click', () => navView.pop());
+                navViewPopButton?.addEventListener('click', () => navView.pop());
 
-            navView.addEventListener('pushed', (e) => {
-                Adw.createToast(`Pushed: ${e.detail.pageName}`);
-                updateNavViewPopButtonState();
-            });
-            navView.addEventListener('popped', (e) => {
-                Adw.createToast(`Popped: ${e.detail.pageName}`);
-                updateNavViewPopButtonState();
-            });
-            updateNavViewPopButtonState(); // Initial state
-        }
+                navView.addEventListener('pushed', (e) => {
+                    Adw.createToast(\`Pushed: \${e.detail.pageName}\`);
+                    updateNavViewPopButtonState();
+                });
+                navView.addEventListener('popped', (e) => {
+                    Adw.createToast(\`Popped: \${e.detail.pageName}\`);
+                    updateNavViewPopButtonState();
+                });
+                updateNavViewPopButtonState(); // Initial state
+            }
+        });
 
 
         console.log("Adwaita Web Showcase Initialized!");
