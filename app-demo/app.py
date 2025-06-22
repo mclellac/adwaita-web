@@ -14,11 +14,35 @@ import os
 import logging
 from PIL import Image
 import uuid
+import bleach
 
 # Globally defined extensions, to be initialized with an app instance
 db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
+
+# Define allowed HTML tags and attributes for Bleach
+ALLOWED_TAGS = [
+    'p', 'br', 'strong', 'em', 'u', 's', 'strike', 'del', 'ins',
+    'a', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'hr',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    # Table elements could be added if desired:
+    # 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption',
+    # 'col', 'colgroup',
+]
+ALLOWED_ATTRIBUTES = {
+    '*': ['class', 'style', 'id', 'title'], # Allow class, style, id, title on any allowed tag
+    'a': ['href', 'target', 'rel'],
+    # 'img': ['src', 'alt', 'width', 'height'], # Images are generally risky from users
+    # 'table': ['summary'],
+    # 'td': ['abbr'],
+    # 'th': ['abbr', 'scope'],
+}
+# Allow specific inline styles if desired, be very restrictive.
+# Example: ALLOWED_STYLES = ['color', 'font-weight', 'text-align']
+# For now, not allowing any specific styles beyond what classes provide.
+ALLOWED_STYLES = []
+
 
 # Forms remain globally defined as they don't store app-specific state directly
 class LoginForm(FlaskForm):
@@ -286,7 +310,14 @@ def create_app(config_overrides=None):
         form = PostForm()
         if form.validate_on_submit():
             title = form.title.data
-            content = form.content.data
+            raw_content = form.content.data
+            content = bleach.clean(
+                raw_content,
+                tags=ALLOWED_TAGS,
+                attributes=ALLOWED_ATTRIBUTES,
+                styles=ALLOWED_STYLES,
+                strip=True  # Strip disallowed tags instead of escaping them
+            )
             _app.logger.info(f"Create post attempt by user '{current_user.username}' (ID: {current_user.id}). Title: '{title}', Content present: {bool(content)}")
             try:
                 new_post = Post(title=title, content=content, author=current_user)
@@ -343,7 +374,14 @@ def create_app(config_overrides=None):
 
         if form.validate_on_submit():
             post.title = form.title.data
-            post.content = form.content.data
+            raw_content = form.content.data
+            post.content = bleach.clean(
+                raw_content,
+                tags=ALLOWED_TAGS,
+                attributes=ALLOWED_ATTRIBUTES,
+                styles=ALLOWED_STYLES,
+                strip=True
+            )
             # Update categories
             post.categories = []
             for category in form.categories.data:
@@ -434,7 +472,14 @@ def create_app(config_overrides=None):
         form = ProfileEditForm(obj=current_user)
         default_avatar_url = url_for('static', filename='img/default_avatar.png')
         if form.validate_on_submit():
-            current_user.profile_info = form.profile_info.data
+            raw_profile_info = form.profile_info.data
+            current_user.profile_info = bleach.clean(
+                raw_profile_info,
+                tags=ALLOWED_TAGS,
+                attributes=ALLOWED_ATTRIBUTES,
+                styles=ALLOWED_STYLES,
+                strip=True
+            )
             current_user.full_name = form.full_name.data
             current_user.location = form.location.data
             current_user.website_url = form.website_url.data
