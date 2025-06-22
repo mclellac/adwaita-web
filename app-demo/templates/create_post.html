@@ -24,10 +24,27 @@
                 {% endif %}
             </div>
 
-            {# Content Field - using a generic row structure inside list-box #}
+            {# Content Field - Tiptap Editor #}
             <div class="adw-row" style="padding: var(--spacing-s) var(--spacing-m); display: flex; flex-direction: column;">
                 {{ form.content.label(class_='adw-label', style='margin-bottom: var(--spacing-xs);') }}
-                {{ form.content(class_='adw-entry', rows='10', id=form.content.id or 'content_field', placeholder='Write your blog post here...', style='width: 100%; min-height: 150px;') }}
+                {# Hidden textarea that Tiptap will sync to #}
+                {{ form.content(id=form.content.id or 'content_field', style='display:none;') }}
+                {# Tiptap editor container and toolbar #}
+                <div id="tiptap-toolbar" class="tiptap-toolbar">
+                    <button type="button" id="bold-btn">B</button>
+                    <button type="button" id="italic-btn">I</button>
+                    <button type="button" id="strike-btn">S</button>
+                    <button type="button" id="bulletList-btn">UL</button>
+                    <button type="button" id="orderedList-btn">OL</button>
+                    <button type="button" id="blockquote-btn">"</button>
+                    <button type="button" id="h1-btn">H1</button>
+                    <button type="button" id="h2-btn">H2</button>
+                    <button type="button" id="h3-btn">H3</button>
+                    <button type="button" id="p-btn">P</button>
+                    <button type="button" id="clear-btn">Clear</button>
+                </div>
+                <div id="tiptap-editor-container"></div> {# Tiptap will mount here #}
+
                 {% if form.content.errors %}
                     <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
                         {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
@@ -65,4 +82,89 @@
         </adw-action-row>
     </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="module">
+    if (window.Tiptap && window.Tiptap.Core && window.Tiptap.StarterKit) {
+        const { Editor } = window.Tiptap.Core;
+        const StarterKit = window.Tiptap.StarterKit;
+        const Placeholder = window.Tiptap.Placeholder;
+
+        const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
+        const editorContainer = document.getElementById('tiptap-editor-container');
+        const form = contentTextarea.closest('form');
+
+        const editor = new Editor({
+            element: editorContainer,
+            extensions: [
+                StarterKit.configure({
+                    // heading: { levels: [1, 2, 3] }, // configure specific starter kit extensions
+                }),
+                Placeholder.configure({
+                    placeholder: 'Write your blog post here...',
+                })
+            ],
+            content: contentTextarea.value, // Load existing content if any (for edit page mostly)
+            onUpdate: ({ editor }) => {
+                contentTextarea.value = editor.getHTML();
+            },
+        });
+
+        // Toolbar button actions
+        const toolbar = document.getElementById('tiptap-toolbar');
+        toolbar.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON') return;
+            const action = e.target.id.replace('-btn', '');
+            switch(action) {
+                case 'bold': editor.chain().focus().toggleBold().run(); break;
+                case 'italic': editor.chain().focus().toggleItalic().run(); break;
+                case 'strike': editor.chain().focus().toggleStrike().run(); break;
+                case 'bulletList': editor.chain().focus().toggleBulletList().run(); break;
+                case 'orderedList': editor.chain().focus().toggleOrderedList().run(); break;
+                case 'blockquote': editor.chain().focus().toggleBlockquote().run(); break;
+                case 'h1': editor.chain().focus().toggleHeading({ level: 1 }).run(); break;
+                case 'h2': editor.chain().focus().toggleHeading({ level: 2 }).run(); break;
+                case 'h3': editor.chain().focus().toggleHeading({ level: 3 }).run(); break;
+                case 'p': editor.chain().focus().setParagraph().run(); break;
+                case 'clear': editor.chain().focus().clearContent().run(); break;
+            }
+        });
+
+        // Update button states based on editor selection
+        editor.on('transaction', () => {
+            document.getElementById('bold-btn').classList.toggle('is-active', editor.isActive('bold'));
+            document.getElementById('italic-btn').classList.toggle('is-active', editor.isActive('italic'));
+            document.getElementById('strike-btn').classList.toggle('is-active', editor.isActive('strike'));
+            document.getElementById('bulletList-btn').classList.toggle('is-active', editor.isActive('bulletList'));
+            document.getElementById('orderedList-btn').classList.toggle('is-active', editor.isActive('orderedList'));
+            document.getElementById('blockquote-btn').classList.toggle('is-active', editor.isActive('blockquote'));
+            document.getElementById('h1-btn').classList.toggle('is-active', editor.isActive('heading', { level: 1 }));
+            document.getElementById('h2-btn').classList.toggle('is-active', editor.isActive('heading', { level: 2 }));
+            document.getElementById('h3-btn').classList.toggle('is-active', editor.isActive('heading', { level: 3 }));
+        });
+
+
+        // Ensure content is synced before form submission (onUpdate should handle most cases)
+        if (form) {
+            form.addEventListener('submit', () => {
+                contentTextarea.value = editor.getHTML();
+            });
+        }
+
+        // Destroy editor when page unloads to prevent memory leaks
+        window.addEventListener('beforeunload', () => {
+            if (editor && !editor.isDestroyed) {
+                editor.destroy();
+            }
+        });
+
+    } else {
+        console.error('Tiptap is not loaded. Rich text editor will not function.');
+        // Fallback: make the original textarea visible if Tiptap fails
+        const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
+        if(contentTextarea) contentTextarea.style.display = 'block';
+    }
+</script>
 {% endblock %}

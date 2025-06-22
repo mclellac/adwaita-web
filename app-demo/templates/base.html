@@ -80,6 +80,70 @@
     </style>
     {# components.js should contain Adw object initialization and initial theme/accent application #}
     <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
+
+    {# Tiptap Editor - Core (for rich text editing) #}
+    <script type="module">
+        // This will make Tiptap's modules available globally for inline scripts in create_post/edit_post
+        // In a bundled environment, you'd import them directly in your JS files.
+        try {
+            const TiptapCore = await import('https://unpkg.com/@tiptap/core?module');
+            const TiptapStarterKit = await import('https://unpkg.com/@tiptap/starter-kit?module');
+            const TiptapPlaceholder = await import('https://unpkg.com/@tiptap/extension-placeholder?module');
+            window.Tiptap = {
+                Core: TiptapCore,
+                StarterKit: TiptapStarterKit.default, // StarterKit is often a default export
+                Placeholder: TiptapPlaceholder.default,
+            };
+            console.log('[Debug] Tiptap modules loaded via dynamic import.');
+        } catch (error) {
+            console.error('[Debug] Failed to load Tiptap modules:', error);
+            // Fallback or error message can be handled here
+        }
+    </script>
+    <style>
+        /* Basic Tiptap Styling */
+        .tiptap {
+            border: 1px solid var(--border-color, #ccc);
+            border-radius: var(--border-radius-sm, 4px);
+            padding: var(--spacing-s, 8px);
+            min-height: 150px; /* Same as original textarea */
+            background-color: var(--view-bg-color, white);
+            color: var(--view-fg-color, black);
+        }
+        .tiptap:focus {
+            outline: none;
+            border-color: var(--accent-color, #3584e4); /* Adwaita accent blue */
+            box-shadow: 0 0 0 2px var(--accent-color-transparent, rgba(53, 132, 228, 0.2));
+        }
+        .tiptap p.is-editor-empty:first-child::before {
+          content: attr(data-placeholder);
+          float: left;
+          color: var(--secondary-text-color, #aaa);
+          pointer-events: none;
+          height: 0;
+        }
+        .tiptap-toolbar button {
+            font-family: inherit;
+            background: var(--button-bg-color, #f0f0f0);
+            color: var(--button-fg-color, #222);
+            border: 1px solid var(--button-border-color, #ccc);
+            padding: var(--spacing-xs, 4px) var(--spacing-s, 8px);
+            margin-right: var(--spacing-xs, 4px);
+            border-radius: var(--border-radius-sm, 4px);
+            cursor: pointer;
+        }
+        .tiptap-toolbar button.is-active {
+            background: var(--accent-bg-color, #3584e4);
+            color: var(--accent-fg-color, white);
+        }
+        .tiptap-toolbar {
+            margin-bottom: var(--spacing-s, 8px);
+            padding: var(--spacing-xs, 4px);
+            background-color: var(--headerbar-bg-color, #fafafa);
+            border: 1px solid var(--border-color, #ccc);
+            border-radius: var(--border-radius-sm);
+        }
+    </style>
 </head>
 <body
   {# Pass server-side preferences for Adw.js to pick up if needed #}
