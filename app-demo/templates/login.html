@@ -14,25 +14,25 @@
     <form method="POST" action="" style="display: contents;"> {# Use display:contents for form if it's just a wrapper for list-box and button #}
       {{ form.hidden_tag() }} {# CSRF token #}
 
-      <adw-list-box style="margin-bottom: var(--spacing-md);"> {# Added margin to separate from button #}
-        <adw-entry-row
-          title="Username"
-          name="username"
-          required="true"
-          value="{{ form.username.data if form and form.username.data is not none else request.form.username or '' }}">
-        </adw-entry-row>
+      <div>
+        <label for="username-entry" class="adw-label" style="display: block; margin-bottom: var(--spacing-xxs);">Username</label>
+        <adw-entry id="username-entry" name="username" required
+                   value="{{ form.username.data if form and form.username.data is not none else request.form.username or '' }}"
+                   placeholder="Your Username" style="width: 100%;">
+        </adw-entry>
+      </div>
 
-        <adw-password-entry-row
-          title="Password"
-          name="password"
-          required="true">
-        </adw-password-entry-row>
-      </adw-list-box>
+      <div>
+        <label for="password-entry" class="adw-label" style="display: block; margin-bottom: var(--spacing-xxs); margin-top: var(--spacing-s);">Password</label>
+        <adw-entry id="password-entry" name="password" type="password" required
+                   placeholder="Your Password" style="width: 100%;">
+        </adw-entry>
+      </div>
 
       <adw-button
         suggested
         type="submit"
-        style="width: 100%; padding: var(--spacing-sm) 0; font-size: var(--font-size-lg);">
+        style="width: 100%; padding: var(--spacing-sm) 0; font-size: var(--font-size-lg); margin-top: var(--spacing-l);">
         Login
       </adw-button>
     </form>
