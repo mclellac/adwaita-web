@@ -61,17 +61,76 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}My Libadwaita Blog{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-web.css') }}">
-        <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
+    <style>
+      /* General error text styling for form validation */
+      .form-error-text,
+      .error-row .adw-action-row__subtitle, /* Target subtitle within an error-row */
+      adw-entry-row[data-error] .adw-entry-row__subtitle, /* Target subtitle of entry row with error */
+      .errors /* Legacy class from create_post, ensure it uses Adwaita vars */ {
+        color: var(--error-fg-color, var(--destructive-color)); /* Use --error-fg-color, fallback to --destructive-color */
+        font-size: var(--font-size-small);
+      }
+      adw-entry-row[data-error] .adw-entry {
+        border-color: var(--error-bg-color, var(--destructive-bg-color)); /* Highlight entry border */
+      }
+      /* Ensure subtitles in adw-entry-row that are errors get the error color */
+      adw-entry-row.has-error .adw-entry-row__subtitle {
+        color: var(--error-fg-color, var(--destructive-color));
+      }
+    </style>
+    {# components.js should contain Adw object initialization and initial theme/accent application #}
+    <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
 </head>
 <body
-  {% if current_user and current_user.is_authenticated %}
-    data-server-theme="{{ current_user.theme or 'system' }}"
-    data-server-accent-color="{{ current_user.accent_color or 'default' }}"
-  {% else %}
-    data-server-theme="system"
-    data-server-accent-color="default"
+  {# Pass server-side preferences for Adw.js to pick up if needed #}
+  {% if current_user and current_user.is_authenticated and current_user.theme %}
+    data-theme-preference="{{ current_user.theme }}"
+  {% endif %}
+  {% if current_user and current_user.is_authenticated and current_user.accent_color %}
+    data-accent-preference="{{ current_user.accent_color }}"
   {% endif %}
 >
+    {# Initial theme and accent application script.
+       This should ideally be part of Adw.js initialization logic (components.js)
+       but added here explicitly to ensure it runs.
+       It relies on Adw.js being loaded and Adw object available.
+    #}
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        if (typeof Adw !== 'undefined' && Adw.AdwInitializer) {
+            // AdwInitializer might already handle localStorage and system preferences.
+            // We explicitly set based on server-provided user preference if available.
+            const body = document.body;
+            const userTheme = body.dataset.themePreference;
+            const userAccent = body.dataset.accentPreference;
+
+            if (userTheme) {
+                // Adw.toggleTheme(theme, applyOnly=true) could be a potential API
+                // For now, directly manipulate class if Adw.js doesn't auto-apply from data-*
+                // Adw.js components.js likely already applies theme from localStorage or system.
+                // This is to override with DB preference if it differs.
+                console.log(`[Debug] Applying saved theme from DB: ${userTheme}`);
+                if (userTheme === 'light') {
+                    document.body.classList.add('light-theme');
+                    document.body.classList.remove('dark-theme'); // Ensure dark is off
+                } else if (userTheme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                    document.body.classList.remove('light-theme'); // Ensure light is off
+                } else { // 'system' or unspecified
+                    // Let Adw.js default (localStorage or prefers-color-scheme) handle it
+                    // Or explicitly call Adw.toggleTheme('system') if that's how it works
+                }
+            }
+
+            if (userAccent && Adw.setAccentColor) {
+                console.log(`[Debug] Applying saved accent color from DB: ${userAccent}`);
+                Adw.setAccentColor(userAccent);
+            }
+        } else {
+            console.warn('[Debug] Adw object or Adw.AdwInitializer not found on DOMContentLoaded for base.html theme/accent setup.');
+        }
+      });
+    </script>
     <adw-application-window>
         <adw-header-bar>
             <adw-window-title slot="title">Blog CMS</adw-window-title>
