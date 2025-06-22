@@ -38,7 +38,28 @@
     // If prefix contains an icon, it should have proper color & size
     .adw-icon {
       color: var(--secondary-fg-color); // Icons in rows are often secondary
-      font-size: 1em; // Or inherit
+      font-size: 16px; // Using font-size as a proxy for SVG size if SVGs use em/currentColor for dimensions
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  // Apply to suffix icons as well for consistent sizing
+  .adw-action-row-suffix {
+    .adw-icon { // General icons in suffix
+      color: var(--secondary-fg-color);
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    // Specific for chevron, e.g. opacity
+    .adw-action-row-chevron.adw-icon {
+      opacity: var(--icon-opacity); // Uses variable defined in _variables.scss
     }
   }
 

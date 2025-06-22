@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   box-sizing: border-box; // Ensure padding and border are included in width/height
-  padding: var(--row-padding-vertical, var(--spacing-m)) var(--row-padding-horizontal, var(--spacing-l));
+  padding: var(--row-padding-vertical, var(--row-padding-vertical-default)) var(--row-padding-horizontal, var(--row-padding-horizontal-default));
   min-height: var(--row-min-height, 48px);
   background-color: var(--row-bg-color, transparent); // Usually transparent if listbox has bg
   color: var(--row-fg-color, var(--primary-fg-color));

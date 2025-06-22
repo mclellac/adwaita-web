@@ -4,7 +4,8 @@
 // Common base for specialized rows if needed, but AdwRow already provides some.
 // These rows are typically used within an AdwListBox or a similar container.
 
-// --- AdwActionRow ---
+// --- AdwActionRow --- (Styles moved to _action_row.scss, which uses row-base mixin)
+/*
 .adw-action-row {
   display: flex;
   align-items: center;
@@ -70,7 +71,7 @@
     }
   }
 }
-
+*/
 
 // --- AdwEntryRow ---
 .adw-entry-row {
