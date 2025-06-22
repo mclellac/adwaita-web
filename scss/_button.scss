@@ -4,73 +4,69 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-xs) var(--spacing-m); // 6px 12px
-  border-width: var(--border-width, 1px); // Use variable, default 1px
+  padding: var(--spacing-xs) var(--spacing-m); // e.g., 6px 12px. Consider slightly more vertical padding for typical Adwaita feel, like 8px 12px (var(--spacing-s) var(--spacing-m))
+  border-width: var(--border-width);
   border-style: solid;
-  border-color: var(--borders-color); // Use general border color for default buttons
-  border-radius: var(--border-radius-default); // Changed to 6px default
+  border-color: var(--button-border-color); // From _variables.scss
+  border-radius: var(--border-radius-default); // 6px
   background-color: var(--button-bg-color);
   color: var(--button-fg-color);
   cursor: pointer;
   text-decoration: none;
   font-size: var(--font-size-base);
+  font-weight: 500; // Adwaita buttons often have slightly bolder text
   text-align: center;
-  transition: background-color 0.1s ease-out, box-shadow 0.1s ease-out, filter 0.1s ease-out;
-  font-weight: 500;
-  position: relative; // For pseudo-elements if needed for complex shadows
+  transition: background-color 0.1s ease-out, border-color 0.1s ease-out, box-shadow 0.1s ease-out;
+  position: relative; // For pseudo-elements if needed
 
-  // Default button shadow for depth - more Adwaita-like
-  // These are subtle and might need adjustment based on --button-bg-color
-  box-shadow: inset 0 1px 0 0 var(--button-highlight-light), // Top highlight
-              inset 0 -1px 0 0 var(--button-shadow-light),  // Bottom shadow line
-              0 1px 2px 0 var(--button-dropshadow-light);   // Subtle drop shadow
-
-  body.dark-theme & { // Specific shadows for dark theme
-    box-shadow: inset 0 1px 0 0 var(--button-highlight-dark),
-                inset 0 -1px 0 0 var(--button-shadow-dark),
-                0 1px 1px 0 var(--button-dropshadow-dark);
-  }
-
+  // Simplified shadow for default Adwaita buttons - more subtle
+  // Adwaita buttons often have a border and a subtle shade, not complex multi-shadows.
+  // The variables file has --button-highlight-light etc. Let's use them if they are subtle.
+  // Libadwaita buttons are quite flat, primarily relying on border and bg changes.
+  // For a more standard Adwaita look, the border is key. Shadow is minimal.
+  box-shadow: none; // Start with none for a flatter look, border is primary.
+                   // If a very subtle depth is needed: 0 1px 1px rgba(0,0,0,0.05);
+                   // For now, let's rely on border and bg changes.
 
   &:hover {
     background-color: var(--button-hover-bg-color);
-    // Slightly adjust shadow on hover if needed, or rely on bg change
+    // border-color: var(--button-hover-border-color); // if defined, or darken(var(--button-border-color), 5%);
   }
 
   &:active,
   &.active {
     background-color: var(--button-active-bg-color);
-    // Stronger inset shadow for pressed state
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+    // border-color: var(--button-active-border-color); // if defined
+    // Minimal inset shadow for pressed state, if any. Adwaita is often just a bg change.
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.05); // Very subtle pressed effect
     body.dark-theme & {
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+      box-shadow: inset 0 1px 1px rgba(0,0,0,0.1);
     }
   }
 
   &:focus-visible {
     outline: 2px solid var(--accent-color);
-    outline-offset: 1px; // Closer offset for less "detached" look
-    // box-shadow: 0 0 0 2px var(--window-bg-color), 0 0 0 4px var(--accent-color); // Alternative focus style
+    outline-offset: 2px; // Adwaita focus rings are usually slightly offset
   }
 
   &.suggested-action {
     background-color: var(--accent-bg-color);
     color: var(--accent-fg-color);
-    border-color: transparent; // Already default, but good to be explicit
-    box-shadow: none; // Suggested actions are typically flat with bg color
+    border-color: transparent; // Suggested actions usually don't have a separate border
+    box-shadow: none;
 
     &:hover {
       background-color: var(--accent-bg-hover-color);
     }
     &:active, &.active {
       background-color: var(--accent-bg-active-color);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+      box-shadow: inset 0 1px 1px rgba(0,0,0,0.1); // Subtle press, if any
     }
   }
 
   &.flat {
     background-color: var(--button-flat-bg-color); // transparent
-    color: var(--button-fg-color); // Should this be --accent-color or --link-color for some flat buttons? Adwaita often uses text color.
+    color: var(--button-fg-color); // Default text color. Could be --accent-color for specific flat accent buttons.
     border-color: transparent;
     box-shadow: none;
 
@@ -79,34 +75,41 @@
     }
     &:active, &.active {
       background-color: var(--button-flat-active-bg-color);
-      box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+      // box-shadow: inset 0 1px 1px rgba(0,0,0,0.05); // Flat buttons usually don't have pressed shadow
     }
   }
+
+  // Flat button with accent color text (e.g. text button)
+  &.flat.accent {
+      color: var(--accent-color);
+      // Hover/active will use the standard flat hover/active BGs which is usually fine.
+      // If text color needs to change on hover for these, that would be an addition.
+  }
+
 
   &.destructive-action {
     background-color: var(--destructive-bg-color);
     color: var(--destructive-fg-color);
     border-color: transparent;
-    box-shadow: none; // Destructive actions are also typically flat with bg color
+    box-shadow: none;
 
     &:hover {
-      background-color: var(--destructive-bg-hover-color);
+      background-color: var(--destructive-bg-hover-color); // Ensure this var exists and is defined
     }
     &:active, &.active {
-      background-color: var(--destructive-bg-active-color);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+      background-color: var(--destructive-bg-active-color); // Ensure this var exists and is defined
+      box-shadow: inset 0 1px 1px rgba(0,0,0,0.1); // Subtle press, if any
     }
   }
 
   &[disabled],
   &:disabled {
-    // Specific disabled colors instead of just opacity
     background-color: var(--button-disabled-bg-light);
     color: var(--button-disabled-fg-light);
-    border-color: transparent;
+    border-color: transparent; // Disabled buttons are usually flat
     box-shadow: none;
     cursor: not-allowed;
-    pointer-events: none; // Already there, good.
+    pointer-events: none;
 
     body.dark-theme & {
       background-color: var(--button-disabled-bg-dark);
@@ -116,41 +119,72 @@
 
   > .adw-icon {
     margin-right: var(--spacing-xs); // 6px
-    width: 16px;
-    height: 16px;
-    font-size: 16px; // Ensures SVG scales if its internal units are em/ex
+    // Ensure icon size is consistent, Adwaita icons are often 16x16 in buttons
+    width: 1em; // Scale with font-size
+    height: 1em; // Scale with font-size
+    font-size: inherit; // Explicitly inherit font-size for scaling
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0; // Prevent icon from shrinking if button text is long
+    flex-shrink: 0;
+
+    // If button text is present, icon should not add to horizontal padding by itself
+    // The button's padding handles it.
+    &:not(:last-child) { // If icon is not the only child (i.e. text follows)
+        // margin-right: var(--spacing-xs); // Already set above
+    }
+    &:only-child {
+        margin-right: 0; // No margin if icon is the only child
+    }
+  }
+
+  // Text next to an icon
+  > .label {
+      margin-left: var(--spacing-xs);
+      &:only-child {
+          margin-left: 0; // No margin if label is the only child (no icon)
+      }
   }
 
   // Icon only, not circular (e.g. back button in headerbar)
-  &.icon-only:not(.circular) {
-    padding: var(--spacing-xs); // 6px padding all around
+  &.icon-only { // Removed :not(.circular) as it's covered by .circular specific styles
+    padding: var(--spacing-xs); // 6px padding all around, or var(--spacing-s) for a bit more room
     > .adw-icon {
       margin-right: 0;
+    }
+    > .label { // Should not be a label in an icon-only button, but if so...
+        display: none;
     }
   }
 
   &.circular {
-    padding: var(--spacing-s); // 9px, or could be var(--spacing-xs) if icons are 16px
+    padding: var(--spacing-s); // 9px, good for 16px icons to have some breathing room
     border-radius: 50%;
-    box-shadow: none; // Circular buttons are often flat or have minimal shadow
-    // For non-flat circular, a subtle drop shadow might be okay:
-    // box-shadow: 0 1px 1px 0 var(--button-dropshadow-light);
-    // body.dark-theme & { box-shadow: 0 1px 1px 0 var(--button-dropshadow-dark); }
+    box-shadow: none; // Circular buttons are typically flat or part of a toolbar that handles shadows
 
+    // If a non-flat circular button is needed (rare in Adwaita standalones)
+    // background-color: var(--button-bg-color);
+    // border: var(--border-width) solid var(--button-border-color);
+    // &:hover { background-color: var(--button-hover-bg-color); }
+    // &:active { background-color: var(--button-active-bg-color); }
 
     > .adw-icon {
       margin-right: 0;
     }
 
-    // Flat circular buttons (common in headerbars)
-    &.flat {
+    // Most circular buttons in Adwaita are flat (e.g., in headerbars)
+    &.flat { // This is the common case for circular
         background-color: transparent;
+        border-color: transparent;
         &:hover { background-color: var(--button-flat-hover-bg-color); }
         &:active { background-color: var(--button-flat-active-bg-color); }
     }
+  }
+
+  // Pill buttons (like in a view switcher or toggle group)
+  &.pill {
+    border-radius: var(--border-radius-large); // More rounded, e.g., 12px or more
+    padding: var(--spacing-xs) var(--spacing-l); // More horizontal padding
+    // Specific styling for pill group context often applies (e.g., no border between them)
   }
 }
