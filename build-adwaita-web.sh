@@ -56,7 +56,6 @@ fi
 # Copy JavaScript files
 echo "--- Copying JavaScript Files ---"
 cp "${JS_INPUT_DIR}/components.js" "${JS_OUTPUT_DIR}/components.js"
-cp "${JS_INPUT_DIR}/adw-initializer.js" "${JS_OUTPUT_DIR}/adw-initializer.js"
 
 JS_COMPONENTS_SUBDIR_SOURCE="${JS_INPUT_DIR}/components"
 JS_COMPONENTS_SUBDIR_DEST="${JS_OUTPUT_DIR}/components"

@@ -1,34 +1,36 @@
 import { adwGenerateId } from './utils.js'; // For BreakpointBin if needed
 
 /**
- * Creates an Adwaita-style box container (flexbox).
+ * Creates an Adwaita-style box container (flexbox) using the AdwBox Web Component.
  */
 export function createAdwBox(options = {}) {
   const opts = options || {};
-  const box = document.createElement("div");
-  box.classList.add("adw-box");
+  const adwBoxElement = document.createElement("adw-box");
 
-  if (opts.orientation === "vertical") {
-    box.classList.add("adw-box-vertical");
-  } else { // Default to horizontal or if orientation is explicitly horizontal
-    box.classList.add("adw-box-horizontal");
+  if (opts.orientation) {
+    adwBoxElement.setAttribute("orientation", opts.orientation);
   }
   if (opts.align) {
-    box.classList.add(`align-${opts.align}`);
+    adwBoxElement.setAttribute("align", opts.align);
   }
   if (opts.justify) {
-    box.classList.add(`justify-${opts.justify}`);
+    adwBoxElement.setAttribute("justify", opts.justify);
   }
   if (opts.spacing) {
-    box.classList.add(`adw-box-spacing-${opts.spacing}`);
+    adwBoxElement.setAttribute("spacing", opts.spacing);
   }
-  if (opts.fillChildren) {
-    box.classList.add("adw-box-fill-children");
+  if (opts.fillChildren) { // options.fillChildren should be boolean
+    adwBoxElement.setAttribute("fill-children", ""); // Presence of attribute means true
   }
+
+  // Append children to the AdwBox component; they will be handled by the slot
   opts.children?.forEach((child) => {
-    if (child instanceof Node) box.appendChild(child);
+    if (child instanceof Node) {
+      adwBoxElement.appendChild(child);
+    }
   });
-  return box;
+
+  return adwBoxElement;
 }
 
 export class AdwBox extends HTMLElement {
@@ -37,28 +39,49 @@ export class AdwBox extends HTMLElement {
     connectedCallback() { this._render(); }
     attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
     _render() {
-        // Clear previous box element if it exists, keep the stylesheet
-        const existingBox = this.shadowRoot.querySelector('.adw-box');
-        if (existingBox) {
-            existingBox.remove();
+        let boxElement = this.shadowRoot.querySelector('.adw-box');
+        if (!boxElement) {
+            // Initial setup: create the box div and slot, append them.
+            // Keep the style link as the first child if it exists.
+            const styleLink = this.shadowRoot.querySelector('link[rel="stylesheet"]');
+            while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== styleLink) {
+                this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+            }
+            boxElement = document.createElement('div');
+            boxElement.classList.add('adw-box');
+            boxElement.appendChild(document.createElement('slot'));
+            this.shadowRoot.appendChild(boxElement);
         }
 
-        const options = {};
-        AdwBox.observedAttributes.forEach(attr => {
-            if (this.hasAttribute(attr)) {
-                const value = this.getAttribute(attr);
-                const camelCaseAttr = attr.replace(/-([a-z])/g, g => g[1].toUpperCase());
-                if (attr === 'fill-children') {
-                    options[camelCaseAttr] = value !== null && value !== 'false';
-                } else {
-                    options[camelCaseAttr] = value;
-                }
-            }
-        });
-        const factory = (typeof Adw !== 'undefined' && Adw.createBox) ? Adw.createBox : createAdwBox;
-        const boxElement = factory(options); // Factory returns the .adw-box div
-        boxElement.appendChild(document.createElement('slot')); // Add slot for children
-        this.shadowRoot.appendChild(boxElement);
+        // Reset classes related to attributes to avoid accumulation
+        boxElement.className = 'adw-box'; // Start with the base class
+
+        // Apply classes based on attributes
+        const orientation = this.getAttribute('orientation');
+        if (orientation === 'vertical') {
+            boxElement.classList.add('adw-box-vertical');
+        } else {
+            boxElement.classList.add('adw-box-horizontal'); // Default
+        }
+
+        const align = this.getAttribute('align');
+        if (align) {
+            boxElement.classList.add(`align-${align}`);
+        }
+
+        const justify = this.getAttribute('justify');
+        if (justify) {
+            boxElement.classList.add(`justify-${justify}`);
+        }
+
+        const spacing = this.getAttribute('spacing');
+        if (spacing) {
+            boxElement.classList.add(`adw-box-spacing-${spacing}`);
+        }
+
+        if (this.hasAttribute('fill-children') && this.getAttribute('fill-children') !== 'false') {
+            boxElement.classList.add('adw-box-fill-children');
+        }
     }
 }
 

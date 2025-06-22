@@ -20,80 +20,67 @@ import { sanitizeHref } from './utils.js'; // Import sanitizeHref
  */
 export function createAdwButton(text, options = {}) {
   const opts = options || {};
-  const isLink = !!opts.href;
-  const button = document.createElement(isLink ? "a" : "button");
-  button.classList.add("adw-button");
+  const button = document.createElement("adw-button");
+
   if (text) {
     button.textContent = text;
   }
 
-  if (isLink) {
-    const safeHref = sanitizeHref(opts.href);
-    if (safeHref) {
-        button.href = safeHref;
-    } else {
-        console.warn(`AdwButton: Blocked potentially unsafe href: ${opts.href}`);
-        button.href = "#"; // Fallback to a safe href
-    }
-    if (opts.disabled) {
-        button.classList.add("disabled"); // Custom styling for disabled links
-        button.setAttribute("aria-disabled", "true");
-        button.removeAttribute("href"); // Also remove href for disabled links
-    }
-  } else {
-    if (opts.disabled) {
-      button.setAttribute("disabled", "");
-      button.setAttribute("aria-disabled", "true");
-    }
+  if (opts.href) {
+    // The AdwButton component itself will handle sanitization via attributeChangedCallback and _render
+    button.setAttribute("href", opts.href);
+  }
+
+  if (opts.disabled) {
+    button.setAttribute("disabled", "");
   }
 
   if (opts.onClick && !opts.disabled) {
     button.addEventListener("click", opts.onClick);
   }
+
   if (opts.suggested) {
-    button.classList.add("suggested-action");
+    button.setAttribute("suggested", "");
   }
   if (opts.destructive) {
-    button.classList.add("destructive-action");
+    button.setAttribute("destructive", "");
   }
   if (opts.flat) {
-    button.classList.add("flat");
+    button.setAttribute("flat", "");
   }
   if (opts.active) {
-    button.classList.add("active");
+    button.setAttribute("active", "");
   }
-  if (opts.isCircular) {
-    button.classList.add("circular");
+  if (opts.isCircular) { // Renamed to 'circular' for consistency with attribute
+    button.setAttribute("circular", "");
   }
 
-  // New iconName handling
+  // Icon handling: AdwButton component handles 'icon-name' and 'icon' attributes
   if (opts.iconName) {
-    if (window.Adw && Adw.createIcon) {
-      const iconElement = Adw.createIcon(opts.iconName, { alt: text ? undefined : (opts.isCircular ? 'icon' : '') });
-      // iconElement is already a span with .adw-icon
-      button.insertBefore(iconElement, button.firstChild);
-    } else {
-      console.warn("AdwButton: Adw.createIcon is not available to create icon:", opts.iconName);
-    }
-  } else if (opts.icon) { // Fallback to old icon logic (deprecated)
-    const iconSpan = document.createElement("span");
-    iconSpan.classList.add("icon"); // Generic class for styling
-    if (typeof opts.icon === 'string' && opts.icon.trim().startsWith("<svg")) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(opts.icon, "image/svg+xml");
-        const svgElement = doc.querySelector("svg");
-        if (svgElement) {
-            iconSpan.appendChild(svgElement);
-        } else {
-            console.warn("AdwButton: Invalid SVG string provided for (deprecated) icon option.", opts.icon);
-        }
-    } else if (typeof opts.icon === 'string' && opts.icon.trim() !== '') {
-        iconSpan.classList.add(opts.icon);
-    }
-    if (iconSpan.hasChildNodes() || iconSpan.classList.length > 1) {
-        button.insertBefore(iconSpan, button.firstChild);
+    button.setAttribute("icon-name", opts.iconName);
+  } else if (opts.icon) { // For deprecated 'icon' option
+    button.setAttribute("icon", opts.icon);
+  }
+
+  // Pass through ARIA attributes if provided in options
+  for (const key in opts) {
+    if (key.startsWith('aria-')) {
+      if (opts[key] !== null && opts[key] !== undefined) {
+        button.setAttribute(key, opts[key]);
+      }
     }
   }
+
+  // Pass through 'type' attribute if provided in options
+  if (opts.type) {
+    button.setAttribute("type", opts.type);
+  }
+
+  // Pass through 'appearance' attribute if provided in options
+  if (opts.appearance) {
+    button.setAttribute("appearance", opts.appearance);
+  }
+
   return button;
 }
 

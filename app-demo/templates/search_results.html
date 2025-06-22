@@ -40,7 +40,7 @@
             {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
                 {% if page_num %}
                     {% if pagination.page == page_num %}
-                        <adw-button appearance="accent" class="active" style="pointer-events: none;">{{ page_num }}</adw-button>
+                    <adw-button suggested class="active" style="pointer-events: none;">{{ page_num }}</adw-button>
                     {% else %}
                         <a href="{{ url_for('search_results', q=query, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                     {% endif %}
