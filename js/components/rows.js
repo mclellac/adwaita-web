@@ -259,36 +259,189 @@ export function createAdwEntryRow(options = {}) {
 }
 export class AdwEntryRow extends HTMLElement {
     static get observedAttributes() { return ['title', 'subtitle', 'required', 'name', 'value', 'placeholder', 'disabled', 'type']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); this._internalEntry = null; }
-    connectedCallback() { this._render(); }
-    attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
-    _render() {
-        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) { this.shadowRoot.removeChild(this.shadowRoot.lastChild); }
-        const row = document.createElement("div"); row.classList.add("adw-row", "adw-entry-row");
-        const textContentDiv = document.createElement("div"); textContentDiv.classList.add("adw-entry-row-text-content");
-        const entryId = this.id ? `${this.id}-entry` : adwGenerateId('adw-entry-row-input');
-        const titleText = this.getAttribute('title') || '';
-        const titleLabel = createAdwLabel(titleText, { htmlTag: "label" }); titleLabel.classList.add("adw-entry-row-title"); titleLabel.setAttribute('for', entryId);
-        textContentDiv.appendChild(titleLabel);
-        const subtitleText = this.getAttribute('subtitle');
-        if (subtitleText) { const subtitleLabel = createAdwLabel(subtitleText, { htmlTag: "span" }); subtitleLabel.classList.add("adw-entry-row-subtitle"); textContentDiv.appendChild(subtitleLabel); }
-        row.appendChild(textContentDiv);
-        this._internalEntry = new AdwEntry(); this._internalEntry.id = entryId;
-        if (this.hasAttribute('placeholder')) this._internalEntry.setAttribute('placeholder', this.getAttribute('placeholder'));
-        if (this.hasAttribute('value')) this._internalEntry.value = this.getAttribute('value');
-        if (this.hasAttribute('disabled')) this._internalEntry.disabled = true;
-        if (this.hasAttribute('name')) this._internalEntry.setAttribute('name', this.getAttribute('name'));
-        if (this.hasAttribute('required')) this._internalEntry.setAttribute('required', '');
-        if (this.hasAttribute('type')) this._internalEntry.setAttribute('type', this.getAttribute('type'));
-        this._internalEntry.classList.add("adw-entry-row-entry");
-        this._internalEntry.addEventListener('input', (e) => { this.value = this._internalEntry.value; this.dispatchEvent(new CustomEvent('input', { detail: { value: this._internalEntry.value, originalEvent: e } })); });
-        this._internalEntry.addEventListener('change', (e) => { this.dispatchEvent(new CustomEvent('change', { detail: { value: this._internalEntry.value, originalEvent: e } })); });
-        row.appendChild(this._internalEntry); this.shadowRoot.appendChild(row);
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
+
+        this._rowDiv = null;
+        this._textContentDiv = null;
+        this._titleLabel = null;
+        this._subtitleLabel = null;
+        this._internalEntry = null;
     }
-    get value() { return this._internalEntry ? this._internalEntry.value : this.getAttribute('value'); }
-    set value(val) { this.setAttribute('value', val); if (this._internalEntry) this._internalEntry.value = val; }
+
+    connectedCallback() {
+        if (!this._internalEntry) { // Ensures initial render if not already done
+            this._render();
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue === newValue) return;
+
+        if (!this._internalEntry) { // If called before connectedCallback or _render has run
+            this._render(); // This will create _internalEntry and apply initial attributes
+            return; // _render will handle applying the current attribute values
+        }
+
+        // If _internalEntry exists, update it or the row's elements directly
+        switch (name) {
+            case 'value':
+                if (this._internalEntry.value !== newValue) {
+                    this._internalEntry.value = newValue === null ? '' : newValue;
+                }
+                break;
+            case 'placeholder':
+                this._internalEntry.setAttribute('placeholder', newValue || '');
+                break;
+            case 'disabled':
+                this._internalEntry.disabled = newValue !== null;
+                if (this._rowDiv) this._rowDiv.classList.toggle('disabled', newValue !== null);
+                break;
+            case 'name':
+                if (newValue === null) this._internalEntry.removeAttribute('name');
+                else this._internalEntry.setAttribute('name', newValue);
+                break;
+            case 'required':
+                if (newValue !== null) this._internalEntry.setAttribute('required', '');
+                else this._internalEntry.removeAttribute('required');
+                break;
+            case 'type':
+                this._internalEntry.setAttribute('type', newValue || 'text');
+                break;
+            case 'title':
+                if (this._titleLabel) this._titleLabel.textContent = newValue || '';
+                break;
+            case 'subtitle':
+                if (this._subtitleLabel) {
+                    if (newValue) {
+                        this._subtitleLabel.textContent = newValue;
+                        this._subtitleLabel.style.display = '';
+                    } else {
+                        this._subtitleLabel.textContent = '';
+                        this._subtitleLabel.style.display = 'none';
+                    }
+                }
+                break;
+            default:
+                // For any other attribute change not handled, a full _render might be needed
+                // if it affects structure. For now, assume handled or doesn't require DOM rebuild.
+                // this._render(); // Fallback if necessary
+                break;
+        }
+    }
+
+    _render() {
+        if (!this._rowDiv) { // Only build DOM structure once
+            while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+                this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+            }
+
+            this._rowDiv = document.createElement("div");
+            this._rowDiv.classList.add("adw-row", "adw-entry-row");
+
+            this._textContentDiv = document.createElement("div");
+            this._textContentDiv.classList.add("adw-entry-row-text-content");
+
+            // Use createAdwLabel for consistency if it has specific styling/logic not in basic <label>
+            this._titleLabel = document.createElement("label"); // Simpler: createAdwLabel(this.getAttribute('title') || '', { htmlTag: "label" });
+            this._titleLabel.classList.add("adw-entry-row-title");
+            this._textContentDiv.appendChild(this._titleLabel);
+
+            this._subtitleLabel = document.createElement("span"); // Simpler: createAdwLabel(this.getAttribute('subtitle') || '', { htmlTag: "span" });
+            this._subtitleLabel.classList.add("adw-entry-row-subtitle");
+            this._textContentDiv.appendChild(this._subtitleLabel);
+
+            this._rowDiv.appendChild(this._textContentDiv);
+
+            this._internalEntry = new AdwEntry();
+            this._internalEntry.classList.add("adw-entry-row-entry");
+
+            this._internalEntry.addEventListener('input', (e) => {
+                const currentAttrValue = this.getAttribute('value');
+                const newEntryValue = this._internalEntry.value;
+                if (currentAttrValue !== newEntryValue) {
+                    this.setAttribute('value', newEntryValue); // Triggers attributeChangedCallback for 'value'
+                }
+                this.dispatchEvent(new CustomEvent('input', { detail: { value: newEntryValue, originalEvent: e }, bubbles: true, composed: true }));
+            });
+            this._internalEntry.addEventListener('change', (e) => {
+                this.dispatchEvent(new CustomEvent('change', { detail: { value: this._internalEntry.value, originalEvent: e }, bubbles: true, composed: true }));
+            });
+            this._rowDiv.appendChild(this._internalEntry);
+            this.shadowRoot.appendChild(this._rowDiv);
+        }
+
+        // Apply/re-apply all relevant attributes to the created elements
+        const entryId = this.id ? `${this.id}-entry` : (this._internalEntry.id || adwGenerateId('adw-entry-row-input'));
+        this._internalEntry.id = entryId;
+        this._titleLabel.setAttribute('for', entryId);
+        this._titleLabel.textContent = this.getAttribute('title') || '';
+
+        const subtitleText = this.getAttribute('subtitle');
+        if (subtitleText) {
+            this._subtitleLabel.textContent = subtitleText;
+            this._subtitleLabel.style.display = '';
+        } else {
+            this._subtitleLabel.textContent = '';
+            this._subtitleLabel.style.display = 'none';
+        }
+
+        const currentValue = this.getAttribute('value');
+        if (this._internalEntry.value !== currentValue) {
+             this._internalEntry.value = currentValue === null ? '' : currentValue;
+        }
+        const placeholderValue = this.getAttribute('placeholder');
+        if (this._internalEntry.getAttribute('placeholder') !== placeholderValue) {
+            if (placeholderValue === null) this._internalEntry.removeAttribute('placeholder');
+            else this._internalEntry.setAttribute('placeholder', placeholderValue);
+        }
+
+        this._internalEntry.disabled = this.hasAttribute('disabled');
+        this._rowDiv.classList.toggle('disabled', this.hasAttribute('disabled'));
+
+        const nameValue = this.getAttribute('name');
+        if (this._internalEntry.getAttribute('name') !== nameValue) {
+            if (nameValue === null) this._internalEntry.removeAttribute('name');
+            else this._internalEntry.setAttribute('name', nameValue);
+        }
+
+        const requiredValue = this.hasAttribute('required');
+        if (this._internalEntry.hasAttribute('required') !== requiredValue) {
+            if (requiredValue) this._internalEntry.setAttribute('required', '');
+            else this._internalEntry.removeAttribute('required');
+        }
+
+        const typeValue = this.getAttribute('type') || 'text';
+        if (this._internalEntry.getAttribute('type') !== typeValue) {
+            this._internalEntry.setAttribute('type', typeValue);
+        }
+    }
+
+    get value() {
+        // Prefer the attribute as source of truth if _internalEntry not ready, but usually _internalEntry is more current.
+        return this._internalEntry ? this._internalEntry.value : (this.getAttribute('value') || '');
+    }
+    set value(val) {
+        const strVal = (val === null || val === undefined) ? '' : String(val);
+        // Setting attribute will trigger attributeChangedCallback which updates _internalEntry.value
+        if (this.getAttribute('value') !== strVal) {
+            this.setAttribute('value', strVal);
+        } else if (this._internalEntry && this._internalEntry.value !== strVal) {
+            // If attribute is already same, but internal field differs (e.g. programmatic value set)
+            this._internalEntry.value = strVal;
+        }
+    }
+
     get disabled() { return this.hasAttribute('disabled'); }
-    set disabled(val) { const isDisabled = Boolean(val); if (isDisabled) this.setAttribute('disabled', ''); else this.removeAttribute('disabled'); if (this._internalEntry) this._internalEntry.disabled = isDisabled; }
+    set disabled(val) {
+        const isDisabled = Boolean(val);
+        if (isDisabled) this.setAttribute('disabled', '');
+        else this.removeAttribute('disabled');
+        // attributeChangedCallback will update _internalEntry.disabled and row class
+    }
 }
 
 const EYE_ICON_SVG = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a6 6 0 00-6 6c0 1.6.6 3.1 1.6 4.2L2 13.8a.8.8 0 001.1 1.1L4.2 13.4A6 6 0 008 14a6 6 0 006-6 6 6 0 00-6-6zm0 10a4 4 0 110-8 4 4 0 010 8zm0-1.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"/></svg>';
@@ -328,50 +481,197 @@ export function createAdwPasswordEntryRow(options = {}) {
 }
 export class AdwPasswordEntryRow extends HTMLElement {
     static get observedAttributes() { return ['title', 'subtitle', 'required', 'name', 'value', 'placeholder', 'disabled']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css'; this.shadowRoot.appendChild(styleLink); this._internalEntry = null; this._visibilityToggle = null; }
-    connectedCallback() { this._render(); }
-    attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
-    _render() {
-        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) { this.shadowRoot.removeChild(this.shadowRoot.lastChild); }
-        const row = document.createElement("div"); row.classList.add("adw-row", "adw-password-entry-row");
-        const textContentDiv = document.createElement("div"); textContentDiv.classList.add("adw-entry-row-text-content");
-        const entryId = this.id ? `${this.id}-entry` : adwGenerateId('adw-password-entry-input');
-        const titleText = this.getAttribute('title') || '';
-        const titleLabel = createAdwLabel(titleText, { htmlTag: "label" }); titleLabel.classList.add("adw-entry-row-title"); titleLabel.setAttribute('for', entryId);
-        textContentDiv.appendChild(titleLabel);
-        const subtitleText = this.getAttribute('subtitle');
-        if (subtitleText) { const subtitleLabel = createAdwLabel(subtitleText, { htmlTag: "span" }); subtitleLabel.classList.add("adw-entry-row-subtitle"); textContentDiv.appendChild(subtitleLabel); }
-        row.appendChild(textContentDiv);
-        const inputArea = document.createElement('div'); inputArea.classList.add('adw-password-entry-input-area');
-        this._internalEntry = new AdwEntry(); this._internalEntry.id = entryId; this._internalEntry.setAttribute('type', 'password');
-        if (this.hasAttribute('placeholder')) this._internalEntry.setAttribute('placeholder', this.getAttribute('placeholder'));
-        if (this.hasAttribute('value')) this._internalEntry.value = this.getAttribute('value');
-        if (this.hasAttribute('name')) this._internalEntry.setAttribute('name', this.getAttribute('name'));
-        if (this.hasAttribute('required')) this._internalEntry.setAttribute('required', '');
-        this._internalEntry.classList.add("adw-entry-row-entry");
-        this._internalEntry.addEventListener('input', (e) => { this.value = this._internalEntry.value; this.dispatchEvent(new CustomEvent('input', { detail: { value: this._internalEntry.value, originalEvent: e } })); });
-        this._internalEntry.addEventListener('change', (e) => { this.dispatchEvent(new CustomEvent('change', { detail: { value: this._internalEntry.value, originalEvent: e } })); });
-        inputArea.appendChild(this._internalEntry);
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '/static/css/adwaita-web.css';
+        this.shadowRoot.appendChild(styleLink);
 
-        this._visibilityToggle = createAdwButton('', { icon: EYE_ICON_SVG, flat: true, isCircular: true });
-        this._visibilityToggle.classList.add('adw-password-entry-row-toggle');
-        this._visibilityToggle.addEventListener('click', () => {
-            const isPassword = this._internalEntry.type === 'password';
-            this._internalEntry.type = isPassword ? 'text' : 'password';
-            const iconSpan = this._visibilityToggle.querySelector('.icon');
-            if(iconSpan) {
-                while(iconSpan.firstChild) iconSpan.removeChild(iconSpan.firstChild);
-                _appendSVGStringToElement(isPassword ? EYE_SLASHED_ICON_SVG : EYE_ICON_SVG, iconSpan);
-            }
-        });
-        inputArea.appendChild(this._visibilityToggle);
-        row.appendChild(inputArea); this.shadowRoot.appendChild(row);
-        this.disabled = this.hasAttribute('disabled');
+        this._rowDiv = null;
+        this._textContentDiv = null;
+        this._titleLabel = null;
+        this._subtitleLabel = null;
+        this._inputArea = null;
+        this._internalEntry = null;
+        this._visibilityToggle = null;
     }
-    get value() { return this._internalEntry ? this._internalEntry.value : this.getAttribute('value'); }
-    set value(val) { this.setAttribute('value', val); if (this._internalEntry) this._internalEntry.value = val; }
+
+    connectedCallback() {
+        if (!this._internalEntry) {
+            this._render();
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue === newValue) return;
+
+        if (!this._internalEntry) {
+            this._render();
+            return;
+        }
+
+        switch (name) {
+            case 'value':
+                if (this._internalEntry.value !== newValue) {
+                    this._internalEntry.value = newValue === null ? '' : newValue;
+                }
+                break;
+            case 'placeholder':
+                this._internalEntry.setAttribute('placeholder', newValue || '');
+                break;
+            case 'disabled':
+                const isDisabled = newValue !== null;
+                this._internalEntry.disabled = isDisabled;
+                if (this._visibilityToggle) this._visibilityToggle.disabled = isDisabled;
+                if (this._rowDiv) this._rowDiv.classList.toggle('disabled', isDisabled);
+                break;
+            case 'name':
+                if (newValue === null) this._internalEntry.removeAttribute('name');
+                else this._internalEntry.setAttribute('name', newValue);
+                break;
+            case 'required':
+                if (newValue !== null) this._internalEntry.setAttribute('required', '');
+                else this._internalEntry.removeAttribute('required');
+                break;
+            case 'title':
+                if (this._titleLabel) this._titleLabel.textContent = newValue || '';
+                break;
+            case 'subtitle':
+                if (this._subtitleLabel) {
+                    if (newValue) {
+                        this._subtitleLabel.textContent = newValue;
+                        this._subtitleLabel.style.display = '';
+                    } else {
+                        this._subtitleLabel.textContent = '';
+                        this._subtitleLabel.style.display = 'none';
+                    }
+                }
+                break;
+            default:
+                // this._render(); // Fallback if necessary
+                break;
+        }
+    }
+
+    _render() {
+        if (!this._rowDiv) { // Only build DOM structure once
+            while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+                this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+            }
+
+            this._rowDiv = document.createElement("div");
+            this._rowDiv.classList.add("adw-row", "adw-password-entry-row");
+
+            this._textContentDiv = document.createElement("div");
+            this._textContentDiv.classList.add("adw-entry-row-text-content");
+
+            this._titleLabel = document.createElement("label");
+            this._titleLabel.classList.add("adw-entry-row-title");
+            this._textContentDiv.appendChild(this._titleLabel);
+
+            this._subtitleLabel = document.createElement("span");
+            this._subtitleLabel.classList.add("adw-entry-row-subtitle");
+            this._textContentDiv.appendChild(this._subtitleLabel);
+
+            this._rowDiv.appendChild(this._textContentDiv);
+
+            this._inputArea = document.createElement('div');
+            this._inputArea.classList.add('adw-password-entry-input-area');
+
+            this._internalEntry = new AdwEntry();
+            this._internalEntry.setAttribute('type', 'password'); // Default type
+            this._internalEntry.classList.add("adw-entry-row-entry");
+
+            this._internalEntry.addEventListener('input', (e) => {
+                const currentAttrValue = this.getAttribute('value');
+                const newEntryValue = this._internalEntry.value;
+                if (currentAttrValue !== newEntryValue) {
+                    this.setAttribute('value', newEntryValue);
+                }
+                this.dispatchEvent(new CustomEvent('input', { detail: { value: newEntryValue, originalEvent: e }, bubbles: true, composed: true }));
+            });
+            this._internalEntry.addEventListener('change', (e) => {
+                this.dispatchEvent(new CustomEvent('change', { detail: { value: this._internalEntry.value, originalEvent: e }, bubbles: true, composed: true }));
+            });
+            this._inputArea.appendChild(this._internalEntry);
+
+            this._visibilityToggle = createAdwButton('', { icon: EYE_ICON_SVG, flat: true, isCircular: true });
+            this._visibilityToggle.classList.add('adw-password-entry-row-toggle');
+            this._visibilityToggle.addEventListener('click', () => {
+                const isPassword = this._internalEntry.type === 'password';
+                this._internalEntry.type = isPassword ? 'text' : 'password';
+                const iconSpan = this._visibilityToggle.querySelector('.icon'); // AdwButton creates a span.icon
+                if (iconSpan) {
+                    iconSpan.innerHTML = ''; // Clear existing SVG
+                    _appendSVGStringToElement(isPassword ? EYE_SLASHED_ICON_SVG : EYE_ICON_SVG, iconSpan);
+                }
+            });
+            this._inputArea.appendChild(this._visibilityToggle);
+            this._rowDiv.appendChild(this._inputArea);
+            this.shadowRoot.appendChild(this._rowDiv);
+        }
+
+        // Apply/re-apply all relevant attributes
+        const entryId = this.id ? `${this.id}-entry` : (this._internalEntry.id || adwGenerateId('adw-password-entry-input'));
+        this._internalEntry.id = entryId;
+        this._titleLabel.setAttribute('for', entryId);
+        this._titleLabel.textContent = this.getAttribute('title') || '';
+
+        const subtitleText = this.getAttribute('subtitle');
+        if (subtitleText) {
+            this._subtitleLabel.textContent = subtitleText;
+            this._subtitleLabel.style.display = '';
+        } else {
+            this._subtitleLabel.textContent = '';
+            this._subtitleLabel.style.display = 'none';
+        }
+
+        const currentValue = this.getAttribute('value');
+        if (this._internalEntry.value !== currentValue) {
+            this._internalEntry.value = currentValue === null ? '' : currentValue;
+        }
+
+        const placeholderValue = this.getAttribute('placeholder');
+        if (this._internalEntry.getAttribute('placeholder') !== placeholderValue) {
+            if (placeholderValue === null) this._internalEntry.removeAttribute('placeholder');
+            else this._internalEntry.setAttribute('placeholder', placeholderValue);
+        }
+
+        const isDisabled = this.hasAttribute('disabled');
+        this._internalEntry.disabled = isDisabled;
+        this._visibilityToggle.disabled = isDisabled;
+        this._rowDiv.classList.toggle('disabled', isDisabled);
+
+        const nameValue = this.getAttribute('name');
+        if (this._internalEntry.getAttribute('name') !== nameValue) {
+             if (nameValue === null) this._internalEntry.removeAttribute('name');
+            else this._internalEntry.setAttribute('name', nameValue);
+        }
+
+        const requiredValue = this.hasAttribute('required');
+        if (this._internalEntry.hasAttribute('required') !== requiredValue) {
+            if (requiredValue) this._internalEntry.setAttribute('required', '');
+            else this._internalEntry.removeAttribute('required');
+        }
+        // Type is fixed to 'password' or 'text' by the toggle, not by attribute for AdwPasswordEntryRow
+    }
+
+    get value() { return this._internalEntry ? this._internalEntry.value : (this.getAttribute('value') || ''); }
+    set value(val) {
+        const strVal = (val === null || val === undefined) ? '' : String(val);
+        if (this.getAttribute('value') !== strVal) {
+            this.setAttribute('value', strVal);
+        } else if (this._internalEntry && this._internalEntry.value !== strVal) {
+            this._internalEntry.value = strVal;
+        }
+    }
+
     get disabled() { return this.hasAttribute('disabled'); }
-    set disabled(val) { const isDisabled = Boolean(val); if (isDisabled) this.setAttribute('disabled', ''); else this.removeAttribute('disabled'); if (this._internalEntry) this._internalEntry.disabled = isDisabled; if (this._visibilityToggle) this._visibilityToggle.disabled = isDisabled; }
+    set disabled(val) {
+        const isDisabled = Boolean(val);
+        if (isDisabled) this.setAttribute('disabled', '');
+        else this.removeAttribute('disabled');
+    }
 }
 
 /**
