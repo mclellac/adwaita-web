@@ -2,11 +2,35 @@
 
 {% block title %}Edit Profile{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/2.0.0/cropper.min.css" integrity="sha512-hmRL32LGLwX7LqH1LXN6q6iI1Tw0KzC/a7h1r71tY9K1L34b4KcvMvP5p3+8sLp4sL/zCgU9XwXg_bsP21q9g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+  /* Additional styles for the cropper container if needed */
+  .cropper-container-wrapper {
+    margin-top: var(--spacing-s);
+    max-width: 100%; /* Ensure it fits within the layout */
+    width: 300px; /* Example fixed width */
+    height: 300px; /* Example fixed height */
+  }
+  .cropper-container-wrapper img {
+    display: block;
+    max-width: 100%; /* Ensure image is responsive within the cropper */
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <adw-clamp style="max-width: 700px; margin: var(--spacing-xl) auto;">
   <adw-preferences-page title="Edit Your Profile">
-    <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data" id="edit-profile-form">
       {{ form.hidden_tag() }} {# CSRF token #}
+
+      {# Hidden fields for crop data #}
+      <input type="hidden" name="crop_x" id="crop_x">
+      <input type="hidden" name="crop_y" id="crop_y">
+      <input type="hidden" name="crop_width" id="crop_width">
+      <input type="hidden" name="crop_height" id="crop_height">
 
       <adw-preferences-group title="Public Information">
         <adw-list-box>
@@ -61,7 +85,7 @@
                   <div class="adw-preferences-row__subtitle">Allow others to see your profile page.</div>
               </div>
               <div class="adw-preferences-row__control-area" style="display: flex; align-items: center; justify-content: flex-end;">
-                  <adw-switch name="is_profile_public" id="{{ form.is_profile_public.id or 'is_profile_public_field' }}" {% if form.is_profile_public.data %}checked{% endif %}></adw-switch>
+                  <adw-switch id="{{ form.is_profile_public.id or 'is_profile_public_field' }}" {% if form.is_profile_public.data %}checked{% endif %}></adw-switch>
               </div>
           </div>
           {% if form.is_profile_public.errors %}
@@ -84,7 +108,15 @@
                     <div class="adw-preferences-row__subtitle">Upload a new photo. Max 2MB.</div>
                 </div>
                 <div class="adw-preferences-row__control-area" style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-s);">
-                    {{ form.profile_photo(id=(form.profile_photo.id or 'profile_photo_field')) }}
+                    {# Original File Input - will be hidden via CSS or JS if preferred, or styled as a button #}
+                    {{ form.profile_photo(id=(form.profile_photo.id or 'profile_photo_field'), class="adw-button") }}
+                    {# Note: Styling file inputs directly is tricky. Often a label is styled like a button and linked to the input.
+                       For simplicity, adding adw-button class, might need more robust styling. Or trigger click via JS.
+                       A better approach for Adwaita might be an <adw-button> that triggers a click on a hidden file input.
+                    #}
+                    <div class="cropper-container-wrapper" id="cropper-wrapper" style="display: none;">
+                        <img id="image-to-crop" src="#" alt="Image to crop">
+                    </div>
                     {% if form.profile_photo.errors %}
                         <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small);">
                             {% for error in form.profile_photo.errors %}<span>{{ error }}</span><br>{% endfor %}
@@ -117,29 +149,92 @@
 
 {% block scripts %}
 {{ super() }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/2.0.0/cropper.min.js" integrity="sha512-CVn9KFL7X9gKjgQvNFvR4S+eQ82U/zVwLz9O3ZJzN46BqXJ+jT1aDqJCYxU1KqXkYl7YvGBeYQxK1iuJk2n/Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-  // Script to handle the hidden input for WTForms BooleanField with adw-switch
   document.addEventListener('DOMContentLoaded', function() {
-    const publicSwitch = document.querySelector('adw-switch[name="is_profile_public"]');
+    // Public switch handler
+    const publicSwitch = document.getElementById('{{ form.is_profile_public.id or "is_profile_public_field" }}');
     if (publicSwitch) {
       let hiddenInput = document.querySelector('input[type="hidden"][name="is_profile_public"]');
       if (!hiddenInput) {
         hiddenInput = document.createElement('input');
         hiddenInput.type = 'hidden';
-        hiddenInput.name = 'is_profile_public'; // This MUST match the WTForms field name
-        // Insert before the switch or its container if it's complex, or append to form
+        hiddenInput.name = 'is_profile_public';
         publicSwitch.closest('form').appendChild(hiddenInput);
       }
-
-      // Set initial value based on switch's checked state (which should be set by Jinja)
       hiddenInput.value = publicSwitch.hasAttribute('checked') ? 'y' : 'n';
-
-      publicSwitch.addEventListener('change', function(event) { // Custom elements often use 'change' or custom events
+      publicSwitch.addEventListener('change', function(event) {
         hiddenInput.value = event.target.checked ? 'y' : 'n';
       });
-       // Also listen for 'state-set' if your adw-switch uses that from previous examples.
-       // However, a simple 'change' event is more standard for input-like elements.
-       // Let's assume AdwSwitch properly dispatches 'change' and has a 'checked' property/attribute.
+    }
+
+    // Cropper.js logic
+    const imageToCrop = document.getElementById('image-to-crop');
+    const photoInput = document.getElementById('{{ form.profile_photo.id or "profile_photo_field" }}');
+    const cropperWrapper = document.getElementById('cropper-wrapper');
+    const form = document.getElementById('edit-profile-form');
+    const cropXField = document.getElementById('crop_x');
+    const cropYField = document.getElementById('crop_y');
+    const cropWidthField = document.getElementById('crop_width');
+    const cropHeightField = document.getElementById('crop_height');
+    let cropper;
+
+    photoInput.addEventListener('change', function(event) {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        const file = files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imageToCrop.src = e.target.result;
+          cropperWrapper.style.display = 'block';
+          if (cropper) {
+            cropper.destroy();
+          }
+          cropper = new Cropper(imageToCrop, {
+            aspectRatio: 1 / 1, // For a square avatar
+            viewMode: 1,        // Restrict crop box to canvas
+            // autoCropArea: 0.8,
+            responsive: true,
+            // ready: function () {
+            //   // Example: Set initial crop box if needed
+            //   // this.cropper.setData({ width: 200, height: 200 });
+            // }
+          });
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // No file selected, or selection cancelled
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        imageToCrop.src = '#'; // Clear previous image
+        cropperWrapper.style.display = 'none';
+        // Clear crop fields if no image is selected
+        cropXField.value = '';
+        cropYField.value = '';
+        cropWidthField.value = '';
+        cropHeightField.value = '';
+      }
+    });
+
+    if (form) {
+      form.addEventListener('submit', function(event) {
+        if (cropper && photoInput.files && photoInput.files.length > 0) {
+          const cropData = cropper.getData(true); // Get rounded data
+          cropXField.value = cropData.x;
+          cropYField.value = cropData.y;
+          cropWidthField.value = cropData.width;
+          cropHeightField.value = cropData.height;
+        } else {
+          // No active cropper or no file selected, ensure crop fields are empty
+          // so server doesn't try to use old/stale crop data if user deselects image.
+          cropXField.value = '';
+          cropYField.value = '';
+          cropWidthField.value = '';
+          cropHeightField.value = '';
+        }
+      });
     }
   });
 </script>
