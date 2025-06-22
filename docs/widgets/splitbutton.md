@@ -2,57 +2,56 @@
 
 An AdwSplitButton is a composite button that combines a main action button with an attached dropdown arrow button. Clicking the main part triggers a default action, while clicking the arrow part typically reveals a menu or more options.
 
-## JavaScript Factory: `Adw.createSplitButton()`
+## JavaScript Factory: `Adw.SplitButton.factory()` or `createAdwSplitButton()`
 
-Creates an Adwaita-styled split button.
+Creates an `<adw-split-button>` Web Component instance.
 
 **Signature:**
 
 ```javascript
-Adw.createSplitButton(options = {}) -> HTMLDivElement
+Adw.SplitButton.factory(options = {}) -> AdwSplitButtonElement
+// or createAdwSplitButton(options = {}) -> AdwSplitButtonElement
 ```
 
 **Parameters:**
 
-*   `options` (Object, optional): Configuration options:
-    *   `actionText` (String, optional): Text for the main action part of the button. Can be empty if using an icon.
-    *   `actionIconHTML` (String, optional): HTML for an icon in the main action part.
-    *   `actionHref` (String, optional): If provided, the main action part becomes an `<a>` tag. *Security: Ensure trusted URL.*
-    *   `onActionClick` (Function, optional): Callback for when the main action part is clicked.
-    *   `onDropdownClick` (Function, optional): Callback for when the dropdown arrow part is clicked. This function is responsible for showing a menu or popover.
-    *   `suggested` (Boolean, optional): If `true`, applies 'suggested-action' styling to the main action part. Defaults to `false`.
-    *   `disabled` (Boolean, optional): If `true`, disables the entire split button. Defaults to `false`.
-    *   `dropdownAriaLabel` (String, optional): ARIA label for the dropdown arrow button. Defaults to "More actions".
+*   `options` (Object, optional): Configuration options, mapped to attributes of the `<adw-split-button>`:
+    *   `actionText` (String, optional): Text for the main action part. Sets the `action-text` attribute. If not provided, content can be slotted.
+    *   `actionIconName` (String, optional): Name of an Adwaita icon for the main action part. Sets the `action-icon-name` attribute.
+    *   `actionHref` (String, optional): If provided, the main action part (an internal `<adw-button>`) will behave like a link. Sets the `action-href` attribute. *Security: Ensure trusted URL.*
+    *   `onActionClick` (Function, optional): Callback for when the main action part is clicked. Attached as an `action-click` event listener.
+    *   `onDropdownClick` (Function, optional): Callback for when the dropdown arrow part is clicked. Attached as a `dropdown-click` event listener.
+    *   `suggested` (Boolean, optional): Sets the `suggested` attribute.
+    *   `disabled` (Boolean, optional): Sets the `disabled` attribute.
+    *   `dropdownAriaLabel` (String, optional): ARIA label for the dropdown arrow button. Sets the `dropdown-aria-label` attribute.
 
 **Returns:**
 
-*   `(HTMLDivElement)`: The main `<div>` container for the split button.
+*   `(AdwSplitButtonElement)`: The created `<adw-split-button>` Web Component instance.
 
 **Example:**
 
 ```html
 <div id="js-splitbutton-container" style="padding: 10px;"></div>
 <script>
+  // Assuming createAdwSplitButton is globally available
   const container = document.getElementById('js-splitbutton-container');
 
-  const saveSplitButton = Adw.createSplitButton({
+  const saveSplitButton = createAdwSplitButton({
     actionText: "Save",
-    actionIconHTML: '<svg viewBox="0 0 16 16"><path d="M2 2v12h12V2H2z"/></svg>', // Save icon (shortened)
+    actionIconName: "document-save-symbolic",
     suggested: true,
     onActionClick: () => {
       Adw.createToast("Default Save action!");
     },
     onDropdownClick: (event) => {
-      // In a real app, you'd show a popover/menu here
       Adw.createToast("Dropdown clicked! Show menu (e.g., Save As, Export).");
-      console.log("Dropdown event target:", event.target); // The arrow button
     }
   });
   container.appendChild(saveSplitButton);
 
-  const downloadSplitButton = Adw.createSplitButton({
+  const downloadSplitButton = createAdwSplitButton({
     actionText: "Download",
-    disabled: false,
     onActionClick: () => { Adw.createToast("Download started."); },
     onDropdownClick: () => { Adw.createToast("Show download options (PDF, CSV, etc.)"); }
   });
@@ -70,15 +69,16 @@ A declarative way to define Adwaita split buttons.
 
 **Attributes:**
 
-*   `action-text` (String, optional): Text for the main action part.
+*   `action-text` (String, optional): Text for the main action part. This is a fallback if no content is provided via slots.
+*   `action-icon-name` (String, optional): Name of an Adwaita icon for the action part.
 *   `action-href` (String, optional): If present, makes the main action part a link.
-*   `suggested` (Boolean, optional): Applies suggested styling to the main action.
-*   `disabled` (Boolean, optional): Disables the entire button.
-*   `dropdown-aria-label` (String, optional): ARIA label for the dropdown arrow.
+*   `suggested` (Boolean attribute): Applies suggested styling to the main action.
+*   `disabled` (Boolean attribute): Disables the entire button.
+*   `dropdown-aria-label` (String, optional): ARIA label for the dropdown arrow. Defaults to "More options".
 
 **Slots:**
-*   `action-icon`: Place HTML for an icon in the main action part here.
-*   Default slot: Can be used for `action-text` if `action-text` attribute is not provided.
+*   Default slot: Content for the main action part (e.g., text, other elements). Takes precedence over `action-text` attribute.
+*   `action-label` (Named slot): Alternative way to provide text content for the action part, can be useful for more complex structures if default slot is used for other things.
 
 **Events:**
 
@@ -89,11 +89,11 @@ A declarative way to define Adwaita split buttons.
 
 ```html
 <adw-split-button
-  action-text="Run"
+  action-icon-name="media-playback-start-symbolic"
   suggested
   dropdown-aria-label="Run options"
   id="run-split-btn">
-  <span slot="action-icon"><svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16"><path d="M4.5 12.5v-9l7 4.5-7 4.5z"/></svg></span> <!-- Play icon -->
+  Run <!-- This text goes into the default slot -->
 </adw-split-button>
 
 <br/><br/>

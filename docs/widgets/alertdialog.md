@@ -2,82 +2,76 @@
 
 An AlertDialog is a specialized `AdwDialog` used for displaying important alerts or simple questions that require a user response. It typically has a heading, a body message, and one or more response buttons.
 
-## JavaScript Factory: `Adw.createAlertDialog()`
+## JavaScript Factory: `Adw.AlertDialog.factory()` or `createAdwAlertDialog()`
 
-Creates and manages an Adwaita-styled alert dialog.
+Creates an `<adw-alert-dialog>` Web Component instance.
 
 **Signature:**
 
 ```javascript
-Adw.createAlertDialog(body, options = {}) -> { dialog: HTMLDivElement, open: function, close: function }
+Adw.AlertDialog.factory(body, options = {}) -> AdwAlertDialogElement
+// or createAdwAlertDialog(body, options = {}) -> AdwAlertDialogElement
 ```
 
 **Parameters:**
 
-*   `body` (String, required): The main message/body text of the alert.
+*   `body` (String, optional): The main message/body text of the alert. Sets the `body` attribute if `options.customContent` is not provided.
 *   `options` (Object, optional): Configuration options:
-    *   `heading` (String, optional): An optional heading for the alert dialog.
-    *   `choices` (Array<Object>, optional): An array of choice objects to create
-        buttons. Each object:
+    *   `heading` (String, optional): Sets the `heading` attribute.
+    *   `choices` (Array<Object>, optional): An array of choice objects to create buttons. Each object should have:
         *   `label` (String, required): Text for the button.
-        *   `value` (String, required): A value associated with this choice, passed
-            to `onResponse`.
-        *   `style` (String, optional): Style for the button. Can be `'default'`,
-            `'suggested'`, or `'destructive'`.
-        If no choices are provided, a default "OK" button is usually created.
-    *   `onResponse` (Function, optional): Callback function executed when a choice
-        button is clicked. Receives the `value` of the chosen option as an
-        argument. The dialog automatically closes after a response.
-    *   `customContent` (HTMLElement, optional): Optional custom HTML element to use
-        as the dialog's content instead of the `body` string. If provided, `body`
-        string might be ignored or used as a fallback label.
-    *   `closeOnBackdropClick` (Boolean, optional): Whether clicking the backdrop
-        closes the dialog. Defaults to `false` for alert dialogs to ensure a
-        choice is made.
+        *   `value` (String, required): A value associated with this choice.
+        *   `style` (String, optional): Style for the button (`'suggested'`, `'destructive'`).
+        The factory creates `<button slot="choice" ...>` elements from these and appends them to the `<adw-alert-dialog>`.
+    *   `onResponse` (Function, optional): Callback for the `response` event. Receives `event.detail.value`.
+    *   `onDialogClosed` (Function, optional): Callback for the `close` event. (Note: `AdwAlertDialog` itself fires `close` when its internal dialog closes).
+    *   `customContent` (Node, optional): A DOM Node to use as the dialog's main content. It will be slotted with `slot="body-content"`.
+    *   `closeOnBackdropClick` (Boolean, optional): Sets the `close-on-backdrop-click` attribute (e.g., `"true"` or `"false"`). Defaults to `false` behavior in the WC if attribute is absent or not "true".
 
 **Returns:**
 
-*   An `Object` with the following properties:
-    *   `dialog` (HTMLDivElement): The main dialog DOM element.
-    *   `open` (Function): Method to display the alert dialog.
-    *   `close` (Function): Method to hide the alert dialog.
+*   `(AdwAlertDialogElement)`: The created `<adw-alert-dialog>` Web Component instance.
 
 **Example:**
 
 ```html
 <div id="js-alertdialog-trigger"></div>
 <script>
+  // Assuming createAdwAlertDialog and createAdwButton are available
   const triggerContainer = document.getElementById('js-alertdialog-trigger');
 
-  const showAlertBtn = Adw.createButton("Show Alert", {
+  const showAlertBtn = createAdwButton("Show Alert", {
     onClick: () => {
-      const alert = Adw.createAlertDialog(
+      const alertDialogWC = createAdwAlertDialog(
         "Are you sure you want to delete this item? This action cannot be undone.",
         {
           heading: "Confirm Deletion",
           choices: [
             { label: "Cancel", value: "cancel" },
-          { label: "Delete", value: "delete", style: "destructive" }
-        ],
-        onResponse: (value) => {
-          Adw.createToast(`Alert response: ${value}`);
-          if (value === "delete") {
-            console.log("Item deletion confirmed.");
-          }
+            { label: "Delete", value: "delete", style: "destructive" }
+          ],
+          onResponse: (value) => { // Note: event.detail.value for WC
+            Adw.createToast(`Alert response: ${value}`);
+            if (value === "delete") {
+              console.log("Item deletion confirmed.");
+            }
+          },
+          onDialogClosed: () => console.log("Alert dialog was closed.")
         }
-      });
-      alert.open();
+      );
+      alertDialogWC.open(); // Call open() on the WC instance
     }
   });
   triggerContainer.appendChild(showAlertBtn);
 
-  const showSimpleAlertBtn = Adw.createButton("Simple Info Alert", {
+  const showSimpleAlertBtn = createAdwButton("Simple Info Alert", {
       onClick: () => {
-          const simpleAlert = Adw.createAlertDialog("Your settings have been saved successfully.", {
-              heading: "Success"
-              // Default "OK" button will be added
-          });
-          simpleAlert.open();
+          const simpleAlertWC = createAdwAlertDialog(
+            "Your settings have been saved successfully.",
+            { heading: "Success" }
+            // AdwAlertDialog WC provides a default "OK" button if no choices.
+          );
+          simpleAlertWC.open();
       }
   });
   triggerContainer.appendChild(showSimpleAlertBtn);
@@ -86,29 +80,30 @@ Adw.createAlertDialog(body, options = {}) -> { dialog: HTMLDivElement, open: fun
 
 ## Web Component: `<adw-alert-dialog>`
 
-A declarative way to define Adwaita alert dialogs.
+A declarative way to define Adwaita alert dialogs. This component internally uses `<adw-dialog>`.
 
 **HTML Tag:** `<adw-alert-dialog>`
 
 **Attributes:**
 
 *   `heading` (String, optional): The heading text for the alert.
-*   `body` (String, optional): The main message text. If not provided, the component's text content might be used.
-*   `open` (Boolean, optional): Controls the visibility of the dialog. Add to open, remove to close.
-*   `close-on-backdrop-click` (Boolean, optional): If set to `"true"`, allows closing by clicking the backdrop. Defaults to `false`.
+*   `body` (String, optional): The main message text. Used if `body-content` slot is empty.
+*   `open` (Boolean attribute): Controls the visibility of the dialog.
+*   `close-on-backdrop-click` (String, optional): Set to `"true"` to allow closing by clicking the backdrop. Defaults to `false` behavior (dialog does not close on backdrop click).
 
 **Slots:**
 
-*   Default slot / `body-content`: For the main body of the alert if more complex HTML than a simple string is needed. If this slot is used, the `body` attribute might be ignored.
-*   `choice`: Use `<button slot="choice" value="myValue" data-style="suggested">My Label</button>` to define response buttons declaratively.
-    *   `value`: The value passed in the `response` event.
-    *   `data-style`: Can be "suggested" or "destructive".
+*   Default slot: Fallback content for the alert body if `body` attribute is not set and `body-content` slot is not used.
+*   `body-content` (Named slot): For providing more complex HTML as the main body of the alert. Takes precedence over `body` attribute and default slot.
+*   `choice`: Use `<button slot="choice" value="myValue" data-style="suggested">My Label</button>` or `<adw-button slot="choice" ...>` to define response buttons.
+    *   `value`: The value passed in the `response` event detail.
+    *   `data-style`: Can be "suggested" or "destructive" to style the generated `adw-button`.
 
 **Events:**
 
-*   `open`: Fired when the dialog opens.
-*   `close`: Fired when the dialog closes (not necessarily after a response, e.g., if closed programmatically).
-*   `response`: Fired when a choice button is clicked. `event.detail` contains `{ value: String }`.
+*   `open`: Fired when the dialog begins to open.
+*   `close`: Fired when the dialog has closed.
+*   `response`: Fired when a choice button is clicked. `event.detail` contains `{ value: String }`. The dialog typically closes itself after a response.
 
 **Methods:**
 

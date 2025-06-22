@@ -4,74 +4,72 @@ Dialogs are modal windows that overlay the current view, used for important mess
 
 Specialized dialogs like `Adw.createAlertDialog()` and `Adw.createAboutDialog()` are also available (see their respective documentation).
 
-## JavaScript Factory: `Adw.createDialog()`
+## JavaScript Factory: `Adw.Dialog.factory()` or `createAdwDialog()`
 
-Creates and manages an Adwaita-styled dialog.
+Creates an `<adw-dialog>` Web Component instance.
 
 **Signature:**
 
 ```javascript
-Adw.createDialog(options = {}) -> { dialog: HTMLDivElement, open: function, close: function }
+Adw.Dialog.factory(options = {}) -> AdwDialogElement
+// or createAdwDialog(options = {}) -> AdwDialogElement
 ```
 
 **Parameters:**
 
 *   `options` (Object, optional): Configuration options:
-    *   `title` (String, optional): Title displayed at the top of the dialog.
-    *   `content` (HTMLElement | String, optional): The main content of the dialog.
-        If a string is provided, it's wrapped in a `<p>` tag. *Security: If
-        providing an HTMLElement, ensure its content is trusted/sanitized if it's
-        user-generated HTML.*
-    *   `buttons` (Array<HTMLElement>, optional): An array of button elements
-        (e.g., created with `Adw.createButton()`) to display in the dialog's
-        action area.
-    *   `onClose` (Function, optional): Callback function executed when the dialog
-        is closed (either programmatically, by Escape key, or backdrop click if
-        enabled).
-    *   `closeOnBackdropClick` (Boolean, optional): If `true` (default), clicking
-        the backdrop overlay will close the dialog. Set to `false` to prevent this.
+    *   `title` (String, optional): Sets the `title` attribute on the `<adw-dialog>`.
+    *   `content` (Node | String, optional): The main content for the dialog.
+        If a string, it's wrapped in a `<p>`. The node is appended to the `<adw-dialog>` and should be targeted to the `content` slot (e.g., by setting `slot="content"` on it, or it will go to the default slot within the content area).
+    *   `buttons` (Array<Node>, optional): An array of button elements (e.g., `<adw-button>` instances) to append to the `<adw-dialog>`, targeted to the `buttons` slot (e.g., by setting `slot="buttons"` on them).
+    *   `onClose` (Function, optional): Callback function attached as a `close` event listener on the `<adw-dialog>`.
+    *   `closeOnBackdropClick` (Boolean, optional): If `false`, sets `close-on-backdrop-click="false"` on the `<adw-dialog>`. Defaults to `true` (attribute not set).
 
 **Returns:**
 
-*   An `Object` with the following properties:
-    *   `dialog` (HTMLDivElement): The main dialog DOM element.
-    *   `open` (Function): Method to call to display the dialog.
-    *   `close` (Function): Method to call to hide the dialog.
+*   `(AdwDialogElement)`: The created `<adw-dialog>` Web Component instance.
 
 **Example:**
 
 ```html
 <div id="js-dialog-trigger-container"></div>
 <script>
+  // Assuming createAdwDialog and createAdwButton are available
   const triggerContainer = document.getElementById('js-dialog-trigger-container');
 
   const contentEl = document.createElement('div');
+  // It's better to set slot="content" if providing a wrapper div
+  // contentEl.setAttribute('slot', 'content');
   const p = document.createElement('p');
   p.textContent = "This is some custom content for the dialog. " +
                   "It can include various HTML elements.";
-  const entry = Adw.createEntry({ placeholder: "Enter something..."});
+  const entry = document.createElement('adw-entry'); // Assuming adw-entry is a WC
+  entry.placeholder = "Enter something...";
   contentEl.append(p, entry);
 
-  const myDialog = Adw.createDialog({
+  const myDialogWC = createAdwDialog({
     title: "My Custom Dialog",
-    content: contentEl,
+    content: contentEl, // This will be slotted
     buttons: [
-      Adw.createButton("Cancel", { onClick: () => myDialog.close() }),
-      Adw.createButton("Submit", {
+      createAdwButton("Cancel", { onClick: () => myDialogWC.close() }),
+      createAdwButton("Submit", {
         suggested: true,
         onClick: () => {
-          Adw.createToast(`Submitted: ${entry.value}`);
-          myDialog.close();
+          const dialogEntry = myDialogWC.querySelector('adw-entry'); // Query within the dialog's light DOM
+          Adw.createToast(`Submitted: ${dialogEntry.value}`);
+          myDialogWC.close();
         }
       })
     ],
     onClose: () => {
-      console.log("Custom dialog closed.");
+      console.log("Custom dialog (WC) closed.");
     }
   });
+  // Note: The dialog is not in the DOM yet. Append it if you want to find it by ID,
+  // or keep the reference. AdwDialog's open() method appends its structure to body.
 
-  const openDialogButton = Adw.createButton("Open JS Dialog", {
-    onClick: () => myDialog.open()
+  const openDialogButton = createAdwButton("Open JS Dialog", {
+    onClick: () => myDialogWC.open() // Call open() on the WC instance
   });
   triggerContainer.appendChild(openDialogButton);
 </script>
@@ -79,20 +77,21 @@ Adw.createDialog(options = {}) -> { dialog: HTMLDivElement, open: function, clos
 
 ## Web Component: `<adw-dialog>`
 
-A declarative way to define Adwaita dialogs.
+A declarative way to define Adwaita dialogs. This component does not use Shadow DOM due to its modal nature of overlaying the entire page.
 
 **HTML Tag:** `<adw-dialog>`
 
 **Attributes:**
 
 *   `title` (String, optional): The title of the dialog.
-*   `open` (Boolean, optional): If present, the dialog will be open by default or can be used to programmatically open/close the dialog by adding/removing the attribute.
-*   `close-on-backdrop-click` (Boolean, optional): If set to `"false"`, clicking the backdrop will not close the dialog. Defaults to `true`.
+*   `open` (Boolean attribute): If present, the dialog will be open. Can be added/removed to programmatically open/close.
+*   `close-on-backdrop-click` (String, optional): If set to `"false"`, clicking the backdrop will not close the dialog. Defaults to `true` (attribute absent).
 
 **Slots:**
 
-*   `content` (default slot if not named, or `slot="content"`): The main content area of the dialog.
-*   `buttons` (`slot="buttons"`): Place `adw-button` or standard `<button>` elements here for the dialog's action area.
+*   `content` (Named slot): The main content area of the dialog. Example: `<div slot="content">...</div>`.
+*   Default slot: Fallback content if `slot="content"` is not used. Content placed here will also appear in the main content area of the dialog.
+*   `buttons` (Named slot): Place `adw-button` or standard `<button>` elements here for the dialog's action area. Example: `<adw-button slot="buttons">OK</adw-button>`.
 
 **Events:**
 

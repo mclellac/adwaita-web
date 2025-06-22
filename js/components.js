@@ -14,6 +14,7 @@ import * as controls from './components/controls.js';
 import * as views from './components/views.js'; // This includes Tab, Navigation, Toolbar views etc.
 import * as layouts from './components/layouts.js'; // Added import for layouts
 import * as listbox from './components/listbox.js'; // Import AdwListBox
+import * as bottomSheet from './components/bottom_sheet.js'; // Import AdwBottomSheet
 
 // Theme and Accent functions are in utils, already exported from there.
 // adwGenerateId is also in utils.
@@ -84,7 +85,7 @@ const Adw = {
     createTabBar: views.createAdwTabBar, // If these were separate in original Adw obj
     createTabPage: views.createAdwTabPage,
     createNavigationView: views.createAdwNavigationView,
-    // createBottomSheet: views.createAdwBottomSheet, // Commented out: Not found in views.js
+    createBottomSheet: bottomSheet.createAdwBottomSheet, // Factory for AdwBottomSheet
 
 
     // Web Component Classes (for direct use or inspection if needed)
@@ -141,7 +142,7 @@ const Adw = {
     TabBar: views.AdwTabBar,
     TabPage: views.AdwTabPage,
     NavigationView: views.AdwNavigationView,
-    // BottomSheet: views.AdwBottomSheet, // Commented out: Not found in views.js
+    BottomSheet: bottomSheet.AdwBottomSheet,
 };
 
 // Make Adw global for now, for compatibility with existing HTML and adw-initializer.js
@@ -210,7 +211,7 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-tab-bar')) customElements.define('adw-tab-bar', Adw.TabBar);
     if (!customElements.get('adw-tab-page')) customElements.define('adw-tab-page', Adw.TabPage);
     if (!customElements.get('adw-navigation-view')) customElements.define('adw-navigation-view', Adw.NavigationView);
-    // if (!customElements.get('adw-bottom-sheet')) customElements.define('adw-bottom-sheet', Adw.BottomSheet); // Commented out: Adw.BottomSheet is not defined
+    if (!customElements.get('adw-bottom-sheet')) customElements.define('adw-bottom-sheet', Adw.BottomSheet);
 }
 
 console.log('[Debug] Adw object populated and custom elements defined.');

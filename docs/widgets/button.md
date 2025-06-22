@@ -1,71 +1,66 @@
 # Button
 
-Buttons allow users to trigger actions. Adwaita-Web provides `Adw.createButton()` for JavaScript creation and the `<adw-button>` Web Component.
+Buttons allow users to trigger actions. Adwaita-Web provides `Adw.Button.factory()` (or equivalent global `createAdwButton()`) for JavaScript creation and the `<adw-button>` Web Component.
 
-## JavaScript Factory: `Adw.createButton()`
+## JavaScript Factory: `Adw.Button.factory()` or `createAdwButton()`
 
-Creates an Adwaita-styled button or a link styled as a button.
+Creates an `<adw-button>` Web Component instance.
 
 **Signature:**
 
 ```javascript
-Adw.createButton(text, options = {}) -> HTMLButtonElement | HTMLAnchorElement
+Adw.Button.factory(text, options = {}) -> AdwButtonElement // Assuming AdwButtonElement is the class for <adw-button>
+// or createAdwButton(text, options = {}) -> AdwButtonElement
 ```
 
 **Parameters:**
 
-*   `text` (String): The text content of the button. Can be empty if using only an icon.
-*   `options` (Object, optional): Configuration options:
-    *   `href` (String, optional): If provided, creates an `<a>` tag styled as a
-        button. *Security: Ensure this URL is trusted or validated to prevent XSS
-        via `javascript:` URLs.*
-    *   `onClick` (Function, optional): Callback function for the button's click
-        event. Not called if the button is disabled.
-    *   `suggested` (Boolean, optional): If `true`, applies the 'suggested-action'
-        class (e.g., for primary actions). Defaults to `false`.
-    *   `destructive` (Boolean, optional): If `true`, applies the
-        'destructive-action' class (e.g., for delete actions). Defaults to `false`.
-    *   `flat` (Boolean, optional): If `true`, applies the 'flat' class for a less
-        prominent button. Defaults to `false`.
-    *   `disabled` (Boolean, optional): If `true`, disables the button. Defaults to
-        `false`.
-    *   `active` (Boolean, optional): If `true`, applies the 'active' class (e.g.,
-        for toggle buttons). Defaults to `false`.
-    *   `isCircular` (Boolean, optional): If `true`, applies the 'circular' class,
-        typically for icon-only buttons. Defaults to `false`.
-    *   `icon` (String, optional): HTML string for an SVG icon, or a CSS class name
-        for an icon font. *Security: If providing an HTML string, ensure it's from
-        a trusted source or sanitized.*
+*   `text` (String, optional): The text content for the button. If provided, it's set as the button's `textContent`.
+*   `options` (Object, optional): Configuration options, mapped to attributes of the `<adw-button>`:
+    *   `href` (String, optional): If provided, the button behaves like a link. *Security: Ensure this URL is trusted or validated.*
+    *   `onClick` (Function, optional): Callback function for the button's click event. Attached directly to the created `<adw-button>` element. Not called if disabled.
+    *   `suggested` (Boolean, optional): Sets the `suggested` attribute.
+    *   `destructive` (Boolean, optional): Sets the `destructive` attribute.
+    *   `flat` (Boolean, optional): Sets the `flat` attribute.
+    *   `disabled` (Boolean, optional): Sets the `disabled` attribute.
+    *   `active` (Boolean, optional): Sets the `active` attribute.
+    *   `circular` (Boolean, optional): Sets the `circular` attribute (renamed from `isCircular`).
+    *   `iconName` (String, optional): Name of the Adwaita icon (e.g., `actions/document-save-symbolic`). Sets the `icon-name` attribute. This is the preferred way to add icons.
+    *   `icon` (String, optional): **Deprecated.** Previously for SVG strings or CSS class names. Use `iconName`.
+    *   `type` (String, optional): Standard HTML button types (`submit`, `button`, `reset`). Sets the `type` attribute.
+    *   `appearance` (String, optional): A general class name to add. Can be used for non-standard styles like `small`, `compact` if defined in application CSS.
+    *   ARIA attributes (e.g., `ariaLabel`, `ariaHaspopup`): These will be set as `aria-label`, `aria-haspopup` on the `<adw-button>` element.
 
 **Returns:**
 
-*   `(HTMLButtonElement | HTMLAnchorElement)`: The created button element.
+*   `(AdwButtonElement)`: The created `<adw-button>` Web Component instance.
 
 **Example:**
 
 ```html
 <div id="js-button-container"></div>
 <script>
+  // Assuming createAdwButton is globally available or Adw.Button.factory
   const container = document.getElementById('js-button-container');
 
   // Standard button
-  const saveButton = Adw.createButton("Save", {
+  const saveButton = createAdwButton("Save", {
     suggested: true,
     onClick: () => Adw.createToast("Save action triggered!")
   });
   container.appendChild(saveButton);
 
   // Icon button
-  const iconButton = Adw.createButton("", {
-    icon: '<svg viewBox="0 0 16 16"><path d="M8 2a.5.5Z"/></svg>', // Plus icon (shortened)
-    isCircular: true,
+  const iconButton = createAdwButton("", { // Text is empty
+    iconName: "document-new-symbolic", // Use iconName
+    circular: true,
     flat: true,
     onClick: () => Adw.createToast("Icon button clicked!")
   });
   container.appendChild(iconButton);
 
   // Link styled as button
-  const linkButton = Adw.createButton("Learn More", {
+  const linkButton = createAdwButton("Learn More", {
     href: "#learn-more-section",
     flat: true
   });
@@ -81,19 +76,21 @@ A declarative way to use Adwaita buttons.
 
 **Attributes:**
 
-*   `href` (String, optional): If provided, renders as an `<a>` tag.
-*   `suggested` (Boolean, optional): Sets suggested action styling.
-*   `destructive` (Boolean, optional): Sets destructive action styling.
-*   `flat` (Boolean, optional): Sets flat styling.
-*   `disabled` (Boolean, optional): Disables the button.
-*   `active` (Boolean, optional): Sets active/pressed state styling.
-*   `circular` (Boolean, optional): Sets circular styling (for icon-only buttons).
-*   `icon` (String, optional): HTML string for an SVG icon, or a CSS class name.
+*   `href` (String, optional): If provided, the underlying element inside the Shadow DOM will be an `<a>` tag.
+*   `suggested` (Boolean attribute): Add attribute for suggested action styling.
+*   `destructive` (Boolean attribute): Add attribute for destructive action styling.
+*   `flat` (Boolean attribute): Add attribute for flat styling.
+*   `disabled` (Boolean attribute): Add attribute to disable the button.
+*   `active` (Boolean attribute): Add attribute for active/pressed state styling.
+*   `circular` (Boolean attribute): Add attribute for circular styling (for icon-only buttons).
+*   `icon-name` (String, optional): Name of the Adwaita icon (e.g., `actions/document-save-symbolic`). This is the preferred method for icons.
+*   `icon` (String, optional): **Deprecated.** Previously for SVG strings or CSS class names. Use `icon-name`.
 *   `type` (String, optional): Standard HTML button types like `submit`, `button`, `reset`. If `type="submit"`, it will attempt to submit the closest form.
+*   `appearance` (String, optional): A general class name that will be added to the internal button element. Useful for custom application-specific appearances like `small` or `compact` if you define these CSS classes.
 
 **Slots:**
 
-*   Default slot: The text content of the button.
+*   Default slot: The text content or other inline elements for the button.
 
 **Example:**
 
@@ -104,12 +101,14 @@ A declarative way to use Adwaita buttons.
 <!-- Destructive flat button with text -->
 <adw-button destructive flat>Delete Item</adw-button>
 
-<!-- Circular icon button -->
-<adw-button circular icon='<svg viewBox="0 0 16 16"><path d="M12.5 5h-9Z"/></svg>'>
-</adw-button>
+<!-- Circular icon button using icon-name -->
+<adw-button circular icon-name="edit-undo-symbolic" aria-label="Undo"></adw-button>
 
 <!-- Link as a button -->
 <adw-button href="https://example.com" target="_blank">Visit Example.com</adw-button>
+
+<!-- Button with custom appearance class (assuming 'small' is defined in app CSS) -->
+<adw-button appearance="small">Small Button</adw-button>
 
 <script>
   document.querySelector('adw-button[suggested]').addEventListener('click', () => {
