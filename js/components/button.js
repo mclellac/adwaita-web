@@ -236,9 +236,21 @@ export class AdwButton extends HTMLElement {
             internalButton.classList.add(appearance);
         }
 
-        if (internalButton.classList.contains('circular') && !internalButton.getAttribute('aria-label') && !internalButton.getAttribute('aria-labelledby') && !this.getAttribute('title')) {
-            const iconContent = iconAttr || 'unspecified icon';
-            console.warn(`AdwButton WC: Circular (icon-only) button created without an accessible name (aria-label, aria-labelledby, or title). Icon: "${iconContent.substring(0,30)}"`, this);
+        if (internalButton.classList.contains('circular') &&
+            !internalButton.getAttribute('aria-label') &&
+            !internalButton.getAttribute('aria-labelledby') &&
+            !this.getAttribute('title')) {
+
+            let iconInfo = 'unspecified icon';
+            const iconNameAttr = this.getAttribute('icon-name'); // Re-fetch for message
+            const iconAttr = this.getAttribute('icon'); // Re-fetch for message
+
+            if (iconNameAttr) {
+                iconInfo = `icon-name: "${iconNameAttr}"`;
+            } else if (iconAttr) {
+                iconInfo = `icon attribute (deprecated): "${iconAttr.substring(0,30)}"`;
+            }
+            console.warn(`AdwButton WC: Circular (icon-only) button created without an accessible name (aria-label, aria-labelledby, or title). ${iconInfo}`, this);
         }
 
         this.shadowRoot.appendChild(internalButton);

@@ -687,7 +687,7 @@ export class AdwPreferencesGroup extends HTMLElement {
 const svgIconCache = new Map();
 // Path should be absolute from the web server root.
 // Assumes icons will be moved to app-demo/static/data/icons/
-const ICON_BASE_PATH = '/static/data/icons/symbolic/';
+const ICON_BASE_PATH = '/data/icons/symbolic/'; // Changed from /static/data/icons/symbolic/
 
 /**
  * Creates an Adwaita-style icon element by fetching and embedding an SVG.
