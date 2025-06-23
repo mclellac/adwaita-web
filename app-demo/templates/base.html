@@ -99,9 +99,9 @@
         // This will make Tiptap's modules available globally for inline scripts in create_post/edit_post
         // In a bundled environment, you'd import them directly in your JS files.
         try {
-            const TiptapCore = await import('https://unpkg.com/@tiptap/core?module');
-            const TiptapStarterKit = await import('https://unpkg.com/@tiptap/starter-kit?module');
-            const TiptapPlaceholder = await import('https://unpkg.com/@tiptap/extension-placeholder?module');
+            const TiptapCore = await import('https://cdn.jsdelivr.net/npm/@tiptap/core/+esm');
+            const TiptapStarterKit = await import('https://cdn.jsdelivr.net/npm/@tiptap/starter-kit/+esm');
+            const TiptapPlaceholder = await import('https://cdn.jsdelivr.net/npm/@tiptap/extension-placeholder/+esm');
             window.Tiptap = {
                 Core: TiptapCore,
                 StarterKit: TiptapStarterKit.default, // StarterKit is often a default export
