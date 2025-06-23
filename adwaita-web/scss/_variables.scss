@@ -355,6 +355,15 @@
   --switch-slider-off-bg-color: rgba(0,0,0,0.08);   // alpha(currentColor, 0.08)
   --switch-knob-disabled-bg-color: var(--adw-light-2);
   --switch-slider-disabled-off-bg-color: rgba(0,0,0,0.06);
+
+  // Banner specific
+  --banner-bg-color: var(--adw-light-3); // Default/Info
+  --banner-fg-color: rgba(0,0,0,0.8);
+  --banner-border-color: var(--adw-light-4); // A slightly darker border for info banners
+
+  --banner-error-bg-color: var(--adw-red-1); // Lighter red for bg in light theme
+  --banner-error-fg-color: var(--adw-light-1); // White text on red
+  --banner-error-border-color: var(--adw-red-2);
 }
 
 @mixin dark-theme {
@@ -486,6 +495,15 @@
   --switch-slider-off-bg-color: rgba(255,255,255,0.12); // alpha(currentColor, 0.12)
   --switch-knob-disabled-bg-color: var(--adw-dark-1);
   --switch-slider-disabled-off-bg-color: rgba(255,255,255,0.08);
+
+  // Banner specific
+  --banner-bg-color: var(--adw-dark-3); // Default/Info
+  --banner-fg-color: #ffffff;
+  --banner-border-color: var(--adw-dark-4);
+
+  --banner-error-bg-color: var(--adw-red-4); // Darker red for bg in dark theme
+  --banner-error-fg-color: var(--adw-light-1); // White text
+  --banner-error-border-color: var(--adw-red-5);
 }
 
 // General Helper Variables (not theme-specific)

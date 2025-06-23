@@ -601,18 +601,17 @@ export function createAdwBanner(title, options = {}) {
     banner.appendChild(contentWrapper); // Add content wrapper to banner
 
     if (opts.dismissible) {
-        const dismissButton = createAdwButton('', {
-            iconName: 'ui/window-close-symbolic', // Corrected icon name
-            flat: true,
-            isCircular: true,
-            ariaLabel: 'Dismiss banner', // Explicitly provide an aria-label
+        const dismissButton = createAdwButton('Dismiss', { // Changed to text label "Dismiss"
+            // flat: true, // Decide on styling: flat or default button appearance
+            // No iconName or isCircular needed for a text button
+            ariaLabel: 'Dismiss banner', // Keeps the aria-label for accessibility
             onClick: () => {
                 banner.remove();
-                // Optionally, dispatch a 'dismissed' event
                 banner.dispatchEvent(new CustomEvent('dismissed', { bubbles: true, composed: true }));
             }
         });
-        dismissButton.classList.add('adw-banner-dismiss-button');
+        dismissButton.classList.add('adw-banner-dismiss-button'); // Keep class for specific styling
+        dismissButton.classList.add('flat'); // Make the dismiss button flat by default
         banner.appendChild(dismissButton);
     }
 
