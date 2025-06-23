@@ -64,50 +64,67 @@
     // Example: if button is too tall, adjust its internal padding or line-height.
   }
 
-  // Specific styling for the dismiss button in a banner
-  .adw-banner-dismiss-button.adw-button.flat {
-    // This is now a text button, styled as flat.
-    // Ensure good contrast and alignment.
-    // Flex properties on .adw-banner should handle alignment.
-    // Default flat button styling from _button.scss will apply.
-    // We can add specific overrides here if needed, e.g., for margin or color.
-    // margin-left: var(--spacing-s); // Add some space if gap on parent isn't enough
-    // color: var(--banner-secondary-fg-color, var(--secondary-fg-color)); // If a different color is needed for dismiss
+  // Common styling for ALL adw-button elements (action or dismiss) inside any banner
+  // This ensures they have a distinct background from the banner itself.
+  .adw-button {
+    background-color: var(--banner-button-bg-color);
+    color: var(--banner-button-fg-color);
+    border: none; // Ensure no border for a cleaner look like in the example image
+    // Padding and other button base styles come from _button.scss
+
+    &:hover {
+      background-color: var(--banner-button-hover-bg-color);
+    }
+    &:active, &.active { // Include .active for toggle buttons if they were used here
+      background-color: var(--banner-button-active-bg-color);
+    }
+
+    // If the button is also flat (like our dismiss button), these styles will override flat's transparent bg.
+    &.flat {
+        background-color: var(--banner-button-bg-color); // Explicitly override flat's transparent bg
+        color: var(--banner-button-fg-color);
+        &:hover {
+          background-color: var(--banner-button-hover-bg-color);
+        }
+        &:active, &.active {
+          background-color: var(--banner-button-active-bg-color);
+        }
+    }
   }
 
-  // Styling for the main action button, if present and needing distinction
-  .adw-banner-button.adw-button {
-      // This is the optional action button, not the dismiss button.
-      // AdwButton's own styles apply. If it needs specific banner context styling:
-      // Example: make it less prominent than a normal button if the banner is informational
-      // &.flat {
-      //   background-color: transparent; // Ensure truly flat if it's a flat action button
-      // }
-  }
-
-
-  // If a banner needs to be themed for specific contexts (e.g. error, warning)
-  // this can be done by adding classes to the AdwBanner element itself.
-  // Default/Info banner uses the main --banner-bg-color, --banner-fg-color, --banner-border-color
-  // The AdwBanner JS adds .adw-banner-info if type is 'info' or it's the default.
-  // So, explicit .adw-banner-info class styling might not be needed if defaults are set correctly.
-
+  // Type-specific overrides
   &.adw-banner-error {
     background-color: var(--banner-error-bg-color);
     color: var(--banner-error-fg-color);
     border-bottom-color: var(--banner-error-border-color);
 
-    // Ensure buttons within error banners have appropriate contrast or style
-    .adw-banner-button, // Main action button
-    .adw-banner-dismiss-button { // Dismiss button
-      // For flat buttons on a dark error background, text might need to be light.
-      // AdwButton's .flat style typically uses `color: var(--accent-color)` or `currentColor`.
-      // If `currentColor` (banner-error-fg-color) is light, this should be fine.
-      // If specific adjustments are needed:
-      // color: var(--banner-error-fg-color); // Ensure button text matches banner's fg
-      // &:hover { background-color: rgba(255,255,255,0.1); } // Example hover for light text on dark bg
+    // Override for buttons inside an ERROR banner
+    .adw-button { // Targets both .adw-banner-button and .adw-banner-dismiss-button within an error banner
+      background-color: var(--banner-error-button-bg-color);
+      color: var(--banner-error-button-fg-color);
+      border: none; // Ensure no border here too
+
+      &:hover {
+        background-color: var(--banner-error-button-hover-bg-color);
+      }
+      &:active, &.active {
+        background-color: var(--banner-error-button-active-bg-color);
+      }
+
+      // If the button is also flat (like our dismiss button), these styles will override flat's transparent bg.
+      &.flat {
+          background-color: var(--banner-error-button-bg-color); // Explicitly override flat's transparent bg
+          color: var(--banner-error-button-fg-color);
+          &:hover {
+            background-color: var(--banner-error-button-hover-bg-color);
+          }
+          &:active, &.active {
+            background-color: var(--banner-error-button-active-bg-color);
+          }
+      }
     }
   }
+  // Add .adw-banner-info for specific info button styling if different from default .adw-button in banner
   // Add .adw-banner-warning, .adw-banner-success if those types are supported and variables defined
 }
 
