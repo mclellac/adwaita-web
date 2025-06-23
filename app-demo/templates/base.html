@@ -96,15 +96,13 @@
         window.Adw = window.Adw || {};
         window.Adw.config = {
             // cssPath should be relative to the HTML file served by Flask.
-            // url_for('static', filename='../build/css/adwaita-web.css') will generate /build/css/adwaita-web.css
-            cssPath: "{{ url_for('static', filename='/css/adwaita-web.css') }}",
+            cssPath: "{{ url_for('static', filename='css/adwaita-web.css') }}",
             // iconBasePath should also be relative to the HTML file.
-            // url_for('static', filename='../build/data/icons/symbolic/') will generate /build/data/icons/symbolic/
-            iconBasePath: "{{ url_for('static', filename='/data/icons/symbolic/') }}"
+            iconBasePath: "{{ url_for('static', filename='data/icons/symbolic/') }}"
         };
         console.log('[Debug] Adw.config initialized:', JSON.stringify(window.Adw.config));
     </script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='/css/adwaita-web.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-web.css') }}">
     <style>
       /* General error text styling for form validation */
       .form-error-text,
@@ -123,7 +121,7 @@
       }
     </style>
     {# components.js should contain Adw object initialization and initial theme/accent application #}
-    <script type="module" src="{{ url_for('static', filename='/js/components.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
 
     {# Tiptap Editor - Core (for rich text editing) - REMOVED #}
     <style>
