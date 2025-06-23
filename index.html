@@ -187,7 +187,7 @@ if (accentPickerBox) {
                     <adw-icon icon-name="status/dialog-error-symbolic" style="color: var(--error-color); font-size: 32px;"></adw-icon>
                     <adw-icon icon-name="ui/pan-up-symbolic"></adw-icon>
                     <adw-icon icon-name="devices/camera-photo-symbolic"></adw-icon>
-                    <adw-icon icon-name="a-missing-icon-name"></adw-icon> {/* Error case */}
+                    {/* <adw-icon icon-name="a-missing-icon-name"></adw-icon> Error case removed */}
                 </adw-box>
                  <details>
                     <summary>Show Icon Examples</summary>
@@ -950,6 +950,7 @@ if (accentPickerBox) {
                 document.getElementById('nav-view-push-page3')?.addEventListener('click', () => {
                     const endButton = document.createElement('adw-button');
                     endButton.iconName = "actions/document-save-symbolic";
+                    endButton.setAttribute('aria-label', 'Save'); // Added aria-label
                     endButton.addEventListener('click', () => Adw.createToast("Save clicked on Page 3 header"));
 
                     const page3Data = createNavPage(
