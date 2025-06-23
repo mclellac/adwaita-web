@@ -25,6 +25,12 @@
     color: var(--accent-text-color);
     border-color: var(--accent-color);
   }
+  #tiptap-editor-container .ProseMirror {
+      min-height: 150px;
+      padding: var(--spacing-s);
+      border: 1px solid var(--border-color); /* Ensure editor area itself has a border */
+      border-radius: var(--radius-m);
+  }
   /* Ensure labels for checkboxes are clickable and aligned */
   .adw-checkbox-row label {
     vertical-align: middle;
@@ -53,55 +59,189 @@
 {% endblock %}
 
 {% block content %}
-<div class="main-content-clamped" style="padding: 20px;"> {# Basic clamp replacement #}
-  <h2>Create New Post (Diagnostic View)</h2>
-  <form method="POST" action="{{ url_for('create_post') }}" novalidate>
-      {{ form.hidden_tag() }} {# CSRF token #}
+<adw-clamp class="main-content-clamped">
+  <adw-preferences-page title="Create New Post">
+    <form method="POST" action="{{ url_for('create_post') }}" novalidate>
+        {{ form.hidden_tag() }} {# CSRF token #}
 
-      <p>
-          {{ form.title.label }}<br>
-          {{ form.title(size=30, class='adw-entry') }}<br>
-          {% if form.title.errors %}
-              {% for error in form.title.errors %}<span style="color:red;">[{{ error }}]</span><br>{% endfor %}
-          {% endif %}
-      </p>
+        <adw-preferences-group title="Post Details">
+            <adw-list-box>
+                <adw-entry-row
+                    title="{{ form.title.label.text }}"
+                    name="{{ form.title.name }}"
+                    id="{{ form.title.id or 'title_field' }}"
+                    placeholder="Enter post title"
+                    value="{{ form.title.data or '' }}"
+                    {% if form.title.flags.required %}required{% endif %}
+                    subtitle="{{ form.title.errors[0] if form.title.errors else '' }}"
+                    class="{{ 'has-error' if form.title.errors else '' }}">
+                </adw-entry-row>
 
-      <p>
-          {{ form.content.label }}<br>
-          {{ form.content(rows=10, cols=70, class='adw-entry', style='resize:vertical;') }}<br>
-          {% if form.content.errors %}
-              {% for error in form.content.errors %}<span style="color:red;">[{{ error }}]</span><br>{% endfor %}
-          {% endif %}
-      </p>
+                <adw-action-row title="{{ form.content.label.text }}" subtitle="Use the toolbar for formatting.">
+                    <div slot="suffix" style="width:100%; display: flex; flex-direction: column;">
+                        {{ form.content(id=form.content.id or 'content_field', style='display:none;') }}
+                        <div id="tiptap-toolbar" class="tiptap-toolbar">
+                            <button type="button" id="bold-btn" aria-label="Bold">B</button>
+                            <button type="button" id="italic-btn" aria-label="Italic">I</button>
+                            <button type="button" id="strike-btn" aria-label="Strikethrough">S</button>
+                            <button type="button" id="bulletList-btn" aria-label="Bullet List">UL</button>
+                            <button type="button" id="orderedList-btn" aria-label="Ordered List">OL</button>
+                            <button type="button" id="blockquote-btn" aria-label="Blockquote">"</button>
+                            <button type="button" id="h1-btn" aria-label="Heading 1">H1</button>
+                            <button type="button" id="h2-btn" aria-label="Heading 2">H2</button>
+                            <button type="button" id="h3-btn" aria-label="Heading 3">H3</button>
+                            <button type="button" id="p-btn" aria-label="Paragraph">P</button>
+                            <button type="button" id="clear-btn" aria-label="Clear Content">Clear</button>
+                        </div>
+                        <div id="tiptap-editor-container"></div> {# Tiptap will mount here #}
+                        {% if form.content.errors %}
+                            <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
+                                {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </adw-action-row>
+            </adw-list-box>
+        </adw-preferences-group>
 
-      <p>
-          {{ form.categories.label }}<br>
-          {# Basic rendering for categories checkbox #}
-          {% for subfield in form.categories %}
-              {{ subfield }} {{ subfield.label }}<br>
-          {% endfor %}
-          {% if form.categories.errors %}
-              {% for error in form.categories.errors %}<span style="color:red;">[{{ error }}]</span><br>{% endfor %}
-          {% endif %}
-      </p>
+        <adw-preferences-group title="{{ form.categories.label.text }}">
+            <adw-list-box class="{{ 'has-error' if form.categories.errors else '' }}">
+                {% for subfield in form.categories %}
+                <adw-action-row class="adw-checkbox-row">
+                    {# Using prefix slot for better control over layout with label #}
+                    <div slot="prefix" style="display:flex; align-items:center;">
+                      {{ subfield(class_="adw-checkbox", id=subfield.id) }}
+                      <label for="{{ subfield.id }}" style="margin-left: var(--spacing-s);">{{ subfield.label.text }}</label>
+                    </div>
+                </adw-action-row>
+                {% endfor %}
+            </adw-list-box>
+            {% if form.categories.errors %}
+            <adw-list-box> <adw-action-row subtitle="{{ form.categories.errors|join(' ') }}" class="error-row"></adw-action-row> </adw-list-box>
+            {% endif %}
+        </adw-preferences-group>
 
-      <p>
-          {{ form.tags_string.label }}<br>
-          {{ form.tags_string(size=50, class='adw-entry') }}<br>
-          {% if form.tags_string.errors %}
-              {% for error in form.tags_string.errors %}<span style="color:red;">[{{ error }}]</span><br>{% endfor %}
-          {% endif %}
-      </p>
+        <adw-preferences-group title="Tags">
+            <adw-list-box>
+                <adw-entry-row
+                    title="{{ form.tags_string.label.text }}"
+                    name="{{ form.tags_string.name }}"
+                    id="{{ form.tags_string.id or 'tags_string_field' }}"
+                    placeholder="e.g., tech, travel, food"
+                    value="{{ form.tags_string.data or '' }}"
+                    subtitle="{{ form.tags_string.errors[0] if form.tags_string.errors else 'Comma-separated values.' }}"
+                    class="{{ 'has-error' if form.tags_string.errors else '' }}">
+                </adw-entry-row>
+            </adw-list-box>
+        </adw-preferences-group>
 
-      <p>
-          {# Rendering submit as a standard button for diagnostics #}
-          <input type="submit" value="{{ form.submit.label.text if form.submit.label else 'Submit Post' }}">
-      </p>
-  </form>
-</div>
+        <adw-action-row>
+            <div slot="suffix" style="display: flex; justify-content: flex-end; gap: var(--spacing-s); width: 100%;">
+                <adw-button type="submit" class="suggested-action" label="{{ form.submit.label.text if form.submit.label else 'Submit Post' }}"></adw-button>
+            </div>
+        </adw-action-row>
+    </form>
+  </adw-preferences-page>
+</adw-clamp>
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
-{# No Tiptap-specific scripts needed anymore #}
+{# Tiptap script remains the same as provided in previous version of this file #}
+<script type="module">
+    if (window.Tiptap && window.Tiptap.Core && window.Tiptap.StarterKit) {
+        const { Editor } = window.Tiptap.Core;
+        const StarterKit = window.Tiptap.StarterKit;
+        const Placeholder = window.Tiptap.Placeholder;
+
+        const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
+        const editorContainer = document.getElementById('tiptap-editor-container');
+        const formEl = contentTextarea.closest('form'); // Renamed to avoid conflict with form variable from WTForms
+
+        const editor = new Editor({
+            element: editorContainer,
+            extensions: [
+                StarterKit.configure({
+                    // heading: { levels: [1, 2, 3] }, // configure specific starter kit extensions
+                }),
+                Placeholder.configure({
+                    placeholder: 'Write your blog post here...',
+                })
+            ],
+            content: contentTextarea.value, // Load existing content if any (for edit page mostly)
+            onUpdate: ({ editor }) => {
+                contentTextarea.value = editor.getHTML();
+            },
+        });
+
+        // Toolbar button actions
+        const toolbar = document.getElementById('tiptap-toolbar');
+        if (toolbar) {
+            toolbar.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'BUTTON') return;
+                const action = e.target.id.replace('-btn', '');
+                switch(action) {
+                    case 'bold': editor.chain().focus().toggleBold().run(); break;
+                    case 'italic': editor.chain().focus().toggleItalic().run(); break;
+                    case 'strike': editor.chain().focus().toggleStrike().run(); break;
+                    case 'bulletList': editor.chain().focus().toggleBulletList().run(); break;
+                    case 'orderedList': editor.chain().focus().toggleOrderedList().run(); break;
+                    case 'blockquote': editor.chain().focus().toggleBlockquote().run(); break;
+                    case 'h1': editor.chain().focus().toggleHeading({ level: 1 }).run(); break;
+                    case 'h2': editor.chain().focus().toggleHeading({ level: 2 }).run(); break;
+                    case 'h3': editor.chain().focus().toggleHeading({ level: 3 }).run(); break;
+                    case 'p': editor.chain().focus().setParagraph().run(); break;
+                    case 'clear': editor.chain().focus().clearContent().run(); break;
+                }
+            });
+        }
+
+
+        // Update button states based on editor selection
+        editor.on('transaction', () => {
+            if (!toolbar) return; // Guard against missing toolbar
+            const boldBtn = document.getElementById('bold-btn');
+            if(boldBtn) boldBtn.classList.toggle('is-active', editor.isActive('bold'));
+            const italicBtn = document.getElementById('italic-btn');
+            if(italicBtn) italicBtn.classList.toggle('is-active', editor.isActive('italic'));
+            const strikeBtn = document.getElementById('strike-btn');
+            if(strikeBtn) strikeBtn.classList.toggle('is-active', editor.isActive('strike'));
+            const bulletListBtn = document.getElementById('bulletList-btn');
+            if(bulletListBtn) bulletListBtn.classList.toggle('is-active', editor.isActive('bulletList'));
+            const orderedListBtn = document.getElementById('orderedList-btn');
+            if(orderedListBtn) orderedListBtn.classList.toggle('is-active', editor.isActive('orderedList'));
+            const blockquoteBtn = document.getElementById('blockquote-btn');
+            if(blockquoteBtn) blockquoteBtn.classList.toggle('is-active', editor.isActive('blockquote'));
+            const h1Btn = document.getElementById('h1-btn');
+            if(h1Btn) h1Btn.classList.toggle('is-active', editor.isActive('heading', { level: 1 }));
+            const h2Btn = document.getElementById('h2-btn');
+            if(h2Btn) h2Btn.classList.toggle('is-active', editor.isActive('heading', { level: 2 }));
+            const h3Btn = document.getElementById('h3-btn');
+            if(h3Btn) h3Btn.classList.toggle('is-active', editor.isActive('heading', { level: 3 }));
+        });
+
+
+        // Ensure content is synced before form submission (onUpdate should handle most cases)
+        if (formEl) {
+            formEl.addEventListener('submit', () => {
+                if (editor && !editor.isDestroyed) {
+                    contentTextarea.value = editor.getHTML();
+                }
+            });
+        }
+
+        // Destroy editor when page unloads to prevent memory leaks
+        window.addEventListener('beforeunload', () => {
+            if (editor && !editor.isDestroyed) {
+                editor.destroy();
+            }
+        });
+
+    } else {
+        console.error('Tiptap is not loaded. Rich text editor will not function.');
+        // Fallback: make the original textarea visible if Tiptap fails
+        const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
+        if(contentTextarea) contentTextarea.style.display = 'block';
+    }
+</script>
 {% endblock %}
