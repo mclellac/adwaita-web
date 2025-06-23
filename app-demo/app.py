@@ -197,8 +197,7 @@ def create_app(config_overrides=None):
         default_db_uri = f"postgresql://{pg_user}:{pg_pass}@{pg_host}/{pg_db}"
     else:
         default_db_uri = f"postgresql://{pg_user}@{pg_host}/{pg_db}"
-    # _app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', default_db_uri)
-    _app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:' # Use SQLite in-memory for testing
+    _app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', default_db_uri) # Restored PostgreSQL
 
     if config_overrides:
         _app.config.from_mapping(config_overrides)
@@ -652,22 +651,13 @@ def create_app(config_overrides=None):
         return render_template('500.html'), 500
 
     with _app.app_context():
-        db.create_all() # Create tables for SQLite in-memory
-        if not User.query.first(): # Uncommented for testing
-            default_username = os.environ.get("ADMIN_USER", "admin")
-            default_password = os.environ.get("ADMIN_PASS", "password")
-            _app.logger.info(f"Attempting to create default admin user: {default_username}")
-            admin_user = User(username=default_username)
-            admin_user.set_password(default_password)
-            db.session.add(admin_user)
-            try:
-                db.session.commit()
-                _app.logger.info(f"Default admin user '{default_username}' (password: '{default_password}') created successfully.")
-            except Exception as e:
-                db.session.rollback()
-                _app.logger.error(f"Error creating default admin user: {e}", exc_info=True)
-        else:
-            _app.logger.info("Database already contains users. Skipping default user creation.")
+        db.create_all() # This will create tables if they don't exist, based on the models.
+                        # For PostgreSQL, this should typically be run once, or managed by migrations.
+                        # Initial data seeding (like creating a default admin user) should be
+                        # handled by a separate script (e.g., setup_db.py) or manually,
+                        # especially for a persistent DB like PostgreSQL.
+        _app.logger.info("Ensured database tables are created if they don't exist (db.create_all()).")
+        # Default user creation logic removed to rely on PostgreSQL setup as per AGENTS.md
 
     return _app
 
