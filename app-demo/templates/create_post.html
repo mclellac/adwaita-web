@@ -25,12 +25,6 @@
     color: var(--accent-text-color);
     border-color: var(--accent-color);
   }
-  #tiptap-editor-container .ProseMirror {
-      min-height: 150px;
-      padding: var(--spacing-s);
-      border: 1px solid var(--border-color); /* Ensure editor area itself has a border */
-      border-radius: var(--radius-m);
-  }
   /* Ensure labels for checkboxes are clickable and aligned */
   .adw-checkbox-row label {
     vertical-align: middle;
@@ -77,23 +71,10 @@
                     class="{{ 'has-error' if form.title.errors else '' }}">
                 </adw-entry-row>
 
-                <adw-action-row title="{{ form.content.label.text }}" subtitle="Use the toolbar for formatting.">
-                    <div slot="suffix" style="width:100%; display: flex; flex-direction: column;">
-                        {{ form.content(id=form.content.id or 'content_field', style='display:none;') }}
-                        <div id="tiptap-toolbar" class="tiptap-toolbar">
-                            <button type="button" id="bold-btn" aria-label="Bold">B</button>
-                            <button type="button" id="italic-btn" aria-label="Italic">I</button>
-                            <button type="button" id="strike-btn" aria-label="Strikethrough">S</button>
-                            <button type="button" id="bulletList-btn" aria-label="Bullet List">UL</button>
-                            <button type="button" id="orderedList-btn" aria-label="Ordered List">OL</button>
-                            <button type="button" id="blockquote-btn" aria-label="Blockquote">"</button>
-                            <button type="button" id="h1-btn" aria-label="Heading 1">H1</button>
-                            <button type="button" id="h2-btn" aria-label="Heading 2">H2</button>
-                            <button type="button" id="h3-btn" aria-label="Heading 3">H3</button>
-                            <button type="button" id="p-btn" aria-label="Paragraph">P</button>
-                            <button type="button" id="clear-btn" aria-label="Clear Content">Clear</button>
-                        </div>
-                        <div id="tiptap-editor-container"></div> {# Tiptap will mount here #}
+                <adw-action-row title="{{ form.content.label.text }}" subtitle="Enter your post content below.">
+                    <div slot="suffix" style="width:100%;">
+                        {# Make textarea visible and style it like an adw-entry #}
+                        {{ form.content(id=form.content.id or 'content_field', class='adw-entry', style='width: 100%; min-height: 200px; resize: vertical;', rows='10') }}
                         {% if form.content.errors %}
                             <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
                                 {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
@@ -147,141 +128,5 @@
 
 {% block scripts %}
 {{ super() }}
-{# Tiptap script remains the same as provided in previous version of this file #}
-<script type="module">
-    function initializeTiptapEditor() {
-        if (!window.Tiptap || !window.Tiptap.Core || !window.Tiptap.StarterKit || !window.Tiptap.Placeholder) {
-            console.error('Tiptap components not fully available for editor initialization.');
-            const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
-            if(contentTextarea) contentTextarea.style.display = 'block'; // Fallback
-            return;
-        }
-        console.log('[Debug] Initializing Tiptap Editor in create_post.html');
-        const { Editor } = window.Tiptap.Core;
-        const StarterKit = window.Tiptap.StarterKit;
-        const Placeholder = window.Tiptap.Placeholder;
-
-        const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
-        const editorContainer = document.getElementById('tiptap-editor-container');
-        // Ensure contentTextarea and editorContainer exist before proceeding
-        if (!contentTextarea || !editorContainer) {
-            console.error('Tiptap init: contentTextarea or editorContainer not found.');
-            if(contentTextarea && !editorContainer) contentTextarea.style.display = 'block'; // Show textarea if only container is missing
-            return;
-        }
-        const formEl = contentTextarea.closest('form'); // Renamed to avoid conflict with form variable from WTForms
-
-        const editor = new Editor({
-            element: editorContainer,
-            extensions: [
-                StarterKit.configure({
-                    // heading: { levels: [1, 2, 3] }, // configure specific starter kit extensions
-                }),
-                Placeholder.configure({
-                    placeholder: 'Write your blog post here...',
-                })
-            ],
-            content: contentTextarea.value, // Load existing content if any (for edit page mostly)
-            onUpdate: ({ editor }) => {
-                contentTextarea.value = editor.getHTML();
-            },
-        });
-
-        // Toolbar button actions
-        const toolbar = document.getElementById('tiptap-toolbar');
-        if (toolbar) {
-            toolbar.addEventListener('click', (e) => {
-                if (e.target.tagName !== 'BUTTON') return;
-                const action = e.target.id.replace('-btn', '');
-                switch(action) {
-                    case 'bold': editor.chain().focus().toggleBold().run(); break;
-                    case 'italic': editor.chain().focus().toggleItalic().run(); break;
-                    case 'strike': editor.chain().focus().toggleStrike().run(); break;
-                    case 'bulletList': editor.chain().focus().toggleBulletList().run(); break;
-                    case 'orderedList': editor.chain().focus().toggleOrderedList().run(); break;
-                    case 'blockquote': editor.chain().focus().toggleBlockquote().run(); break;
-                    case 'h1': editor.chain().focus().toggleHeading({ level: 1 }).run(); break;
-                    case 'h2': editor.chain().focus().toggleHeading({ level: 2 }).run(); break;
-                    case 'h3': editor.chain().focus().toggleHeading({ level: 3 }).run(); break;
-                    case 'p': editor.chain().focus().setParagraph().run(); break;
-                    case 'clear': editor.chain().focus().clearContent().run(); break;
-                }
-            });
-        }
-
-
-        // Update button states based on editor selection
-        editor.on('transaction', () => {
-            if (!toolbar) return; // Guard against missing toolbar
-            const boldBtn = document.getElementById('bold-btn');
-            if(boldBtn) boldBtn.classList.toggle('is-active', editor.isActive('bold'));
-            const italicBtn = document.getElementById('italic-btn');
-            if(italicBtn) italicBtn.classList.toggle('is-active', editor.isActive('italic'));
-            const strikeBtn = document.getElementById('strike-btn');
-            if(strikeBtn) strikeBtn.classList.toggle('is-active', editor.isActive('strike'));
-            const bulletListBtn = document.getElementById('bulletList-btn');
-            if(bulletListBtn) bulletListBtn.classList.toggle('is-active', editor.isActive('bulletList'));
-            const orderedListBtn = document.getElementById('orderedList-btn');
-            if(orderedListBtn) orderedListBtn.classList.toggle('is-active', editor.isActive('orderedList'));
-            const blockquoteBtn = document.getElementById('blockquote-btn');
-            if(blockquoteBtn) blockquoteBtn.classList.toggle('is-active', editor.isActive('blockquote'));
-            const h1Btn = document.getElementById('h1-btn');
-            if(h1Btn) h1Btn.classList.toggle('is-active', editor.isActive('heading', { level: 1 }));
-            const h2Btn = document.getElementById('h2-btn');
-            if(h2Btn) h2Btn.classList.toggle('is-active', editor.isActive('heading', { level: 2 }));
-            const h3Btn = document.getElementById('h3-btn');
-            if(h3Btn) h3Btn.classList.toggle('is-active', editor.isActive('heading', { level: 3 }));
-        });
-
-
-        // Ensure content is synced before form submission (onUpdate should handle most cases)
-        if (formEl) {
-            formEl.addEventListener('submit', () => {
-                if (editor && !editor.isDestroyed) {
-                    contentTextarea.value = editor.getHTML();
-                }
-            });
-        }
-
-        // Destroy editor when page unloads to prevent memory leaks
-        window.addEventListener('beforeunload', () => {
-            if (editor && !editor.isDestroyed) {
-                editor.destroy();
-            }
-        });
-    } // End of initializeTiptapEditor function
-
-    // Event listener for when Tiptap is ready
-    document.addEventListener('tiptap-ready', initializeTiptapEditor);
-
-    // Fallback if Tiptap fails to load (e.g., CDN issue)
-    document.addEventListener('tiptap-failed', () => {
-        console.error('Tiptap failed to load (event received). Rich text editor will not function.');
-        const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
-        if(contentTextarea) contentTextarea.style.display = 'block';
-    });
-
-    // Initial check in case 'tiptap-ready' already fired or Tiptap loaded synchronously before this script.
-    // This is a bit of a belt-and-suspenders approach.
-    if (window.Tiptap && window.Tiptap.Core && window.Tiptap.StarterKit && window.Tiptap.Placeholder) {
-        // Check if it hasn't been initialized by the event listener already
-        // This check is tricky; ideally, the event is the primary mechanism.
-        // For simplicity, we'll rely on the event, but if the page loads very fast
-        // and Tiptap is ready before this script attaches the listener, this could be an issue.
-        // A more robust way might involve a flag.
-        // However, 'type=module' scripts often defer, making event listening more reliable.
-        console.log('[Debug] Tiptap seems to be already available. Attempting initialization if not done by event.');
-        // To avoid double initialization, we might need a flag, e.g. window.tiptapInitialized
-        if (!window.tiptapEditorInitialized) { // Assume we set this flag in initializeTiptapEditor
-           // initializeTiptapEditor(); // Potentially call it here if events are missed.
-                                     // For now, relying on the event listener.
-        }
-    } else if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        // If Tiptap is not ready by the time the document is interactive/complete,
-        // and the 'tiptap-ready' event hasn't fired or been caught, then it's likely an issue.
-        // The 'tiptap-failed' event should cover this.
-        // The 'Tiptap components not fully available' log inside initializeTiptapEditor
-        // if called by 'tiptap-ready' but window.Tiptap is somehow incomplete then, will also indicate issues.
-    }
-</script>
+{# No Tiptap-specific scripts needed anymore #}
 {% endblock %}
