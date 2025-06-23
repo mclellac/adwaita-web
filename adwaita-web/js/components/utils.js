@@ -92,29 +92,126 @@ export function loadSavedTheme() {
         const savedTheme = localStorage.getItem('theme');
         const savedAccentName = localStorage.getItem('accentColorName');
 
+        const docEl = document.documentElement;
         if (savedTheme === 'light') {
-            document.body.classList.add('light-theme');
+            docEl.classList.add('light-theme');
+            docEl.classList.remove('dark-theme'); // Ensure dark is removed
         } else if (savedTheme === 'dark') {
-            document.body.classList.remove('light-theme');
-        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches && !document.body.classList.contains('light-theme') && savedTheme !== 'dark') {
-            document.body.classList.add('light-theme');
+            docEl.classList.add('dark-theme');
+            docEl.classList.remove('light-theme'); // Ensure light is removed
+        } else {
+            // No saved theme, rely on the inline script's initial assessment or system preference.
+            // The inline script should have already set a theme.
+            // This function, when run on DOMContentLoaded, will primarily handle accent color
+            // and ensure localStorage is updated if the inline script made a choice based on prefers-color-scheme.
+            // If inline script somehow failed, this could be a fallback.
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                if (!docEl.classList.contains('light-theme') && !docEl.classList.contains('dark-theme')) {
+                    docEl.classList.add('light-theme');
+                }
+            } else {
+                 if (!docEl.classList.contains('light-theme') && !docEl.classList.contains('dark-theme')) {
+                    docEl.classList.add('dark-theme');
+                }
+            }
+        }
+
+        // Persist the theme choice if it was determined by prefers-color-scheme and not in localStorage yet
+        // or if the inline script set it.
+        // The inline script sets the class but doesn't write to localStorage to avoid premature storage write.
+        if (!savedTheme) {
+            try {
+                if (docEl.classList.contains('light-theme')) {
+                    localStorage.setItem('theme', 'light');
+                } else if (docEl.classList.contains('dark-theme')) {
+                    localStorage.setItem('theme', 'dark');
+                }
+            } catch (e) {
+                console.warn("Could not save initial theme to localStorage:", e);
+            }
         }
 
         setAccentColor(savedAccentName || DEFAULT_ACCENT_COLOR_NAME);
 
     } catch (e) {
         console.warn("Could not load theme from localStorage:", e);
+        const docEl = document.documentElement;
+        // Fallback logic if everything else fails
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-            document.body.classList.add('light-theme');
+            docEl.classList.add('light-theme');
+            docEl.classList.remove('dark-theme');
+        } else {
+            docEl.classList.add('dark-theme');
+            docEl.classList.remove('light-theme');
         }
+        try { localStorage.setItem('theme', docEl.classList.contains('light-theme') ? 'light' : 'dark'); } catch (lserror) { /* ignore */ }
         setAccentColor(DEFAULT_ACCENT_COLOR_NAME); // Fallback to default blue
     }
 }
 
 export function toggleTheme() {
-    document.body.classList.toggle('light-theme');
-    try {
-        localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+    const docEl = document.documentElement;
+    // If light-theme is present, switch to dark. Otherwise, switch to light.
+    if (docEl.classList.contains('light-theme')) {
+        docEl.classList.remove('light-theme');
+        docEl.classList.add('dark-theme');
+        try { localStorage.setItem('theme', 'dark'); } catch (e) { console.warn("LS Error", e); }
+    } else {
+        docEl.classList.remove('dark-theme');
+        docEl.classList.add('light-theme');
+        try { localStorage.setItem('theme', 'light'); } catch (e) { console.warn("LS Error", e); }
+    }
+}
+
+// Global event listener
+window.addEventListener("DOMContentLoaded", () => {
+    // The inline script in <head> handles initial theme application from localStorage or prefers-color-scheme.
+    // loadSavedTheme here will now mostly ensure accent color is applied and
+    // potentially sync localStorage if the theme was determined by prefers-color-scheme by the inline script
+    // (which doesn't write to localStorage to avoid disk write before critical render path).
+    loadSavedTheme();
+
+    // Add listener for system theme changes
+    const lightSchemeMediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+    try { // Some browsers might not support addEventListener on MediaQueryList
+        lightSchemeMediaQuery.addEventListener('change', (e) => {
+            const currentStoredTheme = localStorage.getItem('theme');
+            // Only react if no theme is explicitly set by the user in localStorage
+            if (!currentStoredTheme) {
+                console.log("System theme changed, and no user preference stored. Applying new system theme.");
+                if (e.matches) { // System changed to light
+                    document.documentElement.classList.add('light-theme');
+                    document.documentElement.classList.remove('dark-theme');
+                } else { // System changed to dark
+                    document.documentElement.classList.add('dark-theme');
+                    document.documentElement.classList.remove('light-theme');
+                }
+                // No need to write to localStorage here, as we want to keep respecting system changes
+                // if the user hasn't made an explicit choice.
+            }
+        });
+    } catch (e1) {
+        try { // Fallback for older browsers
+            lightSchemeMediaQuery.addListener((e) => { // Deprecated but common fallback
+                 const currentStoredTheme = localStorage.getItem('theme');
+                 if (!currentStoredTheme) {
+                    if (e.matches) {
+                        document.documentElement.classList.add('light-theme');
+                        document.documentElement.classList.remove('dark-theme');
+                    } else {
+                        document.documentElement.classList.add('dark-theme');
+                        document.documentElement.classList.remove('light-theme');
+                    }
+                }
+            });
+        } catch (e2) {
+            console.warn("Failed to add listener for system theme changes.", e1, e2);
+        }
+    }
+});
+
+
+const ALLOWED_PROTOCOLS = ['http:', 'https:', 'mailto:', 'tel:', 'ftp:', './', '../', '/', '#'];
     } catch (e) {
         console.warn("Could not save theme preference to localStorage:", e);
     }

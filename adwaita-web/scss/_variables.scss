@@ -551,14 +551,33 @@
 
 
 // Theme Application
-// Default to dark theme. JS will add/remove .light-theme class on body.
-:root {
-  @include dark-theme; // Apply dark theme variables by default
+// JS will add .light-theme or .dark-theme class on the HTML element.
+// No default theme is applied here at the root; relies on the class.
+
+html.light-theme {
+  @include light-theme;
 }
 
-body.light-theme {
-  @include light-theme; // Override with light theme variables when .light-theme is present
+html.dark-theme {
+  @include dark-theme;
 }
+
+// Fallback if JS fails or is disabled, apply dark theme by default to :root
+// This is a safety net. The inline script in <head> should prevent this from being needed for JS users.
+// However, for non-JS users, this ensures styles are applied.
+// We need to ensure this doesn't conflict with the html.dark-theme or html.light-theme rules.
+// One way is to make the html.dark-theme and html.light-theme selectors more specific,
+// or accept that non-JS users will get the default dark theme.
+// For now, let's assume the JS will set the class on <html>.
+// If no class is set on <html> by JS (e.g. script error before classing), what happens?
+// Let's provide a very basic default on :root for core variables if no class is set on html.
+// This is tricky because @include dark-theme sets a LOT of variables.
+// A better approach for non-JS might be a <noscript> tag setting a class.
+// Or, we simply ensure one of the classes is always set by the inline script.
+
+// The inline script in base.html now *always* adds either .light-theme or .dark-theme
+// to the <html> element. So, one of these two blocks below will always be active.
+// No further :root default is strictly necessary if that script works reliably.
 
 
 // GTK @define-color mapping (for reference or potential future use if parsing SCSS for such)
