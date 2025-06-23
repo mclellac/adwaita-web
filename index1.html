@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adwaita Web - Full Component Showcase</title>
+    <script>
+        window.Adw = window.Adw || {};
+        window.Adw.config = {
+            cssPath: 'build/css/adwaita-web.css',
+            iconBasePath: 'build/data/icons/symbolic/'
+        };
+    </script>
+    <link rel="stylesheet" href="build/css/adwaita-web.css">
+    <script type="module" src="build/js/components.js" defer></script>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; font-family: var(--font-family-default); }
+        adw-application-window { flex-grow: 1; display: flex; flex-direction: column; }
+        .main-content-area { padding: var(--spacing-l); overflow-y: auto; flex-grow: 1; }
+        .widget-category { margin-bottom: var(--spacing-xl); }
+        .widget-category > adw-label[title-level="1"] { margin-bottom: var(--spacing-l); }
+        .widget-showcase { margin-bottom: var(--spacing-l); padding: var(--spacing-m); border: 1px solid var(--border-color); border-radius: var(--border-radius-default); }
+        .widget-showcase > adw-label[title-level="2"] { margin-top: 0; margin-bottom: var(--spacing-m); }
+        .button-group adw-button, .control-group > * { margin-right: var(--spacing-s); margin-bottom: var(--spacing-s); }
+        adw-box > * { margin: var(--spacing-xs); } /* Simple spacing for box children in demo */
+        adw-list-box { margin-bottom: var(--spacing-m); }
+        /* Ensure dialogs are not visible until opened */
+        adw-dialog, adw-alert-dialog, adw-about-dialog, adw-preferences-dialog, adw-bottom-sheet { display: none; }
+        adw-dialog[open], adw-alert-dialog[open], adw-about-dialog[open], adw-preferences-dialog[open], adw-bottom-sheet[open] { display: block; /* Or as per component's open logic */ }
+
+    </style>
+</head>
+<body>
+    <adw-application-window id="showcase-window">
+        <adw-header-bar slot="header">
+            <adw-window-title slot="title" title="Adwaita Web Full Showcase"></adw-window-title>
+            <adw-button slot="end" id="theme-toggle-btn" class="flat">Toggle Theme</adw-button>
+        </adw-header-bar>
+
+        <div class="main-content-area">
+            <adw-label title-level="1">Comprehensive Widget Showcase</adw-label>
+
+            <!-- Buttons Category -->
+            <section class="widget-category">
+                <adw-label title-level="1">Buttons & Indicators</adw-label>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwButton</adw-label>
+                    <div class="button-group">
+                        <adw-button id="btn-standard">Standard</adw-button>
+                        <adw-button suggested>Suggested</adw-button>
+                        <adw-button destructive>Destructive</adw-button>
+                        <adw-button flat>Flat</adw-button>
+                        <adw-button disabled>Disabled</adw-button>
+                        <adw-button icon-name="actions/document-save-symbolic">With Icon</adw-button>
+                        <adw-button circular icon-name="actions/mail-send-symbolic" aria-label="Send Mail"></adw-button>
+                        <adw-button pill>Pill</adw-button>
+                        <adw-button class="icon-only" icon-name="actions/go-previous-symbolic" aria-label="Back"></adw-button>
+                    </div>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwSplitButton</adw-label>
+                    <adw-split-button action-text="Main Action" id="showcase-split-btn">
+                        <!-- Menu items would typically be added via JS or a dedicated menu component -->
+                    </adw-split-button>
+                    <adw-split-button action-text="Save" action-icon-name="actions/document-save-symbolic" suggested></adw-split-button>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwToggleButton & AdwToggleGroup</adw-label>
+                    <adw-toggle-button label="Toggle Me" id="showcase-toggle-btn"></adw-toggle-button>
+                    <adw-toggle-button icon-name="actions/media-playback-start-symbolic" aria-label="Play" active></adw-toggle-button>
+                    <br>
+                    <adw-toggle-group linked id="showcase-toggle-group">
+                        <adw-toggle-button label="Left" value="left"></adw-toggle-button>
+                        <adw-toggle-button label="Center" value="center" active></adw-toggle-button>
+                        <adw-toggle-button label="Right" value="right"></adw-toggle-button>
+                    </adw-toggle-group>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwSpinner</adw-label>
+                    <adw-spinner active></adw-spinner>
+                    <adw-spinner active size="32px"></adw-spinner>
+                    <adw-spinner></adw-spinner> <!-- Inactive -->
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwProgressBar</adw-label>
+                    <adw-progress-bar value="75"></adw-progress-bar>
+                    <br>
+                    <adw-progress-bar indeterminate></adw-progress-bar>
+                </div>
+            </section>
+
+            <!-- Forms & Inputs Category -->
+            <section class="widget-category">
+                <adw-label title-level="1">Forms & Inputs</adw-label>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwEntry</adw-label>
+                    <adw-entry placeholder="Enter text..."></adw-entry>
+                    <adw-entry value="With text" disabled></adw-entry>
+                </div>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwSpinButton</adw-label>
+                    <adw-spin-button value="5" min="0" max="10" step="1"></adw-spin-button>
+                </div>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwSwitch</adw-label>
+                    <adw-switch></adw-switch>
+                    <adw-switch active></adw-switch>
+                    <adw-switch disabled></adw-switch>
+                </div>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwCheckbox</adw-label>
+                    <adw-checkbox label="Option A"></adw-checkbox>
+                    <adw-checkbox label="Option B" checked></adw-checkbox>
+                </div>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwRadioButton</adw-label>
+                    <adw-radio-button label="Choice 1" name="showcase-radio" value="1"></adw-radio-button>
+                    <adw-radio-button label="Choice 2" name="showcase-radio" value="2" checked></adw-radio-button>
+                </div>
+            </section>
+
+            <!-- Content Display Category -->
+            <section class="widget-category">
+                <adw-label title-level="1">Content Display</adw-label>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwLabel</adw-label>
+                    <adw-label>Simple Label</adw-label><br>
+                    <adw-label title-level="3">Title Level 3 Label</adw-label><br>
+                    <adw-label body>Body text label.</adw-label><br>
+                    <adw-label caption>Caption text label.</adw-label><br>
+                    <adw-label link>Link style label.</adw-label><br>
+                    <adw-label disabled>Disabled Label</adw-label>
+                </div>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwIcon</adw-label>
+                    <adw-icon icon-name="actions/document-new-symbolic" alt="New Document"></adw-icon>
+                    <adw-icon icon-name="status/avatar-default-symbolic" style="font-size: 24px; color: var(--accent-color);"></adw-icon>
+                </div>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwAvatar</adw-label>
+                    <adw-avatar text="JD"></adw-avatar>
+                    <adw-avatar image-src="app-demo/static/img/default_avatar.png" size="48"></adw-avatar>
+                </div>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwStatusPage</adw-label>
+                    <adw-status-page title="No Mail" icon-name="status/mail-unread-symbolic">
+                        <adw-label slot="description">You have no new messages.</adw-label>
+                        <adw-button slot="actions" id="status-page-action-btn">Refresh</adw-button>
+                    </adw-status-page>
+                </div>
+            </section>
+
+            <!-- Layouts Category -->
+            <section class="widget-category">
+                <adw-label title-level="1">Layouts</adw-label>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwBox</adw-label>
+                    <adw-box orientation="horizontal" spacing="m" style="border:1px solid var(--border-color); padding: var(--spacing-s);">
+                        <adw-button>One</adw-button><adw-label>Two</adw-label><adw-entry placeholder="Three"></adw-entry>
+                    </adw-box>
+                    <adw-box orientation="vertical" spacing="s" style="border:1px solid var(--border-color); padding: var(--spacing-s); margin-top:var(--spacing-s);">
+                        <adw-button>Alpha</adw-button><adw-label>Beta</adw-label>
+                    </adw-box>
+                </div>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwBin</adw-label>
+                    <adw-bin style="width: 200px; height: 50px; border: 1px solid var(--border-color);">
+                        <adw-button>Centered Child</adw-button>
+                    </adw-bin>
+                </div>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwClamp</adw-label>
+                    <adw-clamp maximum-size="30ch" style="border:1px solid var(--border-color); padding:var(--spacing-s);">
+                        <adw-label body>This text is clamped and will not exceed 30 characters wide, making it suitable for long readable passages.</adw-label>
+                    </adw-clamp>
+                </div>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwWrapBox</adw-label>
+                    <adw-wrap-box spacing="s" line-spacing="m" style="border:1px solid var(--border-color); padding:var(--spacing-s);">
+                        <adw-button>Item 1</adw-button><adw-button>Item 2</adw-button><adw-button>Item 3</adw-button>
+                        <adw-button>Another Item 4</adw-button><adw-button>Item 5 is a bit longer</adw-button>
+                    </adw-wrap-box>
+                </div>
+                 <div class="widget-showcase">
+                    <adw-label title-level="2">AdwBreakpointBin</adw-label>
+                    <adw-breakpoint-bin default-child-name="mobile" style="border:1px solid var(--border-color); padding:var(--spacing-s); min-height: 80px;">
+                        <adw-label data-condition="0" data-name="mobile">Mobile View</adw-label>
+                        <adw-label data-condition="600" data-name="tablet">Tablet View</adw-label>
+                        <adw-label data-condition="900" data-name="desktop">Desktop View</adw-label>
+                    </adw-breakpoint-bin>
+                </div>
+            </section>
+
+            <!-- Rows & Lists Category -->
+            <section class="widget-category">
+                <adw-label title-level="1">Rows & Lists</adw-label>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwListBox & Rows</adw-label>
+                    <adw-list-box>
+                        <adw-action-row title="Action Row" subtitle="Click me" activatable id="showcase-action-row"></adw-action-row>
+                        <adw-entry-row title="Name" placeholder="Your name"></adw-entry-row>
+                        <adw-password-entry-row title="Password" placeholder="Secret"></adw-password-entry-row>
+                        <adw-expander-row title="Details" subtitle="Expand for more">
+                            <adw-label body style="padding: var(--spacing-m);">Hidden details revealed!</adw-label>
+                        </adw-expander-row>
+                        <adw-combo-row title="Option">
+                            <option slot="options" value="a">Alpha</option>
+                            <option slot="options" value="b" selected>Beta</option>
+                        </adw-combo-row>
+                        <adw-spin-row title="Count" min="1" max="5" value="2"></adw-spin-row>
+                        <adw-switch-row title="Enable Feature X"></adw-switch-row>
+                        <adw-button-row centered>
+                            <adw-button>Cancel</adw-button>
+                            <adw-button suggested>Confirm</adw-button>
+                        </adw-button-row>
+                    </adw-list-box>
+                    <adw-list-box flat>
+                        <adw-action-row title="Flat List Action Row"></adw-action-row>
+                    </adw-list-box>
+                </div>
+            </section>
+
+            <!-- Dialogs & Notifications Category -->
+            <section class="widget-category">
+                <adw-label title-level="1">Dialogs & Notifications</adw-label>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">Dialogs</adw-label>
+                    <adw-button id="show-alert-dialog">Show Alert Dialog</adw-button>
+                    <adw-alert-dialog id="demo-alert" heading="Alert!" body="This is an alert dialog.">
+                        <adw-button slot="choice" value="ok">OK</adw-button>
+                    </adw-alert-dialog>
+
+                    <adw-button id="show-about-dialog">Show About Dialog</adw-button>
+                    <adw-about-dialog id="demo-about" app-name="Showcase App" version="1.0" logo="app-demo/static/img/default_avatar.png" developer-name="AI Agent">
+                    </adw-about-dialog>
+
+                    <adw-button id="show-prefs-dialog">Show Preferences</adw-button>
+                    <adw-preferences-dialog id="demo-prefs" title="Settings">
+                        <adw-preferences-page name="general" title="General" icon-name="preferences/preferences-system-symbolic">
+                            <adw-preferences-group title="Appearance">
+                                <adw-action-row title="Theme" subtitle="System Default"></adw-action-row>
+                            </adw-preferences-group>
+                        </adw-preferences-page>
+                    </adw-preferences-dialog>
+
+                    <adw-button id="show-generic-dialog">Show Generic Dialog</adw-button>
+                    <adw-dialog id="demo-generic" title="Generic Dialog">
+                        <adw-label slot="content">This is a generic dialog with default button.</adw-label>
+                        <!-- No buttons provided, default should appear -->
+                    </adw-dialog>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwToast & AdwToastOverlay</adw-label>
+                    <adw-button id="show-toast-btn">Show Toast</adw-button>
+                    <adw-button id="show-toast-action-btn">Show Toast with Action</adw-button>
+                    <!-- AdwToast (data provider) and AdwToastOverlay are used in JS -->
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwBanner</adw-label>
+                    <adw-button id="show-banner-btn">Show Banner</adw-button>
+                    <div id="banner-container" style="margin-top: var(--spacing-s);"></div>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwBottomSheet</adw-label>
+                    <adw-button id="show-bottom-sheet-btn">Show Bottom Sheet</adw-button>
+                    <adw-bottom-sheet id="demo-bottom-sheet" title="Options Sheet">
+                        <adw-list-box slot="content" flat>
+                            <adw-action-row title="Option 1" activatable></adw-action-row>
+                            <adw-action-row title="Option 2" activatable></adw-action-row>
+                        </adw-list-box>
+                    </adw-bottom-sheet>
+                </div>
+            </section>
+
+            <!-- Views & Navigation Category -->
+            <section class="widget-category">
+                <adw-label title-level="1">Views & Navigation</adw-label>
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwHeaderBar & AdwWindowTitle</adw-label>
+                    <adw-header-bar>
+                        <adw-button slot="start" icon-name="actions/go-previous-symbolic" aria-label="Back" class="icon-only flat"></adw-button>
+                        <adw-window-title slot="title" title="Page Title" subtitle="Subtitle here"></adw-window-title>
+                        <adw-button slot="end" icon-name="actions/open-menu-symbolic" aria-label="Menu" class="icon-only flat"></adw-button>
+                    </adw-header-bar>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwViewSwitcher & Content Area</adw-label>
+                    <adw-view-switcher id="demo-view-switcher">
+                        <div view-name="viewA" view-title="Alpha"></div>
+                        <div view-name="viewB" view-title="Beta" data-view-icon="status/starred-symbolic"></div>
+                    </adw-view-switcher>
+                    <div id="demo-view-content" style="padding: var(--spacing-m); border: 1px solid var(--border-color); min-height: 50px;">Select a view</div>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwFlap</adw-label>
+                    <adw-button id="toggle-flap-btn">Toggle Flap</adw-button>
+                    <adw-flap id="demo-flap" style="border: 1px solid var(--border-color); min-height: 150px; margin-top: var(--spacing-s);">
+                        <adw-box slot="flap-content" style="padding:var(--spacing-m); background: var(--sidebar-bg-color);" min-width="180px">Flap Content</adw-box>
+                        <adw-box slot="main-content" style="padding:var(--spacing-m);">Main Content for Flap</adw-box>
+                    </adw-flap>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwToolbarView</adw-label>
+                    <adw-toolbar-view style="border: 1px solid var(--border-color); min-height: 200px;">
+                        <adw-header-bar slot="top-bar"><adw-window-title slot="title" title="Top Bar"></adw-window-title></adw-header-bar>
+                        <adw-box style="padding:var(--spacing-m); align-items:center; justify-content:center; flex-grow:1;">Toolbar Content</adw-box>
+                        <adw-header-bar slot="bottom-bar"><adw-window-title slot="title" title="Bottom Bar"></adw-window-title></adw-header-bar>
+                    </adw-toolbar-view>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwCarousel</adw-label>
+                    <adw-carousel show-nav-buttons style="min-height: 150px; border: 1px solid var(--border-color);">
+                        <div style="background:var(--theme-color-blue-1); display:flex; align-items:center; justify-content:center; height:100%;">Slide 1</div>
+                        <div style="background:var(--theme-color-green-1); display:flex; align-items:center; justify-content:center; height:100%;">Slide 2</div>
+                    </adw-carousel>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwNavigationSplitView</adw-label>
+                    <adw-navigation-split-view style="border: 1px solid var(--border-color); min-height: 200px;" show-sidebar>
+                         <adw-list-box slot="sidebar" style="min-width:180px; background:var(--sidebar-bg-color);">
+                            <adw-action-row title="Mail"></adw-action-row>
+                            <adw-action-row title="Calendar"></adw-action-row>
+                         </adw-list-box>
+                         <adw-box slot="content" style="padding:var(--spacing-m);">Detail Content Area</adw-box>
+                    </adw-navigation-split-view>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwOverlaySplitView</adw-label>
+                     <adw-overlay-split-view style="border: 1px solid var(--border-color); min-height: 200px;">
+                         <adw-list-box slot="sidebar" style="min-width:180px; background:var(--secondary-sidebar-bg-color);">
+                            <adw-action-row title="Filter Options"></adw-action-row>
+                         </adw-list-box>
+                         <adw-box slot="content" style="padding:var(--spacing-m);">Main Content for Overlay</adw-box>
+                    </adw-overlay-split-view>
+                </div>
+
+                <div class="widget-showcase">
+                    <adw-label title-level="2">AdwTabView</adw-label>
+                    <adw-tab-view style="border: 1px solid var(--border-color); min-height: 150px;">
+                        <adw-tab-page name="t1" title="Tab One" icon-name="actions/document-properties-symbolic">Content 1</adw-tab-page>
+                        <adw-tab-page name="t2" title="Tab Two" active>Content 2</adw-tab-page>
+                    </adw-tab-view>
+                </div>
+
+                <div class="widget-showcase">
+                     <adw-label title-level="2">AdwNavigationView (Conceptual)</adw-label>
+                     <adw-navigation-view id="demo-nav-view" style="border: 1px solid var(--border-color); min-height: 250px;">
+                         {/* JS will push initial page */}
+                     </adw-navigation-view>
+                     <adw-button id="nav-view-push-btn">Push New Page</adw-button>
+                </div>
+
+            </section>
+
+            <!-- Preferences Components (usually inside AdwPreferencesDialog) -->
+            <section class="widget-category">
+                <adw-label title-level="1">Preferences Components</adw-label>
+                 <div class="widget-showcase">
+                    <adw-label title-level="2">AdwPreferencesView, AdwPreferencesPage, AdwPreferencesGroup</adw-label>
+                    <adw-preferences-view>
+                        <adw-preferences-page title="General Settings" name="generalP" icon-name="preferences/preferences-system-symbolic">
+                            <adw-preferences-group title="User Details">
+                                <adw-entry-row title="Username"></adw-entry-row>
+                            </adw-preferences-group>
+                            <adw-preferences-group title="Notifications">
+                                <adw-switch-row title="Enable Notifications" subtitle="Allow apps to send notifications"></adw-switch-row>
+                            </adw-preferences-group>
+                        </adw-preferences-page>
+                    </adw-preferences-view>
+                </div>
+            </section>
+
+        </div> <!-- .main-content-area -->
+        <adw-toast-overlay id="showcase-toast-overlay"></adw-toast-overlay>
+    </adw-application-window>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!window.Adw) {
+            console.error("Adw object not found for showcase page.");
+            return;
+        }
+
+        const toastOverlay = document.getElementById('showcase-toast-overlay');
+
+        // Theme Toggle
+        document.getElementById('theme-toggle-btn')?.addEventListener('click', () => Adw.toggleTheme());
+
+        // Generic toast for button clicks (excluding specific triggers)
+        document.querySelectorAll('adw-button, adw-split-button, adw-toggle-button').forEach(btn => {
+            if (!btn.id?.includes('show-') && !btn.id?.includes('toggle-')) {
+                const actionType = btn.matches('adw-split-button') ? 'action-click' : 'click';
+                btn.addEventListener(actionType, (e) => {
+                    if (e.target.disabled) return;
+                    const label = e.target.getAttribute('aria-label') || e.target.actionText || e.target.textContent.trim() || "Button";
+                    if (toastOverlay) toastOverlay.addToast({ title: `${label} clicked` });
+                });
+            }
+        });
+
+        // Specific Widget Interactions
+        document.getElementById('showcase-action-row')?.addEventListener('click', () => {
+            if (toastOverlay) toastOverlay.addToast({ title: 'Action Row Activated!' });
+        });
+
+        document.getElementById('showcase-toggle-btn')?.addEventListener('toggled', (e) => {
+            if (toastOverlay) toastOverlay.addToast({ title: `Toggle button is ${e.detail.isActive ? 'ON' : 'OFF'}` });
+        });
+        document.getElementById('showcase-toggle-group')?.addEventListener('active-changed', (e) => {
+            if (toastOverlay) toastOverlay.addToast({ title: `Toggle group changed to: ${e.detail.value}` });
+        });
+
+        document.getElementById('status-page-action-btn')?.addEventListener('click', () => {
+            if (toastOverlay) toastOverlay.addToast({ title: 'Status page action clicked!' });
+        });
+
+        // Dialogs
+        const alertDialog = document.getElementById('demo-alert');
+        document.getElementById('show-alert-dialog')?.addEventListener('click', () => alertDialog?.open());
+        alertDialog?.addEventListener('response', (e) => {
+            if (toastOverlay) toastOverlay.addToast({ title: `Alert Dialog response: ${e.detail.value}` });
+        });
+
+        const aboutDialog = document.getElementById('demo-about');
+        document.getElementById('show-about-dialog')?.addEventListener('click', () => aboutDialog?.open());
+
+        const prefsDialog = document.getElementById('demo-prefs');
+        document.getElementById('show-prefs-dialog')?.addEventListener('click', () => prefsDialog?.open());
+
+        const genericDialog = document.getElementById('demo-generic');
+        document.getElementById('show-generic-dialog')?.addEventListener('click', () => genericDialog?.open());
+
+
+        // Toast & Banner
+        document.getElementById('show-toast-btn')?.addEventListener('click', () => {
+            if (toastOverlay) toastOverlay.addToast({ title: 'Simple Toast from Showcase!' });
+        });
+        document.getElementById('show-toast-action-btn')?.addEventListener('click', () => {
+            if (toastOverlay) toastOverlay.addToast({
+                title: 'Toast with an Action!',
+                buttonLabel: "Undo",
+                onAction: () => {
+                    if (toastOverlay) toastOverlay.addToast({ title: "Undo action triggered!"});
+                }
+            });
+        });
+
+        const bannerContainer = document.getElementById('banner-container');
+        document.getElementById('show-banner-btn')?.addEventListener('click', () => {
+            if (bannerContainer) {
+                bannerContainer.innerHTML = ''; // Clear previous
+                // Note: Adw.createBanner returns the element, AdwBanner is the WC class.
+                // We need to append the created banner.
+                const banner = Adw.createBanner("This is a sample banner.", {
+                    type: 'info',
+                    buttonLabel: "More Info",
+                    dismissible: true
+                });
+                banner.addEventListener('button-clicked', () => {
+                     if (toastOverlay) toastOverlay.addToast({ title: "Banner button clicked!"});
+                });
+                 banner.addEventListener('dismissed', () => {
+                     if (toastOverlay) toastOverlay.addToast({ title: "Banner dismissed!"});
+                });
+                bannerContainer.appendChild(banner);
+                // To make it visible (if createAdwBanner doesn't make it visible by default)
+                requestAnimationFrame(() => banner.classList.add('visible'));
+            }
+        });
+
+        // Bottom Sheet
+        const bottomSheet = document.getElementById('demo-bottom-sheet');
+        document.getElementById('show-bottom-sheet-btn')?.addEventListener('click', () => bottomSheet?.open());
+        bottomSheet?.addEventListener('closed', () => {
+             if (toastOverlay) toastOverlay.addToast({title: "Bottom sheet closed."});
+        });
+
+
+        // ViewSwitcher
+        const demoViewSwitcher = document.getElementById('demo-view-switcher');
+        const demoViewContent = document.getElementById('demo-view-content');
+        if (demoViewSwitcher && demoViewContent) {
+            const updateContent = (viewName) => demoViewContent.textContent = `Content for ${viewName}`;
+            demoViewSwitcher.addEventListener('view-changed', (e) => {
+                updateContent(e.detail.viewName);
+                if (toastOverlay) toastOverlay.addToast({ title: `Switched to ${e.detail.viewName}` });
+            });
+            if(demoViewSwitcher.getAttribute('active-view')) { // Initial content
+                 updateContent(demoViewSwitcher.getAttribute('active-view'));
+            } else { // Default to first view if active-view not set
+                const firstView = demoViewSwitcher.querySelector('[view-name]');
+                if(firstView) updateContent(firstView.getAttribute('view-name'));
+            }
+        }
+
+        // Flap
+        const demoFlap = document.getElementById('demo-flap');
+        document.getElementById('toggle-flap-btn')?.addEventListener('click', () => demoFlap?.toggleFlap());
+
+        // NavigationView
+        const demoNavView = document.getElementById('demo-nav-view');
+        if (demoNavView) {
+            let pageCounter = 1;
+            const createPageContent = (name) => {
+                const pageDiv = document.createElement('div');
+                pageDiv.style.padding = 'var(--spacing-l)';
+                pageDiv.innerHTML = `<adw-label title-level="2">Welcome to ${name}</adw-label>
+                                     <p>This is content for ${name}.</p>
+                                     ${name !== 'Page 1' ? '<adw-button class="nav-pop-btn">Go Back</adw-button>' : ''}`;
+
+                pageDiv.querySelector('.nav-pop-btn')?.addEventListener('click', () => demoNavView.pop());
+                return pageDiv;
+            };
+
+            const initialPage = { name: 'Page 1', element: createPageContent('Page 1'), header: { title: 'Page 1' }};
+            demoNavView.push(initialPage);
+
+            document.getElementById('nav-view-push-btn')?.addEventListener('click', () => {
+                pageCounter++;
+                const pageName = `Page ${pageCounter}`;
+                demoNavView.push({ name: pageName, element: createPageContent(pageName), header: { title: pageName } });
+            });
+             demoNavView.addEventListener('pushed', (e) => {
+                if (toastOverlay) toastOverlay.addToast({title: `Pushed: ${e.detail.pageName}`});
+            });
+            demoNavView.addEventListener('popped', (e) => {
+                if (toastOverlay) toastOverlay.addToast({title: `Popped: ${e.detail.pageName}`});
+            });
+        }
+
+        console.log("Adwaita Web Full Showcase Initialized!");
+    });
+    </script>
+</body>
+</html>

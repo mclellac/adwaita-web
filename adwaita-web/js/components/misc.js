@@ -80,6 +80,133 @@ export class AdwLabel extends HTMLElement {
     }
 }
 
+export class AdwToastOverlay extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        // Assuming Adw.config.cssPath is available globally when this component is defined and used.
+        // This path should point to the main adwaita-web.css file.
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
+
+        this._container = document.createElement('div');
+        this._container.classList.add('adw-toast-overlay-container');
+
+        this.shadowRoot.append(styleLink, this._container);
+        this._toasts = []; // Array to keep track of active toasts and their timers
+    }
+
+    /**
+     * Adds a toast to the overlay.
+     * @param {object|HTMLElement} toastOptionsOrElement - Either an options object for createAdwToast,
+     *                                                     or a pre-created toast HTMLElement.
+     */
+    addToast(toastOptionsOrElement) {
+        let toastElement;
+        let toastData;
+
+        if (toastOptionsOrElement instanceof HTMLElement && toastOptionsOrElement.classList.contains('adw-toast')) {
+            toastElement = toastOptionsOrElement;
+            toastData = toastElement._adwToastData || {}; // Use existing data or default
+        } else if (typeof toastOptionsOrElement === 'object' && toastOptionsOrElement !== null) {
+            // Ensure Adw.createToast is available. If Adw is not fully loaded, this might be an issue.
+            // This assumes components.js has populated Adw.createToast by the time addToast is called.
+            const factory = (typeof Adw !== 'undefined' && Adw.createToast) ? Adw.createToast : createAdwToast;
+            toastElement = factory(toastOptionsOrElement.title, toastOptionsOrElement);
+            toastData = toastElement._adwToastData; // Data is set by createAdwToast
+        } else {
+            console.error('AdwToastOverlay: Invalid argument for addToast. Expected options object or toast element.', toastOptionsOrElement);
+            return;
+        }
+
+        // Default timeout handling from _adwToastData
+        const timeoutSeconds = toastData.timeout !== undefined ? toastData.timeout : 4; // Default to 4 seconds if not specified
+
+        // Append to DOM
+        this._container.appendChild(toastElement);
+        this._toasts.push(toastElement);
+
+        // Force reflow for animation
+        void toastElement.offsetWidth;
+        toastElement.classList.add('visible');
+
+        // Handle auto-dismissal if timeout is set
+        if (timeoutSeconds > 0) {
+            toastData.dismissTimerId = setTimeout(() => {
+                this._dismissToast(toastElement);
+            }, timeoutSeconds * 1000);
+        }
+
+        // Listen for explicit dismiss requests from the toast's close button
+        toastElement.addEventListener('dismiss-requested', () => {
+            this._dismissToast(toastElement);
+        }, { once: true });
+
+        // Listen for action button clicks to potentially keep toast open longer or handle specific logic
+        const actionButton = toastElement.querySelector('.adw-toast-action-button');
+        if (actionButton) {
+            actionButton.addEventListener('click', () => {
+                // If there's an action, and a timeout was set, clear it.
+                // The toast will now only be dismissed by its close button or programmatically.
+                if (toastData.dismissTimerId) {
+                    clearTimeout(toastData.dismissTimerId);
+                    toastData.dismissTimerId = null;
+                    toastData.timeout = 0; // Mark as indefinite timeout after action
+                }
+                // The 'button-clicked' event from the toast element itself will bubble up
+                // and can be handled by the component that initiated the toast.
+            });
+        }
+
+        this.dispatchEvent(new CustomEvent('toast-added', { detail: { toastElement } }));
+        return toastElement;
+    }
+
+    _dismissToast(toastElement) {
+        if (!toastElement || !this._toasts.includes(toastElement)) {
+            return; // Already dismissed or not found
+        }
+
+        const toastData = toastElement._adwToastData || {};
+        if (toastData.dismissTimerId) {
+            clearTimeout(toastData.dismissTimerId);
+            toastData.dismissTimerId = null;
+        }
+
+        toastElement.classList.remove('visible');
+        toastElement.classList.add('dismissing'); // For CSS animation out
+
+        const handleTransitionEnd = () => {
+            toastElement.removeEventListener('transitionend', handleTransitionEnd);
+            if (toastElement.parentNode) {
+                toastElement.remove();
+            }
+            this._toasts = this._toasts.filter(t => t !== toastElement);
+            this.dispatchEvent(new CustomEvent('toast-dismissed', { detail: { toastElement } }));
+        };
+
+        // Check if transitions are supported and used for .adw-toast.dismissing
+        const style = getComputedStyle(toastElement);
+        const transitionDuration = parseFloat(style.transitionDuration) * 1000;
+
+        if (transitionDuration > 0) {
+            toastElement.addEventListener('transitionend', handleTransitionEnd, { once: true });
+        } else {
+            // No transition, remove immediately
+            handleTransitionEnd();
+        }
+    }
+
+    /**
+     * Removes all toasts currently displayed in the overlay.
+     */
+    clearAllToasts() {
+        // Create a copy of the array to iterate over, as _dismissToast modifies it
+        [...this._toasts].forEach(toast => this._dismissToast(toast));
+    }
+}
+
 /**
  * Creates an Adwaita-style avatar.
  */
