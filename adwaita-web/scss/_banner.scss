@@ -5,11 +5,11 @@
   // Banners are typically placed at the top of a view or window.
   // They are not part of a listbox structure usually.
   padding: var(--spacing-s) var(--spacing-m); // Slightly less vertical padding than rows
-  background-color: var(--banner-bg-color, var(--secondary-bg-color)); // A distinct but not overly loud background
-  color: var(--banner-fg-color, var(--primary-fg-color));
+  background-color: var(--banner-bg-color); // Use theme-defined default
+  color: var(--banner-fg-color); // Use theme-defined default
   // No border-radius by default, as it usually spans full width.
   // border-radius: var(--border-radius-default);
-  border-bottom: var(--border-width) solid var(--borders-color); // Common to have a bottom separator
+  border-bottom: var(--border-width) solid var(--banner-border-color); // Use theme-defined default
   // margin-bottom: var(--spacing-m); // Margin is context-dependent, parent should handle normally
   box-sizing: border-box; // Ensure padding doesn't affect width calculation for fixed positioning
 
@@ -65,39 +65,57 @@
   }
 
   // Specific styling for the dismiss button in a banner
-  .adw-banner-dismiss-button.adw-button.circular.flat {
-    // Inherits .circular and .flat styles from _button.scss
-    // Adjust color if needed to ensure good contrast against banner background,
-    // though default flat button color (currentcolor) should work if banner-fg-color is set right.
-    // color: var(--banner-secondary-fg-color, var(--secondary-fg-color)); // Example if a dimmer color is desired
-
-    // Ensure it's aligned nicely with the title, especially if title wraps to multiple lines.
-    // Default align-items: center on .adw-banner should handle vertical alignment.
-
-    // Adjust size/padding if the default circular button padding isn't perfect for banners.
-    // For example, if it needs to be slightly smaller or have less padding:
-    // padding: var(--spacing-xs); // e.g., 6px if default var(--spacing-s) is too large
-    // .adw-icon {
-    //   font-size: 0.9em; // If the icon itself needs to be slightly smaller
-    // }
-
-    // Ensure it's visually distinct from the main action button, if present.
-    // The flat circular style already does this well.
+  .adw-banner-dismiss-button.adw-button.flat {
+    // This is now a text button, styled as flat.
+    // Ensure good contrast and alignment.
+    // Flex properties on .adw-banner should handle alignment.
+    // Default flat button styling from _button.scss will apply.
+    // We can add specific overrides here if needed, e.g., for margin or color.
+    // margin-left: var(--spacing-s); // Add some space if gap on parent isn't enough
+    // color: var(--banner-secondary-fg-color, var(--secondary-fg-color)); // If a different color is needed for dismiss
   }
+
+  // Styling for the main action button, if present and needing distinction
+  .adw-banner-button.adw-button {
+      // This is the optional action button, not the dismiss button.
+      // AdwButton's own styles apply. If it needs specific banner context styling:
+      // Example: make it less prominent than a normal button if the banner is informational
+      // &.flat {
+      //   background-color: transparent; // Ensure truly flat if it's a flat action button
+      // }
+  }
+
 
   // If a banner needs to be themed for specific contexts (e.g. error, warning)
   // this can be done by adding classes to the AdwBanner element itself.
-  // Example:
-  // &.error {
-  //   background-color: var(--error-bg-color);
-  //   color: var(--error-fg-color);
-  //   border-color: var(--error-border-color);
-  //   .adw-banner-title { color: var(--error-fg-color); }
-  //   .adw-banner-button { /* Adjust button for error context if needed */ }
-  // }
-  // However, the core AdwBanner is neutral.
+  // Default/Info banner uses the main --banner-bg-color, --banner-fg-color, --banner-border-color
+  // The AdwBanner JS adds .adw-banner-info if type is 'info' or it's the default.
+  // So, explicit .adw-banner-info class styling might not be needed if defaults are set correctly.
+
+  &.adw-banner-error {
+    background-color: var(--banner-error-bg-color);
+    color: var(--banner-error-fg-color);
+    border-bottom-color: var(--banner-error-border-color);
+
+    // Ensure buttons within error banners have appropriate contrast or style
+    .adw-banner-button, // Main action button
+    .adw-banner-dismiss-button { // Dismiss button
+      // For flat buttons on a dark error background, text might need to be light.
+      // AdwButton's .flat style typically uses `color: var(--accent-color)` or `currentColor`.
+      // If `currentColor` (banner-error-fg-color) is light, this should be fine.
+      // If specific adjustments are needed:
+      // color: var(--banner-error-fg-color); // Ensure button text matches banner's fg
+      // &:hover { background-color: rgba(255,255,255,0.1); } // Example hover for light text on dark bg
+    }
+  }
+  // Add .adw-banner-warning, .adw-banner-success if those types are supported and variables defined
 }
 
-// Variables that should be defined (e.g., in _variables.scss):
-// --banner-bg-color: (e.g. var(--secondary-bg-color) or a custom banner color)
-// --banner-fg-color: (e.g. var(--primary-fg-color))
+// Variables that should be defined in _variables.scss (within theme mixins):
+// --banner-bg-color (for default/info)
+// --banner-fg-color (for default/info)
+// --banner-border-color (for default/info)
+// --banner-error-bg-color
+// --banner-error-fg-color
+// --banner-error-border-color
+// etc. for other types

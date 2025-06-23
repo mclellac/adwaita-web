@@ -264,8 +264,9 @@
 
                 <div class="widget-showcase">
                     <adw-label title-level="2">AdwBanner</adw-label>
-                    <adw-button id="show-banner-btn">Show Banner</adw-button>
-                    <div id="banner-container" style="margin-top: var(--spacing-s);"></div>
+                    <adw-button id="show-info-banner-btn">Show Info Banner</adw-button>
+                    <adw-button id="show-error-banner-btn">Show Error Banner</adw-button>
+                    <div id="banner-container" style="margin-top: var(--spacing-s);"></div> {/* This container is no longer strictly necessary for fixed banners */}
                 </div>
 
                 <div class="widget-showcase">
@@ -459,27 +460,38 @@
             });
         });
 
-        const bannerContainer = document.getElementById('banner-container');
-        document.getElementById('show-banner-btn')?.addEventListener('click', () => {
-            if (bannerContainer) {
-                bannerContainer.innerHTML = ''; // Clear previous
-                // Note: Adw.createBanner returns the element, AdwBanner is the WC class.
-                // We need to append the created banner.
-                const banner = Adw.createBanner("This is a sample banner.", {
-                    type: 'info',
-                    buttonLabel: "More Info",
-                    dismissible: true
-                });
-                banner.addEventListener('button-clicked', () => {
-                     if (toastOverlay) toastOverlay.addToast({ title: "Banner button clicked!"});
-                });
-                 banner.addEventListener('dismissed', () => {
-                     if (toastOverlay) toastOverlay.addToast({ title: "Banner dismissed!"});
-                });
-                bannerContainer.appendChild(banner);
-                // To make it visible (if createAdwBanner doesn't make it visible by default)
-                requestAnimationFrame(() => banner.classList.add('visible'));
+        // Banner logic for showcase page
+        // const bannerContainer = document.getElementById('banner-container'); // Not strictly needed for fixed banners
+        const showBannerInShowcase = (type, message, hasAction = false) => {
+            // Remove any existing banner from body to avoid overlap
+            const existingBanner = document.querySelector('body > .adw-banner');
+            if (existingBanner) existingBanner.remove();
+
+            const bannerOptions = { type: type, dismissible: true };
+            if (hasAction) {
+                bannerOptions.buttonLabel = "More Info"; // Standard action button label for this page
             }
+            const banner = Adw.createBanner(message, bannerOptions);
+
+            if (hasAction) {
+                banner.addEventListener('button-clicked', () => {
+                    if (toastOverlay) toastOverlay.addToast({ title: `Showcase Banner action (${type}) clicked!`});
+                });
+            }
+            banner.addEventListener('dismissed', () => {
+                if (toastOverlay) toastOverlay.addToast({ title: `Showcase Banner (${type}) dismissed!`});
+            });
+
+            document.body.appendChild(banner); // Append to body for fixed positioning
+            requestAnimationFrame(() => banner.classList.add('visible'));
+        };
+
+        document.getElementById('show-info-banner-btn')?.addEventListener('click', () => {
+            showBannerInShowcase('info', "This is a sample informational banner with an action.", true);
+        });
+
+        document.getElementById('show-error-banner-btn')?.addEventListener('click', () => {
+            showBannerInShowcase('error', "This is a critical error banner! Please take action.");
         });
 
         // Bottom Sheet

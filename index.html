@@ -389,7 +389,8 @@ if (accentPickerBox) {
 
                 <adw-label title-level="3" style="margin-top:var(--spacing-m);">Banner & Toast</adw-label>
                 <adw-box orientation="horizontal" spacing="s" id="banner-toast-trigger-container">
-                    <adw-button id="trigger-banner">Show Banner</adw-button>
+                    <adw-button id="trigger-info-banner">Show Info Banner</adw-button>
+                    <adw-button id="trigger-error-banner">Show Error Banner</adw-button>
                     <adw-button id="trigger-toast">Show Toast</adw-button>
                 </adw-box>
                 <div id="banner-container-main" style="margin-top: var(--spacing-s);"></div>
@@ -787,28 +788,52 @@ if (accentPickerBox) {
         document.getElementById('trigger-preferences-dialog')?.addEventListener('click', () => prefsDialog?.open());
 
         // --- Banner & Toast Triggers (from misc section) ---
-        const bannerContainerMain = document.getElementById('banner-container-main');
-        document.getElementById('trigger-banner')?.addEventListener('click', () => {
-            if (bannerContainerMain) {
-                // Clear previous banners in this container
-                while(bannerContainerMain.firstChild) bannerContainerMain.removeChild(bannerContainerMain.firstChild);
+        const bannerContainerMain = document.getElementById('banner-container-main'); // This container is not strictly needed for fixed banners
 
-                const banner = Adw.createBanner("This is an example banner from index.html.", {
-                    type: 'info',
-                    // buttonLabel: "Action", // Optional: for button in banner
-                    dismissible: true
-                });
-                // banner.addEventListener('button-clicked', () => mainToastOverlayRef.addToast({title: "Banner action!"}));
-                banner.addEventListener('dismissed', () => mainToastOverlayRef.addToast({title: "index.html banner dismissed."}));
+        const showBanner = (type, message, hasAction = false) => {
+            // Banners are fixed, so they don't need to be in bannerContainerMain.
+            // For demo purposes, we might still clear it if we were putting multiple banners there,
+            // but since only one fixed banner is shown at a time (by replacing), this is less critical.
+            // However, to avoid old banner DOM elements lingering if not dismissed:
+            const existingBanner = document.querySelector('body > .adw-banner'); // Find any existing banner directly in body
+            if (existingBanner) existingBanner.remove();
 
-                bannerContainerMain.appendChild(banner);
-                // Ensure it becomes visible, createBanner creates it hidden by default unless 'revealed' is passed.
-                // Forcing visibility after append for consistent behavior.
-                requestAnimationFrame(() => { banner.classList.add('visible'); });
+
+            const bannerOptions = {
+                type: type,
+                dismissible: true
+            };
+            if (hasAction) {
+                bannerOptions.buttonLabel = "Action";
             }
+
+            const banner = Adw.createBanner(message, bannerOptions);
+
+            if (hasAction) {
+                banner.addEventListener('button-clicked', () => {
+                    if(mainToastOverlayRef) mainToastOverlayRef.addToast({title: `Banner action from ${type} banner!`});
+                });
+            }
+            banner.addEventListener('dismissed', () => {
+                if(mainToastOverlayRef) mainToastOverlayRef.addToast({title: `index.html ${type} banner dismissed.`});
+            });
+
+            // Append banner to body for global fixed positioning to work best
+            document.body.appendChild(banner);
+            // Ensure it becomes visible
+            requestAnimationFrame(() => { banner.classList.add('visible'); });
+        };
+
+        document.getElementById('trigger-info-banner')?.addEventListener('click', () => {
+            showBanner('info', "This is an example informational banner.", true);
         });
 
-        const mainToastOverlay = document.getElementById('main-toast-overlay');
+        document.getElementById('trigger-error-banner')?.addEventListener('click', () => {
+            showBanner('error', "This is an example error banner! Something went wrong.");
+        });
+
+
+        const mainToastOverlay = document.getElementById('main-toast-overlay'); // mainToastOverlayRef is already defined above
         document.getElementById('trigger-toast')?.addEventListener('click', () => {
             if (mainToastOverlay) {
                 // Adw.createToast just creates the element. AdwToastOverlay's addToast will use it.
