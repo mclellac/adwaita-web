@@ -58,6 +58,27 @@
   // e.g., in a search bar with an attached button. This would be handled by a wrapper or specific context.
 }
 
+// Variant for entries used within rows (e.g., AdwEntryRow)
+.adw-entry.row-input {
+  border-width: 0 0 1px 0; // Only bottom border
+  border-radius: 0; // No border radius for a clean line
+  background-color: transparent;
+  box-shadow: none; // Remove inset shadow
+  padding-left: 0; // Row itself will provide horizontal padding
+  padding-right: 0;
+  // padding-top and padding-bottom might need slight adjustment if default from .adw-entry is too much/little for row context
+
+  &:focus,
+  &:focus-within {
+    border-color: var(--_entry-focus-border-color); // Keep accent focus border
+    box-shadow: none; // No outer focus ring for row-input, just the accent border
+  }
+
+  // If the row itself has a background, this transparent entry will blend.
+  // If the row is on a card, the card provides the background.
+}
+
+
 // Variables needed in _variables.scss (ensure they exist, from original file analysis they mostly do):
 // var(--entry-inset-shadow-light) -> e.g., rgba(0,0,0,0.03)
 // var(--entry-inset-shadow-dark) -> e.g., rgba(0,0,0,0.1) or similar for dark
