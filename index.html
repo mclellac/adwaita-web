@@ -832,22 +832,22 @@ if (accentPickerBox) {
             showBanner('error', "This is an example error banner! Something went wrong.");
         });
 
-
-        const mainToastOverlay = document.getElementById('main-toast-overlay'); // mainToastOverlayRef is already defined above
+        // Ensure mainToastOverlayRef is used, which is defined earlier in the script.
+        // const mainToastOverlay = document.getElementById('main-toast-overlay'); // This re-declaration was the issue.
         document.getElementById('trigger-toast')?.addEventListener('click', () => {
-            if (mainToastOverlay) {
+            if (mainToastOverlayRef) { // Use the existing mainToastOverlayRef
                 // Adw.createToast just creates the element. AdwToastOverlay's addToast will use it.
                 // The onAction is now handled internally by createAdwToast if the factory is used by overlay.
                 // Or, if addToast takes options directly:
-                mainToastOverlay.addToast({
+                mainToastOverlayRef.addToast({
                     title: "This is an example toast!",
                     buttonLabel: "Undo", // Adw.createToast uses buttonLabel, not actionName for the button text
                     onAction: () => {
-                        if(mainToastOverlay) mainToastOverlay.addToast({ title: "Undo clicked!" });
+                        if(mainToastOverlayRef) mainToastOverlayRef.addToast({ title: "Undo clicked!" });
                     }
                 });
             } else {
-                console.warn("Main toast overlay not found. Creating toast without displaying.");
+                console.warn("Main toast overlay (mainToastOverlayRef) not found. Creating toast without displaying.");
                 // Fallback to old behavior if overlay not found, though it won't show.
                  Adw.createToast("This is an example toast! (Overlay missing)", { buttonLabel: "Undo", onAction: () => Adw.createToast("Undo clicked! (Overlay missing)") });
             }

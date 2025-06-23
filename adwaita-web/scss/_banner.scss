@@ -44,44 +44,45 @@
   }
 
   .adw-banner-title {
-    flex-grow: 1; // Title takes available space
+    flex-grow: 1;
     font-size: var(--font-size-base);
-    font-weight: normal; // Banners usually have normal weight text
-    // Text alignment: Libadwaita centers if enough space, else left-aligns.
-    // Default to left-align for simplicity in CSS. Centering would require more complex checks or JS.
-    text-align: left;
-    min-width: 0; // For ellipsis if title is very long
+    font-weight: normal;
+    text-align: center; // Center the title text
+    min-width: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    // The flex layout (justify-content: space-between) on .adw-banner
+    // will give this title the available space between start and the button group.
+    // Adding a small margin to ensure it doesn't touch button group if space is very tight.
+    margin-right: var(--spacing-s); // Only if there's a button group.
+    &:only-child { // If title is the only child (no button group)
+        margin-right: 0; // No margin needed
+    }
   }
 
-  .adw-banner-button.adw-button {
-    // Styling for the AdwButton component when used inside a banner
-    flex-shrink: 0; // Button should not shrink
-    // AdwButton's own styles (default, .suggested, .flat) will apply.
-    // Ensure it aligns well with the text.
-    // Example: if button is too tall, adjust its internal padding or line-height.
+  .adw-banner-button-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s); // Space between buttons in the group
+    flex-shrink: 0; // Prevent button group from shrinking
   }
 
-  // Common styling for ALL adw-button elements (action or dismiss) inside any banner
-  // This ensures they have a distinct background from the banner itself.
-  .adw-button {
+  // Styling for buttons inside the .adw-banner-button-group
+  .adw-banner-button-group > .adw-button {
     background-color: var(--banner-button-bg-color);
     color: var(--banner-button-fg-color);
-    border: none; // Ensure no border for a cleaner look like in the example image
-    // Padding and other button base styles come from _button.scss
+    border: none;
 
     &:hover {
       background-color: var(--banner-button-hover-bg-color);
     }
-    &:active, &.active { // Include .active for toggle buttons if they were used here
+    &:active, &.active {
       background-color: var(--banner-button-active-bg-color);
     }
 
-    // If the button is also flat (like our dismiss button), these styles will override flat's transparent bg.
-    &.flat {
-        background-color: var(--banner-button-bg-color); // Explicitly override flat's transparent bg
+    &.flat { // Specific override for flat buttons in the group
+        background-color: var(--banner-button-bg-color);
         color: var(--banner-button-fg-color);
         &:hover {
           background-color: var(--banner-button-hover-bg-color);
@@ -98,11 +99,11 @@
     color: var(--banner-error-fg-color);
     border-bottom-color: var(--banner-error-border-color);
 
-    // Override for buttons inside an ERROR banner
-    .adw-button { // Targets both .adw-banner-button and .adw-banner-dismiss-button within an error banner
+    // Override for buttons inside an ERROR banner's button group
+    .adw-banner-button-group > .adw-button {
       background-color: var(--banner-error-button-bg-color);
       color: var(--banner-error-button-fg-color);
-      border: none; // Ensure no border here too
+      border: none;
 
       &:hover {
         background-color: var(--banner-error-button-hover-bg-color);
@@ -111,9 +112,8 @@
         background-color: var(--banner-error-button-active-bg-color);
       }
 
-      // If the button is also flat (like our dismiss button), these styles will override flat's transparent bg.
-      &.flat {
-          background-color: var(--banner-error-button-bg-color); // Explicitly override flat's transparent bg
+      &.flat { // Specific override for flat buttons in the error group
+          background-color: var(--banner-error-button-bg-color);
           color: var(--banner-error-button-fg-color);
           &:hover {
             background-color: var(--banner-error-button-hover-bg-color);
@@ -124,8 +124,8 @@
       }
     }
   }
-  // Add .adw-banner-info for specific info button styling if different from default .adw-button in banner
-  // Add .adw-banner-warning, .adw-banner-success if those types are supported and variables defined
+  // Add .adw-banner-info for specific info button styling if needed
+  // Add .adw-banner-warning, .adw-banner-success if those types are supported
 }
 
 // Variables that should be defined in _variables.scss (within theme mixins):
