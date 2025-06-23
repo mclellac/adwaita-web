@@ -101,4 +101,59 @@ fi
 # Reduce verbosity for successful operations, keep errors detailed.
 # Removed many "echo" statements for successful steps, focusing on summarizing completion or errors.
 
+echo "--- Copying Built Assets to app-demo/static ---"
+
+APP_DEMO_STATIC_DIR="app-demo/static"
+
+# Define target directories in app-demo/static
+APP_DEMO_CSS_DIR="${APP_DEMO_STATIC_DIR}/css"
+APP_DEMO_JS_DIR="${APP_DEMO_STATIC_DIR}/js"
+APP_DEMO_DATA_DIR="${APP_DEMO_STATIC_DIR}/data"
+APP_DEMO_FONTS_DIR="${APP_DEMO_STATIC_DIR}/fonts"
+
+# Create target directories in app-demo/static if they don't exist
+mkdir -p "${APP_DEMO_CSS_DIR}"
+mkdir -p "${APP_DEMO_JS_DIR}"
+mkdir -p "${APP_DEMO_DATA_DIR}" # Will contain 'icons/symbolic'
+mkdir -p "${APP_DEMO_FONTS_DIR}" # Will contain 'mono' and 'sans'
+
+# Copy CSS
+if [ -f "${CSS_OUTPUT_FILE}" ]; then
+    cp "${CSS_OUTPUT_FILE}" "${APP_DEMO_CSS_DIR}/adwaita-web.css"
+    echo "Copied ${CSS_OUTPUT_FILE} to ${APP_DEMO_CSS_DIR}/adwaita-web.css"
+else
+    echo "WARNING: Built CSS file ${CSS_OUTPUT_FILE} not found. Skipping copy to app-demo."
+fi
+
+# Copy JS (entire JS_OUTPUT_DIR which includes components.js and components/ subdirectory)
+if [ -d "${JS_OUTPUT_DIR}" ] && [ "$(ls -A ${JS_OUTPUT_DIR})" ]; then
+    # Ensure the components subdirectory exists in app-demo as well
+    mkdir -p "${APP_DEMO_JS_DIR}/components"
+    cp -r "${JS_OUTPUT_DIR}/." "${APP_DEMO_JS_DIR}/"
+    echo "Copied JS files from ${JS_OUTPUT_DIR} to ${APP_DEMO_JS_DIR}"
+else
+    echo "WARNING: Built JS directory ${JS_OUTPUT_DIR} not found or empty. Skipping copy to app-demo."
+fi
+
+# Copy Data (entire DATA_OUTPUT_DIR which includes icons/symbolic structure)
+if [ -d "${DATA_OUTPUT_DIR}" ] && [ "$(ls -A ${DATA_OUTPUT_DIR})" ]; then
+    # Ensure the icons/symbolic subdirectory exists in app-demo as well
+    mkdir -p "${APP_DEMO_DATA_DIR}/icons/symbolic" # Re-ensure, though DATA_OUTPUT_DIR cp should handle it
+    cp -r "${DATA_OUTPUT_DIR}/." "${APP_DEMO_DATA_DIR}/"
+    echo "Copied data files from ${DATA_OUTPUT_DIR} to ${APP_DEMO_DATA_DIR}"
+else
+    echo "INFO: Built data directory ${DATA_OUTPUT_DIR} not found or empty. Skipping copy to app-demo."
+fi
+
+# Copy Fonts (entire FONTS_OUTPUT_DIR which includes mono/ and sans/ structure)
+if [ -d "${FONTS_OUTPUT_DIR}" ] && [ "$(ls -A ${FONTS_OUTPUT_DIR})" ]; then
+    # Ensure mono and sans subdirectories exist in app-demo as well
+    mkdir -p "${APP_DEMO_FONTS_DIR}/mono"
+    mkdir -p "${APP_DEMO_FONTS_DIR}/sans"
+    cp -r "${FONTS_OUTPUT_DIR}/." "${APP_DEMO_FONTS_DIR}/"
+    echo "Copied font files from ${FONTS_OUTPUT_DIR} to ${APP_DEMO_FONTS_DIR}"
+else
+    echo "INFO: Built fonts directory ${FONTS_OUTPUT_DIR} not found or empty. Skipping copy to app-demo."
+fi
+
 echo "--- Adwaita-Web Build Script Finished ---"

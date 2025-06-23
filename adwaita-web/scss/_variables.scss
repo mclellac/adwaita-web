@@ -375,6 +375,10 @@
   --banner-error-button-bg-color: rgba(0,0,0,0.08); // Subtle darker overlay on error bg
   --banner-error-button-hover-bg-color: rgba(0,0,0,0.12);
   --banner-error-button-active-bg-color: rgba(0,0,0,0.16);
+
+  // Disabled Button States
+  --button-disabled-fg-light: var(--disabled-fg-color); // Uses existing --disabled-fg-color
+  --button-disabled-bg-light: rgba(0,0,0,0.04);       // Subtle background for disabled buttons
 }
 
 @mixin dark-theme {
@@ -526,6 +530,10 @@
   --banner-error-button-bg-color: rgba(255,255,255,0.08); // Subtle lighter overlay on error bg
   --banner-error-button-hover-bg-color: rgba(255,255,255,0.12);
   --banner-error-button-active-bg-color: rgba(255,255,255,0.16);
+
+  // Disabled Button States
+  --button-disabled-fg-dark: var(--disabled-fg-color); // Uses existing --disabled-fg-color
+  --button-disabled-bg-dark: rgba(255,255,255,0.06);   // Subtle background for disabled buttons
 }
 
 // General Helper Variables (not theme-specific)

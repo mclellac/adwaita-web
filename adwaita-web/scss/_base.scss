@@ -1,6 +1,57 @@
 // scss/_base.scss
 @use "variables"; // Make sure variables are available
 
+// Font face definitions
+// Adwaita Sans
+@font-face {
+  font-family: 'Adwaita Sans';
+  src: url('../fonts/sans/AdwaitaSans-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; // Improves perceived performance
+}
+
+@font-face {
+  font-family: 'Adwaita Sans';
+  src: url('../fonts/sans/AdwaitaSans-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+// Adwaita Mono
+@font-face {
+  font-family: 'Adwaita Mono';
+  src: url('../fonts/mono/AdwaitaMono-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Adwaita Mono';
+  src: url('../fonts/mono/AdwaitaMono-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Adwaita Mono';
+  src: url('../fonts/mono/AdwaitaMono-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Adwaita Mono';
+  src: url('../fonts/mono/AdwaitaMono-BoldItalic.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
 // Apply a natural box layout model to all elements
 *, *::before, *::after {
   box-sizing: border-box;
