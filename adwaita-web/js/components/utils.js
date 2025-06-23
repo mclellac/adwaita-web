@@ -212,16 +212,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 const ALLOWED_PROTOCOLS = ['http:', 'https:', 'mailto:', 'tel:', 'ftp:', './', '../', '/', '#'];
-    } catch (e) {
-        console.warn("Could not save theme preference to localStorage:", e);
-    }
-}
-
-// Global event listener
-window.addEventListener("DOMContentLoaded", loadSavedTheme);
-
-
-const ALLOWED_PROTOCOLS = ['http:', 'https:', 'mailto:', 'tel:', 'ftp:', './', '../', '/', '#'];
 /**
  * Sanitizes an href value to prevent javascript: URLs and other unsafe protocols.
  * @param {string} url The URL to sanitize.
