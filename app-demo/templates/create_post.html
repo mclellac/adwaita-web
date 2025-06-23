@@ -73,8 +73,7 @@
 
                 <adw-action-row title="{{ form.content.label.text }}" subtitle="Enter your post content below.">
                     <div slot="suffix" style="width:100%;">
-                        {# Make textarea visible and style it like an adw-entry #}
-                        {{ form.content(id=form.content.id or 'content_field', class='adw-entry', style='width: 100%; min-height: 200px; resize: vertical;', rows='10') }}
+                        {{ form.content(id=form.content.id or 'content_field', class='adw-entry', style='width: 100%; min-height: 200px; resize: vertical; box-sizing: border-box;', rows='10') }}
                         {% if form.content.errors %}
                             <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
                                 {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
