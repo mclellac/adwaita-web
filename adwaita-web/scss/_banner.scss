@@ -11,6 +11,14 @@
   // border-radius: var(--border-radius-default);
   border-bottom: var(--border-width) solid var(--borders-color); // Common to have a bottom separator
   // margin-bottom: var(--spacing-m); // Margin is context-dependent, parent should handle normally
+  box-sizing: border-box; // Ensure padding doesn't affect width calculation for fixed positioning
+
+  // Positioning: Fixed at the top, full width, overlaying content
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0; // Ensures full width
+  z-index: var(--z-index-banner, 1000); // Ensure it's above most other content
 
   display: flex;
   justify-content: space-between; // Pushes title and button apart
@@ -19,13 +27,14 @@
 
   // Animation for reveal/hide
   opacity: 0;
-  transform: translateY(calc(-100% - var(--border-width))); // Slide up out of view
-  transition: opacity var(--animation-duration-short) var(--animation-ease-out-sine),
-              transform var(--animation-duration-short) var(--animation-ease-out-sine);
+  // Transform from slightly above its final position to slide down into view
+  transform: translateY(calc(-100% - var(--border-width, 1px) - 10px)); // Start further up for a slide-in effect
+  transition: opacity var(--animation-duration-medium) var(--animation-ease-out-cubic),
+              transform var(--animation-duration-medium) var(--animation-ease-out-cubic);
   // Ensure it's not clickable when hidden
   visibility: hidden;
   pointer-events: none;
-  position: relative; // For z-index or absolute positioning if needed by parent context (rare for banner)
+  // position: relative; // No longer relative, now fixed
 
   &.visible {
     opacity: 1;

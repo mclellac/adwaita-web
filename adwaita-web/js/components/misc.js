@@ -175,7 +175,7 @@ export class AdwToastOverlay extends HTMLElement {
         }
 
         toastElement.classList.remove('visible');
-        toastElement.classList.add('dismissing'); // For CSS animation out
+        toastElement.classList.add('hiding'); // Use 'hiding' class as defined in SCSS
 
         const handleTransitionEnd = () => {
             toastElement.removeEventListener('transitionend', handleTransitionEnd);
@@ -186,12 +186,27 @@ export class AdwToastOverlay extends HTMLElement {
             this.dispatchEvent(new CustomEvent('toast-dismissed', { detail: { toastElement } }));
         };
 
-        // Check if transitions are supported and used for .adw-toast.dismissing
+        // Check if transitions are supported and used for .adw-toast.hiding
+        // Ensure the transition event is properly handled
         const style = getComputedStyle(toastElement);
-        const transitionDuration = parseFloat(style.transitionDuration) * 1000;
+        // Sum of transition-duration and transition-delay
+        const transitionTotalDuration = style.transitionDuration.split(',').map(parseFloat).reduce((acc, val) => acc + val, 0) +
+                                      style.transitionDelay.split(',').map(parseFloat).reduce((acc, val) => acc + val, 0);
 
-        if (transitionDuration > 0) {
-            toastElement.addEventListener('transitionend', handleTransitionEnd, { once: true });
+        if (transitionTotalDuration > 0) {
+            // Fallback timer if transitionend doesn't fire (e.g. element removed from DOM prematurely by other means)
+            const fallbackTimeout = setTimeout(() => {
+                console.warn('AdwToast: transitionend fallback triggered for dismissal.');
+                handleTransitionEnd();
+            }, transitionTotalDuration * 1000 + 50); // Add a small buffer
+
+            toastElement.addEventListener('transitionend', (event) => {
+                // Ensure we are listening to the transition on the toast element itself, not its children
+                if (event.target === toastElement) {
+                    clearTimeout(fallbackTimeout);
+                    handleTransitionEnd();
+                }
+            }, { once: true });
         } else {
             // No transition, remove immediately
             handleTransitionEnd();
@@ -472,10 +487,10 @@ export function createAdwToast(title, options = {}) {
 
     // Always add a close button per Libadwaita spec for AdwToast
     const closeButton = createAdwButton('', {
-        icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>',
+        iconName: 'ui/window-close-symbolic', // Consistent icon name
         flat: true,
         isCircular: true,
-        ariaLabel: 'Dismiss toast', // TODO: Localize this
+        ariaLabel: 'Dismiss', // Standard accessibility label for close buttons
         onClick: () => {
             // This event signals intent; the overlay will handle actual removal and 'dismissed' event.
             toastElement.dispatchEvent(new CustomEvent('dismiss-requested', { bubbles: true, composed: true }));

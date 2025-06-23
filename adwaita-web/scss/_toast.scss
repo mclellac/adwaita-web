@@ -34,9 +34,10 @@
   // State when hiding (class added by AdwToastOverlay before removal)
   &.hiding {
     opacity: 0;
-    transform: translateY(50%) scale(0.9); // Animate downwards and fade
+    transform: translateY(100%) scale(0.9); // Animate downwards (same direction as appear) and fade
     // Transition duration for hiding can be slightly different if needed
-    transition-duration: var(--animation-duration-xs);
+    transition-duration: var(--animation-duration-xs); // Use a shorter duration for hiding
+    transition-timing-function: var(--animation-ease-in-quad); // Ease-in for hiding
   }
 
   .adw-toast-content-wrapper {

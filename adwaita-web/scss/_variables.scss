@@ -547,6 +547,18 @@
   // General border color fallbacks (should ideally use specific ones like --borders-color)
   --border-color-light: rgba(0, 0, 0, 0.12);
   --border-color-dark: rgba(255, 255, 255, 0.07);
+
+  // Z-index Scale (CSS Custom Properties)
+  // These are intended for global stacking context management.
+  --z-index-banner: 1000;
+  --z-index-flap: 100; // Flaps are usually part of the page flow or within specific containers
+  --z-index-popover: 1200; // Popovers like menus, tooltips should be high
+  --z-index-toast-overlay: 1500; // Toasts should be very high
+  --z-index-bottom-sheet-backdrop: 1080;
+  --z-index-bottom-sheet: 1081;
+  --z-index-dialog-backdrop: 1100; // Dialog backdrops
+  --z-index-dialog: 1101; // Dialogs themselves
+  --z-index-tooltip: 2000; // Tooltips generally highest
 }
 
 
