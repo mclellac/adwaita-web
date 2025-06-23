@@ -636,11 +636,11 @@ def _update_post_relations(post_instance, form, db_session):
                                     img = img.crop((crop_x, crop_y, crop_x + crop_width, crop_y + crop_height))
                                     _app.logger.info(f"Image cropped. New size: {img.size}")
                                 else:
-                                            _app.logger.warning("Crop width or height is zero, negative, or invalid. Skipping crop.")
-                                            flash("Invalid crop dimensions provided. Photo processed without cropping.", 'warning')
-                                    except ValueError:
-                                        _app.logger.warning(f"Could not parse one or more crop coordinates to numbers. Values: x='{crop_x_str}', y='{crop_y_str}', w='{crop_width_str}', h='{crop_height_str}'. Skipping crop.")
-                                        flash("Invalid crop coordinates provided. Photo processed without cropping.", 'warning')
+                                    _app.logger.warning("Crop width or height is zero, negative, or invalid. Skipping crop.")
+                                    flash("Invalid crop dimensions provided. Photo processed without cropping.", 'warning')
+                            except ValueError:
+                                _app.logger.warning(f"Could not parse one or more crop coordinates to numbers. Values: x='{crop_x_str}', y='{crop_y_str}', w='{crop_width_str}', h='{crop_height_str}'. Skipping crop.")
+                                flash("Invalid crop coordinates provided. Photo processed without cropping.", 'warning')
                         else:
                             _app.logger.info("Crop coordinates not provided or incomplete. Processing image without cropping.")
 
