@@ -70,13 +70,29 @@ export class AdwDialog extends HTMLElement {
     static get observedAttributes() { return ['title', 'close-on-backdrop-click', 'open']; }
     constructor() {
         super();
-        this._dialogElement = null; // The main dialog div
-        this._backdropElement = null; // The backdrop div
+        this.attachShadow({ mode: 'open' });
+        // It's good practice to include stylesheets in the shadow DOM
+        // if the component relies on global styles that might not pierce.
+        // However, for dialogs, often global styles for backdrop/positioning are fine,
+        // and internal structure styling is encapsulated or uses CSS parts.
+        // For now, let's assume Adw.config.cssPath provides necessary styles,
+        // or specific dialog styles are self-contained / correctly namespaced.
+        // If AdwDialog needs its own specific styles isolated:
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
+        this.shadowRoot.appendChild(styleLink);
+
+        this._dialogElement = null; // The main dialog div (will be inside shadow DOM)
+        this._backdropElement = null; // The backdrop div (will be appended to body)
         this._isOpen = false; // Internal state
         this._isOpeningOrClosing = false; // Re-entrancy guard for open/close
     }
+
     connectedCallback() {
-        // DOM is built on first open.
+        // DOM elements (_dialogElement, _backdropElement) are built on first open,
+        // or if attributes change requiring a rebuild.
+        // If the 'open' attribute is present on connection, trigger open.
         if (this.hasAttribute('open') && !this._isOpen) {
             this.open();
         }
@@ -117,10 +133,18 @@ export class AdwDialog extends HTMLElement {
 
     _buildDialogDOM() {
         // This method (re)creates the dialog DOM elements.
-        // It doesn't append to body here, open() method does that.
+        // The main dialog structure is added to the shadowRoot.
+        // The backdrop is created here but appended to body by open().
+
+        // Clear previous shadow DOM content except for the initial <link> stylesheet
+        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
+            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        }
+
         this._backdropElement = document.createElement('div');
         this._backdropElement.classList.add('adw-dialog-backdrop');
 
+        // _dialogElement is the main container *inside* the shadow DOM
         this._dialogElement = document.createElement('div');
         this._dialogElement.classList.add('adw-dialog');
         this._dialogElement.setAttribute('role', 'dialog');
@@ -141,10 +165,8 @@ export class AdwDialog extends HTMLElement {
         const contentEl = document.createElement('div');
         contentEl.classList.add('adw-dialog-content');
         const contentSlotElement = document.createElement('slot');
-        contentSlotElement.name = 'content';
-        // Default content if no slot="content" is provided by the user
-        const defaultContentSlotElement = document.createElement('slot');
-        // Any children of <adw-dialog> not assigned to "title" or "buttons" will go here.
+        contentSlotElement.name = 'content'; // For <... slot="content">
+        const defaultContentSlotElement = document.createElement('slot'); // For default slotted children
         contentEl.appendChild(contentSlotElement);
         contentEl.appendChild(defaultContentSlotElement);
         this._dialogElement.appendChild(contentEl);
@@ -153,14 +175,22 @@ export class AdwDialog extends HTMLElement {
         const buttonsContainer = document.createElement('div');
         buttonsContainer.classList.add('adw-dialog-buttons');
         const buttonsSlotElement = document.createElement('slot');
-        buttonsSlotElement.name = 'buttons';
+        buttonsSlotElement.name = 'buttons'; // For <... slot="buttons">
         buttonsContainer.appendChild(buttonsSlotElement);
         this._dialogElement.appendChild(buttonsContainer);
-        console.log("[AdwDialog._buildDialogDOM] AdwDialog: Created and appended buttonsContainer with slot 'buttons'.");
 
-        buttonsSlotElement.addEventListener('slotchange', () => {
-            console.log("[AdwDialog._buildDialogDOM] AdwDialog: slotchange event fired for 'buttons' slot. Assigned nodes:", buttonsSlotElement.assignedNodes());
+        this.shadowRoot.appendChild(this._dialogElement); // Add the dialog structure to shadow DOM
+
+        console.log("[AdwDialog._buildDialogDOM] AdwDialog: Created and appended buttonsContainer with slot 'buttons' to shadow DOM.");
+
+        buttonsSlotElement.addEventListener('slotchange', (e) => {
+            const assignedNodes = buttonsSlotElement.assignedNodes({ flatten: true });
+            console.log("[AdwDialog._buildDialogDOM] AdwDialog: slotchange event fired for 'buttons' slot. Assigned nodes:", assignedNodes);
+            this._ensureDefaultButton(buttonsContainer, buttonsSlotElement);
         });
+
+        // Initial check for default button after setup
+        this._ensureDefaultButton(buttonsContainer, buttonsSlotElement);
 
         // Event listeners for backdrop click and Escape key
         this._backdropElement.addEventListener('click', (event) => {
@@ -168,14 +198,41 @@ export class AdwDialog extends HTMLElement {
                 this.close();
             }
         });
+        // Keydown listener should be on the dialog element itself or perhaps the host for broader capture
         this._dialogElement.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') this.close();
             if (e.key === 'Tab') this._trapFocus(e);
         });
     }
 
+    _ensureDefaultButton(buttonsContainer, buttonsSlotElement) {
+        // Check if a default button has already been added by this method
+        const existingDefaultButton = buttonsContainer.querySelector('.adw-dialog-default-button');
+
+        const assignedNodes = buttonsSlotElement.assignedNodes({ flatten: true });
+        const hasUserProvidedButtons = assignedNodes.some(node =>
+            node.nodeType === Node.ELEMENT_NODE &&
+            (node.tagName.toLowerCase() === 'adw-button' || node.tagName.toLowerCase() === 'button')
+        );
+
+        if (!hasUserProvidedButtons && !existingDefaultButton) {
+            console.log("[AdwDialog._ensureDefaultButton] No user-provided buttons found, adding default 'Close' button.");
+            const defaultButton = createAdwButton('Close', { suggested: true });
+            defaultButton.classList.add('adw-dialog-default-button'); // Mark it for potential removal/check
+            defaultButton.addEventListener('click', () => this.close());
+            buttonsContainer.appendChild(defaultButton); // Append directly to the container in shadow DOM
+        } else if (hasUserProvidedButtons && existingDefaultButton) {
+            // User has added buttons, so remove our default one if it exists
+            console.log("[AdwDialog._ensureDefaultButton] User-provided buttons found, removing default 'Close' button.");
+            existingDefaultButton.remove();
+        }
+    }
+
     _trapFocus(event) {
-        const focusableElements = Array.from(this._dialogElement.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(el => el.offsetParent !== null);
+        // Focus trapping needs to consider shadow DOM.
+        // Query selectable elements within the shadow-hosted _dialogElement.
+        const focusableElements = Array.from(this._dialogElement.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+                                     .filter(el => el.offsetParent !== null && !el.disabled);
         if (focusableElements.length === 0) { event.preventDefault(); return; }
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
@@ -225,6 +282,13 @@ export class AdwDialog extends HTMLElement {
         }
         this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }));
         this._isOpeningOrClosing = false;
+
+        // After everything is set up and before it's fully displayed, check for buttons.
+        // This needs to be done after the initial slotting has occurred.
+        // The slotchange event is good, but for an initial check, right after build + append is okay.
+        // We need access to buttonsSlotElement, which is inside _buildDialogDOM.
+        // Let's perform this check at the end of _buildDialogDOM or make buttonsSlotElement accessible.
+        // Modifying _buildDialogDOM to do this check and append is cleaner.
     }
 
     close() {

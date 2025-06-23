@@ -73,6 +73,7 @@ const AdwProperties = { // Renamed to avoid conflict with global Adw during cons
     createToast: misc.createAdwToast,
     createBanner: misc.createAdwBanner, // Renamed from createAdwBanner in original global
     createIcon: misc.createAdwIcon, // Add Icon factory
+    // No factory for AdwToastOverlay, it's meant to be used declaratively or via getElementById
     // Controls
     createSwitch: controls.createAdwSwitch,
     createCheckbox: controls.createAdwCheckbox,
@@ -124,7 +125,8 @@ const AdwProperties = { // Renamed to avoid conflict with global Adw during cons
     Spinner: misc.AdwSpinner,
     StatusPage: misc.AdwStatusPage,
     ProgressBar: misc.AdwProgressBar,
-    Toast: misc.AdwToast, // Web component might not be necessary if always imperative
+    Toast: misc.AdwToast, // Data provider Web Component
+    ToastOverlay: misc.AdwToastOverlay, // The actual overlay manager
     Banner: misc.AdwBanner, // Web component might not be necessary
     Icon: misc.AdwIcon, // Add Icon Web Component Class
     PreferencesView: misc.AdwPreferencesView,
@@ -204,7 +206,8 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-spinner')) customElements.define('adw-spinner', window.Adw.Spinner);
     if (!customElements.get('adw-status-page')) customElements.define('adw-status-page', window.Adw.StatusPage);
     if (!customElements.get('adw-progress-bar')) customElements.define('adw-progress-bar', window.Adw.ProgressBar);
-    if (!customElements.get('adw-toast')) customElements.define('adw-toast', window.Adw.Toast);
+    if (!customElements.get('adw-toast')) customElements.define('adw-toast', window.Adw.Toast); // Data provider
+    if (!customElements.get('adw-toast-overlay')) customElements.define('adw-toast-overlay', window.Adw.ToastOverlay); // Manager
     if (!customElements.get('adw-banner')) customElements.define('adw-banner', window.Adw.Banner);
     if (!customElements.get('adw-preferences-view')) customElements.define('adw-preferences-view', window.Adw.PreferencesView);
     if (!customElements.get('adw-preferences-page')) customElements.define('adw-preferences-page', window.Adw.PreferencesPage);

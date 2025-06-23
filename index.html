@@ -265,8 +265,8 @@ if (accentPickerBox) {
                 <adw-label title-level="2">Links</adw-label>
                 <adw-box orientation="vertical" spacing="s">
                     <adw-label is-body>Standard HTML links should inherit Adwaita styling:</adw-label>
-                    <a href="javascript:void(0);" onclick="Adw.createToast('Standard link clicked!', {timeout:1500})">This is a standard link</a>
-                    <adw-label is-body style="margin-top: var(--spacing-s);">A link within a sentence <a href="javascript:void(0);" onclick="Adw.createToast('Inline link clicked!', {timeout:1500})">like this</a> should also be styled.</adw-label>
+                    <a href="javascript:void(0);" onclick="mainToastOverlayRef && mainToastOverlayRef.addToast({ title: 'Standard link clicked!', timeout: 1.5 })">This is a standard link</a>
+                    <adw-label is-body style="margin-top: var(--spacing-s);">A link within a sentence <a href="javascript:void(0);" onclick="mainToastOverlayRef && mainToastOverlayRef.addToast({ title: 'Inline link clicked!', timeout: 1.5 })">like this</a> should also be styled.</adw-label>
                     <adw-label is-body style="margin-top: var(--spacing-s);">Disabled link (via pointer-events and style):</adw-label>
                     <a href="javascript:void(0);" style="pointer-events: none; color: var(--disabled-fg-color); text-decoration: none; cursor: default;">This is a disabled link</a>
                 </adw-box>
@@ -334,7 +334,7 @@ if (accentPickerBox) {
                 </adw-alert-dialog>
 
                 <adw-about-dialog id="about-dialog-example" app-name="Adwaita Web" version="0.1.0"
-                    logo="build/img/default_avatar.png"
+                    logo="app-demo/static/img/default_avatar.png"
                     developer-name="Jules the AI Agent"
                     copyright="© 2024 The Adwaita Web Authors"
                     comments="A demonstration of Adwaita styling for the web."
@@ -692,57 +692,92 @@ if (accentPickerBox) {
         }
 
         // --- General Button Toasts (for quick feedback) ---
+        // Ensure mainToastOverlay is defined before this block
+        const mainToastOverlayRef = document.getElementById('main-toast-overlay');
+
         document.querySelectorAll('.widget-showcase adw-button').forEach(btn => {
-            if (!btn.id?.includes('trigger')) { // Avoid dialog/banner triggers for this generic toast
+            if (!btn.id?.includes('trigger') && !btn.closest('#accent-color-picker-box')) { // Avoid dialog/banner/accent triggers for this generic toast
                 btn.addEventListener('click', (e) => {
                     if (e.target.disabled) return;
                     let label = e.target.getAttribute('aria-label') || e.target.textContent.trim() || e.target.iconName || "Button";
-                    Adw.createToast(`${label} clicked`, { timeout: 1500 });
+                    if (mainToastOverlayRef) {
+                        mainToastOverlayRef.addToast({ title: `${label} clicked`, timeout: 1.5 }); // timeout in seconds
+                    } else {
+                        console.warn("mainToastOverlayRef not found for generic button toast.");
+                    }
                 });
             }
         });
 
         // --- Controls ---
-        document.getElementById('chk-1')?.addEventListener('change', (e) => Adw.createToast(`Checkbox is ${e.target.checked ? 'checked' : 'unchecked'}`));
-        document.getElementById('switch-1')?.addEventListener('change', (e) => Adw.createToast(`Switch is ${e.target.active ? 'on' : 'off'}`));
+        document.getElementById('chk-1')?.addEventListener('change', (e) => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: `Checkbox is ${e.target.checked ? 'checked' : 'unchecked'}` });
+        });
+        document.getElementById('switch-1')?.addEventListener('change', (e) => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: `Switch is ${e.target.active ? 'on' : 'off'}` });
+        });
 
         document.querySelectorAll('adw-radio-button[name="my-radio-group"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
-                if (e.target.checked) Adw.createToast(`Radio selected: ${e.target.value}`);
+                if (e.target.checked && mainToastOverlayRef) mainToastOverlayRef.addToast({ title: `Radio selected: ${e.target.value}` });
             });
         });
 
         const spinBtn1 = document.getElementById('spin-btn-1');
-        spinBtn1?.addEventListener('value-changed', (e) => Adw.createToast(`SpinButton value: ${e.detail.value}`, { timeout: 1000 }));
+        spinBtn1?.addEventListener('value-changed', (e) => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: `SpinButton value: ${e.detail.value}`, timeout: 1 });
+        });
 
         const splitBtn1 = document.getElementById('split-btn-1');
-        splitBtn1?.addEventListener('action-click', () => Adw.createToast('SplitButton 1: Main action clicked!'));
-        splitBtn1?.addEventListener('dropdown-click', () => Adw.createToast('SplitButton 1: Dropdown clicked! (Menu not implemented in demo)'));
+        splitBtn1?.addEventListener('action-click', () => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: 'SplitButton 1: Main action clicked!'});
+        });
+        splitBtn1?.addEventListener('dropdown-click', () => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: 'SplitButton 1: Dropdown clicked! (Menu not implemented in demo)'});
+        });
 
         const splitBtn2 = document.getElementById('split-btn-2');
-        splitBtn2?.addEventListener('action-click', () => Adw.createToast('SplitButton 2 (Save): Main action clicked!'));
-        splitBtn2?.addEventListener('dropdown-click', () => Adw.createToast('SplitButton 2 (Save): Dropdown clicked!'));
+        splitBtn2?.addEventListener('action-click', () => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: 'SplitButton 2 (Save): Main action clicked!'});
+        });
+        splitBtn2?.addEventListener('dropdown-click', () => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: 'SplitButton 2 (Save): Dropdown clicked!'});
+        });
 
         const toggleBtn1 = document.getElementById('toggle-btn-1');
-        toggleBtn1?.addEventListener('toggled', (e) => Adw.createToast(`Toggle '${e.target.label}' is ${e.detail.isActive ? 'active' : 'inactive'}`));
+        toggleBtn1?.addEventListener('toggled', (e) => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: `Toggle '${e.target.label}' is ${e.detail.isActive ? 'active' : 'inactive'}`});
+        });
         const toggleBtn2 = document.getElementById('toggle-btn-2');
-        toggleBtn2?.addEventListener('toggled', (e) => Adw.createToast(`Play toggle is ${e.detail.isActive ? 'active' : 'inactive'}`));
+        toggleBtn2?.addEventListener('toggled', (e) => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: `Play toggle is ${e.detail.isActive ? 'active' : 'inactive'}`});
+        });
 
         const toggleGroup1 = document.getElementById('toggle-group-1');
-        toggleGroup1?.addEventListener('active-changed', (e) => Adw.createToast(`ToggleGroup active: ${e.detail.value}`));
+        toggleGroup1?.addEventListener('active-changed', (e) => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: `ToggleGroup active: ${e.detail.value}`});
+        });
 
         // --- Rows ---
-        document.getElementById('simple-action-row')?.addEventListener('click', () => Adw.createToast("Simple Action Row clicked!"));
+        document.getElementById('simple-action-row')?.addEventListener('click', () => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: "Simple Action Row clicked!"});
+        });
         const expanderRow1 = document.getElementById('expander-row-1');
-        expanderRow1?.addEventListener('toggled', (e) => Adw.createToast(`Expander '${e.target.getAttribute('title')}' is ${e.detail.expanded ? 'expanded' : 'collapsed'}`));
+        expanderRow1?.addEventListener('toggled', (e) => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: `Expander '${e.target.getAttribute('title')}' is ${e.detail.expanded ? 'expanded' : 'collapsed'}`});
+        });
 
         const comboRow1 = document.getElementById('combo-row-1');
-        comboRow1?.addEventListener('change', (e) => Adw.createToast(`ComboRow selection: ${e.detail.value}`));
+        comboRow1?.addEventListener('change', (e) => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: `ComboRow selection: ${e.detail.value}`});
+        });
 
         // --- Dialog Triggers ---
         const alertDialog = document.getElementById('alert-dialog-example');
         document.getElementById('trigger-alert-dialog')?.addEventListener('click', () => alertDialog?.open());
-        alertDialog?.addEventListener('response', (e) => Adw.createToast(`Alert response: ${e.detail.value}`));
+        alertDialog?.addEventListener('response', (e) => {
+            if (mainToastOverlayRef) mainToastOverlayRef.addToast({ title: `Alert response: ${e.detail.value}`});
+        });
 
         const aboutDialog = document.getElementById('about-dialog-example');
         document.getElementById('trigger-about-dialog')?.addEventListener('click', () => aboutDialog?.open());
@@ -755,9 +790,21 @@ if (accentPickerBox) {
         const bannerContainerMain = document.getElementById('banner-container-main');
         document.getElementById('trigger-banner')?.addEventListener('click', () => {
             if (bannerContainerMain) {
-                 // Clear previous banners in this container
+                // Clear previous banners in this container
                 while(bannerContainerMain.firstChild) bannerContainerMain.removeChild(bannerContainerMain.firstChild);
-                Adw.createBanner("This is an example banner.", { type: 'info', container: bannerContainerMain });
+
+                const banner = Adw.createBanner("This is an example banner from index.html.", {
+                    type: 'info',
+                    // buttonLabel: "Action", // Optional: for button in banner
+                    dismissible: true
+                });
+                // banner.addEventListener('button-clicked', () => mainToastOverlayRef.addToast({title: "Banner action!"}));
+                banner.addEventListener('dismissed', () => mainToastOverlayRef.addToast({title: "index.html banner dismissed."}));
+
+                bannerContainerMain.appendChild(banner);
+                // Ensure it becomes visible, createBanner creates it hidden by default unless 'revealed' is passed.
+                // Forcing visibility after append for consistent behavior.
+                requestAnimationFrame(() => { banner.classList.add('visible'); });
             }
         });
 
