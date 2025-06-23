@@ -293,9 +293,9 @@ if (accentPickerBox) {
                         <adw-label is-body style="padding: var(--spacing-m);">This section is open by default.</adw-label>
                     </adw-expander-row>
                     <adw-combo-row title="Select Option" id="combo-row-1">
-                        <option value="1">Option One</option>
-                        <option value="2" selected>Option Two</option>
-                        <option value="3">Option Three</option>
+                        <option slot="options" value="1">Option One</option>
+                        <option slot="options" value="2" selected>Option Two</option>
+                        <option slot="options" value="3">Option Three</option>
                     </adw-combo-row>
                     <adw-spin-row title="Adjust Value" min="0" max="20" value="10" step="2"></adw-spin-row>
                     <adw-button-row centered>
@@ -348,8 +348,8 @@ if (accentPickerBox) {
                         <adw-preferences-group title="Appearance">
                             <adw-action-row title="Theme" subtitle="System Default"></adw-action-row>
                             <adw-combo-row title="Accent Color">
-                                <option value="blue">Blue</option>
-                                <option value="green">Green</option>
+                                <option slot="options" value="blue">Blue</option>
+                                <option slot="options" value="green">Green</option>
                             </adw-combo-row>
                         </adw-preferences-group>
                     </adw-preferences-page>
@@ -616,6 +616,7 @@ if (accentPickerBox) {
 
             <div style="height: 200px;"></div> {/* Extra space at bottom */}
         </div>
+        <adw-toast-overlay id="main-toast-overlay"></adw-toast-overlay>
     </adw-application-window>
 
     <script>
@@ -759,8 +760,25 @@ if (accentPickerBox) {
                 Adw.createBanner("This is an example banner.", { type: 'info', container: bannerContainerMain });
             }
         });
+
+        const mainToastOverlay = document.getElementById('main-toast-overlay');
         document.getElementById('trigger-toast')?.addEventListener('click', () => {
-            Adw.createToast("This is an example toast!", { actionName: "Undo", onAction: () => Adw.createToast("Undo clicked!") });
+            if (mainToastOverlay) {
+                // Adw.createToast just creates the element. AdwToastOverlay's addToast will use it.
+                // The onAction is now handled internally by createAdwToast if the factory is used by overlay.
+                // Or, if addToast takes options directly:
+                mainToastOverlay.addToast({
+                    title: "This is an example toast!",
+                    buttonLabel: "Undo", // Adw.createToast uses buttonLabel, not actionName for the button text
+                    onAction: () => {
+                        if(mainToastOverlay) mainToastOverlay.addToast({ title: "Undo clicked!" });
+                    }
+                });
+            } else {
+                console.warn("Main toast overlay not found. Creating toast without displaying.");
+                // Fallback to old behavior if overlay not found, though it won't show.
+                 Adw.createToast("This is an example toast! (Overlay missing)", { buttonLabel: "Undo", onAction: () => Adw.createToast("Undo clicked! (Overlay missing)") });
+            }
         });
 
         // --- Flap Toggle ---
