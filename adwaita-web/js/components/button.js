@@ -22,21 +22,34 @@ export function createAdwButton(text, options = {}) {
   const opts = options || {};
   const button = document.createElement("adw-button");
 
+  // Set ARIA attributes FIRST, as subsequent attribute settings (e.g. icon-name)
+  // might trigger AdwButton's attributeChangedCallback and an early _render call.
+  for (const key in opts) {
+    if (key.startsWith('aria-')) {
+      let attrName = key;
+      // Normalize common camelCase ARIA properties to kebab-case for attributes
+      if (key === 'ariaLabel') attrName = 'aria-label';
+      else if (key === 'ariaLabelledby') attrName = 'aria-labelledby';
+      else if (key === 'ariaDescribedby') attrName = 'aria-describedby';
+      // Add more normalizations if other aria-* properties are expected in camelCase
+      if (opts[key] !== null && opts[key] !== undefined) {
+        button.setAttribute(attrName, opts[key]);
+      }
+    }
+  }
+
   if (text) {
     button.textContent = text;
   }
 
+  // Set other attributes
   if (opts.href) {
-    // The AdwButton component itself will handle sanitization via attributeChangedCallback and _render
     button.setAttribute("href", opts.href);
   }
-
+  // Important: Check opts.disabled for adding listener, but always set attribute if present.
+  // The AdwButton component will handle its disabled state internally.
   if (opts.disabled) {
     button.setAttribute("disabled", "");
-  }
-
-  if (opts.onClick && !opts.disabled) {
-    button.addEventListener("click", opts.onClick);
   }
 
   if (opts.suggested) {
@@ -51,14 +64,13 @@ export function createAdwButton(text, options = {}) {
   if (opts.active) {
     button.setAttribute("active", "");
   }
-  if (opts.isCircular) { // Renamed to 'circular' for consistency with attribute
+  if (opts.isCircular) {
     button.setAttribute("circular", "");
   }
 
-  // Icon handling: AdwButton component handles 'icon-name' and 'icon' attributes
   if (opts.iconName) {
     button.setAttribute("icon-name", opts.iconName);
-  } else if (opts.icon) { // For deprecated 'icon' option
+  } else if (opts.icon) {
     button.setAttribute("icon", opts.icon);
   }
 
@@ -90,13 +102,24 @@ export function createAdwButton(text, options = {}) {
   }
 
   // Pass through 'type' attribute if provided in options
+
   if (opts.type) {
     button.setAttribute("type", opts.type);
   }
-
-  // Pass through 'appearance' attribute if provided in options
   if (opts.appearance) {
     button.setAttribute("appearance", opts.appearance);
+  }
+
+  // Add click listener last, after disabled state is potentially set.
+  // The AdwButton component itself should manage preventing clicks when disabled.
+  // This listener is for convenience if the factory user wants a quick handler
+  // on the host element, though interaction should ideally be with the component's state.
+  if (typeof opts.onClick === 'function') {
+    button.addEventListener("click", (e) => {
+        // Check the component's actual disabled state before firing
+        if (button.hasAttribute('disabled')) return;
+        opts.onClick(e);
+    });
   }
 
   return button;
@@ -283,11 +306,12 @@ export class AdwButton extends HTMLElement {
             internalButton.classList.add(appearance);
         }
 
-        // Warning check: uses hostAriaLabel and hostTitle which were read from this (host) attributes.
+        // Warning check: Re-read attributes directly in the condition for maximum freshness,
+        // though the previous change to the factory order is the more critical fix.
         if (isEffectivelyIconOnly &&
-            !hostAriaLabel &&
-            !this.getAttribute('aria-labelledby') && // Still check host for labelledby
-            !hostTitle) {
+            !this.getAttribute('aria-label') &&      // Direct re-read
+            !this.getAttribute('aria-labelledby') && // Already direct
+            !this.getAttribute('title')) {           // Direct re-read
 
             let iconInfo = 'unspecified icon';
             // iconNameAttr and iconAttr are already defined earlier in this function.
