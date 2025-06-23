@@ -66,16 +66,20 @@
                     class="{{ 'has-error' if form.title.errors else '' }}">
                 </adw-entry-row>
 
+                {# Replaced adw-action-row with a more direct rendering for TextAreaField #}
+                {# The adw-action-row's title attribute will serve as the label for the content field #}
                 <adw-action-row title="{{ form.content.label.text }}" subtitle="Enter your post content below.">
-                    <div slot="suffix" style="width:100%;">
-                        {{ form.content(id=form.content.id or 'content_field', class='adw-entry', style='width: 100%; min-height: 200px; resize: vertical; box-sizing: border-box;', rows='10') }}
-                        {% if form.content.errors %}
-                            <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                                {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
+                    {# The textarea is placed directly. Removed 'adw-entry' class. #}
+                    {# The 'activatable' attribute might be useful if the whole row should focus the textarea, but let's start simple #}
+                    {{ form.content(id=form.content.id or 'content_field', style='width: 100%; min-height: 200px; resize: vertical; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: var(--radius-s); padding: var(--spacing-xs); background-color: var(--entry-background-color); color: var(--text-color);', rows='10') }}
                 </adw-action-row>
+                 {% if form.content.errors %}
+                    <adw-action-row class="error-row">
+                        <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); padding-left: var(--spacing-m);">
+                            {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
+                        </div>
+                    </adw-action-row>
+                {% endif %}
             </adw-list-box>
         </adw-preferences-group>
 
