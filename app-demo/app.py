@@ -470,6 +470,7 @@ def create_app(config_overrides=None):
                 if user.check_password(form.password.data):
                     _app.logger.info(f"[AUTH_SUCCESS] /login - Password check successful for user '{form.username.data}'.")
                     login_user(user)
+                    _app.logger.info(f"!!!! [DEBUG] Session after login_user: {dict(session)}") # DEBUG LINE
                     _app.logger.info(f"[SESSION_STATE] /login (post-login_user) - Session: {dict(session)}")
                     _app.logger.info(f"[AUTH_STATE] /login (post-login_user) - current_user authenticated: {current_user.is_authenticated}")
                     if current_user.is_authenticated:
