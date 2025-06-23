@@ -16,6 +16,7 @@ from PIL import Image
 import uuid
 import bleach
 import urllib.parse
+import re # For robust slugify
 
 # Globally defined extensions, to be initialized with an app instance
 db = SQLAlchemy()
@@ -35,6 +36,20 @@ ALLOWED_ATTRIBUTES = {
 # ALLOWED_STYLES is not used by bleach.clean if not passed, effectively stripping style contents.
 # If specific styles were needed, attributes callable would be used.
 ALLOWED_STYLES = [] # Kept for documentation, but not passed to bleach.clean
+
+def generate_slug(text: str) -> str:
+    """
+    Generates a URL-friendly slug from a string.
+    """
+    if not text:
+        return ""
+    # Normalize (decompose) and encode to ASCII, ignoring errors (removes accents)
+    text = text.lower()
+    text = re.sub(r'[^\w\s-]', '', text) # Remove non-word, non-space, non-hyphen characters
+    text = re.sub(r'\s+', '-', text) # Replace spaces with hyphens
+    text = re.sub(r'-+', '-', text) # Replace multiple hyphens with single hyphen
+    text = text.strip('-') # Remove leading/trailing hyphens
+    return text
 
 
 # Forms remain globally defined as they don't store app-specific state directly
@@ -131,7 +146,7 @@ class Tag(db.Model):
 
     def __init__(self, name):
         self.name = name
-        self.slug = name.lower().replace(' ', '-').replace('.', '').replace('#', 'sharp').replace('+', 'plus')
+        self.slug = generate_slug(name)
 
     def __repr__(self):
         return f'<Tag {self.name}>'
@@ -143,7 +158,7 @@ class Category(db.Model):
 
     def __init__(self, name):
         self.name = name
-        self.slug = name.lower().replace(' ', '-').replace('.', '')
+        self.slug = generate_slug(name)
 
     def __repr__(self):
         return f'<Category {self.name}>'
@@ -211,6 +226,10 @@ def create_app(config_overrides=None):
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         UPLOAD_FOLDER='app-demo/static/uploads/profile_pics',
         ALLOWED_EXTENSIONS={'png', 'jpg', 'jpeg', 'gif'},
+        MAX_PROFILE_PHOTO_SIZE_BYTES = 2 * 1024 * 1024, # 2MB
+        MAX_CONTENT_LENGTH = 5 * 1024 * 1024, # Max overall request size 5MB, includes photo + other form data
+        POSTS_PER_PAGE = 5,
+        ALLOWED_THEMES = {'light', 'dark', 'system'}, # Using a set for efficient lookup
     )
     pg_user = os.environ.get('POSTGRES_USER', 'postgres')
     pg_pass = os.environ.get('POSTGRES_PASSWORD', '')
@@ -250,7 +269,7 @@ def create_app(config_overrides=None):
             _app.logger.info(f"[AUTH_STATE] / - current_user ID: {current_user.id}, Username: {current_user.username}")
 
         page = request.args.get('page', 1, type=int)
-        per_page = 5
+        per_page = _app.config['POSTS_PER_PAGE']
         pagination = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
         posts = pagination.items
         return render_template('index.html', posts=posts, pagination=pagination)
@@ -322,7 +341,7 @@ def create_app(config_overrides=None):
 
         category = Category.query.filter_by(slug=category_slug).first_or_404()
         page = request.args.get('page', 1, type=int)
-        per_page = 5
+        per_page = _app.config['POSTS_PER_PAGE']
         pagination = Post.query.with_parent(category).order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
         posts = pagination.items
         return render_template('posts_by_category.html', category=category, posts=posts, pagination=pagination)
@@ -350,17 +369,8 @@ def create_app(config_overrides=None):
             )
             try:
                 new_post = Post(title=title, content=content, author=current_user)
-                for category_obj in form.categories.data:
-                    new_post.categories.append(category_obj)
-                tags_string = form.tags_string.data
-                if tags_string:
-                    tag_names = [name.strip() for name in tags_string.split(',') if name.strip()]
-                    for tag_name in tag_names:
-                        tag = Tag.query.filter_by(name=tag_name).first()
-                        if not tag:
-                            tag = Tag(name=tag_name)
-                            db.session.add(tag)
-                        new_post.tags.append(tag)
+                # Call helper for categories and tags
+                _update_post_relations(new_post, form, db.session)
                 db.session.add(new_post)
                 db.session.commit()
                 flash('Post created successfully!', 'success')
@@ -374,6 +384,27 @@ def create_app(config_overrides=None):
                 for error in errors:
                     flash(f"Error in {getattr(form, field).label.text}: {error}", 'warning')
         return render_template('create_post.html', form=form)
+
+def _update_post_relations(post_instance, form, db_session):
+    """Helper function to update categories and tags for a post."""
+    # Categories
+    post_instance.categories = [] # Clear existing categories first
+    for category_obj in form.categories.data:
+        post_instance.categories.append(category_obj)
+
+    # Tags
+    post_instance.tags = [] # Clear existing tags first
+    tags_string = form.tags_string.data
+    if tags_string:
+        tag_names = [name.strip() for name in tags_string.split(',') if name.strip()]
+        for tag_name in tag_names:
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name) # Slug is generated in Tag's __init__
+                db_session.add(tag)
+            post_instance.tags.append(tag)
+    # Note: db_session.commit() is not called here; it's handled by the calling route.
+
 
     @_app.route('/posts/<int:post_id>/delete', methods=['POST'])
     @login_required
@@ -422,19 +453,8 @@ def create_app(config_overrides=None):
                 attributes=ALLOWED_ATTRIBUTES,
                 strip=True
             )
-            post.categories = []
-            for category_obj in form.categories.data:
-                post.categories.append(category_obj)
-            post.tags = []
-            tags_string = form.tags_string.data
-            if tags_string:
-                tag_names = [name.strip() for name in tags_string.split(',') if name.strip()]
-                for tag_name in tag_names:
-                    tag = Tag.query.filter_by(name=tag_name).first()
-                    if not tag:
-                        tag = Tag(name=tag_name)
-                        db.session.add(tag)
-                    post.tags.append(tag)
+            # Call helper for categories and tags
+            _update_post_relations(post, form, db.session)
             try:
                 db.session.commit()
                 flash('Post updated successfully!', 'success')
@@ -521,7 +541,7 @@ def create_app(config_overrides=None):
 
         user_profile = User.query.filter_by(username=username).first_or_404()
         page = request.args.get('page', 1, type=int)
-        per_page = 5
+        per_page = _app.config['POSTS_PER_PAGE']
         posts_pagination = Post.query.with_parent(user_profile).order_by(Post.created_at.desc()).paginate(
             page=page, per_page=per_page, error_out=False
         )
@@ -573,9 +593,18 @@ def create_app(config_overrides=None):
             photo_saved_successfully = False
 
             if file and file.filename:
-                _app.logger.info(f"Profile photo uploaded: {file.filename}, content_type: {file.content_type}")
+                _app.logger.info(f"Profile photo uploaded: {file.filename}, content_type: {file.content_type}, content_length: {file.content_length}")
                 photo_update_attempted = True
-                if allowed_file(file.filename):
+
+                # Check file size against configured limit
+                if file.content_length > _app.config['MAX_PROFILE_PHOTO_SIZE_BYTES']:
+                    _app.logger.warning(f"Profile photo '{file.filename}' exceeds max size of {_app.config['MAX_PROFILE_PHOTO_SIZE_BYTES']} bytes.")
+                    flash(f"Profile photo is too large. Maximum size is {_app.config['MAX_PROFILE_PHOTO_SIZE_BYTES'] // 1024 // 1024}MB.", 'danger')
+                    # We will still try to commit other profile changes below, but photo_saved_successfully will remain false.
+                elif not allowed_file(file.filename):
+                    _app.logger.warning(f"Invalid file type for photo: {file.filename}")
+                    flash('Invalid file type for photo. Allowed types are png, jpg, jpeg, gif.', 'warning')
+                else:
                     try:
                         original_filename = secure_filename(file.filename)
                         ext = original_filename.rsplit('.', 1)[-1].lower()
@@ -596,18 +625,22 @@ def create_app(config_overrides=None):
 
                         if crop_x_str and crop_y_str and crop_width_str and crop_height_str:
                             try:
+                                        # Attempt to convert all first, to catch any single bad value
                                 crop_x = int(float(crop_x_str))
                                 crop_y = int(float(crop_y_str))
                                 crop_width = int(float(crop_width_str))
                                 crop_height = int(float(crop_height_str))
+
                                 if crop_width > 0 and crop_height > 0:
                                     _app.logger.info(f"Applying crop: ({crop_x}, {crop_y}, {crop_x + crop_width}, {crop_y + crop_height})")
                                     img = img.crop((crop_x, crop_y, crop_x + crop_width, crop_y + crop_height))
                                     _app.logger.info(f"Image cropped. New size: {img.size}")
                                 else:
-                                    _app.logger.warning("Crop width or height is zero or negative. Skipping crop.")
-                            except ValueError as ve:
-                                _app.logger.warning(f"Could not parse crop coordinates (ValueError: {ve}). Skipping crop.")
+                                            _app.logger.warning("Crop width or height is zero, negative, or invalid. Skipping crop.")
+                                            flash("Invalid crop dimensions provided. Photo processed without cropping.", 'warning')
+                                    except ValueError:
+                                        _app.logger.warning(f"Could not parse one or more crop coordinates to numbers. Values: x='{crop_x_str}', y='{crop_y_str}', w='{crop_width_str}', h='{crop_height_str}'. Skipping crop.")
+                                        flash("Invalid crop coordinates provided. Photo processed without cropping.", 'warning')
                         else:
                             _app.logger.info("Crop coordinates not provided or incomplete. Processing image without cropping.")
 
@@ -705,7 +738,7 @@ def create_app(config_overrides=None):
         query = request.args.get('q', '').strip()
         _app.logger.info(f"[QUERY_PARAM] /search - Search query: '{query}'")
         page = request.args.get('page', 1, type=int)
-        per_page = 5
+        per_page = _app.config['POSTS_PER_PAGE']
         posts = []
         pagination = None
         if query:
@@ -745,7 +778,7 @@ def create_app(config_overrides=None):
 
         tag = Tag.query.filter_by(slug=tag_slug).first_or_404()
         page = request.args.get('page', 1, type=int)
-        per_page = 5
+        per_page = _app.config['POSTS_PER_PAGE']
         pagination = Post.query.filter(Post.tags.contains(tag)).order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
         posts = pagination.items
         return render_template('posts_by_tag.html', tag=tag, posts=posts, pagination=pagination)
@@ -765,7 +798,7 @@ def create_app(config_overrides=None):
             return jsonify({'status': 'error', 'message': 'Missing theme data'}), 400
 
         new_theme = data['theme']
-        if new_theme not in ['light', 'dark', 'system']:
+        if new_theme not in _app.config['ALLOWED_THEMES']:
             _app.logger.warning(f"[VALIDATION_ERROR] /api/settings/theme - Invalid theme value: {new_theme}")
             return jsonify({'status': 'error', 'message': 'Invalid theme value'}), 400
 
