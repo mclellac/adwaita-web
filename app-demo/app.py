@@ -367,18 +367,42 @@ def create_app(config_overrides=None):
 
     @_app.route('/login', methods=['GET', 'POST'])
     def login():
+        _app.logger.info(f"Login route accessed. Method: {request.method}")
         if current_user.is_authenticated:
+            _app.logger.info("User already authenticated. Redirecting to index.")
             return redirect(url_for('index'))
+
         form = LoginForm()
+        _app.logger.info(f"Request form data on load: {request.form}") # Log form data regardless of method
+
         if form.validate_on_submit():
+            _app.logger.info(f"Form validation successful. Username: '{form.username.data}'")
             user = User.query.filter_by(username=form.username.data).first()
-            if user and user.check_password(form.password.data):
-                login_user(user)
-                flash('Logged in successfully.', 'success')
-                next_page = request.args.get('next')
-                return redirect(next_page or url_for('index'))
+            if user:
+                _app.logger.info(f"User '{form.username.data}' found in database.")
+                if user.check_password(form.password.data):
+                    _app.logger.info(f"Password check successful for user '{form.username.data}'.")
+                    login_user(user)
+                    flash('Logged in successfully.', 'success')
+                    next_page = request.args.get('next')
+                    _app.logger.info(f"Redirecting to '{next_page or url_for('index')}' after successful login.")
+                    return redirect(next_page or url_for('index'))
+                else:
+                    _app.logger.warning(f"Password check failed for user '{form.username.data}'.")
+                    flash('Invalid username or password.', 'danger')
             else:
+                _app.logger.warning(f"User '{form.username.data}' not found in database.")
                 flash('Invalid username or password.', 'danger')
+        elif request.method == 'POST':
+            _app.logger.warning(f"Form validation failed. Errors: {form.errors}")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f"Validation error in {getattr(form, field).label.text}: {error}", 'warning')
+            # It's important to flash a generic message if specific errors aren't caught or preferred
+            if not form.errors: # If form.errors is empty but validation failed (e.g. CSRF)
+                flash('Login attempt failed. Please check your input.', 'danger')
+
+
         return render_template('login.html', form=form)
 
     @_app.route('/logout')
@@ -629,19 +653,21 @@ def create_app(config_overrides=None):
 
     with _app.app_context():
         db.create_all() # Create tables for SQLite in-memory
-        # if not User.query.first(): # Commented out for testing without DB
-        #     default_username = os.environ.get("ADMIN_USER", "admin")
-        #     default_password = os.environ.get("ADMIN_PASS", "password")
-        #     admin_user = User(username=default_username)
-        #     admin_user.set_password(default_password)
-        #     db.session.add(admin_user)
-        #     try:
-        #         db.session.commit()
-        #         print(f"INFO: Default admin user '{default_username}' (password: '{default_password}') created.")
-        #     except Exception as e:
-        #         db.session.rollback()
-        #         _app.logger.error(f"Error creating default admin user: {e}", exc_info=True)
-        pass # Added to handle empty block after commenting out DB init
+        if not User.query.first(): # Uncommented for testing
+            default_username = os.environ.get("ADMIN_USER", "admin")
+            default_password = os.environ.get("ADMIN_PASS", "password")
+            _app.logger.info(f"Attempting to create default admin user: {default_username}")
+            admin_user = User(username=default_username)
+            admin_user.set_password(default_password)
+            db.session.add(admin_user)
+            try:
+                db.session.commit()
+                _app.logger.info(f"Default admin user '{default_username}' (password: '{default_password}') created successfully.")
+            except Exception as e:
+                db.session.rollback()
+                _app.logger.error(f"Error creating default admin user: {e}", exc_info=True)
+        else:
+            _app.logger.info("Database already contains users. Skipping default user creation.")
 
     return _app
 
