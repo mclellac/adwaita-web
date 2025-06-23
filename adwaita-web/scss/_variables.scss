@@ -364,6 +364,17 @@
   --banner-error-bg-color: var(--adw-red-1); // Lighter red for bg in light theme
   --banner-error-fg-color: var(--adw-light-1); // White text on red
   --banner-error-border-color: var(--adw-red-2);
+
+  // Banner button specific (light theme)
+  --banner-button-fg-color: var(--banner-fg-color); // Inherit text color from banner
+  --banner-button-bg-color: rgba(0,0,0,0.05); // Subtle darker overlay
+  --banner-button-hover-bg-color: rgba(0,0,0,0.08);
+  --banner-button-active-bg-color: rgba(0,0,0,0.12);
+
+  --banner-error-button-fg-color: var(--banner-error-fg-color); // Inherit text color
+  --banner-error-button-bg-color: rgba(0,0,0,0.08); // Subtle darker overlay on error bg
+  --banner-error-button-hover-bg-color: rgba(0,0,0,0.12);
+  --banner-error-button-active-bg-color: rgba(0,0,0,0.16);
 }
 
 @mixin dark-theme {
@@ -504,6 +515,17 @@
   --banner-error-bg-color: var(--adw-red-4); // Darker red for bg in dark theme
   --banner-error-fg-color: var(--adw-light-1); // White text
   --banner-error-border-color: var(--adw-red-5);
+
+  // Banner button specific (dark theme)
+  --banner-button-fg-color: var(--banner-fg-color); // Inherit text color from banner
+  --banner-button-bg-color: rgba(255,255,255,0.07); // Subtle lighter overlay
+  --banner-button-hover-bg-color: rgba(255,255,255,0.10);
+  --banner-button-active-bg-color: rgba(255,255,255,0.13);
+
+  --banner-error-button-fg-color: var(--banner-error-fg-color); // Inherit text color
+  --banner-error-button-bg-color: rgba(255,255,255,0.08); // Subtle lighter overlay on error bg
+  --banner-error-button-hover-bg-color: rgba(255,255,255,0.12);
+  --banner-error-button-active-bg-color: rgba(255,255,255,0.16);
 }
 
 // General Helper Variables (not theme-specific)
