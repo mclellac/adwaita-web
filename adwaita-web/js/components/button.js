@@ -74,6 +74,35 @@ export function createAdwButton(text, options = {}) {
     button.setAttribute("icon", opts.icon);
   }
 
+  // Handle specific, known camelCased ARIA properties explicitly
+  if (opts.ariaLabel !== undefined) {
+    button.setAttribute('aria-label', opts.ariaLabel);
+  }
+  if (opts.ariaLabelledby !== undefined) {
+    button.setAttribute('aria-labelledby', opts.ariaLabelledby);
+  }
+  if (opts.ariaDescribedby !== undefined) {
+    button.setAttribute('aria-describedby', opts.ariaDescribedby);
+  }
+
+  // Pass through any direct aria-* attributes already in kebab-case
+  for (const key in opts) {
+    if (key.startsWith('aria-')) {
+      // This will re-set if they were also provided as camelCase and handled above,
+      // but direct kebab-case should take precedence or be the same.
+      // Avoid re-setting for the specific camelCase keys already handled.
+      if (key === 'aria-label' && opts.ariaLabel !== undefined) continue;
+      if (key === 'aria-labelledby' && opts.ariaLabelledby !== undefined) continue;
+      if (key === 'aria-describedby' && opts.ariaDescribedby !== undefined) continue;
+
+      if (opts[key] !== null && opts[key] !== undefined) {
+        button.setAttribute(key, opts[key]);
+      }
+    }
+  }
+
+  // Pass through 'type' attribute if provided in options
+
   if (opts.type) {
     button.setAttribute("type", opts.type);
   }
