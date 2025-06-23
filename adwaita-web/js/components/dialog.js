@@ -1011,8 +1011,17 @@ export class AdwPreferencesDialog extends HTMLElement {
         this._internalDialog.classList.add('adw-preferences-dialog-base'); // For styling hook
         this._internalDialog.setAttribute('title', this.getAttribute('title') || "Preferences");
         // Preferences dialogs are usually larger
-        this._internalDialog.dialogElementForTesting.style.minWidth = '600px'; // Accessing underlying element for style for now
-        this._internalDialog.dialogElementForTesting.style.minHeight = '400px';
+        // Apply styles directly to the <adw-dialog> host element
+        this._internalDialog.style.setProperty('--adw-dialog-min-width', '600px'); // Assuming AdwDialog uses this CSS var
+        this._internalDialog.style.setProperty('--adw-dialog-min-height', '400px'); // Assuming AdwDialog uses this CSS var
+        // If AdwDialog doesn't use CSS variables for this, direct style might be needed,
+        // or AdwDialog needs to be updated to support sizing via attributes or CSS vars.
+        // Forcing style on host:
+        // this._internalDialog.style.minWidth = '600px'; // This might not work as expected depending on AdwDialog's CSS
+        // this._internalDialog.style.minHeight = '400px';
+        // The most robust way would be for AdwDialog to have attributes for size or use parts for styling.
+        // For now, using CSS variables is a common pattern. If these vars are not standard,
+        // this styling might not take effect as intended without changes to AdwDialog's CSS.
 
         const preferencesDialogContentWrapper = document.createElement('div');
         preferencesDialogContentWrapper.setAttribute('slot', 'content');
