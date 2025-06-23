@@ -332,7 +332,7 @@ def create_app(config_overrides=None):
     def create_post():
         _app.logger.info(f"[ROUTE_ENTRY] /create - Method: {request.method}")
         _app.logger.info(f"[SESSION_STATE] /create - Session: {dict(session)}")
-        _app.logger.info(f"[AUTH_STATE] /create - current_user ID: {current_user.id}, Username: {current_user.username}")
+        _app.logger.info(f"[AUTH_STATE] /create - current_user ID: {current_user.id}, Username: {current_user.username}, Authenticated: {current_user.is_authenticated}") # DEBUG
 
         form = PostForm()
         if request.method == 'POST':

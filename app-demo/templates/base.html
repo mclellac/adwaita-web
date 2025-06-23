@@ -138,8 +138,10 @@
                 Placeholder: TiptapPlaceholder.default,
             };
             console.log('[Debug] Tiptap modules loaded via dynamic import.');
+            document.dispatchEvent(new CustomEvent('tiptap-ready')); // Dispatch event
         } catch (error) {
             console.error('[Debug] Failed to load Tiptap modules:', error);
+            document.dispatchEvent(new CustomEvent('tiptap-failed')); // Dispatch failure event
             // Fallback or error message can be handled here
         }
     </script>
