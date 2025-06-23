@@ -656,9 +656,6 @@ def _update_post_relations(post_instance, form, db_session):
                     except Exception as e:
                         _app.logger.error(f"Error processing profile photo: {e}", exc_info=True)
                         flash(f'Error processing profile photo: {e}', 'danger')
-                else:
-                    _app.logger.warning(f"Invalid file type for photo: {file.filename}")
-                    flash('Invalid file type for photo.', 'warning')
             else:
                 _app.logger.info("No profile photo uploaded or file has no filename.")
 
