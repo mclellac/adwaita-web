@@ -73,23 +73,6 @@
     <form method="POST" action="{{ url_for('create_post') }}" novalidate>
         {{ form.hidden_tag() }} {# CSRF token #}
 
-        <!-- Temporary placement for content textarea for isolation testing -->
-        <div style="padding: 10px; border: 1px dashed red; margin-bottom: 10px;">
-            <label for="{{ form.content.id or 'content_field' }}">{{ form.content.label.text }} (Test Placement)</label>
-            {{ form.content(
-                id=form.content.id or 'content_field',
-                class='adw-textarea-standalone',
-                style='width: 100%; min-height: 100px; resize: vertical; box-sizing: border-box;',
-                rows='5'
-            ) }}
-            {% if form.content.errors %}
-                <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xxs);">
-                    {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
-                </div>
-            {% endif %}
-        </div>
-        <!-- End temporary placement -->
-
         <adw-preferences-group title="Post Details">
             <adw-list-box>
                 <adw-entry-row
