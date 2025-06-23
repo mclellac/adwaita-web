@@ -172,7 +172,30 @@ Post.comments = db.relationship('Comment', backref='post', lazy='dynamic', order
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, int(user_id))
+    # It's useful to have access to the app logger here, but login_manager is defined globally.
+    # We can get the current app's logger if this runs within an app context,
+    # which it should when Flask-Login invokes it.
+    logger = logging.getLogger(__name__) # Gets the 'app' logger if __name__ is 'app'
+    if hasattr(Flask, 'current_app') and Flask.current_app:
+        logger = Flask.current_app.logger
+
+    logger.info(f"[LOAD_USER] Attempting to load user with ID: {user_id}")
+    if user_id is None:
+        logger.warning("[LOAD_USER] user_id is None. Cannot load user.")
+        return None
+    try:
+        user = db.session.get(User, int(user_id))
+        if user:
+            logger.info(f"[LOAD_USER] User {user.username} (ID: {user.id}) loaded successfully from session.")
+        else:
+            logger.warning(f"[LOAD_USER] No user found for ID: {user_id}")
+        return user
+    except ValueError:
+        logger.error(f"[LOAD_USER] Invalid user_id format: {user_id}. Cannot convert to int.")
+        return None
+    except Exception as e:
+        logger.error(f"[LOAD_USER] Exception during user loading for ID {user_id}: {e}", exc_info=True)
+        return None
 
 def create_app(config_overrides=None):
     _app = Flask(__name__)
@@ -220,6 +243,12 @@ def create_app(config_overrides=None):
 
     @_app.route('/')
     def index():
+        _app.logger.info(f"[ROUTE_ENTRY] / - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] / - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] / - current_user authenticated: {current_user.is_authenticated}")
+        if current_user.is_authenticated:
+            _app.logger.info(f"[AUTH_STATE] / - current_user ID: {current_user.id}, Username: {current_user.username}")
+
         page = request.args.get('page', 1, type=int)
         per_page = 5
         pagination = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
@@ -228,40 +257,69 @@ def create_app(config_overrides=None):
 
     @_app.route('/posts/<int:post_id>', methods=['GET', 'POST'])
     def view_post(post_id):
+        _app.logger.info(f"[ROUTE_ENTRY] /posts/{post_id} - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /posts/{post_id} - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /posts/{post_id} - current_user authenticated: {current_user.is_authenticated}")
+        if current_user.is_authenticated:
+            _app.logger.info(f"[AUTH_STATE] /posts/{post_id} - current_user ID: {current_user.id}, Username: {current_user.username}")
+
         post = Post.query.get_or_404(post_id)
         form = CommentForm()
         delete_form = DeleteCommentForm()
-        if form.validate_on_submit() and current_user.is_authenticated:
-            comment = Comment(text=form.text.data, author=current_user, post_id=post_id)
-            db.session.add(comment)
-            db.session.commit()
-            flash('Comment posted successfully!', 'success')
-            return redirect(url_for('view_post', post_id=post_id))
+
+        if request.method == 'POST':
+            _app.logger.info(f"[FORM_DATA] /posts/{post_id} - Form data: {request.form}")
+            if form.validate_on_submit() and current_user.is_authenticated:
+                _app.logger.info(f"[ACTION] /posts/{post_id} - Posting comment by user {current_user.username}")
+                comment = Comment(text=form.text.data, author=current_user, post_id=post_id)
+                db.session.add(comment)
+                db.session.commit()
+                flash('Comment posted successfully!', 'success')
+                return redirect(url_for('view_post', post_id=post_id))
+            else:
+                _app.logger.warning(f"[VALIDATION_ERROR] /posts/{post_id} - Comment form validation failed or user not authenticated. Errors: {form.errors}, Auth: {current_user.is_authenticated}")
+
+
         comments = post.comments.all()
         return render_template('post.html', post=post, form=form, comments=comments, delete_form=delete_form)
 
     @_app.route('/comment/<int:comment_id>/delete', methods=['POST'])
     @login_required
     def delete_comment(comment_id):
-        delete_form = DeleteCommentForm()
+        _app.logger.info(f"[ROUTE_ENTRY] /comment/{comment_id}/delete - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /comment/{comment_id}/delete - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /comment/{comment_id}/delete - current_user ID: {current_user.id}, Username: {current_user.username}") # @login_required ensures this
+        _app.logger.info(f"[FORM_DATA] /comment/{comment_id}/delete - Form data: {request.form}")
+
+        delete_form = DeleteCommentForm() # This form is simple, might not need its own data logging unless issues arise
         if delete_form.validate_on_submit():
             comment = Comment.query.get_or_404(comment_id)
             if comment.author != current_user and comment.post.author != current_user:
+                _app.logger.warning(f"[AUTH_FAIL] /comment/{comment_id}/delete - User {current_user.username} not authorized to delete comment.")
                 abort(403)
+
             post_id = comment.post_id
+            _app.logger.info(f"[ACTION] /comment/{comment_id}/delete - Deleting comment by user {current_user.username}")
             db.session.delete(comment)
             db.session.commit()
             flash('Comment deleted.', 'success')
             return redirect(url_for('view_post', post_id=post_id))
         else:
+            _app.logger.warning(f"[VALIDATION_ERROR] /comment/{comment_id}/delete - Delete form validation failed. Errors: {delete_form.errors}")
             flash('Failed to delete comment. Invalid request.', 'danger')
-            comment = Comment.query.get(comment_id)
+            comment = Comment.query.get(comment_id) # Fetch again to redirect if possible
             if comment:
                 return redirect(url_for('view_post', post_id=comment.post_id))
             return redirect(url_for('index'))
 
     @_app.route('/category/<string:category_slug>')
     def posts_by_category(category_slug):
+        _app.logger.info(f"[ROUTE_ENTRY] /category/{category_slug} - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /category/{category_slug} - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /category/{category_slug} - current_user authenticated: {current_user.is_authenticated}")
+        if current_user.is_authenticated:
+            _app.logger.info(f"[AUTH_STATE] /category/{category_slug} - current_user ID: {current_user.id}, Username: {current_user.username}")
+
         category = Category.query.filter_by(slug=category_slug).first_or_404()
         page = request.args.get('page', 1, type=int)
         per_page = 5
@@ -272,8 +330,16 @@ def create_app(config_overrides=None):
     @_app.route('/create', methods=['GET', 'POST'])
     @login_required
     def create_post():
+        _app.logger.info(f"[ROUTE_ENTRY] /create - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /create - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /create - current_user ID: {current_user.id}, Username: {current_user.username}")
+
         form = PostForm()
+        if request.method == 'POST':
+            _app.logger.info(f"[FORM_DATA] /create - Form data: {request.form}")
+
         if form.validate_on_submit():
+            _app.logger.info(f"[ACTION] /create - Post form validated. Creating post by {current_user.username}")
             title = form.title.data
             raw_content = form.content.data
             content = bleach.clean(
@@ -312,9 +378,17 @@ def create_app(config_overrides=None):
     @_app.route('/posts/<int:post_id>/delete', methods=['POST'])
     @login_required
     def delete_post(post_id):
+        _app.logger.info(f"[ROUTE_ENTRY] /posts/{post_id}/delete - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /posts/{post_id}/delete - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /posts/{post_id}/delete - current_user ID: {current_user.id}, Username: {current_user.username}")
+        _app.logger.info(f"[FORM_DATA] /posts/{post_id}/delete - Form data: {request.form}") # Though this form is button-only
+
         post = Post.query.get_or_404(post_id)
         if post.author != current_user:
+            _app.logger.warning(f"[AUTH_FAIL] /posts/{post_id}/delete - User {current_user.username} not authorized to delete post.")
             abort(403)
+
+        _app.logger.info(f"[ACTION] /posts/{post_id}/delete - Deleting post by user {current_user.username}")
         db.session.delete(post)
         db.session.commit()
         return redirect(url_for('index'))
@@ -322,13 +396,24 @@ def create_app(config_overrides=None):
     @_app.route('/posts/<int:post_id>/edit', methods=['GET', 'POST'])
     @login_required
     def edit_post(post_id):
+        _app.logger.info(f"[ROUTE_ENTRY] /posts/{post_id}/edit - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /posts/{post_id}/edit - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /posts/{post_id}/edit - current_user ID: {current_user.id}, Username: {current_user.username}")
+
         post = Post.query.get_or_404(post_id)
         if post.author != current_user:
+            _app.logger.warning(f"[AUTH_FAIL] /posts/{post_id}/edit - User {current_user.username} not authorized to edit post.")
             abort(403)
+
         form = PostForm(obj=post)
-        if not form.tags_string.data and request.method == 'GET':
+        if request.method == 'POST':
+            _app.logger.info(f"[FORM_DATA] /posts/{post_id}/edit - Form data: {request.form}")
+
+        if not form.tags_string.data and request.method == 'GET': # Populate tags on initial GET
             form.tags_string.data = ', '.join([tag.name for tag in post.tags])
+
         if form.validate_on_submit():
+            _app.logger.info(f"[ACTION] /posts/{post_id}/edit - Post edit form validated. Updating post by {current_user.username}")
             post.title = form.title.data
             raw_content = form.content.data
             post.content = bleach.clean(
@@ -366,53 +451,73 @@ def create_app(config_overrides=None):
 
     @_app.route('/login', methods=['GET', 'POST'])
     def login():
-        _app.logger.info(f"Login route accessed. Method: {request.method}")
-        if current_user.is_authenticated:
-            _app.logger.info("User already authenticated. Redirecting to index.")
+        _app.logger.info(f"[ROUTE_ENTRY] /login - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /login (pre-login) - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /login (pre-login) - current_user authenticated: {current_user.is_authenticated}")
+        if current_user.is_authenticated: # Should ideally not happen if redirection works, but good check
+            _app.logger.info(f"[AUTH_STATE] /login (pre-login) - current_user ID: {current_user.id}, Username: {current_user.username}")
             return redirect(url_for('index'))
 
         form = LoginForm()
-        _app.logger.info(f"Request form data on load: {request.form}") # Log form data regardless of method
+        if request.method == 'POST':
+            _app.logger.info(f"[FORM_DATA] /login - Form data: {request.form}")
 
         if form.validate_on_submit():
-            _app.logger.info(f"Form validation successful. Username: '{form.username.data}'")
+            _app.logger.info(f"[ACTION] /login - Form validation successful. Username: '{form.username.data}'")
             user = User.query.filter_by(username=form.username.data).first()
             if user:
-                _app.logger.info(f"User '{form.username.data}' found in database.")
+                _app.logger.info(f"[DB_QUERY] /login - User '{form.username.data}' found in database.")
                 if user.check_password(form.password.data):
-                    _app.logger.info(f"Password check successful for user '{form.username.data}'.")
+                    _app.logger.info(f"[AUTH_SUCCESS] /login - Password check successful for user '{form.username.data}'.")
                     login_user(user)
+                    _app.logger.info(f"[SESSION_STATE] /login (post-login_user) - Session: {dict(session)}")
+                    _app.logger.info(f"[AUTH_STATE] /login (post-login_user) - current_user authenticated: {current_user.is_authenticated}")
+                    if current_user.is_authenticated:
+                         _app.logger.info(f"[AUTH_STATE] /login (post-login_user) - current_user ID: {current_user.id}, Username: {current_user.username}")
+                    else:
+                        _app.logger.error(f"[AUTH_FAIL] /login (post-login_user) - login_user called but current_user is NOT authenticated!")
+
                     flash('Logged in successfully.', 'success')
                     next_page = request.args.get('next')
-                    _app.logger.info(f"Redirecting to '{next_page or url_for('index')}' after successful login.")
+                    _app.logger.info(f"[REDIRECT] /login - Redirecting to '{next_page or url_for('index')}' after successful login.")
                     return redirect(next_page or url_for('index'))
                 else:
-                    _app.logger.warning(f"Password check failed for user '{form.username.data}'.")
+                    _app.logger.warning(f"[AUTH_FAIL] /login - Password check failed for user '{form.username.data}'.")
                     flash('Invalid username or password.', 'danger')
             else:
-                _app.logger.warning(f"User '{form.username.data}' not found in database.")
+                _app.logger.warning(f"[DB_QUERY] /login - User '{form.username.data}' not found in database.")
                 flash('Invalid username or password.', 'danger')
-        elif request.method == 'POST':
-            _app.logger.warning(f"Form validation failed. Errors: {form.errors}")
+        elif request.method == 'POST': # Only log validation errors if it was a POST and validate_on_submit failed
+            _app.logger.warning(f"[VALIDATION_ERROR] /login - Form validation failed. Errors: {form.errors}")
             for field, errors in form.errors.items():
-                for error in errors:
-                    flash(f"Validation error in {getattr(form, field).label.text}: {error}", 'warning')
-            # It's important to flash a generic message if specific errors aren't caught or preferred
-            if not form.errors: # If form.errors is empty but validation failed (e.g. CSRF)
+                flash(f"Validation error in {getattr(form, field).label.text}: {error}", 'warning')
+            if not form.errors:
                 flash('Login attempt failed. Please check your input.', 'danger')
-
 
         return render_template('login.html', form=form)
 
     @_app.route('/logout')
     @login_required
     def logout():
+        _app.logger.info(f"[ROUTE_ENTRY] /logout - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /logout (pre-logout) - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /logout (pre-logout) - current_user ID: {current_user.id}, Username: {current_user.username}")
+
+        user_id_before_logout = current_user.id
         logout_user()
+
+        _app.logger.info(f"[ACTION] /logout - User {user_id_before_logout} logged out.")
+        _app.logger.info(f"[SESSION_STATE] /logout (post-logout) - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /logout (post-logout) - current_user authenticated: {current_user.is_authenticated}")
         return redirect(url_for('index'))
 
     @_app.route('/profile/<username>')
     @login_required
     def profile(username):
+        _app.logger.info(f"[ROUTE_ENTRY] /profile/{username} - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /profile/{username} - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /profile/{username} - current_user ID: {current_user.id}, Username: {current_user.username}")
+
         user_profile = User.query.filter_by(username=username).first_or_404()
         page = request.args.get('page', 1, type=int)
         per_page = 5
@@ -425,23 +530,23 @@ def create_app(config_overrides=None):
     @_app.route('/profile/edit', methods=['GET', 'POST'])
     @login_required
     def edit_profile():
-        _app.logger.info(f"Edit profile route hit. Method: {request.method}")
-        # When method is POST, WTForms populates from request.form.
-        # obj=current_user is used for initial GET display and for providing defaults.
-        form = ProfileEditForm(obj=current_user)
+        _app.logger.info(f"[ROUTE_ENTRY] /profile/edit - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /profile/edit - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /profile/edit - current_user ID: {current_user.id}, Username: {current_user.username}")
+
+        form = ProfileEditForm(obj=current_user) # obj=current_user for GET pre-population
         default_avatar_url = url_for('static', filename='img/default_avatar.png')
 
         if request.method == 'POST':
-            _app.logger.info(f"POST request. Request form data: {request.form}")
-            _app.logger.info(f"POST request. Request files: {request.files}")
-            _app.logger.info(f"Form is_submitted() check (implicitly part of validate_on_submit): {form.is_submitted()}")
+            _app.logger.info(f"[FORM_DATA] /profile/edit - Form data: {request.form}")
+            _app.logger.info(f"[FILE_DATA] /profile/edit - Files: {request.files}")
 
         if form.validate_on_submit():
-            _app.logger.info("Form validation successful.")
+            _app.logger.info(f"[ACTION] /profile/edit - Profile edit form validated for user {current_user.username}")
 
-            # Log data before assignment to current_user
-            _app.logger.info(f"Data from form: full_name='{form.full_name.data}', location='{form.location.data}', website_url='{form.website_url.data}', is_profile_public='{form.is_profile_public.data}'")
-            _app.logger.info(f"Data from form (profile_info snippet): {form.profile_info.data[:100] if form.profile_info.data else ''}...")
+            # Log data from form before assignment
+            _app.logger.debug(f"[FORM_VALUES] /profile/edit - full_name='{form.full_name.data}', location='{form.location.data}', website_url='{form.website_url.data}', is_profile_public='{form.is_profile_public.data}'")
+            _app.logger.debug(f"[FORM_VALUES] /profile/edit - profile_info snippet: {form.profile_info.data[:100] if form.profile_info.data else ''}...")
 
             raw_profile_info = form.profile_info.data
             current_user.profile_info = bleach.clean(
@@ -542,38 +647,62 @@ def create_app(config_overrides=None):
             return redirect(url_for('profile', username=current_user.username))
         elif request.method == 'POST':
             # This block executes if form.validate_on_submit() is False
-            _app.logger.warning("Form validation failed on POST.")
-            _app.logger.warning(f"Form errors: {form.errors}")
+            _app.logger.warning(f"[VALIDATION_ERROR] /profile/edit - Form validation failed. Errors: {form.errors}")
             for field_name, field_errors in form.errors.items():
-                for error in field_errors:
+                for error in field_errors: # Iterate through list of errors for a field
                     flash(f"Error in {getattr(form, field_name).label.text}: {error}", 'warning')
-        else: # GET request
-            _app.logger.info("GET request: Displaying edit profile page.")
+        # No specific 'else' for GET needed if only logging POST issues / form population is by obj=
 
         return render_template('edit_profile.html', form=form, user_profile=current_user, default_avatar_url=default_avatar_url)
 
     @_app.route('/settings')
     @login_required
     def settings_page():
+        _app.logger.info(f"[ROUTE_ENTRY] /settings - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /settings - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /settings - current_user ID: {current_user.id}, Username: {current_user.username}")
         return render_template('settings.html')
 
     @_app.route('/settings/change-password', methods=['GET', 'POST'])
     @login_required
     def change_password_page():
+        _app.logger.info(f"[ROUTE_ENTRY] /settings/change-password - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /settings/change-password - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /settings/change-password - current_user ID: {current_user.id}, Username: {current_user.username}")
+
         form = ChangePasswordForm()
+        if request.method == 'POST':
+            _app.logger.info(f"[FORM_DATA] /settings/change-password - Form data: {request.form}")
+
         if form.validate_on_submit():
+            _app.logger.info(f"[ACTION] /settings/change-password - Change password form validated for user {current_user.username}.")
             if current_user.check_password(form.current_password.data):
                 current_user.set_password(form.new_password.data)
                 db.session.commit()
+                _app.logger.info(f"[AUTH_SUCCESS] /settings/change-password - Password changed successfully for user {current_user.username}.")
                 flash('Your password has been updated successfully!', 'success')
                 return redirect(url_for('settings_page'))
             else:
+                _app.logger.warning(f"[AUTH_FAIL] /settings/change-password - Invalid current password for user {current_user.username}.")
                 flash('Invalid current password.', 'danger')
+        elif request.method == 'POST': # Log validation errors if POST and validation failed
+            _app.logger.warning(f"[VALIDATION_ERROR] /settings/change-password - Form validation failed. Errors: {form.errors}")
+            for field, errors_list in form.errors.items(): # field_errors is a list
+                 for error in errors_list:
+                    flash(f"Error in {getattr(form, field).label.text}: {error}", 'warning')
+
         return render_template('change_password.html', form=form)
 
     @_app.route('/search')
     def search_results():
+        _app.logger.info(f"[ROUTE_ENTRY] /search - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /search - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /search - current_user authenticated: {current_user.is_authenticated}")
+        if current_user.is_authenticated:
+            _app.logger.info(f"[AUTH_STATE] /search - current_user ID: {current_user.id}, Username: {current_user.username}")
+
         query = request.args.get('q', '').strip()
+        _app.logger.info(f"[QUERY_PARAM] /search - Search query: '{query}'")
         page = request.args.get('page', 1, type=int)
         per_page = 5
         posts = []
@@ -589,14 +718,30 @@ def create_app(config_overrides=None):
 
     @_app.route('/about')
     def about_page():
+        _app.logger.info(f"[ROUTE_ENTRY] /about - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /about - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /about - current_user authenticated: {current_user.is_authenticated}")
+        if current_user.is_authenticated:
+            _app.logger.info(f"[AUTH_STATE] /about - current_user ID: {current_user.id}, Username: {current_user.username}")
         return render_template('about.html')
 
     @_app.route('/contact')
     def contact_page():
+        _app.logger.info(f"[ROUTE_ENTRY] /contact - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /contact - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /contact - current_user authenticated: {current_user.is_authenticated}")
+        if current_user.is_authenticated:
+            _app.logger.info(f"[AUTH_STATE] /contact - current_user ID: {current_user.id}, Username: {current_user.username}")
         return render_template('contact.html')
 
     @_app.route('/tag/<string:tag_slug>')
     def posts_by_tag(tag_slug):
+        _app.logger.info(f"[ROUTE_ENTRY] /tag/{tag_slug} - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /tag/{tag_slug} - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /tag/{tag_slug} - current_user authenticated: {current_user.is_authenticated}")
+        if current_user.is_authenticated:
+            _app.logger.info(f"[AUTH_STATE] /tag/{tag_slug} - current_user ID: {current_user.id}, Username: {current_user.username}")
+
         tag = Tag.query.filter_by(slug=tag_slug).first_or_404()
         page = request.args.get('page', 1, type=int)
         per_page = 5
@@ -607,50 +752,81 @@ def create_app(config_overrides=None):
     @_app.route('/api/settings/theme', methods=['POST'])
     @login_required
     def save_theme_preference():
+        _app.logger.info(f"[ROUTE_ENTRY] /api/settings/theme - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /api/settings/theme - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /api/settings/theme - current_user ID: {current_user.id}, Username: {current_user.username}")
+
         data = request.get_json()
+        _app.logger.info(f"[JSON_DATA] /api/settings/theme - Received data: {data}")
+
         if not data or 'theme' not in data:
+            _app.logger.warning(f"[VALIDATION_ERROR] /api/settings/theme - Missing theme data. Data: {data}")
             return jsonify({'status': 'error', 'message': 'Missing theme data'}), 400
+
         new_theme = data['theme']
         if new_theme not in ['light', 'dark', 'system']:
+            _app.logger.warning(f"[VALIDATION_ERROR] /api/settings/theme - Invalid theme value: {new_theme}")
             return jsonify({'status': 'error', 'message': 'Invalid theme value'}), 400
+
+        _app.logger.info(f"[ACTION] /api/settings/theme - User {current_user.username} updating theme to {new_theme}")
         current_user.theme = new_theme
         try:
             db.session.commit()
+            _app.logger.info(f"[DB_SUCCESS] /api/settings/theme - Theme preference for {current_user.username} saved.")
             return jsonify({'status': 'success', 'message': 'Theme updated successfully'})
         except Exception as e:
             db.session.rollback()
-            _app.logger.error(f"Error saving theme: {e}", exc_info=True)
+            _app.logger.error(f"[DB_ERROR] /api/settings/theme - Error saving theme for {current_user.username}: {e}", exc_info=True)
             return jsonify({'status': 'error', 'message': 'Failed to save theme preference'}), 500
 
     @_app.route('/api/settings/accent_color', methods=['POST'])
     @login_required
     def save_accent_color_preference():
+        _app.logger.info(f"[ROUTE_ENTRY] /api/settings/accent_color - Method: {request.method}")
+        _app.logger.info(f"[SESSION_STATE] /api/settings/accent_color - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] /api/settings/accent_color - current_user ID: {current_user.id}, Username: {current_user.username}")
+
         data = request.get_json()
+        _app.logger.info(f"[JSON_DATA] /api/settings/accent_color - Received data: {data}")
+
         if not data or 'accent_color' not in data:
+            _app.logger.warning(f"[VALIDATION_ERROR] /api/settings/accent_color - Missing accent_color data. Data: {data}")
             return jsonify({'status': 'error', 'message': 'Missing accent_color data'}), 400
+
+        _app.logger.info(f"[ACTION] /api/settings/accent_color - User {current_user.username} updating accent_color to {data['accent_color']}")
         current_user.accent_color = data['accent_color']
         try:
             db.session.commit()
+            _app.logger.info(f"[DB_SUCCESS] /api/settings/accent_color - Accent color preference for {current_user.username} saved.")
             return jsonify({'status': 'success', 'message': 'Accent color updated successfully'})
         except Exception as e:
             db.session.rollback()
-            _app.logger.error(f"Error saving accent_color: {e}", exc_info=True)
+            _app.logger.error(f"[DB_ERROR] /api/settings/accent_color - Error saving accent_color for {current_user.username}: {e}", exc_info=True)
             return jsonify({'status': 'error', 'message': 'Failed to save accent color preference'}), 500
 
     @_app.errorhandler(403)
     def forbidden_page(error):
+        _app.logger.warning(f"[ERROR_HANDLER] 403 Forbidden - Path: {request.path} - Error: {error}")
+        _app.logger.info(f"[SESSION_STATE] 403 - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] 403 - current_user authenticated: {current_user.is_authenticated}")
         return render_template('403.html'), 403
 
     @_app.errorhandler(404)
     def page_not_found(error):
+        _app.logger.warning(f"[ERROR_HANDLER] 404 Not Found - Path: {request.path} - Error: {error}")
+        _app.logger.info(f"[SESSION_STATE] 404 - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] 404 - current_user authenticated: {current_user.is_authenticated}")
         return render_template('404.html'), 404
 
     @_app.errorhandler(500)
     def server_error_page(error):
-        _app.logger.error(f"Server error: {error}", exc_info=True)
+        _app.logger.error(f"[ERROR_HANDLER] 500 Server Error - Path: {request.path} - Error: {error}", exc_info=True)
+        _app.logger.info(f"[SESSION_STATE] 500 - Session: {dict(session)}")
+        _app.logger.info(f"[AUTH_STATE] 500 - current_user authenticated: {current_user.is_authenticated}")
         return render_template('500.html'), 500
 
     with _app.app_context():
+        _app.logger.info("Initializing database tables (db.create_all())...")
         db.create_all() # This will create tables if they don't exist, based on the models.
                         # For PostgreSQL, this should typically be run once, or managed by migrations.
                         # Initial data seeding (like creating a default admin user) should be
