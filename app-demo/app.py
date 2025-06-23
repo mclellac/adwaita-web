@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from flask import Flask, render_template, url_for, abort, request, redirect, flash, jsonify
+from flask import Flask, render_template, url_for, abort, request, redirect, flash, jsonify, session
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect, FlaskForm
