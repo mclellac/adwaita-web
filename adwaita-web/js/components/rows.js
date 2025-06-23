@@ -483,8 +483,11 @@ export function createAdwPasswordEntryRow(options = {}) {
     if (entry) {
         const visibilityToggle = createAdwButton('', {
             icon: EYE_ICON_SVG, flat: true, isCircular: true,
+            ariaLabel: 'Show password', // Added aria-label
             onClick: () => {
                 const isPassword = entry.type === 'password'; entry.type = isPassword ? 'text' : 'password';
+                // Also update aria-label when icon changes
+                visibilityToggle.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
                 const iconSpan = visibilityToggle.querySelector('.icon');
                 if(iconSpan) { // createAdwButton creates a span.icon for SVG
                     while(iconSpan.firstChild) iconSpan.removeChild(iconSpan.firstChild);

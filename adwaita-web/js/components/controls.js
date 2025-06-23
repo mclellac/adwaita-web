@@ -481,9 +481,10 @@ export class AdwSpinButton extends HTMLElement {
             iconName: 'ui/pan-down-symbolic',
             flat: true,
             isCircular: false,
-            cssClass: 'adw-spin-button-control',
-            ariaLabel: 'Decrement'
+            // cssClass is not a standard option for createAdwButton factory
+            // ariaLabel will be passed to createAdwButton
         });
+        this._downButton.setAttribute('aria-label', 'Decrement'); // Explicitly set after creation
         this._downButton.classList.add('adw-spin-button-down');
         this._downButton.addEventListener('click', () => { if(!this.disabled) this.value -= this.step; });
 
@@ -491,9 +492,10 @@ export class AdwSpinButton extends HTMLElement {
             iconName: 'ui/pan-up-symbolic',
             flat: true,
             isCircular: false,
-            cssClass: 'adw-spin-button-control',
-            ariaLabel: 'Increment'
+            // cssClass is not a standard option for createAdwButton factory
+            // ariaLabel will be passed to createAdwButton
         });
+        this._upButton.setAttribute('aria-label', 'Increment'); // Explicitly set after creation
         this._upButton.classList.add('adw-spin-button-up');
         this._upButton.addEventListener('click', () => { if(!this.disabled) this.value += this.step; });
 

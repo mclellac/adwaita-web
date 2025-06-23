@@ -306,22 +306,54 @@ export class AdwButton extends HTMLElement {
             internalButton.classList.add(appearance);
         }
 
-        // Warning check: Re-read attributes directly in the condition for maximum freshness,
-        // though the previous change to the factory order is the more critical fix.
-        if (isEffectivelyIconOnly &&
-            !this.getAttribute('aria-label') &&      // Direct re-read
-            !this.getAttribute('aria-labelledby') && // Already direct
-            !this.getAttribute('title')) {           // Direct re-read
+        // Warning check: Use queueMicrotask to delay the check slightly,
+        // allowing parent components to fully set attributes during their own rendering.
+        if (typeof queueMicrotask === 'function') {
+            queueMicrotask(() => {
+                // Re-fetch attributes within the microtask as their values might have settled.
+                const currentHostAriaLabel = this.getAttribute('aria-label');
+                const currentHostAriaLabelledBy = this.getAttribute('aria-labelledby');
+                const currentHostTitle = this.getAttribute('title');
+                const currentIconNameAttr = this.getAttribute('icon-name'); // Re-check icon presence
+                const currentIconAttr = this.getAttribute('icon'); // Re-check deprecated icon
 
-            let iconInfo = 'unspecified icon';
-            // iconNameAttr and iconAttr are already defined earlier in this function.
-            if (iconNameAttr) {
-                iconInfo = `icon-name: "${iconNameAttr}"`;
-            } else if (iconAttr) {
-                iconInfo = `icon attribute (deprecated): "${iconAttr.substring(0,30)}"`;
+                // Re-determine if icon-only based on current state
+                const currentHasSlottedText = Array.from(this.childNodes).some(node =>
+                    (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '') ||
+                    (node.nodeType === Node.ELEMENT_NODE && !node.hasAttribute('slot'))
+                );
+                let currentIsEffectivelyIconOnly = false;
+                if (currentIconNameAttr || currentIconAttr) {
+                    currentIsEffectivelyIconOnly = !currentHasSlottedText;
+                }
+
+                if (currentIsEffectivelyIconOnly &&
+                    !currentHostAriaLabel &&
+                    !currentHostAriaLabelledBy &&
+                    !currentHostTitle) {
+
+                    let iconInfo = 'unspecified icon';
+                    if (currentIconNameAttr) {
+                        iconInfo = `icon-name: "${currentIconNameAttr}"`;
+                    } else if (currentIconAttr) {
+                        iconInfo = `icon attribute (deprecated): "${currentIconAttr.substring(0,30)}"`;
+                    }
+                    console.warn(`AdwButton WC (deferred check): Icon-only button created without an accessible name on the host element (aria-label, aria-labelledby, or title). ${iconInfo}`, this);
+                }
+            });
+        } else {
+            // Fallback for environments without queueMicrotask (e.g., older browsers, though unlikely for modern dev)
+            // Or, simply perform the check immediately if queueMicrotask is not critical.
+            // For this case, we'll keep the immediate check as a fallback.
+            if (isEffectivelyIconOnly &&
+                !hostAriaLabel && // Use already fetched values for immediate check
+                !this.getAttribute('aria-labelledby') &&
+                !hostTitle) {
+                let iconInfo = 'unspecified icon';
+                if (iconNameAttr) iconInfo = `icon-name: "${iconNameAttr}"`;
+                else if (iconAttr) iconInfo = `icon attribute (deprecated): "${iconAttr.substring(0,30)}"`;
+                console.warn(`AdwButton WC (immediate check): Icon-only button created without an accessible name on the host element (aria-label, aria-labelledby, or title). ${iconInfo}`, this);
             }
-            // The warning is about the host <adw-button> lacking an accessible name.
-            console.warn(`AdwButton WC: Icon-only button created without an accessible name on the host element (aria-label, aria-labelledby, or title). ${iconInfo}`, this);
         }
 
         this.shadowRoot.appendChild(internalButton);
