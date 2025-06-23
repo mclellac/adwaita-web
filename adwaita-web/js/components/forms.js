@@ -265,6 +265,7 @@ export function createAdwSpinButton(options = {}) {
     flat: true,
     isCircular: false, // Ensure it's not circular to allow default padding to be small
     cssClass: 'adw-spin-button-control', // Add a class for specific styling if needed
+    ariaLabel: 'Decrement', // Pass as option
     onClick: () => {
         let numValue = parseFloat(entry.value) - step;
         numValue = Math.max(min, numValue);
@@ -277,7 +278,7 @@ export function createAdwSpinButton(options = {}) {
     }
   });
   downButton.classList.add('adw-spin-button-down');
-  downButton.setAttribute('aria-label', 'Decrement');
+  // downButton.setAttribute('aria-label', 'Decrement'); // Now passed in options
 
   const upButton = createAdwButton('', {
     // icon: '<svg viewBox="0 0 16 16" fill="currentColor" style="width:1em;height:1em;"><path d="M4 10h8L8 5z"/></svg>',
@@ -286,6 +287,7 @@ export function createAdwSpinButton(options = {}) {
     flat: true,
     isCircular: false, // Ensure it's not circular
     cssClass: 'adw-spin-button-control',
+    ariaLabel: 'Increment', // Pass as option
     onClick: () => {
         let numValue = parseFloat(entry.value) + step;
         numValue = Math.min(max, numValue);
@@ -394,20 +396,22 @@ export class AdwSpinButton extends HTMLElement {
             iconName: 'ui/pan-down-symbolic',
             flat: true,
             isCircular: false,
-            cssClass: 'adw-spin-button-control'
+            cssClass: 'adw-spin-button-control',
+            ariaLabel: 'Decrement'
         });
         this._downButton.classList.add('adw-spin-button-down');
-        this._downButton.setAttribute('aria-label', 'Decrement');
+        // this._downButton.setAttribute('aria-label', 'Decrement'); // Now passed in options
         this._downButton.addEventListener('click', () => { if(!this.disabled) this.value -= this.step; });
 
         this._upButton = createAdwButton('', {
             iconName: 'ui/pan-up-symbolic',
             flat: true,
             isCircular: false,
-            cssClass: 'adw-spin-button-control'
+            cssClass: 'adw-spin-button-control',
+            ariaLabel: 'Increment'
         });
         this._upButton.classList.add('adw-spin-button-up');
-        this._upButton.setAttribute('aria-label', 'Increment');
+        // this._upButton.setAttribute('aria-label', 'Increment'); // Now passed in options
         this._upButton.addEventListener('click', () => { if(!this.disabled) this.value += this.step; });
 
         btnContainer.appendChild(this._upButton);
