@@ -11,7 +11,7 @@
       {# This block itself doesn't render anything visible here #}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('login') }}" style="display: contents;"> {# Use display:contents for form if it's just a wrapper for list-box and button #}
+    <form method="POST" action="{{ url_for('login') }}" id="login-form" style="display: contents;"> {# Use display:contents for form if it's just a wrapper for list-box and button #}
       {{ form.hidden_tag() }} {# CSRF token #}
 
       <div>
@@ -41,7 +41,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
+    const form = document.getElementById('login-form');
     const usernameEntry = document.getElementById('username-entry');
     const passwordEntry = document.getElementById('password-entry');
     const submitButton = form.querySelector('adw-button[type="submit"]');
