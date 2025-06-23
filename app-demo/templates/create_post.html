@@ -149,10 +149,14 @@
 {{ super() }}
 {# Tiptap script remains the same as provided in previous version of this file #}
 <script type="module">
+    console.log('[Debug Create Post] Tiptap script executing.');
     if (window.Tiptap && window.Tiptap.Core && window.Tiptap.StarterKit) {
+        console.log('[Debug Create Post] Tiptap objects found on window. Starting editor initialization.');
         const { Editor } = window.Tiptap.Core;
         const StarterKit = window.Tiptap.StarterKit;
         const Placeholder = window.Tiptap.Placeholder;
+
+        console.log('[Debug Create Post] Editor, StarterKit, Placeholder destructured/assigned.');
 
         const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
         const editorContainer = document.getElementById('tiptap-editor-container');
@@ -160,6 +164,12 @@
 
         const editor = new Editor({
             element: editorContainer,
+            onCreate: () => {
+                console.log('[Debug Create Post] Tiptap editor CREATED.');
+            },
+            onFocus: () => {
+                console.log('[Debug Create Post] Tiptap editor FOCUSED.');
+            },
             extensions: [
                 StarterKit.configure({
                     // heading: { levels: [1, 2, 3] }, // configure specific starter kit extensions
@@ -171,14 +181,19 @@
             content: contentTextarea.value, // Load existing content if any (for edit page mostly)
             onUpdate: ({ editor }) => {
                 contentTextarea.value = editor.getHTML();
+                console.log('[Debug Create Post] Tiptap editor content updated, synced to textarea.');
             },
         });
+
+        console.log('[Debug Create Post] Tiptap editor instance allegedly created:', editor);
 
         // Toolbar button actions
         const toolbar = document.getElementById('tiptap-toolbar');
         if (toolbar) {
+            console.log('[Debug Create Post] Tiptap toolbar element found.');
             toolbar.addEventListener('click', (e) => {
                 if (e.target.tagName !== 'BUTTON') return;
+                console.log('[Debug Create Post] Toolbar button clicked:', e.target.id);
                 const action = e.target.id.replace('-btn', '');
                 switch(action) {
                     case 'bold': editor.chain().focus().toggleBold().run(); break;
@@ -194,10 +209,13 @@
                     case 'clear': editor.chain().focus().clearContent().run(); break;
                 }
             });
+        } else {
+            console.warn('[Debug Create Post] Tiptap toolbar element NOT found.');
         }
 
 
         // Update button states based on editor selection
+        console.log('[Debug Create Post] Setting up editor "transaction" event listener for toolbar updates.');
         editor.on('transaction', () => {
             if (!toolbar) return; // Guard against missing toolbar
             const boldBtn = document.getElementById('bold-btn');
@@ -223,25 +241,31 @@
 
         // Ensure content is synced before form submission (onUpdate should handle most cases)
         if (formEl) {
+            console.log('[Debug Create Post] Form element found. Adding submit listener for final sync.');
             formEl.addEventListener('submit', () => {
+                console.log('[Debug Create Post] Form submit event triggered. Syncing editor content.');
                 if (editor && !editor.isDestroyed) {
                     contentTextarea.value = editor.getHTML();
                 }
             });
+        } else {
+            console.warn('[Debug Create Post] Form element NOT found for submit listener.');
         }
 
         // Destroy editor when page unloads to prevent memory leaks
         window.addEventListener('beforeunload', () => {
+            console.log('[Debug Create Post] beforeunload event. Destroying editor.');
             if (editor && !editor.isDestroyed) {
                 editor.destroy();
             }
         });
+        console.log('[Debug Create Post] Tiptap setup complete.');
 
     } else {
-        console.error('Tiptap is not loaded. Rich text editor will not function.');
+        console.error('[Debug Create Post] Tiptap is not loaded (window.Tiptap or its components are missing). Rich text editor will not function.');
         // Fallback: make the original textarea visible if Tiptap fails
         const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
-        if(contentTextarea) contentTextarea.style.display = 'block';
+        if(contentTextarea) { console.log('[Debug Create Post] Fallback: Making textarea visible.'); contentTextarea.style.display = 'block'; }
     }
 </script>
 {% endblock %}

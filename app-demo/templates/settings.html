@@ -42,5 +42,13 @@
 
 {% block scripts %}
 {{ super() }}
+<script>
+  // Provide URLs for settings.js
+  window.settingsUrls = {
+    saveThemeUrl: "{{ url_for('save_theme_preference') }}",
+    saveAccentUrl: "{{ url_for('save_accent_color_preference') }}",
+    csrfToken: "{{ csrf_token() }}" // Also pass CSRF token here for cleaner JS
+  };
+</script>
 <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 {% endblock %}

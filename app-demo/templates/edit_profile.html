@@ -163,6 +163,7 @@
     let cropper;
 
     if (uploadPhotoButton && photoInput) {
+      console.log('[Debug Profile Edit] Upload photo button and photo input field found.');
       uploadPhotoButton.addEventListener('click', function() {
         try {
           photoInput.click(); // Trigger the hidden file input

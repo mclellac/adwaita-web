@@ -551,8 +551,12 @@ def test_user_posts_on_profile_page(app_instance, client, new_user, new_user_dat
         db.session.commit()
 
     # Test Page 1
-    with app_instance.app_context():
+    with app_instance.app_context(): # Establish app context for url_for
         response_page1 = client.get(url_for('profile', username=user_data['username'], page=1))
+        # Generate relative paths for comparison with template output
+        expected_url_page_2 = url_for("profile", username=user_data["username"], page=2, _external=False)
+        expected_url_page_1 = url_for("profile", username=user_data["username"], page=1, _external=False) # For page 2 assertions
+
     assert response_page1.status_code == 200
     html_content_page1 = response_page1.data.decode('utf-8')
 
@@ -564,13 +568,14 @@ def test_user_posts_on_profile_page(app_instance, client, new_user, new_user_dat
         # Checking for title within the adw-action-row structure
         assert f'title="{expected_titles_page1[i]}"' in html_content_page1
 
-    assert b"Page 1 of 2" in response_page1.data
-    assert "Next" in html_content_page1 # Check for the word "Next" in button
-    # For disabled state, the text "Previous" would still be there but inside a disabled button
+    # Check for pagination structure: Page 1 is active, Page 2 exists
+    assert f'<adw-button class="suggested-action" aria-current="page">1</adw-button>' in html_content_page1
+    assert f'<adw-button href="{expected_url_page_2}">2</adw-button>' in html_content_page1
+    assert "Next" in html_content_page1
     assert "Previous" in html_content_page1
 
     # Test Page 2
-    with app_instance.app_context():
+    with app_instance.app_context(): # Establish app context for url_for
         response_page2 = client.get(url_for('profile', username=user_data['username'], page=2))
     assert response_page2.status_code == 200
     html_content_page2 = response_page2.data.decode('utf-8')
@@ -584,9 +589,11 @@ def test_user_posts_on_profile_page(app_instance, client, new_user, new_user_dat
     # Ensure posts from page 1 are not on page 2 (e.g. check Post 7 is not on page 2)
     assert f'title="{expected_titles_page1[0]}"' not in html_content_page2
 
-    assert b"Page 2 of 2" in response_page2.data
-    assert "Previous" in html_content_page2 # "Previous" link should be active
-    assert "Next" in html_content_page2 # "Next" button text, but should be disabled or not a link
+    # Check for pagination structure: Page 2 is active
+    assert f'<adw-button class="suggested-action" aria-current="page">2</adw-button>' in html_content_page2
+    assert f'<adw-button href="{expected_url_page_1}">1</adw-button>' in html_content_page2
+    assert "Previous" in html_content_page2
+    assert "Next" in html_content_page2
 
 def test_edit_post(app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
