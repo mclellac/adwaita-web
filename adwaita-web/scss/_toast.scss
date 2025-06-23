@@ -82,9 +82,23 @@
     margin-left: var(--spacing-s);
     color: var(--toast-secondary-fg-color, rgba(255,255,255,0.7));
 
-    .adw-icon, .icon svg {
-        font-size: var(--icon-size-inline, 1em);
+    // Target the icon container (span.icon or adw-icon)
+    .adw-icon, .icon {
+        display: inline-flex; // Ensure proper alignment and sizing
+        align-items: center;
+        justify-content: center;
+        // Use a specific size for the icon container, matching typical Adwaita small icon buttons
+        width: var(--icon-size-small, 16px); // e.g., 16px
+        height: var(--icon-size-small, 16px);
     }
+
+    // Target the SVG element itself within the icon container
+    .adw-icon svg, .icon svg {
+        width: 100%; // Fill the container
+        height: 100%; // Fill the container
+        // fill: currentColor; // Already set in SVG string, but good to ensure
+    }
+
     &:hover {
         color: var(--toast-foreground-color, rgba(255,255,255,1));
         background-color: rgba(255,255,255,0.1);

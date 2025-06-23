@@ -55,6 +55,27 @@
     // Example: if button is too tall, adjust its internal padding or line-height.
   }
 
+  // Specific styling for the dismiss button in a banner
+  .adw-banner-dismiss-button.adw-button.circular.flat {
+    // Inherits .circular and .flat styles from _button.scss
+    // Adjust color if needed to ensure good contrast against banner background,
+    // though default flat button color (currentcolor) should work if banner-fg-color is set right.
+    // color: var(--banner-secondary-fg-color, var(--secondary-fg-color)); // Example if a dimmer color is desired
+
+    // Ensure it's aligned nicely with the title, especially if title wraps to multiple lines.
+    // Default align-items: center on .adw-banner should handle vertical alignment.
+
+    // Adjust size/padding if the default circular button padding isn't perfect for banners.
+    // For example, if it needs to be slightly smaller or have less padding:
+    // padding: var(--spacing-xs); // e.g., 6px if default var(--spacing-s) is too large
+    // .adw-icon {
+    //   font-size: 0.9em; // If the icon itself needs to be slightly smaller
+    // }
+
+    // Ensure it's visually distinct from the main action button, if present.
+    // The flat circular style already does this well.
+  }
+
   // If a banner needs to be themed for specific contexts (e.g. error, warning)
   // this can be done by adding classes to the AdwBanner element itself.
   // Example:

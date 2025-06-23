@@ -7,9 +7,11 @@
   // display: flex; (from .adw-row)
   // align-items: center; (from .adw-row)
   gap: var(--spacing-m); // Standard gap for row items
+  justify-content: space-between; // Ensure spacing if spinbutton doesn't grow significantly
 
   .adw-spin-row-text-content {
-    flex-grow: 1; // Allow text content to take available space
+    flex-grow: 0; // Title part should not grow
+    flex-shrink: 1; // Can shrink if needed
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -34,7 +36,9 @@
 
   .adw-spin-row-spin-button {
     // This class is on the adw-spin-button component itself (the wrapper div)
-    flex-shrink: 0; // Don't allow the spin button to shrink
+    flex-grow: 1;   // Allow spin button to take available space
+    flex-shrink: 1; // Can also shrink
+    min-width: 120px; // Give it a reasonable minimum width
   }
 }
 

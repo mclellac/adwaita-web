@@ -29,7 +29,8 @@
     box-sizing: border-box;
     // background-color: var(--window-bg-color); // Pages have their own bg or inherit
     overflow-y: auto; // Allow individual pages to scroll
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    transition: transform var(--animation-duration-short, 250ms) var(--animation-ease-in-out, ease-in-out),
+                opacity var(--animation-duration-short, 250ms) var(--animation-ease-in-out, ease-in-out);
     // visibility: hidden; // Controlled by display initially
 
     // &.adw-navigation-page-active {

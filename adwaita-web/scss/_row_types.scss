@@ -79,11 +79,21 @@
   align-items: center;
   width: 100%;
   gap: var(--spacing-m);
+  justify-content: space-between; // Ensure proper spacing distribution
 
-  .adw-entry-row-title {
-    // No specific styles needed if it's just an AdwLabel, it will inherit.
-    // font-weight: normal; // If needed to override default label boldness
+  .adw-entry-row-text-content { // Assuming JS structure wraps title/subtitle in this
+    flex-grow: 0;
+    flex-shrink: 1;
+    // Add other properties from AdwComboRow's text-content if necessary:
+    // display: flex;
+    // flex-direction: column;
+    // justify-content: center;
+    // overflow: hidden;
   }
+
+  // .adw-entry-row-title {
+  //   // Styles for actual title label if needed beyond what AdwLabel provides
+  // }
 
   .adw-entry-row-entry {
     flex-grow: 1;
@@ -181,9 +191,11 @@ body.dark-theme .adw-expander-row-content.expanded {
   align-items: center;
   width: 100%;
   gap: var(--spacing-m);
+  justify-content: space-between; // Ensure spacing if select doesn't grow significantly
 
   .adw-combo-row-text-content { // Similar to ActionRow's text content
-    flex-grow: 1;
+    flex-grow: 0; // Title part should not grow
+    flex-shrink: 1; // Can shrink if needed
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -196,40 +208,48 @@ body.dark-theme .adw-expander-row-content.expanded {
   }
 
   .adw-combo-row-select {
-    // Basic styling, can be enhanced
-    padding: var(--spacing-xs) var(--spacing-s);
-    border: var(--border-width, 1px) solid var(--button-border-color);
-    border-radius: var(--border-radius-default);
-    background-color: var(--button-bg-color);
-    color: var(--button-fg-color);
-    min-width: 150px; // Ensure select has some width
-    // For true Adwaita look, this <select> would need significant custom styling
-    // to hide the native dropdown and mimic a GtkDropDown appearance (button-like with an arrow).
-    // The current styling provides basic theming for the native select.
+    // Reset default browser appearance if possible (tricky with select)
+    // -webkit-appearance: none; /* Not using this for now to keep native dropdown arrow */
+    // -moz-appearance: none;
+    // appearance: none;
+
+    background-color: transparent;
+    border: none; // Remove default border
+    border-bottom: 1px solid var(--borders-color); // Subtle bottom border, like .row-input for AdwEntry
+    border-radius: 0; // No border radius for a clean line
+    padding: var(--spacing-xxs) 0; // Minimal vertical padding to align text, horizontal spacing via row gap.
+                                   // Adjust if text is not vertically centered.
+    font-size: inherit; // Inherit font size from row
+    color: inherit; // Inherit text color
+    flex-grow: 1; // Take available space
+    min-width: 100px; // Prevent it from becoming too small
+    // Native select appearance is hard to override perfectly.
+    // For a true Adwaita GtkDropDown look, a custom component emulating <select> would be needed.
+    // This aims for a cleaner integration of the native <select>.
+
+    // Custom dropdown arrow if hiding native one (requires appearance: none)
+    // background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22currentColor%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M4.94%205.72a.75.75%200%200%201%201.06-.04l1.97%201.928%201.97-1.928a.75.75%200%201%201%201.02%201.1l-2.5%202.449a.75.75%200%200%201-1.02%200L4.98%206.78a.75.75%200%200%201-.04-1.06Z%22%2F%3E%3C%2Fsvg%3E");
+    // background-repeat: no-repeat;
+    // background-position: right var(--spacing-xs) center;
+    // padding-right: var(--spacing-l); // Make space for custom arrow if used
 
     &:hover {
-      background-color: var(--button-hover-bg-color);
+      // No background change on hover for this style, border might change if desired
+      // border-bottom-color: var(--borders-hover-color, var(--borders-color));
     }
-    &:focus-visible {
-      outline: 2px solid var(--accent-bg-color);
-      outline-offset: 1px;
+    &:focus { // Using :focus for select, focus-visible might not always trigger as expected on <select>
+      outline: none;
+      border-bottom-color: var(--accent-color); // Accent color for focused bottom border
     }
     &:disabled {
-        opacity: var(--opacity-disabled, 0.5);
+        border-bottom-color: var(--borders-color); // Keep border for consistency
+        border-bottom-style: dashed; // Indicate disabled state with dashed line
+        opacity: var(--opacity-disabled, 0.5); // Standard disabled opacity
+        color: var(--disabled-fg-color); // Use disabled foreground color
+        background-color: transparent; // Ensure background remains transparent
         cursor: not-allowed;
-        background-color: var(--button-disabled-bg-light); // Use disabled button bg
-        color: var(--button-disabled-fg-light); // Use disabled button fg
-        border-color: transparent; // Or a disabled border color
-        body.dark-theme & {
-            background-color: var(--button-disabled-bg-dark);
-            color: var(--button-disabled-fg-dark);
-        }
     }
   }
 }
 
-// Dark theme for ComboRow select specific properties are handled by the variables now.
-// .dark-theme .adw-combo-row .adw-combo-row-select,
-// body.dark-theme .adw-combo-row .adw-combo-row-select {
-//    // Variables like --button-border-color, --button-bg-color should correctly switch
-// }
+// Dark theme variables should handle color changes automatically.

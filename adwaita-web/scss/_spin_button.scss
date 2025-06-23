@@ -106,3 +106,45 @@ body.dark-theme .adw-spin-button {
     border-color: var(--accent-bg-color);
   }
 }
+
+// Variant for spin buttons used within rows (e.g., AdwSpinRow)
+.adw-spin-button.row-input {
+  border-width: 0 0 1px 0; // Only bottom border
+  border-radius: 0; // No border radius for a clean line
+  background-color: transparent; // Main background transparent
+
+  .adw-spin-button-entry {
+    background-color: transparent; // Entry part also transparent
+    padding-left: 0; // AdwEntryRow will handle overall padding
+  }
+
+  .adw-spin-button-buttons {
+    .adw-spin-button-control.adw-button {
+      background-color: transparent; // Buttons also transparent initially
+      color: var(--secondary-fg-color); // Use a less prominent color for icons
+
+      &:hover {
+        background-color: var(--button-flat-hover-bg-color); // Subtle hover
+        color: var(--primary-fg-color);
+      }
+      &:active {
+        background-color: var(--button-flat-active-bg-color);
+      }
+    }
+    .adw-spin-button-up {
+      border-bottom-color: var(--borders-color); // Match row border style
+    }
+  }
+
+  &:focus-within { // Focus indication on the wrapper
+    outline: none; // Remove outer outline
+    border-bottom-color: var(--accent-color); // Accent color for focused bottom border
+  }
+
+  &.disabled {
+    border-bottom-style: dashed;
+    .adw-spin-button-entry, .adw-spin-button-buttons .adw-button {
+        background-color: transparent !important; // Ensure transparent even when disabled
+    }
+  }
+}

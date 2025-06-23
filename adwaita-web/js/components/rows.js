@@ -226,7 +226,14 @@ export class AdwActionRow extends HTMLElement {
         const titleLabel = createAdwLabel(titleText, {htmlTag: 'span'}); titleLabel.classList.add('adw-action-row-title');
         const titleSlot = document.createElement('slot'); titleSlot.name = 'title-override'; titleLabel.appendChild(titleSlot);
         contentDiv.appendChild(titleLabel);
-        if (subtitleText) { const subtitleLabel = createAdwLabel(subtitleText, {htmlTag: 'span'}); subtitleLabel.classList.add('adw-action-row-subtitle'); contentDiv.appendChild(subtitleLabel); }
+        if (subtitleText) {
+            const subtitleLabel = createAdwLabel(subtitleText, {htmlTag: 'span'});
+            subtitleLabel.classList.add('adw-action-row-subtitle');
+            contentDiv.appendChild(subtitleLabel);
+            row.classList.add('has-subtitle');
+        } else {
+            row.classList.remove('has-subtitle');
+        }
         row.appendChild(contentDiv);
 
         const suffixContainer = document.createElement('div'); suffixContainer.classList.add('adw-action-row-suffix');
@@ -364,6 +371,15 @@ export class AdwEntryRow extends HTMLElement {
 
             this._internalEntry = new AdwEntry();
             this._internalEntry.classList.add("adw-entry-row-entry");
+            // Apply the row-input variant style
+            if (this._internalEntry.shadowRoot && this._internalEntry.shadowRoot.querySelector('.adw-entry')) {
+              // If AdwEntry is a web component and its internal input is what needs styling directly
+              // This depends on AdwEntry's internal structure.
+              // For now, assume AdwEntry itself can take the .row-input class or its styles apply to its host.
+            }
+            // Add .row-input to the AdwEntry host element itself if its styles are scoped to :host or .adw-entry
+            this._internalEntry.classList.add("row-input");
+
 
             this._internalEntry.addEventListener('input', (e) => {
                 const currentAttrValue = this.getAttribute('value');
@@ -587,6 +603,7 @@ export class AdwPasswordEntryRow extends HTMLElement {
             this._internalEntry = new AdwEntry();
             this._internalEntry.setAttribute('type', 'password'); // Default type
             this._internalEntry.classList.add("adw-entry-row-entry");
+            this._internalEntry.classList.add("row-input"); // Apply the row-input variant style
 
             this._internalEntry.addEventListener('input', (e) => {
                 const currentAttrValue = this.getAttribute('value');
@@ -945,7 +962,8 @@ export class AdwSpinRow extends HTMLElement {
         const titleText = this.getAttribute('title') || ''; const titleLabel = createAdwLabel(titleText, { htmlTag: "span" }); titleLabel.classList.add("adw-spin-row-title"); textContentDiv.appendChild(titleLabel);
         const subtitleText = this.getAttribute('subtitle'); if (subtitleText) { const subtitleLabel = createAdwLabel(subtitleText, { htmlTag: "span" }); subtitleLabel.classList.add("adw-spin-row-subtitle"); textContentDiv.appendChild(subtitleLabel); }
         row.appendChild(textContentDiv);
-        this._internalSpinButton = new AdwSpinButton(); this._internalSpinButton.classList.add("adw-spin-row-spin-button");
+        this._internalSpinButton = new AdwSpinButton();
+        this._internalSpinButton.classList.add("adw-spin-row-spin-button", "row-input"); // Add .row-input
         if (this.hasAttribute('value')) this._internalSpinButton.value = parseFloat(this.getAttribute('value'));
         if (this.hasAttribute('min')) this._internalSpinButton.setAttribute('min', this.getAttribute('min'));
         if (this.hasAttribute('max')) this._internalSpinButton.setAttribute('max', this.getAttribute('max'));

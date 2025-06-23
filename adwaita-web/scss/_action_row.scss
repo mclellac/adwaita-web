@@ -7,12 +7,29 @@
   // The AdwActionRow web component's shadow DOM root has .adw-action-row,
   // so we apply row-base styles here.
   @include mixins.row-base; // Applies common row styles like min-height, padding, border-bottom
-  padding-top: var(--spacing-s);    // Override default vertical padding from row-base for ActionRow (9px)
-  padding-bottom: var(--spacing-s); // Override default vertical padding from row-base for ActionRow (9px)
+  // Override default vertical padding from row-base for ActionRow
+  // Aim for ~54px height for single-line, ~70px for two-line (title + subtitle)
+  // These values assume typical font sizes and line heights.
+  // Libadwaita uses 12px top/bottom for single line content area usually.
+  padding-top: 12px;
+  padding-bottom: 12px;
   // background-color: var(--card-bg-color); // This was in old version. Rows usually take listbox bg.
                                          // If used standalone on a card, card provides bg.
                                          // If within a listbox on a card, listbox provides bg.
   gap: var(--spacing-m); // Use gap for spacing prefix, content, and suffix
+
+  &.has-subtitle {
+    // Adjust padding for rows with subtitles to achieve ~70px height
+    // This often means slightly more padding if the text content height itself isn't enough.
+    // Given title + subtitle, their combined height + margin-top on subtitle will be significant.
+    // The 12px top/bottom might already be fine, or might need slight adjustment
+    // depending on actual rendered height of title+subtitle block.
+    // Let's start with the same and adjust if testing shows need.
+    // padding-top: 12px;
+    // padding-bottom: 12px;
+    // If row-base min-height is, e.g. 48px, this padding makes it at least 72px.
+    // Consider if min-height from row-base should be overridden or removed for ActionRow.
+  }
 
   // If the row itself is clickable/activatable
   &.activatable {
