@@ -156,6 +156,11 @@ export class AdwDialog extends HTMLElement {
         buttonsSlotElement.name = 'buttons';
         buttonsContainer.appendChild(buttonsSlotElement);
         this._dialogElement.appendChild(buttonsContainer);
+        console.log("[AdwDialog._buildDialogDOM] AdwDialog: Created and appended buttonsContainer with slot 'buttons'.");
+
+        buttonsSlotElement.addEventListener('slotchange', () => {
+            console.log("[AdwDialog._buildDialogDOM] AdwDialog: slotchange event fired for 'buttons' slot. Assigned nodes:", buttonsSlotElement.assignedNodes());
+        });
 
         // Event listeners for backdrop click and Escape key
         this._backdropElement.addEventListener('click', (event) => {
@@ -447,23 +452,29 @@ export class AdwAlertDialog extends HTMLElement {
 
         // Dialog Buttons (Choices)
         const choiceElements = Array.from(this.querySelectorAll('[slot="choice"]'));
+        console.log('[AdwAlertDialog._buildInternalDialog] Found choiceElements count:', choiceElements.length, choiceElements);
+
         if (choiceElements.length > 0) {
             choiceElements.forEach(el => {
                 const button = document.createElement('adw-button');
+                const buttonText = el.textContent.trim();
+                const buttonValue = el.getAttribute('value') || buttonText;
+                console.log('[AdwAlertDialog._buildInternalDialog] Creating choice button. Text:', buttonText, 'Value:', buttonValue);
                 button.setAttribute('slot', 'buttons');
-                button.textContent = el.textContent.trim();
-                const value = el.getAttribute('value') || el.textContent.trim();
+                button.textContent = buttonText;
                 const style = el.dataset.style || el.getAttribute('data-style');
                 if (style === 'suggested') button.setAttribute('suggested', '');
                 if (style === 'destructive') button.setAttribute('destructive', '');
 
                 button.addEventListener('click', () => {
-                    this.dispatchEvent(new CustomEvent('response', { detail: { value } }));
+                    this.dispatchEvent(new CustomEvent('response', { detail: { value: buttonValue } }));
                     this.close();
                 });
                 this._internalDialog.appendChild(button);
+                console.log('[AdwAlertDialog._buildInternalDialog] Appended choice button to internal AdwDialog:', button);
             });
         } else {
+            console.log('[AdwAlertDialog._buildInternalDialog] No choiceElements found, creating default OK button.');
             // Default "OK" button if no choices provided
             const okButton = document.createElement('adw-button');
             okButton.setAttribute('slot', 'buttons');
@@ -474,6 +485,7 @@ export class AdwAlertDialog extends HTMLElement {
                 this.close();
             });
             this._internalDialog.appendChild(okButton);
+            console.log('[AdwAlertDialog._buildInternalDialog] Appended default OK button to internal AdwDialog:', okButton);
         }
 
         // Forward the 'close' event from the internal dialog

@@ -334,6 +334,9 @@ export function createAdwToast(title, options = {}) {
                     composed: true,
                     detail: { actionName: opts.actionName, actionTarget: opts.actionTarget, originalEvent: event }
                 }));
+                if (typeof opts.onAction === 'function') { // Call onAction if provided
+                    opts.onAction();
+                }
             }
         });
         actionButton.classList.add('adw-toast-action-button');
