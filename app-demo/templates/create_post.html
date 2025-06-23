@@ -53,76 +53,52 @@
 {% endblock %}
 
 {% block content %}
-<adw-clamp class="main-content-clamped">
-  <adw-preferences-page title="Create New Post">
-    <form method="POST" action="{{ url_for('create_post') }}" novalidate>
-        {{ form.hidden_tag() }} {# CSRF token #}
+<div class="main-content-clamped" style="padding: 20px;"> {# Basic clamp replacement #}
+  <h2>Create New Post (Diagnostic View)</h2>
+  <form method="POST" action="{{ url_for('create_post') }}" novalidate>
+      {{ form.hidden_tag() }} {# CSRF token #}
 
-        <adw-preferences-group title="Post Details">
-            <adw-list-box>
-                <adw-entry-row
-                    title="{{ form.title.label.text }}"
-                    name="{{ form.title.name }}"
-                    id="{{ form.title.id or 'title_field' }}"
-                    placeholder="Enter post title"
-                    value="{{ form.title.data or '' }}"
-                    {% if form.title.flags.required %}required{% endif %}
-                    subtitle="{{ form.title.errors[0] if form.title.errors else '' }}"
-                    class="{{ 'has-error' if form.title.errors else '' }}">
-                </adw-entry-row>
+      <p>
+          {{ form.title.label }}<br>
+          {{ form.title(size=30, class='adw-entry') }}<br>
+          {% if form.title.errors %}
+              {% for error in form.title.errors %}<span style="color:red;">[{{ error }}]</span><br>{% endfor %}
+          {% endif %}
+      </p>
 
-                <adw-action-row title="{{ form.content.label.text }}" subtitle="Enter your post content below.">
-                    <div slot="suffix" style="width:100%;">
-                        {{ form.content(id=form.content.id or 'content_field', class='adw-entry', style='width: 100%; min-height: 200px; resize: vertical; box-sizing: border-box;', rows='10') }}
-                        {% if form.content.errors %}
-                            <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                                {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </adw-action-row>
-            </adw-list-box>
-        </adw-preferences-group>
+      <p>
+          {{ form.content.label }}<br>
+          {{ form.content(rows=10, cols=70, class='adw-entry', style='resize:vertical;') }}<br>
+          {% if form.content.errors %}
+              {% for error in form.content.errors %}<span style="color:red;">[{{ error }}]</span><br>{% endfor %}
+          {% endif %}
+      </p>
 
-        <adw-preferences-group title="{{ form.categories.label.text }}">
-            <adw-list-box class="{{ 'has-error' if form.categories.errors else '' }}">
-                {% for subfield in form.categories %}
-                <adw-action-row class="adw-checkbox-row">
-                    {# Using prefix slot for better control over layout with label #}
-                    <div slot="prefix" style="display:flex; align-items:center;">
-                      {{ subfield(class_="adw-checkbox", id=subfield.id) }}
-                      <label for="{{ subfield.id }}" style="margin-left: var(--spacing-s);">{{ subfield.label.text }}</label>
-                    </div>
-                </adw-action-row>
-                {% endfor %}
-            </adw-list-box>
-            {% if form.categories.errors %}
-            <adw-list-box> <adw-action-row subtitle="{{ form.categories.errors|join(' ') }}" class="error-row"></adw-action-row> </adw-list-box>
-            {% endif %}
-        </adw-preferences-group>
+      <p>
+          {{ form.categories.label }}<br>
+          {# Basic rendering for categories checkbox #}
+          {% for subfield in form.categories %}
+              {{ subfield }} {{ subfield.label }}<br>
+          {% endfor %}
+          {% if form.categories.errors %}
+              {% for error in form.categories.errors %}<span style="color:red;">[{{ error }}]</span><br>{% endfor %}
+          {% endif %}
+      </p>
 
-        <adw-preferences-group title="Tags">
-            <adw-list-box>
-                <adw-entry-row
-                    title="{{ form.tags_string.label.text }}"
-                    name="{{ form.tags_string.name }}"
-                    id="{{ form.tags_string.id or 'tags_string_field' }}"
-                    placeholder="e.g., tech, travel, food"
-                    value="{{ form.tags_string.data or '' }}"
-                    subtitle="{{ form.tags_string.errors[0] if form.tags_string.errors else 'Comma-separated values.' }}"
-                    class="{{ 'has-error' if form.tags_string.errors else '' }}">
-                </adw-entry-row>
-            </adw-list-box>
-        </adw-preferences-group>
+      <p>
+          {{ form.tags_string.label }}<br>
+          {{ form.tags_string(size=50, class='adw-entry') }}<br>
+          {% if form.tags_string.errors %}
+              {% for error in form.tags_string.errors %}<span style="color:red;">[{{ error }}]</span><br>{% endfor %}
+          {% endif %}
+      </p>
 
-        <adw-action-row>
-            <div slot="suffix" style="display: flex; justify-content: flex-end; gap: var(--spacing-s); width: 100%;">
-                <adw-button type="submit" class="suggested-action" label="{{ form.submit.label.text if form.submit.label else 'Submit Post' }}"></adw-button>
-            </div>
-        </adw-action-row>
-    </form>
-  </adw-preferences-page>
-</adw-clamp>
+      <p>
+          {# Rendering submit as a standard button for diagnostics #}
+          <input type="submit" value="{{ form.submit.label.text if form.submit.label else 'Submit Post' }}">
+      </p>
+  </form>
+</div>
 {% endblock %}
 
 {% block scripts %}
