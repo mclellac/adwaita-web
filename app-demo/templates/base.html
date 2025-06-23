@@ -174,37 +174,37 @@
     #}
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        if (typeof Adw !== 'undefined' && Adw.AdwInitializer) {
-            // AdwInitializer might already handle localStorage and system preferences.
-            // We explicitly set based on server-provided user preference if available.
+        // Check if Adw object and setAccentColor function are available
+        if (typeof Adw !== 'undefined' && typeof Adw.setAccentColor === 'function') {
             const body = document.body;
-            const userTheme = body.dataset.themePreference;
-            const userAccent = body.dataset.accentPreference;
+            const userTheme = body.dataset.themePreference; // From server
+            const userAccent = body.dataset.accentPreference; // From server
 
             if (userTheme) {
-                // Adw.toggleTheme(theme, applyOnly=true) could be a potential API
-                // For now, directly manipulate class if Adw.js doesn't auto-apply from data-*
-                // Adw.js components.js likely already applies theme from localStorage or system.
-                // This is to override with DB preference if it differs.
                 console.log(`[Debug] Applying saved theme from DB: ${userTheme}`);
                 if (userTheme === 'light') {
                     document.body.classList.add('light-theme');
-                    document.body.classList.remove('dark-theme'); // Ensure dark is off
+                    document.body.classList.remove('dark-theme');
                 } else if (userTheme === 'dark') {
                     document.body.classList.add('dark-theme');
-                    document.body.classList.remove('light-theme'); // Ensure light is off
-                } else { // 'system' or unspecified
-                    // Let Adw.js default (localStorage or prefers-color-scheme) handle it
-                    // Or explicitly call Adw.toggleTheme('system') if that's how it works
+                    document.body.classList.remove('light-theme');
                 }
+                // Update localStorage with the theme from DB so loadSavedTheme (if it runs later or on other pages) is consistent
+                try { localStorage.setItem('theme', userTheme); } catch (e) { console.warn("Could not save theme to localStorage from DB prefs:", e); }
             }
+            // If no userTheme from DB, Adw.loadSavedTheme (already attached to DOMContentLoaded in utils.js)
+            // will handle applying theme from localStorage or system preference.
 
-            if (userAccent && Adw.setAccentColor) {
+            if (userAccent) {
                 console.log(`[Debug] Applying saved accent color from DB: ${userAccent}`);
-                Adw.setAccentColor(userAccent);
+                Adw.setAccentColor(userAccent); // This function in utils.js already updates localStorage.
             }
+            // If no userAccent from DB, Adw.loadSavedTheme will call setAccentColor
+            // with the value from localStorage or the default.
         } else {
-            console.warn('[Debug] Adw object or Adw.AdwInitializer not found on DOMContentLoaded for base.html theme/accent setup.');
+            // This warning means Adw object itself or Adw.setAccentColor isn't ready when this script runs.
+            // This would be a more fundamental load order issue with components.js itself.
+            console.warn('[Debug] Adw object or Adw.setAccentColor not found on DOMContentLoaded for base.html theme/accent setup. Check components.js loading.');
         }
       });
     </script>
