@@ -542,11 +542,3 @@ export class AdwOverlaySplitView extends HTMLElement {
 }
 
 // No customElements.define here
-
-[end of adwaita-web/js/components/views.js]
-
-[end of adwaita-web/js/components/views.js]
-
-[end of adwaita-web/js/components/views.js]
-
-[end of adwaita-web/js/components/views.js]
