@@ -36,9 +36,9 @@ export function createAdwRow(options = {}) {
 
 export class AdwRow extends HTMLElement {
     static get observedAttributes() { return ['activated', 'interactive']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._onClick = null; }
-    connectedCallback() { this._render(); }
-    attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._onClick = null; console.log('AdwRow constructor', this.id || this.className); }
+    connectedCallback() { console.log('AdwRow connected', this.id || this.className); this._render(); }
+    attributeChangedCallback(name, oldValue, newValue) { console.log('AdwRow attrChanged', name, this.id || this.className); if (oldValue !== newValue) this._render(); }
     set onClick(handler) { this._onClick = (typeof handler === 'function') ? handler : null; this._render(); }
     get onClick() { return this._onClick; }
     _render() {
@@ -148,9 +148,9 @@ export function createAdwActionRow(options = {}) {
 }
 export class AdwActionRow extends HTMLElement {
     static get observedAttributes() { return ['title', 'subtitle', 'icon-name', 'icon', 'show-chevron', 'activatable']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._onClick = null;}
-    connectedCallback() { this._render(); }
-    attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
+    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._onClick = null; console.log('AdwActionRow constructor', this.title);}
+    connectedCallback() { console.log('AdwActionRow connected', this.title); this._render(); }
+    attributeChangedCallback(name, oldValue, newValue) { console.log('AdwActionRow attrChanged', name, this.title); if (oldValue !== newValue) this._render(); }
     set onClick(handler) { this._onClick = (typeof handler === 'function') ? handler : null; this._render(); }
     get onClick() { return this._onClick; }
     _render() {
@@ -277,15 +277,18 @@ export class AdwEntryRow extends HTMLElement {
         this._titleLabel = null;
         this._subtitleLabel = null;
         this._internalEntry = null;
+        console.log('AdwEntryRow constructor', this.title);
     }
 
     connectedCallback() {
+        console.log('AdwEntryRow connected', this.title);
         if (!this._internalEntry) { // Ensures initial render if not already done
             this._render();
         }
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
+        console.log('AdwEntryRow attrChanged', name, this.title);
         if (oldValue === newValue) return;
 
         if (!this._internalEntry) { // If called before connectedCallback or _render has run
