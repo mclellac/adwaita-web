@@ -62,18 +62,29 @@ export function createAdwButton(text, options = {}) {
     button.setAttribute("icon", opts.icon);
   }
 
-  // Pass through ARIA attributes if provided in options
+  // Handle specific, known camelCased ARIA properties explicitly
+  if (opts.ariaLabel !== undefined) {
+    button.setAttribute('aria-label', opts.ariaLabel);
+  }
+  if (opts.ariaLabelledby !== undefined) {
+    button.setAttribute('aria-labelledby', opts.ariaLabelledby);
+  }
+  if (opts.ariaDescribedby !== undefined) {
+    button.setAttribute('aria-describedby', opts.ariaDescribedby);
+  }
+
+  // Pass through any direct aria-* attributes already in kebab-case
   for (const key in opts) {
     if (key.startsWith('aria-')) {
-      let attrName = key;
-      // Normalize common camelCase ARIA properties to kebab-case for attributes
-      if (key === 'ariaLabel') attrName = 'aria-label';
-      else if (key === 'ariaLabelledby') attrName = 'aria-labelledby';
-      else if (key === 'ariaDescribedby') attrName = 'aria-describedby';
-      // Add more normalizations if other aria-* properties are expected in camelCase
+      // This will re-set if they were also provided as camelCase and handled above,
+      // but direct kebab-case should take precedence or be the same.
+      // Avoid re-setting for the specific camelCase keys already handled.
+      if (key === 'aria-label' && opts.ariaLabel !== undefined) continue;
+      if (key === 'aria-labelledby' && opts.ariaLabelledby !== undefined) continue;
+      if (key === 'aria-describedby' && opts.ariaDescribedby !== undefined) continue;
 
       if (opts[key] !== null && opts[key] !== undefined) {
-        button.setAttribute(attrName, opts[key]);
+        button.setAttribute(key, opts[key]);
       }
     }
   }

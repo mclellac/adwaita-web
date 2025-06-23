@@ -457,7 +457,7 @@ export function createAdwBanner(title, options = {}) {
 
     if (opts.dismissible) {
         const dismissButton = createAdwButton('', {
-            iconName: 'window-close-symbolic', // Use icon-name instead of direct SVG
+            iconName: 'ui/window-close-symbolic', // Corrected icon name
             flat: true,
             isCircular: true,
             ariaLabel: 'Dismiss banner', // Explicitly provide an aria-label
@@ -688,6 +688,10 @@ const svgIconCache = new Map();
 // Base path for icons. Configurable via Adw.config.iconBasePath.
 // Defaults to a path relative to where the main components.js might be (e.g., build/js/ -> ../data/icons/).
 // This allows it to work for index.html if Adw.config.iconBasePath is not set.
+// NOTE FOR `app-demo` USAGE: The `app-demo` application relies on icons from `adwaita-web/data/icons/symbolic/`
+// being copied into its own `app-demo/static/data/icons/symbolic/` directory.
+// Ensure the `build-adwaita-web.sh` script (or a similar process) is run to copy these assets,
+// otherwise icons requested by `icon-name` will result in 404 errors in `app-demo`.
 function getIconBasePath() {
     if (typeof Adw !== 'undefined' && Adw.config && Adw.config.iconBasePath) {
         return Adw.config.iconBasePath.endsWith('/') ? Adw.config.iconBasePath : Adw.config.iconBasePath + '/';
