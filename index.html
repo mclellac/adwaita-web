@@ -21,6 +21,11 @@
         .widget-showcase { margin-bottom: var(--spacing-l); }
         .widget-showcase > adw-label[title-level="1"] { margin-bottom: var(--spacing-m); }
         .button-group adw-button { margin-right: var(--spacing-s); margin-bottom: var(--spacing-s); }
+
+        /* Hide original light DOM choice buttons for AdwAlertDialog as they are processed internally */
+        adw-alert-dialog > adw-button[slot="choice"] {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
