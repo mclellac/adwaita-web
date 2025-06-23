@@ -567,52 +567,51 @@ export function createAdwBanner(title, options = {}) {
     banner.setAttribute('role', 'status'); // Or 'alert' if it's for important dynamic changes
     if (opts.id) banner.id = opts.id;
 
-    const contentWrapper = document.createElement('div'); // Wrapper for title and button
-    contentWrapper.classList.add('adw-banner-content-wrapper');
-
+    // Create title span
     const titleSpan = document.createElement('span');
     titleSpan.classList.add('adw-banner-title');
     if (opts.useMarkup) {
-        titleSpan.innerHTML = title; // Assumes sanitized HTML if markup is used
+        titleSpan.innerHTML = title; // Assumes sanitized HTML
     } else {
         titleSpan.textContent = title;
     }
-    contentWrapper.appendChild(titleSpan); // Add title to wrapper
+    banner.appendChild(titleSpan); // Title is a direct child of banner
 
-    if (opts.buttonLabel) {
+    // Create a group for action and dismiss buttons
+    const buttonGroup = document.createElement('div');
+    buttonGroup.classList.add('adw-banner-button-group');
+
+    let actionButton = null;
+    if (opts.buttonLabel) { // Action button
         const buttonOptions = {
-            // label: opts.buttonLabel, // Label is passed directly to createAdwButton
             onClick: (event) => {
-                // Dispatch a custom event from the banner itself
                 banner.dispatchEvent(new CustomEvent('button-clicked', { bubbles: true, composed: true, detail: { originalEvent: event } }));
             }
         };
-        if (opts.buttonStyle === 'suggested') {
-            buttonOptions.suggested = true;
-        } else if (opts.buttonStyle === 'destructive') {
-            buttonOptions.destructive = true;
-        }
-        // buttonOptions.flat = true; // Banners typically have non-flat action buttons
+        if (opts.buttonStyle === 'suggested') buttonOptions.suggested = true;
+        else if (opts.buttonStyle === 'destructive') buttonOptions.destructive = true;
 
-        const button = createAdwButton(opts.buttonLabel, buttonOptions);
-        button.classList.add('adw-banner-button');
-        contentWrapper.appendChild(button); // Add action button to wrapper
+        actionButton = createAdwButton(opts.buttonLabel, buttonOptions);
+        actionButton.classList.add('adw-banner-button');
+        buttonGroup.appendChild(actionButton);
     }
-    banner.appendChild(contentWrapper); // Add content wrapper to banner
 
-    if (opts.dismissible) {
-        const dismissButton = createAdwButton('Dismiss', { // Changed to text label "Dismiss"
-            // flat: true, // Decide on styling: flat or default button appearance
-            // No iconName or isCircular needed for a text button
-            ariaLabel: 'Dismiss banner', // Keeps the aria-label for accessibility
+    let dismissButton = null;
+    if (opts.dismissible) { // Dismiss button
+        dismissButton = createAdwButton('Dismiss', {
+            ariaLabel: 'Dismiss banner',
             onClick: () => {
                 banner.remove();
                 banner.dispatchEvent(new CustomEvent('dismissed', { bubbles: true, composed: true }));
             }
         });
-        dismissButton.classList.add('adw-banner-dismiss-button'); // Keep class for specific styling
-        dismissButton.classList.add('flat'); // Make the dismiss button flat by default
-        banner.appendChild(dismissButton);
+        dismissButton.classList.add('adw-banner-dismiss-button');
+        dismissButton.classList.add('flat'); // Keep dismiss button flat
+        buttonGroup.appendChild(dismissButton);
+    }
+
+    if (buttonGroup.hasChildNodes()) {
+        banner.appendChild(buttonGroup);
     }
 
     // Set type class for styling (e.g., adw-banner-warning)
