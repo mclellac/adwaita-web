@@ -6,8 +6,8 @@ set -e
 SASS_SOURCE_DIR="adwaita-web/scss"
 SASS_INPUT_FILE="${SASS_SOURCE_DIR}/style.scss"
 JS_INPUT_DIR="adwaita-web/js"
-DATA_INPUT_DIR="adwaita-web/data"        # Assuming fonts are in data/fonts
-FONTS_INPUT_DIR="adwaita-web/data/fonts" # Placeholder, adjust if fonts are elsewhere
+DATA_INPUT_DIR="adwaita-web/data"
+FONTS_INPUT_DIR="adwaita-web/fonts"
 
 BUILD_DIR="build"
 CSS_OUTPUT_DIR="${BUILD_DIR}/css"

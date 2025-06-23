@@ -5,6 +5,8 @@
 app-demo/static/css/adwaita-web.css
 app-demo/static/css/adwaita-web.css.map
 app-demo/static/js/*
+app-demo/static/fonts
+app-demo/static/data
 
 # Python
 __pycache__/
