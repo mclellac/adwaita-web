@@ -197,7 +197,8 @@ def create_app(config_overrides=None):
         default_db_uri = f"postgresql://{pg_user}:{pg_pass}@{pg_host}/{pg_db}"
     else:
         default_db_uri = f"postgresql://{pg_user}@{pg_host}/{pg_db}"
-    _app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', default_db_uri)
+    # _app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', default_db_uri)
+    _app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:' # Use SQLite in-memory for testing
 
     if config_overrides:
         _app.config.from_mapping(config_overrides)
@@ -627,7 +628,7 @@ def create_app(config_overrides=None):
         return render_template('500.html'), 500
 
     with _app.app_context():
-        # db.create_all() # Commented out for testing without DB
+        db.create_all() # Create tables for SQLite in-memory
         # if not User.query.first(): # Commented out for testing without DB
         #     default_username = os.environ.get("ADMIN_USER", "admin")
         #     default_password = os.environ.get("ADMIN_PASS", "password")
