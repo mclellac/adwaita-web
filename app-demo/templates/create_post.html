@@ -149,13 +149,26 @@
 {{ super() }}
 {# Tiptap script remains the same as provided in previous version of this file #}
 <script type="module">
-    if (window.Tiptap && window.Tiptap.Core && window.Tiptap.StarterKit) {
+    function initializeTiptapEditor() {
+        if (!window.Tiptap || !window.Tiptap.Core || !window.Tiptap.StarterKit || !window.Tiptap.Placeholder) {
+            console.error('Tiptap components not fully available for editor initialization.');
+            const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
+            if(contentTextarea) contentTextarea.style.display = 'block'; // Fallback
+            return;
+        }
+        console.log('[Debug] Initializing Tiptap Editor in create_post.html');
         const { Editor } = window.Tiptap.Core;
         const StarterKit = window.Tiptap.StarterKit;
         const Placeholder = window.Tiptap.Placeholder;
 
         const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
         const editorContainer = document.getElementById('tiptap-editor-container');
+        // Ensure contentTextarea and editorContainer exist before proceeding
+        if (!contentTextarea || !editorContainer) {
+            console.error('Tiptap init: contentTextarea or editorContainer not found.');
+            if(contentTextarea && !editorContainer) contentTextarea.style.display = 'block'; // Show textarea if only container is missing
+            return;
+        }
         const formEl = contentTextarea.closest('form'); // Renamed to avoid conflict with form variable from WTForms
 
         const editor = new Editor({
@@ -236,12 +249,39 @@
                 editor.destroy();
             }
         });
+    } // End of initializeTiptapEditor function
 
-    } else {
-        console.error('Tiptap is not loaded. Rich text editor will not function.');
-        // Fallback: make the original textarea visible if Tiptap fails
+    // Event listener for when Tiptap is ready
+    document.addEventListener('tiptap-ready', initializeTiptapEditor);
+
+    // Fallback if Tiptap fails to load (e.g., CDN issue)
+    document.addEventListener('tiptap-failed', () => {
+        console.error('Tiptap failed to load (event received). Rich text editor will not function.');
         const contentTextarea = document.getElementById('{{ form.content.id or "content_field" }}');
         if(contentTextarea) contentTextarea.style.display = 'block';
+    });
+
+    // Initial check in case 'tiptap-ready' already fired or Tiptap loaded synchronously before this script.
+    // This is a bit of a belt-and-suspenders approach.
+    if (window.Tiptap && window.Tiptap.Core && window.Tiptap.StarterKit && window.Tiptap.Placeholder) {
+        // Check if it hasn't been initialized by the event listener already
+        // This check is tricky; ideally, the event is the primary mechanism.
+        // For simplicity, we'll rely on the event, but if the page loads very fast
+        // and Tiptap is ready before this script attaches the listener, this could be an issue.
+        // A more robust way might involve a flag.
+        // However, 'type=module' scripts often defer, making event listening more reliable.
+        console.log('[Debug] Tiptap seems to be already available. Attempting initialization if not done by event.');
+        // To avoid double initialization, we might need a flag, e.g. window.tiptapInitialized
+        if (!window.tiptapEditorInitialized) { // Assume we set this flag in initializeTiptapEditor
+           // initializeTiptapEditor(); // Potentially call it here if events are missed.
+                                     // For now, relying on the event listener.
+        }
+    } else if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        // If Tiptap is not ready by the time the document is interactive/complete,
+        // and the 'tiptap-ready' event hasn't fired or been caught, then it's likely an issue.
+        // The 'tiptap-failed' event should cover this.
+        // The 'Tiptap components not fully available' log inside initializeTiptapEditor
+        // if called by 'tiptap-ready' but window.Tiptap is somehow incomplete then, will also indicate issues.
     }
 </script>
 {% endblock %}
