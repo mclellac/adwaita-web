@@ -44,6 +44,21 @@
   .adw-entry-row.has-error, .adw-action-row.has-error {
       /* Standard error indication for rows already applies via subtitle or Adwaita's own styling */
   }
+  .adw-textarea-standalone {
+    background-color: var(--entry-background-color, var(--view-bg-color));
+    color: var(--text-color, var(--view-fg-color));
+    border: 1px solid var(--border-color, var(--borders-color));
+    border-radius: var(--radius-m);
+    padding: var(--spacing-s);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: var(--body-line-height);
+  }
+  .adw-textarea-standalone:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: -1px; /* Adjust to be inside or on the border */
+    border-color: var(--accent-color); /* Also change border color on focus */
+  }
 </style>
 {% endblock %}
 
@@ -66,20 +81,21 @@
                     class="{{ 'has-error' if form.title.errors else '' }}">
                 </adw-entry-row>
 
-                {# Replaced adw-action-row with a more direct rendering for TextAreaField #}
-                {# The adw-action-row's title attribute will serve as the label for the content field #}
                 <adw-action-row title="{{ form.content.label.text }}" subtitle="Enter your post content below.">
-                    {# The textarea is placed directly. Removed 'adw-entry' class. #}
-                    {# The 'activatable' attribute might be useful if the whole row should focus the textarea, but let's start simple #}
-                    {{ form.content(id=form.content.id or 'content_field', style='width: 100%; min-height: 200px; resize: vertical; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: var(--radius-s); padding: var(--spacing-xs); background-color: var(--entry-background-color); color: var(--text-color);', rows='10') }}
+                    <div slot="suffix" style="width:100%; padding-top: var(--spacing-xs);"> {# Added padding-top for spacing #}
+                        {{ form.content(
+                            id=form.content.id or 'content_field',
+                            class='adw-textarea-standalone', {# Custom class for styling #}
+                            style='width: 100%; min-height: 200px; resize: vertical; box-sizing: border-box;',
+                            rows='10'
+                        ) }}
+                        {% if form.content.errors %}
+                            <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xxs);">
+                                {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
                 </adw-action-row>
-                 {% if form.content.errors %}
-                    <adw-action-row class="error-row">
-                        <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); padding-left: var(--spacing-m);">
-                            {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
-                        </div>
-                    </adw-action-row>
-                {% endif %}
             </adw-list-box>
         </adw-preferences-group>
 
