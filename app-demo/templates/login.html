@@ -38,4 +38,38 @@
     </form>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const usernameEntry = document.getElementById('username-entry');
+    const passwordEntry = document.getElementById('password-entry');
+    const submitButton = form.querySelector('adw-button[type="submit"]');
+
+    if (!form || !usernameEntry || !passwordEntry || !submitButton) {
+        console.error('[Debug] Login form elements not found for Enter key handler.');
+        return;
+    }
+
+    console.log('[Debug] Attaching Enter key listeners to login fields.');
+
+    const handleEnterKey = (event) => {
+        if (event.key === 'Enter') {
+            console.log('[Debug] Enter key pressed in an input field.');
+            event.preventDefault(); // Prevent any default action just in case
+            // Check if the button's shadowRoot and its internal button exist
+            if (submitButton.shadowRoot && submitButton.shadowRoot.querySelector('button')) {
+                 console.log('[Debug] Triggering click on internal shadow DOM button.');
+                 submitButton.shadowRoot.querySelector('button').click();
+            } else {
+                 console.log('[Debug] Shadow DOM button not found, attempting click on adw-button itself.');
+                 submitButton.click(); // Fallback to clicking the custom element
+            }
+        }
+    };
+
+    usernameEntry.addEventListener('keydown', handleEnterKey);
+    passwordEntry.addEventListener('keydown', handleEnterKey);
+});
+</script>
 {% endblock %}
