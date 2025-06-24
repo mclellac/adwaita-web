@@ -1,4 +1,4 @@
-import { adwGenerateId } from './utils.js';
+import { adwGenerateId, getAdwCommonStyleSheet } from './utils.js'; // Import getAdwCommonStyleSheet
 import { createAdwButton } from './button.js';
 // Assuming other dependencies like createAdwExpanderRow, createAdwViewSwitcher will be available via Adw global or direct import
 // For now, to avoid circular dependencies during this refactor step, we might rely on Adw.expanderRow etc.
@@ -66,22 +66,51 @@ export function createAdwDialog(options = {}) {
   return adwDialogWC;
 }
 
+/**
+ * @element adw-dialog
+ * @description A modal dialog component that overlays the current page.
+ * It includes a backdrop, content area, and a button area.
+ * The dialog can be opened or closed programmatically or via the `open` attribute.
+ *
+ * @attr {String} [title] - The title displayed at the top of the dialog.
+ * @attr {Boolean} [open] - If present, the dialog is displayed. Can be set/removed to control visibility.
+ * @attr {Boolean} [close-on-backdrop-click="true"] - If set to "false", clicking on the backdrop will not close the dialog.
+ *                                                 Defaults to true (dialog closes on backdrop click).
+ *
+ * @slot content - Used to project the main content of the dialog. If not specified, default slotted children go here.
+ * @slot buttons - Used to project buttons into the dialog's action/footer area.
+ *                 If no buttons are slotted, a default "Close" button is added.
+ *
+ * @csspart dialog - The main dialog container element within the Shadow DOM.
+ * @csspart backdrop - The backdrop element that covers the page.
+ * @csspart title - The title element within the dialog.
+ * @csspart content - The container for the content slot.
+ * @csspart buttons - The container for the buttons slot.
+ *
+ * @fires open - Dispatched when the dialog becomes fully open and visible.
+ * @fires close - Dispatched when the dialog becomes fully closed and hidden.
+ *
+ * @example
+ * <adw-dialog title="My Dialog" id="myDialog">
+ *   <p slot="content">This is the content of the dialog.</p>
+ *   <adw-button slot="buttons" on:click="document.getElementById('myDialog').close()">Custom Close</adw-button>
+ * </adw-dialog>
+ * <script>
+ *   document.getElementById('myDialog').open();
+ * </script>
+ */
 export class AdwDialog extends HTMLElement {
+    /** @internal */
     static get observedAttributes() { return ['title', 'close-on-backdrop-click', 'open']; }
+
+    /**
+     * Creates an instance of AdwDialog.
+     * @constructor
+     */
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        // It's good practice to include stylesheets in the shadow DOM
-        // if the component relies on global styles that might not pierce.
-        // However, for dialogs, often global styles for backdrop/positioning are fine,
-        // and internal structure styling is encapsulated or uses CSS parts.
-        // For now, let's assume Adw.config.cssPath provides necessary styles,
-        // or specific dialog styles are self-contained / correctly namespaced.
-        // If AdwDialog needs its own specific styles isolated:
-        const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet';
-        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
-        this.shadowRoot.appendChild(styleLink);
+        // Stylesheet will be adopted in connectedCallback
 
         this._dialogElement = null; // The main dialog div (will be inside shadow DOM)
         this._backdropElement = null; // The backdrop div (will be appended to body)
@@ -89,19 +118,76 @@ export class AdwDialog extends HTMLElement {
         this._isOpeningOrClosing = false; // Re-entrancy guard for open/close
     }
 
-    connectedCallback() {
+    /** @internal */
+    _fallbackLoadStylesheet() {
+        // Fallback for browsers that don't support adoptedStyleSheets,
+        // or if the adopted stylesheet failed to load.
+        if (!this.shadowRoot.querySelector('link[rel="stylesheet"]')) {
+            const styleLink = document.createElement('link');
+            styleLink.rel = 'stylesheet';
+            styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
+            if (styleLink.href) {
+                this.shadowRoot.appendChild(styleLink);
+            } else {
+                console.warn("AdwDialog: Fallback stylesheet Adw.config.cssPath is not defined.");
+            }
+        }
+    }
+
+    /**
+     * @internal
+     * Lifecycle callback invoked when the element is added to the DOM.
+     * Handles stylesheet adoption and initial rendering if 'open' attribute is present.
+     */
+    async connectedCallback() {
+        if (typeof CSSStyleSheet !== 'undefined' && 'adoptedStyleSheets' in Document.prototype) {
+            try {
+                const commonSheet = await getAdwCommonStyleSheet();
+                if (commonSheet && !this.shadowRoot.adoptedStyleSheets.includes(commonSheet)) {
+                    this.shadowRoot.adoptedStyleSheets = [...this.shadowRoot.adoptedStyleSheets, commonSheet];
+                } else if (!commonSheet) {
+                    console.warn("AdwDialog: Common stylesheet not available, attempting fallback.");
+                    this._fallbackLoadStylesheet();
+                }
+            } catch (error) {
+                console.error("AdwDialog: Error adopting common stylesheet, attempting fallback.", error);
+                this._fallbackLoadStylesheet();
+            }
+        } else {
+            this._fallbackLoadStylesheet();
+        }
+
         // DOM elements (_dialogElement, _backdropElement) are built on first open,
         // or if attributes change requiring a rebuild.
         // If the 'open' attribute is present on connection, trigger open.
+        // Ensure _buildDialogDOM is called if needed, which might now happen after stylesheet adoption
         if (this.hasAttribute('open') && !this._isOpen) {
+            // open() will call _buildDialogDOM if elements are not ready
             this.open();
+        } else if (!this._dialogElement && !this.hasAttribute('open')) {
+            // If dialog is not set to open but also not yet built (e.g. just connected)
+            // we might want to build it if other attributes like title are set and it might be shown soon.
+            // For now, _buildDialogDOM is primarily called by open() or when attributes change while open.
+            // If a dialog is created but not opened, _buildDialogDOM is deferred.
         }
     }
+
+    /**
+     * @internal
+     * Lifecycle callback invoked when the element is removed from the DOM.
+     * Ensures the dialog is closed and cleaned up.
+     */
     disconnectedCallback() {
         if (this._isOpen) { // If connected, and then removed from DOM while open, ensure cleanup.
             this.close();
         }
     }
+
+    /**
+     * @internal
+     * Lifecycle callback invoked when one of the observed attributes changes.
+     * Handles changes to 'title', 'open', and 'close-on-backdrop-click'.
+     */
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
 
@@ -131,15 +217,28 @@ export class AdwDialog extends HTMLElement {
         }
     }
 
+    /**
+     * @internal
+     * Builds or rebuilds the dialog's internal DOM structure (backdrop, dialog container, title, slots).
+     * This method is called when the dialog is opened for the first time or when attributes
+     * that affect its structure (like 'title') are changed while it's open.
+     */
     _buildDialogDOM() {
         // This method (re)creates the dialog DOM elements.
         // The main dialog structure is added to the shadowRoot.
         // The backdrop is created here but appended to body by open().
 
-        // Clear previous shadow DOM content except for the initial <link> stylesheet
-        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
-            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+        // Clear previous shadow DOM content (excluding adopted stylesheets or fallback link)
+        const nodesToRemove = [];
+        for (const child of this.shadowRoot.childNodes) {
+            // Do not remove adopted stylesheets; <style> tags might be used by adopted sheets.
+            // Do not remove the fallback <link> if it exists.
+            if (child.nodeName !== 'STYLE' && !(child.nodeName === 'LINK' && child.getAttribute('rel') === 'stylesheet')) {
+                nodesToRemove.push(child);
+            }
         }
+        nodesToRemove.forEach(node => this.shadowRoot.removeChild(node));
+
 
         this._backdropElement = document.createElement('div');
         this._backdropElement.classList.add('adw-dialog-backdrop');
@@ -205,6 +304,12 @@ export class AdwDialog extends HTMLElement {
         });
     }
 
+    /**
+     * @internal
+     * Ensures that a default "Close" button is present if no buttons are slotted by the user.
+     * @param {HTMLDivElement} buttonsContainer - The container element for buttons in the Shadow DOM.
+     * @param {HTMLSlotElement} buttonsSlotElement - The slot element for buttons.
+     */
     _ensureDefaultButton(buttonsContainer, buttonsSlotElement) {
         // Check if a default button has already been added by this method
         const existingDefaultButton = buttonsContainer.querySelector('.adw-dialog-default-button');
@@ -228,6 +333,12 @@ export class AdwDialog extends HTMLElement {
         }
     }
 
+    /**
+     * @internal
+     * Traps focus within the dialog when it's open.
+     * Handles Tab and Shift+Tab navigation.
+     * @param {KeyboardEvent} event - The keyboard event.
+     */
     _trapFocus(event) {
         // Focus trapping needs to consider shadow DOM.
         // Query selectable elements within the shadow-hosted _dialogElement.
@@ -245,6 +356,12 @@ export class AdwDialog extends HTMLElement {
 
     // _render() method is removed as its functionality is merged into attributeChangedCallback or handled by _buildDialogDOM.
 
+    /**
+     * Opens the dialog.
+     * Builds the dialog DOM if not already built, appends backdrop and dialog to the body,
+     * sets focus, and applies 'open' classes for transitions.
+     * Dispatches an 'open' event.
+     */
     open() {
         if (this._isOpen || this._isOpeningOrClosing) {
             return;
@@ -291,6 +408,11 @@ export class AdwDialog extends HTMLElement {
         // Modifying _buildDialogDOM to do this check and append is cleaner.
     }
 
+    /**
+     * Closes the dialog.
+     * Removes 'open' classes, cleans up DOM elements after transitions,
+     * and dispatches a 'close' event.
+     */
     close() {
         if (!this._isOpen || this._isOpeningOrClosing) {
             return;
@@ -410,26 +532,72 @@ export function createAdwAlertDialog(body, options = {}) {
   return alertDialogWC;
 }
 
+/**
+ * @element adw-alert-dialog
+ * @description A specialized dialog for presenting alerts or simple confirmations to the user.
+ * It typically includes a heading, body text, and one or more choices (buttons).
+ * This component wraps an `AdwDialog` internally.
+ *
+ * @attr {String} [heading] - The main heading or title of the alert dialog.
+ * @attr {String} [body] - The primary message or body text of the alert. This is ignored if the `body-content` slot is used.
+ * @attr {Boolean} [open] - If present, the dialog is displayed. Controls visibility.
+ * @attr {Boolean} [close-on-backdrop-click="false"] - If set to "true", clicking on the backdrop will close the alert dialog.
+ *                                                 Defaults to "false" for alert dialogs (requires explicit action).
+ *
+ * @slot body-content - Used to project custom HTML content into the body of the alert.
+ *                      If this slot is used, the `body` attribute is ignored.
+ * @slot choice - Used to provide custom button elements as choices. Each slotted element should be a `<button>`
+ *                or `<adw-button>`. It should have text content for the label.
+ *                A `value` attribute on the slotted button will be used in the `response` event.
+ *                A `data-style="suggested|destructive"` attribute can style the button.
+ *                If no choices are slotted, a default "OK" button is provided.
+ *
+ * @fires response - Dispatched when a choice button is clicked. The `event.detail.value` contains the
+ *                   value of the choice (or its text content if no value is set). The dialog closes after this.
+ * @fires close - Dispatched when the dialog is closed (either by a choice or programmatically).
+ *
+ * @example
+ * <adw-alert-dialog id="myAlert" heading="Confirm Action" body="Are you sure you want to proceed?">
+ *   <button slot="choice" value="cancel">Cancel</button>
+ *   <button slot="choice" value="confirm" data-style="suggested">Confirm</button>
+ * </adw-alert-dialog>
+ * <script>
+ *   const alert = document.getElementById('myAlert');
+ *   alert.addEventListener('response', (e) => console.log('Response:', e.detail.value));
+ *   alert.open();
+ * </script>
+ */
 export class AdwAlertDialog extends HTMLElement {
+    /** @internal */
     static get observedAttributes() { return ['heading', 'body', 'open', 'close-on-backdrop-click']; }
 
+    /**
+     * Creates an instance of AdwAlertDialog.
+     * @constructor
+     */
     constructor() {
         super();
         this._internalDialog = null;
-        this._choices = [];
+        // this._choices = []; // This seems unused, consider removing if confirmed.
         this._isOpen = false;
         this._isProcessingOpenClose = false;
     }
+
+    /** @internal */
     connectedCallback() {
         if (this.hasAttribute('open') && !this._isOpen) {
             this.open();
         }
     }
+
+    /** @internal */
     disconnectedCallback() {
         if (this._isOpen) {
             this.close();
         }
     }
+
+    /** @internal */
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
 
@@ -454,6 +622,12 @@ export class AdwAlertDialog extends HTMLElement {
         }
     }
 
+    /**
+     * @internal
+     * Builds the internal `AdwDialog` instance that this `AdwAlertDialog` wraps.
+     * It configures the internal dialog with content, heading, and choices based on
+     * the attributes and slotted content of this component.
+     */
     _buildInternalDialog() {
         // Ensure this._internalDialog is fresh if we are rebuilding.
         // The attributeChangedCallback handles nullifying it before calling open->build.
@@ -566,6 +740,11 @@ export class AdwAlertDialog extends HTMLElement {
         });
     }
 
+    /**
+     * Opens the alert dialog.
+     * If not already built, it constructs the internal `AdwDialog` first.
+     * Sets the `open` attribute and manages internal state.
+     */
     open() {
         if (this._isOpen || this._isProcessingOpenClose) return;
         this._isProcessingOpenClose = true;
@@ -584,9 +763,16 @@ export class AdwAlertDialog extends HTMLElement {
         }
         // AdwAlertDialog might dispatch its own 'open' event if needed,
         // but often the internal dialog's event is sufficient if it bubbles or is handled.
+        // No separate 'open' event is dispatched by AdwAlertDialog itself; users can listen on the internal dialog if necessary,
+        // or rely on the fact that `open()` call completion implies it's opening.
         this._isProcessingOpenClose = false;
     }
 
+    /**
+     * Closes the alert dialog.
+     * Manages internal state and removes the `open` attribute.
+     * A 'close' event is dispatched when the dialog is fully closed (forwarded from the internal dialog).
+     */
     close() {
         if (!this._isOpen || this._isProcessingOpenClose) return;
         this._isProcessingOpenClose = true;
@@ -670,8 +856,65 @@ export function createAdwAboutDialog(options = {}) {
   return aboutDialogWC;
 }
 
+/**
+ * @element adw-about-dialog
+ * @description A dialog for displaying information about an application, including its name, version,
+ * copyright, developers, and license. It wraps an `AdwDialog` internally.
+ *
+ * @attr {String} [app-name] - The name of the application.
+ * @attr {String} [app-icon] - The icon name for the application (used with `Adw.createIcon`).
+ * @attr {String} [logo] - URL to an image asset for the application's logo. Takes precedence over `app-icon`.
+ * @attr {String} [version] - The version number of the application.
+ * @attr {String} [copyright] - Copyright statement (e.g., "© 2023 Your Name").
+ * @attr {String} [developer-name] - Primary developer or organization name.
+ * @attr {String} [website] - URL to the application's or developer's website.
+ * @attr {String} [website-label] - Custom label for the website link (defaults to the URL).
+ * @attr {String} [license-type] - Short description of the license (e.g., "GNU GPL v3.0 or later").
+ *                                 Full license text can be provided via the `license-text` slot.
+ * @attr {String} [comments] - A short description or comments about the application.
+ *                            This is ignored if the `comments` slot is used.
+ * @attr {String} [developers] - Comma-separated list of developer names. Alternatively, use the `developers-list` slot.
+ * @attr {String} [documenters] - Comma-separated list of documenter names. Alternatively, use the `documenters-list` slot.
+ * @attr {String} [designers] - Comma-separated list of designer names. Alternatively, use the `designers-list` slot.
+ * @attr {String} [artists] - Comma-separated list of artist names. Alternatively, use the `artists-list` slot.
+ * @attr {String} [translators] - Comma-separated list of translator names. Alternatively, use the `translators-list` slot.
+ * @attr {Boolean} [open] - If present, the dialog is displayed.
+ *
+ * @slot comments - Used to project custom HTML content for the application comments. Overrides the `comments` attribute.
+ * @slot license-text - Used to project pre-formatted full license text. Often used with a `<pre>` tag.
+ * @slot details - Used to project completely custom content into the "Details" expander section.
+ *                 Overrides default lists like developers, documenters, etc.
+ * @slot developers-list - Slot for `<li>` elements listing developers. Overrides `developers` attribute.
+ * @slot documenters-list - Slot for `<li>` elements listing documenters. Overrides `documenters` attribute.
+ * @slot designers-list - Slot for `<li>` elements listing designers. Overrides `designers` attribute.
+ * @slot artists-list - Slot for `<li>` elements listing artists. Overrides `artists` attribute.
+ * @slot translators-list - Slot for `<li>` elements listing translators. Overrides `translators` attribute.
+ * @slot - Default slot can be used for comments if the `comments` attribute or `comments` named slot is not used.
+ *
+ * @fires close - Dispatched when the dialog is closed.
+ *
+ * @example
+ * <adw-about-dialog id="aboutApp"
+ *   app-name="My Awesome App"
+ *   version="1.2.3"
+ *   copyright="© 2023 Cool Coders Inc."
+ *   developer-name="Cool Coders Inc."
+ *   website="https://example.com"
+ *   license-type="MIT License"
+ *   comments="This app does awesome things!"
+ *   developers="Jane Doe,John Smith">
+ *   <pre slot="license-text">Permission is hereby granted...</pre>
+ * </adw-about-dialog>
+ * <script>document.getElementById('aboutApp').open();</script>
+ */
 export class AdwAboutDialog extends HTMLElement {
+    /** @internal */
     static get observedAttributes() { return ['app-name', 'open', /* other attributes from _gatherOptions */ 'app-icon', 'logo', 'version', 'copyright', 'developer-name', 'website', 'website-label', 'license-type', 'comments', 'developers', 'documenters', 'designers', 'artists', 'translators']; }
+
+    /**
+     * Creates an instance of AdwAboutDialog.
+     * @constructor
+     */
     constructor() {
         super();
         // Removed _dialogInstance, using _internalDialog
@@ -681,6 +924,7 @@ export class AdwAboutDialog extends HTMLElement {
         this._isProcessingOpenClose = false;
     }
 
+    /** @internal */
     connectedCallback() {
         // Observe direct children for slot changes, not full subtree for performance.
         this._slotObserver.observe(this, { childList: true, attributes: true, attributeFilter: ['slot'] });
@@ -689,11 +933,13 @@ export class AdwAboutDialog extends HTMLElement {
         }
     }
 
+    /** @internal */
     disconnectedCallback() {
         this._slotObserver.disconnect();
         if (this._internalDialog) this.close(); // Use this.close to manage state
     }
 
+    /** @internal */
     _rebuildOnSlotChange() {
         // If open, close, rebuild, and reopen.
         // This is a simple strategy; more complex would be live-updating the dialog content.
@@ -707,6 +953,7 @@ export class AdwAboutDialog extends HTMLElement {
         }
     }
 
+    /** @internal */
     _closeInternalDialog(dispatchHostEvent = true) {
         if (this._internalDialog && this._internalDialog.hasAttribute('open')) {
             this._internalDialog.removeAttribute('open');
@@ -715,7 +962,7 @@ export class AdwAboutDialog extends HTMLElement {
         // If dispatchHostEvent is true, AdwAboutDialog's close method will handle attribute and event.
     }
 
-
+    /** @internal */
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
 
@@ -740,6 +987,15 @@ export class AdwAboutDialog extends HTMLElement {
         }
     }
 
+    /**
+     * @internal
+     * Helper method to create a list section (e.g., for developers, documenters)
+     * using either slotted `<li>` elements or a comma-separated attribute string.
+     * @param {string} title - The title for this section (e.g., "Developers").
+     * @param {string} itemsSlotName - The name of the slot for `<li>` items (e.g., "developers-list").
+     * @param {string} itemsArrayFallbackAttr - The name of the attribute containing a comma-separated list (e.g., "developers").
+     * @returns {HTMLDivElement|null} The created section element or null if no items.
+     */
     _createListSectionWC(title, itemsSlotName, itemsArrayFallbackAttr) {
         const items = [];
         const slottedItems = this.querySelectorAll(`[slot="${itemsSlotName}"] > li`);
@@ -768,7 +1024,13 @@ export class AdwAboutDialog extends HTMLElement {
         return sectionDiv;
     }
 
-
+    /**
+     * @internal
+     * Builds the internal `AdwDialog` instance that this `AdwAboutDialog` wraps.
+     * It constructs the complex layout of the about dialog, including header,
+     * application info, comments, contributor lists, and license information,
+     * based on attributes and slotted content.
+     */
     _buildInternalDialogDOM() {
         this._internalDialog = document.createElement('adw-dialog');
         this._internalDialog.classList.add('adw-about-dialog-base'); // For styling hook
@@ -924,12 +1186,18 @@ export class AdwAboutDialog extends HTMLElement {
         });
     }
 
+    /** @internal */
     _openInternalDialog() {
         if (this._internalDialog) {
              this._internalDialog.setAttribute('open', '');
         }
     }
 
+    /**
+     * Opens the About dialog.
+     * Builds the dialog DOM if not already built, then shows it.
+     * Sets the `open` attribute.
+     */
     open() {
         if (this._isOpen || this._isProcessingOpenClose) return;
         this._isProcessingOpenClose = true;
@@ -947,9 +1215,14 @@ export class AdwAboutDialog extends HTMLElement {
         }
         // AdwDialog's open event will bubble if this._internalDialog dispatches it.
         // Or, AdwAboutDialog can dispatch its own 'open' event if distinct behavior is needed.
+        // For now, no separate 'open' event.
         this._isProcessingOpenClose = false;
     }
 
+    /**
+     * Closes the About dialog.
+     * Removes the `open` attribute. A 'close' event is dispatched when fully closed.
+     */
     close() {
         if (!this._isOpen || this._isProcessingOpenClose) return;
         this._isProcessingOpenClose = true;
@@ -1021,9 +1294,45 @@ export function createAdwPreferencesDialog(options = {}) {
   return preferencesDialogWC;
 }
 
+/**
+ * @element adw-preferences-dialog
+ * @description A dialog for presenting application preferences, typically organized into navigable pages.
+ * It uses an `AdwViewSwitcher` internally to manage different preference pages and wraps an `AdwDialog`.
+ *
+ * @attr {String} [title="Preferences"] - The title of the preferences dialog.
+ * @attr {Boolean} [open] - If present, the dialog is displayed.
+ * @attr {String} [initial-page-name] - The `name` attribute of the `adw-preferences-page`
+ *                                     or slotted page element that should be initially visible.
+ *                                     If not set, the first page is shown.
+ *
+ * @slot page - Used to project `adw-preferences-page` elements (or other elements acting as pages)
+ *              into the dialog. Each page element should have a `name` attribute (for `initial-page-name`
+ *              and view switcher navigation) and a `title` attribute (for the view switcher tab label).
+ *              If `title` is missing, it defaults to "Page X". If `name` is missing, it defaults to "page-X".
+ *
+ * @fires close - Dispatched when the dialog is closed.
+ *
+ * @example
+ * <adw-preferences-dialog id="prefsDialog" initial-page-name="general">
+ *   <adw-preferences-page slot="page" name="general" title="General">
+ *     <!-- General preference controls -->
+ *     <adw-entry-row title="Username"></adw-entry-row>
+ *   </adw-preferences-page>
+ *   <adw-preferences-page slot="page" name="appearance" title="Appearance">
+ *     <!-- Appearance preference controls -->
+ *     <adw-switch title="Dark Mode"></adw-switch>
+ *   </adw-preferences-page>
+ * </adw-preferences-dialog>
+ * <script>document.getElementById('prefsDialog').open();</script>
+ */
 export class AdwPreferencesDialog extends HTMLElement {
+    /** @internal */
     static get observedAttributes() { return ['title', 'open', 'initial-page-name']; }
 
+    /**
+     * Creates an instance of AdwPreferencesDialog.
+     * @constructor
+     */
     constructor() {
         super();
         // Removed _dialogInstance
@@ -1033,6 +1342,7 @@ export class AdwPreferencesDialog extends HTMLElement {
         this._isProcessingOpenClose = false;
     }
 
+    /** @internal */
     connectedCallback() {
         // Observe direct children for adw-preferences-page or similar
         this._slotObserver.observe(this, { childList: true, attributes: true, attributeFilter: ['slot', 'name', 'title'] });
@@ -1041,11 +1351,13 @@ export class AdwPreferencesDialog extends HTMLElement {
         }
     }
 
+    /** @internal */
     disconnectedCallback() {
         this._slotObserver.disconnect();
         if (this._internalDialog) this.close();
     }
 
+    /** @internal */
     _rebuildOnSlotChange() {
         if (this.hasAttribute('open')) {
             if (this._internalDialog && this._internalDialog.hasAttribute('open')) {
@@ -1058,6 +1370,7 @@ export class AdwPreferencesDialog extends HTMLElement {
         }
     }
 
+    /** @internal */
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
 
@@ -1082,6 +1395,11 @@ export class AdwPreferencesDialog extends HTMLElement {
         }
     }
 
+    /**
+     * @internal
+     * Builds the internal `AdwDialog` instance that this `AdwPreferencesDialog` wraps.
+     * It constructs the layout with an `AdwViewSwitcher` to manage the slotted preference pages.
+     */
     _buildInternalDialogDOM() {
         this._internalDialog = document.createElement('adw-dialog');
         this._internalDialog.classList.add('adw-preferences-dialog-base'); // For styling hook
@@ -1172,7 +1490,11 @@ export class AdwPreferencesDialog extends HTMLElement {
         return this._internalDialog ? this._internalDialog._dialogElement : null;
     }
 
-
+    /**
+     * Opens the Preferences dialog.
+     * Builds the dialog DOM if not already built, then shows it.
+     * Sets the `open` attribute.
+     */
     open() {
         if (this._isOpen || this._isProcessingOpenClose) return;
         this._isProcessingOpenClose = true;
@@ -1191,6 +1513,10 @@ export class AdwPreferencesDialog extends HTMLElement {
         this._isProcessingOpenClose = false;
     }
 
+    /**
+     * Closes the Preferences dialog.
+     * Removes the `open` attribute. A 'close' event is dispatched when fully closed.
+     */
     close() {
         if (!this._isOpen || this._isProcessingOpenClose) return;
         this._isProcessingOpenClose = true;
