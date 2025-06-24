@@ -103,6 +103,9 @@ const AdwProperties = { // Renamed to avoid conflict with global Adw during cons
     createBottomSheet: bottomSheet.createAdwBottomSheet, // Factory for AdwBottomSheet
     createPopover: popover.createAdwPopover, // Factory for AdwPopover (new)
 
+    // Theme utilities now include the main applicator
+    applyFinalThemeAndAccent: utils.applyFinalThemeAndAccent,
+
 
     // Web Component Classes (for direct use or inspection if needed)
     Button: button.AdwButton,
@@ -249,4 +252,13 @@ if (typeof customElements !== 'undefined') {
 }
 
 console.log('[Debug] Adw object populated and custom elements defined.');
-console.log('[Debug] components.js refactored execution ended.');
+
+// Apply the final theme and accent color once the Adw object is ready and DOM is likely parsed.
+// Using DOMContentLoaded ensures body.dataset is available for DB preferences.
+if (document.readyState === 'loading') { // DOMContentLoaded or after
+    window.addEventListener('DOMContentLoaded', Adw.applyFinalThemeAndAccent);
+} else { // `DOMContentLoaded` already fired
+    Adw.applyFinalThemeAndAccent();
+}
+
+console.log('[Debug] components.js execution ended, theme/accent application scheduled/run.');

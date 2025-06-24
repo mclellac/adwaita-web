@@ -326,42 +326,60 @@ def create_app(config_overrides=None):
         form = PostForm()
         if request.method == 'POST':
             _app.logger.info(f"[FORM_DATA] /create - Form data: {request.form}")
-        if form.validate_on_submit():
+            # _app.logger.info(f"[FORM_FILES] /create - Form files: {request.files}") # No files in PostForm
+
+        if form.validate_on_submit(): # This is True only on POST with valid data
             title = form.title.data
             raw_content = form.content.data
             content = bleach.clean(raw_content, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+
             try:
                 new_post = Post(title=title, content=content, author=current_user)
-                _update_post_relations(new_post, form, db.session)
                 db.session.add(new_post)
-                db.session.commit()
+                # It's often better to add and flush the main object to get its ID if related objects need it,
+                # or if _update_post_relations relies on post_instance being in the session.
+                # However, _update_post_relations adds new Tags to the session, so a single commit later is fine.
+
+                _update_post_relations(new_post, form, db.session) # This adds new tags to session if any
+
+                db.session.commit() # Commits new_post, category associations, and new tags
+
                 flash('Post created successfully!', 'success')
+                _app.logger.info(f"Post '{title}' created successfully by user {current_user.username}.")
                 return redirect(url_for('index'))
             except Exception as e:
                 db.session.rollback()
-                _app.logger.error(f"Error creating post: {e}", exc_info=True)
-                flash(f'Error creating post: {e}', 'danger')
-        elif request.method == 'POST':
+                _app.logger.error(f"Error creating post during DB operations: {e}", exc_info=True)
+                flash(f'Error creating post: Could not save to database. Details: {str(e)}', 'danger')
+
+        elif request.method == 'POST': # Specifically for POST requests that failed form.validate_on_submit()
+            _app.logger.warning(f"Post creation form validation failed for user {current_user.username}.")
+            _app.logger.warning(f"Form errors: {form.errors}") # Log all form errors to server logs
+            flash('Failed to create post. Please check the errors highlighted below.', 'danger') # General error for user
             for field, errors in form.errors.items():
                 for error in errors:
+                    # Flashing individual errors - this was already present and is good.
                     flash(f"Error in {getattr(form, field).label.text}: {error}", 'warning')
+
         return render_template('create_post.html', form=form)
 
     def _update_post_relations(post_instance, form, db_session):
         """Helper function to update categories and tags for a post."""
-        post_instance.categories = []
-        for category_obj in form.categories.data:
+        post_instance.categories = [] # Clear existing categories first
+        for category_obj in form.categories.data: # form.categories.data should be a list of Category objects
             post_instance.categories.append(category_obj)
-        post_instance.tags = []
+
+        post_instance.tags = [] # Clear existing tags first
         tags_string = form.tags_string.data
         if tags_string:
             tag_names = [name.strip() for name in tags_string.split(',') if name.strip()]
             for tag_name in tag_names:
                 tag = Tag.query.filter_by(name=tag_name).first()
                 if not tag:
-                    tag = Tag(name=tag_name)
-                    db_session.add(tag)
+                    tag = Tag(name=tag_name) # Creates new Tag object
+                    db_session.add(tag) # Add new tag to the session to be committed
                 post_instance.tags.append(tag)
+        # No commit here; commit happens in the caller after all updates.
 
     @_app.route('/posts/<int:post_id>/delete', methods=['POST'])
     @login_required
