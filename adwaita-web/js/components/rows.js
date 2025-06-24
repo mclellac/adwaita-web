@@ -1,4 +1,4 @@
-import { adwGenerateId } from './utils.js';
+import { adwGenerateId, getAdwCommonStyleSheet } from './utils.js'; // Import getAdwCommonStyleSheet
 import { createAdwButton, AdwButton } from './button.js';
 import { createAdwLabel, AdwLabel } from './misc.js';
 import { createAdwEntry, AdwEntry } from './forms.js';
@@ -146,18 +146,121 @@ export function createAdwActionRow(options = {}) {
     }
     return row;
 }
+
+/**
+ * @element adw-action-row
+ * @description A row typically used in lists, displaying a title, an optional subtitle,
+ * an optional icon prefix, and an optional suffix widget (like a chevron or switch).
+ * It can be made activatable to behave like a button.
+ *
+ * @attr {String} [title] - The main title text of the row.
+ * @attr {String} [subtitle] - Subtitle text displayed below the title.
+ * @attr {String} [icon-name] - Name of an Adwaita icon for the prefix (e.g., 'go-next-symbolic').
+ * @attr {String} [icon] - Deprecated. HTML string for an SVG icon or class name for icon font (prefix). Use `icon-name`.
+ * @attr {Boolean} [show-chevron] - If present, a chevron icon is displayed in the suffix area, typically indicating navigation.
+ * @attr {Boolean} [activatable] - If present, makes the entire row interactive like a button (clickable, focusable).
+ *
+ * @slot title-override - Allows replacing the title text with custom HTML content.
+ * @slot suffix-widget - Allows projecting a custom widget (e.g., `adw-switch`, `adw-button`) into the suffix area.
+ *                       This is displayed after the chevron if `show-chevron` is also present.
+ *
+ * @csspart row - The main row container element within the Shadow DOM.
+ * @csspart prefix - The container for the prefix icon.
+ * @csspart content - The container for the title and subtitle.
+ * @csspart title - The title text element (an `adw-label` internally).
+ * @csspart subtitle - The subtitle text element (an `adw-label` internally).
+ * @csspart suffix - The container for suffix elements (chevron, slotted widget).
+ *
+ * @fires click - Dispatched when the row is clicked, if `activatable` or an `onClick` handler is set.
+ *
+ * @example
+ * <adw-action-row title="Wi-Fi Settings" subtitle="Connected to MyNetwork" icon-name="network-wireless-symbolic" show-chevron activatable></adw-action-row>
+ *
+ * <adw-action-row title="Enable Feature">
+ *   <adw-switch slot="suffix-widget" checked></adw-switch>
+ * </adw-action-row>
+ */
 export class AdwActionRow extends HTMLElement {
+    /** @internal */
     static get observedAttributes() { return ['title', 'subtitle', 'icon-name', 'icon', 'show-chevron', 'activatable']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); this._onClick = null; console.log('AdwActionRow constructor', this.title);}
-    connectedCallback() { console.log('AdwActionRow connected', this.title); this._render(); }
-    attributeChangedCallback(name, oldValue, newValue) { console.log('AdwActionRow attrChanged', name, this.title); if (oldValue !== newValue) this._render(); }
-    set onClick(handler) { this._onClick = (typeof handler === 'function') ? handler : null; this._render(); }
-    get onClick() { return this._onClick; }
-    _render() {
-        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) {
-            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+
+    /**
+     * Creates an instance of AdwActionRow.
+     * @constructor
+     */
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        // Stylesheet will be adopted in connectedCallback
+        this._onClick = null;
+        // console.log('AdwActionRow constructor', this.title);
+    }
+
+    /** @internal */
+    _fallbackLoadStylesheet() {
+        if (!this.shadowRoot.querySelector('link[rel="stylesheet"]')) {
+            const styleLink = document.createElement('link');
+            styleLink.rel = 'stylesheet';
+            styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
+            if (styleLink.href) {
+                this.shadowRoot.appendChild(styleLink);
+            } else {
+                console.warn("AdwActionRow: Fallback stylesheet Adw.config.cssPath is not defined.");
+            }
         }
-        const row = document.createElement("div"); row.classList.add("adw-action-row");
+    }
+
+    /** @internal */
+    async connectedCallback() {
+        // console.log('AdwActionRow connected', this.title);
+        if (typeof CSSStyleSheet !== 'undefined' && 'adoptedStyleSheets' in Document.prototype) {
+            try {
+                const commonSheet = await getAdwCommonStyleSheet();
+                if (commonSheet && !this.shadowRoot.adoptedStyleSheets.includes(commonSheet)) {
+                    this.shadowRoot.adoptedStyleSheets = [...this.shadowRoot.adoptedStyleSheets, commonSheet];
+                } else if (!commonSheet) {
+                    this._fallbackLoadStylesheet();
+                }
+            } catch (error) {
+                this._fallbackLoadStylesheet();
+            }
+        } else {
+            this._fallbackLoadStylesheet();
+        }
+        this._render();
+    }
+
+    /** @internal */
+    attributeChangedCallback(name, oldValue, newValue) {
+        // console.log('AdwActionRow attrChanged', name, this.title);
+        if (oldValue !== newValue) this._render();
+    }
+
+    /**
+     * Sets a JavaScript click event handler for the row.
+     * Setting this property will automatically make the row activatable.
+     * @param {Function|null} handler - The function to call on click, or null to remove.
+     */
+    set onClick(handler) { this._onClick = (typeof handler === 'function') ? handler : null; this._render(); }
+    /**
+     * Gets the JavaScript click event handler for the row.
+     * @returns {Function|null}
+     */
+    get onClick() { return this._onClick; }
+
+    /** @internal */
+    _render() {
+        const nodesToRemove = [];
+        for (const child of this.shadowRoot.childNodes) {
+            if (child.nodeName !== 'STYLE' && !(child.nodeName === 'LINK' && child.getAttribute('rel') === 'stylesheet')) {
+                nodesToRemove.push(child);
+            }
+        }
+        nodesToRemove.forEach(node => this.shadowRoot.removeChild(node));
+
+        const row = document.createElement("div");
+        row.classList.add("adw-action-row");
+        row.part.add('row'); // Expose main row div
         const titleText = this.getAttribute('title') || '';
         const subtitleText = this.getAttribute('subtitle');
         const iconName = this.getAttribute('icon-name');
@@ -174,39 +277,17 @@ export class AdwActionRow extends HTMLElement {
 
         const prefix = document.createElement('div');
         prefix.classList.add('adw-action-row-prefix');
+        prefix.part.add('prefix');
         let iconAddedToPrefix = false;
 
         if (iconName) {
-            // Prefer creating the adw-icon custom element.
-            // It will be an HTMLUnknownElement if not yet defined, and upgrade later.
             const iconElement = document.createElement('adw-icon');
             iconElement.setAttribute('icon-name', iconName);
             prefix.appendChild(iconElement);
             iconAddedToPrefix = true;
-
-            // Fallback to iconHTML only if iconName failed to produce a valid element or Adw.Icon is missing.
-            // This specific fallback condition might be redundant if createAdwIcon handles its own errors well,
-            // but kept if direct SVG/class string is a desired alternative path.
-            // However, the primary path is now document.createElement('adw-icon').
-            if (!(iconElement instanceof HTMLElement && iconElement.constructor !== HTMLElement) && iconHTML) {
-                 // This condition means iconElement is likely an HTMLUnknownElement or Adw.Icon is not on Adw
-                 // If iconHTML is provided as a backup, use it.
-                console.warn('AdwActionRow: adw-icon for iconName might not be defined or Adw.Icon missing, attempting iconHTML fallback.');
-                prefix.innerHTML = ''; // Clear the potentially unknown adw-icon
-                const iconSpan = document.createElement('span');
-                if (iconHTML.trim().startsWith("<svg")) {
-                    _appendSVGStringToElement(iconHTML, iconSpan);
-                } else if (iconHTML.trim() !== '') {
-                    iconSpan.classList.add(...iconHTML.split(' '));
-                }
-                if (iconSpan.hasChildNodes() || iconSpan.classList.length > 0) {
-                    prefix.appendChild(iconSpan);
-                    // iconAddedToPrefix is already true
-                } else {
-                    iconAddedToPrefix = false; // Failed to add icon via iconHTML too
-                }
-            }
-        } else if (iconHTML) { // Only iconHTML is provided
+            // Simplified: Removed complex fallback for iconHTML when iconName is present.
+            // Assume adw-icon will handle its rendering or remain an unknown element until defined.
+        } else if (iconHTML) { // Only iconHTML is provided (deprecated path)
             const iconSpan = document.createElement('span');
             if (iconHTML.trim().startsWith("<svg")) {
                 _appendSVGStringToElement(iconHTML, iconSpan);
@@ -218,17 +299,50 @@ export class AdwActionRow extends HTMLElement {
                 iconAddedToPrefix = true;
             }
         }
-        if(iconAddedToPrefix) {
+        if (iconAddedToPrefix) {
             row.appendChild(prefix);
+        } else {
+            // Ensure prefix div isn't added if empty, to prevent taking up space due to gap.
+            // Or, ensure CSS handles empty prefix gracefully (e.g. display:none or no padding/margin).
+            // For now, let's not append it if empty.
         }
 
-        const contentDiv = document.createElement('div'); contentDiv.classList.add('adw-action-row-content');
-        const titleLabel = createAdwLabel(titleText, {htmlTag: 'span'}); titleLabel.classList.add('adw-action-row-title');
-        const titleSlot = document.createElement('slot'); titleSlot.name = 'title-override'; titleLabel.appendChild(titleSlot);
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('adw-action-row-content');
+        contentDiv.part.add('content');
+
+        // Title handling
+        const titleLabel = document.createElement('span'); // createAdwLabel is a factory, use direct element for WC consistency
+        titleLabel.classList.add('adw-action-row-title');
+        titleLabel.part.add('title');
+        const titleSlot = document.createElement('slot');
+        titleSlot.name = 'title-override';
+        // If title-override slot is empty, set textContent from title attribute
+        titleSlot.addEventListener('slotchange', () => {
+            const assignedNodes = titleSlot.assignedNodes({ flatten: true });
+            if (assignedNodes.length === 0) {
+                titleLabel.textContent = this.getAttribute('title') || '';
+            } else {
+                titleLabel.textContent = ''; // Clear attribute-based title if slot is used
+            }
+        });
+        titleLabel.appendChild(titleSlot);
+        // Initial population for title
+        // Check if slot is initially populated (might be tricky before first slotchange)
+        // For simplicity, set textContent initially and let slotchange override if needed.
+        // A more robust way is to check after connectedCallback + first render cycle.
+        if (!this.querySelector('[slot="title-override"]')) {
+             titleLabel.textContent = titleText;
+        }
+
         contentDiv.appendChild(titleLabel);
+
+        // Subtitle handling
         if (subtitleText) {
-            const subtitleLabel = createAdwLabel(subtitleText, {htmlTag: 'span'});
+            const subtitleLabel = document.createElement('span'); // createAdwLabel is a factory
             subtitleLabel.classList.add('adw-action-row-subtitle');
+            subtitleLabel.part.add('subtitle');
+            subtitleLabel.textContent = subtitleText;
             contentDiv.appendChild(subtitleLabel);
             row.classList.add('has-subtitle');
         } else {
@@ -236,13 +350,34 @@ export class AdwActionRow extends HTMLElement {
         }
         row.appendChild(contentDiv);
 
-        const suffixContainer = document.createElement('div'); suffixContainer.classList.add('adw-action-row-suffix');
-        if (showChevron) { _appendChevron(suffixContainer); }
-        const suffixSlot = document.createElement('slot'); suffixSlot.name = 'suffix-widget';
+        // Suffix handling
+        const suffixContainer = document.createElement('div');
+        suffixContainer.classList.add('adw-action-row-suffix');
+        suffixContainer.part.add('suffix');
+
+        let suffixHasContent = false;
+        if (showChevron) {
+            _appendChevron(suffixContainer);
+            suffixHasContent = true;
+        }
+        const suffixSlot = document.createElement('slot');
+        suffixSlot.name = 'suffix-widget';
         suffixContainer.appendChild(suffixSlot);
-        if (showChevron || this.querySelector('[slot="suffix-widget"]')) { // Only add if chevron or actual slotted content
+
+        // Check if suffix-widget slot has assigned nodes
+        // This check needs to happen after the element is in the DOM and slots are assigned.
+        // We can do an initial check for querySelector, and rely on slotchange if needed.
+        if (this.querySelector('[slot="suffix-widget"]')) {
+            suffixHasContent = true;
+        }
+        // TODO: Add a slotchange listener for suffix-widget to dynamically add/remove suffixContainer
+        // if its content changes between empty/non-empty, or simply always append it and let CSS hide if empty.
+        // For now, append if it has initial content.
+
+        if (suffixHasContent) {
             row.appendChild(suffixContainer);
         }
+
         this.shadowRoot.appendChild(row);
     }
 }
