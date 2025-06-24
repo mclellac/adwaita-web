@@ -1,5 +1,5 @@
-import { adwGenerateId, getAdwCommonStyleSheet as getAdwCommonStyleSheetFromUtils } from './utils.js'; // Added getAdwCommonStyleSheet
-import { createAdwButton } from './button.js'; // Used by AdwSpinButton, AdwToggleButton
+import { adwGenerateId, getAdwCommonStyleSheet } from './utils.js';
+import { createAdwButton } from './button.js'; // AdwToggleButton uses AdwButton
 
 /**
  * Creates an Adwaita-style switch.
@@ -9,12 +9,11 @@ import { createAdwButton } from './button.js'; // Used by AdwSpinButton, AdwTogg
 export function createAdwSwitch(options = {}) {
   const opts = options || {};
   const adwSwitch = document.createElement("adw-switch");
-
   if (opts.checked) adwSwitch.setAttribute('checked', '');
   if (opts.disabled) adwSwitch.setAttribute('disabled', '');
   if (opts.label) adwSwitch.setAttribute('label', opts.label);
-
-  // For custom elements, users typically add event listeners directly.
+  if (opts.name) adwSwitch.setAttribute('name', opts.name); // For form association if enabled
+  if (opts.value) adwSwitch.setAttribute('value', opts.value); // For form association if enabled
   if (typeof opts.onChanged === 'function') {
     adwSwitch.addEventListener("change", opts.onChanged);
   }
@@ -23,33 +22,31 @@ export function createAdwSwitch(options = {}) {
 
 /**
  * @element adw-switch
- * @description An Adwaita-styled switch control, typically used for boolean settings.
- *
- * @attr {Boolean} [checked=false] - If present, the switch is in the 'on' state.
+ * @description An Adwaita-styled switch control. Can be form-associated.
+ * @attr {Boolean} [checked=false] - If present, the switch is 'on'.
  * @attr {Boolean} [disabled=false] - If present, disables the switch.
- * @attr {String} [label] - Optional text label displayed next to the switch.
- * @attr {String} [name] - The name of the switch, used for form submission if it were form-associated.
- * @attr {String} [value="on"] - The value submitted with the form if the switch is checked and form-associated.
- *
- * @fires change - Dispatched when the switch's checked state changes. `event.detail.checked` contains the new state.
- *
- * @csspart switch - The main `<label>` wrapper element.
- * @csspart input - The internal `<input type="checkbox" role="switch">` element.
- * @csspart slider - The visual slider part of the switch.
- * @csspart label - The text label `<span>` element if a label is provided.
+ * @attr {String} [label] - Optional text label.
+ * @attr {String} [name] - Name for form submission.
+ * @attr {String} [value="on"] - Value submitted if checked.
+ * @fires change - When checked state changes. `event.detail.checked`.
+ * @csspart switch - The main `<label>` wrapper.
+ * @csspart input - The internal `<input type="checkbox" role="switch">`.
+ * @csspart slider - The visual slider.
+ * @csspart label - The text label `<span>`.
  */
 export class AdwSwitch extends HTMLElement {
-    // Not form-associated by default, but could be made so if needed for direct form data.
-    // For now, it's a presentational control often used with AdwActionRow which might handle form logic.
+    static formAssociated = true; // Enable form association
     /** @internal */
     static get observedAttributes() { return ['checked', 'disabled', 'label', 'name', 'value']; }
 
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
+        this._internals = this.attachInternals();
         this._inputElement = null;
         this._labelElement = null;
         this._wrapper = null;
+        this._initialChecked = this.hasAttribute('checked');
     }
 
     /** @internal */
@@ -86,62 +83,73 @@ export class AdwSwitch extends HTMLElement {
     async connectedCallback() {
         await this._ensureStylesheets();
         if (!this._wrapper) this._render();
+        this._updateFormValue();
     }
 
     /** @internal */
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
-        if (!this._wrapper) { // If called before _render (e.g. attributes set on creation)
-            if(this.isConnected) this._render(); // Render if connected
-            return;
-        }
+        if (!this._wrapper && this.isConnected) this._render();
 
+        const hasNewAttr = newValue !== null;
         switch(name) {
             case 'checked':
-                if (this._inputElement) this._inputElement.checked = this.hasAttribute('checked');
+                if (this._inputElement) this._inputElement.checked = hasNewAttr;
+                this._updateFormValue();
                 break;
             case 'disabled':
-                const isDisabled = this.hasAttribute('disabled');
+                const isDisabled = hasNewAttr;
                 if (this._inputElement) this._inputElement.disabled = isDisabled;
-                if (this._wrapper) this._wrapper.classList.toggle('disabled', isDisabled);
-                if (this._wrapper) this._wrapper.setAttribute('aria-disabled', isDisabled.toString());
+                if (this._wrapper) {
+                    this._wrapper.classList.toggle('disabled', isDisabled);
+                    this._wrapper.setAttribute('aria-disabled', isDisabled.toString());
+                }
                 break;
             case 'label':
                 if (this._labelElement) this._labelElement.textContent = newValue || '';
-                else if (newValue && this._wrapper) { // Label added dynamically
+                else if (newValue && this._wrapper) {
                     this._labelElement = document.createElement("span");
                     this._labelElement.classList.add("adw-switch-label");
                     this._labelElement.part.add('label');
                     this._labelElement.textContent = newValue;
                     this._wrapper.appendChild(this._labelElement);
-                } else if (!newValue && this._labelElement) { // Label removed
+                } else if (!newValue && this._labelElement) {
                     this._labelElement.remove();
                     this._labelElement = null;
                 }
                 break;
             case 'name':
-                if (this._inputElement) {
-                    if (newValue !== null) this._inputElement.name = newValue;
+                if (this._inputElement) { // Internal name for non-FACE scenarios or direct inspection
+                    if (hasNewAttr) this._inputElement.name = newValue;
                     else this._inputElement.removeAttribute('name');
                 }
                 break;
             case 'value':
                 if (this._inputElement) {
-                    if (newValue !== null) this._inputElement.value = newValue;
-                    else this._inputElement.value = 'on'; // Default checkbox value
+                     this._inputElement.value = newValue === null ? 'on' : newValue;
                 }
+                this._updateFormValue();
                 break;
         }
     }
 
     /** @internal */
+    _updateFormValue() {
+        if (this.checked) {
+            this._internals.setFormValue(this.value); // Submit host's value attribute if checked
+        } else {
+            this._internals.setFormValue(null); // Don't submit if not checked
+        }
+    }
+
+    /** @internal */
     _render() {
-        if (this._wrapper) { // Clear previous content if any, preserving stylesheets
+        if (this._wrapper) {
             const nodesToRemove = Array.from(this.shadowRoot.childNodes).filter(
                 child => child !== this._wrapper && child.nodeName !== 'STYLE' && !(child.nodeName === 'LINK' && child.getAttribute('rel') === 'stylesheet')
             );
             nodesToRemove.forEach(node => this.shadowRoot.removeChild(node));
-            if(this._wrapper.parentNode) this._wrapper.remove(); // remove old wrapper if it exists
+            if(this._wrapper.parentNode) this._wrapper.remove();
         }
 
         this._wrapper = document.createElement("label");
@@ -153,11 +161,9 @@ export class AdwSwitch extends HTMLElement {
         this._inputElement.setAttribute("role", "switch");
         this._inputElement.part.add('input');
         this._inputElement.addEventListener("change", (e) => {
-            this.checked = this._inputElement.checked; // This will use the setter
-            this.dispatchEvent(new CustomEvent('change', { // CustomEvent for detail
-                bubbles: true,
-                composed: true,
-                detail: { checked: this.checked }
+            this.checked = this._inputElement.checked;
+            this.dispatchEvent(new CustomEvent('change', {
+                bubbles: true, composed: true, detail: { checked: this.checked }
             }));
         });
 
@@ -180,41 +186,38 @@ export class AdwSwitch extends HTMLElement {
             this._labelElement = null;
         }
 
-        // Apply initial attributes
         this._inputElement.checked = this.hasAttribute('checked');
         const isDisabled = this.hasAttribute('disabled');
         this._inputElement.disabled = isDisabled;
         this._wrapper.classList.toggle('disabled', isDisabled);
         this._wrapper.setAttribute('aria-disabled', isDisabled.toString());
-
         const nameAttr = this.getAttribute('name');
-        if (nameAttr) this._inputElement.name = nameAttr;
-        this._inputElement.value = this.getAttribute('value') || 'on';
+        if (nameAttr) this._inputElement.name = nameAttr; // Internal input name
+        this._inputElement.value = this.getAttribute('value') || 'on'; // Default value for checkbox
 
         this.shadowRoot.appendChild(this._wrapper);
+        this._updateFormValue();
     }
+
+    /** @internal */ formAssociatedCallback(form) {}
+    /** @internal */
+    formDisabledCallback(disabled) { this.disabled = disabled; }
+    /** @internal */
+    formResetCallback() { this.checked = this._initialChecked; }
+    /** @internal */
+    formStateRestoreCallback(state) { this.checked = (state === this.value); }
+
 
     get checked() { return this.hasAttribute('checked'); }
     set checked(value) {
-        const isChecked = Boolean(value);
-        if (isChecked) this.setAttribute('checked', '');
-        else this.removeAttribute('checked');
-        // attributeChangedCallback will sync _inputElement.checked
+        if (Boolean(value)) this.setAttribute('checked', ''); else this.removeAttribute('checked');
     }
-
     get disabled() { return this.hasAttribute('disabled'); }
-    set disabled(value) {
-        const isDisabled = Boolean(value);
-        if (isDisabled) this.setAttribute('disabled', '');
-        else this.removeAttribute('disabled');
-    }
-
+    set disabled(value) { if (Boolean(value)) this.setAttribute('disabled', ''); else this.removeAttribute('disabled'); }
     get name() { return this.getAttribute('name'); }
     set name(val) { if (val) this.setAttribute('name', val); else this.removeAttribute('name');}
-
-    get value() { return this.getAttribute('value') || 'on'; }
+    get value() { return this.getAttribute('value') || 'on'; } // Checkboxes default to 'on'
     set value(val) { this.setAttribute('value', val || 'on'); }
-
     get label() { return this.getAttribute('label'); }
     set label(val) { if(val) this.setAttribute('label', val); else this.removeAttribute('label');}
 
@@ -234,7 +237,7 @@ export function createAdwCheckbox(options = {}) {
     if(opts.checked) checkbox.setAttribute('checked', '');
     if(opts.disabled) checkbox.setAttribute('disabled', '');
     if(opts.name) checkbox.setAttribute('name', opts.name);
-    if(opts.value) checkbox.setAttribute('value', opts.value);
+    if(opts.value) checkbox.setAttribute('value', opts.value); // Important for form submission
     if(opts.label) checkbox.setAttribute('label', opts.label);
     if(typeof opts.onChanged === 'function') checkbox.addEventListener('change', opts.onChanged);
     return checkbox;
@@ -242,8 +245,7 @@ export function createAdwCheckbox(options = {}) {
 
 /**
  * @element adw-checkbox
- * @description An Adwaita-styled checkbox control.
- * This component is form-associated.
+ * @description An Adwaita-styled checkbox control. This component is form-associated.
  *
  * @attr {Boolean} [checked=false] - If present, the checkbox is checked.
  * @attr {Boolean} [disabled=false] - If present, disables the checkbox.
@@ -307,13 +309,13 @@ export class AdwCheckbox extends HTMLElement {
     async connectedCallback() {
         await this._ensureStylesheets();
         if (!this._wrapper) this._render();
-        this._updateFormValue();
+        this._updateFormValue(); // Set initial form value
     }
 
     /** @internal */
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
-        if (!this._wrapper && this.isConnected) this._render(); // Render if needed and connected
+        if (!this._wrapper && this.isConnected) this._render();
 
         const hasNewAttr = newValue !== null;
         switch(name) {
@@ -328,28 +330,28 @@ export class AdwCheckbox extends HTMLElement {
                 break;
             case 'label':
                 if (this._labelElement) this._labelElement.textContent = newValue || '';
-                else if (newValue && this._wrapper) { // Label added dynamically
+                else if (newValue && this._wrapper) {
                     this._labelElement = document.createElement("span");
                     this._labelElement.classList.add("adw-checkbox-label");
                     this._labelElement.part.add('label');
                     this._labelElement.textContent = newValue;
                     this._wrapper.appendChild(this._labelElement);
-                } else if (!newValue && this._labelElement) { // Label removed
+                } else if (!newValue && this._labelElement) {
                     this._labelElement.remove();
                     this._labelElement = null;
                 }
                 break;
-            case 'name':
+            case 'name': // Host name is used by form. Internal for fallback.
                 if (this._inputElement) {
                     if (hasNewAttr) this._inputElement.name = newValue;
                     else this._inputElement.removeAttribute('name');
                 }
                 break;
-            case 'value':
+            case 'value': // Value of the checkbox when submitted
                 if (this._inputElement) {
                      this._inputElement.value = newValue === null ? 'on' : newValue;
                 }
-                this._updateFormValue(); // Value change might affect submission
+                this._updateFormValue(); // If checked, the submitted value changes
                 break;
         }
     }
@@ -357,9 +359,9 @@ export class AdwCheckbox extends HTMLElement {
     /** @internal */
     _updateFormValue() {
         if (this.checked) {
-            this._internals.setFormValue(this.value);
+            this._internals.setFormValue(this.value); // Submit host's value attribute if checked
         } else {
-            this._internals.setFormValue(null); // Unchecked checkboxes typically don't submit a value
+            this._internals.setFormValue(null); // Unchecked checkboxes don't submit their value
         }
     }
 
@@ -381,7 +383,7 @@ export class AdwCheckbox extends HTMLElement {
         this._inputElement.type = 'checkbox';
         this._inputElement.part.add('input');
         this._inputElement.addEventListener('change', (e) => {
-            this.checked = this._inputElement.checked; // Uses setter
+            this.checked = this._inputElement.checked; // Uses setter, which handles attribute & form value
             this.dispatchEvent(new CustomEvent('change', { detail: { checked: this.checked }, bubbles: true, composed: true }));
         });
 
@@ -405,53 +407,31 @@ export class AdwCheckbox extends HTMLElement {
         }
 
         this._inputElement.checked = this.hasAttribute('checked');
-        const isDisabled = this.hasAttribute('disabled');
-        this._inputElement.disabled = isDisabled;
-        this._wrapper.classList.toggle('disabled', isDisabled);
+        this._inputElement.disabled = this.hasAttribute('disabled');
+        this._wrapper.classList.toggle('disabled', this.hasAttribute('disabled'));
 
         const nameAttr = this.getAttribute('name');
-        if (nameAttr) this._inputElement.name = nameAttr;
-        this._inputElement.value = this.getAttribute('value') || 'on';
+        if (nameAttr) this._inputElement.name = nameAttr; // Internal name for consistency
+        this._inputElement.value = this.getAttribute('value') || 'on'; // Default HTML value for checkbox
 
         this.shadowRoot.appendChild(this._wrapper);
-        this._updateFormValue(); // Set initial form value
     }
 
-    // Form Associated Lifecycle Callbacks
+    /** @internal */ formAssociatedCallback(form) {}
     /** @internal */
-    formAssociatedCallback(form) { /* console.log(`AdwCheckbox named '${this.name}' associated with form:`, form); */ }
+    formDisabledCallback(disabled) { this.disabled = disabled; }
     /** @internal */
-    formDisabledCallback(disabled) {
-        this.disabled = disabled; // Use setter
-    }
+    formResetCallback() { this.checked = this._initialChecked; }
     /** @internal */
-    formResetCallback() {
-        this.checked = this._initialChecked; // Use setter
-    }
-    /** @internal */
-    formStateRestoreCallback(state /*, mode */) {
-        // For checkbox, state is typically its value if checked, or null.
-        this.checked = state !== null;
-        if (state !== null && this.value !== state && !this.hasAttribute('value')) {
-            // If browser restores a value different from default 'on' and no value attr is set,
-            // it implies the value attribute might have been implicitly part of the state.
-            // This is less common for simple checkboxes unless value changes.
-            // For safety, one might set this.value = state here if this.value is 'on'.
-        }
-    }
+    formStateRestoreCallback(state) { this.checked = (state === this.value); }
 
     get checked() { return this.hasAttribute('checked'); }
     set checked(value) {
-        const isChecked = Boolean(value);
-        if (isChecked) this.setAttribute('checked', '');
-        else this.removeAttribute('checked');
-        // attributeChangedCallback will call _updateFormValue and sync _inputElement
+        if (Boolean(value)) this.setAttribute('checked', ''); else this.removeAttribute('checked');
     }
 
     get disabled() { return this.hasAttribute('disabled'); }
-    set disabled(value) {
-        if (Boolean(value)) this.setAttribute('disabled', ''); else this.removeAttribute('disabled');
-    }
+    set disabled(value) { if (Boolean(value)) this.setAttribute('disabled', ''); else this.removeAttribute('disabled'); }
 
     get name() { return this.getAttribute('name'); }
     set name(val) { if(val) this.setAttribute('name', val); else this.removeAttribute('name'); }
@@ -466,11 +446,8 @@ export class AdwCheckbox extends HTMLElement {
     blur() { if(this._inputElement) this._inputElement.blur(); }
 }
 
-// ... rest of the file (AdwRadioButton, AdwSplitButton, AdwToggleButton, AdwToggleGroup) ...
-// ... AdwSpinButton (already partially updated to use AdwEntry custom element in its factory) ...
-// We need to ensure AdwSpinButton itself is also updated if it's intended to be form-associated,
-// or if its factory/internal structure needs further alignment with AdwEntry changes.
-// For this step, focus is on AdwCheckbox.
+// ... AdwRadioButton, AdwSplitButton, AdwToggleButton, AdwToggleGroup remain ...
+// For brevity, their code is omitted here but is assumed to be the same as the last full file overwrite.
 
 /**
  * Creates an Adwaita-style radio button.
@@ -583,7 +560,6 @@ export class AdwSplitButton extends HTMLElement {
             this._dropdownButton.classList.add('adw-split-button-dropdown');
             this._dropdownButton.setAttribute('icon-name', 'ui/pan-down-symbolic');
             this._dropdownButton.setAttribute('aria-haspopup', 'true');
-            // MODIFIED: Set initial aria-label for dropdown button
             const initialDropdownAriaLabel = this.getAttribute('dropdown-aria-label') || 'More options';
             this._dropdownButton.setAttribute('aria-label', initialDropdownAriaLabel);
 
@@ -629,7 +605,6 @@ export class AdwSplitButton extends HTMLElement {
         this._actionButton.toggleAttribute('suggested', isSuggested);
         this._actionButton.toggleAttribute('disabled', isDisabled);
 
-        // Ensure dropdown button's aria-label is up-to-date
         this._dropdownButton.setAttribute('aria-label', dropdownAriaLabel);
         this._dropdownButton.toggleAttribute('disabled', isDisabled);
     }
@@ -912,9 +887,10 @@ export class AdwToggleGroup extends HTMLElement {
         } else {
             this.setAttribute('active-value', newValue);
         }
-        if (oldValue === newValue && newValue !== null) {
+        if (oldValue === newValue && newValue !== null) { // If value was set to same, still ensure UI consistency
              this._updateButtonStatesAndListeners();
         }
+        // Note: attributeChangedCallback handles dispatching 'active-changed' if value truly changes
     }
 }
 
