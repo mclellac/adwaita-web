@@ -4,7 +4,7 @@ from flask import request, url_for, session # Added for request.path and url_for
 from io import BytesIO # Added for file upload simulation
 import time # Added for time.sleep in edit_post test
 from unittest.mock import patch, MagicMock # Added for mocking
-from app import create_app, db, User, Post, Tag, Comment # Import create_app and extensions
+from app import create_app, db, User, Post, Tag, Comment, Category # Import create_app and extensions, ADDED Category
 from datetime import datetime, timezone, timedelta # Added for post creation timestamps
 
 
@@ -564,11 +564,13 @@ def test_user_posts_on_profile_page(app_instance, client, new_user, new_user_dat
         # Checking for title within the adw-action-row structure
         assert f'title="{expected_titles_page1[i]}"' in html_content_page1
 
-    assert b"Page 1 of 2" in response_page1.data
-    assert "Next" in html_content_page1 # Check for the word "Next" in button
-    # For disabled state, the text "Previous" would still be there but inside a disabled button
-    assert "Previous" in html_content_page1
-
+    # Check for current page '1' being active, and '2' being a link
+    assert '<adw-button class="suggested-action" aria-current="page">1</adw-button>' in html_content_page1
+    with app_instance.app_context(): # Add context for url_for
+        profile_url_page2 = url_for("profile", username=user_data["username"], page=2, _external=False)
+        assert f'<adw-button href="{profile_url_page2}">2</adw-button>' in html_content_page1
+        assert f'<adw-button href="{profile_url_page2}">Next &raquo;</adw-button>' in html_content_page1
+    assert '<adw-button disabled>&laquo; Previous</adw-button>' in html_content_page1
     # Test Page 2
     with app_instance.app_context():
         response_page2 = client.get(url_for('profile', username=user_data['username'], page=2))
@@ -584,9 +586,14 @@ def test_user_posts_on_profile_page(app_instance, client, new_user, new_user_dat
     # Ensure posts from page 1 are not on page 2 (e.g. check Post 7 is not on page 2)
     assert f'title="{expected_titles_page1[0]}"' not in html_content_page2
 
-    assert b"Page 2 of 2" in response_page2.data
-    assert "Previous" in html_content_page2 # "Previous" link should be active
-    assert "Next" in html_content_page2 # "Next" button text, but should be disabled or not a link
+    # Check for current page '2' being active, and '1' being a link
+    assert '<adw-button class="suggested-action" aria-current="page">2</adw-button>' in html_content_page2
+    with app_instance.app_context(): # Add context for url_for
+        profile_url_page1 = url_for("profile", username=user_data["username"], page=1, _external=False)
+        assert f'<adw-button href="{profile_url_page1}">1</adw-button>' in html_content_page2
+        assert f'<adw-button href="{profile_url_page1}">&laquo; Previous</adw-button>' in html_content_page2
+    assert '<adw-button disabled>Next &raquo;</adw-button>' in html_content_page2
+
 
 def test_edit_post(app_instance, client, new_user, new_user_data_factory):
     user_data = new_user_data_factory()
@@ -1050,3 +1057,344 @@ class TestSearchFunctionality:
         # Post 3 should not be on page 2
         assert f"Post {per_page_in_app + 1} with {search_term}".encode() not in response_page2.data
         assert b"Previous" in response_page2.data # Pagination control
+
+# --- Static Page Tests ---
+def test_about_page(app_instance, client): # Added app_instance
+    with app_instance.app_context(): # Added app_context
+        response = client.get(url_for('about_page'))
+    assert response.status_code == 200
+    assert b'<adw-preferences-group' in response.data
+    assert b'title="About This Blog Demo"' in response.data
+
+def test_contact_page(app_instance, client): # Added app_instance
+    with app_instance.app_context(): # Added app_context
+        response = client.get(url_for('contact_page'))
+    assert response.status_code == 200
+    assert b"Contact Us" in response.data # Assuming "Contact Us" is a key phrase
+
+# --- Post Deletion Tests ---
+def test_delete_post_success(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    with app_instance.app_context():
+        post_to_delete = Post(title="Post to be Deleted", content="Content of deletable post.", author=new_user)
+        db.session.add(post_to_delete)
+        db.session.commit()
+        post_id = post_to_delete.id
+
+    with app_instance.app_context():
+        response = client.post(url_for('delete_post', post_id=post_id), follow_redirects=True)
+
+    assert response.status_code == 200 # Should redirect to index
+    with app_instance.app_context():
+        assert response.request.path == url_for('index', _external=False)
+    # Flash message for deletion is not explicitly defined in app.py's delete_post, so we don't check it.
+    # Instead, we verify the post is gone from the index page and DB.
+    assert b"Post to be Deleted" not in response.data
+
+    with app_instance.app_context():
+        assert Post.query.get(post_id) is None
+
+def test_delete_post_unauthorized(app_instance, client, new_user, new_user_data_factory):
+    # User1 creates a post
+    user1_data = new_user_data_factory(username_suffix="_user1")
+    with app_instance.app_context():
+        user1 = User(username=user1_data['username'])
+        user1.set_password(user1_data['password'])
+        db.session.add(user1)
+        post_by_user1 = Post(title="User1's Post", content="Content by User1.", author=user1)
+        db.session.add(post_by_user1)
+        db.session.commit()
+        post_id = post_by_user1.id
+
+    # User2 (new_user) logs in and tries to delete User1's post
+    user2_data = new_user_data_factory() # Default new_user
+    login_user_helper(client, user2_data['username'], user2_data['password'])
+
+    with app_instance.app_context():
+        response = client.post(url_for('delete_post', post_id=post_id))
+
+    assert response.status_code == 403 # Forbidden
+
+    with app_instance.app_context():
+        assert Post.query.get(post_id) is not None # Post should still exist
+
+def test_delete_post_unauthenticated(app_instance, client, new_user): # new_user creates the post
+    with app_instance.app_context():
+        post_to_delete = Post(title="Unauth Delete Test Post", content="Content", author=new_user)
+        db.session.add(post_to_delete)
+        db.session.commit()
+        post_id = post_to_delete.id
+
+    # No login
+    with app_instance.app_context():
+        response = client.post(url_for('delete_post', post_id=post_id))
+    assert response.status_code == 302 # Redirect to login
+
+    with app_instance.app_context():
+        assert Post.query.get(post_id) is not None # Post should still exist
+
+
+# --- Comment Deletion Tests (Extended) ---
+def test_delete_comment_by_post_author(app_instance, client, new_user_data_factory):
+    # User1 (post author)
+    post_author_data = new_user_data_factory(username_suffix="_post_author")
+    # User2 (comment author)
+    comment_author_data = new_user_data_factory(username_suffix="_comment_author")
+
+    with app_instance.app_context():
+        post_author = User(username=post_author_data['username'])
+        post_author.set_password(post_author_data['password'])
+        comment_author = User(username=comment_author_data['username'])
+        comment_author.set_password(comment_author_data['password'])
+        db.session.add_all([post_author, comment_author])
+        db.session.commit() # Commit users first to get IDs
+
+        post = Post(title="Post for Comment Deletion by Author", content="Content.", author=post_author)
+        comment_by_other = Comment(text="Comment by another user", author=comment_author, post=post)
+        db.session.add_all([post, comment_by_other])
+        db.session.commit()
+        comment_id = comment_by_other.id
+        post_id_for_redirect = post.id
+
+    # Post author logs in
+    login_user_helper(client, post_author_data['username'], post_author_data['password'])
+
+    with app_instance.app_context():
+        response_delete = client.post(url_for('delete_comment', comment_id=comment_id), follow_redirects=True)
+
+    assert response_delete.status_code == 200
+    assert b"Comment deleted." in response_delete.data
+    assert b"Comment by another user" not in response_delete.data
+
+    with app_instance.app_context():
+        assert Comment.query.get(comment_id) is None
+        # Check redirect went to the correct post page
+        assert response_delete.request.path == url_for('view_post', post_id=post_id_for_redirect, _external=False)
+
+
+def test_delete_comment_unauthorized(app_instance, client, new_user_data_factory):
+    # User1 (post author)
+    post_author_data = new_user_data_factory(username_suffix="_pa")
+    # User2 (comment author)
+    comment_author_data = new_user_data_factory(username_suffix="_ca")
+    # User3 (random user trying to delete)
+    deleter_data = new_user_data_factory(username_suffix="_deleter")
+
+    with app_instance.app_context():
+        post_author = User(username=post_author_data['username']); post_author.set_password(post_author_data['password'])
+        comment_author = User(username=comment_author_data['username']); comment_author.set_password(comment_author_data['password'])
+        deleter = User(username=deleter_data['username']); deleter.set_password(deleter_data['password'])
+        db.session.add_all([post_author, comment_author, deleter])
+        db.session.commit()
+
+        post = Post(title="Unauthorized Comment Deletion Test", content="Content.", author=post_author)
+        comment = Comment(text="A comment", author=comment_author, post=post)
+        db.session.add_all([post, comment])
+        db.session.commit()
+        comment_id = comment.id
+
+    # Deleter logs in
+    login_user_helper(client, deleter_data['username'], deleter_data['password'])
+
+    with app_instance.app_context():
+        response_delete = client.post(url_for('delete_comment', comment_id=comment_id))
+    assert response_delete.status_code == 403 # Forbidden
+
+    with app_instance.app_context():
+        assert Comment.query.get(comment_id) is not None # Comment should still exist
+
+# --- Category and Tag Page Tests ---
+def test_posts_by_category_page(app_instance, client, new_user):
+    with app_instance.app_context():
+        category1 = Category(name="Tech Reviews")
+        db.session.add(category1)
+        db.session.commit() # Commit to get category1.slug
+
+        post1 = Post(title="Tech Post 1", content="Content about tech.", author=new_user, categories=[category1])
+        post2 = Post(title="Another Post", content="Different topic.", author=new_user) # No category or different category
+        db.session.add_all([post1, post2])
+        db.session.commit()
+
+        response = client.get(url_for('posts_by_category', category_slug=category1.slug))
+    assert response.status_code == 200
+    assert b"Posts in Tech Reviews" in response.data # Assuming template shows "Posts in CategoryName"
+    assert b"Tech Post 1" in response.data
+    assert b"Another Post" not in response.data
+
+def test_posts_by_tag_page(app_instance, client, new_user):
+    with app_instance.app_context():
+        tag1 = Tag(name="python-programming")
+        db.session.add(tag1)
+        db.session.commit() # Commit to get tag1.slug
+
+        post1 = Post(title="Python Post 1", content="Content about Python.", author=new_user, tags=[tag1])
+        post2 = Post(title="Java Post", content="Content about Java.", author=new_user) # No tag or different tag
+        db.session.add_all([post1, post2])
+        db.session.commit()
+
+        response = client.get(url_for('posts_by_tag', tag_slug=tag1.slug))
+    assert response.status_code == 200
+    # The template uses <adw-preferences-group title="Posts tagged '{{ tag.name }}'">
+    assert b'<adw-preferences-group' in response.data
+    assert f'title="Posts tagged \'{tag1.name}\'"'.encode('utf-8') in response.data
+    assert b"Python Post 1" in response.data # Post content should be bytes
+    assert b"Java Post" not in response.data   # Post content should be bytes
+
+def test_category_page_not_found(app_instance, client):
+    with app_instance.app_context():
+        response = client.get(url_for('posts_by_category', category_slug="non-existent-category"))
+    assert response.status_code == 404
+
+def test_tag_page_not_found(app_instance, client):
+    with app_instance.app_context():
+        response = client.get(url_for('posts_by_tag', tag_slug="non-existent-tag"))
+    assert response.status_code == 404
+
+# --- Error Page Tests ---
+def test_404_not_found(client): # app_instance not strictly needed as it's a direct client call
+    response = client.get("/this-page-does-not-exist")
+    assert response.status_code == 404
+    assert b"Page Not Found" in response.data # Check for a key phrase from 404.html
+
+# To test 403, we can try accessing a route that explicitly aborts(403)
+# Example: deleting someone else's post (already covered in test_delete_post_unauthorized)
+
+# To test 500, we need to mock a route to raise an unhandled exception.
+# Patch target needs to be where it's looked up (app.py in this case if Post is used as app.Post)
+# or the direct module if Post.query is called from 'from app import Post'.
+# Given the import style, 'app.Post.query' should be correct IF Post is used like app.Post in routes.
+# However, routes likely use 'Post' directly due to 'from app import ... Post'.
+# So, the target for patch should be 'app.Post.query' if Post is from app.py,
+# or more precisely where `Post` is defined and used.
+# The error "Working outside of application context" for patch suggests it needs app context.
+def test_500_server_error(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    original_propagate_setting = app_instance.config.get('PROPAGATE_EXCEPTIONS')
+    app_instance.config['PROPAGATE_EXCEPTIONS'] = False # Allow Flask's 500 handler to run
+
+    try:
+        with app_instance.app_context():
+            with patch('app.Post.query') as mock_post_query:
+                mock_post_query.order_by.side_effect = Exception("Simulated database error")
+
+                with patch.object(app_instance.logger, 'error') as mock_logger_error:
+                    response = client.get(url_for('index'))
+                    # Check that the error was logged by Flask's handler
+                    # This assertion might be tricky if the log format is complex or other errors are logged.
+                    # A more robust check might be to see if any log message contains "Simulated database error"
+                    # For now, just check if error logger was called.
+                    mock_logger_error.assert_called()
+
+        assert response.status_code == 500
+        assert b"Internal Server Error" in response.data # Check for key phrase from 500.html
+    finally:
+        # Restore original setting
+        if original_propagate_setting is not None:
+            app_instance.config['PROPAGATE_EXCEPTIONS'] = original_propagate_setting
+        else:
+            # If it wasn't set, it defaults to True if DEBUG is True, False otherwise.
+            # For testing, it's often True. We can remove it to revert to default behavior.
+            app_instance.config.pop('PROPAGATE_EXCEPTIONS', None)
+
+
+# --- Bleach Sanitization (Implicit Check) ---
+# This test ensures that if a user tries to inject harmful HTML, it's sanitized.
+# The app.py uses bleach.clean on post content and profile info.
+def test_html_sanitization_in_post_content(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    raw_content = "This is <strong>strong</strong> text with a <script>alert('Hacked!');</script> tag."
+    expected_sanitized_content = "This is <strong>strong</strong> text with a &lt;script&gt;alert('Hacked!');&lt;/script&gt; tag."
+    # Note: Bleach by default escapes unknown tags, it doesn't remove them unless strip=True.
+    # The app.py uses strip=True, so the script tag should be removed entirely.
+    expected_sanitized_content_stripped = "This is <strong>strong</strong> text with a  tag." # If script tag content is also stripped
+    # Let's check the app.py ALLOWED_TAGS and strip settings
+    # ALLOWED_TAGS does not include 'script'. strip=True means it's removed.
+    # ALLOWED_ATTRIBUTES = {'*': ['class', 'style', 'id', 'title'], 'a': ['href', 'target', 'rel']}
+    # So, the script tag and its content should be gone.
+
+    post_data = {
+        'title': 'HTML Sanitization Test Post',
+        'content': raw_content
+    }
+    with app_instance.app_context():
+        client.post(url_for('create_post'), data=post_data, follow_redirects=True)
+        created_post = Post.query.filter_by(title=post_data['title']).first()
+        assert created_post is not None
+        # The exact output depends on bleach configuration.
+        # We expect the <script> tag to be gone.
+        assert "<script>" not in created_post.content
+        assert "<strong>" in created_post.content # Allowed tag
+
+        # Let's check the actual sanitized content based on app's bleach config
+        import bleach
+        from app import ALLOWED_TAGS, ALLOWED_ATTRIBUTES # Import from app.py
+        app_expected_sanitized = bleach.clean(raw_content, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+        assert created_post.content == app_expected_sanitized
+
+    # Verify on the view page
+    with app_instance.app_context():
+        response_view = client.get(url_for('view_post', post_id=created_post.id))
+    assert response_view.status_code == 200
+    # The browser will render &lt; as <, so we check for the escaped version if it wasn't stripped
+    # Since it's stripped, we check that the script tag is NOT present.
+    assert b"<script>alert('Hacked!');</script>" not in response_view.data
+    assert b"&lt;script&gt;alert('Hacked!');&lt;/script&gt;" not in response_view.data
+    assert b"<strong>strong</strong>" in response_view.data # Allowed HTML should be present
+
+
+def test_html_sanitization_in_profile_bio(app_instance, client, new_user, new_user_data_factory):
+    user_data = new_user_data_factory()
+    login_user_helper(client, user_data['username'], user_data['password'])
+
+    raw_bio = "My bio: <img src=x onerror=alert('bio_hacked') /> <a href=\"javascript:alert('link_hacked')\">Click</a>"
+    # Expected after bleach based on app.py's ALLOWED_TAGS/ATTRIBUTES and strip=True
+    # img is not allowed. a is allowed but with specific attributes. javascript: hrefs are usually stripped.
+    # ALLOWED_TAGS = ['p', 'br', 'strong', 'em', 'u', 's', 'strike', 'del', 'ins', 'a', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+    # ALLOWED_ATTRIBUTES = {'*': ['class', 'style', 'id', 'title'], 'a': ['href', 'target', 'rel']}
+    # bleach will remove the img tag and its attributes.
+    # bleach will remove the href from 'a' if it's 'javascript:...'.
+
+    profile_data = {'profile_info': raw_bio}
+    with app_instance.app_context():
+        client.post(url_for('edit_profile'), data=profile_data, follow_redirects=True)
+        updated_user = User.query.filter_by(username=user_data['username']).first()
+        assert updated_user is not None
+
+        import bleach
+        from app import ALLOWED_TAGS, ALLOWED_ATTRIBUTES
+        app_expected_sanitized_bio = bleach.clean(raw_bio, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+
+        assert updated_user.profile_info == app_expected_sanitized_bio
+        assert "<img" not in updated_user.profile_info
+        assert "onerror" not in updated_user.profile_info
+        assert "javascript:alert" not in updated_user.profile_info # Check if the dangerous href is gone
+
+    # Verify on the profile view page
+    with app_instance.app_context():
+        response_view = client.get(url_for('profile', username=user_data['username']))
+    assert response_view.status_code == 200
+    # Check that the sanitized (and likely less harmful) version is displayed
+    # For example, the 'Click' text from the link might remain, but not the JS href.
+    assert b"My bio:" in response_view.data
+
+    # Check specifically within the rendered bio section if possible, to avoid global JS handler interference
+    # For now, we rely on the DB check being correct and assume the template renders db_user.profile_info directly or via a safe filter.
+    # The raw_bio should not be present in its harmful form.
+    assert b"<img src=x onerror=alert('bio_hacked') />" not in response_view.data
+    assert b"javascript:alert('link_hacked')" not in response_view.data # Check the dangerous JS href
+
+    # Check if the benign parts are there, based on how bleach processes it
+    if "Click" in app_expected_sanitized_bio and "<a>" in app_expected_sanitized_bio:
+        assert b"<a>Click</a>" in response_view.data # If 'a' tag is kept (even if href is stripped)
+    elif "Click" in app_expected_sanitized_bio:
+         assert b"Click" in response_view.data # If 'a' tag is stripped but content remains
+    # else: the word "Click" itself might have been stripped if the 'a' tag was removed entirely by bleach.
+
+# Ensure all fixtures are used or remove if not necessary for a test.
+# Ensure app_instance is used when app context is needed (e.g., for url_for, db operations).
