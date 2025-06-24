@@ -136,11 +136,13 @@
             </adw-list-box>
         </adw-preferences-group>
 
-        <adw-action-row>
-            <div slot="suffix" style="display: flex; justify-content: flex-end; gap: var(--spacing-s); width: 100%;">
-                <adw-button type="submit" suggested label="{{ form.submit.label.text if form.submit.label else 'Submit Post' }}"></adw-button>
-            </div>
-        </adw-action-row>
+        {# Removed AdwActionRow wrapper for the submit button. #}
+        {# Place the button directly or within a simple div for layout if needed. #}
+        <div style="display: flex; justify-content: flex-end; padding-top: var(--spacing-m); padding-bottom: var(--spacing-m);">
+            <adw-button type="submit" suggested label="{{ form.submit.label.text if form.submit.label else 'Submit Post' }}">
+                {{ form.submit.label.text if form.submit.label else 'Submit Post' }} {# Ensure button has text content if label attribute is not directly supported for slotted text #}
+            </adw-button>
+        </div>
     </form>
   </adw-preferences-page>
 </adw-clamp>
