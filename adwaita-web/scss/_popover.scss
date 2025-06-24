@@ -1,0 +1,99 @@
+// Adwaita Popover Styles
+//
+// Variables to leverage from _variables.scss:
+// - Popover background: $popover_bg_color (or $window_bg_color if more general)
+// - Popover border/shadow: $popover_box_shadow (or $dialog_box_shadow), $popover_border_color
+// - Popover border-radius: $popover_border_radius (or $window_border_radius)
+// - Arrow fill: Same as popover background
+// - Arrow border: Same as popover border
+// - Spacing for padding. Adwaita popovers typically have more padding than simple tooltips.
+
+.adw-popover-surface { // This class would be on the host <adw-popover> itself
+    // display: none; // Controlled by [open] attribute
+    position: fixed; // Or absolute, depending on final implementation strategy
+    z-index: var(--z-index-popover, 1000); // Ensure it's above most content
+
+    background-color: var(--popover-bg-color, var(--window-bg-color));
+    border-radius: var(--popover-border-radius, var(--window-border-radius, 6px));
+    box-shadow: var(--popover-box-shadow, var(--dialog-box-shadow, 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)));
+    // Adwaita popovers often have significant padding, e.g., 12px or more.
+    // This padding should be on the content area within the popover, not the host itself if an arrow is outside.
+    // For now, let's assume the slot content will manage its own padding or the popover WC adds a padded inner div.
+    // If the custom element <adw-popover> is the surface:
+    // padding: var(--popover-padding, var(--spacing-xl, 12px));
+
+    // Transition for open/close
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+
+    &[open] {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+// If the popover content is wrapped in an internal div inside the shadow DOM:
+// :host {
+//   display: none;
+//   position: fixed;
+//   z-index: var(--z-index-popover, 1000);
+//   opacity: 0;
+//   transform: scale(0.95);
+//   transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+// }
+// :host([open]) {
+//   display: block; // Or flex/grid depending on internal layout
+//   opacity: 1;
+//   transform: scale(1);
+// }
+// .popover-internal-wrapper { /* This would be the styled surface */
+//   background-color: var(--popover-bg-color, var(--window-bg-color));
+//   border-radius: var(--popover-border-radius, var(--window-border-radius, 6px));
+//   box-shadow: var(--popover-box-shadow, var(--dialog-box-shadow, ...));
+//   padding: var(--popover-padding, var(--spacing-xl, 12px));
+// }
+
+
+// Arrow styling (placeholder)
+// .adw-popover-arrow {
+//   position: absolute;
+//   width: 12px; // Example size
+//   height: 12px; // Example size
+//   background-color: var(--popover-bg-color, var(--window-bg-color));
+//   transform: rotate(45deg);
+//   // Border would match popover border
+//   border-style: solid;
+//   border-color: var(--popover-border-color, var(--border-color));
+//   border-width: 0; // Set specific borders based on position
+// }
+
+// Example for arrow pointing up (popover is below target)
+// .adw-popover-arrow.arrow-top {
+//   top: -6px; // Half of height
+//   left: 50%;
+//   margin-left: -6px; // Half of width
+//   border-top-width: 1px;
+//   border-left-width: 1px;
+// }
+
+// Example for arrow pointing left (popover is to the right of target)
+// .adw-popover-arrow.arrow-left {
+//   left: -6px;
+//   top: 50%;
+//   margin-top: -6px;
+//   border-left-width: 1px;
+//   border-bottom-width: 1px;
+// }
+// etc. for other positions.
+// The arrow's background should obscure the part of the popover border it overlaps.
+// This can be tricky and might involve a "mask" or careful border manipulation.
+// Simpler arrows might just be a triangle without a border.
+
+// Ensure popovers used within other Adwaita components (like AdwMenuButton)
+// integrate smoothly.
+// For example, AdwMenuButton might set a specific class or CSS variable
+// to style its popover content more like a menu.
+
+// Consider :popover-open pseudo-class if using native HTML Popover API in the future.
+// For now, we rely on the [open] attribute.
