@@ -1,4 +1,4 @@
-import { sanitizeHref } from './utils.js'; // Import sanitizeHref
+import { sanitizeHref, getAdwCommonStyleSheet } from './utils.js'; // Import sanitizeHref and getAdwCommonStyleSheet
 
 /**
  * Creates an Adwaita-style button.
@@ -125,45 +125,7 @@ export function createAdwButton(text, options = {}) {
   return button;
 }
 
-// Helper to fetch and cache the stylesheet
-// In a real-world scenario, this would be centralized, e.g., in components.js or utils.js
-let adwButtonCommonSheet = null;
-let sheetPromise = null;
-
-async function getAdwButtonCommonStyleSheet() {
-    if (adwButtonCommonSheet) {
-        return adwButtonCommonSheet;
-    }
-    if (sheetPromise) {
-        return sheetPromise;
-    }
-
-    const cssPath = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
-    if (!cssPath) {
-        console.error("AdwButton: Adw.config.cssPath is not defined. Cannot load styles.");
-        return null;
-    }
-
-    sheetPromise = new Promise(async (resolve, reject) => {
-        try {
-            const response = await fetch(cssPath);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch stylesheet from ${cssPath}: ${response.statusText}`);
-            }
-            const cssText = await response.text();
-            const sheet = new CSSStyleSheet();
-            await sheet.replace(cssText);
-            adwButtonCommonSheet = sheet;
-            resolve(adwButtonCommonSheet);
-        } catch (error) {
-            console.error("AdwButton: Error loading common stylesheet:", error);
-            reject(error);
-        } finally {
-            sheetPromise = null; // Clear promise after completion
-        }
-    });
-    return sheetPromise;
-}
+// Stylesheet loading is now handled by getAdwCommonStyleSheet from utils.js
 
 /**
  * @element adw-button
@@ -228,19 +190,23 @@ export class AdwButton extends HTMLElement {
      * Handles stylesheet adoption and initial rendering.
      */
     async connectedCallback() {
-        if (!this.shadowRoot.adoptedStyleSheets.includes(adwButtonCommonSheet) && typeof CSSStyleSheet !== 'undefined' && 'adoptedStyleSheets' in Document.prototype) {
+        // Check if CSSStyleSheet is supported and adoptedStyleSheets is available
+        if (typeof CSSStyleSheet !== 'undefined' && 'adoptedStyleSheets' in Document.prototype) {
             try {
-                const sheet = await getAdwButtonCommonStyleSheet();
-                if (sheet && !this.shadowRoot.adoptedStyleSheets.includes(sheet)) { // Check again in case of multiple calls
-                    this.shadowRoot.adoptedStyleSheets = [...this.shadowRoot.adoptedStyleSheets, sheet];
-                } else if (!sheet) {
-                    this._fallbackLoadStylesheet(); // Fallback if sheet creation failed
+                const commonSheet = await getAdwCommonStyleSheet(); // From utils.js
+                if (commonSheet && !this.shadowRoot.adoptedStyleSheets.includes(commonSheet)) {
+                    this.shadowRoot.adoptedStyleSheets = [...this.shadowRoot.adoptedStyleSheets, commonSheet];
+                } else if (!commonSheet) {
+                    // If commonSheet failed to load (e.g. cssPath not defined, network error)
+                    console.warn("AdwButton: Common stylesheet not available, attempting fallback.");
+                    this._fallbackLoadStylesheet();
                 }
             } catch (error) {
-                console.error("AdwButton: Failed to adopt common stylesheet, falling back.", error);
+                // Catch errors from getAdwCommonStyleSheet promise rejection
+                console.error("AdwButton: Error adopting common stylesheet, attempting fallback.", error);
                 this._fallbackLoadStylesheet();
             }
-        } else if (!('adoptedStyleSheets' in Document.prototype) || typeof CSSStyleSheet === 'undefined') {
+        } else {
             // Fallback for browsers that don't support adoptedStyleSheets
             this._fallbackLoadStylesheet();
         }

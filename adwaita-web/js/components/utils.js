@@ -239,3 +239,51 @@ export function sanitizeHref(url) {
     }
     return null; // Disallow if protocol not in whitelist or URL is malformed
 }
+
+// Centralized Adopted Stylesheet Logic
+let adwCommonSheet = null;
+let sheetPromise = null;
+
+/**
+ * Fetches the common Adwaita stylesheet and returns it as a CSSStyleSheet object.
+ * Caches the sheet after the first successful fetch.
+ * Relies on `Adw.config.cssPath` being set.
+ * @returns {Promise<CSSStyleSheet|null>} A promise that resolves to the CSSStyleSheet object or null if fetching fails.
+ * @internal
+ */
+export async function getAdwCommonStyleSheet() {
+    if (adwCommonSheet) {
+        return adwCommonSheet;
+    }
+    if (sheetPromise) {
+        return sheetPromise;
+    }
+
+    const cssPath = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
+    if (!cssPath) {
+        console.error("getAdwCommonStyleSheet: Adw.config.cssPath is not defined. Cannot load styles.");
+        return null;
+    }
+
+    sheetPromise = new Promise(async (resolve, reject) => {
+        try {
+            const response = await fetch(cssPath);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch stylesheet from ${cssPath}: ${response.statusText}`);
+            }
+            const cssText = await response.text();
+            const sheet = new CSSStyleSheet();
+            await sheet.replace(cssText);
+            adwCommonSheet = sheet;
+            console.info(`Adwaita common stylesheet loaded and processed from: ${cssPath}`);
+            resolve(adwCommonSheet);
+        } catch (error) {
+            console.error("getAdwCommonStyleSheet: Error loading common stylesheet:", error);
+            adwCommonSheet = null; // Ensure it's null on error so next attempt tries again (or stays null if path is bad)
+            reject(error); // Propagate error for components to handle (e.g. fallback)
+        } finally {
+            sheetPromise = null; // Clear promise regardless of outcome to allow retries if needed (e.g. path changes)
+        }
+    });
+    return sheetPromise;
+}

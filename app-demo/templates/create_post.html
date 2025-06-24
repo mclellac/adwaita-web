@@ -77,21 +77,24 @@
                     class="{{ 'has-error' if form.title.errors else '' }}">
                 </adw-entry-row>
 
-                <adw-action-row title="{{ form.content.label.text }}" subtitle="Enter your post content below.">
-                    <div slot="suffix" style="width:100%; padding-top: var(--spacing-xs);"> {# Added padding-top for spacing #}
-                        {{ form.content(
-                            id=form.content.id or 'content_field',
-                            class='adw-textarea-standalone',
-                            style='width: 100%; min-height: 200px; resize: vertical; box-sizing: border-box;',
-                            rows='10'
-                        ) }}
-                        {% if form.content.errors %}
-                            <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xxs);">
-                                {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </adw-action-row>
+                {# Removed AdwActionRow wrapper for the content textarea #}
+                {# Directly use a list item or a simple div for the textarea and its label/errors #}
+                {# Assuming this is still within the AdwListBox for consistent row appearance/separation #}
+                <li class="adw-row" style="display: flex; flex-direction: column; align-items: flex-start; padding-bottom: var(--spacing-m);">
+                    <label for="{{ form.content.id or 'content_field' }}" class="adw-label" style="font-weight: normal; padding-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
+                    {# <span class="adw-label-subtitle" style="font-size: var(--font-size-small); color: var(--secondary-fg-color); margin-bottom: var(--spacing-xs);">Enter your post content below.</span> #}
+                    {{ form.content(
+                        id=form.content.id or 'content_field',
+                        class='adw-textarea-standalone',
+                        style='width: 100%; min-height: 200px; resize: vertical; box-sizing: border-box;',
+                        rows='10'
+                    ) }}
+                    {% if form.content.errors %}
+                        <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xxs);">
+                            {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
+                        </div>
+                    {% endif %}
+                </li>
             </adw-list-box>
         </adw-preferences-group>
 
