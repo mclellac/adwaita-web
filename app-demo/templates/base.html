@@ -142,44 +142,13 @@
        but added here explicitly to ensure it runs.
        It relies on Adw.js being loaded and Adw object available.
     #}
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        // Check if Adw object and setAccentColor function are available
-        if (typeof Adw !== 'undefined' && typeof Adw.setAccentColor === 'function') {
-            const docEl = document.documentElement; // Target <html> element
-            const bodyDataSet = document.body.dataset; // Read from body's data attributes
-            const userTheme = bodyDataSet.themePreference;
-            const userAccent = bodyDataSet.accentPreference;
-
-            if (userTheme) {
-                console.log(`[Debug] Applying saved theme from DB to html element: ${userTheme}`);
-                if (userTheme === 'light') {
-                    docEl.classList.add('light-theme');
-                    docEl.classList.remove('dark-theme');
-                } else if (userTheme === 'dark') {
-                    docEl.classList.add('dark-theme');
-                    docEl.classList.remove('light-theme');
-                }
-                // Update localStorage with the theme from DB. This is important because
-                // Adw.loadSavedTheme might run before this and set a theme from localStorage.
-                // This ensures the DB preference overrides and is stored for next page load.
-                try { localStorage.setItem('theme', userTheme); } catch (e) { console.warn("Could not save theme to localStorage from DB prefs:", e); }
-            }
-            // If no userTheme from DB, the Adw.loadSavedTheme (attached to DOMContentLoaded in utils.js)
-            // will handle applying theme from localStorage or system preference.
-            // The inline script in <head> has already done an initial application.
-
-            if (userAccent) {
-                console.log(`[Debug] Applying saved accent color from DB: ${userAccent}`);
-                Adw.setAccentColor(userAccent); // This function in utils.js updates localStorage.
-            }
-            // If no userAccent from DB, Adw.loadSavedTheme would have called setAccentColor
-            // with the value from localStorage or the default.
-        } else {
-            console.warn('[Debug] Adw object or Adw.setAccentColor not found on DOMContentLoaded for base.html theme/accent setup. Check components.js loading.');
-        }
-      });
-    </script>
+    <!--
+      The DOMContentLoaded script that was here to apply DB theme/accent preferences
+      has been removed. This logic is now centralized within Adw.applyFinalThemeAndAccent()
+      which is called by components.js.
+      The data-theme-preference and data-accent-preference attributes on the <body> tag
+      will be read by Adw.applyFinalThemeAndAccent().
+    -->
     <adw-application-window>
         <adw-header-bar>
             <adw-window-title slot="title">Blog CMS</adw-window-title>
