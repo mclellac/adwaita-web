@@ -12,7 +12,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0.95);
-  z-index: #{variables.$zindex-dialog}; // Use SCSS variable
+  z-index: var(--z-index-dialog);
   opacity: 0;
   transition: opacity 0.15s ease-out, transform 0.15s ease-out;
 
@@ -55,7 +55,7 @@
   width: 100%;
   height: 100%;
   background-color: var(--dialog-backdrop-color); // Use new variable
-  z-index: #{variables.$zindex-dialog-backdrop}; // Use SCSS variable
+  z-index: var(--z-index-dialog-backdrop);
   opacity: 0;
   transition: opacity 0.15s ease-out;
 

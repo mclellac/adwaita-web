@@ -5,21 +5,6 @@
 {% block styles %}
 {{ super() }}
 <style>
-  .tiptap-toolbar {
-    display: flex;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-s);
-    flex-wrap: wrap;
-  }
-  .tiptap-toolbar button {
-    background-color: var(--button-secondary-background-color);
-    color: var(--button-secondary-text-color);
-    border: 1px solid var(--button-secondary-border-color);
-    border-radius: var(--radius-s);
-    padding: var(--spacing-xxs) var(--spacing-xs);
-    cursor: pointer;
-    font-weight: bold;
-  }
   /* Ensure labels for checkboxes are clickable and aligned */
   .adw-checkbox-row label {
     vertical-align: middle;
@@ -45,24 +30,30 @@
       /* Standard error indication for rows already applies via subtitle or Adwaita's own styling */
   }
   .adw-textarea-standalone {
-    display: block !important;
-    visibility: visible !important;
-    background-color: var(--entry-background-color, var(--view-bg-color)) !important;
-    color: var(--text-color, var(--view-fg-color)) !important;
-    border: 1px solid var(--border-color, var(--borders-color)) !important;
-    border-radius: var(--radius-m) !important;
-    padding: var(--spacing-s) !important;
-    font-family: inherit !important;
-    font-size: inherit !important;
-    line-height: var(--body-line-height) !important;
-    min-height: 150px !important; /* Reduced min-height slightly for testing */
-    width: 100% !important; /* Ensure it takes width */
-    box-sizing: border-box !important; /* Ensure padding/border included in width/height */
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit; /* Inherit from body/page */
+    font-size: var(--font-size-base); /* Standard base font size */
+    line-height: 1.5; /* Good for readability */
+    padding: var(--spacing-xs) var(--spacing-s); /* Consistent with AdwEntry */
+    background-color: var(--view-bg-color); /* Use view background, like entries */
+    color: var(--view-fg-color); /* Standard view foreground color */
+    border: var(--border-width) solid var(--borders-color); /* Standard borders */
+    border-radius: var(--border-radius-medium); /* Consistent with AdwEntry */
+    min-height: 150px;
+    resize: vertical;
+    box-shadow: var(--entry-inset-shadow); /* Use Adwaita entry inset shadow, theme-aware */
+    transition: border-color 0.1s ease-out, box-shadow 0.1s ease-out;
+  }
+  .adw-textarea-standalone::placeholder {
+    color: var(--view-fg-color); /* Standard text color for placeholder */
+    opacity: 0.5; /* Adwaita placeholders are less prominent */
   }
   .adw-textarea-standalone:focus {
-    outline: 2px solid var(--accent-color) !important;
-    outline-offset: -1px !important; /* Adjust to be inside or on the border */
-    border-color: var(--accent-color) !important; /* Also change border color on focus */
+    outline: none;
+    border-color: var(--accent-color); /* Standard focus border color */
+    box-shadow: var(--entry-inset-shadow), var(--entry-focus-ring-shadow); /* Combine inset shadow with focus ring */
   }
 </style>
 {% endblock %}
@@ -108,16 +99,24 @@
             <adw-list-box class="{{ 'has-error' if form.categories.errors else '' }}">
                 {% for subfield in form.categories %}
                 <adw-action-row class="adw-checkbox-row">
-                    {# Using prefix slot for better control over layout with label #}
-                    <div slot="prefix" style="display:flex; align-items:center;">
-                      {{ subfield(class_="adw-checkbox", id=subfield.id) }}
-                      <label for="{{ subfield.id }}" style="margin-left: var(--spacing-s);">{{ subfield.label.text }}</label>
-                    </div>
+                    <adw-checkbox slot="prefix"
+                                  name="{{ subfield.name }}"
+                                  id="{{ subfield.id }}"
+                                  value="{{ subfield.widget.attrs.get('value', subfield.data) }}"
+                                  label="{{ subfield.label.text }}"
+                                  {% if subfield.data %}checked{% endif %}>
+                    </adw-checkbox>
+                    {% if loop.first and form.categories.errors %}
+                        {# Display errors as subtitle of the first action row in the group #}
+                        <adw-label slot="subtitle" class="error-text" style="color: var(--error-color);">{{ form.categories.errors|join('; ') }}</adw-label>
+                    {% endif %}
                 </adw-action-row>
                 {% endfor %}
             </adw-list-box>
-            {% if form.categories.errors %}
+            {# The error display is now part of the loop above, this block can be removed or adjusted #}
+            {# {% if form.categories.errors %}
             <adw-list-box> <adw-action-row subtitle="{{ form.categories.errors|join(' ') }}" class="error-row"></adw-action-row> </adw-list-box>
+            {% endif %} #}
             {% endif %}
         </adw-preferences-group>
 
@@ -137,7 +136,7 @@
 
         <adw-action-row>
             <div slot="suffix" style="display: flex; justify-content: flex-end; gap: var(--spacing-s); width: 100%;">
-                <adw-button type="submit" class="suggested-action" label="{{ form.submit.label.text if form.submit.label else 'Submit Post' }}"></adw-button>
+                <adw-button type="submit" suggested label="{{ form.submit.label.text if form.submit.label else 'Submit Post' }}"></adw-button>
             </div>
         </adw-action-row>
     </form>
@@ -148,69 +147,5 @@
 {% block scripts %}
 {{ super() }}
 {# Tiptap JavaScript removed. #}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('[DEBUG_TEXTAREA] DOMContentLoaded event fired.');
-    const textareaId = '{{ form.content.id or "content_field" }}';
-    const textarea = document.getElementById(textareaId);
-    let suffixDiv = null;
-    let actionRow = null;
-
-    if (textarea) {
-        suffixDiv = textarea.parentElement; // Assuming textarea is direct child of the suffix div
-        if (suffixDiv && suffixDiv.slot === 'suffix') {
-            actionRow = suffixDiv.parentElement; // Assuming suffixDiv is direct child of adw-action-row
-        } else {
-            // If textarea is not in a suffix div, try to find action row differently if needed
-            // For now, this handles the expected structure.
-            console.warn('[DEBUG_TEXTAREA] Textarea parent is not the expected suffix div:', suffixDiv);
-            // Try to find the specific adw-action-row for content if direct parentage isn't as expected
-            // This is a fallback selector, adjust if create_post.html structure for content is different
-            let allActionRows = document.querySelectorAll('adw-action-row');
-            allActionRows.forEach(row => {
-                if (row.querySelector('#' + textareaId)) {
-                    actionRow = row;
-                    // If suffixDiv wasn't found via direct parent, try to find it within this actionRow
-                    if (!suffixDiv || suffixDiv.slot !== 'suffix') {
-                       let potentialSuffix = row.querySelector('div[slot="suffix"]');
-                       if (potentialSuffix && potentialSuffix.contains(textarea)) {
-                           suffixDiv = potentialSuffix;
-                       }
-                    }
-                }
-            });
-        }
-    } else {
-        console.error('[DEBUG_TEXTAREA] Textarea with ID ' + textareaId + ' not found!');
-    }
-
-    function logElementDetails(element, name) {
-        if (element) {
-            console.log(`[DEBUG_TEXTAREA] --- ${name} ---`);
-            console.log(`[DEBUG_TEXTAREA] ${name} Element:`, element);
-            console.log(`[DEBUG_TEXTAREA] ${name} Inline Styles - display: '${element.style.display}', visibility: '${element.style.visibility}', opacity: '${element.style.opacity}'`);
-            console.log(`[DEBUG_TEXTAREA] ${name} Dimensions - offsetWidth: ${element.offsetWidth}, offsetHeight: ${element.offsetHeight}, clientWidth: ${element.clientWidth}, clientHeight: ${element.clientHeight}`);
-            const computedStyles = window.getComputedStyle(element);
-            console.log(`[DEBUG_TEXTAREA] ${name} Computed Styles - display: '${computedStyles.display}', visibility: '${computedStyles.visibility}', opacity: '${computedStyles.opacity}'`);
-            console.log(`[DEBUG_TEXTAREA] ${name} OuterHTML:`, element.outerHTML);
-            console.log(`[DEBUG_TEXTAREA] --- End ${name} ---`);
-        } else {
-            console.warn(`[DEBUG_TEXTAREA] ${name} element not found or not correctly identified.`);
-        }
-    }
-
-    logElementDetails(textarea, 'Textarea');
-    if (suffixDiv) { // Only log if suffixDiv was found
-        logElementDetails(suffixDiv, 'Suffix Div (Parent of Textarea)');
-    } else {
-        console.warn('[DEBUG_TEXTAREA] Suffix Div not found, cannot log details.');
-    }
-    if (actionRow && actionRow.matches && actionRow.matches('adw-action-row')) { // Check if it's an adw-action-row
-        logElementDetails(actionRow, 'AdwActionRow (Parent of Suffix Div)');
-    } else {
-         console.warn('[DEBUG_TEXTAREA] AdwActionRow not found or not correctly identified, cannot log details. Found:', actionRow);
-    }
-    console.log('[DEBUG_TEXTAREA] Debug script execution finished.');
-});
-</script>
+{# Textarea debugging script removed. #}
 {% endblock %}

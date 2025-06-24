@@ -5,21 +5,6 @@
 {% block styles %}
 {{ super() }}
 <style>
-  .tiptap-toolbar {
-    display: flex;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-s);
-    flex-wrap: wrap;
-  }
-  .tiptap-toolbar button {
-    background-color: var(--button-secondary-background-color);
-    color: var(--button-secondary-text-color);
-    border: 1px solid var(--button-secondary-border-color);
-    border-radius: var(--radius-s);
-    padding: var(--spacing-xxs) var(--spacing-xs);
-    cursor: pointer;
-    font-weight: bold;
-  }
   .adw-checkbox-row label {
     vertical-align: middle;
     margin-left: var(--spacing-s);
@@ -57,8 +42,8 @@
 
                 <adw-action-row title="{{ form.content.label.text }}" subtitle="Edit your post content below.">
                     <div slot="suffix" style="width:100%;">
-                        {# Make textarea visible and style it like an adw-entry #}
-                        {{ form.content(id=form.content.id or 'content_field_edit', class='adw-entry', style='width: 100%; min-height: 200px; resize: vertical;', rows='10') }}
+                        {# Use adw-textarea-standalone for consistent multiline entry styling #}
+                        {{ form.content(id=form.content.id or 'content_field_edit', class='adw-textarea-standalone', style='width: 100%; min-height: 200px; resize: vertical;', rows='10') }}
                         {% if form.content.errors %}
                             <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
                                 {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
@@ -73,15 +58,23 @@
             <adw-list-box class="{{ 'has-error' if form.categories.errors else '' }}">
                 {% for subfield in form.categories %}
                 <adw-action-row class="adw-checkbox-row">
-                    <div slot="prefix" style="display:flex; align-items:center;">
-                      {{ subfield(class_="adw-checkbox", id=subfield.id) }} {# WTForms pre-selects based on obj data #}
-                      <label for="{{ subfield.id }}" style="margin-left: var(--spacing-s);">{{ subfield.label.text }}</label>
-                    </div>
+                    <adw-checkbox slot="prefix"
+                                  name="{{ subfield.name }}"
+                                  id="{{ subfield.id }}"
+                                  value="{{ subfield.widget.attrs.get('value', subfield.data) }}"
+                                  label="{{ subfield.label.text }}"
+                                  {% if subfield.data %}checked{% endif %}>
+                    </adw-checkbox>
+                    {% if loop.first and form.categories.errors %}
+                        <adw-label slot="subtitle" class="error-text" style="color: var(--error-color);">{{ form.categories.errors|join('; ') }}</adw-label>
+                    {% endif %}
                 </adw-action-row>
                 {% endfor %}
             </adw-list-box>
-            {% if form.categories.errors %}
+            {# Errors handled in the loop now #}
+            {# {% if form.categories.errors %}
             <adw-list-box> <adw-action-row subtitle="{{ form.categories.errors|join(' ') }}" class="error-row"></adw-action-row> </adw-list-box>
+            {% endif %} #}
             {% endif %}
         </adw-preferences-group>
 
@@ -101,8 +94,8 @@
 
         <adw-action-row>
             <div slot="suffix" style="display: flex; justify-content: flex-end; gap: var(--spacing-s); width: 100%;">
-                <adw-button type="link" href="{{ url_for('view_post', post_id=post.id) }}">Cancel</adw-button>
-                <adw-button type="submit" class="suggested-action" label="{{ form.submit.label.text if form.submit.label else 'Update Post' }}"></adw-button>
+                <adw-button flat href="{{ url_for('view_post', post_id=post.id) }}">Cancel</adw-button>
+                <adw-button type="submit" suggested label="{{ form.submit.label.text if form.submit.label else 'Update Post' }}"></adw-button>
             </div>
         </adw-action-row>
     </form>

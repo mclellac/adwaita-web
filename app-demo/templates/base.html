@@ -183,9 +183,9 @@
     <adw-application-window>
         <adw-header-bar>
             <adw-window-title slot="title">Blog CMS</adw-window-title>
-            <a href="{{ url_for('index') }}" class="adw-button" slot="start">Home</a>
-            <a href="{{ url_for('about_page') }}" class="adw-button" slot="start">About</a>
-            <a href="{{ url_for('contact_page') }}" class="adw-button" slot="start">Contact</a>
+            <adw-button href="{{ url_for('index') }}" slot="start">Home</adw-button>
+            <adw-button href="{{ url_for('about_page') }}" slot="start">About</adw-button>
+            <adw-button href="{{ url_for('contact_page') }}" slot="start">Contact</adw-button>
             <form action="{{ url_for('search_results') }}" method="GET" slot="start" style="display: flex; align-items: center; gap: var(--spacing-xs); margin-left: var(--spacing-s);">
                 <adw-entry name="q" placeholder="Search posts..." value="{{ request.args.get('q', '') }}" style="min-width: 150px;"></adw-entry> {# Added min-width for better appearance #}
                 <adw-button type="submit" flat aria-label="Search">
@@ -211,12 +211,12 @@
                         </span>
                     </span>
                 {% endif %}
-            </a>
-            <a href="{{ url_for('settings_page') }}" class="adw-button" slot="end">Settings</a>
-            <a href="{{ url_for('logout') }}" class="adw-button" slot="end">Logout</a>
-            <a href="{{ url_for('create_post') }}" class="adw-button suggested-action" slot="end">New Post</a>
+            </adw-button>
+            <adw-button href="{{ url_for('settings_page') }}" slot="end">Settings</adw-button>
+            <adw-button href="{{ url_for('logout') }}" slot="end">Logout</adw-button>
+            <adw-button href="{{ url_for('create_post') }}" suggested slot="end">New Post</adw-button>
         {% else %}
-            <a href="{{ url_for('login') }}" class="adw-button" slot="end">Login</a>
+            <adw-button href="{{ url_for('login') }}" slot="end">Login</adw-button>
         {% endif %}
         </adw-header-bar>
         <main class="adw-page">

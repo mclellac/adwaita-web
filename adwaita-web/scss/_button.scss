@@ -4,7 +4,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-xs) var(--spacing-m); // e.g., 6px 12px. Consider slightly more vertical padding for typical Adwaita feel, like 8px 12px (var(--spacing-s) var(--spacing-m))
+  padding: var(--spacing-s) var(--spacing-m);
   border-width: var(--border-width);
   border-style: solid;
   border-color: var(--button-border-color); // From _variables.scss

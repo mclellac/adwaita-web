@@ -61,8 +61,8 @@ export function createAdwCheckbox(options = {}) {
     const input = document.createElement('input'); input.type = 'checkbox';
     if(opts.checked) input.checked = true; if(opts.disabled) input.disabled = true; if(opts.name) input.name = opts.name; if(opts.value) input.value = opts.value;
     if(typeof opts.onChanged === 'function') input.addEventListener('change', opts.onChanged);
-    const checkmark = document.createElement('span'); checkmark.classList.add('adw-checkbox-checkmark'); checkmark.setAttribute('aria-hidden', 'true');
-    wrapper.appendChild(input); wrapper.appendChild(checkmark);
+    const indicator = document.createElement('span'); indicator.classList.add('adw-checkbox-indicator'); indicator.setAttribute('aria-hidden', 'true');
+    wrapper.appendChild(input); wrapper.appendChild(indicator);
     if(opts.label){ const labelSpan = document.createElement('span'); labelSpan.classList.add('adw-checkbox-label'); labelSpan.textContent = opts.label; wrapper.appendChild(labelSpan); }
     return wrapper;
 }
@@ -76,8 +76,8 @@ export class AdwCheckbox extends HTMLElement {
         const wrapper = document.createElement('label'); wrapper.classList.add('adw-checkbox');
         this._inputElement = document.createElement('input'); this._inputElement.type = 'checkbox';
         this._inputElement.addEventListener('change', (e) => { this.checked = this._inputElement.checked; this.dispatchEvent(new Event('change', { bubbles: true, composed: true, detail: { checked: this.checked } })); });
-        const checkmark = document.createElement('span'); checkmark.classList.add('adw-checkbox-checkmark'); checkmark.setAttribute('aria-hidden', 'true');
-        wrapper.appendChild(this._inputElement); wrapper.appendChild(checkmark);
+        const indicator = document.createElement('span'); indicator.classList.add('adw-checkbox-indicator'); indicator.setAttribute('aria-hidden', 'true');
+        wrapper.appendChild(this._inputElement); wrapper.appendChild(indicator);
         const labelText = this.getAttribute('label'); if (labelText) { const labelSpan = document.createElement('span'); labelSpan.classList.add('adw-checkbox-label'); labelSpan.textContent = labelText; wrapper.appendChild(labelSpan); }
         this.checked = this.hasAttribute('checked'); this.disabled = this.hasAttribute('disabled');
         if (this.hasAttribute('name')) this._inputElement.name = this.getAttribute('name');

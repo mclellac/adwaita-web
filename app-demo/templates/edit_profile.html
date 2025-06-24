@@ -51,8 +51,8 @@
             title="{{ form.profile_info.label.text }}"
             subtitle="Tell us a bit about yourself. Supports basic HTML.">
             <div style="width: 100%;" slot="suffix">
-              {# WTForms TextareaField, styled as adw-entry #}
-              {{ form.profile_info(rows="6", class="adw-entry", style="width: 100%; min-height: 120px;", id=form.profile_info.id) }}
+              {# WTForms TextareaField, styled with adw-textarea-standalone for Adwaita multiline entry look #}
+              {{ form.profile_info(rows="6", class="adw-textarea-standalone", style="width: 100%; min-height: 120px;", id=form.profile_info.id) }}
             </div>
           </adw-action-row>
           {% if form.profile_info.errors %}
@@ -135,8 +135,8 @@
 
       <adw-action-row> {# This was adw-box before, adw-action-row is more standard for buttons at the bottom of a preferences page group/list #}
         <div slot="suffix" style="display: flex; gap: var(--spacing-s); justify-content: flex-end; width: 100%;">
-            <adw-button type="link" href="{{ url_for('profile', username=current_user.username) }}">Cancel</adw-button>
-            <adw-button type="submit" class="suggested-action" label="{{ form.submit.label.text if form.submit.label else 'Update Profile' }}"></adw-button>
+            <adw-button flat href="{{ url_for('profile', username=current_user.username) }}">Cancel</adw-button>
+            <adw-button type="submit" suggested label="{{ form.submit.label.text if form.submit.label else 'Update Profile' }}"></adw-button>
             {# {{ form.submit() }} is no longer needed if we use adw-button for submit #}
         </div>
       </adw-action-row>
