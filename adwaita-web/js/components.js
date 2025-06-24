@@ -15,6 +15,7 @@ import * as views from './components/views.js'; // This includes Tab, Navigation
 import * as layouts from './components/layouts.js'; // Added import for layouts
 import * as listbox from './components/listbox.js'; // Import AdwListBox
 import * as bottomSheet from './components/bottom_sheet.js'; // Import AdwBottomSheet
+import * as popover from './components/popover.js'; // Import AdwPopover (new)
 
 // Theme and Accent functions are in utils, already exported from there.
 // adwGenerateId is also in utils.
@@ -100,6 +101,7 @@ const AdwProperties = { // Renamed to avoid conflict with global Adw during cons
     createTabPage: views.createAdwTabPage,
     createNavigationView: views.createAdwNavigationView,
     createBottomSheet: bottomSheet.createAdwBottomSheet, // Factory for AdwBottomSheet
+    createPopover: popover.createAdwPopover, // Factory for AdwPopover (new)
 
 
     // Web Component Classes (for direct use or inspection if needed)
@@ -158,6 +160,7 @@ const AdwProperties = { // Renamed to avoid conflict with global Adw during cons
     TabPage: views.AdwTabPage,
     NavigationView: views.AdwNavigationView,
     BottomSheet: bottomSheet.AdwBottomSheet,
+    Popover: popover.AdwPopover, // Web Component Class for AdwPopover (new)
 };
 
 // Merge other Adw properties into window.Adw, being careful not to overwrite config again
@@ -241,6 +244,8 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-tab-page')) customElements.define('adw-tab-page', window.Adw.TabPage);
     if (!customElements.get('adw-navigation-view')) customElements.define('adw-navigation-view', window.Adw.NavigationView);
     if (!customElements.get('adw-bottom-sheet')) customElements.define('adw-bottom-sheet', window.Adw.BottomSheet);
+    // From popover.js (new)
+    if (!customElements.get('adw-popover')) customElements.define('adw-popover', window.Adw.Popover);
 }
 
 console.log('[Debug] Adw object populated and custom elements defined.');

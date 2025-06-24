@@ -125,22 +125,126 @@ export function createAdwButton(text, options = {}) {
   return button;
 }
 
+// Helper to fetch and cache the stylesheet
+// In a real-world scenario, this would be centralized, e.g., in components.js or utils.js
+let adwButtonCommonSheet = null;
+let sheetPromise = null;
+
+async function getAdwButtonCommonStyleSheet() {
+    if (adwButtonCommonSheet) {
+        return adwButtonCommonSheet;
+    }
+    if (sheetPromise) {
+        return sheetPromise;
+    }
+
+    const cssPath = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
+    if (!cssPath) {
+        console.error("AdwButton: Adw.config.cssPath is not defined. Cannot load styles.");
+        return null;
+    }
+
+    sheetPromise = new Promise(async (resolve, reject) => {
+        try {
+            const response = await fetch(cssPath);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch stylesheet from ${cssPath}: ${response.statusText}`);
+            }
+            const cssText = await response.text();
+            const sheet = new CSSStyleSheet();
+            await sheet.replace(cssText);
+            adwButtonCommonSheet = sheet;
+            resolve(adwButtonCommonSheet);
+        } catch (error) {
+            console.error("AdwButton: Error loading common stylesheet:", error);
+            reject(error);
+        } finally {
+            sheetPromise = null; // Clear promise after completion
+        }
+    });
+    return sheetPromise;
+}
+
+/**
+ * @element adw-button
+ * @description An Adwaita-styled button component that can act as a standard button or a link.
+ * It supports various styles like suggested/destructive actions, flat, and circular for icon buttons.
+ *
+ * @attr {String} [href] - If provided, the button renders as an `<a>` tag, using this value for its `href`.
+ *                         Sanitized to prevent unsafe protocols.
+ * @attr {Boolean} [suggested] - If present, applies the 'suggested-action' styling (e.g., for primary actions).
+ * @attr {Boolean} [destructive] - If present, applies the 'destructive-action' styling (e.g., for delete actions).
+ * @attr {Boolean} [flat] - If present, applies a flat style with no background or border unless hovered/active.
+ * @attr {Boolean} [disabled] - If present, disables the button, preventing clicks and changing appearance.
+ * @attr {Boolean} [active] - If present, forces an 'active' or 'pressed' visual state. Useful for toggle buttons.
+ * @attr {Boolean} [circular] - If present, styles the button as a circle, typically for icon-only buttons.
+ * @attr {String} [icon-name] - The name of an Adwaita icon to display (e.g., 'document-save-symbolic').
+ *                              This is the preferred way to add icons.
+ * @attr {String} [icon] - Deprecated. Used to specify an icon, either as an SVG string or an icon font class.
+ *                         Use `icon-name` instead.
+ * @attr {String} [appearance] - Allows for additional appearance classes to be added to the internal button for custom styling.
+ * @attr {String} [type] - For non-link buttons, specifies the button type (e.g., 'submit', 'reset', 'button'). Defaults to 'button'.
+ *
+ * @slot - The default slot is used for the button's text content.
+ *
+ * @csspart button - The internal `<button>` or `<a>` element. (Note: This part is not explicitly defined yet, but would be a good addition)
+ *
+ * @fires click - Standard click event. For `type="submit"`, it also attempts to submit the closest form.
+ *
+ * @example
+ * <!-- Standard Button -->
+ * <adw-button>Click Me</adw-button>
+ *
+ * <!-- Suggested Action Button with Icon -->
+ * <adw-button suggested icon-name="object-select-symbolic">Save</adw-button>
+ *
+ * <!-- Destructive Link Button -->
+ * <adw-button destructive href="/delete-item">Delete</adw-button>
+ *
+ * <!-- Circular Icon-Only Button -->
+ * <adw-button circular icon-name="go-previous-symbolic" aria-label="Go Back"></adw-button>
+ */
 export class AdwButton extends HTMLElement {
+    /**
+     * @internal
+     */
     static get observedAttributes() {
         return ['href', 'suggested', 'destructive', 'flat', 'disabled', 'active', 'circular', 'icon-name', 'icon', 'appearance', 'type'];
     }
 
+    /**
+     * Creates an instance of AdwButton.
+     * @constructor
+     */
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        const styleLink = document.createElement('link');
-        styleLink.rel = 'stylesheet';
-        // Assuming Adw object will be available globally for config path
-        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
-        this.shadowRoot.appendChild(styleLink);
+        // Styles will be applied in connectedCallback after sheet is loaded
     }
 
-    connectedCallback() {
+    /**
+     * @internal
+     * Lifecycle callback invoked when the element is added to the DOM.
+     * Handles stylesheet adoption and initial rendering.
+     */
+    async connectedCallback() {
+        if (!this.shadowRoot.adoptedStyleSheets.includes(adwButtonCommonSheet) && typeof CSSStyleSheet !== 'undefined' && 'adoptedStyleSheets' in Document.prototype) {
+            try {
+                const sheet = await getAdwButtonCommonStyleSheet();
+                if (sheet && !this.shadowRoot.adoptedStyleSheets.includes(sheet)) { // Check again in case of multiple calls
+                    this.shadowRoot.adoptedStyleSheets = [...this.shadowRoot.adoptedStyleSheets, sheet];
+                } else if (!sheet) {
+                    this._fallbackLoadStylesheet(); // Fallback if sheet creation failed
+                }
+            } catch (error) {
+                console.error("AdwButton: Failed to adopt common stylesheet, falling back.", error);
+                this._fallbackLoadStylesheet();
+            }
+        } else if (!('adoptedStyleSheets' in Document.prototype) || typeof CSSStyleSheet === 'undefined') {
+            // Fallback for browsers that don't support adoptedStyleSheets
+            this._fallbackLoadStylesheet();
+        }
+
         this._render();
         if (this.getAttribute('type') === 'submit') {
             const internalButton = this.shadowRoot.querySelector('button, a');
@@ -173,11 +277,31 @@ export class AdwButton extends HTMLElement {
         }
     }
 
-    _render() {
-        // Clear previous content except for the style link
-        while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link[rel="stylesheet"]')) {
-            this.shadowRoot.removeChild(this.shadowRoot.lastChild);
+    _fallbackLoadStylesheet() {
+        // Fallback for browsers that don't support adoptedStyleSheets,
+        // or if the adopted stylesheet failed to load.
+        if (!this.shadowRoot.querySelector('link[rel="stylesheet"]')) {
+            const styleLink = document.createElement('link');
+            styleLink.rel = 'stylesheet';
+            styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
+            if (styleLink.href) {
+                this.shadowRoot.appendChild(styleLink);
+            } else {
+                console.warn("AdwButton: Fallback stylesheet Adw.config.cssPath is not defined.");
+            }
         }
+    }
+
+    _render() {
+        // Clear previous content (excluding adopted stylesheets or the fallback link)
+        const nodesToRemove = [];
+        for (const child of this.shadowRoot.childNodes) {
+            if (child.nodeName !== 'STYLE' && !(child.nodeName === 'LINK' && child.getAttribute('rel') === 'stylesheet')) {
+                nodesToRemove.push(child);
+            }
+        }
+        nodesToRemove.forEach(node => this.shadowRoot.removeChild(node));
+
 
         const href = this.getAttribute('href');
         const isLink = !!href;
