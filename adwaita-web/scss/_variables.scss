@@ -57,19 +57,6 @@
   --adw-dark-3: #3d3846;
   --adw-dark-4: #241f31;
   --adw-dark-5: #000000;
-
-  // Teal (Added as per existing variables, ensure these are standard or well-defined)
-  --adw-teal-1: #66d9cf;
-  --adw-teal-2: #40bfb3;
-  --adw-teal-3: #29a698;
-  --adw-teal-4: #1f8073;
-  --adw-teal-5: #15594e;
-  // Pink (Added as per existing variables, ensure these are standard or well-defined)
-  --adw-pink-1: #f9aac9;
-  --adw-pink-2: #f582ae;
-  --adw-pink-3: #f05993;
-  --adw-pink-4: #e83178;
-  --adw-pink-5: #c41a5f;
 }
 
 // Variables for chosen accent colors (to be updated by JS)
@@ -184,32 +171,6 @@
   --accent-orange-dark-fg-color: var(--adw-light-1);
   --accent-orange-dark-hover-bg-color: var(--adw-orange-2);
   --accent-orange-dark-active-bg-color: var(--adw-orange-1);
-
-  // Teal
-  --accent-teal-light-color: var(--adw-teal-4);
-  --accent-teal-light-bg-color: var(--adw-teal-3);
-  --accent-teal-light-fg-color: var(--adw-light-1);
-  --accent-teal-light-hover-bg-color: var(--adw-teal-4);
-  --accent-teal-light-active-bg-color: var(--adw-teal-5);
-
-  --accent-teal-dark-color: var(--adw-teal-1);
-  --accent-teal-dark-bg-color: var(--adw-teal-3);
-  --accent-teal-dark-fg-color: var(--adw-light-1);
-  --accent-teal-dark-hover-bg-color: var(--adw-teal-2);
-  --accent-teal-dark-active-bg-color: var(--adw-teal-1);
-
-  // Pink
-  --accent-pink-light-color: var(--adw-pink-4);
-  --accent-pink-light-bg-color: var(--adw-pink-3);
-  --accent-pink-light-fg-color: var(--adw-light-1);
-  --accent-pink-light-hover-bg-color: var(--adw-pink-4);
-  --accent-pink-light-active-bg-color: var(--adw-pink-5);
-
-  --accent-pink-dark-color: var(--adw-pink-1);
-  --accent-pink-dark-bg-color: var(--adw-pink-3);
-  --accent-pink-dark-fg-color: var(--adw-light-1);
-  --accent-pink-dark-hover-bg-color: var(--adw-pink-2);
-  --accent-pink-dark-active-bg-color: var(--adw-pink-1);
 
   // Brown (Slate)
   --accent-brown-light-color: var(--adw-brown-4);
@@ -607,6 +568,24 @@
   --z-index-dialog-backdrop: 1100; // Dialog backdrops
   --z-index-dialog: 1101; // Dialogs themselves
   --z-index-tooltip: 2000; // Tooltips generally highest
+
+  // Animation Timing
+  --animation-duration-xslow: 0.5s;
+  --animation-duration-slow: 0.3s;
+  --animation-duration-medium: 0.2s;
+  --animation-duration-fast: 0.15s;
+  --animation-duration-xfast: 0.1s;
+
+  // Animation Easing Functions (standard CSS keyword values)
+  --animation-ease-linear: linear;
+  --animation-ease-in: ease-in;
+  --animation-ease-out: ease-out;
+  --animation-ease-in-out: ease-in-out;
+  // Adwaita often uses cubic-bezier for smoother transitions,
+  // but standard keywords are more maintainable without specific curves.
+  // Example for a common Adwaita-like feel:
+  --animation-ease-out-cubic: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+  --animation-ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1.000);
 }
 
 
@@ -719,12 +698,3 @@ html.dark-theme {
   // The actual styling relies on the CSS custom properties defined in the theme mixins.
   @include define-gtk-colors();
 }
-
-
-// Z-indexes
-$zindex-flap: 100;
-$zindex-popover: 500;
-$zindex-dialog: 1000;
-$zindex-dialog-backdrop: 999;
-$zindex-toast: 1500;
-$zindex-tooltip: 2000;

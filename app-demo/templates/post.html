@@ -21,7 +21,7 @@
             <div class="post-categories" style="margin-top: var(--spacing-s); display:flex; flex-wrap:wrap; gap:var(--spacing-xs); align-items:center;">
                 <adw-label is_body="true"><strong>Categories:</strong></adw-label>
                 {% for category in post.categories %}
-                    <adw-button type="link" class="flat small" href="{{ url_for('posts_by_category', category_slug=category.slug) }}">{{ category.name }}</adw-button>
+                    <adw-button flat class="small" href="{{ url_for('posts_by_category', category_slug=category.slug) }}">{{ category.name }}</adw-button>
                 {% endfor %}
             </div>
             {% endif %}
@@ -30,7 +30,7 @@
             <div class="post-tags" style="margin-top: var(--spacing-xs); display:flex; flex-wrap:wrap; gap:var(--spacing-xs); align-items:center;">
                 <adw-label is_body="true"><strong>Tags:</strong></adw-label>
                 {% for tag in post.tags %}
-                  <adw-button type="link" class="flat small" href="{{ url_for('posts_by_tag', tag_slug=tag.slug) }}">{{ tag.name }}</adw-button>
+                  <adw-button flat class="small" href="{{ url_for('posts_by_tag', tag_slug=tag.slug) }}">{{ tag.name }}</adw-button>
                 {% endfor %}
             </div>
             {% endif %}
@@ -56,7 +56,7 @@
                     {% else %}
                     <p style="font-size: var(--font-size-body); color: var(--secondary-text-color); margin-top:0;">This author has not provided a bio yet.</p>
                     {% endif %}
-                    <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-button flat" style="align-self: flex-start; margin-top: var(--spacing-s);">View Profile of {{ post.author.username }}</a>
+                    <adw-button flat href="{{ url_for('profile', username=post.author.username) }}" style="align-self: flex-start; margin-top: var(--spacing-s);">View Profile of {{ post.author.username }}</adw-button>
                 </div>
             </adw-box>
         </div>
@@ -99,7 +99,7 @@
         <div class="post-actions" style="margin-bottom: var(--spacing-l); display:flex; gap: var(--spacing-s);">
             <adw-button href="{{ url_for('edit_post', post_id=post.id) }}">Edit Post</adw-button>
             {# Delete button triggers dialog; actual form submission is handled by JS #}
-            <adw-button id="open-delete-dialog-btn" class="destructive-action">Delete Post</adw-button>
+            <adw-button id="open-delete-dialog-btn" destructive>Delete Post</adw-button>
         </div>
 
         <adw-dialog id="delete-confirm-dialog" title="Confirm Deletion">
@@ -137,7 +137,7 @@
                     {% if current_user.is_authenticated and (comment.author == current_user or post.author == current_user) %}
                         <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" onsubmit="return confirm('Are you sure you want to delete this comment?');" style="margin-left: calc(32px + var(--spacing-s)); text-align: right;">
                             {{ delete_form.hidden_tag() }} {# CSRF for delete comment form (passed from route) #}
-                            <adw-button type="submit" class="destructive-action compact small">Delete Comment</adw-button>
+                            <adw-button type="submit" destructive class="compact small">Delete Comment</adw-button>
                         </form>
                     {% endif %}
                 </adw-box>
@@ -156,7 +156,7 @@
                 <adw-list-box>
                     <adw-action-row title="{{ form.text.label.text }}">
                          <div slot="suffix" style="width:100%;">
-                            {{ form.text(rows="4", class="adw-entry", style="width: 100%; min-height: 80px;", id=form.text.id) }}
+                            {{ form.text(rows="4", class="adw-textarea-standalone", style="width: 100%; min-height: 80px;", id=form.text.id) }}
                          </div>
                     </adw-action-row>
                     {% if form.text.errors %}
@@ -164,7 +164,7 @@
                     {% endif %}
                     <adw-action-row>
                         <div slot="suffix" style="width:100%; display:flex; justify-content:flex-end;">
-                            <adw-button type="submit" class="suggested-action">{{ form.submit.label.text }}</adw-button>
+                             <adw-button type="submit" suggested>{{ form.submit.label.text }}</adw-button>
                         </div>
                     </adw-action-row>
                 </adw-list-box>

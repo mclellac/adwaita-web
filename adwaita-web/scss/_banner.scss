@@ -28,7 +28,7 @@
   // Animation for reveal/hide
   opacity: 0;
   // Transform from slightly above its final position to slide down into view
-  transform: translateY(calc(-100% - var(--border-width, 1px) - 10px)); // Start further up for a slide-in effect
+  transform: translateY(-100%); // Standard slide-in from top
   transition: opacity var(--animation-duration-medium) var(--animation-ease-out-cubic),
               transform var(--animation-duration-medium) var(--animation-ease-out-cubic);
   // Ensure it's not clickable when hidden

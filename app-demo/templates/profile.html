@@ -63,7 +63,7 @@
         {# Edit Profile Button #}
         {% if current_user == user_profile %}
         <adw-box orientation="horizontal" justify="start" style="margin-top: var(--spacing-m); margin-bottom: var(--spacing-l);">
-            <adw-button href="{{ url_for('edit_profile') }}" class="suggested-action">Edit Profile</adw-button>
+            <adw-button href="{{ url_for('edit_profile') }}" suggested>Edit Profile</adw-button>
         </adw-box>
         {% endif %}
 
@@ -94,7 +94,7 @@
                     {% for page_num in posts_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
                         {% if page_num %}
                             {% if page_num == posts_pagination.page %}
-                                <adw-button class="suggested-action" aria-current="page">{{ page_num }}</adw-button>
+                                <adw-button suggested aria-current="page">{{ page_num }}</adw-button>
                             {% else %}
                                 <adw-button href="{{ url_for('profile', username=user_profile.username, page=page_num) }}">{{ page_num }}</adw-button>
                             {% endif %}

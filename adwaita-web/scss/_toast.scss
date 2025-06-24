@@ -5,11 +5,11 @@
 .adw-toast {
   // Base style for a toast notification.
   // Toasts are displayed by an AdwToastOverlay. Positioning is handled by the overlay.
-  background-color: var(--toast-background-color, hsl(0, 0%, 18%)); // Dark background
-  color: var(--toast-foreground-color, hsl(0, 0%, 95%)); // Light foreground
+  background-color: var(--toast-bg-color); // Use variable from _variables.scss
+  color: var(--toast-fg-color);       // Use variable from _variables.scss
   padding: var(--spacing-s) var(--spacing-m);
-  border-radius: var(--toast-border-radius, var(--border-radius-large));
-  box-shadow: var(--popover-box-shadow, 0 2px 8px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.1));
+  border-radius: var(--border-radius-large); // Use general large border radius
+  box-shadow: var(--toast-box-shadow); // Use variable from _variables.scss (popover shadow is a good fit)
 
   display: flex;
   align-items: center;
@@ -21,8 +21,8 @@
   // Default state for animation by overlay:
   opacity: 0;
   transform: translateY(100%) scale(0.9); // Start off-screen (bottom) and slightly scaled down
-  transition: opacity var(--animation-duration-short) var(--animation-ease-out-quad),
-              transform var(--animation-duration-short) var(--animation-ease-out-quad);
+  transition: opacity var(--animation-duration-fast) var(--animation-ease-out-cubic),
+              transform var(--animation-duration-fast) var(--animation-ease-out-cubic);
   will-change: transform, opacity;
 
   // State when visible (class added by AdwToastOverlay)
@@ -36,8 +36,8 @@
     opacity: 0;
     transform: translateY(100%) scale(0.9); // Animate downwards (same direction as appear) and fade
     // Transition duration for hiding can be slightly different if needed
-    transition-duration: var(--animation-duration-xs); // Use a shorter duration for hiding
-    transition-timing-function: var(--animation-ease-in-quad); // Ease-in for hiding
+    transition-duration: var(--animation-duration-xfast); // Use a shorter duration for hiding
+    transition-timing-function: var(--animation-ease-in); // Ease-in for hiding (standard keyword)
   }
 
   .adw-toast-content-wrapper {
@@ -70,9 +70,11 @@
     // AdwButton styles (flat, suggested, etc.) will apply.
     // Ensure good contrast on dark toast background.
     &.flat {
-      color: var(--toast-accent-fg-color, var(--accent-color)); // Use a toast-specific accent or fallback
+      // Assuming accent-color is chosen to be visible on dark backgrounds.
+      // If a specific lighter variant of accent is needed for toasts, define --toast-accent-fg-color
+      color: var(--accent-color);
       &:hover {
-        background-color: rgba(255,255,255,0.1);
+        background-color: rgba(255,255,255,0.1); // Standard flat button hover on dark
       }
     }
   }
@@ -81,7 +83,7 @@
   .adw-toast-close-button.adw-button {
     flex-shrink: 0;
     margin-left: var(--spacing-s);
-    color: var(--toast-secondary-fg-color, rgba(255,255,255,0.7));
+    color: var(--secondary-text-color); // Use general secondary text color for dark bg
 
     // Target the icon container (span.icon or adw-icon)
     .adw-icon, .icon {
