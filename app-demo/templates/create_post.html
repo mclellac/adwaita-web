@@ -152,4 +152,69 @@
 {{ super() }}
 {# Tiptap JavaScript removed. #}
 {# Textarea debugging script removed. #}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('form[action="{{ url_for("create_post") }}"]');
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            // Clear any previously added temporary hidden inputs for these fields
+            form.querySelectorAll('input[type="hidden"][name="title"]').forEach(el => el.remove());
+            form.querySelectorAll('input[type="hidden"][name="tags_string"]').forEach(el => el.remove());
+            form.querySelectorAll('input[type="hidden"][name="categories"]').forEach(el => el.remove());
+
+
+            // Handle adw-entry-row for 'title'
+            const titleEntryRow = form.querySelector('adw-entry-row[name="title"]');
+            if (titleEntryRow) {
+                const titleValue = titleEntryRow.value; // Assuming .value property gives the current value
+                const hiddenTitle = document.createElement('input');
+                hiddenTitle.type = 'hidden';
+                hiddenTitle.name = 'title';
+                hiddenTitle.value = titleValue;
+                form.appendChild(hiddenTitle);
+                console.log('[Debug] Added hidden input for title with value:', titleValue);
+            } else {
+                console.warn('[Debug] AdwEntryRow for title not found.');
+            }
+
+            // Handle adw-entry-row for 'tags_string'
+            const tagsEntryRow = form.querySelector('adw-entry-row[name="tags_string"]');
+            if (tagsEntryRow) {
+                const tagsValue = tagsEntryRow.value;
+                const hiddenTags = document.createElement('input');
+                hiddenTags.type = 'hidden';
+                hiddenTags.name = 'tags_string';
+                hiddenTags.value = tagsValue;
+                form.appendChild(hiddenTags);
+                console.log('[Debug] Added hidden input for tags_string with value:', tagsValue);
+            } else {
+                console.warn('[Debug] AdwEntryRow for tags_string not found.');
+            }
+
+            // Handle adw-checkbox elements for 'categories'
+            const categoryCheckboxes = form.querySelectorAll('adw-checkbox[name="categories"]');
+            categoryCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) { // Assuming .checked property exists and is reliable
+                    const hiddenCategory = document.createElement('input');
+                    hiddenCategory.type = 'hidden';
+                    hiddenCategory.name = 'categories'; // All selected categories will have the same name
+                    hiddenCategory.value = checkbox.value; // Assuming .value property gives the category ID
+                    form.appendChild(hiddenCategory);
+                    console.log('[Debug] Added hidden input for category with value:', checkbox.value);
+                }
+            });
+            if (categoryCheckboxes.length === 0) {
+                 console.warn('[Debug] No adw-checkbox elements for categories found.');
+            }
+
+
+            // Optional: A small delay to ensure hidden fields are processed, though usually not needed.
+            // setTimeout(() => { form.submit(); }, 100); // This might cause double submission if not careful
+            console.log('[Debug] Form data augmentation complete. Proceeding with submission.');
+        });
+    } else {
+        console.error('[Debug] Create post form not found for submit event listener attachment.');
+    }
+});
+</script>
 {% endblock %}
