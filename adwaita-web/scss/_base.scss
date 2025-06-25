@@ -130,3 +130,11 @@ input, button, textarea, select {
 button, [role="button"] {
   cursor: pointer;
 }
+
+// Basic HR styling
+hr {
+  border: none; // Remove default border
+  border-top: var(--border-width) solid var(--borders-color); // Use Adwaita border color and width
+  margin: var(--spacing-m) 0; // Default margin, can be overridden by inline styles
+  height: 0; // Ensure no extra height
+}

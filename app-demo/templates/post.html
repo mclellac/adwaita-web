@@ -6,14 +6,18 @@
 <adw-clamp max-width="800px" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
     <article class="post-article">
         <header style="margin-bottom: var(--spacing-l);">
-            <h1>{{ post.title }}</h1>
+            <h1>{{ post.title }}{% if not post.is_published and current_user == post.author %} <span style="color: var(--secondary-text-color); font-size: var(--font-size-large);">(Draft)</span>{% endif %}</h1>
             <div class="post-meta-detail" style="color: var(--secondary-text-color); font-size: var(--font-size-small);">
                 <p style="margin-bottom: var(--spacing-xxs);">
                     By: <a href="{{ url_for('profile', username=post.author.username) }}">{{ post.author.username if post.author else 'Unknown Author' }}</a>
-                    on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else 'N/A' }} UTC</time>
+                    {% if post.is_published and post.published_at %}
+                        on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time> (Published)
+                    {% else %}
+                         (Draft created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>)
+                    {% endif %}
                 </p>
-                {% if post.updated_at and post.updated_at != post.created_at %}
-                    <p><small>(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') if post.updated_at else 'N/A' }} UTC</time>)</small></p>
+                {% if post.updated_at and post.updated_at != post.created_at and (post.published_at is none or post.updated_at != post.published_at) %}
+                    <p><small>(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>)</small></p>
                 {% endif %}
             </div>
 
@@ -50,7 +54,7 @@
                 </adw-avatar>
                 <div style="display:flex; flex-direction: column; flex-grow:1;">
                     {% if post.author.profile_info %}
-                    <p class="author-bio-text" style="font-size: var(--font-size-body); color: var(--text-color); margin-top: 0; margin-bottom:var(--spacing-s); white-space: pre-wrap;">
+                    <p class="author-bio-text" style="font-size: var(--font-size-body); color: var(--window-fg-color); margin-top: 0; margin-bottom:var(--spacing-s); white-space: pre-wrap;">
                         {{ post.author.profile_info | safe }}
                     </p>
                     {% else %}

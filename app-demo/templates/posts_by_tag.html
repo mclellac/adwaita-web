@@ -16,7 +16,7 @@
         <adw-list-box class="blog-posts-list">
             {% for post in posts %}
             <adw-box orientation="vertical" class="blog-post-card" style="margin-bottom: var(--spacing-l); padding: var(--spacing-m); border-radius: var(--border-radius-md); border: 1px solid var(--border-color); list-style-type: none;">
-                <h3 style="margin-top:0; margin-bottom: var(--spacing-xs);"><a href="{{ url_for('view_post', post_id=post.id) }}" class="post-title" style="text-decoration: none; color: var(--text-color);">{{ post.title }}</a></h3>
+                <h3 style="margin-top:0; margin-bottom: var(--spacing-xs);"><a href="{{ url_for('view_post', post_id=post.id) }}" class="post-title" style="text-decoration: none; color: var(--link-color);">{{ post.title }}</a></h3>
                 <p class="post-meta" style="font-size: var(--font-size-small); color: var(--secondary-text-color); margin-bottom: var(--spacing-s);">
                     By: <a href="{{ url_for('profile', username=post.author.username) }}">{{ post.author.username if post.author else 'Unknown Author' }}</a>
                     on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>

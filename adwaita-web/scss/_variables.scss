@@ -297,6 +297,7 @@
   --secondary-text-color: rgba(0,0,0,0.7);          // For less prominent text
   --dialog-box-shadow: var(--dialog-box-shadow-light);
   --dialog-backdrop-color: rgba(0, 0, 0, 0.25);
+  --box-shadow-sm: var(--box-shadow-sm-light);      // Apply light version
 
   --list-row-hover-bg-color: rgba(0,0,0,0.06);      // Subtle hover for list rows
   --list-row-active-bg-color: rgba(0,0,0,0.08);     // Slightly more prominent active
@@ -308,7 +309,7 @@
   --entry-border-color: var(--borders-color);
   --entry-disabled-bg-color: rgba(0,0,0,0.04);
   --entry-disabled-border-color: rgba(0,0,0,0.1);
-  --entry-inset-shadow-light: rgba(0,0,0,0.03);
+  --entry-inset-shadow: var(--entry-inset-shadow-light-val); // Apply light version
 
   --disabled-fg-color: rgba(0,0,0,0.35);            // General disabled foreground
 
@@ -452,6 +453,7 @@
   --secondary-text-color: rgba(255,255,255,0.7);
   --dialog-box-shadow: var(--dialog-box-shadow-dark);
   --dialog-backdrop-color: rgba(0, 0, 0, 0.4);
+  --box-shadow-sm: var(--box-shadow-sm-dark);        // Apply dark version
 
   --list-row-hover-bg-color: rgba(255,255,255,0.08);
   --list-row-active-bg-color: rgba(255,255,255,0.1);
@@ -463,7 +465,7 @@
   --entry-border-color: var(--borders-color);
   --entry-disabled-bg-color: rgba(255,255,255,0.04);
   --entry-disabled-border-color: rgba(255,255,255,0.1);
-  --entry-inset-shadow-dark: rgba(0,0,0,0.15);
+  --entry-inset-shadow: var(--entry-inset-shadow-dark-val); // Apply dark version
 
   --disabled-fg-color: rgba(255,255,255,0.35);
 
@@ -542,6 +544,10 @@
   --popover-box-shadow-dark: 0 1px 2px 0 rgba(0,0,0,0.25), 0 2px 8px 0 rgba(0,0,0,0.25);
   --dialog-box-shadow-light: 0 4px 8px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.1);
   --dialog-box-shadow-dark: 0 3px 9px rgba(0,0,0,0.5);
+  --box-shadow-sm-light: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.06); // Subtle small shadow
+  --box-shadow-sm-dark: 0 1px 2px rgba(0,0,0,0.20), 0 1px 3px rgba(0,0,0,0.20); // Subtle small shadow for dark
+  --entry-inset-shadow-light-val: inset 0 1px 1px rgba(0,0,0,0.06); // Typical Adwaita entry inset shadow
+  --entry-inset-shadow-dark-val: inset 0 1px 1px rgba(0,0,0,0.25);  // Darker inset for dark theme
 
   // Alert Dialog
   --alert-dialog-text-max-width: 40ch;

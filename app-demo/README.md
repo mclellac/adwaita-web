@@ -103,6 +103,18 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
 
 6.  Open your web browser and go to `http://127.0.0.1:5000/` to see the application.
 
+## Key Features
+
+*   **User Authentication**: Login, logout, and profile management.
+*   **Post Management**: Create, edit, and delete blog posts.
+*   **Drafts and Publishing**: Save posts as drafts before publishing them. Published posts are visible to everyone, while drafts are only visible to the author.
+*   **Categories and Tags**: Organize posts with categories and tags.
+*   **Comments**: Users can comment on posts.
+*   **Profile Customization**: Users can edit their profile information, including bio and profile photo.
+*   **Theme Customization**: Users can select light/dark mode and accent colors (via Settings API).
+*   **Search**: Basic search functionality for posts.
+*   **Adwaita Styling**: UI styled with the `adwaita-web` library.
+
 ## Project Structure
 
 *   `app.py`: Main Flask application file, contains routes and logic.

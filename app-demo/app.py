@@ -33,26 +33,19 @@ ALLOWED_ATTRIBUTES = {
     '*': ['class', 'style', 'id', 'title'],
     'a': ['href', 'target', 'rel'],
 }
-# ALLOWED_STYLES is not used by bleach.clean if not passed, effectively stripping style contents.
-# If specific styles were needed, attributes callable would be used.
-ALLOWED_STYLES = [] # Kept for documentation, but not passed to bleach.clean
+ALLOWED_STYLES = []
 
 def generate_slug(text: str) -> str:
-    """
-    Generates a URL-friendly slug from a string.
-    """
     if not text:
         return ""
-    # Normalize (decompose) and encode to ASCII, ignoring errors (removes accents)
     text = text.lower()
-    text = re.sub(r'[^\w\s-]', '', text) # Remove non-word, non-space, non-hyphen characters
-    text = re.sub(r'\s+', '-', text) # Replace spaces with hyphens
-    text = re.sub(r'-+', '-', text) # Replace multiple hyphens with single hyphen
-    text = text.strip('-') # Remove leading/trailing hyphens
+    text = re.sub(r'[^\w\s-]', '', text)
+    text = re.sub(r'\s+', '-', text)
+    text = re.sub(r'-+', '-', text)
+    text = text.strip('-')
     return text
 
-
-# Forms remain globally defined as they don't store app-specific state directly
+# Forms
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -82,8 +75,9 @@ class PostForm(FlaskForm):
         option_widget=CheckboxInput(),
         allow_blank=True
     )
-    submit = SubmitField('Submit Post')
     tags_string = StringField('Tags (comma-separated)', validators=[Optional(), Length(max=250)])
+    save_draft = SubmitField('Save Draft')
+    publish = SubmitField('Publish')
 
 class ProfileEditForm(FlaskForm):
     full_name = StringField('Display Name', validators=[Optional(), Length(max=120)])
@@ -101,11 +95,13 @@ class CommentForm(FlaskForm):
 class DeleteCommentForm(FlaskForm):
     submit = SubmitField('Delete')
 
+# Helper
 def allowed_file(filename):
     from flask import current_app
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
+# Models
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -143,11 +139,9 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     slug = db.Column(db.String(100), unique=True, nullable=False)
-
     def __init__(self, name):
         self.name = name
         self.slug = generate_slug(name)
-
     def __repr__(self):
         return f'<Tag {self.name}>'
 
@@ -155,11 +149,9 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     slug = db.Column(db.String(100), unique=True, nullable=False)
-
     def __init__(self, name):
         self.name = name
         self.slug = generate_slug(name)
-
     def __repr__(self):
         return f'<Category {self.name}>'
 
@@ -170,10 +162,10 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
-    categories = db.relationship('Category', secondary=post_categories, lazy='subquery',
-                                 backref=db.backref('posts', lazy=True))
-    tags = db.relationship('Tag', secondary=post_tags, lazy='subquery',
-                           backref=db.backref('posts', lazy=True))
+    categories = db.relationship('Category', secondary=post_categories, lazy='subquery', backref=db.backref('posts', lazy=True))
+    tags = db.relationship('Tag', secondary=post_tags, lazy='subquery', backref=db.backref('posts', lazy=True))
+    is_published = db.Column(db.Boolean, nullable=False, default=True)
+    published_at = db.Column(db.DateTime, nullable=True)
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -190,7 +182,6 @@ def load_user(user_id):
     logger = logging.getLogger(__name__)
     if hasattr(Flask, 'current_app') and Flask.current_app:
         logger = Flask.current_app.logger
-
     logger.info(f"[LOAD_USER] Attempting to load user with ID: {user_id}")
     if user_id is None:
         logger.warning("[LOAD_USER] user_id is None. Cannot load user.")
@@ -208,6 +199,12 @@ def load_user(user_id):
     except Exception as e:
         logger.error(f"[LOAD_USER] Exception during user loading for ID {user_id}: {e}", exc_info=True)
         return None
+
+def flash_form_errors(form):
+    """Flashes all errors from a WTForm instance."""
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(f"Error in {getattr(form, field).label.text}: {error}", 'warning')
 
 def create_app(config_overrides=None):
     _app = Flask(__name__)
@@ -228,15 +225,34 @@ def create_app(config_overrides=None):
         POSTS_PER_PAGE = 5,
         ALLOWED_THEMES = {'light', 'dark', 'system'},
     )
-    pg_user = os.environ.get('POSTGRES_USER', 'postgres')
-    pg_pass = os.environ.get('POSTGRES_PASSWORD', '')
-    pg_host = os.environ.get('POSTGRES_HOST', 'localhost')
-    pg_db = os.environ.get('POSTGRES_DB', 'appdb')
-    if pg_pass:
-        default_db_uri = f"postgresql://{pg_user}:{pg_pass}@{pg_host}/{pg_db}"
+    db_user = os.environ.get('POSTGRES_USER', 'postgres')
+    db_pass = os.environ.get('POSTGRES_PASSWORD')
+    db_host = os.environ.get('POSTGRES_HOST', 'localhost')
+    db_name = os.environ.get('POSTGRES_DB', 'appdb')
+    if db_pass:
+        default_db_uri = f"postgresql://{db_user}:{db_pass}@{db_host}/{db_name}"
     else:
-        default_db_uri = f"postgresql://{pg_user}@{pg_host}/{pg_db}"
-    _app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', default_db_uri)
+        default_db_uri = f"postgresql://{db_user}@{db_host}/{db_name}"
+    database_url = os.environ.get('DATABASE_URL', default_db_uri)
+    _app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    log_db_uri = database_url
+    if db_pass:
+        log_db_uri = f"postgresql://{db_user}:********@{db_host}/{db_name}"
+    if os.environ.get('DATABASE_URL') and db_pass:
+        try:
+            parsed_url = urllib.parse.urlparse(os.environ.get('DATABASE_URL'))
+            if parsed_url.password:
+                log_db_uri = parsed_url._replace(password="********").geturl()
+            else:
+                log_db_uri = os.environ.get('DATABASE_URL')
+        except Exception:
+            log_db_uri = "DATABASE_URL (details hidden for security)"
+    _app.logger.info(f"Database URI configured to: {log_db_uri}")
+    _app.logger.info(f"Upload folder set to: {_app.config['UPLOAD_FOLDER']}")
+    _app.logger.info(f"Allowed image extensions: {_app.config['ALLOWED_EXTENSIONS']}")
+    _app.logger.info(f"Max profile photo size: {_app.config['MAX_PROFILE_PHOTO_SIZE_BYTES']} bytes")
+    _app.logger.info(f"Posts per page: {_app.config['POSTS_PER_PAGE']}")
+    _app.logger.info(f"Flask App Debug Mode: {_app.debug}")
 
     if config_overrides:
         _app.config.from_mapping(config_overrides)
@@ -254,234 +270,386 @@ def create_app(config_overrides=None):
         return urllib.parse.quote_plus(s)
 
     @_app.context_processor
-    def inject_user():
-        return dict(current_user=current_user)
+    def inject_global_template_variables():
+        return {
+            'current_user': current_user,
+            'default_avatar_url': url_for('static', filename='img/default_avatar.png')
+        }
 
     @_app.route('/')
     def index():
-        _app.logger.info(f"[ROUTE_ENTRY] / - Method: {request.method}")
-        _app.logger.info(f"[SESSION_STATE] / - Session: {dict(session)}")
-        _app.logger.info(f"[AUTH_STATE] / - current_user authenticated: {current_user.is_authenticated}")
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: '/', Method: {request.method}, IP: {request.remote_addr}")
+        _app.logger.debug(f"[SESSION_STATE] Session data: {dict(session)}")
         if current_user.is_authenticated:
-            _app.logger.info(f"[AUTH_STATE] / - current_user ID: {current_user.id}, Username: {current_user.username}")
-
+            _app.logger.debug(f"[AUTH_STATE] User: {current_user.username} (ID: {current_user.id}) is authenticated.")
+        else:
+            _app.logger.debug(f"[AUTH_STATE] User is anonymous.")
         page = request.args.get('page', 1, type=int)
         per_page = _app.config['POSTS_PER_PAGE']
-        pagination = Post.query.order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
-        posts = pagination.items
+        _app.logger.debug(f"Fetching published posts for index page {page}, {per_page} posts per page.")
+        try:
+            query = Post.query.filter_by(is_published=True).order_by(Post.published_at.desc(), Post.created_at.desc())
+            pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+            posts = pagination.items
+            _app.logger.debug(f"Found {len(posts)} published posts for page {page}. Total published posts from pagination: {pagination.total}")
+        except Exception as e:
+            _app.logger.error(f"Error fetching posts for index page: {e}", exc_info=True)
+            flash("Error loading posts. Please try again later.", "danger")
+            posts = []
+            pagination = None
         return render_template('index.html', posts=posts, pagination=pagination)
 
     @_app.route('/posts/<int:post_id>', methods=['GET', 'POST'])
     def view_post(post_id):
-        _app.logger.info(f"[ROUTE_ENTRY] /posts/{post_id} - Method: {request.method}")
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /posts/{post_id}, Method: {request.method}, IP: {request.remote_addr}")
         post = Post.query.get_or_404(post_id)
+        if not post.is_published:
+            if not current_user.is_authenticated or current_user != post.author:
+                _app.logger.warning(f"User {current_user.username if current_user.is_authenticated else 'Anonymous'} "
+                                 f"attempted to view unpublished post ID: {post_id}. Denying access with 404.")
+                abort(404)
+            _app.logger.debug(f"Author {current_user.username} is viewing their own unpublished post '{post.title}' (ID: {post_id}).")
+        else:
+            _app.logger.debug(f"Viewing published post '{post.title}' (ID: {post_id}).")
         form = CommentForm()
         delete_form = DeleteCommentForm()
-
         if request.method == 'POST':
-            _app.logger.info(f"[FORM_DATA] /posts/{post_id} - Form data: {request.form}")
-            if form.validate_on_submit() and current_user.is_authenticated:
-                comment = Comment(text=form.text.data, author=current_user, post_id=post_id)
-                db.session.add(comment)
-                db.session.commit()
-                flash('Comment posted successfully!', 'success')
-                return redirect(url_for('view_post', post_id=post_id))
+            _app.logger.debug(f"[FORM_SUBMISSION] Comment form submitted for post {post_id}. Data: {request.form}")
+            if not current_user.is_authenticated:
+                _app.logger.warning(f"[AUTH_FAILURE] Anonymous user tried to comment on post {post_id}.")
+                flash('You must be logged in to comment.', 'danger')
+                return redirect(url_for('login', next=url_for('view_post', post_id=post_id)))
+            if form.validate_on_submit():
+                _app.logger.info(f"User {current_user.username} submitting comment on post {post_id}.")
+                try:
+                    comment = Comment(text=form.text.data, author=current_user, post_id=post_id)
+                    db.session.add(comment)
+                    db.session.commit()
+                    _app.logger.info(f"Comment (ID: {comment.id}) by {current_user.username} added to post {post_id}.")
+                    flash('Comment posted successfully!', 'success')
+                    return redirect(url_for('view_post', post_id=post_id))
+                except Exception as e:
+                    db.session.rollback()
+                    _app.logger.error(f"Error saving comment for post {post_id} by user {current_user.username}: {e}", exc_info=True)
+                    flash('Error posting comment. Please try again.', 'danger')
             else:
-                _app.logger.warning(f"[VALIDATION_ERROR] /posts/{post_id} - Comment form validation failed or user not authenticated. Errors: {form.errors}, Auth: {current_user.is_authenticated}")
+                _app.logger.warning(f"[VALIDATION_ERROR] Comment form validation failed for post {post_id} by user {current_user.username}. Errors: {form.errors}")
+                flash_form_errors(form)
         comments = post.comments.all()
+        _app.logger.debug(f"Fetched {len(comments)} comments for post {post_id}.")
         return render_template('post.html', post=post, form=form, comments=comments, delete_form=delete_form)
 
     @_app.route('/comment/<int:comment_id>/delete', methods=['POST'])
     @login_required
     def delete_comment(comment_id):
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /comment/{comment_id}/delete, Method: {request.method}, User: {current_user.username}")
         delete_form = DeleteCommentForm()
         if delete_form.validate_on_submit():
             comment = Comment.query.get_or_404(comment_id)
-            if comment.author != current_user and comment.post.author != current_user:
-                abort(403)
             post_id = comment.post_id
-            db.session.delete(comment)
-            db.session.commit()
-            flash('Comment deleted.', 'success')
-            return redirect(url_for('view_post', post_id=post_id))
+            _app.logger.info(f"User {current_user.username} attempting to delete comment ID: {comment_id} from post ID: {post_id}.")
+            can_delete = False
+            if comment.author == current_user:
+                _app.logger.debug(f"User {current_user.username} is the author of comment {comment_id}. Allowing delete.")
+                can_delete = True
+            elif comment.post.author == current_user:
+                _app.logger.debug(f"User {current_user.username} is the author of post {post_id}. Allowing delete of comment {comment_id}.")
+                can_delete = True
+            if not can_delete:
+                _app.logger.warning(f"User {current_user.username} is not authorized to delete comment {comment_id}. Author: {comment.author.username}, Post Author: {comment.post.author.username}.")
+                abort(403)
+            try:
+                db.session.delete(comment)
+                db.session.commit()
+                flash('Comment deleted.', 'success')
+                _app.logger.info(f"Comment ID: {comment_id} successfully deleted by {current_user.username}.")
+                return redirect(url_for('view_post', post_id=post_id))
+            except Exception as e:
+                db.session.rollback()
+                _app.logger.error(f"Error deleting comment ID: {comment_id} by user {current_user.username}: {e}", exc_info=True)
+                flash('Error deleting comment. Please try again.', 'danger')
+                return redirect(url_for('view_post', post_id=post_id))
         else:
-            flash('Failed to delete comment. Invalid request.', 'danger')
-            comment = Comment.query.get(comment_id)
-            if comment:
-                return redirect(url_for('view_post', post_id=comment.post_id))
+            _app.logger.warning(f"Delete comment form validation failed for comment ID: {comment_id}. Errors: {delete_form.errors}")
+            flash('Failed to delete comment. Invalid request or session expired.', 'danger')
+            comment_for_redirect = Comment.query.get(comment_id)
+            if comment_for_redirect:
+                return redirect(url_for('view_post', post_id=comment_for_redirect.post_id))
             return redirect(url_for('index'))
 
     @_app.route('/category/<string:category_slug>')
     def posts_by_category(category_slug):
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /category/{category_slug}, Method: {request.method}, IP: {request.remote_addr}")
         category = Category.query.filter_by(slug=category_slug).first_or_404()
+        _app.logger.debug(f"Fetching posts for category '{category.name}' (Slug: {category_slug}).")
         page = request.args.get('page', 1, type=int)
         per_page = _app.config['POSTS_PER_PAGE']
-        pagination = Post.query.with_parent(category).order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
-        posts = pagination.items
+        try:
+            query = Post.query.with_parent(category).filter_by(is_published=True).order_by(Post.published_at.desc(), Post.created_at.desc())
+            pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+            posts = pagination.items
+            _app.logger.debug(f"Found {len(posts)} published posts for category '{category.name}' on page {page}. Total: {pagination.total}")
+        except Exception as e:
+            _app.logger.error(f"Error fetching posts for category {category_slug}: {e}", exc_info=True)
+            flash(f"Error loading posts for category {category.name}.", "danger")
+            posts = []
+            pagination = None
         return render_template('posts_by_category.html', category=category, posts=posts, pagination=pagination)
 
     @_app.route('/create', methods=['GET', 'POST'])
     @login_required
     def create_post():
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /create, Method: {request.method}, User: {current_user.username}")
         form = PostForm()
         if request.method == 'POST':
-            _app.logger.info(f"[FORM_DATA] /create - Form data: {request.form}")
-            # _app.logger.info(f"[FORM_FILES] /create - Form files: {request.files}") # No files in PostForm
-
-        if form.validate_on_submit(): # This is True only on POST with valid data
+            log_form_data = {key: (value[:200] + '...' if isinstance(value, str) and len(value) > 200 else value)
+                             for key, value in request.form.items()}
+            _app.logger.debug(f"[FORM_SUBMISSION] Create post form submitted by {current_user.username}. Data (truncated): {log_form_data}")
+        if form.validate_on_submit():
             title = form.title.data
             raw_content = form.content.data
+            _app.logger.debug(f"Raw content length for new post by {current_user.username}: {len(raw_content)}")
             content = bleach.clean(raw_content, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
-
+            _app.logger.debug(f"Sanitized content length for new post: {len(content)}")
+            is_published_intent = form.publish.data
             try:
-                new_post = Post(title=title, content=content, author=current_user)
+                _app.logger.info(f"User {current_user.username} creating post titled '{title}'. Intent: {'Publish' if is_published_intent else 'Save Draft'}.")
+                new_post = Post(title=title, content=content, author=current_user, is_published=is_published_intent)
+                if is_published_intent:
+                    new_post.published_at = datetime.now(timezone.utc)
+                    _app.logger.info(f"Post '{title}' by {current_user.username} will be published at {new_post.published_at}.")
+                else:
+                    new_post.published_at = None
+                    _app.logger.info(f"Post '{title}' by {current_user.username} will be saved as a draft.")
                 db.session.add(new_post)
-                # It's often better to add and flush the main object to get its ID if related objects need it,
-                # or if _update_post_relations relies on post_instance being in the session.
-                # However, _update_post_relations adds new Tags to the session, so a single commit later is fine.
-
-                _update_post_relations(new_post, form, db.session) # This adds new tags to session if any
-
-                db.session.commit() # Commits new_post, category associations, and new tags
-
-                flash('Post created successfully!', 'success')
-                _app.logger.info(f"Post '{title}' created successfully by user {current_user.username}.")
-                return redirect(url_for('index'))
+                _update_post_relations(new_post, form, db.session)
+                db.session.commit()
+                _app.logger.info(f"Post '{new_post.title}' (ID: {new_post.id}, Published: {new_post.is_published}) created successfully by user {current_user.username}.")
+                if new_post.is_published:
+                    flash('Post published successfully!', 'success')
+                    return redirect(url_for('view_post', post_id=new_post.id))
+                else:
+                    flash('Post saved as draft successfully!', 'success')
+                    return redirect(url_for('view_post', post_id=new_post.id))
             except Exception as e:
                 db.session.rollback()
-                _app.logger.error(f"Error creating post during DB operations: {e}", exc_info=True)
+                _app.logger.error(f"Error creating post '{title}' by user {current_user.username} (publish intent: {is_published_intent}): {e}", exc_info=True)
                 flash(f'Error creating post: Could not save to database. Details: {str(e)}', 'danger')
-
-        elif request.method == 'POST': # Specifically for POST requests that failed form.validate_on_submit()
-            _app.logger.warning(f"Post creation form validation failed for user {current_user.username}.")
-            _app.logger.warning(f"Form errors: {form.errors}") # Log all form errors to server logs
-            flash('Failed to create post. Please check the errors highlighted below.', 'danger') # General error for user
-            for field, errors in form.errors.items():
-                for error in errors:
-                    # Flashing individual errors - this was already present and is good.
-                    flash(f"Error in {getattr(form, field).label.text}: {error}", 'warning')
-
+        elif request.method == 'POST':
+            _app.logger.warning(f"Post creation form validation failed for user {current_user.username}. Errors: {form.errors}")
+            flash('Failed to create post. Please check the errors highlighted below.', 'danger')
+            flash_form_errors(form)
+        else:
+            _app.logger.debug(f"Displaying create post form to user {current_user.username}.")
         return render_template('create_post.html', form=form)
 
     def _update_post_relations(post_instance, form, db_session):
-        """Helper function to update categories and tags for a post."""
-        post_instance.categories = [] # Clear existing categories first
-        for category_obj in form.categories.data: # form.categories.data should be a list of Category objects
+        _app.logger.debug(f"Updating relations for post ID: {post_instance.id if post_instance.id else 'NEW'}")
+        selected_categories = form.categories.data
+        _app.logger.debug(f"Selected categories from form: {[c.name for c in selected_categories]}")
+        post_instance.categories = []
+        for category_obj in selected_categories:
             post_instance.categories.append(category_obj)
-
-        post_instance.tags = [] # Clear existing tags first
+            _app.logger.debug(f"Associated category '{category_obj.name}' with post.")
+        if not selected_categories:
+            _app.logger.debug("No categories selected for post.")
+        post_instance.tags = []
         tags_string = form.tags_string.data
+        _app.logger.debug(f"Tags string from form: '{tags_string}'")
         if tags_string:
             tag_names = [name.strip() for name in tags_string.split(',') if name.strip()]
+            _app.logger.debug(f"Processed tag names: {tag_names}")
             for tag_name in tag_names:
                 tag = Tag.query.filter_by(name=tag_name).first()
                 if not tag:
-                    tag = Tag(name=tag_name) # Creates new Tag object
-                    db_session.add(tag) # Add new tag to the session to be committed
+                    _app.logger.info(f"Tag '{tag_name}' not found, creating new tag.")
+                    tag = Tag(name=tag_name)
+                    db_session.add(tag)
+                else:
+                    _app.logger.debug(f"Found existing tag '{tag.name}' (ID: {tag.id}).")
                 post_instance.tags.append(tag)
-        # No commit here; commit happens in the caller after all updates.
+                _app.logger.debug(f"Associated tag '{tag.name}' with post.")
+        else:
+            _app.logger.debug("No tags provided for post.")
 
     @_app.route('/posts/<int:post_id>/delete', methods=['POST'])
     @login_required
     def delete_post(post_id):
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /posts/{post_id}/delete, Method: {request.method}, User: {current_user.username}")
         post = Post.query.get_or_404(post_id)
+        _app.logger.info(f"User {current_user.username} attempting to delete post '{post.title}' (ID: {post_id}).")
         if post.author != current_user:
+            _app.logger.warning(f"User {current_user.username} is not authorized to delete post {post_id} (Author: {post.author.username}). Aborting with 403.")
             abort(403)
-        db.session.delete(post)
-        db.session.commit()
+        try:
+            db.session.delete(post)
+            db.session.commit()
+            _app.logger.info(f"Post ID: {post_id} ('{post.title}') successfully deleted by {current_user.username}.")
+            flash('Post deleted successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            _app.logger.error(f"Error deleting post ID: {post_id} by user {current_user.username}: {e}", exc_info=True)
+            flash('Error deleting post. Please try again.', 'danger')
         return redirect(url_for('index'))
 
     @_app.route('/posts/<int:post_id>/edit', methods=['GET', 'POST'])
     @login_required
     def edit_post(post_id):
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /posts/{post_id}/edit, Method: {request.method}, User: {current_user.username}")
         post = Post.query.get_or_404(post_id)
+        _app.logger.debug(f"User {current_user.username} editing post '{post.title}' (ID: {post_id}).")
         if post.author != current_user:
+            _app.logger.warning(f"User {current_user.username} is not authorized to edit post {post_id} (Author: {post.author.username}). Aborting with 403.")
             abort(403)
         form = PostForm(obj=post)
-        if not form.tags_string.data and request.method == 'GET':
-            form.tags_string.data = ', '.join([tag.name for tag in post.tags])
+        if request.method == 'GET':
+            _app.logger.debug(f"Displaying edit form for post {post_id} to user {current_user.username}.")
+            if not form.tags_string.data:
+                form.tags_string.data = ', '.join([tag.name for tag in post.tags])
+                _app.logger.debug(f"Populated tags_string for GET: '{form.tags_string.data}'")
+        if request.method == 'POST':
+            log_form_data = {key: (value[:200] + '...' if isinstance(value, str) and len(value) > 200 else value)
+                             for key, value in request.form.items()}
+            _app.logger.debug(f"[FORM_SUBMISSION] Edit post form submitted for post {post_id}. Data (truncated): {log_form_data}")
         if form.validate_on_submit():
+            _app.logger.info(f"User {current_user.username} updating post '{post.title}' (ID: {post_id}).")
             post.title = form.title.data
             raw_content = form.content.data
+            _app.logger.debug(f"Raw content length for edited post {post_id}: {len(raw_content)}")
             post.content = bleach.clean(raw_content, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+            _app.logger.debug(f"Sanitized content length for edited post {post_id}: {len(post.content)}")
+            is_published_intent = form.publish.data
+            _app.logger.info(f"Updating post {post_id}. Publish intent: {is_published_intent}. Current published state: {post.is_published}")
+            post.is_published = is_published_intent
+            if is_published_intent:
+                if post.published_at is None:
+                    post.published_at = datetime.now(timezone.utc)
+                    _app.logger.info(f"Post {post_id} is being published at {post.published_at}.")
+            else:
+                post.published_at = None
+                _app.logger.info(f"Post {post_id} is being saved as a draft. Cleared/nulled published_at.")
             _update_post_relations(post, form, db.session)
             try:
                 db.session.commit()
-                flash('Post updated successfully!', 'success')
+                _app.logger.info(f"Post ID: {post.id} ('{post.title}', Published: {post.is_published}) updated successfully by {current_user.username}.")
+                if post.is_published:
+                    flash('Post updated and published successfully!', 'success')
+                else:
+                    flash('Post updated and saved as draft successfully!', 'success')
                 return redirect(url_for('view_post', post_id=post.id))
             except Exception as e:
                 db.session.rollback()
-                _app.logger.error(f"Error updating post {post.id}: {e}", exc_info=True)
+                _app.logger.error(f"Error updating post {post.id} ('{post.title}') by {current_user.username} (publish intent: {is_published_intent}): {e}", exc_info=True)
                 flash(f'Error updating post: {e}', 'danger')
         elif request.method == 'POST':
-            for field, errors in form.errors.items():
-                for error in errors:
-                    flash(f"Error in {getattr(form, field).label.text}: {error}", 'warning')
+            _app.logger.warning(f"Edit post form validation failed for post {post_id} by {current_user.username}. Errors: {form.errors}")
+            flash_form_errors(form)
         return render_template('edit_post.html', form=form, post=post)
 
     @_app.route('/login', methods=['GET', 'POST'])
     def login():
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /login, Method: {request.method}, IP: {request.remote_addr}")
         if current_user.is_authenticated:
+            _app.logger.debug(f"User {current_user.username} already authenticated, redirecting to index.")
             return redirect(url_for('index'))
         form = LoginForm()
+        if request.method == 'POST':
+             _app.logger.debug(f"[FORM_SUBMISSION] Login form submitted. Username: '{form.username.data}'")
         if form.validate_on_submit():
             user = User.query.filter_by(username=form.username.data).first()
             if user and user.check_password(form.password.data):
                 login_user(user)
-                _app.logger.info(f"!!!! [DEBUG] Session after login_user: {dict(session)}")
+                _app.logger.info(f"User '{user.username}' (ID: {user.id}) logged in successfully.")
+                _app.logger.debug(f"Session after login for user '{user.username}': {dict(session)}")
                 flash('Logged in successfully.', 'success')
                 next_page = request.args.get('next')
+                _app.logger.debug(f"Login next page: '{next_page}', redirecting.")
                 return redirect(next_page or url_for('index'))
             else:
+                _app.logger.warning(f"Invalid login attempt for username: '{form.username.data}'. User exists: {user is not None}.")
                 flash('Invalid username or password.', 'danger')
         elif request.method == 'POST':
-            for field, errors in form.errors.items(): # Ensure error is defined in loop
-                for error_message in errors: # errors is a list of messages
-                    flash(f"Validation error in {getattr(form, field).label.text}: {error_message}", 'warning')
+            _app.logger.warning(f"Login form validation failed for username: '{form.username.data}'. Errors: {form.errors}")
+            flash_form_errors(form)
             if not form.errors:
                  flash('Login attempt failed. Please check your input.', 'danger')
+        else:
+            _app.logger.debug("Displaying login form.")
         return render_template('login.html', form=form)
 
     @_app.route('/logout')
     @login_required
     def logout():
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /logout, Method: {request.method}, User: {current_user.username}")
+        user_id_before_logout = current_user.id
+        username_before_logout = current_user.username
         logout_user()
+        _app.logger.info(f"User '{username_before_logout}' (ID: {user_id_before_logout}) logged out successfully.")
+        _app.logger.debug(f"Session after logout: {dict(session)}")
+        flash('Logged out successfully.', 'success')
         return redirect(url_for('index'))
 
     @_app.route('/profile/<username>')
     @login_required
     def profile(username):
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /profile/{username}, Method: {request.method}, Requested by: {current_user.username}")
         user_profile = User.query.filter_by(username=username).first_or_404()
+        _app.logger.debug(f"Displaying profile for user '{user_profile.username}' (ID: {user_profile.id}).")
+        if not user_profile.is_profile_public and user_profile != current_user:
+            _app.logger.warning(f"User {current_user.username} attempted to view private profile of {user_profile.username}. Denying access.")
+            flash("This profile is private.", "warning")
+            abort(403)
         page = request.args.get('page', 1, type=int)
         per_page = _app.config['POSTS_PER_PAGE']
-        posts_pagination = Post.query.with_parent(user_profile).order_by(Post.created_at.desc()).paginate(
-            page=page, per_page=per_page, error_out=False
-        )
-        default_avatar_url = url_for('static', filename='img/default_avatar.png')
-        return render_template('profile.html', user_profile=user_profile, posts_pagination=posts_pagination, default_avatar_url=default_avatar_url)
+        posts_query = Post.query.with_parent(user_profile)
+        if current_user == user_profile:
+            _app.logger.debug(f"Fetching all posts (published and drafts) for own profile '{user_profile.username}', page {page}.")
+            posts_query = posts_query.order_by(Post.updated_at.desc())
+        else:
+            _app.logger.debug(f"Fetching only published posts for profile '{user_profile.username}', page {page}.")
+            posts_query = posts_query.filter_by(is_published=True).order_by(Post.published_at.desc(), Post.created_at.desc())
+        try:
+            posts_pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
+            _app.logger.debug(f"Found {len(posts_pagination.items)} posts for profile '{user_profile.username}' on page {page} (total matching criteria: {posts_pagination.total}).")
+        except Exception as e:
+            _app.logger.error(f"Error fetching posts for profile {user_profile.username}: {e}", exc_info=True)
+            flash("Error loading posts for this profile.", "danger")
+            posts_pagination = None
+        return render_template('profile.html', user_profile=user_profile, posts_pagination=posts_pagination)
 
     @_app.route('/profile/edit', methods=['GET', 'POST'])
     @login_required
     def edit_profile():
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /profile/edit, Method: {request.method}, User: {current_user.username}")
         form = ProfileEditForm(obj=current_user)
-        default_avatar_url = url_for('static', filename='img/default_avatar.png')
+        if request.method == 'POST':
+            log_form_data = {key: (value[:200] + '...' if isinstance(value, str) and len(value) > 200 else value)
+                             for key, value in request.form.items() if key != 'csrf_token'}
+            log_form_data['profile_photo_filename'] = form.profile_photo.data.filename if form.profile_photo.data else 'None'
+            _app.logger.debug(f"[FORM_SUBMISSION] Edit profile form submitted by {current_user.username}. Data (text truncated, photo by filename): {log_form_data}")
         if form.validate_on_submit():
+            _app.logger.info(f"User {current_user.username} updating profile.")
             raw_profile_info = form.profile_info.data
             current_user.profile_info = bleach.clean(raw_profile_info, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
             current_user.full_name = form.full_name.data
             current_user.location = form.location.data
             current_user.website_url = form.website_url.data
             current_user.is_profile_public = form.is_profile_public.data
-
+            _app.logger.debug(f"Profile text fields updated for {current_user.username}: "
+                             f"Name='{current_user.full_name}', Location='{current_user.location}', "
+                             f"Website='{current_user.website_url}', Public={current_user.is_profile_public}, "
+                             f"Bio length={len(current_user.profile_info or '')}")
             file = form.profile_photo.data
             photo_update_attempted = False
             photo_saved_successfully = False
-
             if file and file.filename:
                 photo_update_attempted = True
+                _app.logger.debug(f"Profile photo update attempt by {current_user.username}. Filename: {file.filename}, Content-Length: {file.content_length}")
                 if file.content_length > _app.config['MAX_PROFILE_PHOTO_SIZE_BYTES']:
+                    _app.logger.warning(f"Profile photo for {current_user.username} too large: {file.content_length} bytes.")
                     flash(f"Profile photo is too large. Maximum size is {_app.config['MAX_PROFILE_PHOTO_SIZE_BYTES'] // 1024 // 1024}MB.", 'danger')
                 elif not allowed_file(file.filename):
+                    _app.logger.warning(f"Invalid file type for profile photo by {current_user.username}: {file.filename}")
                     flash('Invalid file type for photo. Allowed types are png, jpg, jpeg, gif.', 'warning')
                 else:
                     try:
@@ -491,12 +659,15 @@ def create_app(config_overrides=None):
                         upload_folder_path = _app.config['UPLOAD_FOLDER']
                         save_path = os.path.join(upload_folder_path, unique_filename)
                         os.makedirs(upload_folder_path, exist_ok=True)
+                        _app.logger.debug(f"Attempting to save profile photo to: {save_path}")
                         img = Image.open(file.stream)
+                        _app.logger.debug(f"Profile photo opened with Pillow. Original size: {img.size}")
                         crop_x_str = request.form.get('crop_x')
                         crop_y_str = request.form.get('crop_y')
                         crop_width_str = request.form.get('crop_width')
                         crop_height_str = request.form.get('crop_height')
                         if crop_x_str and crop_y_str and crop_width_str and crop_height_str:
+                            _app.logger.debug(f"Crop parameters received: X={crop_x_str}, Y={crop_y_str}, W={crop_width_str}, H={crop_height_str}")
                             try:
                                 crop_x = int(float(crop_x_str))
                                 crop_y = int(float(crop_y_str))
@@ -504,19 +675,27 @@ def create_app(config_overrides=None):
                                 crop_height = int(float(crop_height_str))
                                 if crop_width > 0 and crop_height > 0:
                                     img = img.crop((crop_x, crop_y, crop_x + crop_width, crop_y + crop_height))
+                                    _app.logger.debug(f"Image cropped to: {img.size}")
                                 else:
+                                    _app.logger.warning("Invalid crop dimensions (<=0). Photo processed without cropping.")
                                     flash("Invalid crop dimensions provided. Photo processed without cropping.", 'warning')
-                            except ValueError:
+                            except ValueError as ve:
+                                _app.logger.warning(f"Invalid crop coordinates: {ve}. Photo processed without cropping.")
                                 flash("Invalid crop coordinates provided. Photo processed without cropping.", 'warning')
+                        else:
+                            _app.logger.debug("No crop parameters provided or some are missing. Processing photo without explicit cropping.")
                         img.thumbnail((200, 200))
+                        _app.logger.debug(f"Image thumbnail generated. Size: {img.size}")
                         img.save(save_path)
+                        _app.logger.info(f"Profile photo for {current_user.username} saved to {save_path}")
                         current_user.profile_photo_url = os.path.join('uploads/profile_pics', unique_filename)
                         photo_saved_successfully = True
                     except Exception as e:
-                        _app.logger.error(f"Error processing profile photo: {e}", exc_info=True)
+                        _app.logger.error(f"Error processing profile photo for {current_user.username}: {e}", exc_info=True)
                         flash(f'Error processing profile photo: {e}', 'danger')
             try:
                 db.session.commit()
+                _app.logger.info(f"Profile changes for {current_user.username} committed to DB.")
                 if photo_update_attempted:
                     if photo_saved_successfully:
                         flash('Profile and photo updated successfully!', 'success')
@@ -526,83 +705,128 @@ def create_app(config_overrides=None):
                     flash('Profile updated successfully!', 'success')
             except Exception as e:
                 db.session.rollback()
-                _app.logger.error(f"Error saving profile changes to DB: {e}", exc_info=True)
+                _app.logger.error(f"Error saving profile changes to DB for {current_user.username}: {e}", exc_info=True)
                 flash(f'Error saving profile changes: {e}', 'danger')
             return redirect(url_for('profile', username=current_user.username))
         elif request.method == 'POST':
-            for field_name, field_errors in form.errors.items():
-                for error in field_errors:
-                    flash(f"Error in {getattr(form, field_name).label.text}: {error}", 'warning')
-        return render_template('edit_profile.html', form=form, user_profile=current_user, default_avatar_url=default_avatar_url)
+            _app.logger.warning(f"Edit profile form validation failed for user {current_user.username}. Errors: {form.errors}")
+            flash_form_errors(form)
+        else:
+            _app.logger.debug(f"Displaying edit profile form for user {current_user.username}.")
+        return render_template('edit_profile.html', form=form, user_profile=current_user)
 
     @_app.route('/settings')
     @login_required
     def settings_page():
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /settings, Method: {request.method}, User: {current_user.username}")
+        _app.logger.debug(f"Displaying settings page for user {current_user.username}.")
         return render_template('settings.html')
 
     @_app.route('/settings/change-password', methods=['GET', 'POST'])
     @login_required
     def change_password_page():
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /settings/change-password, Method: {request.method}, User: {current_user.username}")
         form = ChangePasswordForm()
+        if request.method == 'POST':
+            _app.logger.debug(f"[FORM_SUBMISSION] Change password form submitted by {current_user.username}.")
         if form.validate_on_submit():
+            _app.logger.info(f"User {current_user.username} attempting to change password.")
             if current_user.check_password(form.current_password.data):
-                current_user.set_password(form.new_password.data)
-                db.session.commit()
-                flash('Your password has been updated successfully!', 'success')
-                return redirect(url_for('settings_page'))
+                try:
+                    current_user.set_password(form.new_password.data)
+                    db.session.commit()
+                    _app.logger.info(f"Password changed successfully for user {current_user.username}.")
+                    flash('Your password has been updated successfully!', 'success')
+                    return redirect(url_for('settings_page'))
+                except Exception as e:
+                    db.session.rollback()
+                    _app.logger.error(f"Error saving new password for user {current_user.username}: {e}", exc_info=True)
+                    flash('Error changing password. Please try again.', 'danger')
             else:
+                _app.logger.warning(f"Invalid current password provided by user {current_user.username} during password change attempt.")
                 flash('Invalid current password.', 'danger')
         elif request.method == 'POST':
-            for field, errors_list in form.errors.items():
-                 for error in errors_list:
-                    flash(f"Error in {getattr(form, field).label.text}: {error}", 'warning')
+            _app.logger.warning(f"Change password form validation failed for user {current_user.username}. Errors: {form.errors}")
+            flash_form_errors(form)
+        else:
+            _app.logger.debug(f"Displaying change password form for user {current_user.username}.")
         return render_template('change_password.html', form=form)
 
     @_app.route('/search')
     def search_results():
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /search, Method: {request.method}, IP: {request.remote_addr}")
         query = request.args.get('q', '').strip()
         page = request.args.get('page', 1, type=int)
         per_page = _app.config['POSTS_PER_PAGE']
+        _app.logger.info(f"Search performed with query: '{query}', page: {page}.")
         posts = []
         pagination = None
         if query:
             search_term = f"%{query}%"
-            posts_query = Post.query.filter(
-                or_(Post.title.ilike(search_term), Post.content.ilike(search_term))
-            ).order_by(Post.created_at.desc())
-            pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
-            posts = pagination.items
+            try:
+                posts_query = Post.query.filter(
+                    Post.is_published==True,
+                    or_(Post.title.ilike(search_term), Post.content.ilike(search_term))
+                ).order_by(Post.published_at.desc(), Post.created_at.desc())
+                pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
+                posts = pagination.items
+                _app.logger.debug(f"Search for '{query}' found {len(posts)} published posts on page {page}. Total results: {pagination.total}")
+            except Exception as e:
+                _app.logger.error(f"Error during search for query '{query}': {e}", exc_info=True)
+                flash("Error performing search. Please try again.", "danger")
+        else:
+            _app.logger.debug("Search query was empty. Displaying no results.")
+            flash("Please enter a search term.", "info")
         return render_template('search_results.html', query=query, posts=posts, pagination=pagination)
 
     @_app.route('/about')
     def about_page():
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /about, Method: {request.method}, IP: {request.remote_addr}")
+        _app.logger.debug("Displaying About page.")
         return render_template('about.html')
 
     @_app.route('/contact')
     def contact_page():
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /contact, Method: {request.method}, IP: {request.remote_addr}")
+        _app.logger.debug("Displaying Contact page.")
         return render_template('contact.html')
 
     @_app.route('/tag/<string:tag_slug>')
     def posts_by_tag(tag_slug):
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /tag/{tag_slug}, Method: {request.method}, IP: {request.remote_addr}")
         tag = Tag.query.filter_by(slug=tag_slug).first_or_404()
+        _app.logger.debug(f"Fetching posts for tag '{tag.name}' (Slug: {tag_slug}).")
         page = request.args.get('page', 1, type=int)
         per_page = _app.config['POSTS_PER_PAGE']
-        pagination = Post.query.filter(Post.tags.contains(tag)).order_by(Post.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
-        posts = pagination.items
+        try:
+            query = Post.query.filter(Post.tags.contains(tag), Post.is_published==True).order_by(Post.published_at.desc(), Post.created_at.desc())
+            pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+            posts = pagination.items
+            _app.logger.debug(f"Found {len(posts)} published posts for tag '{tag.name}' on page {page}. Total: {pagination.total}")
+        except Exception as e:
+            _app.logger.error(f"Error fetching posts for tag {tag_slug}: {e}", exc_info=True)
+            flash(f"Error loading posts for tag {tag.name}.", "danger")
+            posts = []
+            pagination = None
         return render_template('posts_by_tag.html', tag=tag, posts=posts, pagination=pagination)
 
     @_app.route('/api/settings/theme', methods=['POST'])
     @login_required
     def save_theme_preference():
+        _app.logger.debug(f"[API_ROUTE_ENTRY] Path: /api/settings/theme, Method: {request.method}, User: {current_user.username}")
         data = request.get_json()
         if not data or 'theme' not in data:
+            _app.logger.warning(f"API /api/settings/theme: Missing theme data in request from {current_user.username}. Data: {data}")
             return jsonify({'status': 'error', 'message': 'Missing theme data'}), 400
         new_theme = data['theme']
+        _app.logger.info(f"User {current_user.username} attempting to set theme to: '{new_theme}'.")
         if new_theme not in _app.config['ALLOWED_THEMES']:
+            _app.logger.warning(f"API /api/settings/theme: Invalid theme value '{new_theme}' from {current_user.username}.")
             return jsonify({'status': 'error', 'message': 'Invalid theme value'}), 400
         current_user.theme = new_theme
         try:
             db.session.commit()
+            _app.logger.info(f"Theme preference '{new_theme}' saved for user {current_user.username}.")
             return jsonify({'status': 'success', 'message': 'Theme updated successfully'})
         except Exception as e:
             db.session.rollback()
@@ -612,12 +836,17 @@ def create_app(config_overrides=None):
     @_app.route('/api/settings/accent_color', methods=['POST'])
     @login_required
     def save_accent_color_preference():
+        _app.logger.debug(f"[API_ROUTE_ENTRY] Path: /api/settings/accent_color, Method: {request.method}, User: {current_user.username}")
         data = request.get_json()
         if not data or 'accent_color' not in data:
+            _app.logger.warning(f"API /api/settings/accent_color: Missing accent_color data in request from {current_user.username}. Data: {data}")
             return jsonify({'status': 'error', 'message': 'Missing accent_color data'}), 400
-        current_user.accent_color = data['accent_color']
+        new_accent_color = data['accent_color']
+        _app.logger.info(f"User {current_user.username} attempting to set accent_color to: '{new_accent_color}'.")
+        current_user.accent_color = new_accent_color
         try:
             db.session.commit()
+            _app.logger.info(f"Accent color preference '{new_accent_color}' saved for user {current_user.username}.")
             return jsonify({'status': 'success', 'message': 'Accent color updated successfully'})
         except Exception as e:
             db.session.rollback()
@@ -626,22 +855,32 @@ def create_app(config_overrides=None):
 
     @_app.errorhandler(403)
     def forbidden_page(error):
+        user_info = f"User: {current_user.username}" if current_user.is_authenticated else "User: Anonymous"
+        _app.logger.warning(f"[ERROR_HANDLER] 403 Forbidden - Path: {request.path}, IP: {request.remote_addr}, {user_info}, Error: {error}", exc_info=False)
         return render_template('403.html'), 403
 
     @_app.errorhandler(404)
     def page_not_found(error):
+        user_info = f"User: {current_user.username}" if current_user.is_authenticated else "User: Anonymous"
+        _app.logger.warning(f"[ERROR_HANDLER] 404 Not Found - Path: {request.path}, IP: {request.remote_addr}, {user_info}, Error: {error}", exc_info=False)
         return render_template('404.html'), 404
 
     @_app.errorhandler(500)
     def server_error_page(error):
-        _app.logger.error(f"[ERROR_HANDLER] 500 Server Error - Path: {request.path} - Error: {error}", exc_info=True)
+        user_info = f"User: {current_user.username}" if current_user.is_authenticated else "User: Anonymous"
+        _app.logger.error(f"[ERROR_HANDLER] 500 Server Error - Path: {request.path}, IP: {request.remote_addr}, {user_info}, Error: {error}", exc_info=True)
         return render_template('500.html'), 500
 
     with _app.app_context():
-        _app.logger.info("Initializing database tables (db.create_all())...")
-        db.create_all()
-        _app.logger.info("Ensured database tables are created if they don't exist (db.create_all()).")
+        _app.logger.info("Application context pushed for initial db.create_all().")
+        try:
+            _app.logger.info("Attempting to ensure database tables are created (db.create_all())...")
+            db.create_all()
+            _app.logger.info("db.create_all() completed. Tables should exist if they didn't.")
+        except Exception as e:
+            _app.logger.error(f"Error during initial db.create_all(): {e}", exc_info=True)
 
+    _app.logger.info("Flask application instance created and configured.")
     return _app
 
 if __name__ == '__main__':

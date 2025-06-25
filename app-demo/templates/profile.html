@@ -73,11 +73,11 @@
                 <adw-list-box>
                     {% for post in posts_pagination.items %}
                         <adw-action-row
-                            title="{{ post.title }}"
-                            subtitle="Posted on: {{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else 'N/A' }} UTC"
+                            title="{{ post.title }}{% if not post.is_published and current_user == post.author %} (Draft){% endif %}"
+                            subtitle="{% if post.is_published and post.published_at %}Published: {{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC{% elif not post.is_published %}Draft - Last updated: {{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC{% else %}Created: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC{% endif %}"
                             href="{{ url_for('view_post', post_id=post.id) }}"
                             show-chevron="true"
-                            clickable> {# Explicitly make it clickable if href is present #}
+                            clickable>
                         </adw-action-row>
                     {% endfor %}
                 </adw-list-box>
