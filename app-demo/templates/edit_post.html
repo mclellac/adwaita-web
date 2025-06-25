@@ -28,81 +28,49 @@
         {{ form.hidden_tag() }} {# CSRF token #}
 
         <adw-preferences-group title="Post Details">
-            <adw-list-box>
-                <adw-entry-row
-                    title="{{ form.title.label.text }}"
-                    name="{{ form.title.name }}"
-                    id="{{ form.title.id or 'title_field' }}"
-                    placeholder="Enter post title"
-                    value="{{ form.title.data or '' }}"
-                    {% if form.title.flags.required %}required{% endif %}
-                    subtitle="{{ form.title.errors[0] if form.title.errors else '' }}"
-                    class="{{ 'has-error' if form.title.errors else '' }}">
-                </adw-entry-row>
+            <adw-entry-row title="{{ form.title.label.text }}"
+                             subtitle="{{ form.title.errors|join(' ') if form.title.errors else '' }}"
+                             class="{{ 'has-error' if form.title.errors else '' }}">
+              {{ form.title(placeholder="Enter post title", required=form.title.flags.required) }}
+            </adw-entry-row>
 
-                <adw-action-row title="{{ form.content.label.text }}" subtitle="Edit your post content below.">
-                    <div slot="suffix" style="width:100%;">
-                        {# Use adw-textarea-standalone for consistent multiline entry styling #}
-                        {{ form.content(id=form.content.id or 'content_field_edit', class='adw-textarea-standalone', style='width: 100%; min-height: 200px; resize: vertical;', rows='10') }}
-                        {% if form.content.errors %}
-                            <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs);">
-                                {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </adw-action-row>
-            </adw-list-box>
+            <adw-expander-row title="{{ form.content.label.text }}"
+                                subtitle="{{ form.content.errors|join(' ') if form.content.errors else 'Edit your post content below.' }}"
+                                class="{{ 'has-error' if form.content.errors else '' }}"
+                                expanded="true">
+              <div slot="content" style="padding: var(--spacing-s) 0;">
+                {{ form.content(class='adw-textarea-standalone', style='width: 100%; min-height: 250px; resize: vertical;', rows='15') }}
+              </div>
+            </adw-expander-row>
         </adw-preferences-group>
 
         <adw-preferences-group title="{{ form.categories.label.text }}">
             <adw-list-box class="{{ 'has-error' if form.categories.errors else '' }}">
                 {% for subfield in form.categories %}
                 <adw-action-row class="adw-checkbox-row">
-                    <adw-checkbox slot="prefix"
-                                  name="{{ subfield.name }}"
-                                  id="{{ subfield.id }}"
-                                  value="{{ subfield.widget.attrs.get('value', subfield.data) }}"
-                                  label="{{ subfield.label.text }}"
-                                  {% if subfield.data %}checked{% endif %}>
-                    </adw-checkbox>
-                    {% if loop.first and form.categories.errors %}
-                        <adw-label slot="subtitle" class="error-text" style="color: var(--error-color);">{{ form.categories.errors|join('; ') }}</adw-label>
-                    {% endif %}
+                    {{ subfield(style="margin-right: var(--spacing-s); vertical-align: middle;") }}
+                    {{ subfield.label(style="vertical-align: middle;") }}
                 </adw-action-row>
                 {% endfor %}
+                {% if form.categories.errors %}
+                <adw-action-row subtitle="{{ form.categories.errors|join('; ') }}" class="error-row"></adw-action-row>
+                {% endif %}
             </adw-list-box>
-            {# Errors handled in the loop now #}
-            {# {% if form.categories.errors %}
-            <adw-list-box> <adw-action-row subtitle="{{ form.categories.errors|join(' ') }}" class="error-row"></adw-action-row> </adw-list-box>
-            {% endif %} #}
         </adw-preferences-group>
 
         <adw-preferences-group title="Tags">
-            <adw-list-box>
-                <adw-entry-row
-                    title="{{ form.tags_string.label.text }}"
-                    name="{{ form.tags_string.name }}"
-                    id="{{ form.tags_string.id or 'tags_string_field' }}"
-                    placeholder="e.g., tech, travel, food"
-                    value="{{ form.tags_string.data or '' }}" {# Pre-filled by WTForms obj=post #}
-                    subtitle="{{ form.tags_string.errors[0] if form.tags_string.errors else 'Comma-separated values.' }}"
-                    class="{{ 'has-error' if form.tags_string.errors else '' }}">
-                </adw-entry-row>
-            </adw-list-box>
+            <adw-entry-row title="{{ form.tags_string.label.text }}"
+                             subtitle="{{ form.tags_string.errors|join(' ') if form.tags_string.errors else 'Comma-separated values.' }}"
+                             class="{{ 'has-error' if form.tags_string.errors else '' }}">
+              {{ form.tags_string(placeholder="e.g., tech, travel, food") }} {# Value pre-filled by WTForms obj=post logic #}
+            </adw-entry-row>
         </adw-preferences-group>
 
         <adw-action-row>
             <div slot="suffix" style="display: flex; justify-content: flex-end; gap: var(--spacing-s); width: 100%;">
                 <adw-button flat href="{{ url_for('view_post', post_id=post.id) }}">Cancel</adw-button>
-                {# Conditional class for 'Publish' button based on current state #}
-                <adw-button type="submit" name="{{ form.save_draft.name }}" id="{{ form.save_draft.id }}" value="{{ form.save_draft.label.text }}"
-                            class="{{ '' if post.is_published else 'suggested' }}">
-                    {{ form.save_draft.label.text }}
-                </adw-button>
-                <adw-button type="submit" name="{{ form.publish.name }}" id="{{ form.publish.id }}" value="{{ form.publish.label.text }}"
-                            class="{{ 'suggested' if not post.is_published else '' }}">
-                    {{ form.publish.label.text }}
-                </adw-button>
+                {{ form.save_draft(class="adw-button " ~ ('suggested' if post.is_published else '')) }}
+                {{ form.publish(class="adw-button " ~ ('suggested' if not post.is_published else '')) }}
             </div>
         </adw-action-row>
     </form>
@@ -112,5 +80,5 @@
 
 {% block scripts %}
 {{ super() }}
-{# No Tiptap-specific scripts needed anymore for edit_post.html #}
+{# All custom JavaScript for form handling has been removed. #}
 {% endblock %}

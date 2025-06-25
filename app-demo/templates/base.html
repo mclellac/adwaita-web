@@ -36,6 +36,35 @@
       adw-entry-row.has-error .adw-entry-row__subtitle {
         color: var(--error-fg-color, var(--destructive-color));
       }
+
+      /* Styles for flashed messages to align with Adwaita */
+      .flash-message-base {
+        padding: var(--spacing-m);
+        margin-bottom: var(--spacing-m);
+        border-radius: var(--border-radius-lg);
+        border: 1px solid transparent;
+        font-size: var(--font-size-body);
+      }
+      .flash-message-danger, .flash-message-error { /* Flask uses 'danger' for errors */
+        background-color: var(--error-bg-color, #e01b24);
+        color: var(--error-fg-color, #ffffff);
+        border-color: var(--error-shade-color, var(--destructive-color));
+      }
+      .flash-message-success {
+        background-color: var(--success-bg-color, #2ec27e);
+        color: var(--success-fg-color, #ffffff);
+        border-color: var(--success-shade-color, var(--success-color));
+      }
+      .flash-message-warning {
+        background-color: var(--warning-bg-color, #e5a50a);
+        color: var(--warning-fg-color, rgba(0,0,0,0.8));
+        border-color: var(--warning-shade-color, var(--warning-color));
+      }
+      .flash-message-info, .flash-message-message { /* Flask uses 'message' for info */
+        background-color: var(--accent-bg-color, #3584e4); /* Or a more neutral info color if available */
+        color: var(--accent-fg-color, #ffffff);
+        border-color: var(--accent-shade-color, var(--accent-color));
+      }
     </style>
     {# components.js should contain Adw object initialization and initial theme/accent application #}
     <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
@@ -114,9 +143,10 @@
             {# Fallback: Render flashed messages directly if needed, without JS #}
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
-                <div id="manual-flash-messages" style="position: sticky; top: 0; z-index: 1050; padding: var(--spacing-s) var(--spacing-xl);">
+                <div id="manual-flash-messages" style="position: sticky; top: 0; z-index: 1050; padding: var(--spacing-m) var(--spacing-xl) 0;"> {# Adjusted padding #}
                   {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" style="padding: var(--spacing-s); margin-bottom: var(--spacing-s); border-radius: var(--border-radius-md); background-color: var(--secondary-background-color); color: var(--text-color); border: 1px solid var(--border-color);">
+                    {% set category_class = 'flash-message-' ~ (category if category != 'message' else 'info') %}
+                    <div class="flash-message-base {{ category_class }}" role="alert">
                       {{ message }}
                     </div>
                   {% endfor %}

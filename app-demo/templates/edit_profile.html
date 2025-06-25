@@ -33,69 +33,58 @@
       <input type="hidden" name="crop_height" id="crop_height">
 
       <adw-preferences-group title="Public Information">
-        <adw-list-box>
-          {# Full Name Entry Row #}
-          <adw-entry-row
-            title="{{ form.full_name.label.text }}"
-            name="{{ form.full_name.name }}"
-            value="{{ form.full_name.data or '' }}"
-            placeholder="Your full name or display name"
-            subtitle="{{ form.full_name.errors[0] if form.full_name.errors else '' }}"
-            class="{{ 'has-error' if form.full_name.errors else '' }}">
-          </adw-entry-row>
-          {# The hidden CSRF token input is still needed by form.hidden_tag() #}
-          {# Also, ensure form.full_name.id is available if labels need to point to it, though adw-entry-row handles its own title #}
+        {# Full Name Entry Row #}
+        <adw-entry-row title="{{ form.full_name.label.text }}"
+                         subtitle="{{ form.full_name.errors|join(' ') if form.full_name.errors else '' }}"
+                         class="{{ 'has-error' if form.full_name.errors else '' }}">
+          {{ form.full_name(placeholder="Your full name or display name") }}
+        </adw-entry-row>
 
-          {# Bio/Profile Info - Custom Row for Text Area #}
-          <adw-action-row
-            title="{{ form.profile_info.label.text }}"
-            subtitle="Tell us a bit about yourself. Supports basic HTML.">
-            <div style="width: 100%;" slot="suffix">
-              {# WTForms TextareaField, styled with adw-textarea-standalone for Adwaita multiline entry look #}
-              {{ form.profile_info(rows="6", class="adw-textarea-standalone", style="width: 100%; min-height: 120px;", id=form.profile_info.id) }}
-            </div>
-          </adw-action-row>
-          {% if form.profile_info.errors %}
-          <adw-action-row subtitle="{{ form.profile_info.errors|join(' ') }}" class="error-row"></adw-action-row>
-          {% endif %}
+        {# Bio/Profile Info - Using adw-expander-row to contain the textarea #}
+        <adw-expander-row title="{{ form.profile_info.label.text }}"
+                            subtitle="{{ form.profile_info.errors|join(' ') if form.profile_info.errors else 'Tell us a bit about yourself. Supports basic HTML.' }}"
+                            class="{{ 'has-error' if form.profile_info.errors else '' }}">
+          <div slot="content" style="padding: var(--spacing-s) 0;">
+            {{ form.profile_info(rows="8", class="adw-textarea-standalone", style="width: 100%; min-height: 150px;") }}
+          </div>
+        </adw-expander-row>
 
-          {# Location Entry Row #}
-          <adw-entry-row
-            title="{{ form.location.label.text }}"
-            name="{{ form.location.name }}"
-            value="{{ form.location.data or '' }}"
-            placeholder="e.g., City, Country"
-            subtitle="{{ form.location.errors[0] if form.location.errors else '' }}"
-            class="{{ 'has-error' if form.location.errors else '' }}">
-          </adw-entry-row>
+        {# Location Entry Row #}
+        <adw-entry-row title="{{ form.location.label.text }}"
+                         subtitle="{{ form.location.errors|join(' ') if form.location.errors else '' }}"
+                         class="{{ 'has-error' if form.location.errors else '' }}">
+          {{ form.location(placeholder="e.g., City, Country") }}
+        </adw-entry-row>
 
-          {# Website URL Entry Row #}
-          <adw-entry-row
-            title="{{ form.website_url.label.text }}"
-            name="{{ form.website_url.name }}"
-            type="url" {# adw-entry-row should support type attribute if its internal input does #}
-            value="{{ form.website_url.data or '' }}"
-            placeholder="https://example.com"
-            subtitle="{{ form.website_url.errors[0] if form.website_url.errors else '' }}"
-            class="{{ 'has-error' if form.website_url.errors else '' }}">
-          </adw-entry-row>
+        {# Website URL Entry Row #}
+        <adw-entry-row title="{{ form.website_url.label.text }}"
+                         subtitle="{{ form.website_url.errors|join(' ') if form.website_url.errors else '' }}"
+                         class="{{ 'has-error' if form.website_url.errors else '' }}">
+          {{ form.website_url(placeholder="https://example.com", type="url") }}
+        </adw-entry-row>
 
-          {# is_profile_public Switch Row #}
-          <adw-switch-row
-            title="{{ form.is_profile_public.label.text }}"
-            subtitle="Allow others to see your profile page."
-            name="{{ form.is_profile_public.name }}"
-            id="{{ form.is_profile_public.id }}"
-            {% if form.is_profile_public.data %}checked{% endif %}
-            class="{{ 'has-error' if form.is_profile_public.errors else '' }}">
-          </adw-switch-row>
-          {# No explicit error display here, assuming subtitle on has-error is enough or consistent with others #}
-          {% if form.is_profile_public.errors %}
-          {# This is a fallback, ideally the subtitle on the switch-row itself would show the error #}
-          <adw-action-row subtitle="{{ form.is_profile_public.errors|join(' ') }}" class="error-row"></adw-action-row>
-          {% endif %}
+        {# is_profile_public Switch Row #}
+        {# For WTForms BooleanField to work with a custom widget/HTML structure like adw-switch-row,
+           we need to render the hidden input part of the BooleanField and then control the 'checked'
+           state of the adw-switch-row. The 'name' attribute must be on the actual input.
+           The adw-switch-row itself doesn't submit its state directly unless it's designed to wrap an input.
+           Let's assume adw-switch-row can take a standard input type="checkbox" or we manually manage it.
+           A simpler way that adw-switch-row often works is by having its own 'name' and 'value' and being 'checked'.
+           If adw-switch-row is a proper custom element that integrates with forms, setting its 'name' and 'checked' attributes should be enough.
+        #}
+        <adw-switch-row title="{{ form.is_profile_public.label.text }}"
+                          subtitle="{{ (form.is_profile_public.errors|join(' ') if form.is_profile_public.errors else 'Allow others to see your profile page.') }}"
+                          name="{{ form.is_profile_public.name }}"
+                          value="y" {# Standard value for checkbox being true, WTForms BooleanField expects 'y' or similar if not using default #}
+                          class="{{ 'has-error' if form.is_profile_public.errors else '' }}"
+                          {% if form.is_profile_public.data %}checked{% endif %}>
+            {# {{ form.is_profile_public() }} might render a standard checkbox, which we don't want to see.
+               We rely on the adw-switch-row to carry the name and checked state.
+               Flask-WTF's BooleanField will process the presence of 'form.is_profile_public.name' in form data.
+               If 'checked', the 'value' ('y') is sent. If not, nothing for this name is sent.
+            #}
+        </adw-switch-row>
 
-        </adw-list-box>
       </adw-preferences-group>
 
       <adw-preferences-group title="Profile Photo">

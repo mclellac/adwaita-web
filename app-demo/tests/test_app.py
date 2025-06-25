@@ -138,8 +138,11 @@ def test_settings_page_loads_authenticated(app_instance, client, new_user, new_u
     assert response.status_code == 200
     assert b"Settings" in response.data
     assert b"Appearance" in response.data
+    assert b"Theme" in response.data # Changed from "Dark Mode"
+    assert b"System Default" in response.data # Option in theme combo
+    assert b"Light" in response.data # Option in theme combo
+    assert b"Dark" in response.data # Option in theme combo
     assert b"Accent Color" in response.data
-    assert b"Dark Mode" in response.data
 
 def test_settings_page_redirects_unauthenticated(app_instance, client):
     with app_instance.app_context():

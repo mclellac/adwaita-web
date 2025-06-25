@@ -6,27 +6,29 @@
   <adw-preferences-view style="max-width: 700px; margin: var(--spacing-xl) auto;">
     <adw-preferences-page title="Settings">
       <adw-preferences-group title="Appearance">
-        <adw-list-box>
-          <adw-switch-row title="Enable Dark Mode"
-                          subtitle="Toggle between light (off) and dark (on) themes"
-                          id="theme-switch"
-                          data-current-theme="{{ current_user.theme or 'system' }}">
-          </adw-switch-row>
-          <adw-combo-row title="Accent Color"
+        <adw-combo-row title="Theme"
+                         subtitle="Select your preferred interface theme"
+                         id="theme-combo-row">
+          {# Ensure Adw.config.ALLOWED_THEMES is available or hardcode, flask_app.config['ALLOWED_THEMES'] #}
+          {% set current_theme = current_user.theme or 'system' %}
+          <option value="system" {% if current_theme == 'system' %}selected{% endif %}>System Default</option>
+          <option value="light" {% if current_theme == 'light' %}selected{% endif %}>Light</option>
+          <option value="dark" {% if current_theme == 'dark' %}selected{% endif %}>Dark</option>
+        </adw-combo-row>
+
+        <adw-combo-row title="Accent Color"
                          subtitle="Choose a site-wide accent color"
-                         id="accent-color-combo"
-                         data-current-accent="{{ current_user.accent_color or 'default' }}">
-            <!-- Options will be populated by JavaScript.
-                 Example:
-                 <option value="default" selected>Default (Blue)</option>
-                 <option value="green">Green</option>
-                 <option value="orange">Orange</option>
-                 <option value="purple">Purple</option>
-                 <option value="red">Red</option>
-                 <option value="yellow">Yellow</option>
-            -->
-          </adw-combo-row>
-        </adw-list-box>
+                         id="accent-color-combo-row">
+          {% set current_accent = current_user.accent_color or 'default' %}
+          {# These values should correspond to CSS classes or variables Adwaita-Web uses #}
+          <option value="default" {% if current_accent == 'default' %}selected{% endif %}>Default (Blue)</option>
+          <option value="green" {% if current_accent == 'green' %}selected{% endif %}>Green</option>
+          <option value="orange" {% if current_accent == 'orange' %}selected{% endif %}>Orange</option>
+          <option value="purple" {% if current_accent == 'purple' %}selected{% endif %}>Purple</option>
+          <option value="red" {% if current_accent == 'red' %}selected{% endif %}>Red</option>
+          <option value="yellow" {% if current_accent == 'yellow' %}selected{% endif %}>Yellow</option>
+          <option value="pink" {% if current_accent == 'pink' %}selected{% endif %}>Pink</option> {# Added Pink as an example #}
+        </adw-combo-row>
       </adw-preferences-group>
 
       <adw-preferences-group title="Account">
