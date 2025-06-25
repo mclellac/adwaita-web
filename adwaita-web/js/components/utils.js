@@ -83,7 +83,7 @@ export function setAccentColor(accentName = DEFAULT_ACCENT_COLOR_NAME) {
     try {
         localStorage.setItem('accentColorName', accentName);
     } catch (e) {
-        console.warn("Could not save accent color name to localStorage:", e);
+        // console.warn("Could not save accent color name to localStorage:", e);
     }
 }
 
@@ -127,14 +127,14 @@ export function loadSavedTheme() {
                     localStorage.setItem('theme', 'dark');
                 }
             } catch (e) {
-                console.warn("Could not save initial theme to localStorage:", e);
+                // console.warn("Could not save initial theme to localStorage:", e);
             }
         }
 
         setAccentColor(savedAccentName || DEFAULT_ACCENT_COLOR_NAME);
 
     } catch (e) {
-        console.warn("Could not load theme from localStorage:", e);
+        // console.warn("Could not load theme from localStorage:", e);
         const docEl = document.documentElement;
         // Fallback logic if everything else fails
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
@@ -155,11 +155,11 @@ export function toggleTheme() {
     if (docEl.classList.contains('light-theme')) {
         docEl.classList.remove('light-theme');
         docEl.classList.add('dark-theme');
-        try { localStorage.setItem('theme', 'dark'); } catch (e) { console.warn("LS Error", e); }
+        try { localStorage.setItem('theme', 'dark'); } catch (e) { /* console.warn("LS Error", e); */ }
     } else {
         docEl.classList.remove('dark-theme');
         docEl.classList.add('light-theme');
-        try { localStorage.setItem('theme', 'light'); } catch (e) { console.warn("LS Error", e); }
+        try { localStorage.setItem('theme', 'light'); } catch (e) { /* console.warn("LS Error", e); */ }
     }
 }
 
@@ -187,7 +187,7 @@ let systemThemeListenerAttached = false;
  * It should be called once the main Adw object is ready and DOM is available (e.g., DOMContentLoaded or module script end).
  */
 export function applyFinalThemeAndAccent() {
-    console.log('[Theme] applyFinalThemeAndAccent called');
+    // console.log('[Theme] applyFinalThemeAndAccent called');
     const docEl = document.documentElement;
     const bodyDataSet = document.body ? document.body.dataset : {};
 
@@ -199,33 +199,33 @@ export function applyFinalThemeAndAccent() {
     if (dbTheme && (dbTheme === 'light' || dbTheme === 'dark')) {
         finalTheme = dbTheme;
         themeSource = 'db';
-        console.log(`[Theme] Using theme from DB: ${finalTheme}`);
+        // console.log(`[Theme] Using theme from DB: ${finalTheme}`);
         try {
             // Always update localStorage to reflect DB state as highest non-session truth
             localStorage.setItem('theme', finalTheme);
-            console.log(`[Theme] Updated localStorage theme to ${finalTheme} from DB.`);
-        } catch (e) { console.warn("Could not save DB theme to localStorage:", e); }
+            // console.log(`[Theme] Updated localStorage theme to ${finalTheme} from DB.`);
+        } catch (e) { /* console.warn("Could not save DB theme to localStorage:", e); */ }
     } else if (lsTheme && (lsTheme === 'light' || lsTheme === 'dark')) {
         finalTheme = lsTheme;
         themeSource = 'localStorage';
-        console.log(`[Theme] Using theme from localStorage: ${finalTheme}`);
+        // console.log(`[Theme] Using theme from localStorage: ${finalTheme}`);
     } else if (window.matchMedia) {
         if (window.matchMedia('(prefers-color-scheme: light)').matches) {
             finalTheme = 'light';
             themeSource = 'prefers-color-scheme';
-            console.log(`[Theme] Using theme from prefers-color-scheme: light`);
+            // console.log(`[Theme] Using theme from prefers-color-scheme: light`);
         } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
             finalTheme = 'dark';
             themeSource = 'prefers-color-scheme';
-            console.log(`[Theme] Using theme from prefers-color-scheme: dark`);
+            // console.log(`[Theme] Using theme from prefers-color-scheme: dark`);
         }
         // Save the derived system preference to localStorage if it's the source
         if (themeSource === 'prefers-color-scheme') {
-             try { localStorage.setItem('theme', finalTheme); console.log(`[Theme] Saved derived system theme ${finalTheme} to localStorage.`); }
-             catch (e) { console.warn("Could not save system theme to localStorage:", e); }
+             try { localStorage.setItem('theme', finalTheme); /* console.log(`[Theme] Saved derived system theme ${finalTheme} to localStorage.`); */ }
+             catch (e) { /* console.warn("Could not save system theme to localStorage:", e); */ }
         }
     } else {
-        console.log(`[Theme] Using default theme: ${finalTheme}`);
+        // console.log(`[Theme] Using default theme: ${finalTheme}`);
     }
 
     // Apply the final theme
@@ -236,11 +236,11 @@ export function applyFinalThemeAndAccent() {
     if (needsLightTheme && (!docEl.classList.contains('light-theme') || docEl.classList.contains('dark-theme'))) {
         docEl.classList.add('light-theme');
         docEl.classList.remove('dark-theme');
-        console.log('[Theme] Applied light-theme class.');
+        // console.log('[Theme] Applied light-theme class.');
     } else if (needsDarkTheme && (!docEl.classList.contains('dark-theme') || docEl.classList.contains('light-theme'))) {
         docEl.classList.add('dark-theme');
         docEl.classList.remove('light-theme');
-        console.log('[Theme] Applied dark-theme class.');
+        // console.log('[Theme] Applied dark-theme class.');
     }
 
 
@@ -253,14 +253,14 @@ export function applyFinalThemeAndAccent() {
     if (dbAccent) {
         finalAccent = dbAccent;
         // accentSource = 'db';
-        console.log(`[Theme] Using accent from DB: ${finalAccent}`);
+        // console.log(`[Theme] Using accent from DB: ${finalAccent}`);
         // setAccentColor will update localStorage
     } else if (lsAccent) {
         finalAccent = lsAccent;
         // accentSource = 'localStorage';
-        console.log(`[Theme] Using accent from localStorage: ${finalAccent}`);
+        // console.log(`[Theme] Using accent from localStorage: ${finalAccent}`);
     } else {
-        console.log(`[Theme] Using default accent: ${finalAccent}`);
+        // console.log(`[Theme] Using default accent: ${finalAccent}`);
     }
     setAccentColor(finalAccent); // This also saves to localStorage
 
@@ -272,7 +272,7 @@ export function applyFinalThemeAndAccent() {
             const currentLsTheme = localStorage.getItem('theme');
 
             if (!currentDbTheme && !currentLsTheme) {
-                console.log("[Theme] System theme changed, and no user preference stored. Applying new system theme.");
+                // console.log("[Theme] System theme changed, and no user preference stored. Applying new system theme.");
                 const newSystemTheme = e.matches ? 'light' : 'dark';
                 if (newSystemTheme === 'light') {
                     if (!docEl.classList.contains('light-theme') || docEl.classList.contains('dark-theme')) {
@@ -286,21 +286,21 @@ export function applyFinalThemeAndAccent() {
                     }
                 }
             } else {
-                console.log("[Theme] System theme changed, but a user preference (DB or localStorage) exists. Ignoring system change for automatic application.");
+                // console.log("[Theme] System theme changed, but a user preference (DB or localStorage) exists. Ignoring system change for automatic application.");
             }
         };
 
         try {
             lightSchemeMediaQuery.addEventListener('change', systemThemeChangeHandler);
             systemThemeListenerAttached = true;
-            console.log("[Theme] Attached system theme change listener.");
+            // console.log("[Theme] Attached system theme change listener.");
         } catch (e1) {
             try {
                 lightSchemeMediaQuery.addListener(systemThemeChangeHandler); // Deprecated
                 systemThemeListenerAttached = true;
-                console.log("[Theme] Attached system theme change listener (fallback).");
+                // console.log("[Theme] Attached system theme change listener (fallback).");
             } catch (e2) {
-                console.warn("Failed to add listener for system theme changes.", e1, e2);
+                // console.warn("Failed to add listener for system theme changes.", e1, e2);
             }
         }
     }
@@ -357,7 +357,7 @@ export async function getAdwCommonStyleSheet() {
 
     const cssPath = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
     if (!cssPath) {
-        console.error("getAdwCommonStyleSheet: Adw.config.cssPath is not defined. Cannot load styles.");
+        // console.error("getAdwCommonStyleSheet: Adw.config.cssPath is not defined. Cannot load styles.");
         return null;
     }
 
@@ -371,10 +371,10 @@ export async function getAdwCommonStyleSheet() {
             const sheet = new CSSStyleSheet();
             await sheet.replace(cssText);
             adwCommonSheet = sheet;
-            console.info(`Adwaita common stylesheet loaded and processed from: ${cssPath}`);
+            // console.info(`Adwaita common stylesheet loaded and processed from: ${cssPath}`);
             resolve(adwCommonSheet);
         } catch (error) {
-            console.error("getAdwCommonStyleSheet: Error loading common stylesheet:", error);
+            // console.error("getAdwCommonStyleSheet: Error loading common stylesheet:", error);
             adwCommonSheet = null; // Ensure it's null on error so next attempt tries again (or stays null if path is bad)
             reject(error); // Propagate error for components to handle (e.g. fallback)
         } finally {
