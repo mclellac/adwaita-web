@@ -17,17 +17,26 @@
       <adw-preferences-group title="Account Credentials">
         {# Username Field #}
         <adw-entry-row title="{{ form.username.label.text }}"
+                         name="{{ form.username.name }}"
+                         id="{{ form.username.id or 'username' }}"
+                         required {# Assuming username is required by the form #}
+                         placeholder="Enter your username"
+                         value="{{ form.username.data or '' }}" {# Pre-fill if needed, though not typical for login username #}
                          subtitle="{{ form.username.errors|join(' ') if form.username.errors else '' }}"
                          class="{{ 'has-error' if form.username.errors else '' }}">
-          {{ form.username(placeholder="Enter your username") }}
+          {# Do NOT render {{ form.username() }} here if adw-entry-row is form-associated #}
         </adw-entry-row>
 
-        {# Password Field #}
-        <adw-entry-row title="{{ form.password.label.text }}"
-                         subtitle="{{ form.password.errors|join(' ') if form.password.errors else '' }}"
-                         class="{{ 'has-error' if form.password.errors else '' }}">
-          {{ form.password(placeholder="Enter your password", type="password") }}
-        </adw-entry-row>
+        {# Password Field - Use adw-password-entry-row #}
+        <adw-password-entry-row title="{{ form.password.label.text }}"
+                                name="{{ form.password.name }}"
+                                id="{{ form.password.id or 'password' }}"
+                                required {# Assuming password is required by the form #}
+                                placeholder="Enter your password"
+                                subtitle="{{ form.password.errors|join(' ') if form.password.errors else '' }}"
+                                class="{{ 'has-error' if form.password.errors else '' }}">
+          {# Do NOT render {{ form.password() }} here; adw-password-entry-row provides its own input #}
+        </adw-password-entry-row>
       </adw-preferences-group>
 
       {{ form.submit(class="adw-button suggested", style="width: 100%; margin-top: var(--spacing-m);") }}
