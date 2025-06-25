@@ -553,13 +553,16 @@ def test_other_user_views_profile_page(app_instance, client, create_specific_use
     with app_instance.app_context():
         profile_owner_for_posts = db.session.get(User, profile_owner_id)
         assert profile_owner_for_posts is not None, f"Failed to fetch profile_owner with ID {profile_owner_id}"
-        Post(title="Owner Published Post", content="p1", author=profile_owner_for_posts, is_published=True, published_at=datetime.now(timezone.utc) - timedelta(days=1))
-        Post(title="Owner Draft Post", content="d1", author=profile_owner_for_posts, is_published=False)
-        Post(title="Owner Another Published", content="p2", author=profile_owner_for_posts, is_published=True, published_at=datetime.now(timezone.utc))
+        # Ensure the author object is part of the current session context before adding posts
+        db.session.add(profile_owner_for_posts)
+
+        post1 = Post(title="Owner Published Post", content="p1", author=profile_owner_for_posts, is_published=True, published_at=datetime.now(timezone.utc) - timedelta(days=1))
+        post2 = Post(title="Owner Draft Post", content="d1", author=profile_owner_for_posts, is_published=False)
+        post3 = Post(title="Owner Another Published", content="p2", author=profile_owner_for_posts, is_published=True, published_at=datetime.now(timezone.utc))
+        db.session.add_all([post1, post2, post3]) # Add posts explicitly
         db.session.commit()
-        # Attempt to ensure data is visible to subsequent requests
-        db.session.expunge_all()
-        db.session.close()
+        # db.session.expunge_all() # Removed
+        # db.session.close() # Removed
 
     _, viewer_username, viewer_password = create_specific_user("_viewer")
     login_user_helper(client, viewer_username, viewer_password)
@@ -1147,12 +1150,14 @@ class TestSearchFunctionality:
     def test_search_does_not_find_drafts(self, app_instance, client, new_user):
         search_term = "searchabledraft"
         with app_instance.app_context():
-            Post(title=f"Published {search_term} Post", content="Content", author=new_user, is_published=True, published_at=datetime.now(timezone.utc))
-            Post(title=f"Draft {search_term} Post", content="Content", author=new_user, is_published=False)
+            db.session.add(new_user) # Ensure user is in session
+            post1 = Post(title=f"Published {search_term} Post", content="Content", author=new_user, is_published=True, published_at=datetime.now(timezone.utc))
+            post2 = Post(title=f"Draft {search_term} Post", content="Content", author=new_user, is_published=False)
+            db.session.add_all([post1, post2])
             db.session.commit()
             # Attempt to ensure data is visible to subsequent requests
-            db.session.expunge_all()
-            db.session.close()
+            # db.session.expunge_all() # Removed
+            # db.session.close() # Removed
         search_url = None
         with app_instance.app_context():
             search_url = url_for('search_results', q=search_term)
@@ -1277,21 +1282,29 @@ def test_delete_comment_unauthorized(app_instance, client, new_user_data_factory
 # --- Category and Tag Page Tests ---
 def test_posts_by_category_page(app_instance, client, new_user):
     with app_instance.app_context():
+        db.session.add(new_user) # Ensure user is in session
         category1 = Category(name="Tech Reviews")
         db.session.add(category1)
+        # It's better to commit category and user before creating posts that reference them.
         db.session.commit()
-        Post(title="Published Tech Post 1", content="Content about tech.", author=new_user, categories=[category1], is_published=True, published_at=datetime.now(timezone.utc))
-        Post(title="Draft Tech Post 2", content="Draft content about tech.", author=new_user, categories=[category1], is_published=False)
-        Post(title="Another Published Post", content="Different topic.", author=new_user, is_published=True, published_at=datetime.now(timezone.utc))
+
+        post1 = Post(title="Published Tech Post 1", content="Content about tech.", author=new_user, categories=[category1], is_published=True, published_at=datetime.now(timezone.utc))
+        post2 = Post(title="Draft Tech Post 2", content="Draft content about tech.", author=new_user, categories=[category1], is_published=False)
+        post3 = Post(title="Another Published Post", content="Different topic.", author=new_user, is_published=True, published_at=datetime.now(timezone.utc))
+        db.session.add_all([post1, post2, post3])
         db.session.commit()
+
         category_slug_val = category1.slug # Access slug while category1 is session-bound
         # Ensure session is closed after setup
-        db.session.expunge_all()
-        db.session.close()
+        # db.session.expunge_all() # Removed
+        # db.session.close() # Removed
         category_url = None
-        with app_instance.app_context(): # Context for url_for
-            category_url = url_for('posts_by_category', category_slug=category_slug_val)
-        response = client.get(category_url) # client.get() outside explicit context
+        # category_url needs to be defined within an app_context if using url_for,
+        # but the client.get can be outside if the URL is already formed.
+        # For simplicity and consistency, keeping url_for and client.get together.
+        category_url = url_for('posts_by_category', category_slug=category_slug_val)
+        response = client.get(category_url)
+
     assert response.status_code == 200
     assert b"Posts in Category: Tech Reviews" in response.data
     if b"Published Tech Post 1" not in response.data:
@@ -1302,18 +1315,23 @@ def test_posts_by_category_page(app_instance, client, new_user):
 
 def test_posts_by_tag_page(app_instance, client, new_user):
     with app_instance.app_context():
+        db.session.add(new_user) # Ensure user is in session
         tag1 = Tag(name="python-programming")
         db.session.add(tag1)
+        # It's better to commit tag and user before creating posts that reference them.
         db.session.commit()
-        Post(title="Published Python Post 1", content="Content about Python.", author=new_user, tags=[tag1], is_published=True, published_at=datetime.now(timezone.utc))
-        Post(title="Draft Python Post 2", content="Draft about Python.", author=new_user, tags=[tag1], is_published=False)
-        Post(title="Java Post", content="Content about Java.", author=new_user, is_published=True, published_at=datetime.now(timezone.utc))
+
+        post1 = Post(title="Published Python Post 1", content="Content about Python.", author=new_user, tags=[tag1], is_published=True, published_at=datetime.now(timezone.utc))
+        post2 = Post(title="Draft Python Post 2", content="Draft about Python.", author=new_user, tags=[tag1], is_published=False)
+        post3 = Post(title="Java Post", content="Content about Java.", author=new_user, is_published=True, published_at=datetime.now(timezone.utc))
+        db.session.add_all([post1, post2, post3])
         db.session.commit()
+
         tag_slug_val = tag1.slug # Access slug while tag1 is session-bound
         tag_name_val = tag1.name # Access name while tag1 is session-bound
         # Ensure session is closed after setup
-        db.session.expunge_all()
-        db.session.close()
+        # db.session.expunge_all() # Removed
+        # db.session.close() # Removed
         tag_url = None
         with app_instance.app_context(): # Context for url_for
             tag_url = url_for('posts_by_tag', tag_slug=tag_slug_val)

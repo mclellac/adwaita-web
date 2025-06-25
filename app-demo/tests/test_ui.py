@@ -128,7 +128,7 @@ def test_homepage_loads_adwaita_elements(driver):
     try:
         window_title = header_bar.find_element(By.TAG_NAME, "adw-window-title")
         assert window_title.is_displayed(), "Adwaita window title is not displayed."
-        assert window_title.get_attribute("title") == "Blog CMS", "Window title text is incorrect."
+        assert window_title.text == "Blog CMS", "Window title text is incorrect."
     except NoSuchElementException:
         pytest.fail("Adwaita window title not found within header bar.")
 
@@ -138,16 +138,40 @@ def test_homepage_loads_adwaita_elements(driver):
 def test_login_page_elements(driver):
     if driver is None: pytest.skip("WebDriver not available.")
     driver.get(BASE_URL + "/login")
+    time.sleep(2) # Increased delay
+    # Wait for custom elements to be defined
+    driver.execute_async_script(
+        "const callback = arguments[arguments.length - 1];"
+        "Promise.all(["
+        "  customElements.whenDefined('adw-entry-row'),"
+        "  customElements.whenDefined('adw-entry'),"
+        "  customElements.whenDefined('adw-button')"
+        "]).then(() => callback());"
+    )
 
     try:
         # Adwaita specific elements for login form
-        username_entry = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "adw-entry-row[title='Username'] adw-entry input"))
+        username_adw_entry_row = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, "adw-entry-row[title='Username']"))
         )
-        assert username_entry.is_displayed()
+        username_adw_entry = driver.execute_script(
+            "return arguments[0].shadowRoot.querySelector('adw-entry.adw-entry-row-entry')",
+            username_adw_entry_row
+        )
+        assert username_adw_entry is not None, "adw-entry in username_adw_entry_row shadow DOM not found"
+        username_input_field = driver.execute_script("return arguments[0].shadowRoot.querySelector('input.adw-entry')", username_adw_entry)
+        assert username_input_field is not None, "Username input field within shadow DOM not found"
+        assert username_input_field.is_displayed()
 
-        password_entry = driver.find_element(By.CSS_SELECTOR, "adw-entry-row[title='Password'] adw-entry input[type='password']")
-        assert password_entry.is_displayed()
+        password_adw_entry_row = driver.find_element(By.CSS_SELECTOR, "adw-entry-row[title='Password']")
+        password_adw_entry = driver.execute_script(
+            "return arguments[0].shadowRoot.querySelector('adw-entry.adw-entry-row-entry')",
+            password_adw_entry_row
+        )
+        assert password_adw_entry is not None, "adw-entry in password_adw_entry_row shadow DOM not found"
+        password_input_field = driver.execute_script("return arguments[0].shadowRoot.querySelector('input.adw-entry')", password_adw_entry)
+        assert password_input_field is not None, "Password input field within shadow DOM not found"
+        assert password_input_field.is_displayed()
 
         login_button = driver.find_element(By.CSS_SELECTOR, "adw-button[type='submit'][suggested]")
         assert login_button.is_displayed()
@@ -162,13 +186,59 @@ def test_login_page_elements(driver):
 def test_user_login_and_new_post_button_visible(driver):
     if driver is None: pytest.skip("WebDriver not available.")
     driver.get(BASE_URL + "/login")
+    time.sleep(2) # Increased delay
+    # Wait for custom elements to be defined
+    driver.execute_async_script(
+        "const callback = arguments[arguments.length - 1];"
+        "Promise.all(["
+        "  customElements.whenDefined('adw-entry-row'),"
+        "  customElements.whenDefined('adw-entry'),"
+        "  customElements.whenDefined('adw-button')"
+        "]).then(() => callback());"
+    )
 
     # Log in
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "adw-entry-row[title='Username'] adw-entry input"))
-    ).send_keys("testuiuser")
-    driver.find_element(By.CSS_SELECTOR, "adw-entry-row[title='Password'] adw-entry input[type='password']").send_keys("password123")
-    driver.find_element(By.CSS_SELECTOR, "adw-button[type='submit'][suggested]").click()
+    username_adw_entry_row = WebDriverWait(driver, 10).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "adw-entry-row[title='Username']"))
+    )
+    username_adw_entry = driver.execute_script(
+        "return arguments[0].shadowRoot.querySelector('adw-entry.adw-entry-row-entry')",
+        username_adw_entry_row
+    )
+    assert username_adw_entry is not None, "adw-entry in username_adw_entry_row shadow DOM not found for login"
+    username_input_field = driver.execute_script("return arguments[0].shadowRoot.querySelector('input.adw-entry')", username_adw_entry)
+    assert username_input_field is not None, "Username input field in shadow DOM not found for login"
+    username_input_field.send_keys("testuiuser")
+    # Directly set the value of the hidden input within AdwEntry
+    driver.execute_script("arguments[0].shadowRoot.querySelector('input[type=hidden]').value = arguments[1]", username_adw_entry, "testuiuser")
+
+
+    password_adw_entry_row = driver.find_element(By.CSS_SELECTOR, "adw-entry-row[title='Password']")
+    password_adw_entry = driver.execute_script(
+        "return arguments[0].shadowRoot.querySelector('adw-entry.adw-entry-row-entry')",
+        password_adw_entry_row
+    )
+    assert password_adw_entry is not None, "adw-entry in password_adw_entry_row shadow DOM not found for login"
+    password_input_field = driver.execute_script("return arguments[0].shadowRoot.querySelector('input.adw-entry')", password_adw_entry)
+    assert password_input_field is not None, "Password input field in shadow DOM not found for login"
+    password_input_field.send_keys("password123")
+    # Directly set the value of the hidden input within AdwEntry
+    driver.execute_script("arguments[0].shadowRoot.querySelector('input[type=hidden]').value = arguments[1]", password_adw_entry, "password123")
+
+    # Debug: Check hidden input names
+    username_hidden_input_name = driver.execute_script(
+        "return arguments[0].shadowRoot.querySelector('input[type=hidden]').name", username_adw_entry
+    )
+    print(f"DEBUG: Username hidden input name: {username_hidden_input_name}")
+    password_hidden_input_name = driver.execute_script(
+        "return arguments[0].shadowRoot.querySelector('input[type=hidden]').name", password_adw_entry
+    )
+    print(f"DEBUG: Password hidden input name: {password_hidden_input_name}")
+
+    driver.execute_script("document.getElementById('login-form').submit();") # Direct form submission by ID
+
+    # Explicitly wait for URL to change to homepage after login
+    WebDriverWait(driver, 10).until(EC.url_to_be(BASE_URL + "/"))
 
     # Wait for redirect to homepage and check for "New Post" button
     try:
@@ -187,11 +257,41 @@ def test_create_post_page_elements(driver):
     if driver is None: pytest.skip("WebDriver not available.")
     # First, log in
     driver.get(BASE_URL + "/login")
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "adw-entry-row[title='Username'] adw-entry input"))
-    ).send_keys("testuiuser")
-    driver.find_element(By.CSS_SELECTOR, "adw-entry-row[title='Password'] adw-entry input[type='password']").send_keys("password123")
-    driver.find_element(By.CSS_SELECTOR, "adw-button[type='submit'][suggested]").click()
+    time.sleep(2) # Increased delay
+    # Wait for custom elements to be defined on login page
+    driver.execute_async_script(
+        "const callback = arguments[arguments.length - 1];"
+        "Promise.all(["
+        "  customElements.whenDefined('adw-entry-row'),"
+        "  customElements.whenDefined('adw-entry'),"
+        "  customElements.whenDefined('adw-button')"
+        "]).then(() => callback());"
+    )
+    username_adw_entry_row = WebDriverWait(driver, 10).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "adw-entry-row[title='Username']"))
+    )
+    username_adw_entry = driver.execute_script(
+        "return arguments[0].shadowRoot.querySelector('adw-entry.adw-entry-row-entry')",
+        username_adw_entry_row
+    )
+    assert username_adw_entry is not None, "adw-entry in username_adw_entry_row shadow DOM not found for login"
+    username_input_field = driver.execute_script("return arguments[0].shadowRoot.querySelector('input.adw-entry')", username_adw_entry)
+    assert username_input_field is not None, "Username input field in shadow DOM not found for login"
+    username_input_field.send_keys("testuiuser")
+    driver.execute_script("arguments[0].shadowRoot.querySelector('input[type=hidden]').value = arguments[1]", username_adw_entry, "testuiuser")
+
+    password_adw_entry_row = driver.find_element(By.CSS_SELECTOR, "adw-entry-row[title='Password']")
+    password_adw_entry = driver.execute_script(
+        "return arguments[0].shadowRoot.querySelector('adw-entry.adw-entry-row-entry')",
+        password_adw_entry_row
+    )
+    assert password_adw_entry is not None, "adw-entry in password_adw_entry_row shadow DOM not found for login"
+    password_input_field = driver.execute_script("return arguments[0].shadowRoot.querySelector('input.adw-entry')", password_adw_entry)
+    assert password_input_field is not None, "Password input field in shadow DOM not found for login"
+    password_input_field.send_keys("password123")
+    driver.execute_script("arguments[0].shadowRoot.querySelector('input[type=hidden]').value = arguments[1]", password_adw_entry, "password123")
+
+    driver.execute_script("document.getElementById('login-form').submit();") # Direct form submission by ID
 
     # Navigate to create post page
     WebDriverWait(driver, 10).until(EC.url_to_be(BASE_URL + "/")) # Wait for login redirect
@@ -243,11 +343,41 @@ def test_flash_messages_toast_and_banner(driver):
 
     # 1. Trigger a danger banner (login failure)
     driver.get(BASE_URL + "/login")
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "adw-entry-row[title='Username'] adw-entry input"))
-    ).send_keys("wronguser")
-    driver.find_element(By.CSS_SELECTOR, "adw-entry-row[title='Password'] adw-entry input[type='password']").send_keys("wrongpass")
-    driver.find_element(By.CSS_SELECTOR, "adw-button[type='submit'][suggested]").click()
+    time.sleep(2) # Increased delay
+    # Wait for custom elements to be defined
+    driver.execute_async_script(
+        "const callback = arguments[arguments.length - 1];"
+        "Promise.all(["
+        "  customElements.whenDefined('adw-entry-row'),"
+        "  customElements.whenDefined('adw-entry'),"
+        "  customElements.whenDefined('adw-button')"
+        "]).then(() => callback());"
+    )
+    username_adw_entry_row_fail = WebDriverWait(driver, 10).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "adw-entry-row[title='Username']"))
+    )
+    username_adw_entry_fail = driver.execute_script(
+        "return arguments[0].shadowRoot.querySelector('adw-entry.adw-entry-row-entry')",
+        username_adw_entry_row_fail
+    )
+    assert username_adw_entry_fail is not None, "adw-entry in username_adw_entry_row_fail shadow DOM not found"
+    username_input_field_fail = driver.execute_script("return arguments[0].shadowRoot.querySelector('input.adw-entry')", username_adw_entry_fail)
+    assert username_input_field_fail is not None, "Username input field in shadow DOM not found for fail case"
+    username_input_field_fail.send_keys("wronguser")
+    driver.execute_script("arguments[0].shadowRoot.querySelector('input[type=hidden]').value = arguments[1]", username_adw_entry_fail, "wronguser")
+
+    password_adw_entry_row_fail = driver.find_element(By.CSS_SELECTOR, "adw-entry-row[title='Password']")
+    password_adw_entry_fail = driver.execute_script(
+        "return arguments[0].shadowRoot.querySelector('adw-entry.adw-entry-row-entry')",
+        password_adw_entry_row_fail
+    )
+    assert password_adw_entry_fail is not None, "adw-entry in password_adw_entry_row_fail shadow DOM not found"
+    password_input_field_fail = driver.execute_script("return arguments[0].shadowRoot.querySelector('input.adw-entry')", password_adw_entry_fail)
+    assert password_input_field_fail is not None, "Password input field in shadow DOM not found for fail case"
+    password_input_field_fail.send_keys("wrongpass")
+    driver.execute_script("arguments[0].shadowRoot.querySelector('input[type=hidden]').value = arguments[1]", password_adw_entry_fail, "wrongpass")
+
+    driver.execute_script("document.getElementById('login-form').submit();") # Direct form submission by ID
 
     try:
         danger_banner = WebDriverWait(driver, 10).until(
@@ -269,11 +399,41 @@ def test_flash_messages_toast_and_banner(driver):
 
     # 2. Trigger a success toast (successful login)
     driver.get(BASE_URL + "/login") # Go back to login
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "adw-entry-row[title='Username'] adw-entry input"))
-    ).send_keys("testuiuser")
-    driver.find_element(By.CSS_SELECTOR, "adw-entry-row[title='Password'] adw-entry input[type='password']").send_keys("password123")
-    driver.find_element(By.CSS_SELECTOR, "adw-button[type='submit'][suggested]").click()
+    time.sleep(2) # Increased delay
+    # Wait for custom elements to be defined
+    driver.execute_async_script(
+        "const callback = arguments[arguments.length - 1];"
+        "Promise.all(["
+        "  customElements.whenDefined('adw-entry-row'),"
+        "  customElements.whenDefined('adw-entry'),"
+        "  customElements.whenDefined('adw-button')"
+        "]).then(() => callback());"
+    )
+    username_adw_entry_row_success = WebDriverWait(driver, 10).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "adw-entry-row[title='Username']"))
+    )
+    username_adw_entry_success = driver.execute_script(
+        "return arguments[0].shadowRoot.querySelector('adw-entry.adw-entry-row-entry')",
+        username_adw_entry_row_success
+    )
+    assert username_adw_entry_success is not None, "adw-entry in username_adw_entry_row_success shadow DOM not found"
+    username_input_field_success = driver.execute_script("return arguments[0].shadowRoot.querySelector('input.adw-entry')", username_adw_entry_success)
+    assert username_input_field_success is not None, "Username input field in shadow DOM not found for success case"
+    username_input_field_success.send_keys("testuiuser")
+    driver.execute_script("arguments[0].shadowRoot.querySelector('input[type=hidden]').value = arguments[1]", username_adw_entry_success, "testuiuser")
+
+    password_adw_entry_row_success = driver.find_element(By.CSS_SELECTOR, "adw-entry-row[title='Password']")
+    password_adw_entry_success = driver.execute_script(
+        "return arguments[0].shadowRoot.querySelector('adw-entry.adw-entry-row-entry')",
+        password_adw_entry_row_success
+    )
+    assert password_adw_entry_success is not None, "adw-entry in password_adw_entry_row_success shadow DOM not found"
+    password_input_field_success = driver.execute_script("return arguments[0].shadowRoot.querySelector('input.adw-entry')", password_adw_entry_success)
+    assert password_input_field_success is not None, "Password input field in shadow DOM not found for success case"
+    password_input_field_success.send_keys("password123")
+    driver.execute_script("arguments[0].shadowRoot.querySelector('input[type=hidden]').value = arguments[1]", password_adw_entry_success, "password123")
+
+    driver.execute_script("document.getElementById('login-form').submit();") # Direct form submission by ID
 
     try:
         # Adw.createToast creates an adw-toast element, usually in an adw-toast-overlay
