@@ -29,32 +29,7 @@
   .adw-entry-row.has-error, .adw-action-row.has-error {
       /* Standard error indication for rows already applies via subtitle or Adwaita's own styling */
   }
-  .adw-textarea-standalone {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    font-family: inherit; /* Inherit from body/page */
-    font-size: var(--font-size-base); /* Standard base font size */
-    line-height: 1.5; /* Good for readability */
-    padding: var(--spacing-xs) var(--spacing-s); /* Consistent with AdwEntry */
-    background-color: var(--view-bg-color); /* Use view background, like entries */
-    color: var(--view-fg-color); /* Standard view foreground color */
-    border: var(--border-width) solid var(--borders-color); /* Standard borders */
-    border-radius: var(--border-radius-medium); /* Consistent with AdwEntry */
-    min-height: 150px;
-    resize: vertical;
-    box-shadow: var(--entry-inset-shadow); /* Use Adwaita entry inset shadow, theme-aware */
-    transition: border-color 0.1s ease-out, box-shadow 0.1s ease-out;
-  }
-  .adw-textarea-standalone::placeholder {
-    color: var(--view-fg-color); /* Standard text color for placeholder */
-    opacity: 0.5; /* Adwaita placeholders are less prominent */
-  }
-  .adw-textarea-standalone:focus {
-    outline: none;
-    border-color: var(--accent-color); /* Standard focus border color */
-    box-shadow: var(--entry-inset-shadow), var(--entry-focus-ring-shadow); /* Combine inset shadow with focus ring */
-  }
+  /* Styles for .adw-textarea-standalone have been moved to adwaita-web/scss/_entry.scss */
 </style>
 {% endblock %}
 
@@ -138,9 +113,14 @@
 
         {# Removed AdwActionRow wrapper for the submit button. #}
         {# Place the button directly or within a simple div for layout if needed. #}
-        <div style="display: flex; justify-content: flex-end; padding-top: var(--spacing-m); padding-bottom: var(--spacing-m);">
-            <adw-button type="submit" suggested label="{{ form.submit.label.text if form.submit.label else 'Submit Post' }}">
-                {{ form.submit.label.text if form.submit.label else 'Submit Post' }} {# Ensure button has text content if label attribute is not directly supported for slotted text #}
+        <div style="display: flex; justify-content: flex-end; gap: var(--spacing-s); padding-top: var(--spacing-m); padding-bottom: var(--spacing-m);">
+            {# name attribute on button is important for Flask to identify which was clicked if not using WTForms SubmitField's .data property #}
+            {# However, WTForms SubmitField's .data property is cleaner. Ensure form object in template has these fields. #}
+            <adw-button type="submit" name="{{ form.save_draft.name }}" id="{{ form.save_draft.id }}" value="{{ form.save_draft.label.text }}">
+                {{ form.save_draft.label.text }}
+            </adw-button>
+            <adw-button type="submit" name="{{ form.publish.name }}" id="{{ form.publish.id }}" value="{{ form.publish.label.text }}" suggested>
+                {{ form.publish.label.text }}
             </adw-button>
         </div>
     </form>

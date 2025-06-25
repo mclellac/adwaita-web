@@ -94,7 +94,15 @@
         <adw-action-row>
             <div slot="suffix" style="display: flex; justify-content: flex-end; gap: var(--spacing-s); width: 100%;">
                 <adw-button flat href="{{ url_for('view_post', post_id=post.id) }}">Cancel</adw-button>
-                <adw-button type="submit" suggested label="{{ form.submit.label.text if form.submit.label else 'Update Post' }}"></adw-button>
+                {# Conditional class for 'Publish' button based on current state #}
+                <adw-button type="submit" name="{{ form.save_draft.name }}" id="{{ form.save_draft.id }}" value="{{ form.save_draft.label.text }}"
+                            class="{{ '' if post.is_published else 'suggested' }}">
+                    {{ form.save_draft.label.text }}
+                </adw-button>
+                <adw-button type="submit" name="{{ form.publish.name }}" id="{{ form.publish.id }}" value="{{ form.publish.label.text }}"
+                            class="{{ 'suggested' if not post.is_published else '' }}">
+                    {{ form.publish.label.text }}
+                </adw-button>
             </div>
         </adw-action-row>
     </form>

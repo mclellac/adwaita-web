@@ -85,3 +85,43 @@
 // var(--entry-disabled-bg-color)
 // var(--entry-disabled-border-color)
 // var(--disabled-fg-color)
+
+// Standalone Textarea (multiline entry)
+// Mirrors .adw-entry but for <textarea> elements.
+.adw-textarea-standalone {
+  // Uses global Adwaita variables directly, as it's a standalone element class
+  background-color: var(--view-bg-color);
+  color: var(--view-fg-color);
+  border: 1px solid var(--entry-border-color, var(--borders-color)); // Fallback for entry-border-color
+  border-radius: var(--border-radius-default); // Use a slightly larger radius for textareas generally
+  padding: var(--spacing-s) var(--spacing-m);
+  font-family: var(--document-font-family);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  resize: vertical; // Allow vertical resize by default
+  box-shadow: var(--entry-inset-shadow); // Use the themed inset shadow
+  transition: border-color var(--animation-duration-fast) var(--animation-ease-out-cubic),
+              box-shadow var(--animation-duration-fast) var(--animation-ease-out-cubic);
+  width: 100%; // Default to full width, can be overridden by parent container or inline style
+
+  &::placeholder {
+    color: var(--view-fg-color); // Consistent with .adw-entry
+    opacity: 0.5;                // Consistent with .adw-entry
+  }
+
+  &:focus {
+    border-color: var(--accent-color); // Use global accent color for focus
+    // Adwaita focus ring for entries:
+    box-shadow: var(--entry-inset-shadow), 0 0 0 2px var(--accent-color); // Use solid accent color for focus ring, similar to .adw-entry
+    outline: none;
+  }
+
+  &:disabled {
+    background-color: var(--entry-disabled-bg-color);
+    border-color: var(--entry-disabled-border-color);
+    color: var(--disabled-fg-color);
+    box-shadow: none;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
