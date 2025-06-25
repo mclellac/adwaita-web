@@ -110,74 +110,26 @@
                 {# Banners will be injected here by the script below #}
             </div>
 
+            {# Flashed messages script REMOVED for aggressive JS reduction #}
+            {# Fallback: Render flashed messages directly if needed, without JS #}
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
-                <script>
-                  document.addEventListener('DOMContentLoaded', function() {
-                    if (!window.Adw || !window.Adw.createBanner || !window.Adw.createToast) {
-                      console.error('Adw.createBanner or Adw.createToast function not found. Check components.js for correct export names.');
-                      // Fallback to simple console logs if Adw functions are missing
-                      const flashMessagesForFallback = {{ messages|tojson|safe }};
-                      if (flashMessagesForFallback) {
-                        flashMessagesForFallback.forEach(fm => console.log(`FALLBACK FLASH (${fm[0]}): ${fm[1]}`));
-                      }
-                      return;
-                    }
-                    const flashMessages = {{ messages|tojson|safe }};
-                    const bannerContainer = document.getElementById('flash-banner-container'); // Still needed for banners
-
-                    if (flashMessages) { // bannerContainer check is only relevant for banners
-                      flashMessages.forEach(flashMessage => {
-                        let category = flashMessage[0]; // Flask category (e.g., 'success', 'danger', 'warning', 'message')
-                        const message = flashMessage[1];  // Message text
-
-                        if (category === 'success') {
-                          Adw.createToast(message, { type: 'success', timeout: 5000 });
-                        } else if (category === 'info' || category === 'message') { // Flask's default category is 'message'
-                          Adw.createToast(message, { type: 'info', timeout: 5000 });
-                        } else if (category === 'danger') {
-                          if (bannerContainer) {
-                            const banner = Adw.createBanner(message, { // createBanner returns the element
-                              type: 'error', // AdwBanner uses 'error' for danger
-                              dismissible: true
-                              // container: bannerContainer // Adw.createBanner doesn't take container, append it manually
-                            });
-                            bannerContainer.appendChild(banner);
-                            banner.revealed = true; // Make it visible
-                          } else {
-                            console.error('bannerContainer not found for danger message:', message);
-                             Adw.createToast(message, { type: 'error', timeout: 7000 }); // Fallback to toast
-                          }
-                        } else if (category === 'warning') {
-                          if (bannerContainer) {
-                             const banner = Adw.createBanner(message, {
-                              type: 'warning',
-                              dismissible: true
-                            });
-                            bannerContainer.appendChild(banner);
-                            banner.revealed = true; // Make it visible
-                          } else {
-                            console.error('bannerContainer not found for warning message:', message);
-                            Adw.createToast(message, { type: 'warning', timeout: 7000 }); // Fallback to toast
-                          }
-                        } else {
-                          // Fallback for any other category, perhaps use a default toast or banner
-                          Adw.createToast(message, { timeout: 5000 }); // Default to a generic toast
-                        }
-                      });
-                    }
-                  });
-                </script>
+                <div id="manual-flash-messages" style="position: sticky; top: 0; z-index: 1050; padding: var(--spacing-s) var(--spacing-xl);">
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" style="padding: var(--spacing-s); margin-bottom: var(--spacing-s); border-radius: var(--border-radius-md); background-color: var(--secondary-background-color); color: var(--text-color); border: 1px solid var(--border-color);">
+                      {{ message }}
+                    </div>
+                  {% endfor %}
+                </div>
               {% endif %}
             {% endwith %}
+
             <div class="main-content-clamped">
                 {% block content %}{% endblock %}
             </div>
         </main>
     </adw-application-window>
     {% block scripts %}{% endblock %}
-    <script>
-      console.log('[Debug] HTML parsing complete. End of body reached.');
-    </script>
+    {# Final console log REMOVED #}
 </body>
 </html>
