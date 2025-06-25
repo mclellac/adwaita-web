@@ -95,7 +95,7 @@ A declarative way to use Adwaita row elements.
   </adw-row>
 
   <adw-row activated interactive id="wc-row-2">
-    <adw-box align="center" spacing="m">
+    <adw-box class="adw-box align-center adw-box-spacing-m">
       <!-- Placeholder for an icon -->
       <span style="font-size: 24px;">⭐</span>
       <adw-label>Selected Item</adw-label>

@@ -4,40 +4,27 @@ An AdwWrapBox is a layout container that arranges its children in a line (horizo
 
 ## JavaScript Factory: `Adw.createWrapBox()`
 
-Creates an Adwaita-styled wrap box container.
+Creates an Adwaita-styled wrap box container by creating an `<adw-wrap-box>` element and applying CSS classes.
 
 **Signature:**
 
 ```javascript
-Adw.createWrapBox(options = {}) -> HTMLDivElement
+Adw.createWrapBox(options = {}) -> AdwWrapBoxElement
 ```
 
 **Parameters:**
 
-*   `options` (Object, optional): Configuration options:
-    *   `children` (Array<HTMLElement>, optional): Child elements to add to the
-        wrap box.
-    *   `orientation` (String, optional): Main layout direction before wrapping.
-        Can be `"horizontal"` (default) or `"vertical"`.
-    *   `spacing` (String | Number, optional): Gap between items along the main
-        axis and cross axis if `lineSpacing` is not set. Can be a predefined
-        Adwaita spacing unit (e.g., "s", "m") or a CSS value (e.g., "10px",
-        10 for 10px). Defaults to a medium spacing.
-    *   `lineSpacing` (String | Number, optional): Gap between lines of wrapped
-        items (cross-axis spacing). If not set, `spacing` is used for both item
-        and line gaps.
-    *   `align` (String, optional): `align-items` value (cross-axis alignment of
-        items within a line). E.g., `"start"`, `"center"`, `"end"`, `"stretch"`.
-        Defaults to `"start"`.
-    *   `justify` (String, optional): `justify-content` value (main-axis
-        alignment of items within a line). E.g., `"start"`, `"center"`, `"end"`,
-        `"between"`. Defaults to `"start"`.
-    *   *Note: `align-content` (for alignment of wrapped lines) might also be
-        configurable or default to stretch/start.*
+*   `options` (Object, optional): Configuration options. The factory function will add appropriate CSS classes to the `<adw-wrap-box>` element:
+    *   `children` (Array<HTMLElement>, optional): Child elements to add to the wrap box (will be slotted).
+    *   `orientation` (String, optional): Adds `"wrap-box-horizontal"` (default) or `"wrap-box-vertical"`.
+    *   `spacing` (String, optional): Adds class like `"wrap-box-spacing-m"` (e.g., "xs", "s", "m", "l", "xl"). This controls the `gap` property.
+    *   `lineSpacing` (String, optional): *Note: This option is not directly mapped to a separate class in the CSS-first refactor if it differs from `spacing`. `spacing` controls the overall `gap`. For distinct row/column gaps, custom styling might be needed on the element.*
+    *   `align` (String, optional): Adds class like `"wrap-align-center"` (e.g., `"start"`, `"center"`, `"end"`, `"stretch"`, `"baseline"`). Controls `align-items`.
+    *   `justify` (String, optional): Adds class like `"wrap-justify-between"` (e.g., `"start"`, `"center"`, `"end"`, `"between"`, `"around"`, `"evenly"`). Controls `justify-content`.
 
 **Returns:**
 
-*   `(HTMLDivElement)`: The created `<div>` element representing the wrap box.
+*   `(AdwWrapBoxElement)`: The created `<adw-wrap-box>` Web Component instance, with CSS classes applied.
 
 **Example:**
 
@@ -60,8 +47,8 @@ Adw.createWrapBox(options = {}) -> HTMLDivElement
 
   // Horizontal WrapBox
   const hWrapBox = Adw.createWrapBox({
-    children: items.map(item => item.cloneNode(true)), // Pass clones if items array is reused
-    spacing: "s", // "var(--spacing-s)" for gap
+    children: items.map(item => item.cloneNode(true)),
+    spacing: "s",
     align: "center"
   });
   hContainer.appendChild(hWrapBox);
@@ -70,31 +57,53 @@ Adw.createWrapBox(options = {}) -> HTMLDivElement
   const vWrapBox = Adw.createWrapBox({
     children: items.slice(0,5).map(item => {
         const btn = item.cloneNode(true);
-        btn.style.width = "100%"; // Make buttons take full width of column
+        btn.style.width = "100%";
         return btn;
     }),
     orientation: "vertical",
     spacing: "xs",
-    lineSpacing: "m", // Different spacing between columns
-    align: "stretch" // Stretch items in the cross axis (horizontally here)
+    // lineSpacing: "m", // For distinct line spacing, apply custom style for row-gap or column-gap
+    align: "stretch"
   });
+  // Example for custom line spacing if needed:
+  // vWrapBox.style.rowGap = 'var(--spacing-m)'; // If orientation is horizontal
+  // vWrapBox.style.columnGap = 'var(--spacing-m)'; // If orientation is vertical
   vContainer.appendChild(vWrapBox);
 </script>
 ```
 
 ## Web Component: `<adw-wrap-box>`
 
-A declarative way to use Adwaita wrap box containers.
+A declarative way to use Adwaita wrap box containers. Styling and behavior are controlled by applying CSS classes directly to the `<adw-wrap-box>` element.
 
 **HTML Tag:** `<adw-wrap-box>`
 
-**Attributes:**
+**CSS Classes for Styling:**
 
-*   `orientation` (String, optional): `"horizontal"` (default) or `"vertical"`.
-*   `spacing` (String, optional): Spacing preset (e.g., `"xs"`, `"s"`, `"m"`) or a CSS value for gap between items.
-*   `line-spacing` (String, optional): Spacing preset or CSS value for gap between wrapped lines.
-*   `align` (String, optional): `align-items` value (e.g., `"start"`, `"center"`, `"end"`, `"stretch"`).
-*   `justify` (String, optional): `justify-content` value (e.g., `"start"`, `"center"`, `"end"`, `"between"`).
+*   **Base Class:** `adw-wrap-box` (This class is automatically handled by the component's internal structure or should be applied to the host element if it's expected to behave as the wrap box directly).
+*   **Orientation:**
+    *   `wrap-box-horizontal` (default, `flex-direction: row;`)
+    *   `wrap-box-vertical` (`flex-direction: column;`)
+*   **Spacing (Gap):**
+    *   `wrap-box-spacing-xs`
+    *   `wrap-box-spacing-s`
+    *   `wrap-box-spacing-m` (default gap if no spacing class is specified by the SCSS for `.adw-wrap-box` base)
+    *   `wrap-box-spacing-l`
+    *   `wrap-box-spacing-xl`
+    *   *Note:* These classes set a uniform `gap`. If you need different `row-gap` and `column-gap` (equivalent to a distinct `line-spacing`), you may need to apply custom inline styles or additional CSS.
+*   **Alignment (`align-items` on the cross-axis):**
+    *   `wrap-align-start` (default)
+    *   `wrap-align-center`
+    *   `wrap-align-end`
+    *   `wrap-align-stretch`
+    *   `wrap-align-baseline`
+*   **Justification (`justify-content` on the main-axis):**
+    *   `wrap-justify-start` (default)
+    *   `wrap-justify-center`
+    *   `wrap-justify-end`
+    *   `wrap-justify-between`
+    *   `wrap-justify-around`
+    *   `wrap-justify-evenly`
 
 **Slots:**
 
@@ -104,7 +113,7 @@ A declarative way to use Adwaita wrap box containers.
 
 ```html
 <p>Horizontal Wrapping (default):</p>
-<adw-wrap-box spacing="m" align="start" style="border: 1px solid var(--borders-color); padding: var(--spacing-s); max-width: 400px;">
+<adw-wrap-box class="adw-wrap-box wrap-box-spacing-m wrap-align-start" style="border: 1px solid var(--borders-color); padding: var(--spacing-s); max-width: 400px;">
   <adw-button style="width: 120px;">Button 1</adw-button>
   <adw-button style="width: 150px;">Button Two</adw-button>
   <adw-button style="width: 100px;">Item C</adw-button>
@@ -113,8 +122,8 @@ A declarative way to use Adwaita wrap box containers.
 </adw-wrap-box>
 
 <p style="margin-top: 1em;">Vertical Wrapping (items form new columns):</p>
-<adw-wrap-box orientation="vertical" spacing="s" line-spacing="l" align="stretch"
-              style="border: 1px solid var(--borders-color); padding: var(--spacing-s); height: 120px; width: 300px;">
+<adw-wrap-box class="adw-wrap-box wrap-box-vertical wrap-box-spacing-s wrap-align-stretch"
+              style="border: 1px solid var(--borders-color); padding: var(--spacing-s); height: 120px; width: 300px; column-gap: var(--spacing-l); /* Custom line spacing */">
   <adw-button>Alpha</adw-button>
   <adw-button>Beta</adw-button>
   <adw-button>Gamma</adw-button>
@@ -127,9 +136,7 @@ A declarative way to use Adwaita wrap box containers.
 
 *   Primary SCSS: `scss/_wrap_box.scss`.
 *   The component uses CSS Flexbox with `flex-wrap: wrap;`.
-*   `gap`, `row-gap`, `column-gap` are used for spacing based on `spacing` and `line-spacing` attributes.
-*   `align-items` and `justify-content` are set based on `align` and `justify` attributes.
-*   `flex-direction` is set based on the `orientation` attribute.
+*   Styling (orientation, gap, alignment, justification) is primarily controlled by the CSS classes applied to the `<adw-wrap-box>` host element.
 
 ---
 Next: [Clamp](./clamp.md)

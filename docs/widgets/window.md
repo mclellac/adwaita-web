@@ -79,7 +79,7 @@ A declarative way to define an Adwaita application window structure.
     <p>This is the content area of the
        <code>&lt;adw-application-window&gt;</code>.</p>
     <p>It can contain any HTML or other Adwaita components.</p>
-    <adw-box spacing="m">
+    <adw-box class="adw-box adw-box-spacing-m">
         <adw-button suggested>Confirm</adw-button>
         <adw-button>Cancel</adw-button>
     </adw-box>

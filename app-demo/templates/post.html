@@ -47,7 +47,7 @@
         {% if post.author %}
         <div class="author-bio-section" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl); padding: var(--spacing-l); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); background-color: var(--window-bg-color); box-shadow: var(--box-shadow-sm);">
             <h3 style="margin-top:0; margin-bottom:var(--spacing-m);">About {{ post.author.full_name or post.author.username }}</h3>
-            <adw-box orientation="horizontal" spacing="m" style="align-items: flex-start;">
+            <adw-box class="adw-box adw-box-horizontal adw-box-spacing-m" style="align-items: flex-start;">
                 <adw-avatar size="64"
                             image-src="{{ url_for('static', filename=post.author.profile_photo_url) if post.author.profile_photo_url else url_for('static', filename='img/default_avatar.png') }}"
                             text="{{ post.author.username[0]|upper if post.author.username else 'A' }}">
@@ -68,7 +68,7 @@
 
         <div class="share-buttons-section" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
             <h4 style="margin-bottom: var(--spacing-s);">Share this post:</h4>
-            <adw-box orientation="horizontal" spacing="s" style="flex-wrap: wrap; gap: var(--spacing-s);">
+            <adw-box class="adw-box adw-box-horizontal adw-box-spacing-s" style="flex-wrap: wrap; gap: var(--spacing-s);">
                 <adw-button
                     href="https://twitter.com/intent/tweet?url={{ request.url_root[:-1] }}{{ url_for('view_post', post_id=post.id) }}&text={{ post.title|urlencode }}"
                     target="_blank" rel="noopener noreferrer"
@@ -129,7 +129,7 @@
         {% if comments %}
             <adw-list-box>
                 {% for comment in comments %}
-                <adw-box orientation="vertical" class="comment-card" style="padding: var(--spacing-m); border-bottom: 1px solid var(--border-color);">
+                <adw-box class="adw-box adw-box-vertical comment-card" style="padding: var(--spacing-m); border-bottom: 1px solid var(--border-color);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xs);">
                         <div style="display:flex; align-items:center; gap:var(--spacing-s);">
                             <adw-avatar text="{{ comment.author.username[0] if comment.author.username else '?' }}" image-src="{{ url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else url_for('static', filename='img/default_avatar.png') }}" size="32"></adw-avatar>
@@ -182,9 +182,9 @@
     {% endif %}
 
 
-    <div class="adw-box justify-content-center" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
+    <adw-box class="adw-box justify-content-center" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
          <adw-button href="{{ url_for('index') }}">Back to Posts</adw-button>
-    </div>
+    </adw-box>
 </adw-clamp>
 
 <script>

@@ -160,10 +160,10 @@
                 <adw-label title-level="1">Layouts</adw-label>
                 <div class="widget-showcase">
                     <adw-label title-level="2">AdwBox</adw-label>
-                    <adw-box orientation="horizontal" spacing="m" style="border:1px solid var(--border-color); padding: var(--spacing-s);">
+                    <adw-box class="adw-box adw-box-horizontal adw-box-spacing-m" style="border:1px solid var(--border-color); padding: var(--spacing-s);">
                         <adw-button>One</adw-button><adw-label>Two</adw-label><adw-entry placeholder="Three"></adw-entry>
                     </adw-box>
-                    <adw-box orientation="vertical" spacing="s" style="border:1px solid var(--border-color); padding: var(--spacing-s); margin-top:var(--spacing-s);">
+                    <adw-box class="adw-box adw-box-vertical adw-box-spacing-s" style="border:1px solid var(--border-color); padding: var(--spacing-s); margin-top:var(--spacing-s);">
                         <adw-button>Alpha</adw-button><adw-label>Beta</adw-label>
                     </adw-box>
                 </div>
@@ -181,7 +181,7 @@
                 </div>
                 <div class="widget-showcase">
                     <adw-label title-level="2">AdwWrapBox</adw-label>
-                    <adw-wrap-box spacing="s" line-spacing="m" style="border:1px solid var(--border-color); padding:var(--spacing-s);">
+                    <adw-wrap-box class="adw-wrap-box wrap-box-spacing-s" style="border:1px solid var(--border-color); padding:var(--spacing-s); row-gap: var(--spacing-m); /* Explicitly setting line-spacing via row-gap */">
                         <adw-button>Item 1</adw-button><adw-button>Item 2</adw-button><adw-button>Item 3</adw-button>
                         <adw-button>Another Item 4</adw-button><adw-button>Item 5 is a bit longer</adw-button>
                     </adw-wrap-box>
@@ -306,8 +306,8 @@
                     <adw-label title-level="2">AdwFlap</adw-label>
                     <adw-button id="toggle-flap-btn">Toggle Flap</adw-button>
                     <adw-flap id="demo-flap" style="border: 1px solid var(--border-color); min-height: 150px; margin-top: var(--spacing-s);">
-                        <adw-box slot="flap-content" style="padding:var(--spacing-m); background: var(--sidebar-bg-color);" min-width="180px">Flap Content</adw-box>
-                        <adw-box slot="main-content" style="padding:var(--spacing-m);">Main Content for Flap</adw-box>
+                        <adw-box class="adw-box" slot="flap-content" style="padding:var(--spacing-m); background: var(--sidebar-bg-color);" min-width="180px">Flap Content</adw-box>
+                        <adw-box class="adw-box" slot="main-content" style="padding:var(--spacing-m);">Main Content for Flap</adw-box>
                     </adw-flap>
                 </div>
 
@@ -315,7 +315,7 @@
                     <adw-label title-level="2">AdwToolbarView</adw-label>
                     <adw-toolbar-view style="border: 1px solid var(--border-color); min-height: 200px;">
                         <adw-header-bar slot="top-bar"><adw-window-title slot="title" title="Top Bar"></adw-window-title></adw-header-bar>
-                        <adw-box style="padding:var(--spacing-m); align-items:center; justify-content:center; flex-grow:1;">Toolbar Content</adw-box>
+                        <adw-box class="adw-box" style="padding:var(--spacing-m); align-items:center; justify-content:center; flex-grow:1;">Toolbar Content</adw-box>
                         <adw-header-bar slot="bottom-bar"><adw-window-title slot="title" title="Bottom Bar"></adw-window-title></adw-header-bar>
                     </adw-toolbar-view>
                 </div>
@@ -335,7 +335,7 @@
                             <adw-action-row title="Mail"></adw-action-row>
                             <adw-action-row title="Calendar"></adw-action-row>
                          </adw-list-box>
-                         <adw-box slot="content" style="padding:var(--spacing-m);">Detail Content Area</adw-box>
+                         <adw-box class="adw-box" slot="content" style="padding:var(--spacing-m);">Detail Content Area</adw-box>
                     </adw-navigation-split-view>
                 </div>
 
@@ -345,7 +345,7 @@
                          <adw-list-box slot="sidebar" style="min-width:180px; background:var(--secondary-sidebar-bg-color);">
                             <adw-action-row title="Filter Options"></adw-action-row>
                          </adw-list-box>
-                         <adw-box slot="content" style="padding:var(--spacing-m);">Main Content for Overlay</adw-box>
+                         <adw-box class="adw-box" slot="content" style="padding:var(--spacing-m);">Main Content for Overlay</adw-box>
                     </adw-overlay-split-view>
                 </div>
 

@@ -157,7 +157,7 @@ A declarative way to define Adwaita toolbar views.
     officia deserunt mollit anim id est laborum.</p>
   </div>
 
-  <adw-box slot="bottom-bar" spacing="m" align="center"
+  <adw-box class="adw-box adw-box-spacing-m align-center" slot="bottom-bar"
            style="padding: var(--spacing-s); border-top: 1px solid var(--borders-color);">
     <adw-label>Status: Ready</adw-label>
     <div style="flex-grow: 1;"></div> <!-- Spacer -->

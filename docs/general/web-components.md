@@ -23,7 +23,7 @@ Once `js/components.js` (or the bundled `adwaita-web.js`) is included in your pa
 **Example: Using `<adw-button>` and `<adw-entry>`**
 
 ```html
-<adw-box orientation="vertical" spacing="m">
+<adw-box class="adw-box adw-box-vertical adw-box-spacing-m">
   <adw-label title-level="1">Login Form</adw-label>
   <adw-entry-row title="Username" placeholder="Enter your username"></adw-entry-row>
   <adw-password-entry-row title="Password" placeholder="Enter your password"></adw-password-entry-row>
