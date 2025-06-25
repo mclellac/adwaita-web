@@ -176,7 +176,7 @@ for (const key in AdwProperties) {
 // This is belt-and-suspenders; the initial window.Adw.config setup should be sufficient.
 if (!window.Adw.config) {
     // This case should ideally not be hit if index.html and the top part of this script run correctly.
-    // If Adw.config is missing, re-apply defaults.
+    console.warn("Adw.config was unexpectedly missing, re-applying defaults.");
     window.Adw.config = defaultConfig;
 }
 
@@ -251,6 +251,24 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-popover')) customElements.define('adw-popover', window.Adw.Popover);
 }
 
-// Apply the final theme and accent color once the Adw object is ready and the DOM is fully parsed.
-// Always use DOMContentLoaded to ensure body.dataset (potentially set by server-side templates) is available.
-window.addEventListener('DOMContentLoaded', Adw.applyFinalThemeAndAccent);
+console.log('[Debug] Adw object populated and custom elements defined.');
+
+// Apply the final theme and accent color once the Adw object is ready and DOM is likely parsed.
+// Using DOMContentLoaded ensures body.dataset is available for DB preferences.
+window.addEventListener('DOMContentLoaded', () => {
+    Adw.applyFinalThemeAndAccent();
+
+    // After theme application and component definitions, make the main content visible.
+    // This assumes the main container has the class "adw-initializing".
+    const appWindow = document.querySelector('adw-application-window.adw-initializing');
+    if (appWindow) {
+        appWindow.classList.remove('adw-initializing');
+        // Optionally, explicitly set visibility if there are concerns about CSS specificity or timing.
+        // appWindow.style.visibility = 'visible';
+        console.log('[Debug] Adwaita initialized, application window made visible.');
+    } else {
+        console.warn('[Debug] Adwaita initialized, but adw-application-window.adw-initializing not found to make visible.');
+    }
+});
+
+console.log('[Debug] components.js execution ended, theme/accent application and visibility toggle scheduled.');

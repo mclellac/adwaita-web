@@ -73,6 +73,12 @@
     <style>
         /* Tiptap styles removed */
     </style>
+    <style>
+      /* Initially hide Adwaita content to prevent FOUC */
+      .adw-initializing {
+        visibility: hidden;
+      }
+    </style>
 </head>
 <body
   {# Pass server-side preferences for Adw.js to pick up if needed #}
@@ -95,7 +101,7 @@
       The data-theme-preference and data-accent-preference attributes on the <body> tag
       will be read by Adw.applyFinalThemeAndAccent().
     -->
-    <adw-application-window>
+    <adw-application-window class="adw-initializing">
         <adw-header-bar>
             <adw-window-title slot="title">Blog CMS</adw-window-title>
             <adw-button href="{{ url_for('index') }}" slot="start">Home</adw-button>
