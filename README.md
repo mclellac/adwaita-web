@@ -207,14 +207,14 @@ A flexbox container.
 
 -   **HTML Example:**
     ```html
-    <adw-box orientation="horizontal" spacing="s" align="center">
+    <adw-box class="adw-box adw-box-horizontal adw-box-spacing-s align-center">
       <adw-button>OK</adw-button>
       <adw-button>Cancel</adw-button>
     </adw-box>
     ```
-    Attributes: `orientation` ('vertical'/'horizontal'), `spacing`, `align`, `justify`, `fill-children`.
+    Classes: `adw-box-vertical` or `adw-box-horizontal`, `adw-box-spacing-[xs|s|m|l|xl]`, `align-[start|center|end|stretch]`, `justify-[start|center|end|between|around|evenly]`, `adw-box-fill-children`.
 -   **JS Factory:** `Adw.createBox(options = {})`
-    - `options`: `orientation`, `align`, `justify`, `spacing`, `fillChildren`, `children`.
+    - `options`: `orientation`, `align`, `justify`, `spacing`, `fillChildren`, `children` (these options will now map to classes).
 
 ### List Boxes (`<adw-list-box>` / `Adw.createListBox()`) & Rows
 

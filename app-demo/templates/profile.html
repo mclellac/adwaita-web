@@ -4,16 +4,16 @@
 
 {% block content %}
 <adw-clamp style="max-width: 800px; margin: var(--spacing-xl) auto;">
-    <adw-box orientation="vertical" spacing="l">
+    <adw-box class="adw-box adw-box-vertical adw-box-spacing-l">
 
         {# User Header Info #}
-        <adw-box orientation="horizontal" spacing="xl" style="align-items: center;">
+        <adw-box class="adw-box adw-box-horizontal adw-box-spacing-xl" style="align-items: center;">
             <adw-avatar
                 size="96"
                 image-src="{{ url_for('static', filename=user_profile.profile_photo_url) if user_profile.profile_photo_url else default_avatar_url }}"
                 text="{{ user_profile.username }}">
             </adw-avatar>
-            <adw-box orientation="vertical" spacing="xs">
+            <adw-box class="adw-box adw-box-vertical adw-box-spacing-xs">
                 {% if user_profile.full_name %}
                     <adw-label title-level="1">{{ user_profile.full_name }}</adw-label>
                     <adw-label title-level="3" class="secondary-text">@{{ user_profile.username }}</adw-label>
@@ -62,7 +62,7 @@
 
         {# Edit Profile Button #}
         {% if current_user == user_profile %}
-        <adw-box orientation="horizontal" justify="start" style="margin-top: var(--spacing-m); margin-bottom: var(--spacing-l);">
+        <adw-box class="adw-box adw-box-horizontal justify-start" style="margin-top: var(--spacing-m); margin-bottom: var(--spacing-l);">
             <adw-button href="{{ url_for('edit_profile') }}" suggested>Edit Profile</adw-button>
         </adw-box>
         {% endif %}

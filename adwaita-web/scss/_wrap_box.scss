@@ -2,38 +2,48 @@
 @use 'variables';
 
 .adw-wrap-box {
-  // display: flex; // Set by JS factory/WC directly for now
-  // flex-wrap: wrap; // Set by JS factory/WC directly
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row; // Default orientation
+  gap: var(--spacing-m); // Default spacing
 
-  // Default spacing if not overridden by JS (though JS sets gap directly)
-  // gap: var(--spacing-m);
+  // Orientation
+  &.wrap-box-horizontal {
+    flex-direction: row;
+  }
+  &.wrap-box-vertical {
+    flex-direction: column;
+  }
 
-  // If specific utility classes were to be used instead of direct style manipulation by JS:
-  // &.horizontal { flex-direction: row; }
-  // &.vertical { flex-direction: column; }
+  // Spacing (gap)
+  // These will set both row-gap and column-gap to the same value.
+  // If distinct line-spacing vs item-spacing is critical and common,
+  // more complex classes or local CSS variables might be needed.
+  &.wrap-box-spacing-xs { gap: var(--spacing-xs); }
+  &.wrap-box-spacing-s { gap: var(--spacing-s); }
+  &.wrap-box-spacing-m { gap: var(--spacing-m); }
+  &.wrap-box-spacing-l { gap: var(--spacing-l); }
+  &.wrap-box-spacing-xl { gap: var(--spacing-xl); }
 
-  // &.spacing-xs { gap: var(--spacing-xs); }
-  // &.spacing-s { gap: var(--spacing-s); }
-  // &.spacing-m { gap: var(--spacing-m); }
-  // &.spacing-l { gap: var(--spacing-l); }
-  // &.spacing-xl { gap: var(--spacing-xl); }
+  // Alignment (align-items)
+  &.wrap-align-start { align-items: flex-start; }
+  &.wrap-align-center { align-items: center; }
+  &.wrap-align-end { align-items: flex-end; }
+  &.wrap-align-stretch { align-items: stretch; }
+  &.wrap-align-baseline { align-items: baseline; }
 
-  // &.align-start { align-items: flex-start; }
-  // &.align-center { align-items: center; }
-  // &.align-end { align-items: flex-end; }
-  // &.align-stretch { align-items: stretch; }
 
-  // &.justify-start { justify-content: flex-start; }
-  // &.justify-center { justify-content: center; }
-  // &.justify-end { justify-content: flex-end; }
-  // &.justify-between { justify-content: space-between; }
-  // &.justify-around { justify-content: space-around; }
-  // &.justify-evenly { justify-content: space-evenly; }
+  // Justification (justify-content)
+  // Note: justify-content applies to the main axis. For wrapping content,
+  // align-content might also be relevant if there are multiple lines.
+  // For simplicity, sticking to justify-content based on AdwBox.
+  &.wrap-justify-start { justify-content: flex-start; }
+  &.wrap-justify-center { justify-content: center; }
+  &.wrap-justify-end { justify-content: flex-end; }
+  &.wrap-justify-between { justify-content: space-between; }
+  &.wrap-justify-around { justify-content: space-around; }
+  &.wrap-justify-evenly { justify-content: space-evenly; }
 }
 
-// No dark theme specific styles usually needed if it's a simple wrapper
-// and children handle their own theming.
-// .dark-theme .adw-wrap-box,
-// body.dark-theme .adw-wrap-box {
-//   // ...
-// }
+// No specific dark theme styles needed for AdwWrapBox itself,
+// as it's a layout container. Children handle their own theming.

@@ -7,21 +7,26 @@ export function createAdwBox(options = {}) {
   const opts = options || {};
   const adwBoxElement = document.createElement("adw-box");
 
-  if (opts.orientation) {
-    adwBoxElement.setAttribute("orientation", opts.orientation);
+  // Add classes based on options
+  const classes = ['adw-box'];
+  if (opts.orientation === 'vertical') {
+    classes.push('adw-box-vertical');
+  } else {
+    classes.push('adw-box-horizontal'); // Default
   }
   if (opts.align) {
-    adwBoxElement.setAttribute("align", opts.align);
+    classes.push(`align-${opts.align}`);
   }
   if (opts.justify) {
-    adwBoxElement.setAttribute("justify", opts.justify);
+    classes.push(`justify-${opts.justify}`);
   }
   if (opts.spacing) {
-    adwBoxElement.setAttribute("spacing", opts.spacing);
+    classes.push(`adw-box-spacing-${opts.spacing}`);
   }
-  if (opts.fillChildren) { // options.fillChildren should be boolean
-    adwBoxElement.setAttribute("fill-children", ""); // Presence of attribute means true
+  if (opts.fillChildren) {
+    classes.push('adw-box-fill-children');
   }
+  adwBoxElement.className = classes.join(' ');
 
   // Append children to the AdwBox component; they will be handled by the slot
   opts.children?.forEach((child) => {
@@ -34,55 +39,37 @@ export function createAdwBox(options = {}) {
 }
 
 export class AdwBox extends HTMLElement {
-    static get observedAttributes() { return ['orientation', 'spacing', 'align', 'justify', 'fill-children']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); }
-    connectedCallback() { this._render(); }
-    attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._render(); }
-    _render() {
-        let boxElement = this.shadowRoot.querySelector('.adw-box');
-        if (!boxElement) {
-            // Initial setup: create the box div and slot, append them.
-            // Keep the style link as the first child if it exists.
-            const styleLink = this.shadowRoot.querySelector('link[rel="stylesheet"]');
-            while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== styleLink) {
-                this.shadowRoot.removeChild(this.shadowRoot.lastChild);
-            }
-            boxElement = document.createElement('div');
-            boxElement.classList.add('adw-box');
-            boxElement.appendChild(document.createElement('slot'));
-            this.shadowRoot.appendChild(boxElement);
-        }
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        // The actual div with class="adw-box" will be created by the user in light DOM,
+        // or by createAdwBox. This component just provides a slot for that.
+        // Styles should be applied globally or inherited.
+        // For isolation, if AdwBox *itself* needs specific host styles, add them here.
+        // But for children, they are styled by the classes applied to the slotted element.
 
-        // Reset classes related to attributes to avoid accumulation
-        boxElement.className = 'adw-box'; // Start with the base class
+        // If a common stylesheet is used via adoptedStyleSheets, it would be done here
+        // or in a base class. For now, assuming CSS is global or managed elsewhere
+        // as this component itself doesn't need to dynamically change its internal structure
+        // based on attributes anymore.
 
-        // Apply classes based on attributes
-        const orientation = this.getAttribute('orientation');
-        if (orientation === 'vertical') {
-            boxElement.classList.add('adw-box-vertical');
-        } else {
-            boxElement.classList.add('adw-box-horizontal'); // Default
-        }
+        // The primary purpose of this custom element is to provide a named slot
+        // and potentially encapsulate future complexities if needed.
+        // For a pure CSS component, this JS is minimal.
+        const slot = document.createElement('slot');
+        this.shadowRoot.appendChild(slot);
 
-        const align = this.getAttribute('align');
-        if (align) {
-            boxElement.classList.add(`align-${align}`);
-        }
-
-        const justify = this.getAttribute('justify');
-        if (justify) {
-            boxElement.classList.add(`justify-${justify}`);
-        }
-
-        const spacing = this.getAttribute('spacing');
-        if (spacing) {
-            boxElement.classList.add(`adw-box-spacing-${spacing}`);
-        }
-
-        if (this.hasAttribute('fill-children') && this.getAttribute('fill-children') !== 'false') {
-            boxElement.classList.add('adw-box-fill-children');
-        }
+        // If Adw.config.cssPath is essential for all components, and not handled globally:
+        // const styleLink = document.createElement('link');
+        // styleLink.rel = 'stylesheet';
+        // styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
+        // if (styleLink.href) {
+        //     this.shadowRoot.appendChild(styleLink);
+        // }
     }
+
+    // No observedAttributes, connectedCallback, attributeChangedCallback, or _render needed
+    // as the component's own rendering is static and styling is via CSS classes on the slotted content.
 }
 
 /**
@@ -248,50 +235,169 @@ export class AdwFlap extends HTMLElement {
 
 /** Creates an AdwBin container. */
 export function createAdwBin(options = {}) {
-    const opts = options || {}; const bin = document.createElement('div'); bin.classList.add('adw-bin');
-    if (opts.child instanceof Node) bin.appendChild(opts.child);
-    else if (opts.child) console.warn("AdwBin: options.child was provided but is not a valid DOM Node.");
-    return bin;
+    const opts = options || {};
+    const adwBinElement = document.createElement('adw-bin');
+    if (opts.child instanceof Node) {
+        adwBinElement.appendChild(opts.child); // Child will be slotted
+    } else if (opts.child) {
+        console.warn("AdwBin factory: options.child was provided but is not a valid DOM Node.");
+    }
+    return adwBinElement;
 }
 export class AdwBin extends HTMLElement {
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ const binDiv = document.createElement('div'); binDiv.classList.add('adw-bin'); const slot = document.createElement('slot'); binDiv.appendChild(slot); this.shadowRoot.append(styleLink, binDiv); }
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        // Link to the common stylesheet
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
+        if (styleLink.href) {
+            this.shadowRoot.appendChild(styleLink);
+        }
+
+        // The internal structure for AdwBin is a div that takes the adw-bin class,
+        // and a slot for the user's content.
+        const internalBinDiv = document.createElement('div');
+        internalBinDiv.classList.add('adw-bin'); // This is what _bin.scss targets
+        const slot = document.createElement('slot');
+        internalBinDiv.appendChild(slot);
+        this.shadowRoot.appendChild(internalBinDiv);
+    }
 }
 
 /** Creates an AdwWrapBox container. */
 export function createAdwWrapBox(options = {}) {
-    const opts = options || {}; const wrapBox = document.createElement('div'); wrapBox.classList.add('adw-wrap-box'); wrapBox.style.display = 'flex'; wrapBox.style.flexWrap = 'wrap';
-    if (opts.orientation === 'vertical') wrapBox.style.flexDirection = 'column'; else wrapBox.style.flexDirection = 'row';
-    let gapValue = "var(--spacing-m)"; if (typeof opts.spacing === 'number') gapValue = `${opts.spacing}px`; else if (typeof opts.spacing === 'string') gapValue = opts.spacing;
-    let rowGapValue = gapValue; if (typeof opts.lineSpacing === 'number') rowGapValue = `${opts.lineSpacing}px`; else if (typeof opts.lineSpacing === 'string') rowGapValue = opts.lineSpacing;
-    if (rowGapValue !== gapValue) { wrapBox.style.rowGap = rowGapValue; wrapBox.style.columnGap = gapValue; } else wrapBox.style.gap = gapValue;
-    const flexAlignMap = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch', baseline: 'baseline' }; wrapBox.style.alignItems = flexAlignMap[opts.align] || flexAlignMap.start;
-    const flexJustifyMap = { start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between', around: 'space-around', evenly: 'space-evenly' }; wrapBox.style.justifyContent = flexJustifyMap[opts.justify] || flexJustifyMap.start;
-    (opts.children || []).forEach(child => { if (child instanceof Node) wrapBox.appendChild(child); }); return wrapBox;
+    const opts = options || {};
+    const adwWrapBoxElement = document.createElement('adw-wrap-box');
+
+    const classes = ['adw-wrap-box'];
+    if (opts.orientation === 'vertical') {
+        classes.push('wrap-box-vertical');
+    } else {
+        classes.push('wrap-box-horizontal'); // Default
+    }
+
+    if (opts.spacing) {
+        classes.push(`wrap-box-spacing-${opts.spacing}`);
+    }
+    // Note: 'line-spacing' distinct from 'spacing' is not directly supported by simple classes using 'gap'.
+    // If line-spacing is critical and different from item spacing, this would need custom CSS variables or more complex JS.
+    // For now, 'spacing' controls the 'gap' property.
+    if (opts.lineSpacing && opts.lineSpacing !== opts.spacing) {
+        console.warn("AdwWrapBox factory: Distinct 'lineSpacing' from 'spacing' is not directly supported by CSS classes in this refactor. 'spacing' will be used for gap.");
+    }
+
+    if (opts.align) {
+        classes.push(`wrap-align-${opts.align}`);
+    }
+    if (opts.justify) {
+        classes.push(`wrap-justify-${opts.justify}`);
+    }
+    adwWrapBoxElement.className = classes.join(' ');
+
+    (opts.children || []).forEach(child => {
+        if (child instanceof Node) adwWrapBoxElement.appendChild(child);
+    });
+    return adwWrapBoxElement;
 }
 export class AdwWrapBox extends HTMLElement {
-    static get observedAttributes() { return ['orientation', 'spacing', 'line-spacing', 'align', 'justify']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this._wrapBoxElement = document.createElement('div'); this._wrapBoxElement.classList.add('adw-wrap-box'); const slot = document.createElement('slot'); this._wrapBoxElement.appendChild(slot); this.shadowRoot.append(styleLink, this._wrapBoxElement); }
-    connectedCallback() { this._updateStyles(); }
-    attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._updateStyles(); }
-    _updateStyles() { const opts = {}; if (this.hasAttribute('orientation')) opts.orientation = this.getAttribute('orientation'); if (this.hasAttribute('spacing')) opts.spacing = this.getAttribute('spacing'); if (this.hasAttribute('line-spacing')) opts.lineSpacing = this.getAttribute('line-spacing'); if (this.hasAttribute('align')) opts.align = this.getAttribute('align'); if (this.hasAttribute('justify')) opts.justify = this.getAttribute('justify'); this._wrapBoxElement.style.display = 'flex'; this._wrapBoxElement.style.flexWrap = 'wrap'; if (opts.orientation === 'vertical') this._wrapBoxElement.style.flexDirection = 'column'; else this._wrapBoxElement.style.flexDirection = 'row'; let gapValue = "var(--spacing-m)"; if (opts.spacing) gapValue = isNaN(parseFloat(opts.spacing)) ? opts.spacing : `${parseFloat(opts.spacing)}px`; let rowGapValue = gapValue; if (opts.lineSpacing) rowGapValue = isNaN(parseFloat(opts.lineSpacing)) ? opts.lineSpacing : `${parseFloat(opts.lineSpacing)}px`; if (rowGapValue !== gapValue) { this._wrapBoxElement.style.rowGap = rowGapValue; this._wrapBoxElement.style.columnGap = gapValue; } else { this._wrapBoxElement.style.gap = gapValue; delete this._wrapBoxElement.style.rowGap; delete this._wrapBoxElement.style.columnGap;} const flexAlignMap = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch', baseline: 'baseline' }; this._wrapBoxElement.style.alignItems = flexAlignMap[opts.align] || flexAlignMap.start; const flexJustifyMap = { start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between', around: 'space-around', evenly: 'space-evenly' }; this._wrapBoxElement.style.justifyContent = flexJustifyMap[opts.justify] || flexJustifyMap.start; }
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+
+        // Optional: Link to the common stylesheet if Adw.config.cssPath is defined
+        // and if AdwWrapBox needs to ensure its own ":host" styles are encapsulated
+        // or if it relies on common styles not guaranteed to be global.
+        // For a pure class-based component where styles target the host via global CSS,
+        // this might not be strictly necessary if Adw.config.cssPath is loaded globally.
+        // However, including it for consistency with other components that might need it.
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
+        if (styleLink.href) {
+            this.shadowRoot.appendChild(styleLink);
+        }
+
+        // The component only needs to provide a slot for its children.
+        // The <adw-wrap-box> host element itself will be styled by the CSS classes
+        // (e.g., <adw-wrap-box class="adw-wrap-box wrap-box-vertical ...">).
+        const slot = document.createElement('slot');
+        this.shadowRoot.appendChild(slot);
+    }
+
+    // No observedAttributes, connectedCallback, or attributeChangedCallback needed
+    // if styling is driven by classes on the host element.
 }
 
 /** Creates an AdwClamp container. */
 export function createAdwClamp(options = {}) {
-    const opts = options || {}; const clamp = document.createElement('div'); clamp.classList.add('adw-clamp');
-    const innerWrapper = document.createElement('div'); innerWrapper.classList.add('adw-clamp-child-wrapper'); innerWrapper.style.maxWidth = opts.maximumSize || '80ch';
-    clamp.style.display = 'flex'; clamp.style.justifyContent = 'center';
-    if (opts.child instanceof Node) innerWrapper.appendChild(opts.child); else if (opts.child) console.warn("AdwClamp: options.child was not a valid DOM Node.");
-    clamp.appendChild(innerWrapper);
-    if (opts.isScrollable) { clamp.classList.add('scrollable'); clamp.style.overflowX = 'hidden'; clamp.style.overflowY = 'auto'; innerWrapper.style.width = '100%'; }
-    return clamp;
+    const opts = options || {};
+    const adwClampElement = document.createElement('adw-clamp');
+
+    if (opts.maximumSize) {
+        adwClampElement.setAttribute('maximum-size', opts.maximumSize);
+    }
+    if (opts.isScrollable) {
+        adwClampElement.setAttribute('scrollable', '');
+    }
+
+    if (opts.child instanceof Node) {
+        adwClampElement.appendChild(opts.child); // Child will be slotted
+    } else if (opts.child) {
+        console.warn("AdwClamp factory: options.child was provided but is not a valid DOM Node.");
+    }
+    return adwClampElement;
 }
 export class AdwClamp extends HTMLElement {
     static get observedAttributes() { return ['maximum-size', 'scrollable']; }
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this._clampElement = document.createElement('div'); this._clampElement.classList.add('adw-clamp'); this._childWrapper = document.createElement('div'); this._childWrapper.classList.add('adw-clamp-child-wrapper'); const slot = document.createElement('slot'); this._childWrapper.appendChild(slot); this._clampElement.appendChild(this._childWrapper); this.shadowRoot.append(styleLink, this._clampElement); }
-    connectedCallback() { this._updateStyles(); }
-    attributeChangedCallback(name, oldValue, newValue) { if (oldValue !== newValue) this._updateStyles(); }
-    _updateStyles() { this._childWrapper.style.maxWidth = this.getAttribute('maximum-size') || '80ch'; this._clampElement.style.display = 'flex'; this._clampElement.style.justifyContent = 'center'; if (this.hasAttribute('scrollable')) { this._clampElement.classList.add('scrollable'); this._clampElement.style.overflowX = 'hidden'; this._clampElement.style.overflowY = 'auto'; this._childWrapper.style.width = '100%'; } else { this._clampElement.classList.remove('scrollable'); this._clampElement.style.overflowX = ''; this._clampElement.style.overflowY = ''; this._childWrapper.style.width = '';}}
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
+        if (styleLink.href) {
+            this.shadowRoot.appendChild(styleLink);
+        }
+
+        this._clampElement = document.createElement('div');
+        this._clampElement.classList.add('adw-clamp'); // Base class for display:flex, justify-content:center
+
+        this._childWrapper = document.createElement('div');
+        this._childWrapper.classList.add('adw-clamp-child-wrapper');
+        const slot = document.createElement('slot');
+        this._childWrapper.appendChild(slot);
+        this._clampElement.appendChild(this._childWrapper);
+        this.shadowRoot.appendChild(this._clampElement);
+    }
+
+    connectedCallback() {
+        this._updateStyles();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this._updateStyles();
+        }
+    }
+
+    _updateStyles() {
+        // Set max-width directly on the child wrapper
+        this._childWrapper.style.maxWidth = this.getAttribute('maximum-size') || '80ch';
+
+        // Toggle .scrollable class on the main clamp element based on attribute
+        if (this.hasAttribute('scrollable')) {
+            this._clampElement.classList.add('scrollable');
+            // Potentially ensure childWrapper takes full width if clamp itself is to scroll its content
+            // this._childWrapper.style.width = '100%'; // Already default in SCSS
+        } else {
+            this._clampElement.classList.remove('scrollable');
+            // this._childWrapper.style.width = ''; // Reset if needed, but SCSS handles it
+        }
+    }
 }
 
 /** Creates an AdwBreakpointBin container. */

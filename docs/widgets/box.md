@@ -15,17 +15,17 @@ Adw.Box.factory(options = {}) -> AdwBoxElement // Assuming AdwBoxElement is the 
 
 **Parameters:**
 
-*   `options` (Object, optional): Configuration options, mapped to attributes of the `<adw-box>`:
-    *   `orientation` (String, optional): Sets the `orientation` attribute (`"horizontal"` or `"vertical"`).
-    *   `align` (String, optional): Sets the `align` attribute (e.g., `"start"`, `"center"`, `"end"`).
-    *   `justify` (String, optional): Sets the `justify` attribute (e.g., `"start"`, `"center"`, `"between"`).
-    *   `spacing` (String, optional): Sets the `spacing` attribute (e.g., `"s"`, `"m"`, or a CSS value).
-    *   `fillChildren` (Boolean, optional): If `true`, sets the `fill-children` attribute.
+*   `options` (Object, optional): Configuration options. The factory function will add appropriate CSS classes to the `<adw-box>` element based on these options:
+    *   `orientation` (String, optional): Adds `"adw-box-horizontal"` (default) or `"adw-box-vertical"`.
+    *   `align` (String, optional): Adds class like `"align-center"` (e.g., `"start"`, `"center"`, `"end"`).
+    *   `justify` (String, optional): Adds class like `"justify-between"` (e.g., `"start"`, `"center"`, `"between"`).
+    *   `spacing` (String, optional): Adds class like `"adw-box-spacing-m"` (e.g., `"s"`, `"m"`, or a CSS value - though presets are preferred for classes).
+    *   `fillChildren` (Boolean, optional): If `true`, adds class `"adw-box-fill-children"`.
     *   `children` (Array<Node>, optional): An array of DOM nodes to append as children to the created `<adw-box>` element. These will be handled by the default slot.
 
 **Returns:**
 
-*   `(AdwBoxElement)`: The created `<adw-box>` Web Component instance.
+*   `(AdwBoxElement)`: The created `<adw-box>` Web Component instance, with CSS classes applied.
 
 **Example:**
 
@@ -37,23 +37,22 @@ Adw.Box.factory(options = {}) -> AdwBoxElement // Assuming AdwBoxElement is the 
 
   // Horizontal box with spacing and centered alignment
   const hbox = createAdwBox({
-    orientation: "horizontal",
-    spacing: "m",
-    align: "center"
+    orientation: "horizontal", // results in class "adw-box-horizontal"
+    spacing: "m",          // results in class "adw-box-spacing-m"
+    align: "center"          // results in class "align-center"
   });
   // Append children (which are now also Web Components or standard elements)
   hbox.appendChild(createAdwButton("Button 1")); // Assuming createAdwButton exists
-  const label = document.createElement('adw-label'); // Example: createAdwLabel might not exist yet
+  const label = document.createElement('adw-label');
   label.textContent = "Some Text";
   hbox.appendChild(label);
-  // hbox.appendChild(createAdwEntry({ placeholder: "Input..." })); // If createAdwEntry exists
   container.appendChild(hbox);
 
   // Vertical box
   const vbox = createAdwBox({
-    orientation: "vertical",
-    spacing: "s",
-    fillChildren: true // Sets the fill-children attribute
+    orientation: "vertical", // results in class "adw-box-vertical"
+    spacing: "s",          // results in class "adw-box-spacing-s"
+    fillChildren: true     // results in class "adw-box-fill-children"
   });
   vbox.appendChild(createAdwButton("Top Button (fills)"));
   vbox.appendChild(createAdwButton("Bottom Button (fills)"));
@@ -66,17 +65,36 @@ Adw.Box.factory(options = {}) -> AdwBoxElement // Assuming AdwBoxElement is the 
 
 ## Web Component: `<adw-box>`
 
-A declarative way to use Adwaita box containers.
+A declarative way to use Adwaita box containers. Styling and behavior are controlled by applying CSS classes.
 
 **HTML Tag:** `<adw-box>`
 
-**Attributes:**
+**CSS Classes for Styling:**
 
-*   `orientation` (String, optional): `"horizontal"` (default) or `"vertical"`.
-*   `spacing` (String, optional): Spacing preset (e.g., `"xs"`, `"s"`, `"m"`, `"l"`, `"xl"`) or a CSS value.
-*   `align` (String, optional): `align-items` value (e.g., `"start"`, `"center"`, `"end"`, `"stretch"`).
-*   `justify` (String, optional): `justify-content` value (e.g., `"start"`, `"center"`, `"end"`, `"between"`).
-*   `fill-children` (Boolean, optional): If present, children will attempt to grow to fill space.
+*   **Base Class:** `adw-box` (should always be present on the element you want to act as a box, often the `<adw-box>` custom element itself, or a `div` inside it if the custom element is just a slot provider).
+*   **Orientation:**
+    *   `adw-box-horizontal` (default if neither is specified on a plain `div.adw-box`)
+    *   `adw-box-vertical`
+*   **Spacing (Gap):**
+    *   `adw-box-spacing-xs`
+    *   `adw-box-spacing-s`
+    *   `adw-box-spacing-m`
+    *   `adw-box-spacing-l`
+    *   `adw-box-spacing-xl`
+*   **Alignment (`align-items`):**
+    *   `align-start`
+    *   `align-center`
+    *   `align-end`
+    *   `align-stretch`
+*   **Justification (`justify-content`):**
+    *   `justify-start`
+    *   `justify-center`
+    *   `justify-end`
+    *   `justify-between`
+    *   `justify-around`
+    *   `justify-evenly`
+*   **Fill Children:**
+    *   `adw-box-fill-children` (children will attempt to grow to fill space)
 
 **Slots:**
 
@@ -86,7 +104,7 @@ A declarative way to use Adwaita box containers.
 
 ```html
 <!-- Horizontal box with medium spacing, items centered vertically -->
-<adw-box orientation="horizontal" spacing="m" align="center" style="border: 1px solid var(--borders-color); padding: 5px;">
+<adw-box class="adw-box adw-box-horizontal adw-box-spacing-m align-center" style="border: 1px solid var(--borders-color); padding: 5px;">
   <adw-button suggested>Save</adw-button>
   <adw-label>Status: OK</adw-label>
   <adw-spinner active size="small"></adw-spinner>
@@ -95,7 +113,7 @@ A declarative way to use Adwaita box containers.
 <br/>
 
 <!-- Vertical box, children stretched horizontally -->
-<adw-box orientation="vertical" spacing="s" align="stretch" style="border: 1px solid var(--borders-color); padding: 5px; width: 200px;">
+<adw-box class="adw-box adw-box-vertical adw-box-spacing-s align-stretch" style="border: 1px solid var(--borders-color); padding: 5px; width: 200px;">
   <adw-button>First Item</adw-button>
   <adw-entry placeholder="Type here..."></adw-entry>
   <adw-button flat>Last Item</adw-button>
@@ -104,7 +122,7 @@ A declarative way to use Adwaita box containers.
 <br/>
 
 <!-- Horizontal box where children fill available width -->
-<adw-box orientation="horizontal" spacing="xs" fill-children
+<adw-box class="adw-box adw-box-horizontal adw-box-spacing-xs adw-box-fill-children"
            style="border: 1px solid var(--borders-color); padding: 5px; width: 100%;">
   <adw-button style="min-width: 100px;">A</adw-button> <!-- flex-grow will be applied -->
   <adw-label style="text-align: center;">B (Centered)</adw-label>
@@ -115,7 +133,7 @@ A declarative way to use Adwaita box containers.
 ## Styling
 
 *   Primary SCSS: `scss/_box.scss`
-*   The component primarily uses CSS Flexbox properties (`display: flex`, `flex-direction`, `gap`, `align-items`, `justify-content`).
+*   The component relies on CSS Flexbox properties (`display: flex`, `flex-direction`, `gap`, `align-items`, `justify-content`) applied through the utility classes.
 *   Spacing classes like `adw-box-spacing-m` apply CSS variables like `var(--spacing-m)` to the `gap` property.
 *   `adw-box-fill-children` class makes direct children of the box have `flex-grow: 1`.
 

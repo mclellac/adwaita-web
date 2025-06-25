@@ -48,7 +48,7 @@
             <!-- Accent Color Picker -->
             <section class="widget-showcase">
                 <adw-label title-level="2">Theme Controls</adw-label>
-                <adw-box orientation="horizontal" spacing="s" id="accent-color-picker-box" style="align-items: center; margin-bottom: var(--spacing-m); flex-wrap: wrap;">
+                <adw-box class="adw-box adw-box-horizontal adw-box-spacing-s" id="accent-color-picker-box" style="align-items: center; margin-bottom: var(--spacing-m); flex-wrap: wrap;">
                     <adw-label>Accent Color:</adw-label>
                     {/* Declarative buttons will be placed here directly.
                         The Adw.getAccentColors() usually returns:
@@ -186,7 +186,7 @@ if (accentPickerBox) {
             <!-- Icons Section -->
             <section class="widget-showcase">
                 <adw-label title-level="2">Icons (&lt;adw-icon&gt;)</adw-label>
-                <adw-box orientation="horizontal" spacing="m" style="align-items: center; font-size: 24px;">
+                <adw-box class="adw-box adw-box-horizontal adw-box-spacing-m" style="align-items: center; font-size: 24px;">
                     <adw-icon icon-name="actions/document-new-symbolic" aria-label="New Document"></adw-icon>
                     <adw-icon icon-name="actions/document-save-symbolic" style="color: var(--accent-color);"></adw-icon>
                     <adw-icon icon-name="status/dialog-error-symbolic" style="color: var(--error-color); font-size: 32px;"></adw-icon>
@@ -204,7 +204,7 @@ if (accentPickerBox) {
             <!-- Controls Section (Checkbox, Radio, Switch, SpinButton, SplitButton, ToggleButton, ToggleGroup) -->
             <section class="widget-showcase">
                 <adw-label title-level="2">Controls</adw-label>
-                <adw-box orientation="vertical" spacing="m">
+                <adw-box class="adw-box adw-box-vertical adw-box-spacing-m">
                     <adw-row>
                         <adw-checkbox label="Enable Feature" id="chk-1" checked></adw-checkbox>
                         <adw-checkbox label="Disabled Checkbox" disabled></adw-checkbox>
@@ -263,7 +263,7 @@ if (accentPickerBox) {
             <!-- Links Section -->
             <section class="widget-showcase">
                 <adw-label title-level="2">Links</adw-label>
-                <adw-box orientation="vertical" spacing="s">
+                <adw-box class="adw-box adw-box-vertical adw-box-spacing-s">
                     <adw-label is-body>Standard HTML links should inherit Adwaita styling:</adw-label>
                     <a href="javascript:void(0);" onclick="mainToastOverlayRef && mainToastOverlayRef.addToast({ title: 'Standard link clicked!', timeout: 1.5 })">This is a standard link</a>
                     <adw-label is-body style="margin-top: var(--spacing-s);">A link within a sentence <a href="javascript:void(0);" onclick="mainToastOverlayRef && mainToastOverlayRef.addToast({ title: 'Inline link clicked!', timeout: 1.5 })">like this</a> should also be styled.</adw-label>
@@ -322,7 +322,7 @@ if (accentPickerBox) {
             <!-- Dialogs Section -->
             <section class="widget-showcase">
                 <adw-label title-level="2">Dialogs</adw-label>
-                <adw-box orientation="horizontal" spacing="s">
+                <adw-box class="adw-box adw-box-horizontal adw-box-spacing-s">
                     <adw-button id="trigger-alert-dialog">Show Alert Dialog</adw-button>
                     <adw-button id="trigger-about-dialog">Show About Dialog</adw-button>
                     <adw-button id="trigger-preferences-dialog">Show Preferences Dialog</adw-button>
@@ -388,7 +388,7 @@ if (accentPickerBox) {
                 </adw-status-page>
 
                 <adw-label title-level="3" style="margin-top:var(--spacing-m);">Banner & Toast</adw-label>
-                <adw-box orientation="horizontal" spacing="s" id="banner-toast-trigger-container">
+                <adw-box class="adw-box adw-box-horizontal adw-box-spacing-s" id="banner-toast-trigger-container">
                     <adw-button id="trigger-info-banner">Show Info Banner</adw-button>
                     <adw-button id="trigger-error-banner">Show Error Banner</adw-button>
                     <adw-button id="trigger-toast">Show Toast</adw-button>
@@ -407,7 +407,7 @@ if (accentPickerBox) {
             <section class="widget-showcase">
                 <adw-label title-level="2">Layouts</adw-label>
                 <adw-label title-level="3">Box</adw-label>
-                <adw-box orientation="horizontal" spacing="m" style="padding:var(--spacing-s); border:1px dashed var(--border-color);">
+                <adw-box class="adw-box adw-box-horizontal adw-box-spacing-m" style="padding:var(--spacing-s); border:1px dashed var(--border-color);">
                     <adw-button>Box Child 1</adw-button>
                     <adw-label>Box Child 2</adw-label>
                     <adw-entry placeholder="Box Child 3"></adw-entry>
@@ -421,17 +421,17 @@ if (accentPickerBox) {
                 <adw-label title-level="3" style="margin-top:var(--spacing-m);">Flap</adw-label>
                  <adw-button id="toggle-main-flap">Toggle Flap</adw-button>
                 <adw-flap id="main-flap-example" style="border: 1px solid var(--border-color); margin-top: var(--spacing-s); min-height: 150px;">
-                    <adw-box slot="flap-content" style="padding: var(--spacing-m); background: var(--sidebar-bg-color);" min-width="200px">
+                    <adw-box class="adw-box" slot="flap-content" style="padding: var(--spacing-m); background: var(--sidebar-bg-color);" min-width="200px">
                         <adw-label title-level="3">Flap Content</adw-label>
                         <adw-action-row title="Settings"></adw-action-row>
                     </adw-box>
-                    <adw-box slot="main-content" style="padding: var(--spacing-m);">
+                    <adw-box class="adw-box" slot="main-content" style="padding: var(--spacing-m);">
                         <adw-label title-level="3">Main Content (Flap Demo)</adw-label>
                     </adw-box>
                 </adw-flap>
 
                 <adw-label title-level="3" style="margin-top:var(--spacing-m);">WrapBox</adw-label>
-                <adw-wrap-box spacing="s" line-spacing="m" align="center" style="padding:var(--spacing-s); border:1px dashed var(--border-color); min-height: 100px;">
+                <adw-wrap-box class="adw-wrap-box wrap-box-spacing-s wrap-align-center" style="padding:var(--spacing-s); border:1px dashed var(--border-color); min-height: 100px; gap: var(--spacing-m); /* Explicitly setting line-spacing via gap for demo */">
                     <adw-button>Button 1</adw-button>
                     <adw-button suggested>Button 2 (Suggested)</adw-button>
                     <adw-button destructive>Button 3 (Destructive)</adw-button>
@@ -444,16 +444,16 @@ if (accentPickerBox) {
                 <adw-label title-level="3" style="margin-top:var(--spacing-m);">BreakpointBin</adw-label>
                 <adw-label is-body style="margin-bottom: var(--spacing-xs);">Resize the browser window to see different children shown by BreakpointBin. Children are defined with `data-condition` (min-width).</adw-label>
                 <adw-breakpoint-bin default-child-name="small" style="padding:var(--spacing-s); border:1px dashed var(--border-color); min-height: 100px; resize: horizontal; overflow: auto; max-width: 100%;">
-                    <adw-box data-condition="0" data-name="small" style="background-color: var(--theme-color-red-2); padding: var(--spacing-m);">
+                    <adw-box class="adw-box" data-condition="0" data-name="small" style="background-color: var(--theme-color-red-2); padding: var(--spacing-m);">
                         <adw-label title-level="4">Small View (0px+)</adw-label>
                         <adw-label is-body>This is shown when the BreakpointBin is narrow.</adw-label>
                     </adw-box>
-                    <adw-box data-condition="400" data-name="medium" style="background-color: var(--theme-color-green-2); padding: var(--spacing-m);">
+                    <adw-box class="adw-box" data-condition="400" data-name="medium" style="background-color: var(--theme-color-green-2); padding: var(--spacing-m);">
                         <adw-label title-level="4">Medium View (400px+)</adw-label>
                         <adw-label is-body>This appears when the BreakpointBin is a bit wider.</adw-label>
                         <adw-button>A Button</adw-button>
                     </adw-box>
-                    <adw-box data-condition="700" data-name="large" style="background-color: var(--theme-color-blue-2); padding: var(--spacing-m);">
+                    <adw-box class="adw-box" data-condition="700" data-name="large" style="background-color: var(--theme-color-blue-2); padding: var(--spacing-m);">
                         <adw-label title-level="4">Large View (700px+)</adw-label>
                         <adw-label is-body>This is for wider BreakpointBin containers.</adw-label>
                         <adw-entry placeholder="Enter something..."></adw-entry>
@@ -511,7 +511,7 @@ if (accentPickerBox) {
                         <adw-window-title slot="title" title="ToolbarView Top"></adw-window-title>
                         <adw-button slot="start" icon-name="actions/go-up-symbolic" id="tbv-hide-top" title="Hide Top Bar"></adw-button>
                     </adw-header-bar>
-                    <adw-box orientation="vertical" spacing="m" style="padding: var(--spacing-l); align-items: center;">
+                    <adw-box class="adw-box adw-box-vertical adw-box-spacing-m" style="padding: var(--spacing-l); align-items: center;">
                         <adw-label title-level="4">Main Content Area</adw-label>
                         <adw-label is-body>This is the main content of the ToolbarView.</adw-label>
                         <adw-spinner active></adw-spinner>
@@ -521,14 +521,14 @@ if (accentPickerBox) {
                         <adw-button slot="end" icon-name="actions/go-down-symbolic" id="tbv-hide-bottom" title="Hide Bottom Bar"></adw-button>
                     </adw-header-bar>
                 </adw-toolbar-view>
-                <adw-box orientation="horizontal" spacing="s" style="margin-top: var(--spacing-s);">
+                <adw-box class="adw-box adw-box-horizontal adw-box-spacing-s" style="margin-top: var(--spacing-s);">
                     <adw-button id="tbv-show-top">Show Top Bar</adw-button>
                     <adw-button id="tbv-show-bottom">Show Bottom Bar</adw-button>
                 </adw-box>
 
                 <adw-label title-level="3" style="margin-top:var(--spacing-m);">Carousel</adw-label>
                 <adw-carousel id="my-carousel" show-nav-buttons autoplay loop style="min-height: 200px; width: 100%; max-width: 500px; margin-bottom: var(--spacing-s); border: 1px solid var(--border-color);">
-                    <adw-box style="background-color: var(--theme-color-blue-1); width: 100%; height: 100%; display:flex; align-items:center; justify-content:center;">
+                    <adw-box class="adw-box" style="background-color: var(--theme-color-blue-1); width: 100%; height: 100%; display:flex; align-items:center; justify-content:center;">
                         <adw-label title-level="1">Slide 1</adw-label>
                     </adw-box>
                     <adw-status-page title="Slide 2" icon-name="emoji/face-smile-symbolic" style="width: 100%; height: 100%;">
@@ -538,7 +538,7 @@ if (accentPickerBox) {
                         <adw-label title-level="1" style="color: var(--theme-color-green-5);">Slide 3 (Plain Div)</adw-label>
                     </div>
                 </adw-carousel>
-                <adw-box orientation="horizontal" spacing="s">
+                <adw-box class="adw-box adw-box-horizontal adw-box-spacing-s">
                      <adw-button id="carousel-prev">Prev</adw-button>
                      <adw-button id="carousel-next">Next</adw-button>
                      <adw-spin-button id="carousel-goto-slide" min="0" max="2" value="0"></adw-spin-button>
@@ -553,7 +553,7 @@ if (accentPickerBox) {
                         <adw-action-row title="Item 2" activatable data-item-id="item2"></adw-action-row>
                         <adw-action-row title="Item 3 (No Content)" activatable data-item-id="item3"></adw-action-row>
                     </adw-list-box>
-                    <adw-box slot="content" id="nav-split-content-area" orientation="vertical" spacing="m" style="padding: var(--spacing-l); align-items:center; justify-content:center;">
+                    <adw-box class="adw-box adw-box-vertical adw-box-spacing-m" slot="content" id="nav-split-content-area" style="padding: var(--spacing-l); align-items:center; justify-content:center;">
                         <adw-status-page title="Select an Item" icon-name="actions/edit-select-all-symbolic">
                             <adw-label slot="description">Content will appear here.</adw-label>
                         </adw-status-page>
@@ -568,7 +568,7 @@ if (accentPickerBox) {
                         <adw-action-row title="Option A" activatable data-option-id="optionA"></adw-action-row>
                         <adw-action-row title="Option B" activatable data-option-id="optionB"></adw-action-row>
                     </adw-list-box>
-                    <adw-box slot="content" id="overlay-split-content-area" orientation="vertical" spacing="m" style="padding: var(--spacing-l); align-items:center; justify-content:center;">
+                    <adw-box class="adw-box adw-box-vertical adw-box-spacing-m" slot="content" id="overlay-split-content-area" style="padding: var(--spacing-l); align-items:center; justify-content:center;">
                         <adw-status-page title="Main Content" icon-name="emoji/face-plain-symbolic">
                             <adw-label slot="description">Sidebar is on the end for this demo.</adw-label>
                         </adw-status-page>
@@ -581,7 +581,7 @@ if (accentPickerBox) {
                 <adw-navigation-view id="my-navigation-view" style="border: 1px solid var(--border-color); min-height: 350px; margin-bottom:var(--spacing-s);">
                     <!-- Initial page defined in JS -->
                 </adw-navigation-view>
-                <adw-box orientation="horizontal" spacing="s">
+                <adw-box class="adw-box adw-box-horizontal adw-box-spacing-s">
                     <adw-button id="nav-view-push-page2">Push Page 2</adw-button>
                     <adw-button id="nav-view-push-page3">Push Page 3 (Custom Header)</adw-button>
                     <adw-button id="nav-view-pop" disabled>Pop Page (JS enables)</adw-button>
@@ -591,13 +591,13 @@ if (accentPickerBox) {
                 <adw-label title-level="3" style="margin-top:var(--spacing-m);">TabView</adw-label>
                  <adw-tab-view id="main-tab-view" style="border: 1px solid var(--border-color); min-height: 200px;">
                     <adw-tab-page name="tab1" title="First Tab" icon-name="categories/applications-graphics-symbolic">
-                        <adw-box style="padding:var(--spacing-l);">Content of Tab 1</adw-box>
+                        <adw-box class="adw-box" style="padding:var(--spacing-l);">Content of Tab 1</adw-box>
                     </adw-tab-page>
                     <adw-tab-page name="tab2" title="Second Tab" icon-name="categories/applications-multimedia-symbolic" active>
-                        <adw-box style="padding:var(--spacing-l);">Content of Tab 2. More text to see wrapping.</adw-box>
+                        <adw-box class="adw-box" style="padding:var(--spacing-l);">Content of Tab 2. More text to see wrapping.</adw-box>
                     </adw-tab-page>
                     <adw-tab-page name="tab3" title="Third Tab (Closeable)" icon-name="categories/applications-utilities-symbolic" closeable>
-                        <adw-box style="padding:var(--spacing-l);">This tab can be closed.</adw-box>
+                        <adw-box class="adw-box" style="padding:var(--spacing-l);">This tab can be closed.</adw-box>
                     </adw-tab-page>
                 </adw-tab-view>
                 <details>
