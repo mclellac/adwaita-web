@@ -278,6 +278,7 @@ def create_app(config_overrides=None):
 
     @_app.route('/')
     def index():
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_ENTRY_DEBUG] {request.path} - Start")
         _app.logger.debug(f"[ROUTE_ENTRY] Path: '/', Method: {request.method}, IP: {request.remote_addr}")
         _app.logger.debug(f"[SESSION_STATE] Session data: {dict(session)}")
         if current_user.is_authenticated:
@@ -297,10 +298,15 @@ def create_app(config_overrides=None):
             flash("Error loading posts. Please try again later.", "danger")
             posts = []
             pagination = None
-        return render_template('index.html', posts=posts, pagination=pagination)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('index.html', posts=posts, pagination=pagination)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/posts/<int:post_id>', methods=['GET', 'POST'])
     def view_post(post_id):
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_ENTRY_DEBUG] {request.path} - Start")
         _app.logger.debug(f"[ROUTE_ENTRY] Path: /posts/{post_id}, Method: {request.method}, IP: {request.remote_addr}")
         post = Post.query.get_or_404(post_id)
         if not post.is_published:
@@ -337,7 +343,11 @@ def create_app(config_overrides=None):
                 flash_form_errors(form)
         comments = post.comments.all()
         _app.logger.debug(f"Fetched {len(comments)} comments for post {post_id}.")
-        return render_template('post.html', post=post, form=form, comments=comments, delete_form=delete_form)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('post.html', post=post, form=form, comments=comments, delete_form=delete_form)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/comment/<int:comment_id>/delete', methods=['POST'])
     @login_required
@@ -394,7 +404,11 @@ def create_app(config_overrides=None):
             flash(f"Error loading posts for category {category.name}.", "danger")
             posts = []
             pagination = None
-        return render_template('posts_by_category.html', category=category, posts=posts, pagination=pagination)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('posts_by_category.html', category=category, posts=posts, pagination=pagination)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/create', methods=['GET', 'POST'])
     @login_required
@@ -441,7 +455,11 @@ def create_app(config_overrides=None):
             flash_form_errors(form)
         else:
             _app.logger.debug(f"Displaying create post form to user {current_user.username}.")
-        return render_template('create_post.html', form=form)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('create_post.html', form=form)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     def _update_post_relations(post_instance, form, db_session):
         _app.logger.debug(f"Updating relations for post ID: {post_instance.id if post_instance.id else 'NEW'}")
@@ -544,7 +562,11 @@ def create_app(config_overrides=None):
         elif request.method == 'POST':
             _app.logger.warning(f"Edit post form validation failed for post {post_id} by {current_user.username}. Errors: {form.errors}")
             flash_form_errors(form)
-        return render_template('edit_post.html', form=form, post=post)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('edit_post.html', form=form, post=post)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/login', methods=['GET', 'POST'])
     def login():
@@ -575,7 +597,11 @@ def create_app(config_overrides=None):
                  flash('Login attempt failed. Please check your input.', 'danger')
         else:
             _app.logger.debug("Displaying login form.")
-        return render_template('login.html', form=form)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('login.html', form=form)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/logout')
     @login_required
@@ -615,7 +641,11 @@ def create_app(config_overrides=None):
             _app.logger.error(f"Error fetching posts for profile {user_profile.username}: {e}", exc_info=True)
             flash("Error loading posts for this profile.", "danger")
             posts_pagination = None
-        return render_template('profile.html', user_profile=user_profile, posts_pagination=posts_pagination)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('profile.html', user_profile=user_profile, posts_pagination=posts_pagination)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/profile/edit', methods=['GET', 'POST'])
     @login_required
@@ -713,14 +743,23 @@ def create_app(config_overrides=None):
             flash_form_errors(form)
         else:
             _app.logger.debug(f"Displaying edit profile form for user {current_user.username}.")
-        return render_template('edit_profile.html', form=form, user_profile=current_user)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('edit_profile.html', form=form, user_profile=current_user)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/settings')
     @login_required
     def settings_page():
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_ENTRY_DEBUG] {request.path} - Start")
         _app.logger.debug(f"[ROUTE_ENTRY] Path: /settings, Method: {request.method}, User: {current_user.username}")
         _app.logger.debug(f"Displaying settings page for user {current_user.username}.")
-        return render_template('settings.html')
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('settings.html')
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/settings/change-password', methods=['GET', 'POST'])
     @login_required
@@ -750,7 +789,11 @@ def create_app(config_overrides=None):
             flash_form_errors(form)
         else:
             _app.logger.debug(f"Displaying change password form for user {current_user.username}.")
-        return render_template('change_password.html', form=form)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('change_password.html', form=form)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/search')
     def search_results():
@@ -777,22 +820,37 @@ def create_app(config_overrides=None):
         else:
             _app.logger.debug("Search query was empty. Displaying no results.")
             flash("Please enter a search term.", "info")
-        return render_template('search_results.html', query=query, posts=posts, pagination=pagination)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('search_results.html', query=query, posts=posts, pagination=pagination)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/about')
     def about_page():
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_ENTRY_DEBUG] {request.path} - Start")
         _app.logger.debug(f"[ROUTE_ENTRY] Path: /about, Method: {request.method}, IP: {request.remote_addr}")
         _app.logger.debug("Displaying About page.")
-        return render_template('about.html')
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('about.html')
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/contact')
     def contact_page():
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_ENTRY_DEBUG] {request.path} - Start")
         _app.logger.debug(f"[ROUTE_ENTRY] Path: /contact, Method: {request.method}, IP: {request.remote_addr}")
         _app.logger.debug("Displaying Contact page.")
-        return render_template('contact.html')
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('contact.html')
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/tag/<string:tag_slug>')
     def posts_by_tag(tag_slug):
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_ENTRY_DEBUG] {request.path} - Start")
         _app.logger.debug(f"[ROUTE_ENTRY] Path: /tag/{tag_slug}, Method: {request.method}, IP: {request.remote_addr}")
         tag = Tag.query.filter_by(slug=tag_slug).first_or_404()
         _app.logger.debug(f"Fetching posts for tag '{tag.name}' (Slug: {tag_slug}).")
@@ -808,7 +866,11 @@ def create_app(config_overrides=None):
             flash(f"Error loading posts for tag {tag.name}.", "danger")
             posts = []
             pagination = None
-        return render_template('posts_by_tag.html', tag=tag, posts=posts, pagination=pagination)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('posts_by_tag.html', tag=tag, posts=posts, pagination=pagination)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/api/settings/theme', methods=['POST'])
     @login_required

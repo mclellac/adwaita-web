@@ -1,41 +1,63 @@
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Script Start');
 // Main Adwaita Web component aggregator
 
 // Utilities
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Before utils import');
 import * as utils from './components/utils.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: After utils import');
 
 // Components
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing button...');
 import * as button from './components/button.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing headerBar...');
 import * as headerBar from './components/header_bar.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing dialog...');
 import * as dialog from './components/dialog.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing forms...');
 import * as forms from './components/forms.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing rows...');
 import * as rows from './components/rows.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing misc...');
 import * as misc from './components/misc.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing controls...');
 import * as controls from './components/controls.js';
-import * as views from './components/views.js'; // This includes Tab, Navigation, Toolbar views etc.
-import * as layouts from './components/layouts.js'; // Added import for layouts
-import * as listbox from './components/listbox.js'; // Import AdwListBox
-import * as bottomSheet from './components/bottom_sheet.js'; // Import AdwBottomSheet
-import * as popover from './components/popover.js'; // Import AdwPopover (new)
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing views...');
+import * as views from './components/views.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing layouts...');
+import * as layouts from './components/layouts.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing listbox...');
+import * as listbox from './components/listbox.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing bottomSheet...');
+import * as bottomSheet from './components/bottom_sheet.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Importing popover...');
+import * as popover from './components/popover.js';
+console.log(new Date().toISOString(), 'COMPONENTS.JS: After all component imports');
 
 // Theme and Accent functions are in utils, already exported from there.
 // adwGenerateId is also in utils.
 
 // Ensure Adw and Adw.config objects exist, then merge in defaults.
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Before Adw/Adw.config initialization');
 window.Adw = window.Adw || {};
 window.Adw.config = window.Adw.config || {};
+console.log(new Date().toISOString(), 'COMPONENTS.JS: After Adw/Adw.config initialization');
 
 const defaultConfig = {
     cssPath: '/static/css/adwaita-web.css', // This will only be used if not set by user HTML
     iconBasePath: '/data/icons/symbolic/' // Default for icons if not set by user.
 };
+console.log(new Date().toISOString(), 'COMPONENTS.JS: defaultConfig defined');
 
 // Merge defaults without overwriting existing values provided by user (e.g., in index.html)
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Before merging defaultConfig into Adw.config');
 for (const key in defaultConfig) {
     if (window.Adw.config[key] === undefined) {
         window.Adw.config[key] = defaultConfig[key];
     }
 }
+console.log(new Date().toISOString(), 'COMPONENTS.JS: After merging defaultConfig, Adw.config is:', JSON.stringify(window.Adw.config));
 
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Before AdwProperties definition');
 const AdwProperties = { // Renamed to avoid conflict with global Adw during construction
     // Utilities
     adwGenerateId: utils.adwGenerateId,
@@ -165,28 +187,33 @@ const AdwProperties = { // Renamed to avoid conflict with global Adw during cons
     BottomSheet: bottomSheet.AdwBottomSheet,
     Popover: popover.AdwPopover, // Web Component Class for AdwPopover (new)
 };
+console.log(new Date().toISOString(), 'COMPONENTS.JS: AdwProperties defined');
 
 // Merge other Adw properties into window.Adw, being careful not to overwrite config again
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Before merging AdwProperties into window.Adw');
 for (const key in AdwProperties) {
     // No need to check for 'config' here as AdwProperties doesn't have it.
     window.Adw[key] = AdwProperties[key];
 }
+console.log(new Date().toISOString(), 'COMPONENTS.JS: After merging AdwProperties into window.Adw');
 
 // Ensure Adw.config is part of the final window.Adw if it somehow got detached.
 // This is belt-and-suspenders; the initial window.Adw.config setup should be sufficient.
 if (!window.Adw.config) {
     // This case should ideally not be hit if index.html and the top part of this script run correctly.
-    // If Adw.config is missing, re-apply defaults.
+    console.warn(new Date().toISOString(), "COMPONENTS.JS: Adw.config was unexpectedly missing, re-applying defaults.");
     window.Adw.config = defaultConfig;
 }
+console.log(new Date().toISOString(), 'COMPONENTS.JS: After Adw.config re-check');
 
 
 // Define all custom elements
 // Use window.Adw directly now as it's fully populated.
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Before customElements definitions');
 if (typeof customElements !== 'undefined') {
-    // From button.js
+    console.log(new Date().toISOString(), 'COMPONENTS.JS: Defining adw-button');
     if (!customElements.get('adw-button')) customElements.define('adw-button', window.Adw.Button);
-    // From header_bar.js
+    console.log(new Date().toISOString(), 'COMPONENTS.JS: Defining adw-header-bar and adw-window-title');
     if (!customElements.get('adw-header-bar')) customElements.define('adw-header-bar', window.Adw.HeaderBar);
     if (!customElements.get('adw-window-title')) customElements.define('adw-window-title', window.Adw.WindowTitle);
     // From dialog.js
@@ -249,8 +276,49 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-bottom-sheet')) customElements.define('adw-bottom-sheet', window.Adw.BottomSheet);
     // From popover.js (new)
     if (!customElements.get('adw-popover')) customElements.define('adw-popover', window.Adw.Popover);
+    console.log(new Date().toISOString(), 'COMPONENTS.JS: After all customElements definitions');
+} else {
+    console.warn(new Date().toISOString(), 'COMPONENTS.JS: customElements API not found. Adwaita components will not be defined.');
 }
 
-// Apply the final theme and accent color once the Adw object is ready and the DOM is fully parsed.
-// Always use DOMContentLoaded to ensure body.dataset (potentially set by server-side templates) is available.
-window.addEventListener('DOMContentLoaded', Adw.applyFinalThemeAndAccent);
+console.log(new Date().toISOString(), '[Debug] Adw object populated and custom elements defined.');
+
+// Apply the final theme and accent color once the Adw object is ready and DOM is likely parsed.
+// Using DOMContentLoaded ensures body.dataset is available for DB preferences.
+console.log(new Date().toISOString(), 'COMPONENTS.JS: Before DOMContentLoaded listener setup for theme/unhide');
+window.addEventListener('DOMContentLoaded', () => {
+    console.log(new Date().toISOString(), 'COMPONENTS.JS: DOMContentLoaded event fired.');
+    console.log(new Date().toISOString(), 'COMPONENTS.JS: Before Adw.applyFinalThemeAndAccent()');
+    Adw.applyFinalThemeAndAccent();
+    console.log(new Date().toISOString(), 'COMPONENTS.JS: After Adw.applyFinalThemeAndAccent()');
+
+    // After theme application and component definitions, make the main content visible.
+    // This assumes the main container has the class "adw-initializing".
+    console.log(new Date().toISOString(), 'COMPONENTS.JS: Before querySelector for adw-application-window.adw-initializing');
+    const appWindow = document.querySelector('adw-application-window.adw-initializing');
+    if (appWindow) {
+        console.log(new Date().toISOString(), 'COMPONENTS.JS: adw-application-window.adw-initializing found.');
+
+        appWindow.removeAttribute('hidden'); // Remove hidden attribute FIRST
+        console.log(new Date().toISOString(), 'COMPONENTS.JS: Removed "hidden" attribute from appWindow.');
+
+        // Visual Debug Cue: Add a border
+        appWindow.style.border = '5px solid red';
+        console.log(new Date().toISOString(), 'COMPONENTS.JS: Applied RED BORDER to appWindow for visual debug.');
+
+        setTimeout(() => {
+            console.log(new Date().toISOString(), 'COMPONENTS.JS: Timeout: Removing red border and adw-initializing class.');
+            appWindow.style.border = ''; // Remove border
+            appWindow.classList.remove('adw-initializing'); // This class might now be redundant if 'hidden' works well
+            // Optionally, explicitly set visibility if there are concerns about CSS specificity or timing.
+            // appWindow.style.visibility = 'visible';
+            console.log(new Date().toISOString(), '[Debug] Adwaita initialized, application window made visible (after visual cue).');
+        }, 1000); // Keep border for 1 second
+
+    } else {
+        console.warn(new Date().toISOString(), '[Debug] Adwaita initialized, but adw-application-window.adw-initializing not found to make visible.');
+    }
+    console.log(new Date().toISOString(), 'COMPONENTS.JS: DOMContentLoaded listener finished.');
+});
+
+console.log(new Date().toISOString(), '[Debug] components.js execution ended, theme/accent application and visibility toggle scheduled via DOMContentLoaded.');

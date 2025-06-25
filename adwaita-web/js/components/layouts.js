@@ -95,9 +95,23 @@ export function createAdwWindow(options = {}) {
 }
 
 export class AdwApplicationWindow extends HTMLElement {
-    constructor() { super(); this.attachShadow({ mode: 'open' }); const styleLink = document.createElement('link'); styleLink.rel = 'stylesheet'; styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */ this.shadowRoot.appendChild(styleLink); }
-    connectedCallback() { this._render(); }
+    constructor() {
+        super();
+        console.log(new Date().toISOString(), 'AdwApplicationWindow: constructor');
+        this.attachShadow({ mode: 'open' });
+        const styleLink = document.createElement('link');
+        styleLink.rel = 'stylesheet';
+        styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
+        this.shadowRoot.appendChild(styleLink);
+        console.log(new Date().toISOString(), 'AdwApplicationWindow: constructor end');
+    }
+    connectedCallback() {
+        console.log(new Date().toISOString(), 'AdwApplicationWindow: connectedCallback start');
+        this._render();
+        console.log(new Date().toISOString(), 'AdwApplicationWindow: connectedCallback end');
+    }
     _render() {
+        console.log(new Date().toISOString(), 'AdwApplicationWindow: _render start');
         while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) this.shadowRoot.removeChild(this.shadowRoot.lastChild);
         const windowDiv = document.createElement('div'); windowDiv.classList.add('adw-window'); // This is the main container for AdwApplicationWindow
         // It should probably have a more specific class if it's distinct from a generic adw-window from the factory
@@ -107,6 +121,7 @@ export class AdwApplicationWindow extends HTMLElement {
         const mainContent = document.createElement('main'); mainContent.classList.add('adw-window-content');
         mainContent.appendChild(document.createElement('slot')); // Default slot for main content
         windowDiv.append(headerSlot, mainContent); this.shadowRoot.appendChild(windowDiv);
+        console.log(new Date().toISOString(), 'AdwApplicationWindow: _render end');
     }
 }
 
