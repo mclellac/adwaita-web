@@ -1,96 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>
-        window.onerror = function(message, source, lineno, colno, error) {
-            console.error('[Debug] Global JS Error:', message, 'at', source, 'line:', lineno, 'col:', colno, 'Error object:', error);
-            var errorBanner = document.getElementById('js-error-banner');
-            if (!errorBanner) {
-                errorBanner = document.createElement('div');
-                errorBanner.id = 'js-error-banner';
-                errorBanner.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:var(--error-bg-color, #d32f2f);color:var(--error-fg-color, white);padding:10px;z-index:9999;font-family:monospace;font-size:14px;';
-                // Prepend to body if body exists, otherwise wait for DOMContentLoaded
-                if (document.body) {
-                    document.body.prepend(errorBanner);
-                } else {
-                    document.addEventListener('DOMContentLoaded', function() {
-                        if(document.body) document.body.prepend(errorBanner);
-                    });
-                }
-            }
-            // Add new error to the banner, rather than replacing
-            const errorText = document.createElement('p');
-            errorText.style.margin = '2px 0';
-            errorText.textContent = `ERROR: ${message} (at ${source.substring(source.lastIndexOf('/')+1)}:${lineno})`;
-            errorBanner.appendChild(errorText);
-            return false; // False to prevent default browser error handling (e.g., stopping other scripts)
-        };
-
-        window.onunhandledrejection = function(event) {
-            console.error('[Debug] Unhandled Promise Rejection:', event.reason);
-            var rejectionBanner = document.getElementById('js-rejection-banner');
-             if (!rejectionBanner) {
-                rejectionBanner = document.createElement('div');
-                rejectionBanner.id = 'js-rejection-banner';
-                rejectionBanner.style.cssText = 'position:fixed;top:100px;left:0;width:100%;background:var(--warning-bg-color, #ffa000);color:var(--warning-fg-color, black);padding:10px;z-index:9998;font-family:monospace;font-size:14px;';
-                 if (document.body) {
-                    document.body.prepend(rejectionBanner);
-                } else {
-                    document.addEventListener('DOMContentLoaded', function() {
-                       if(document.body) document.body.prepend(rejectionBanner);
-                    });
-                }
-            }
-            const rejectionText = document.createElement('p');
-            rejectionText.style.margin = '2px 0';
-            let reasonText = 'Unknown reason';
-            if (event.reason instanceof Error) {
-                reasonText = `${event.reason.message} (Stack: ${event.reason.stack ? event.reason.stack.split('\n')[0] : 'N/A'})`;
-            } else if (typeof event.reason === 'string') {
-                reasonText = event.reason;
-            } else {
-                try {reasonText = JSON.stringify(event.reason);} catch(e){reasonText = 'Non-serializable object';}
-            }
-            rejectionText.textContent = `UNHANDLED PROMISE REJECTION: ${reasonText}`;
-            rejectionBanner.appendChild(rejectionText);
-        };
-        console.log('[Debug] Global error handlers registered.');
-    </script>
+    {# Global JS Error and Unhandled Promise Rejection Handlers REMOVED #}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}My Libadwaita Blog{% endblock %}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <script>
-      // Anti-flicker script
-      (function() {
-        try {
-          var theme = localStorage.getItem('theme');
-          var docEl = document.documentElement; // Use <html> element
-          if (theme === 'light') {
-            docEl.classList.add('light-theme');
-            docEl.classList.remove('dark-theme');
-          } else if (theme === 'dark') {
-            docEl.classList.add('dark-theme');
-            docEl.classList.remove('light-theme');
-          } else {
-            // No theme in localStorage, check prefers-color-scheme
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-              docEl.classList.add('light-theme');
-              docEl.classList.remove('dark-theme');
-            } else {
-              // Default to dark if no preference or prefers-color-scheme is dark
-              docEl.classList.add('dark-theme');
-              docEl.classList.remove('light-theme');
-            }
-          }
-        } catch (e) {
-          // If anything goes wrong, just proceed, worst case is a flash.
-          console.warn('Error applying initial theme:', e);
-          document.documentElement.classList.add('dark-theme'); // Default to dark on error
-        }
-      })();
-    </script>
+    {# Anti-flicker theme script REMOVED - Rely on components.js and body data attributes #}
     <script>
         // Initialize Adw.config for components
         window.Adw = window.Adw || {};
