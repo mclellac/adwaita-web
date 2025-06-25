@@ -14,96 +14,57 @@
     <form method="POST" action="{{ url_for('login') }}" id="login-form" style="display: contents;"> {# Use display:contents for form if it's just a wrapper for list-box and button #}
       {{ form.hidden_tag() }} {# CSRF token #}
 
-      <adw-preferences-group>
+      <adw-preferences-group title="Account Details">
         <adw-list-box style="margin-bottom: var(--spacing-m);">
-            <adw-entry-row title="Username"
-                           input-id="username-input" {# For label linking, adw-entry-row might handle this internally for its input #}
-                           name="username" required
-                           value="{{ form.username.data if form and form.username.data is not none else request.form.get('username', '') }}"
-                           placeholder="Your Username"
-                           subtitle="{{ form.username.errors[0] if form and form.username.errors else '' }}"
-                           class="{{ 'has-error' if form and form.username.errors else '' }}">
-            </adw-entry-row>
+            <adw-action-row title="{{ form.username.label.text }}">
+                <div slot="suffix" style="width: 220px;">
+                    {{ form.username(class="adw-entry", placeholder="Your Username", **{"aria-describedby": "username-errors" if form.username.errors else None}) }}
+                </div>
+            </adw-action-row>
+            {% if form.username.errors %}
+            <adw-action-row class="error-row" subtitle-lines="0">
+                <div slot="prefix"></div> {# Empty prefix to align subtitle #}
+                <div slot="subtitle" id="username-errors">
+                    {% for error in form.username.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            </adw-action-row>
+            {% endif %}
 
-            <adw-entry-row title="Password"
-                           input-id="password-input"
-                           name="password" type="password" required
-                           placeholder="Your Password"
-                           subtitle="{{ form.password.errors[0] if form and form.password.errors else '' }}"
-                           class="{{ 'has-error' if form and form.password.errors else '' }}">
-            </adw-entry-row>
+            <adw-action-row title="{{ form.password.label.text }}">
+                <div slot="suffix" style="width: 220px;">
+                    {{ form.password(class="adw-entry", placeholder="Your Password", **{"aria-describedby": "password-errors" if form.password.errors else None}) }}
+                </div>
+            </adw-action-row>
+            {% if form.password.errors %}
+            <adw-action-row class="error-row" subtitle-lines="0">
+                 <div slot="prefix"></div> {# Empty prefix to align subtitle #}
+                 <div slot="subtitle" id="password-errors">
+                    {% for error in form.password.errors %}<span>{{ error }}</span><br>{% endfor %}
+                 </div>
+            </adw-action-row>
+            {% endif %}
         </adw-list-box>
       </adw-preferences-group>
 
-      <adw-button
-        suggested
-        type="submit"
-        form-id="login-form" {# Associate button with form if outside or if needed for JS #}
-        style="width: 100%; padding: var(--spacing-sm) 0; font-size: var(--font-size-lg);">
-        Login
-      </adw-button>
+      {# The submit button can be rendered by WTForms or as a separate adw-button #}
+      {# Using adw-button for consistency, ensuring it's type="submit" and part of the form #}
+      {{ form.submit(class="adw-button suggested", style="width: 100%; padding: var(--spacing-sm) 0; font-size: var(--font-size-lg);") }}
     </form>
   </div>
 </div>
 
 <script>
-// This script is for handling form submission via Enter key for adw-entry-row components.
-// It relies on the adw-entry-row containing an actual input/adw-entry that receives keydown.
+// Simplified script: Standard form inputs handle Enter key for submission by default.
+// The previous script for adw-entry-row is no longer needed for these fields.
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('login-form');
     if (!form) {
         console.error('[Debug] Login form not found.');
         return;
     }
-    const submitButton = form.querySelector('adw-button[type="submit"]');
-    if (!submitButton) {
-        console.error('[Debug] Login form submit button not found.');
-        return;
-    }
-
-    const entryRows = form.querySelectorAll('adw-entry-row');
-    if (entryRows.length === 0) {
-        console.warn('[Debug] No adw-entry-row elements found in the login form for Enter key handling.');
-        return;
-    }
-
-    console.log('[Debug] Attaching Enter key listeners to adw-entry-row inputs within login form.');
-
-    const handleEnterKey = (event) => {
-        if (event.key === 'Enter') {
-            console.log('[Debug] Enter key pressed in an adw-entry-row input field.');
-            event.preventDefault();
-            // Attempt to submit the form directly, or click the button
-             if (submitButton.shadowRoot && submitButton.shadowRoot.querySelector('button')) {
-                 console.log('[Debug] Triggering click on internal shadow DOM button.');
-                 submitButton.shadowRoot.querySelector('button').click();
-            } else {
-                 console.log('[Debug] Shadow DOM button not found, attempting click on adw-button itself.');
-                 submitButton.click();
-            }
-        }
-    };
-
-    entryRows.forEach(row => {
-        // adw-entry-row usually has a <input> or <adw-entry> in its shadow DOM or light DOM.
-        // We need to target the actual input element for the keydown event.
-        // This might require the adw-entry-row to expose its input or for us to query its shadowRoot.
-        // For simplicity, let's assume adw-entry-row itself might propagate or handle this,
-        // or its internal adw-entry handles it. If not, this part needs refinement based on component implementation.
-        const inputElement = row.querySelector('input, adw-entry'); // Check light DOM first
-        if (inputElement) {
-            inputElement.addEventListener('keydown', handleEnterKey);
-        } else if (row.shadowRoot) {
-            const shadowInput = row.shadowRoot.querySelector('input, adw-entry');
-            if (shadowInput) {
-                shadowInput.addEventListener('keydown', handleEnterKey);
-            } else {
-                 console.warn('[Debug] No input/adw-entry found in adw-entry-row for Enter key:', row.title);
-            }
-        } else {
-             console.warn('[Debug] No input/adw-entry found directly or in shadowRoot for adw-entry-row:', row.title);
-        }
-    });
+    // If you still have other adw-entry-rows on other forms, that script might be relevant elsewhere.
+    // For this login form with standard inputs, it's not essential.
+    console.log('[Debug] Login form with standard inputs initialized.');
 });
 </script>
 {% endblock %}
