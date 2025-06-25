@@ -79,27 +79,34 @@ export function setAccentColor(accentName = DEFAULT_ACCENT_COLOR_NAME) {
     root.style.setProperty('--chosen-accent-dark-color', accent.dark.color); // Was 'standalone'
     root.style.setProperty('--chosen-accent-dark-hover-bg-color', accent.dark.hover || accent.dark.bg);
     root.style.setProperty('--chosen-accent-dark-active-bg-color', accent.dark.active || accent.dark.bg);
+    console.log(new Date().toISOString(), 'UTILS.JS: setAccentColor - Applied CSS variables for accent:', accentName);
 
     try {
         localStorage.setItem('accentColorName', accentName);
+        console.log(new Date().toISOString(), 'UTILS.JS: setAccentColor - Saved accentColorName to localStorage:', accentName);
     } catch (e) {
-        console.warn("Could not save accent color name to localStorage:", e);
+        console.warn(new Date().toISOString(), "UTILS.JS: setAccentColor - Could not save accent color name to localStorage:", e);
     }
 }
 
 export function loadSavedTheme() {
+    console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - Function start');
     try {
         const savedTheme = localStorage.getItem('theme');
         const savedAccentName = localStorage.getItem('accentColorName');
+        console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - Retrieved from localStorage - theme:', savedTheme, 'accentName:', savedAccentName);
 
         const docEl = document.documentElement;
         if (savedTheme === 'light') {
             docEl.classList.add('light-theme');
             docEl.classList.remove('dark-theme'); // Ensure dark is removed
+            console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - Applied light-theme from localStorage.');
         } else if (savedTheme === 'dark') {
             docEl.classList.add('dark-theme');
             docEl.classList.remove('light-theme'); // Ensure light is removed
+            console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - Applied dark-theme from localStorage.');
         } else {
+            console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - No theme in localStorage, checking prefers-color-scheme.');
             // No saved theme, rely on the inline script's initial assessment or system preference.
             // The inline script should have already set a theme.
             // This function, when run on DOMContentLoaded, will primarily handle accent color
@@ -108,10 +115,12 @@ export function loadSavedTheme() {
             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
                 if (!docEl.classList.contains('light-theme') && !docEl.classList.contains('dark-theme')) {
                     docEl.classList.add('light-theme');
+                    console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - Applied light-theme from prefers-color-scheme.');
                 }
             } else {
                  if (!docEl.classList.contains('light-theme') && !docEl.classList.contains('dark-theme')) {
                     docEl.classList.add('dark-theme');
+                    console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - Applied dark-theme from prefers-color-scheme (or default).');
                 }
             }
         }
@@ -120,21 +129,25 @@ export function loadSavedTheme() {
         // or if the inline script set it.
         // The inline script sets the class but doesn't write to localStorage to avoid premature storage write.
         if (!savedTheme) {
+            console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - No savedTheme in localStorage, attempting to save current theme.');
             try {
                 if (docEl.classList.contains('light-theme')) {
                     localStorage.setItem('theme', 'light');
+                    console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - Saved current light-theme to localStorage.');
                 } else if (docEl.classList.contains('dark-theme')) {
                     localStorage.setItem('theme', 'dark');
+                    console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - Saved current dark-theme to localStorage.');
                 }
             } catch (e) {
-                console.warn("Could not save initial theme to localStorage:", e);
+                console.warn(new Date().toISOString(), "UTILS.JS: loadSavedTheme - Could not save initial theme to localStorage:", e);
             }
         }
 
         setAccentColor(savedAccentName || DEFAULT_ACCENT_COLOR_NAME);
+        console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - Called setAccentColor with:', savedAccentName || DEFAULT_ACCENT_COLOR_NAME);
 
     } catch (e) {
-        console.warn("Could not load theme from localStorage:", e);
+        console.warn(new Date().toISOString(), "UTILS.JS: loadSavedTheme - Error during execution:", e);
         const docEl = document.documentElement;
         // Fallback logic if everything else fails
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
@@ -146,21 +159,27 @@ export function loadSavedTheme() {
         }
         try { localStorage.setItem('theme', docEl.classList.contains('light-theme') ? 'light' : 'dark'); } catch (lserror) { /* ignore */ }
         setAccentColor(DEFAULT_ACCENT_COLOR_NAME); // Fallback to default blue
+        console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - Fallback: applied theme and default accent.');
     }
+    console.log(new Date().toISOString(), 'UTILS.JS: loadSavedTheme - Function end.');
 }
 
 export function toggleTheme() {
+    console.log(new Date().toISOString(), 'UTILS.JS: toggleTheme - Function start.');
     const docEl = document.documentElement;
     // If light-theme is present, switch to dark. Otherwise, switch to light.
     if (docEl.classList.contains('light-theme')) {
         docEl.classList.remove('light-theme');
         docEl.classList.add('dark-theme');
-        try { localStorage.setItem('theme', 'dark'); } catch (e) { console.warn("LS Error", e); }
+        try { localStorage.setItem('theme', 'dark'); console.log(new Date().toISOString(), 'UTILS.JS: toggleTheme - Switched to dark, saved to localStorage.'); }
+        catch (e) { console.warn(new Date().toISOString(), "UTILS.JS: toggleTheme - LS Error (dark):", e); }
     } else {
         docEl.classList.remove('dark-theme');
         docEl.classList.add('light-theme');
-        try { localStorage.setItem('theme', 'light'); } catch (e) { console.warn("LS Error", e); }
+        try { localStorage.setItem('theme', 'light'); console.log(new Date().toISOString(), 'UTILS.JS: toggleTheme - Switched to light, saved to localStorage.'); }
+        catch (e) { console.warn(new Date().toISOString(), "UTILS.JS: toggleTheme - LS Error (light):", e); }
     }
+    console.log(new Date().toISOString(), 'UTILS.JS: toggleTheme - Function end.');
 }
 
 // Global event listener for DOMContentLoaded is removed.
@@ -169,6 +188,7 @@ export function toggleTheme() {
 // Listener for system theme changes should be set up once.
 // We'll attach it inside applyFinalThemeAndAccent to ensure it's set after initial decisions.
 let systemThemeListenerAttached = false;
+console.log(new Date().toISOString(), 'UTILS.JS: systemThemeListenerAttached initialized to false.');
 
 /**
  * Applies the definitive theme and accent color to the application.
@@ -187,60 +207,67 @@ let systemThemeListenerAttached = false;
  * It should be called once the main Adw object is ready and DOM is available (e.g., DOMContentLoaded or module script end).
  */
 export function applyFinalThemeAndAccent() {
-    console.log('[Theme] applyFinalThemeAndAccent called');
+    console.log(new Date().toISOString(), '[Theme Debug] applyFinalThemeAndAccent called');
     const docEl = document.documentElement;
     const bodyDataSet = document.body ? document.body.dataset : {};
+    console.log(new Date().toISOString(), '[Theme Debug] bodyDataSet:', JSON.stringify(bodyDataSet));
 
     let finalTheme = 'dark'; // Default theme
     const dbTheme = bodyDataSet.themePreference;
     const lsTheme = localStorage.getItem('theme');
     let themeSource = 'default';
+    console.log(new Date().toISOString(), '[Theme Debug] Initial values - dbTheme:', dbTheme, 'lsTheme:', lsTheme);
 
     if (dbTheme && (dbTheme === 'light' || dbTheme === 'dark')) {
         finalTheme = dbTheme;
         themeSource = 'db';
-        console.log(`[Theme] Using theme from DB: ${finalTheme}`);
+        console.log(new Date().toISOString(), `[Theme Debug] Using theme from DB: ${finalTheme}`);
         try {
             // Always update localStorage to reflect DB state as highest non-session truth
             localStorage.setItem('theme', finalTheme);
-            console.log(`[Theme] Updated localStorage theme to ${finalTheme} from DB.`);
-        } catch (e) { console.warn("Could not save DB theme to localStorage:", e); }
+            console.log(new Date().toISOString(), `[Theme Debug] Updated localStorage theme to ${finalTheme} from DB.`);
+        } catch (e) { console.warn(new Date().toISOString(), "[Theme Debug] Could not save DB theme to localStorage:", e); }
     } else if (lsTheme && (lsTheme === 'light' || lsTheme === 'dark')) {
         finalTheme = lsTheme;
         themeSource = 'localStorage';
-        console.log(`[Theme] Using theme from localStorage: ${finalTheme}`);
+        console.log(new Date().toISOString(), `[Theme Debug] Using theme from localStorage: ${finalTheme}`);
     } else if (window.matchMedia) {
+        console.log(new Date().toISOString(), '[Theme Debug] Checking prefers-color-scheme.');
         if (window.matchMedia('(prefers-color-scheme: light)').matches) {
             finalTheme = 'light';
             themeSource = 'prefers-color-scheme';
-            console.log(`[Theme] Using theme from prefers-color-scheme: light`);
+            console.log(new Date().toISOString(), `[Theme Debug] Using theme from prefers-color-scheme: light`);
         } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
             finalTheme = 'dark';
             themeSource = 'prefers-color-scheme';
-            console.log(`[Theme] Using theme from prefers-color-scheme: dark`);
+            console.log(new Date().toISOString(), `[Theme Debug] Using theme from prefers-color-scheme: dark`);
         }
         // Save the derived system preference to localStorage if it's the source
         if (themeSource === 'prefers-color-scheme') {
-             try { localStorage.setItem('theme', finalTheme); console.log(`[Theme] Saved derived system theme ${finalTheme} to localStorage.`); }
-             catch (e) { console.warn("Could not save system theme to localStorage:", e); }
+             try { localStorage.setItem('theme', finalTheme); console.log(new Date().toISOString(), `[Theme Debug] Saved derived system theme ${finalTheme} to localStorage.`); }
+             catch (e) { console.warn(new Date().toISOString(), "[Theme Debug] Could not save system theme to localStorage:", e); }
         }
     } else {
-        console.log(`[Theme] Using default theme: ${finalTheme}`);
+        console.log(new Date().toISOString(), `[Theme Debug] Using default theme: ${finalTheme} (window.matchMedia not available)`);
     }
+    console.log(new Date().toISOString(), `[Theme Debug] Final theme decision: ${finalTheme} (Source: ${themeSource})`);
 
     // Apply the final theme
     // Only change classes if necessary to avoid redundant DOM manipulation / potential flicker
     const needsLightTheme = finalTheme === 'light';
     const needsDarkTheme = finalTheme === 'dark'; // Or finalTheme !== 'light'
+    console.log(new Date().toISOString(), `[Theme Debug] Needs light: ${needsLightTheme}, Needs dark: ${needsDarkTheme}. Current classes: ${docEl.className}`);
 
     if (needsLightTheme && (!docEl.classList.contains('light-theme') || docEl.classList.contains('dark-theme'))) {
         docEl.classList.add('light-theme');
         docEl.classList.remove('dark-theme');
-        console.log('[Theme] Applied light-theme class.');
+        console.log(new Date().toISOString(), '[Theme Debug] Applied light-theme class.');
     } else if (needsDarkTheme && (!docEl.classList.contains('dark-theme') || docEl.classList.contains('light-theme'))) {
         docEl.classList.add('dark-theme');
         docEl.classList.remove('light-theme');
-        console.log('[Theme] Applied dark-theme class.');
+        console.log(new Date().toISOString(), '[Theme Debug] Applied dark-theme class.');
+    } else {
+        console.log(new Date().toISOString(), '[Theme Debug] Theme classes already correctly set, no change made.');
     }
 
 
@@ -248,62 +275,75 @@ export function applyFinalThemeAndAccent() {
     let finalAccent = DEFAULT_ACCENT_COLOR_NAME;
     const dbAccent = bodyDataSet.accentPreference;
     const lsAccent = localStorage.getItem('accentColorName');
-    // let accentSource = 'default'; // Keep track if needed for logging
+    let accentSource = 'default (blue)';
+    console.log(new Date().toISOString(), '[Theme Debug] Accent values - dbAccent:', dbAccent, 'lsAccent:', lsAccent);
+
 
     if (dbAccent) {
         finalAccent = dbAccent;
-        // accentSource = 'db';
-        console.log(`[Theme] Using accent from DB: ${finalAccent}`);
+        accentSource = 'db';
+        console.log(new Date().toISOString(), `[Theme Debug] Using accent from DB: ${finalAccent}`);
         // setAccentColor will update localStorage
     } else if (lsAccent) {
         finalAccent = lsAccent;
-        // accentSource = 'localStorage';
-        console.log(`[Theme] Using accent from localStorage: ${finalAccent}`);
+        accentSource = 'localStorage';
+        console.log(new Date().toISOString(), `[Theme Debug] Using accent from localStorage: ${finalAccent}`);
     } else {
-        console.log(`[Theme] Using default accent: ${finalAccent}`);
+        console.log(new Date().toISOString(), `[Theme Debug] Using default accent: ${finalAccent}`);
     }
+    console.log(new Date().toISOString(), `[Theme Debug] Final accent decision: ${finalAccent} (Source: ${accentSource})`);
     setAccentColor(finalAccent); // This also saves to localStorage
 
     // Setup listener for system theme changes AFTER initial setup
     if (window.matchMedia && !systemThemeListenerAttached) {
+        console.log(new Date().toISOString(), '[Theme Debug] Setting up system theme change listener.');
         const lightSchemeMediaQuery = window.matchMedia('(prefers-color-scheme: light)');
         const systemThemeChangeHandler = (e) => {
+            console.log(new Date().toISOString(), '[Theme Debug] System theme change event fired. Matches light:', e.matches);
             const currentDbTheme = document.body ? document.body.dataset.themePreference : null;
             const currentLsTheme = localStorage.getItem('theme');
+            console.log(new Date().toISOString(), '[Theme Debug] System theme change - currentDbTheme:', currentDbTheme, 'currentLsTheme:', currentLsTheme);
 
             if (!currentDbTheme && !currentLsTheme) {
-                console.log("[Theme] System theme changed, and no user preference stored. Applying new system theme.");
+                console.log(new Date().toISOString(), "[Theme Debug] System theme changed, and no user preference stored. Applying new system theme.");
                 const newSystemTheme = e.matches ? 'light' : 'dark';
                 if (newSystemTheme === 'light') {
                     if (!docEl.classList.contains('light-theme') || docEl.classList.contains('dark-theme')) {
                         docEl.classList.add('light-theme');
                         docEl.classList.remove('dark-theme');
+                        console.log(new Date().toISOString(), '[Theme Debug] System change: Applied light-theme.');
                     }
                 } else {
                      if (!docEl.classList.contains('dark-theme') || docEl.classList.contains('light-theme')) {
                         docEl.classList.add('dark-theme');
                         docEl.classList.remove('light-theme');
+                        console.log(new Date().toISOString(), '[Theme Debug] System change: Applied dark-theme.');
                     }
                 }
             } else {
-                console.log("[Theme] System theme changed, but a user preference (DB or localStorage) exists. Ignoring system change for automatic application.");
+                console.log(new Date().toISOString(), "[Theme Debug] System theme changed, but a user preference (DB or localStorage) exists. Ignoring system change for automatic application.");
             }
         };
 
         try {
             lightSchemeMediaQuery.addEventListener('change', systemThemeChangeHandler);
             systemThemeListenerAttached = true;
-            console.log("[Theme] Attached system theme change listener.");
+            console.log(new Date().toISOString(), "[Theme Debug] Attached system theme change listener.");
         } catch (e1) {
             try {
                 lightSchemeMediaQuery.addListener(systemThemeChangeHandler); // Deprecated
                 systemThemeListenerAttached = true;
-                console.log("[Theme] Attached system theme change listener (fallback).");
+                console.log(new Date().toISOString(), "[Theme Debug] Attached system theme change listener (fallback).");
             } catch (e2) {
-                console.warn("Failed to add listener for system theme changes.", e1, e2);
+                console.warn(new Date().toISOString(), "[Theme Debug] Failed to add listener for system theme changes.", e1, e2);
             }
         }
+    } else if (systemThemeListenerAttached) {
+        console.log(new Date().toISOString(), '[Theme Debug] System theme change listener already attached.');
+    } else {
+        console.log(new Date().toISOString(), '[Theme Debug] window.matchMedia not available, cannot attach system theme listener.');
     }
+    console.log(new Date().toISOString(), '[Theme Debug] applyFinalThemeAndAccent finished.');
 }
 
 
@@ -357,28 +397,32 @@ export async function getAdwCommonStyleSheet() {
 
     const cssPath = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : '';
     if (!cssPath) {
-        console.error("getAdwCommonStyleSheet: Adw.config.cssPath is not defined. Cannot load styles.");
+        console.error(new Date().toISOString(), "UTILS.JS: getAdwCommonStyleSheet - Adw.config.cssPath is not defined. Cannot load styles.");
         return null;
     }
+    console.log(new Date().toISOString(), `UTILS.JS: getAdwCommonStyleSheet - Fetching CSS from: ${cssPath}`);
 
     sheetPromise = new Promise(async (resolve, reject) => {
         try {
             const response = await fetch(cssPath);
+            console.log(new Date().toISOString(), `UTILS.JS: getAdwCommonStyleSheet - Fetch response status: ${response.status} for ${cssPath}`);
             if (!response.ok) {
                 throw new Error(`Failed to fetch stylesheet from ${cssPath}: ${response.statusText}`);
             }
             const cssText = await response.text();
+            console.log(new Date().toISOString(), `UTILS.JS: getAdwCommonStyleSheet - CSS text fetched (length: ${cssText.length}) from ${cssPath}`);
             const sheet = new CSSStyleSheet();
             await sheet.replace(cssText);
             adwCommonSheet = sheet;
-            console.info(`Adwaita common stylesheet loaded and processed from: ${cssPath}`);
+            console.info(new Date().toISOString(), `UTILS.JS: getAdwCommonStyleSheet - Adwaita common stylesheet loaded and processed from: ${cssPath}`);
             resolve(adwCommonSheet);
         } catch (error) {
-            console.error("getAdwCommonStyleSheet: Error loading common stylesheet:", error);
+            console.error(new Date().toISOString(), "UTILS.JS: getAdwCommonStyleSheet - Error loading common stylesheet:", error);
             adwCommonSheet = null; // Ensure it's null on error so next attempt tries again (or stays null if path is bad)
             reject(error); // Propagate error for components to handle (e.g. fallback)
         } finally {
             sheetPromise = null; // Clear promise regardless of outcome to allow retries if needed (e.g. path changes)
+            console.log(new Date().toISOString(), `UTILS.JS: getAdwCommonStyleSheet - Cleared sheetPromise for ${cssPath}`);
         }
     });
     return sheetPromise;

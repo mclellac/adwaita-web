@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: HEAD Start');</script>
     {# Global JS Error and Unhandled Promise Rejection Handlers REMOVED #}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}My Libadwaita Blog{% endblock %}</title>
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: Before Adw.config script');</script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     {# Anti-flicker theme script REMOVED - Rely on components.js and body data attributes #}
     <script>
+        console.log(new Date().toISOString(), 'BASE.HTML: Adw.config script - Start');
         // Initialize Adw.config for components
         window.Adw = window.Adw || {};
         window.Adw.config = {
@@ -17,9 +20,13 @@
             // iconBasePath should also be relative to the HTML file.
             iconBasePath: "{{ url_for('static', filename='data/icons/symbolic/') }}"
         };
-        console.log('[Debug] Adw.config initialized:', JSON.stringify(window.Adw.config));
+        console.log(new Date().toISOString(), '[Debug] Adw.config initialized:', JSON.stringify(window.Adw.config));
+        console.log(new Date().toISOString(), 'BASE.HTML: Adw.config script - End');
     </script>
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: Before adwaita-web.css link');</script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-web.css') }}">
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: After adwaita-web.css link');</script>
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: Before inline style for .adw-initializing');</script>
     <style>
       /* General error text styling for form validation */
       .form-error-text,
@@ -79,8 +86,20 @@
         visibility: hidden;
       }
     </style>
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: After inline style for .adw-initializing');</script>
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: Before components.js script tag');</script>
+    {# components.js should contain Adw object initialization and initial theme/accent application #}
+    <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: After components.js script tag');</script>
+
+    {# Tiptap Editor - Core (for rich text editing) - REMOVED #}
+    <style>
+        /* Tiptap styles removed */
+    </style>
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: HEAD End');</script>
 </head>
-<body
+<body>
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: BODY Start');</script>
   {# Pass server-side preferences for Adw.js to pick up if needed #}
   {% if current_user and current_user.is_authenticated and current_user.theme %}
     data-theme-preference="{{ current_user.theme }}"
@@ -101,9 +120,13 @@
       The data-theme-preference and data-accent-preference attributes on the <body> tag
       will be read by Adw.applyFinalThemeAndAccent().
     -->
-    <adw-application-window class="adw-initializing">
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: Before adw-application-window');</script>
+    <adw-application-window class="adw-initializing" hidden>
+        <script>console.log(new Date().toISOString(), 'BASE.HTML: Inside adw-application-window, before adw-header-bar');</script>
         <adw-header-bar>
+            <script>console.log(new Date().toISOString(), 'BASE.HTML: Inside adw-header-bar, before adw-window-title');</script>
             <adw-window-title slot="title">Blog CMS</adw-window-title>
+            <script>console.log(new Date().toISOString(), 'BASE.HTML: Inside adw-header-bar, after adw-window-title');</script>
             <adw-button href="{{ url_for('index') }}" slot="start">Home</adw-button>
             <adw-button href="{{ url_for('about_page') }}" slot="start">About</adw-button>
             <adw-button href="{{ url_for('contact_page') }}" slot="start">Contact</adw-button>
@@ -164,8 +187,11 @@
                 {% block content %}{% endblock %}
             </div>
         </main>
+        <script>console.log(new Date().toISOString(), 'BASE.HTML: Inside adw-application-window, after main');</script>
     </adw-application-window>
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: After adw-application-window');</script>
     {% block scripts %}{% endblock %}
     {# Final console log REMOVED #}
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: BODY End');</script>
 </body>
 </html>

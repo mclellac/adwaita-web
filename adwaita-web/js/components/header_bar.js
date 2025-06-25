@@ -93,14 +93,21 @@ export class AdwWindowTitle extends HTMLElement {
 export class AdwHeaderBar extends HTMLElement {
     constructor() {
         super();
+        console.log(new Date().toISOString(), 'AdwHeaderBar: constructor');
         this.attachShadow({ mode: 'open' });
         const styleLink = document.createElement('link');
         styleLink.rel = 'stylesheet';
         styleLink.href = (typeof Adw !== 'undefined' && Adw.config && Adw.config.cssPath) ? Adw.config.cssPath : ''; /* Expect Adw.config.cssPath to be set */
         this.shadowRoot.appendChild(styleLink);
+        console.log(new Date().toISOString(), 'AdwHeaderBar: constructor end');
     }
-    connectedCallback() { this._render(); }
+    connectedCallback() {
+        console.log(new Date().toISOString(), 'AdwHeaderBar: connectedCallback start');
+        this._render();
+        console.log(new Date().toISOString(), 'AdwHeaderBar: connectedCallback end');
+    }
     _render() {
+        console.log(new Date().toISOString(), 'AdwHeaderBar: _render start');
         while (this.shadowRoot.lastChild && this.shadowRoot.lastChild !== this.shadowRoot.querySelector('link')) this.shadowRoot.removeChild(this.shadowRoot.lastChild);
         const header = document.createElement('header'); header.classList.add('adw-header-bar');
 
@@ -116,5 +123,6 @@ export class AdwHeaderBar extends HTMLElement {
         const endSlot = document.createElement('slot'); endSlot.name = 'end'; endBox.appendChild(endSlot);
 
         header.append(startBox, centerBox, endBox); this.shadowRoot.appendChild(header);
+        console.log(new Date().toISOString(), 'AdwHeaderBar: _render end');
     }
 }
