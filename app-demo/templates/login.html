@@ -11,60 +11,27 @@
       {# This block itself doesn't render anything visible here #}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('login') }}" id="login-form" style="display: contents;"> {# Use display:contents for form if it's just a wrapper for list-box and button #}
+    <form method="POST" action="{{ url_for('login') }}" id="login-form" style="display: flex; flex-direction: column; gap: var(--spacing-m);">
       {{ form.hidden_tag() }} {# CSRF token #}
 
-      <adw-preferences-group title="Account Details">
-        <adw-list-box style="margin-bottom: var(--spacing-m);">
-            <adw-action-row title="{{ form.username.label.text }}">
-                <div slot="suffix" style="width: 220px;">
-                    {{ form.username(class="adw-entry", placeholder="Your Username", **{"aria-describedby": "username-errors" if form.username.errors else None}) }}
-                </div>
-            </adw-action-row>
-            {% if form.username.errors %}
-            <adw-action-row class="error-row" subtitle-lines="0">
-                <div slot="prefix"></div> {# Empty prefix to align subtitle #}
-                <div slot="subtitle" id="username-errors">
-                    {% for error in form.username.errors %}<span>{{ error }}</span><br>{% endfor %}
-                </div>
-            </adw-action-row>
-            {% endif %}
+      <adw-preferences-group title="Account Credentials">
+        {# Username Field #}
+        <adw-entry-row title="{{ form.username.label.text }}"
+                         subtitle="{{ form.username.errors|join(' ') if form.username.errors else '' }}"
+                         class="{{ 'has-error' if form.username.errors else '' }}">
+          {{ form.username(placeholder="Enter your username") }}
+        </adw-entry-row>
 
-            <adw-action-row title="{{ form.password.label.text }}">
-                <div slot="suffix" style="width: 220px;">
-                    {{ form.password(class="adw-entry", placeholder="Your Password", **{"aria-describedby": "password-errors" if form.password.errors else None}) }}
-                </div>
-            </adw-action-row>
-            {% if form.password.errors %}
-            <adw-action-row class="error-row" subtitle-lines="0">
-                 <div slot="prefix"></div> {# Empty prefix to align subtitle #}
-                 <div slot="subtitle" id="password-errors">
-                    {% for error in form.password.errors %}<span>{{ error }}</span><br>{% endfor %}
-                 </div>
-            </adw-action-row>
-            {% endif %}
-        </adw-list-box>
+        {# Password Field #}
+        <adw-entry-row title="{{ form.password.label.text }}"
+                         subtitle="{{ form.password.errors|join(' ') if form.password.errors else '' }}"
+                         class="{{ 'has-error' if form.password.errors else '' }}">
+          {{ form.password(placeholder="Enter your password", type="password") }}
+        </adw-entry-row>
       </adw-preferences-group>
 
-      {# The submit button can be rendered by WTForms or as a separate adw-button #}
-      {# Using adw-button for consistency, ensuring it's type="submit" and part of the form #}
-      {{ form.submit(class="adw-button suggested", style="width: 100%; padding: var(--spacing-sm) 0; font-size: var(--font-size-lg);") }}
+      {{ form.submit(class="adw-button suggested", style="width: 100%; margin-top: var(--spacing-m);") }}
     </form>
   </div>
 </div>
-
-<script>
-// Simplified script: Standard form inputs handle Enter key for submission by default.
-// The previous script for adw-entry-row is no longer needed for these fields.
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('login-form');
-    if (!form) {
-        console.error('[Debug] Login form not found.');
-        return;
-    }
-    // If you still have other adw-entry-rows on other forms, that script might be relevant elsewhere.
-    // For this login form with standard inputs, it's not essential.
-    console.log('[Debug] Login form with standard inputs initialized.');
-});
-</script>
 {% endblock %}

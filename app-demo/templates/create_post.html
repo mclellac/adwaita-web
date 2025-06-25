@@ -40,88 +40,53 @@
         {{ form.hidden_tag() }} {# CSRF token #}
 
         <adw-preferences-group title="Post Details">
-            <adw-list-box>
-                <adw-entry-row
-                    title="{{ form.title.label.text }}"
-                    name="{{ form.title.name }}"
-                    id="{{ form.title.id or 'title_field' }}"
-                    placeholder="Enter post title"
-                    value="{{ form.title.data or '' }}"
-                    {% if form.title.flags.required %}required{% endif %}
-                    subtitle="{{ form.title.errors[0] if form.title.errors else '' }}"
-                    class="{{ 'has-error' if form.title.errors else '' }}">
-                </adw-entry-row>
+            <adw-entry-row title="{{ form.title.label.text }}"
+                             subtitle="{{ form.title.errors|join(' ') if form.title.errors else '' }}"
+                             class="{{ 'has-error' if form.title.errors else '' }}">
+              {{ form.title(placeholder="Enter post title", required=form.title.flags.required) }}
+            </adw-entry-row>
 
-                {# Removed AdwActionRow wrapper for the content textarea #}
-                {# Directly use a list item or a simple div for the textarea and its label/errors #}
-                {# Assuming this is still within the AdwListBox for consistent row appearance/separation #}
-                <li class="adw-row" style="display: flex; flex-direction: column; align-items: flex-start; padding-bottom: var(--spacing-m);">
-                    <label for="{{ form.content.id or 'content_field' }}" class="adw-label" style="font-weight: normal; padding-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
-                    {# <span class="adw-label-subtitle" style="font-size: var(--font-size-small); color: var(--secondary-fg-color); margin-bottom: var(--spacing-xs);">Enter your post content below.</span> #}
-                    {{ form.content(
-                        id=form.content.id or 'content_field',
-                        class='adw-textarea-standalone',
-                        style='width: 100%; min-height: 200px; resize: vertical; box-sizing: border-box;',
-                        rows='10'
-                    ) }}
-                    {% if form.content.errors %}
-                        <div class="errors" style="color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xxs);">
-                            {% for error in form.content.errors %}{{ error }}<br>{% endfor %}
-                        </div>
-                    {% endif %}
-                </li>
-            </adw-list-box>
+            {# Adopting a similar structure for content as in edit_profile for bio #}
+            <adw-expander-row title="{{ form.content.label.text }}"
+                                subtitle="{{ form.content.errors|join(' ') if form.content.errors else 'Enter your post content below.' }}"
+                                class="{{ 'has-error' if form.content.errors else '' }}"
+                                expanded="true"> {# Start expanded for main content area #}
+              <div slot="content" style="padding: var(--spacing-s) 0;">
+                {{ form.content(class='adw-textarea-standalone', style='width: 100%; min-height: 250px; resize: vertical;', rows='15') }}
+              </div>
+            </adw-expander-row>
         </adw-preferences-group>
 
         <adw-preferences-group title="{{ form.categories.label.text }}">
             <adw-list-box class="{{ 'has-error' if form.categories.errors else '' }}">
+                {# Iterate through category subfields (checkboxes) #}
                 {% for subfield in form.categories %}
                 <adw-action-row class="adw-checkbox-row">
-                    <adw-checkbox slot="prefix"
-                                  name="{{ subfield.name }}"
-                                  id="{{ subfield.id }}"
-                                  value="{{ subfield.widget.attrs.get('value', subfield.data) }}"
-                                  label="{{ subfield.label.text }}"
-                                  {% if subfield.data %}checked{% endif %}>
-                    </adw-checkbox>
-                    {% if loop.first and form.categories.errors %}
-                        {# Display errors as subtitle of the first action row in the group #}
-                        <adw-label slot="subtitle" class="error-text" style="color: var(--error-color);">{{ form.categories.errors|join('; ') }}</adw-label>
-                    {% endif %}
+                    {# Render the actual checkbox input from WTForms, and its label #}
+                    {{ subfield(style="margin-right: var(--spacing-s); vertical-align: middle;") }}
+                    {{ subfield.label(style="vertical-align: middle;") }}
                 </adw-action-row>
                 {% endfor %}
+                {% if form.categories.errors %}
+                {# Display overall errors for the category group, if any, as a subtitle in a separate row #}
+                <adw-action-row subtitle="{{ form.categories.errors|join('; ') }}" class="error-row"></adw-action-row>
+                {% endif %}
             </adw-list-box>
-            {# The error display is now part of the loop above, this block can be removed or adjusted #}
-            {# {% if form.categories.errors %}
-            <adw-list-box> <adw-action-row subtitle="{{ form.categories.errors|join(' ') }}" class="error-row"></adw-action-row> </adw-list-box>
-            {% endif %} #}
         </adw-preferences-group>
 
         <adw-preferences-group title="Tags">
-            <adw-list-box>
-                <adw-entry-row
-                    title="{{ form.tags_string.label.text }}"
-                    name="{{ form.tags_string.name }}"
-                    id="{{ form.tags_string.id or 'tags_string_field' }}"
-                    placeholder="e.g., tech, travel, food"
-                    value="{{ form.tags_string.data or '' }}"
-                    subtitle="{{ form.tags_string.errors[0] if form.tags_string.errors else 'Comma-separated values.' }}"
-                    class="{{ 'has-error' if form.tags_string.errors else '' }}">
-                </adw-entry-row>
-            </adw-list-box>
+            <adw-entry-row title="{{ form.tags_string.label.text }}"
+                             subtitle="{{ form.tags_string.errors|join(' ') if form.tags_string.errors else 'Comma-separated values.' }}"
+                             class="{{ 'has-error' if form.tags_string.errors else '' }}">
+              {{ form.tags_string(placeholder="e.g., tech, travel, food") }}
+            </adw-entry-row>
         </adw-preferences-group>
 
-        {# Removed AdwActionRow wrapper for the submit button. #}
-        {# Place the button directly or within a simple div for layout if needed. #}
         <div style="display: flex; justify-content: flex-end; gap: var(--spacing-s); padding-top: var(--spacing-m); padding-bottom: var(--spacing-m);">
-            {# name attribute on button is important for Flask to identify which was clicked if not using WTForms SubmitField's .data property #}
-            {# However, WTForms SubmitField's .data property is cleaner. Ensure form object in template has these fields. #}
-            <adw-button type="submit" name="{{ form.save_draft.name }}" id="{{ form.save_draft.id }}" value="{{ form.save_draft.label.text }}">
-                {{ form.save_draft.label.text }}
-            </adw-button>
-            <adw-button type="submit" name="{{ form.publish.name }}" id="{{ form.publish.id }}" value="{{ form.publish.label.text }}" suggested>
-                {{ form.publish.label.text }}
-            </adw-button>
+            {# Render WTForms SubmitFields directly, they will be styled as adw-button by default if no class or adw-button class is applied #}
+            {# Or, use adw-button tags and ensure their names match the form fields for backend detection #}
+            {{ form.save_draft(class="adw-button") }}
+            {{ form.publish(class="adw-button suggested") }}
         </div>
     </form>
   </adw-preferences-page>
@@ -130,71 +95,5 @@
 
 {% block scripts %}
 {{ super() }}
-{# Tiptap JavaScript removed. #}
-{# Textarea debugging script removed. #}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('form[action="{{ url_for("create_post") }}"]');
-    if (form) {
-        form.addEventListener('submit', function (event) {
-            // Clear any previously added temporary hidden inputs for these fields
-            form.querySelectorAll('input[type="hidden"][name="title"]').forEach(el => el.remove());
-            form.querySelectorAll('input[type="hidden"][name="tags_string"]').forEach(el => el.remove());
-            form.querySelectorAll('input[type="hidden"][name="categories"]').forEach(el => el.remove());
-
-
-            // Handle adw-entry-row for 'title'
-            const titleEntryRow = form.querySelector('adw-entry-row[name="title"]');
-            if (titleEntryRow) {
-                const titleValue = titleEntryRow.value; // Assuming .value property gives the current value
-                const hiddenTitle = document.createElement('input');
-                hiddenTitle.type = 'hidden';
-                hiddenTitle.name = 'title';
-                hiddenTitle.value = titleValue;
-                form.appendChild(hiddenTitle);
-                console.log('[Debug] Added hidden input for title with value:', titleValue);
-            } else {
-                console.warn('[Debug] AdwEntryRow for title not found.');
-            }
-
-            // Handle adw-entry-row for 'tags_string'
-            const tagsEntryRow = form.querySelector('adw-entry-row[name="tags_string"]');
-            if (tagsEntryRow) {
-                const tagsValue = tagsEntryRow.value;
-                const hiddenTags = document.createElement('input');
-                hiddenTags.type = 'hidden';
-                hiddenTags.name = 'tags_string';
-                hiddenTags.value = tagsValue;
-                form.appendChild(hiddenTags);
-                console.log('[Debug] Added hidden input for tags_string with value:', tagsValue);
-            } else {
-                console.warn('[Debug] AdwEntryRow for tags_string not found.');
-            }
-
-            // Handle adw-checkbox elements for 'categories'
-            const categoryCheckboxes = form.querySelectorAll('adw-checkbox[name="categories"]');
-            categoryCheckboxes.forEach(checkbox => {
-                if (checkbox.checked) { // Assuming .checked property exists and is reliable
-                    const hiddenCategory = document.createElement('input');
-                    hiddenCategory.type = 'hidden';
-                    hiddenCategory.name = 'categories'; // All selected categories will have the same name
-                    hiddenCategory.value = checkbox.value; // Assuming .value property gives the category ID
-                    form.appendChild(hiddenCategory);
-                    console.log('[Debug] Added hidden input for category with value:', checkbox.value);
-                }
-            });
-            if (categoryCheckboxes.length === 0) {
-                 console.warn('[Debug] No adw-checkbox elements for categories found.');
-            }
-
-
-            // Optional: A small delay to ensure hidden fields are processed, though usually not needed.
-            // setTimeout(() => { form.submit(); }, 100); // This might cause double submission if not careful
-            console.log('[Debug] Form data augmentation complete. Proceeding with submission.');
-        });
-    } else {
-        console.error('[Debug] Create post form not found for submit event listener attachment.');
-    }
-});
-</script>
+{# All custom JavaScript for form handling has been removed. #}
 {% endblock %}
