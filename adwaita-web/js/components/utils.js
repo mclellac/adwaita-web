@@ -465,7 +465,6 @@ export function adwMakeFocusable(parentElement) {
 }
 
 export {
-    adwGenerateId,
     ACCENT_COLOR_DEFINITIONS,
     DEFAULT_ACCENT_COLOR_NAME,
     getAccentColors,
