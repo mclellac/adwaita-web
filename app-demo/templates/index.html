@@ -5,9 +5,35 @@
 {% block content %}
 <adw-clamp max-width="900px" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
     <h1 class="page-title" style="text-align: center; margin-bottom: var(--spacing-l); font-size: var(--font-size-xxl, 1.5rem);">All Blog Posts</h1>
+
     <div style="text-align: center; margin-bottom: var(--spacing-m);">
-        <adw-spinner size="large" id="index-loading-spinner" style="display: none;"></adw-spinner>
+        <adw-button id="popover-test-button" suggested>Test Popover</adw-button>
+        <adw-spinner size="large" id="index-loading-spinner" style="display: none; margin-left: var(--spacing-s);"></adw-spinner>
     </div>
+
+    <adw-popover id="test-popover" target="#popover-test-button" position="bottom">
+        <div style="padding: 12px; min-width: 200px;">
+            <adw-label is-body="true">This is a popover!</adw-label>
+            <adw-entry placeholder="Type something..." style="margin-top: var(--spacing-s); margin-bottom: var(--spacing-s);"></adw-entry>
+            <adw-button on:click="document.getElementById('test-popover').hide()">Close from inside</adw-button>
+        </div>
+    </adw-popover>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const popoverButton = document.getElementById('popover-test-button');
+            const popover = document.getElementById('test-popover');
+            if (popoverButton && popover) {
+                popoverButton.addEventListener('click', () => {
+                    if (popover.hasAttribute('open')) {
+                        popover.hide();
+                    } else {
+                        popover.show();
+                    }
+                });
+            }
+        });
+    </script>
 
     {% if posts %}
         <adw-list-box class="blog-posts-list"> {# Using adw-list-box for semantic grouping of post cards #}

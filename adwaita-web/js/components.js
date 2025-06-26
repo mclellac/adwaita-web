@@ -123,7 +123,7 @@ const AdwProperties = { // Renamed to avoid conflict with global Adw during cons
     createTabPage: views.createAdwTabPage,
     createNavigationView: views.createAdwNavigationView,
     createBottomSheet: bottomSheet.createAdwBottomSheet, // Factory for AdwBottomSheet
-    createPopover: popover.createAdwPopover, // Factory for AdwPopover (new)
+    createPopover: popover.createAdwPopover,
 
     // Theme utilities now include the main applicator
     applyFinalThemeAndAccent: utils.applyFinalThemeAndAccent,
@@ -185,7 +185,7 @@ const AdwProperties = { // Renamed to avoid conflict with global Adw during cons
     TabPage: views.AdwTabPage,
     NavigationView: views.AdwNavigationView,
     BottomSheet: bottomSheet.AdwBottomSheet,
-    Popover: popover.AdwPopover, // Web Component Class for AdwPopover (new)
+    Popover: popover.AdwPopover,
 };
 console.log(new Date().toISOString(), 'COMPONENTS.JS: AdwProperties defined');
 
@@ -274,7 +274,6 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-tab-page')) customElements.define('adw-tab-page', window.Adw.TabPage);
     if (!customElements.get('adw-navigation-view')) customElements.define('adw-navigation-view', window.Adw.NavigationView);
     if (!customElements.get('adw-bottom-sheet')) customElements.define('adw-bottom-sheet', window.Adw.BottomSheet);
-    // From popover.js (new)
     if (!customElements.get('adw-popover')) customElements.define('adw-popover', window.Adw.Popover);
     console.log(new Date().toISOString(), 'COMPONENTS.JS: After all customElements definitions');
 } else {
