@@ -17,7 +17,7 @@
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s; // Delay visibility change until end of opacity
-  z-index: calc(var(--z-index-dialog) - 1);
+  z-index: var(--z-index-bottom-sheet-backdrop, 1080);
 }
 
 :host(.is-modal.is-open) .backdrop {
@@ -84,7 +84,7 @@
   transform: translateY(100%);
   transition: transform 0.25s ease-in-out, visibility 0s linear 0.25s;
   visibility: hidden;
-  z-index: var(--z-index-dialog);
+  z-index: var(--z-index-bottom-sheet, 1081);
 
   // Styles for non-full-width will be applied by JS by modifying classes/styles on .sheet-area
   // e.g. :host(:not([full-width])) .sheet-area { width: var(--adw-bottom-sheet-width, 500px); ... }

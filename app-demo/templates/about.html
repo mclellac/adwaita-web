@@ -18,9 +18,122 @@
             </adw-expander-row>
         </adw-preferences-group>
 
+        <adw-preferences-group title="Overlay Tests">
+            <adw-action-row title="Test Banner" id="test-banner-row">
+                <adw-button slot="suffix" id="show-banner-button">Show Banner</adw-button>
+            </adw-action-row>
+            <adw-action-row title="Test Toast" id="test-toast-row">
+                <adw-button slot="suffix" id="show-toast-button">Show Toast</adw-button>
+            </adw-action-row>
+            <adw-action-row title="Test Dialog" id="test-dialog-row">
+                <adw-button slot="suffix" id="show-dialog-button">Show Dialog</adw-button>
+            </adw-action-row>
+            <adw-action-row title="Test Bottom Sheet" id="test-bottom-sheet-row">
+                <adw-button slot="suffix" id="show-bottom-sheet-button">Show Bottom Sheet</adw-button>
+            </adw-action-row>
+        </adw-preferences-group>
+
+        <!-- AdwDialog for testing -->
+        <adw-dialog id="test-dialog" title="Test Dialog">
+            <div slot="content">
+                <p>This is a test dialog. It should appear above the page content and banner.</p>
+                <adw-button id="dialog-popover-button">Show Popover from Dialog</adw-button>
+                <adw-button id="dialog-toast-button" style="margin-left: 8px;">Show Toast from Dialog</adw-button>
+            </div>
+            <adw-button slot="buttons" on:click="document.getElementById('test-dialog').close()">Close Dialog</adw-button>
+        </adw-dialog>
+
+        <!-- AdwPopover for testing (attached to dialog button) -->
+        <adw-popover id="dialog-popover" target="#dialog-popover-button" position="bottom">
+            <div style="padding:12px; width: 200px;">
+                <adw-label is-body="true">Popover from dialog!</adw-label>
+                <adw-entry placeholder="Focus test..."></adw-entry>
+            </div>
+        </adw-popover>
+
+        <!-- AdwBottomSheet for testing -->
+        <adw-bottom-sheet id="test-bottom-sheet" full-width="false" align="center">
+            <div slot="sheet" style="padding: 20px; text-align: center;">
+                <h2>Test Bottom Sheet</h2>
+                <p>This is a bottom sheet. It should overlay content but might be below dialogs.</p>
+                <adw-button on:click="document.getElementById('test-bottom-sheet').close()">Close Sheet</adw-button>
+            </div>
+        </adw-bottom-sheet>
+
+        <!-- AdwToastOverlay will be added to base.html or managed globally if not already present -->
+        <!-- For this test, ensure one is available. Assuming one is in base.html or auto-created. -->
+
+
         <div style="text-align: center; margin-top: var(--spacing-xl);">
             <adw-button href="{{ url_for('index') }}">Back to Home</adw-button>
         </div>
     </adw-box>
 </adw-clamp>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Banner
+        const showBannerButton = document.getElementById('show-banner-button');
+        showBannerButton.addEventListener('click', () => {
+            // Remove any existing test banner first
+            const existingBanner = document.getElementById('test-page-banner');
+            if (existingBanner) existingBanner.remove();
+
+            const banner = Adw.createBanner('This is a test banner!', {
+                id: 'test-page-banner',
+                dismissible: true,
+                revealed: false, // Create hidden, then reveal
+                type: 'info' // 'info', 'error', 'warning', 'success'
+            });
+            document.body.insertBefore(banner, document.body.firstChild); // Prepend to body
+            // Force reflow before adding visible class for transition
+            void banner.offsetWidth;
+            banner.classList.add('visible');
+
+            banner.addEventListener('dismissed', () => console.log('Test banner dismissed.'));
+        });
+
+        // Toast
+        const showToastButton = document.getElementById('show-toast-button');
+        showToastButton.addEventListener('click', () => {
+            let toastOverlay = document.querySelector('adw-toast-overlay');
+            if (!toastOverlay) { // Ensure toast overlay exists
+                toastOverlay = document.createElement('adw-toast-overlay');
+                document.body.appendChild(toastOverlay);
+            }
+            toastOverlay.addToast({ title: 'This is a test toast!', timeout: 5 });
+        });
+
+        // Dialog
+        const showDialogButton = document.getElementById('show-dialog-button');
+        const testDialog = document.getElementById('test-dialog');
+        showDialogButton.addEventListener('click', () => testDialog.open());
+
+        // Popover from Dialog
+        const dialogPopoverButton = document.getElementById('dialog-popover-button');
+        const dialogPopover = document.getElementById('dialog-popover');
+        dialogPopoverButton.addEventListener('click', () => {
+            if (dialogPopover.hasAttribute('open')) dialogPopover.hide();
+            else dialogPopover.show();
+        });
+
+        // Toast from Dialog
+        const dialogToastButton = document.getElementById('dialog-toast-button');
+        dialogToastButton.addEventListener('click', () => {
+            let toastOverlay = document.querySelector('adw-toast-overlay');
+            if (!toastOverlay) {
+                toastOverlay = document.createElement('adw-toast-overlay');
+                document.body.appendChild(toastOverlay);
+            }
+            toastOverlay.addToast({ title: 'Toast from inside dialog!', timeout: 3 });
+        });
+
+
+        // Bottom Sheet
+        const showBottomSheetButton = document.getElementById('show-bottom-sheet-button');
+        const testBottomSheet = document.getElementById('test-bottom-sheet');
+        showBottomSheetButton.addEventListener('click', () => testBottomSheet.open());
+
+    });
+</script>
 {% endblock %}
