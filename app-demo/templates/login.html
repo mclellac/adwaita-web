@@ -15,11 +15,10 @@
       {{ form.hidden_tag() }} {# CSRF token #}
 
       <adw-preferences-group title="Account Credentials">
-        {# Username Field #}
-        {# Render the actual input field for WTForms compatibility #}
-        {{ form.username(class="adw-entry", placeholder="Enter your username", style="display:none;") }}
+        {# Username Field - Set name directly on the custom element #}
         <adw-entry-row title="{{ form.username.label.text }}"
-                         id="username-row" {# Use a specific ID for JS targeting #}
+                         name="{{ form.username.name }}"  {# Name attribute for form submission #}
+                         id="{{ form.username.id or 'username-row' }}"
                          required
                          placeholder="Enter your username"
                          value="{{ form.username.data or '' }}"
@@ -27,11 +26,10 @@
                          class="{{ 'has-error' if form.username.errors else '' }}">
         </adw-entry-row>
 
-        {# Password Field - Use adw-password-entry-row #}
-        {# Render the actual input field for WTForms compatibility #}
-        {{ form.password(class="adw-entry", placeholder="Enter your password", style="display:none;") }}
+        {# Password Field - Set name directly on the custom element #}
         <adw-password-entry-row title="{{ form.password.label.text }}"
-                                id="password-row" {# Use a specific ID for JS targeting #}
+                                name="{{ form.password.name }}" {# Name attribute for form submission #}
+                                id="{{ form.password.id or 'password-row' }}"
                                 required
                                 placeholder="Enter your password"
                                 subtitle="{{ form.password.errors|join(' ') if form.password.errors else '' }}"
@@ -48,70 +46,57 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const loginForm = document.getElementById('login-form');
-    const usernameRow = document.getElementById('username-row');
-    const passwordRow = document.getElementById('password-row');
-    const actualUsernameInput = document.querySelector('input[name="{{ form.username.name }}"]');
-    const actualPasswordInput = document.querySelector('input[name="{{ form.password.name }}"]');
+    const usernameRow = document.getElementById('{{ form.username.id or "username-row" }}');
+    const passwordRow = document.getElementById('{{ form.password.id or "password-row" }}');
 
-    if (loginForm && usernameRow && passwordRow && actualUsernameInput && actualPasswordInput) {
-        // Function to sync value from adw-entry-row to hidden input
-        const syncValue = (sourceRow, targetInput) => {
-            // Use the .value property of the custom element directly,
-            // as AdwEntryRow/AdwPasswordEntryRow are designed to expose it.
-            targetInput.value = sourceRow.value;
-        };
+    // The AdwEntry (inside AdwEntryRow/AdwPasswordEntryRow) should handle its own value
+    // for form submission via its internal hidden input if 'name' is set on AdwEntryRow/AdwPasswordEntryRow.
+    // So, explicit JS syncing to manually created hidden inputs is removed.
 
-        // Sync values before form submission
-        loginForm.addEventListener('submit', function (event) {
-            syncValue(usernameRow, actualUsernameInput);
-            syncValue(passwordRow, actualPasswordInput);
-            // console.log('Submitting with username:', actualUsernameInput.value, 'password:', actualPasswordInput.value);
-        });
-
-        // Optional: Sync on input/change from custom elements if they emit events
-        // This depends on adw-entry-row and adw-password-entry-row implementation
-        // For example, if they emit an 'input' or 'change' event:
-        const setupSyncOnEvent = (sourceRow, targetInput, eventName = 'input') => {
-            const adwInputElement = sourceRow.shadowRoot ? sourceRow.shadowRoot.querySelector('.adw-entry') : sourceRow.querySelector('.adw-entry');
-            if (adwInputElement) {
-                 adwInputElement.addEventListener(eventName, () => {
-                    targetInput.value = adwInputElement.value;
-                    // console.log(`Synced ${targetInput.name} on ${eventName}: ${targetInput.value}`);
-                });
+    // For Enter key submission:
+    // This ensures Enter key in the custom rows attempts submission.
+    const handleEnterKey = (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent any default action of the input itself
+            // loginForm.submit(); // Standard submit
+            // A more robust way to trigger form submission, including HTML5 validation:
+             if (loginForm.requestSubmit) {
+                loginForm.requestSubmit();
             } else {
-                 // If direct input access isn't feasible, try observing attribute changes on the row itself.
-                 // This is less ideal as 'value' attribute might not always reflect internal state.
-                 new MutationObserver(() => {
-                    targetInput.value = sourceRow.getAttribute('value') || '';
-                 }).observe(sourceRow, { attributes: true, attributeFilter: ['value'] });
+                loginForm.submit();
             }
-        };
+        }
+    };
 
-        setupSyncOnEvent(usernameRow, actualUsernameInput, 'input');
-        setupSyncOnEvent(usernameRow, actualUsernameInput, 'change');
-        setupSyncOnEvent(passwordRow, actualPasswordInput, 'input');
-        setupSyncOnEvent(passwordRow, actualPasswordInput, 'change');
-
-
-        // For Enter key submission:
-        // The form should submit with Enter if a <button type="submit"> is present.
-        // If still problematic, this ensures Enter key in the custom rows attempts submission.
-        const handleEnterKey = (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent any default action of the input itself
-                loginForm.requestSubmit ? loginForm.requestSubmit() : loginForm.submit();
+    // Try to attach to the internal <input> or <adw-entry> inside the shadow DOM of the rows
+    const attachEnterListener = (rowElement) => {
+        if (rowElement && rowElement.shadowRoot) {
+            // AdwEntryRow and AdwPasswordEntryRow both use an _internalEntry which is an AdwEntry.
+            // AdwEntry in turn has an _inputElement.
+            const internalAdwEntry = rowElement._internalEntry; // Accessing internal component instance
+            if (internalAdwEntry && internalAdwEntry.shadowRoot) {
+                const inputField = internalAdwEntry._inputElement; // Accessing internal input of AdwEntry
+                if (inputField) {
+                    inputField.addEventListener('keypress', handleEnterKey);
+                } else {
+                     console.warn('Could not find internal input field in AdwEntry for Enter key listener:', rowElement.id);
+                }
+            } else if (internalAdwEntry && internalAdwEntry.focus) { // If _inputElement is not exposed, try attaching to AdwEntry itself
+                internalAdwEntry.addEventListener('keypress', handleEnterKey);
             }
-        };
+            else {
+                 console.warn('Could not find internal AdwEntry or its shadowRoot for Enter key listener:', rowElement.id);
+            }
+        } else if (rowElement) {
+            // Fallback if direct shadow DOM access isn't working as expected, try generic query
+            const genericInput = rowElement.querySelector('input, adw-entry');
+            if (genericInput) genericInput.addEventListener('keypress', handleEnterKey);
+        }
+    };
 
-        const usernameInternalInput = usernameRow.shadowRoot ? usernameRow.shadowRoot.querySelector('input, adw-entry') : usernameRow.querySelector('input, adw-entry');
-        if (usernameInternalInput) usernameInternalInput.addEventListener('keypress', handleEnterKey);
+    if (usernameRow) attachEnterListener(usernameRow);
+    if (passwordRow) attachEnterListener(passwordRow);
 
-        const passwordInternalInput = passwordRow.shadowRoot ? passwordRow.shadowRoot.querySelector('input, adw-entry') : passwordRow.querySelector('input, adw-entry');
-        if (passwordInternalInput) passwordInternalInput.addEventListener('keypress', handleEnterKey);
-
-    } else {
-        console.error('Login form or custom input rows not found for JS enhancements.');
-    }
 });
 </script>
 {% endblock %}
