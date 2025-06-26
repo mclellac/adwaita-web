@@ -464,4 +464,16 @@ export function adwMakeFocusable(parentElement) {
     });
 }
 
-export { adwGenerateId, toggleTheme, getAccentColors, setAccentColor, DEFAULT_ACCENT_COLOR, loadSavedTheme, applyFinalThemeAndAccent, getAdwCommonStyleSheet, adwMakeFocusable };
+export {
+    adwGenerateId,
+    ACCENT_COLOR_DEFINITIONS,
+    DEFAULT_ACCENT_COLOR_NAME,
+    getAccentColors,
+    setAccentColor,
+    loadSavedTheme,
+    toggleTheme,
+    applyFinalThemeAndAccent,
+    sanitizeHref,
+    getAdwCommonStyleSheet,
+    adwMakeFocusable
+};
