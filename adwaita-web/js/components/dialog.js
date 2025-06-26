@@ -23,13 +23,8 @@ export function createAdwDialog(options = {}) {
     adwDialogWC.setAttribute('title', opts.title);
   }
 
-  if (opts.closeOnBackdropClick === false) { // Note: attribute presence means true in WC, so only set if false.
+  if (opts.closeOnBackdropClick === false) {
     adwDialogWC.setAttribute('close-on-backdrop-click', 'false');
-  } else {
-      // Default is true, so no need to set attribute if true or undefined.
-      // However, AdwDialog WC's current listener checks:
-      // (!this.hasAttribute('close-on-backdrop-click') || this.getAttribute('close-on-backdrop-click') !== 'false')
-      // This means if the attribute is missing, it defaults to true. So this is fine.
   }
 
   if (opts.content) {
@@ -59,18 +54,13 @@ export function createAdwDialog(options = {}) {
   if (typeof opts.onClose === 'function') {
     adwDialogWC.addEventListener('close', opts.onClose);
   }
-
-  // The factory used to return an object with open/close methods.
-  // Now it returns the WC instance. The caller will use adwDialogWC.open() or adwDialogWC.close()
-  // or set the 'open' attribute.
   return adwDialogWC;
 }
 
 /**
  * @element adw-dialog
  * @description A modal dialog component that overlays the current page.
- * It includes a backdrop, content area, and a button area.
- * The dialog can be opened or closed programmatically or via the `open` attribute.
+ * It leverages the native HTML `<dialog>` element for core modality and backdrop functionality.
  *
  * @attr {String} [title] - The title displayed at the top of the dialog.
  * @attr {Boolean} [open] - If present, the dialog is displayed. Can be set/removed to control visibility.
@@ -81,14 +71,13 @@ export function createAdwDialog(options = {}) {
  * @slot buttons - Used to project buttons into the dialog's action/footer area.
  *                 If no buttons are slotted, a default "Close" button is added.
  *
- * @csspart dialog - The main dialog container element within the Shadow DOM.
- * @csspart backdrop - The backdrop element that covers the page.
+ * @csspart dialog - The native `<dialog>` element within the Shadow DOM.
  * @csspart title - The title element within the dialog.
  * @csspart content - The container for the content slot.
  * @csspart buttons - The container for the buttons slot.
  *
  * @fires open - Dispatched when the dialog becomes fully open and visible.
- * @fires close - Dispatched when the dialog becomes fully closed and hidden.
+ * @fires close - Dispatched when the dialog becomes fully closed and hidden (after the native 'close' event).
  *
  * @example
  * <adw-dialog title="My Dialog" id="myDialog">
@@ -103,25 +92,16 @@ export class AdwDialog extends HTMLElement {
     /** @internal */
     static get observedAttributes() { return ['title', 'close-on-backdrop-click', 'open']; }
 
-    /**
-     * Creates an instance of AdwDialog.
-     * @constructor
-     */
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        // Stylesheet will be adopted in connectedCallback
-
-        this._dialogElement = null; // The main dialog div (will be inside shadow DOM)
-        this._backdropElement = null; // The backdrop div (will be appended to body)
-        this._isOpen = false; // Internal state
-        this._isOpeningOrClosing = false; // Re-entrancy guard for open/close
+        this._nativeDialogElement = null; // This will be the HTML <dialog> element
+        this._isOpen = false; // Internal state of AdwDialog component
+        this._isProcessingOpenClose = false; // Guard for open/close operations
     }
 
     /** @internal */
     _fallbackLoadStylesheet() {
-        // Fallback for browsers that don't support adoptedStyleSheets,
-        // or if the adopted stylesheet failed to load.
         if (!this.shadowRoot.querySelector('link[rel="stylesheet"]')) {
             const styleLink = document.createElement('link');
             styleLink.rel = 'stylesheet';
@@ -134,11 +114,7 @@ export class AdwDialog extends HTMLElement {
         }
     }
 
-    /**
-     * @internal
-     * Lifecycle callback invoked when the element is added to the DOM.
-     * Handles stylesheet adoption and initial rendering if 'open' attribute is present.
-     */
+    /** @internal */
     async connectedCallback() {
         if (typeof CSSStyleSheet !== 'undefined' && 'adoptedStyleSheets' in Document.prototype) {
             try {
@@ -146,48 +122,34 @@ export class AdwDialog extends HTMLElement {
                 if (commonSheet && !this.shadowRoot.adoptedStyleSheets.includes(commonSheet)) {
                     this.shadowRoot.adoptedStyleSheets = [...this.shadowRoot.adoptedStyleSheets, commonSheet];
                 } else if (!commonSheet) {
-                    console.warn("AdwDialog: Common stylesheet not available, attempting fallback.");
                     this._fallbackLoadStylesheet();
                 }
             } catch (error) {
-                console.error("AdwDialog: Error adopting common stylesheet, attempting fallback.", error);
                 this._fallbackLoadStylesheet();
             }
         } else {
             this._fallbackLoadStylesheet();
         }
 
-        // DOM elements (_dialogElement, _backdropElement) are built on first open,
-        // or if attributes change requiring a rebuild.
-        // If the 'open' attribute is present on connection, trigger open.
-        // Ensure _buildDialogDOM is called if needed, which might now happen after stylesheet adoption
+        if (!this._nativeDialogElement) {
+            this._buildDialogDOM(); // Ensure dialog structure is built on connect
+        }
+
         if (this.hasAttribute('open') && !this._isOpen) {
-            // open() will call _buildDialogDOM if elements are not ready
             this.open();
-        } else if (!this._dialogElement && !this.hasAttribute('open')) {
-            // If dialog is not set to open but also not yet built (e.g. just connected)
-            // we might want to build it if other attributes like title are set and it might be shown soon.
-            // For now, _buildDialogDOM is primarily called by open() or when attributes change while open.
-            // If a dialog is created but not opened, _buildDialogDOM is deferred.
         }
     }
 
-    /**
-     * @internal
-     * Lifecycle callback invoked when the element is removed from the DOM.
-     * Ensures the dialog is closed and cleaned up.
-     */
+    /** @internal */
     disconnectedCallback() {
-        if (this._isOpen) { // If connected, and then removed from DOM while open, ensure cleanup.
-            this.close();
+        // If the element is removed from DOM while open, ensure the native dialog is closed.
+        if (this._nativeDialogElement && this._nativeDialogElement.hasAttribute('open')) {
+            this._nativeDialogElement.close(); // This will trigger its 'close' event
         }
+        this._isOpen = false; // Reset state
     }
 
-    /**
-     * @internal
-     * Lifecycle callback invoked when one of the observed attributes changes.
-     * Handles changes to 'title', 'open', and 'close-on-backdrop-click'.
-     */
+    /** @internal */
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
 
@@ -199,121 +161,100 @@ export class AdwDialog extends HTMLElement {
                 this.close();
             }
         } else { // title, close-on-backdrop-click
-            if (this._isOpen) {
-                const currentOpenAttr = this.hasAttribute('open');
-                // Setting _isOpen to false temporarily to allow close() to proceed if it checks _isOpen
-                // This is a bit tricky; ideally close() should always perform cleanup if elements exist.
-                // Let's ensure close() can run even if about to re-open.
-                this.close();
-                this._dialogElement = null;
-                this._backdropElement = null;
-                if (currentOpenAttr) {
-                    this.open();
-                }
-            } else {
-                this._dialogElement = null;
-                this._backdropElement = null;
+            // Rebuild DOM if attributes change that affect structure
+            // This is a simple approach; more granular updates could be implemented.
+            if (this.isConnected) { // Only rebuild if connected
+                 const wasOpen = this._isOpen;
+                 if (wasOpen) this.close(); // Close before rebuilding if it was open
+                 this._buildDialogDOM();
+                 if (wasOpen) this.open(); // Reopen if it was open
             }
         }
     }
 
-    /**
-     * @internal
-     * Builds or rebuilds the dialog's internal DOM structure (backdrop, dialog container, title, slots).
-     * This method is called when the dialog is opened for the first time or when attributes
-     * that affect its structure (like 'title') are changed while it's open.
-     */
+    /** @internal */
     _buildDialogDOM() {
-        // This method (re)creates the dialog DOM elements.
-        // The main dialog structure is added to the shadowRoot.
-        // The backdrop is created here but appended to body by open().
-
         // Clear previous shadow DOM content (excluding adopted stylesheets or fallback link)
         const nodesToRemove = [];
         for (const child of this.shadowRoot.childNodes) {
-            // Do not remove adopted stylesheets; <style> tags might be used by adopted sheets.
-            // Do not remove the fallback <link> if it exists.
             if (child.nodeName !== 'STYLE' && !(child.nodeName === 'LINK' && child.getAttribute('rel') === 'stylesheet')) {
                 nodesToRemove.push(child);
             }
         }
         nodesToRemove.forEach(node => this.shadowRoot.removeChild(node));
 
+        this._nativeDialogElement = document.createElement('dialog');
+        this._nativeDialogElement.part.add('dialog'); // For external styling
 
-        this._backdropElement = document.createElement('div');
-        this._backdropElement.classList.add('adw-dialog-backdrop');
-
-        // _dialogElement is the main container *inside* the shadow DOM
-        this._dialogElement = document.createElement('div');
-        this._dialogElement.classList.add('adw-dialog');
-        this._dialogElement.setAttribute('role', 'dialog');
-        this._dialogElement.setAttribute('aria-modal', 'true');
-
-        const title = this.getAttribute('title');
-        if (title) {
-            const titleId = adwGenerateId('adw-dialog-wc-title');
-            this._dialogElement.setAttribute('aria-labelledby', titleId);
+        const titleText = this.getAttribute('title');
+        if (titleText) {
+            const titleId = adwGenerateId('adw-dialog-title');
+            this._nativeDialogElement.setAttribute('aria-labelledby', titleId);
             const titleEl = document.createElement('div');
             titleEl.classList.add('adw-dialog-title');
+            titleEl.part.add('title');
             titleEl.id = titleId;
-            titleEl.textContent = title;
-            this._dialogElement.appendChild(titleEl);
+            titleEl.textContent = titleText;
+            this._nativeDialogElement.appendChild(titleEl);
         }
 
-        // Content - Use a slot to project content
         const contentEl = document.createElement('div');
         contentEl.classList.add('adw-dialog-content');
+        contentEl.part.add('content');
         const contentSlotElement = document.createElement('slot');
-        contentSlotElement.name = 'content'; // For <... slot="content">
+        contentSlotElement.name = 'content';
         const defaultContentSlotElement = document.createElement('slot'); // For default slotted children
         contentEl.appendChild(contentSlotElement);
         contentEl.appendChild(defaultContentSlotElement);
-        this._dialogElement.appendChild(contentEl);
+        this._nativeDialogElement.appendChild(contentEl);
 
-        // Buttons - Use a slot to project buttons
         const buttonsContainer = document.createElement('div');
         buttonsContainer.classList.add('adw-dialog-buttons');
+        buttonsContainer.part.add('buttons');
         const buttonsSlotElement = document.createElement('slot');
-        buttonsSlotElement.name = 'buttons'; // For <... slot="buttons">
+        buttonsSlotElement.name = 'buttons';
         buttonsContainer.appendChild(buttonsSlotElement);
-        this._dialogElement.appendChild(buttonsContainer);
+        this._nativeDialogElement.appendChild(buttonsContainer);
 
-        this.shadowRoot.appendChild(this._dialogElement); // Add the dialog structure to shadow DOM
+        this.shadowRoot.appendChild(this._nativeDialogElement);
 
-        console.log("[AdwDialog._buildDialogDOM] AdwDialog: Created and appended buttonsContainer with slot 'buttons' to shadow DOM.");
-
-        buttonsSlotElement.addEventListener('slotchange', (e) => {
-            const assignedNodes = buttonsSlotElement.assignedNodes({ flatten: true });
-            console.log("[AdwDialog._buildDialogDOM] AdwDialog: slotchange event fired for 'buttons' slot. Assigned nodes:", assignedNodes);
+        buttonsSlotElement.addEventListener('slotchange', () => {
             this._ensureDefaultButton(buttonsContainer, buttonsSlotElement);
         });
+        this._ensureDefaultButton(buttonsContainer, buttonsSlotElement); // Initial check
 
-        // Initial check for default button after setup
-        this._ensureDefaultButton(buttonsContainer, buttonsSlotElement);
-
-        // Event listeners for backdrop click and Escape key
-        this._backdropElement.addEventListener('click', (event) => {
-            if (event.target === this._backdropElement && (!this.hasAttribute('close-on-backdrop-click') || this.getAttribute('close-on-backdrop-click') !== 'false')) {
-                this.close();
+        // Event listener for backdrop click
+        this._nativeDialogElement.addEventListener('click', (event) => {
+            if (event.target === this._nativeDialogElement) { // Clicked on the dialog's backdrop pseudo-element
+                if (this.getAttribute('close-on-backdrop-click') !== 'false') {
+                    this.close(); // Calls AdwDialog's close method
+                }
             }
         });
-        // Keydown listener should be on the dialog element itself or perhaps the host for broader capture
-        this._dialogElement.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') this.close();
-            if (e.key === 'Tab') this._trapFocus(e);
+
+        // Listen to the native 'close' event to sync state and dispatch custom event
+        this._nativeDialogElement.addEventListener('close', () => {
+            this._isOpen = false; // Update AdwDialog's internal state
+            if (this.hasAttribute('open')) {
+                this.removeAttribute('open'); // Sync AdwDialog's 'open' attribute
+            }
+            this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
+            this._isProcessingOpenClose = false;
+        });
+
+        // Optional: Listen to 'cancel' event if specific Escape key handling is needed
+        this._nativeDialogElement.addEventListener('cancel', (event) => {
+            // Native dialog fires 'cancel' then 'close' on Escape.
+            // If we wanted to prevent Escape closure under certain conditions:
+            // if (!this.allowEscapeToClose) event.preventDefault();
+            // If prevented, the 'close' event on _nativeDialogElement won't fire.
+            // For AdwDialog, default behavior (Escape closes) is usually desired.
         });
     }
 
-    /**
-     * @internal
-     * Ensures that a default "Close" button is present if no buttons are slotted by the user.
-     * @param {HTMLDivElement} buttonsContainer - The container element for buttons in the Shadow DOM.
-     * @param {HTMLSlotElement} buttonsSlotElement - The slot element for buttons.
-     */
+    /** @internal */
     _ensureDefaultButton(buttonsContainer, buttonsSlotElement) {
-        // Check if a default button has already been added by this method
         const existingDefaultButton = buttonsContainer.querySelector('.adw-dialog-default-button');
-
         const assignedNodes = buttonsSlotElement.assignedNodes({ flatten: true });
         const hasUserProvidedButtons = assignedNodes.some(node =>
             node.nodeType === Node.ELEMENT_NODE &&
@@ -321,151 +262,122 @@ export class AdwDialog extends HTMLElement {
         );
 
         if (!hasUserProvidedButtons && !existingDefaultButton) {
-            console.log("[AdwDialog._ensureDefaultButton] No user-provided buttons found, adding default 'Close' button.");
             const defaultButton = createAdwButton('Close', { suggested: true });
-            defaultButton.classList.add('adw-dialog-default-button'); // Mark it for potential removal/check
+            defaultButton.classList.add('adw-dialog-default-button');
             defaultButton.addEventListener('click', () => this.close());
-            buttonsContainer.appendChild(defaultButton); // Append directly to the container in shadow DOM
+            buttonsContainer.appendChild(defaultButton);
         } else if (hasUserProvidedButtons && existingDefaultButton) {
-            // User has added buttons, so remove our default one if it exists
-            console.log("[AdwDialog._ensureDefaultButton] User-provided buttons found, removing default 'Close' button.");
             existingDefaultButton.remove();
         }
     }
 
-    /**
-     * @internal
-     * Traps focus within the dialog when it's open.
-     * Handles Tab and Shift+Tab navigation.
-     * @param {KeyboardEvent} event - The keyboard event.
-     */
+    /** @internal */
     _trapFocus(event) {
-        // Focus trapping needs to consider shadow DOM.
-        // Query selectable elements within the shadow-hosted _dialogElement.
-        const focusableElements = Array.from(this._dialogElement.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
-                                     .filter(el => el.offsetParent !== null && !el.disabled);
+        // The native <dialog> element handles basic focus trapping when opened with showModal().
+        // This custom trapping logic might conflict or be redundant.
+        // It should be tested if this is still needed. For now, we'll keep it,
+        // but it might be removable if native trapping is sufficient.
+        if (!this._nativeDialogElement || !this._nativeDialogElement.hasAttribute('open')) return;
+
+        const focusableElements = Array.from(this._nativeDialogElement.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+                                     .filter(el => el.offsetParent !== null && !el.disabled && el.tabIndex !== -1);
         if (focusableElements.length === 0) { event.preventDefault(); return; }
+
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
-        if (event.shiftKey && document.activeElement === firstElement) {
-            lastElement.focus(); event.preventDefault();
-        } else if (!event.shiftKey && document.activeElement === lastElement) {
-            firstElement.focus(); event.preventDefault();
+
+        // Check if the event target (document.activeElement) is within the shadow DOM of this component
+        let activeElementIsInside = false;
+        let currentElement = document.activeElement;
+        while(currentElement && currentElement !== document.body) {
+            if (currentElement.shadowRoot === this.shadowRoot) {
+                activeElementIsInside = true;
+                break;
+            }
+            currentElement = currentElement.host || currentElement.parentNode;
+        }
+        // If focus is outside, this trapping logic might not be robust.
+        // However, native <dialog> should keep focus inside.
+
+        if (event.shiftKey) {
+            if (document.activeElement === firstElement || this.shadowRoot.activeElement === firstElement) {
+                lastElement.focus();
+                event.preventDefault();
+            }
+        } else {
+            if (document.activeElement === lastElement || this.shadowRoot.activeElement === lastElement) {
+                firstElement.focus();
+                event.preventDefault();
+            }
         }
     }
 
-    // _render() method is removed as its functionality is merged into attributeChangedCallback or handled by _buildDialogDOM.
 
-    /**
-     * Opens the dialog.
-     * Builds the dialog DOM if not already built, appends backdrop and dialog to the body,
-     * sets focus, and applies 'open' classes for transitions.
-     * Dispatches an 'open' event.
-     */
     open() {
-        if (this._isOpen || this._isOpeningOrClosing) {
-            return;
-        }
-        this._isOpeningOrClosing = true;
+        if (this._isOpen || this._isProcessingOpenClose) return;
+        this._isProcessingOpenClose = true;
 
-        if (!this._dialogElement || !this._backdropElement) {
+        if (!this._nativeDialogElement || !this.shadowRoot.contains(this._nativeDialogElement)) {
+            // Ensure DOM is built if called before connectedCallback or after attribute changes
             this._buildDialogDOM();
         }
 
-        document.body.appendChild(this._backdropElement);
-        // Dialog is child of backdrop, already handled in _buildDialogDOM if it appends there,
-        // or ensure it's appended if _buildDialogDOM only creates them.
-        // Assuming _buildDialogDOM creates them but doesn't append _dialogElement to _backdropElement,
-        // or if it does, this line is redundant.
-        // Let's assume _buildDialogDOM only creates them.
-        if (this._dialogElement && !this._dialogElement.parentElement) {
-             this._backdropElement.appendChild(this._dialogElement);
+        if (this._nativeDialogElement && typeof this._nativeDialogElement.showModal === 'function') {
+            this._nativeDialogElement.showModal(); // This makes it modal and visible
+            this._isOpen = true; // AdwDialog's state
+            if (!this.hasAttribute('open')) {
+                this.setAttribute('open', ''); // Sync AdwDialog's attribute
+            }
+            // Native <dialog> handles initial focus.
+            // Custom focus trapping via _trapFocus might still be used for Tab key.
+            // Add keydown listener for Tab when dialog is open
+            this._nativeDialogElement.addEventListener('keydown', this._onDialogKeyDown);
+
+
+            this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }));
+        } else {
+            console.error("AdwDialog: Native dialog element not available or showModal not supported.");
         }
-
-
-        const firstFocusable = this._dialogElement.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-        if (firstFocusable) firstFocusable.focus();
-        else { this._dialogElement.setAttribute('tabindex', '-1'); this._dialogElement.focus(); }
-
-        // Force reflow before adding 'open' class for transition
-        void this._backdropElement.offsetWidth;
-
-        this._backdropElement.classList.add('open');
-        this._dialogElement.classList.add('open');
-
-        this._isOpen = true;
-        if (!this.hasAttribute('open')) {
-            this.setAttribute('open', '');
-        }
-        this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }));
-        this._isOpeningOrClosing = false;
-
-        // After everything is set up and before it's fully displayed, check for buttons.
-        // This needs to be done after the initial slotting has occurred.
-        // The slotchange event is good, but for an initial check, right after build + append is okay.
-        // We need access to buttonsSlotElement, which is inside _buildDialogDOM.
-        // Let's perform this check at the end of _buildDialogDOM or make buttonsSlotElement accessible.
-        // Modifying _buildDialogDOM to do this check and append is cleaner.
+        this._isProcessingOpenClose = false;
     }
 
-    /**
-     * Closes the dialog.
-     * Removes 'open' classes, cleans up DOM elements after transitions,
-     * and dispatches a 'close' event.
-     */
     close() {
-        if (!this._isOpen || this._isOpeningOrClosing) {
+        // AdwDialog's close method primarily calls close on the native dialog.
+        // The native dialog's 'close' event listener will handle updating AdwDialog's state.
+        if (!this._isOpen && !this._isProcessingOpenClose && !(this._nativeDialogElement && this._nativeDialogElement.hasAttribute('open'))) {
+             // If AdwDialog thinks it's closed, and native dialog also seems closed, do nothing.
+             // This can prevent issues if close() is called multiple times.
             return;
         }
-        this._isOpeningOrClosing = true;
+        // this._isProcessingOpenClose = true; // This guard might be more complex now with async native close
 
-        if (this._backdropElement && this._dialogElement) {
-            this._backdropElement.classList.remove('open');
-            this._dialogElement.classList.remove('open');
-
-            const onTransitionEnd = () => {
-                if (this._backdropElement) { // Check if still exists
-                    this._backdropElement.removeEventListener('transitionend', onTransitionEnd);
-                    if (this._backdropElement.parentNode) {
-                        this._backdropElement.remove();
-                    }
+        if (this._nativeDialogElement && typeof this._nativeDialogElement.close === 'function') {
+            if (this._nativeDialogElement.hasAttribute('open')) { // Only call if native dialog is open
+                this._nativeDialogElement.close();
+            } else {
+                 // If native dialog is already closed, but our state is lagging, sync it.
+                 if (this._isOpen) {
+                    this._isOpen = false;
+                    if (this.hasAttribute('open')) this.removeAttribute('open');
+                    this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
                 }
-                // Nullify elements only if we are truly done closing.
-                if (!this._isOpen) {
-                     this._dialogElement = null;
-                     this._backdropElement = null;
-                }
-                this._isOpeningOrClosing = false;
-            };
-
-            // Listen to transitionend on the backdrop.
-            // Fallback to timeout if no transition is detected or takes too long.
-            let transitionDetected = false;
-            const transitionHandler = () => {
-                transitionDetected = true;
-                onTransitionEnd();
-            };
-            this._backdropElement.addEventListener('transitionend', transitionHandler, {once: true});
-
-            setTimeout(() => {
-                if (!transitionDetected) {
-                    console.warn("AdwDialog: Backdrop transitionend not detected, falling back to timeout for cleanup.");
-                    onTransitionEnd();
-                }
-                if (this._backdropElement) { // Cleanup listener if timeout fired first
-                     this._backdropElement.removeEventListener('transitionend', transitionHandler);
-                }
-            }, 300); // Increased timeout slightly beyond typical transition
-
+            }
         } else {
-             this._isOpeningOrClosing = false;
+            console.error("AdwDialog: Native dialog element not available or close not supported.");
+             // Fallback state sync if native element is missing
+            this._isOpen = false;
+            if (this.hasAttribute('open')) this.removeAttribute('open');
         }
+        // The native 'close' event handler will manage _isProcessingOpenClose = false.
+        // Remove keydown listener for Tab
+        if (this._nativeDialogElement) {
+            this._nativeDialogElement.removeEventListener('keydown', this._onDialogKeyDown);
+        }
+    }
 
-        this._isOpen = false;
-        if (this.hasAttribute('open')) {
-            this.removeAttribute('open');
-        }
-        this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
+     _onDialogKeyDown = (e) => { // Bound method for adding/removing listener
+        if (e.key === 'Tab') this._trapFocus(e);
+        // Escape is handled by native dialog's 'cancel' event
     }
 }
 
