@@ -427,3 +427,41 @@ export async function getAdwCommonStyleSheet() {
     });
     return sheetPromise;
 }
+
+/**
+ * Finds all focusable elements within a given parent element.
+ * @param {HTMLElement} parentElement - The element to search within.
+ * @returns {HTMLElement[]} An array of focusable elements.
+ */
+export function adwMakeFocusable(parentElement) {
+    if (!parentElement || typeof parentElement.querySelectorAll !== 'function') {
+        return [];
+    }
+    // Common focusable elements. Note: [tabindex] must not be negative.
+    // Elements with tabindex="-1" are focusable by script but not by keyboard.
+    // We exclude them here as this is typically for keyboard navigation trapping.
+    const focusableSelectors = [
+        'a[href]:not([tabindex^="-"])',
+        'button:not([disabled]):not([tabindex^="-"])',
+        'input:not([disabled]):not([tabindex^="-"])',
+        'select:not([disabled]):not([tabindex^="-"])',
+        'textarea:not([disabled]):not([tabindex^="-"])',
+        '[tabindex]:not([tabindex^="-"])' // Catches elements with tabindex="0" or positive
+    ];
+    const elements = parentElement.querySelectorAll(focusableSelectors.join(', '));
+
+    // Filter out elements that are not visible or are inert
+    return Array.from(elements).filter(el => {
+        const style = window.getComputedStyle(el);
+        const inert = el.hasAttribute('inert') || (el.closest && el.closest('[inert]'));
+        const hidden = el.hasAttribute('hidden') || (el.closest && el.closest('[hidden]'));
+
+        return style.display !== 'none' &&
+               style.visibility !== 'hidden' &&
+               el.offsetParent !== null && // Check if it's rendered and has layout
+               !inert && // Check for inert attribute on element or ancestors
+               !hidden; // Check for hidden attribute on element or ancestors
+    });
+}
+
+export { adwGenerateId, toggleTheme, getAccentColors, setAccentColor, DEFAULT_ACCENT_COLOR, loadSavedTheme, applyFinalThemeAndAccent, getAdwCommonStyleSheet, adwMakeFocusable };
