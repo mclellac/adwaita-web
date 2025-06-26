@@ -56,13 +56,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (loginForm && usernameRow && passwordRow && actualUsernameInput && actualPasswordInput) {
         // Function to sync value from adw-entry-row to hidden input
         const syncValue = (sourceRow, targetInput) => {
-            const adwInputElement = sourceRow.shadowRoot ? sourceRow.shadowRoot.querySelector('.adw-entry') : sourceRow.querySelector('.adw-entry');
-            if (adwInputElement) {
-                targetInput.value = adwInputElement.value;
-            } else {
-                // Fallback if internal structure changes or not found
-                targetInput.value = sourceRow.getAttribute('value') || '';
-            }
+            // Use the .value property of the custom element directly,
+            // as AdwEntryRow/AdwPasswordEntryRow are designed to expose it.
+            targetInput.value = sourceRow.value;
         };
 
         // Sync values before form submission
