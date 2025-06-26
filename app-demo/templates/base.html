@@ -86,7 +86,7 @@
     <script>console.log(new Date().toISOString(), 'BASE.HTML: After components.js script tag');</script>
     <script>console.log(new Date().toISOString(), 'BASE.HTML: HEAD End');</script>
 </head>
-<body>
+<body class="adw-initializing" hidden> {# Added adw-initializing and hidden here #}
     <script>console.log(new Date().toISOString(), 'BASE.HTML: BODY Start');</script>
   {# Pass server-side preferences for Adw.js to pick up if needed #}
   {% if current_user and current_user.is_authenticated and current_user.theme %}
@@ -107,9 +107,9 @@
       The data-theme-preference and data-accent-preference attributes on the <body> tag
       will be read by Adw.applyFinalThemeAndAccent().
     -->
-    <script>console.log(new Date().toISOString(), 'BASE.HTML: Before adw-application-window');</script>
-    <adw-application-window class="adw-initializing" hidden>
-        <script>console.log(new Date().toISOString(), 'BASE.HTML: Inside adw-application-window, before adw-header-bar');</script>
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: Before adw-header-bar (adw-application-window removed)');</script>
+    {# <adw-application-window class="adw-initializing" hidden> #} {# Removed adw-application-window #}
+        <script>console.log(new Date().toISOString(), 'BASE.HTML: Inside former adw-application-window, before adw-header-bar');</script>
         <adw-header-bar>
             <script>console.log(new Date().toISOString(), 'BASE.HTML: Inside adw-header-bar, before adw-window-title');</script>
             <adw-window-title slot="title">Blog CMS</adw-window-title>
@@ -174,9 +174,9 @@
                 {% block content %}{% endblock %}
             </div>
         </main>
-        <script>console.log(new Date().toISOString(), 'BASE.HTML: Inside adw-application-window, after main');</script>
-    </adw-application-window>
-    <script>console.log(new Date().toISOString(), 'BASE.HTML: After adw-application-window');</script>
+        <script>console.log(new Date().toISOString(), 'BASE.HTML: Inside former adw-application-window, after main');</script>
+    {# </adw-application-window> #} {# Removed adw-application-window #}
+    <script>console.log(new Date().toISOString(), 'BASE.HTML: After former adw-application-window');</script>
     {% block scripts %}{% endblock %}
     {# Final console log REMOVED #}
     <script>console.log(new Date().toISOString(), 'BASE.HTML: BODY End');</script>
