@@ -167,7 +167,6 @@ const AdwProperties = { // Renamed to avoid conflict with global Adw during cons
     ToggleGroup: controls.AdwToggleGroup,
     // Layouts from layouts.js
     Box: layouts.AdwBox,
-    ApplicationWindow: layouts.AdwApplicationWindow,
     Flap: layouts.AdwFlap,
     Bin: layouts.AdwBin,
     WrapBox: layouts.AdwWrapBox,
@@ -255,7 +254,6 @@ if (typeof customElements !== 'undefined') {
     if (!customElements.get('adw-toggle-group')) customElements.define('adw-toggle-group', window.Adw.ToggleGroup);
     // From layouts.js
     if (!customElements.get('adw-box')) customElements.define('adw-box', window.Adw.Box);
-    if (!customElements.get('adw-application-window')) customElements.define('adw-application-window', window.Adw.ApplicationWindow);
     if (!customElements.get('adw-flap')) customElements.define('adw-flap', window.Adw.Flap);
     if (!customElements.get('adw-bin')) customElements.define('adw-bin', window.Adw.Bin);
     if (!customElements.get('adw-wrap-box')) customElements.define('adw-wrap-box', window.Adw.WrapBox);
@@ -293,31 +291,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // After theme application and component definitions, make the main content visible.
     // This assumes the main container has the class "adw-initializing".
-    console.log(new Date().toISOString(), 'COMPONENTS.JS: Before querySelector for adw-application-window.adw-initializing');
-    const appWindow = document.querySelector('adw-application-window.adw-initializing');
-    if (appWindow) {
-        console.log(new Date().toISOString(), 'COMPONENTS.JS: adw-application-window.adw-initializing found.');
+    console.log(new Date().toISOString(), 'COMPONENTS.JS: Before querySelector for .adw-initializing');
+    const appBody = document.querySelector('body.adw-initializing'); // Changed selector to body
+    if (appBody) {
+        console.log(new Date().toISOString(), 'COMPONENTS.JS: body.adw-initializing found.');
 
-        appWindow.removeAttribute('hidden'); // Remove hidden attribute FIRST
-        console.log(new Date().toISOString(), 'COMPONENTS.JS: Removed "hidden" attribute from appWindow.');
+        appBody.removeAttribute('hidden'); // Remove hidden attribute FIRST
+        console.log(new Date().toISOString(), 'COMPONENTS.JS: Removed "hidden" attribute from body.');
 
         // Visual Debug Cue: Add a border
-        appWindow.style.border = '5px solid red';
-        console.log(new Date().toISOString(), 'COMPONENTS.JS: Applied RED BORDER to appWindow for visual debug.');
+        appBody.style.border = '5px solid red';
+        console.log(new Date().toISOString(), 'COMPONENTS.JS: Applied RED BORDER to body for visual debug.');
 
         // Give the browser a chance to process the removal of 'hidden' and component connections
         requestAnimationFrame(() => {
             console.log(new Date().toISOString(), 'COMPONENTS.JS: First requestAnimationFrame callback.');
             requestAnimationFrame(() => {
                 console.log(new Date().toISOString(), 'COMPONENTS.JS: Second requestAnimationFrame callback. Removing border and adw-initializing class.');
-                appWindow.style.border = ''; // Remove border
-                appWindow.classList.remove('adw-initializing');
-                console.log(new Date().toISOString(), '[Debug] Adwaita initialized, application window made visible (after rAF and visual cue).');
+                appBody.style.border = ''; // Remove border
+                appBody.classList.remove('adw-initializing');
+                console.log(new Date().toISOString(), '[Debug] Adwaita initialized, application body made visible (after rAF and visual cue).');
             });
         });
 
     } else {
-        console.warn(new Date().toISOString(), '[Debug] Adwaita initialized, but adw-application-window.adw-initializing not found to make visible.');
+        console.warn(new Date().toISOString(), '[Debug] Adwaita initialized, but body.adw-initializing not found to make visible.');
     }
     console.log(new Date().toISOString(), 'COMPONENTS.JS: DOMContentLoaded listener finished.');
 });
