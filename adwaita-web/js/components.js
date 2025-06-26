@@ -4,6 +4,8 @@ console.log(new Date().toISOString(), 'COMPONENTS.JS: Script Start');
 // Utilities
 console.log(new Date().toISOString(), 'COMPONENTS.JS: Before utils import');
 import * as utils from './components/utils.js';
+// Import getAdwCommonStyleSheet specifically
+import { getAdwCommonStyleSheet } from './components/utils.js';
 console.log(new Date().toISOString(), 'COMPONENTS.JS: After utils import');
 
 // Components
@@ -283,39 +285,57 @@ console.log(new Date().toISOString(), '[Debug] Adw object populated and custom e
 // Apply the final theme and accent color once the Adw object is ready and DOM is likely parsed.
 // Using DOMContentLoaded ensures body.dataset is available for DB preferences.
 console.log(new Date().toISOString(), 'COMPONENTS.JS: Before DOMContentLoaded listener setup for theme/unhide');
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => { // Make listener async
     console.log(new Date().toISOString(), 'COMPONENTS.JS: DOMContentLoaded event fired.');
-    console.log(new Date().toISOString(), 'COMPONENTS.JS: Before Adw.applyFinalThemeAndAccent()');
-    Adw.applyFinalThemeAndAccent();
-    console.log(new Date().toISOString(), 'COMPONENTS.JS: After Adw.applyFinalThemeAndAccent()');
 
-    // After theme application and component definitions, make the main content visible.
-    // This assumes the main container has the class "adw-initializing".
-    console.log(new Date().toISOString(), 'COMPONENTS.JS: Before querySelector for .adw-initializing');
-    const appBody = document.querySelector('body.adw-initializing'); // Changed selector to body
-    if (appBody) {
-        console.log(new Date().toISOString(), 'COMPONENTS.JS: body.adw-initializing found.');
+    try {
+        console.log(new Date().toISOString(), 'COMPONENTS.JS: Before getAdwCommonStyleSheet()');
+        await getAdwCommonStyleSheet(Adw.config.cssPath); // Wait for CSS to be fetched and processed
+        console.log(new Date().toISOString(), 'COMPONENTS.JS: After getAdwCommonStyleSheet()');
 
-        appBody.removeAttribute('hidden'); // Remove hidden attribute FIRST
-        console.log(new Date().toISOString(), 'COMPONENTS.JS: Removed "hidden" attribute from body.');
+        console.log(new Date().toISOString(), 'COMPONENTS.JS: Before Adw.applyFinalThemeAndAccent()');
+        Adw.applyFinalThemeAndAccent();
+        console.log(new Date().toISOString(), 'COMPONENTS.JS: After Adw.applyFinalThemeAndAccent()');
 
-        // Visual Debug Cue: Add a border
-        appBody.style.border = '5px solid red';
-        console.log(new Date().toISOString(), 'COMPONENTS.JS: Applied RED BORDER to body for visual debug.');
+        // After theme application, CSS loading, and component definitions, make the main content visible.
+        console.log(new Date().toISOString(), 'COMPONENTS.JS: Before querySelector for .adw-initializing');
+        const appBody = document.querySelector('body.adw-initializing');
+        if (appBody) {
+            console.log(new Date().toISOString(), 'COMPONENTS.JS: body.adw-initializing found.');
 
-        // Give the browser a chance to process the removal of 'hidden' and component connections
-        requestAnimationFrame(() => {
-            console.log(new Date().toISOString(), 'COMPONENTS.JS: First requestAnimationFrame callback.');
+            appBody.removeAttribute('hidden'); // Remove hidden attribute FIRST
+            console.log(new Date().toISOString(), 'COMPONENTS.JS: Removed "hidden" attribute from body.');
+
+            // Visual Debug Cue: Add a border (optional, for quick check)
+            // appBody.style.border = '2px solid green';
+            // console.log(new Date().toISOString(), 'COMPONENTS.JS: Applied GREEN BORDER to body for visual debug.');
+
+
+            // The main change is that unhiding happens *after* CSS is loaded.
+            // The requestAnimationFrame calls might still be beneficial for a smoother transition if any FOUC remains,
+            // but the core fix is awaiting the CSS.
             requestAnimationFrame(() => {
-                console.log(new Date().toISOString(), 'COMPONENTS.JS: Second requestAnimationFrame callback. Removing border and adw-initializing class.');
-                appBody.style.border = ''; // Remove border
-                appBody.classList.remove('adw-initializing');
-                console.log(new Date().toISOString(), '[Debug] Adwaita initialized, application body made visible (after rAF and visual cue).');
+                // console.log(new Date().toISOString(), 'COMPONENTS.JS: First requestAnimationFrame callback.');
+                requestAnimationFrame(() => {
+                    // console.log(new Date().toISOString(), 'COMPONENTS.JS: Second requestAnimationFrame callback. Removing border and adw-initializing class.');
+                    // appBody.style.border = ''; // Remove border
+                    appBody.classList.remove('adw-initializing');
+                    console.log(new Date().toISOString(), '[Debug] Adwaita initialized, application body made visible after CSS load.');
+                });
             });
-        });
 
-    } else {
-        console.warn(new Date().toISOString(), '[Debug] Adwaita initialized, but body.adw-initializing not found to make visible.');
+        } else {
+            console.warn(new Date().toISOString(), '[Debug] Adwaita initialized, but body.adw-initializing not found to make visible.');
+        }
+    } catch (error) {
+        console.error(new Date().toISOString(), 'COMPONENTS.JS: Error during DOMContentLoaded processing:', error);
+        // Fallback: try to unhide the body anyway if there was an error loading CSS, to prevent a blank page.
+        const appBody = document.querySelector('body.adw-initializing');
+        if (appBody) {
+            appBody.removeAttribute('hidden');
+            appBody.classList.remove('adw-initializing');
+            console.warn(new Date().toISOString(), '[Debug] Fallback: Unhid body due to error during init.');
+        }
     }
     console.log(new Date().toISOString(), 'COMPONENTS.JS: DOMContentLoaded listener finished.');
 });
