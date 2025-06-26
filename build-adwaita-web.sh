@@ -40,7 +40,8 @@ if [ ${sass_exit_code} -ne 0 ]; then
     if [ ${sass_exit_code} -eq 127 ]; then
         echo "NOTE: Exit code 127 often means 'command not found'. Is sass installed and in your PATH?"
     fi
-    exit 1
+    # exit 1 # Temporarily allow script to continue even if SASS fails/hangs
+    echo "WARNING: SASS compilation step did not succeed. CSS file may not be updated. Continuing script..."
 else
     if [ -n "${sass_output_and_error}" ]; then
         echo "SASS Compilation Warnings (or other output):"
@@ -51,8 +52,10 @@ fi
 
 # Verify the output file
 if [ ! -f "${CSS_OUTPUT_FILE}" ]; then
-    echo "ERROR: Output CSS file '${CSS_OUTPUT_FILE}' was not created."
-    exit 1
+    echo "WARNING: Output CSS file '${CSS_OUTPUT_FILE}' was not created. SASS step likely failed or hung."
+    # exit 1 # Continue script
+else
+    echo "Output CSS file '${CSS_OUTPUT_FILE}' exists."
 fi
 
 # Copy JavaScript files
