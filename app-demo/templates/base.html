@@ -75,11 +75,6 @@
     </style>
     {# components.js should contain Adw object initialization and initial theme/accent application #}
     <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
-
-    {# Tiptap Editor - Core (for rich text editing) - REMOVED #}
-    <style>
-        /* Tiptap styles removed */
-    </style>
     <style>
       /* Initially hide Adwaita content to prevent FOUC */
       .adw-initializing {
@@ -91,11 +86,6 @@
     {# components.js should contain Adw object initialization and initial theme/accent application #}
     <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
     <script>console.log(new Date().toISOString(), 'BASE.HTML: After components.js script tag');</script>
-
-    {# Tiptap Editor - Core (for rich text editing) - REMOVED #}
-    <style>
-        /* Tiptap styles removed */
-    </style>
     <script>console.log(new Date().toISOString(), 'BASE.HTML: HEAD End');</script>
 </head>
 <body>
@@ -107,7 +97,6 @@
   {% if current_user and current_user.is_authenticated and current_user.accent_color %}
     data-accent-preference="{{ current_user.accent_color }}"
   {% endif %}
->
     {# Initial theme and accent application script.
        This should ideally be part of Adw.js initialization logic (components.js)
        but added here explicitly to ensure it runs.
