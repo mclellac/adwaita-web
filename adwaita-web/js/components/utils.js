@@ -463,16 +463,3 @@ export function adwMakeFocusable(parentElement) {
                !hidden; // Check for hidden attribute on element or ancestors
     });
 }
-
-export {
-    ACCENT_COLOR_DEFINITIONS,
-    DEFAULT_ACCENT_COLOR_NAME,
-    getAccentColors,
-    setAccentColor,
-    loadSavedTheme,
-    toggleTheme,
-    applyFinalThemeAndAccent,
-    sanitizeHref,
-    getAdwCommonStyleSheet,
-    adwMakeFocusable
-};
