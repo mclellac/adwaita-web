@@ -306,14 +306,16 @@ window.addEventListener('DOMContentLoaded', () => {
         appWindow.style.border = '5px solid red';
         console.log(new Date().toISOString(), 'COMPONENTS.JS: Applied RED BORDER to appWindow for visual debug.');
 
-        setTimeout(() => {
-            console.log(new Date().toISOString(), 'COMPONENTS.JS: Timeout: Removing red border and adw-initializing class.');
-            appWindow.style.border = ''; // Remove border
-            appWindow.classList.remove('adw-initializing'); // This class might now be redundant if 'hidden' works well
-            // Optionally, explicitly set visibility if there are concerns about CSS specificity or timing.
-            // appWindow.style.visibility = 'visible';
-            console.log(new Date().toISOString(), '[Debug] Adwaita initialized, application window made visible (after visual cue).');
-        }, 1000); // Keep border for 1 second
+        // Give the browser a chance to process the removal of 'hidden' and component connections
+        requestAnimationFrame(() => {
+            console.log(new Date().toISOString(), 'COMPONENTS.JS: First requestAnimationFrame callback.');
+            requestAnimationFrame(() => {
+                console.log(new Date().toISOString(), 'COMPONENTS.JS: Second requestAnimationFrame callback. Removing border and adw-initializing class.');
+                appWindow.style.border = ''; // Remove border
+                appWindow.classList.remove('adw-initializing');
+                console.log(new Date().toISOString(), '[Debug] Adwaita initialized, application window made visible (after rAF and visual cue).');
+            });
+        });
 
     } else {
         console.warn(new Date().toISOString(), '[Debug] Adwaita initialized, but adw-application-window.adw-initializing not found to make visible.');
