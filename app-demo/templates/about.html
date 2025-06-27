@@ -1,139 +1,102 @@
 {% extends "base.html" %}
 {% block title %}About Us - {{ super() }}{% endblock %}
 {% block content %}
-<adw-clamp style="max-width: 800px; margin: 20px auto; padding: var(--spacing-l);">
-    <adw-box class="adw-box adw-box-vertical adw-box-spacing-l">
-        <h1 class="adw-title-1" style="text-align: center;">About This Application</h1>
+<div class="adw-clamp" style="max-width: 800px; margin: 20px auto; padding: var(--spacing-l);">
+    <div class="adw-box vertical spacing-l">
+        <h1 class="adw-label title-1" style="text-align: center;">About This Application</h1>
 
-        <adw-preferences-group>
-            <adw-action-row title="Purpose" subtitle="This is a demonstration application showcasing the Adwaita-Web UI library integration with a Flask backend."></adw-action-row>
-            <adw-action-row title="Features" subtitle="It includes a basic blog, user profiles, and various examples of Adwaita widgets in action."></adw-action-row>
-            <adw-expander-row title="Technology Stack" subtitle="Learn more about the tech used.">
-                <div slot="rows" style="padding: var(--spacing-m);">
-                    <p><adw-label is_body="true"><strong>Frontend:</strong> Adwaita-Web (Custom JS/SCSS), Flask Templates (Jinja2)</adw-label></p>
-                    <p><adw-label is_body="true"><strong>Backend:</strong> Flask (Python)</adw-label></p>
-                    <p><adw-label is_body="true"><strong>Database:</strong> SQLAlchemy with PostgreSQL (default)</adw-label></p>
-                    <p><adw-label is_body="true"><strong>UI Library:</strong> Adwaita-Web (toplevel scss & js)</adw-label></p>
+        <div class="adw-preferences-group" role="group" aria-labelledby="about-purpose-title">
+            <div class="adw-preferences-group__title-container">
+                <h3 class="adw-preferences-group__title" id="about-purpose-title">Information</h3>
+            </div>
+            <div class="adw-action-row">
+                <div class="adw-action-row__text">
+                    <span class="adw-action-row__title">Purpose</span>
+                    <span class="adw-action-row__subtitle">This is a demonstration application showcasing the Adwaita-Skin CSS library integration with a Flask backend.</span>
                 </div>
-            </adw-expander-row>
-        </adw-preferences-group>
-
-        <adw-preferences-group title="Overlay Tests">
-            <adw-action-row title="Test Banner" id="test-banner-row">
-                <adw-button slot="suffix" id="show-banner-button">Show Banner</adw-button>
-            </adw-action-row>
-            <adw-action-row title="Test Toast" id="test-toast-row">
-                <adw-button slot="suffix" id="show-toast-button">Show Toast</adw-button>
-            </adw-action-row>
-            <adw-action-row title="Test Dialog" id="test-dialog-row">
-                <adw-button slot="suffix" id="show-dialog-button">Show Dialog</adw-button>
-            </adw-action-row>
-            <adw-action-row title="Test Bottom Sheet" id="test-bottom-sheet-row">
-                <adw-button slot="suffix" id="show-bottom-sheet-button">Show Bottom Sheet</adw-button>
-            </adw-action-row>
-        </adw-preferences-group>
-
-        <!-- AdwDialog for testing -->
-        <adw-dialog id="test-dialog" title="Test Dialog">
-            <div slot="content">
-                <p>This is a test dialog. It should appear above the page content and banner.</p>
-                <adw-button id="dialog-popover-button">Show Popover from Dialog</adw-button>
-                <adw-button id="dialog-toast-button" style="margin-left: 8px;">Show Toast from Dialog</adw-button>
             </div>
-            <adw-button slot="buttons" on:click="document.getElementById('test-dialog').close()">Close Dialog</adw-button>
-        </adw-dialog>
-
-        <!-- AdwPopover for testing (attached to dialog button) -->
-        <adw-popover id="dialog-popover" target="#dialog-popover-button" position="bottom">
-            <div style="padding:12px; width: 200px;">
-                <adw-label is-body="true">Popover from dialog!</adw-label>
-                <adw-entry placeholder="Focus test..."></adw-entry>
+            <div class="adw-action-row">
+                <div class="adw-action-row__text">
+                    <span class="adw-action-row__title">Features</span>
+                    <span class="adw-action-row__subtitle">It includes a basic blog, user profiles, and various examples of Adwaita widgets in action.</span>
+                </div>
             </div>
-        </adw-popover>
-
-        <!-- AdwBottomSheet for testing -->
-        <adw-bottom-sheet id="test-bottom-sheet" full-width="false" align="center">
-            <div slot="sheet" style="padding: 20px; text-align: center;">
-                <h2>Test Bottom Sheet</h2>
-                <p>This is a bottom sheet. It should overlay content but might be below dialogs.</p>
-                <adw-button on:click="document.getElementById('test-bottom-sheet').close()">Close Sheet</adw-button>
+            <div class="adw-expander-row">
+                <div class="adw-action-row activatable" role="button" tabindex="0" aria-expanded="false">
+                    <div class="adw-action-row__text">
+                        <span class="adw-action-row__title">Technology Stack</span>
+                        <span class="adw-action-row__subtitle">Learn more about the tech used.</span>
+                    </div>
+                    <span class="adw-expander-row__chevron"></span>
+                </div>
+                <div class="adw-expander-row-content" style="padding: var(--spacing-m);">
+                    <p><span class="adw-label body"><strong>Frontend:</strong> Adwaita-Skin (Pure CSS/SCSS), Flask Templates (Jinja2)</span></p>
+                    <p><span class="adw-label body"><strong>Backend:</strong> Flask (Python)</span></p>
+                    <p><span class="adw-label body"><strong>Database:</strong> SQLAlchemy with PostgreSQL (default)</span></p>
+                    <p><span class="adw-label body"><strong>UI Library:</strong> Adwaita-Skin (this project)</span></p>
+                </div>
             </div>
-        </adw-bottom-sheet>
+        </div>
 
-        <!-- AdwToastOverlay will be added to base.html or managed globally if not already present -->
-        <!-- For this test, ensure one is available. Assuming one is in base.html or auto-created. -->
+        <div class="adw-preferences-group" role="group" aria-labelledby="about-overlay-tests-title">
+            <div class="adw-preferences-group__title-container">
+                <h3 class="adw-preferences-group__title" id="about-overlay-tests-title">Overlay Tests (Static Display)</h3>
+            </div>
+            <div class="adw-action-row">
+                <div class="adw-action-row__text"><span class="adw-action-row__title">Test Banner</span></div>
+                <div class="adw-action-row__suffix-widget"><button class="adw-button" id="show-banner-button-static">Show Banner (No Action)</button></div>
+            </div>
+            <div class="adw-action-row">
+                <div class="adw-action-row__text"><span class="adw-action-row__title">Test Toast</span></div>
+                <div class="adw-action-row__suffix-widget"><button class="adw-button" id="show-toast-button-static">Show Toast (No Action)</button></div>
+            </div>
+            <div class="adw-action-row">
+                <div class="adw-action-row__text"><span class="adw-action-row__title">Test Dialog</span></div>
+                <div class="adw-action-row__suffix-widget"><button class="adw-button" id="show-dialog-button-static">Show Dialog (No Action)</button></div>
+            </div>
+            <div class="adw-action-row">
+                <div class="adw-action-row__text"><span class="adw-action-row__title">Test Bottom Sheet</span></div>
+                <div class="adw-action-row__suffix-widget"><button class="adw-button" id="show-bottom-sheet-button-static">Show Bottom Sheet (No Action)</button></div>
+            </div>
+        </div>
 
+        <!-- Static AdwDialog for testing appearance -->
+        <div class="adw-dialog" id="test-dialog-static" role="dialog" aria-labelledby="dialog-static-title" style="display: block; position:relative; margin-top: var(--spacing-l); max-width: 400px;">
+            <header class="adw-header-bar adw-dialog__header">
+                <h2 class="adw-header-bar__title" id="dialog-static-title">Test Dialog (Static)</h2>
+            </header>
+            <div class="adw-dialog__content">
+                <p class="adw-label body">This is a test dialog. It should appear above the page content and banner.</p>
+                <button class="adw-button" id="dialog-popover-button-static">Show Popover (No Action)</button>
+                <button class="adw-button" id="dialog-toast-button-static" style="margin-left: 8px;">Show Toast (No Action)</button>
+            </div>
+            <footer class="adw-dialog__actions">
+                <button class="adw-button flat">Close Dialog (No Action)</button>
+            </footer>
+        </div>
+
+        <!-- Static AdwPopover for testing appearance -->
+        <div class="adw-popover" id="dialog-popover-static" style="display: block; position:relative; margin-top: var(--spacing-s); border: 1px solid var(--border-color); width: 220px;">
+            <div style="padding:12px;">
+                <p class="adw-label body">Popover from dialog! (Static)</p>
+                <input type="text" class="adw-entry" placeholder="Focus test...">
+            </div>
+        </div>
+
+        <!-- Static AdwBottomSheet for testing appearance -->
+         <div class="adw-bottom-sheet" id="test-bottom-sheet-static" style="display: block; position:relative; margin-top: var(--spacing-l); border: 1px solid var(--border-color);">
+            <div class="adw-bottom-sheet__sheet" style="padding: 20px; text-align: center;">
+                <h2 class="adw-label title-2">Test Bottom Sheet (Static)</h2>
+                <p class="adw-label body">This is a bottom sheet. It should overlay content but might be below dialogs.</p>
+                <button class="adw-button">Close Sheet (No Action)</button>
+            </div>
+        </div>
 
         <div style="text-align: center; margin-top: var(--spacing-xl);">
-            <adw-button href="{{ url_for('index') }}">Back to Home</adw-button>
+            <a href="{{ url_for('index') }}" class="adw-button">Back to Home</a>
         </div>
-    </adw-box>
-</adw-clamp>
+    </div>
+</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Banner
-        const showBannerButton = document.getElementById('show-banner-button');
-        showBannerButton.addEventListener('click', () => {
-            // Remove any existing test banner first
-            const existingBanner = document.getElementById('test-page-banner');
-            if (existingBanner) existingBanner.remove();
-
-            const banner = Adw.createBanner('This is a test banner!', {
-                id: 'test-page-banner',
-                dismissible: true,
-                revealed: false, // Create hidden, then reveal
-                type: 'info' // 'info', 'error', 'warning', 'success'
-            });
-            document.body.insertBefore(banner, document.body.firstChild); // Prepend to body
-            // Force reflow before adding visible class for transition
-            void banner.offsetWidth;
-            banner.classList.add('visible');
-
-            banner.addEventListener('dismissed', () => console.log('Test banner dismissed.'));
-        });
-
-        // Toast
-        const showToastButton = document.getElementById('show-toast-button');
-        showToastButton.addEventListener('click', () => {
-            let toastOverlay = document.querySelector('adw-toast-overlay');
-            if (!toastOverlay) { // Ensure toast overlay exists
-                toastOverlay = document.createElement('adw-toast-overlay');
-                document.body.appendChild(toastOverlay);
-            }
-            toastOverlay.addToast({ title: 'This is a test toast!', timeout: 5 });
-        });
-
-        // Dialog
-        const showDialogButton = document.getElementById('show-dialog-button');
-        const testDialog = document.getElementById('test-dialog');
-        showDialogButton.addEventListener('click', () => testDialog.open());
-
-        // Popover from Dialog
-        const dialogPopoverButton = document.getElementById('dialog-popover-button');
-        const dialogPopover = document.getElementById('dialog-popover');
-        dialogPopoverButton.addEventListener('click', () => {
-            if (dialogPopover.hasAttribute('open')) dialogPopover.hide();
-            else dialogPopover.show();
-        });
-
-        // Toast from Dialog
-        const dialogToastButton = document.getElementById('dialog-toast-button');
-        dialogToastButton.addEventListener('click', () => {
-            let toastOverlay = document.querySelector('adw-toast-overlay');
-            if (!toastOverlay) {
-                toastOverlay = document.createElement('adw-toast-overlay');
-                document.body.appendChild(toastOverlay);
-            }
-            toastOverlay.addToast({ title: 'Toast from inside dialog!', timeout: 3 });
-        });
-
-
-        // Bottom Sheet
-        const showBottomSheetButton = document.getElementById('show-bottom-sheet-button');
-        const testBottomSheet = document.getElementById('test-bottom-sheet');
-        showBottomSheetButton.addEventListener('click', () => testBottomSheet.open());
-
-    });
-</script>
+{# Removed JavaScript for dynamic overlays #}
 {% endblock %}
