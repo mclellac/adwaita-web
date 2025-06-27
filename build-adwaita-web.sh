@@ -3,21 +3,29 @@
 set -e
 
 # Define paths
+
+# adwaita-web paths
 SASS_SOURCE_DIR="adwaita-web/scss"
 SASS_INPUT_FILE="${SASS_SOURCE_DIR}/style.scss"
 JS_INPUT_DIR="adwaita-web/js"
 DATA_INPUT_DIR="adwaita-web/data"
 FONTS_INPUT_DIR="adwaita-web/fonts"
 
+# adwaita-skin paths
+ADWAITA_SKIN_SASS_SOURCE_DIR="adwaita-skin/scss"
+ADWAITA_SKIN_SASS_INPUT_FILE="${ADWAITA_SKIN_SASS_SOURCE_DIR}/adwaita-skin.scss"
+ADWAITA_SKIN_CSS_OUTPUT_DIR="adwaita-skin/css" # This is the source dir for copying
+ADWAITA_SKIN_CSS_OUTPUT_FILE="${ADWAITA_SKIN_CSS_OUTPUT_DIR}/adwaita-skin.css"
+
 BUILD_DIR="build"
-CSS_OUTPUT_DIR="${BUILD_DIR}/css"
+CSS_OUTPUT_DIR="${BUILD_DIR}/css" # For adwaita-web build artifacts
 JS_OUTPUT_DIR="${BUILD_DIR}/js"
 DATA_OUTPUT_DIR="${BUILD_DIR}/data"
 FONTS_OUTPUT_DIR="${BUILD_DIR}/fonts"
 
-CSS_OUTPUT_FILE="${CSS_OUTPUT_DIR}/adwaita-web.css"
+CSS_OUTPUT_FILE="${CSS_OUTPUT_DIR}/adwaita-web.css" # adwaita-web css output
 
-echo "--- Starting Adwaita-Web Build Script ---"
+echo "--- Starting Build Script ---"
 
 # Create output directories if they don't exist
 mkdir -p "${CSS_OUTPUT_DIR}"
@@ -28,8 +36,8 @@ mkdir -p "${FONTS_OUTPUT_DIR}"
 mkdir -p "${JS_OUTPUT_DIR}/components"
 mkdir -p "${DATA_OUTPUT_DIR}/icons/symbolic"
 
-# Compile SASS to CSS
-echo "--- Compiling SASS to CSS ---"
+# Compile SASS to CSS for adwaita-web
+echo "--- Compiling SASS to CSS for adwaita-web ---"
 sass_output_and_error=$(sass "${SASS_INPUT_FILE}" "${CSS_OUTPUT_FILE}" --style compressed 2>&1)
 sass_exit_code=$?
 
@@ -56,6 +64,35 @@ if [ ! -f "${CSS_OUTPUT_FILE}" ]; then
     # exit 1 # Continue script
 else
     echo "Output CSS file '${CSS_OUTPUT_FILE}' exists."
+fi
+
+# Compile SASS to CSS for adwaita-skin
+echo "--- Compiling SASS to CSS for adwaita-skin ---"
+mkdir -p "${ADWAITA_SKIN_CSS_OUTPUT_DIR}"
+adwaita_skin_sass_output_and_error=$(sass "${ADWAITA_SKIN_SASS_INPUT_FILE}" "${ADWAITA_SKIN_CSS_OUTPUT_FILE}" --style compressed 2>&1)
+adwaita_skin_sass_exit_code=$?
+
+if [ ${adwaita_skin_sass_exit_code} -ne 0 ]; then
+    echo "ERROR: adwaita-skin SASS compilation failed (exit code ${adwaita_skin_sass_exit_code})."
+    echo "SASS Compiler Output:"
+    echo "${adwaita_skin_sass_output_and_error}"
+    if [ ${adwaita_skin_sass_exit_code} -eq 127 ]; then
+        echo "NOTE: Exit code 127 often means 'command not found'. Is sass installed and in your PATH?"
+    fi
+    echo "WARNING: adwaita-skin SASS compilation step did not succeed. CSS file may not be updated. Continuing script..."
+else
+    if [ -n "${adwaita_skin_sass_output_and_error}" ]; then
+        echo "adwaita-skin SASS Compilation Warnings (or other output):"
+        echo "${adwaita_skin_sass_output_and_error}"
+    fi
+    echo "adwaita-skin SASS compilation successful: ${ADWAITA_SKIN_CSS_OUTPUT_FILE}"
+fi
+
+# Verify the adwaita-skin output file
+if [ ! -f "${ADWAITA_SKIN_CSS_OUTPUT_FILE}" ]; then
+    echo "WARNING: Output adwaita-skin CSS file '${ADWAITA_SKIN_CSS_OUTPUT_FILE}' was not created. SASS step likely failed or hung."
+else
+    echo "Output adwaita-skin CSS file '${ADWAITA_SKIN_CSS_OUTPUT_FILE}' exists."
 fi
 
 # Copy JavaScript files
@@ -120,12 +157,20 @@ mkdir -p "${APP_DEMO_JS_DIR}"
 mkdir -p "${APP_DEMO_DATA_DIR}" # Will contain 'icons/symbolic'
 mkdir -p "${APP_DEMO_FONTS_DIR}" # Will contain 'mono' and 'sans'
 
-# Copy CSS
+# Copy adwaita-web CSS
 if [ -f "${CSS_OUTPUT_FILE}" ]; then
     cp "${CSS_OUTPUT_FILE}" "${APP_DEMO_CSS_DIR}/adwaita-web.css"
     echo "Copied ${CSS_OUTPUT_FILE} to ${APP_DEMO_CSS_DIR}/adwaita-web.css"
 else
-    echo "WARNING: Built CSS file ${CSS_OUTPUT_FILE} not found. Skipping copy to app-demo."
+    echo "WARNING: Built adwaita-web CSS file ${CSS_OUTPUT_FILE} not found. Skipping copy to app-demo."
+fi
+
+# Copy adwaita-skin CSS
+if [ -f "${ADWAITA_SKIN_CSS_OUTPUT_FILE}" ]; then
+    cp "${ADWAITA_SKIN_CSS_OUTPUT_FILE}" "${APP_DEMO_CSS_DIR}/adwaita-skin.css"
+    echo "Copied ${ADWAITA_SKIN_CSS_OUTPUT_FILE} to ${APP_DEMO_CSS_DIR}/adwaita-skin.css"
+else
+    echo "WARNING: Built adwaita-skin CSS file '${ADWAITA_SKIN_CSS_OUTPUT_FILE}' not found. Skipping copy to app-demo."
 fi
 
 # Copy JS (entire JS_OUTPUT_DIR which includes components.js and components/ subdirectory)
@@ -159,4 +204,4 @@ else
     echo "INFO: Built fonts directory ${FONTS_OUTPUT_DIR} not found or empty. Skipping copy to app-demo."
 fi
 
-echo "--- Adwaita-Web Build Script Finished ---"
+echo "--- Build Script Finished ---"
