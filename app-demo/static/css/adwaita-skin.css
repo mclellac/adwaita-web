@@ -50,13 +50,18 @@
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -66,9 +71,9 @@
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -131,14 +136,19 @@
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 :root {
@@ -192,13 +202,18 @@
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -208,9 +223,9 @@
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -274,14 +289,19 @@
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 :root {
@@ -335,13 +355,18 @@
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -351,9 +376,9 @@
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -416,14 +441,19 @@
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 :root {
@@ -477,13 +507,18 @@
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -493,9 +528,9 @@
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -559,14 +594,19 @@
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 *,
@@ -1041,13 +1081,18 @@ hr {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -1057,9 +1102,9 @@ hr {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -1122,14 +1167,19 @@ hr {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 :root {
@@ -1183,13 +1233,18 @@ hr {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -1199,9 +1254,9 @@ hr {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -1265,14 +1320,19 @@ hr {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-button {
@@ -1348,16 +1408,16 @@ hr {
 }
 .adw-button.destructive-action {
   background-color: var(--destructive-bg-color);
-  border-color: var(--destructive-bg-color);
+  border-color: var(--destructive-border-color, var(--destructive-bg-color));
   color: var(--destructive-fg-color);
 }
 .adw-button.destructive-action:hover {
   background-color: var(--destructive-bg-hover-color);
-  border-color: var(--destructive-bg-hover-color);
+  border-color: var(--destructive-border-color, var(--destructive-bg-hover-color));
 }
 .adw-button.destructive-action:active {
   background-color: var(--destructive-bg-active-color);
-  border-color: var(--destructive-bg-active-color);
+  border-color: var(--destructive-border-color, var(--destructive-bg-active-color));
 }
 .adw-button.flat {
   background-color: transparent;
@@ -1495,13 +1555,18 @@ input[type=reset].adw-button {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -1511,9 +1576,9 @@ input[type=reset].adw-button {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -1576,14 +1641,19 @@ input[type=reset].adw-button {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 :root {
@@ -1637,13 +1707,18 @@ input[type=reset].adw-button {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -1653,9 +1728,9 @@ input[type=reset].adw-button {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -1719,14 +1794,19 @@ input[type=reset].adw-button {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 :root {
@@ -1979,13 +2059,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -1995,9 +2080,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -2061,14 +2146,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-header-bar {
@@ -2206,13 +2296,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -2222,9 +2317,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -2288,14 +2383,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-list-box {
@@ -2428,13 +2528,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -2444,9 +2549,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -2510,14 +2615,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-dialog {
@@ -2625,13 +2735,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -2641,9 +2756,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -2707,14 +2822,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 /*
@@ -2947,13 +3067,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -2963,9 +3088,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -3029,14 +3154,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-action-row {
@@ -3148,7 +3278,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
 .adw-action-row.monospace:not(.property) .adw-action-row-subtitle {
   font-family: var(--font-family-monospace);
 }
-
+.adw-action-row.destructive-action .adw-action-row-title {
+  color: var(--destructive-color);
+}
 :root {
   --body-bg-color: #ffffff;
   --text-color: rgba(0, 0, 0, 0.8);
@@ -3200,13 +3332,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -3216,9 +3353,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -3282,14 +3419,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-entry-row {
@@ -3416,13 +3558,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -3432,9 +3579,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -3498,14 +3645,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-expander-row .adw-expander-row-header.adw-action-row {
@@ -3587,13 +3739,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -3603,9 +3760,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -3669,14 +3826,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-switch {
@@ -3794,13 +3956,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -3810,9 +3977,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -3876,14 +4043,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-checkbox {
@@ -4012,13 +4184,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -4028,9 +4205,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -4094,14 +4271,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-radio {
@@ -4227,13 +4409,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -4243,9 +4430,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -4308,14 +4495,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 :root {
@@ -4369,13 +4561,18 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -4385,9 +4582,9 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -4451,14 +4648,19 @@ input[type=search].adw-textarea::-webkit-search-results-decoration {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-label {
@@ -4570,13 +4772,18 @@ label.adw-label {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -4586,9 +4793,9 @@ label.adw-label {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -4652,14 +4859,19 @@ label.adw-label {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-icon {
@@ -4730,13 +4942,18 @@ label.adw-label {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -4746,9 +4963,9 @@ label.adw-label {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -4812,14 +5029,19 @@ label.adw-label {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 :root {
@@ -4928,13 +5150,18 @@ label.adw-label {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -4944,9 +5171,9 @@ label.adw-label {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -5010,14 +5237,19 @@ label.adw-label {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 :root {
@@ -5112,13 +5344,18 @@ label.adw-label {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -5128,9 +5365,9 @@ label.adw-label {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -5194,14 +5431,19 @@ label.adw-label {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-progress-bar {
@@ -5304,13 +5546,18 @@ label.adw-label {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -5320,9 +5567,9 @@ label.adw-label {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -5386,14 +5633,19 @@ label.adw-label {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-toast {
@@ -5522,13 +5774,18 @@ label.adw-label {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -5538,9 +5795,9 @@ label.adw-label {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -5604,14 +5861,19 @@ label.adw-label {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-banner {
@@ -5760,13 +6022,18 @@ label.adw-label {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -5776,9 +6043,9 @@ label.adw-label {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -5842,14 +6109,19 @@ label.adw-label {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 :host(adw-popover) {
@@ -5953,13 +6225,18 @@ label.adw-label {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -5969,9 +6246,9 @@ label.adw-label {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -6035,14 +6312,19 @@ label.adw-label {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-tab-button {
@@ -6249,13 +6531,18 @@ adw-tab-page > .adw-tab-page {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -6265,9 +6552,9 @@ adw-tab-page > .adw-tab-page {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -6331,14 +6618,19 @@ adw-tab-page > .adw-tab-page {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-toolbar-view {
@@ -6416,13 +6708,18 @@ adw-tab-page > .adw-tab-page {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -6432,9 +6729,9 @@ adw-tab-page > .adw-tab-page {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -6498,14 +6795,19 @@ adw-tab-page > .adw-tab-page {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-view-switcher {
@@ -6638,13 +6940,18 @@ adw-tab-page > .adw-tab-page {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -6654,9 +6961,9 @@ adw-tab-page > .adw-tab-page {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -6720,14 +7027,19 @@ adw-tab-page > .adw-tab-page {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-spin-button {
@@ -6902,13 +7214,18 @@ adw-tab-page > .adw-tab-page {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -6918,9 +7235,9 @@ adw-tab-page > .adw-tab-page {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -6984,14 +7301,19 @@ adw-tab-page > .adw-tab-page {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-status-page {
@@ -7085,13 +7407,18 @@ adw-tab-page > .adw-tab-page {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -7101,9 +7428,9 @@ adw-tab-page > .adw-tab-page {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -7167,14 +7494,19 @@ adw-tab-page > .adw-tab-page {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-preferences-page {
@@ -7254,13 +7586,18 @@ adw-tab-page > .adw-tab-page {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -7270,9 +7607,9 @@ adw-tab-page > .adw-tab-page {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -7336,14 +7673,19 @@ adw-tab-page > .adw-tab-page {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-switch-row {
@@ -7454,13 +7796,18 @@ adw-tab-page > .adw-tab-page {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -7470,9 +7817,9 @@ adw-tab-page > .adw-tab-page {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -7536,14 +7883,19 @@ adw-tab-page > .adw-tab-page {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-split-button {
@@ -7732,13 +8084,18 @@ adw-tab-page > .adw-tab-page {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -7748,9 +8105,9 @@ adw-tab-page > .adw-tab-page {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -7814,14 +8171,19 @@ adw-tab-page > .adw-tab-page {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-toggle-group {
@@ -7984,13 +8346,18 @@ adw-tab-page > .adw-tab-page {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -8000,9 +8367,9 @@ adw-tab-page > .adw-tab-page {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -8066,14 +8433,19 @@ adw-tab-page > .adw-tab-page {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-box {
@@ -8206,13 +8578,18 @@ body.dark-theme .adw-card {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -8222,9 +8599,9 @@ body.dark-theme .adw-card {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -8288,14 +8665,19 @@ body.dark-theme .adw-card {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-wrap-box {
@@ -8428,13 +8810,18 @@ body.dark-theme .adw-card {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -8444,9 +8831,9 @@ body.dark-theme .adw-card {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -8510,14 +8897,19 @@ body.dark-theme .adw-card {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-clamp {
@@ -8584,13 +8976,18 @@ body.dark-theme .adw-card {
   --accent-bg-hover-color: rgb(30.5065502183, 118.3034934498, 224.9934497817);
   --accent-bg-active-color: rgb(27.1179039301, 106.4628820961, 202.8820960699);
   --destructive-color: #c01c28;
-  --destructive-bg-color: #e01b24;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(201.2430278884, 24.2569721116, 32.3426294821);
-  --destructive-bg-active-color: rgb(178.4860557769, 21.5139442231, 28.6852589641);
+  --destructive-bg-color: #feebee;
+  --destructive-fg-color: #c01c28;
+  --destructive-border-color: #f5c6c0;
+  --destructive-bg-hover-color: rgb(252.7857142857, 210.7142857143, 217.3571428571);
+  --destructive-bg-active-color: rgb(251.5714285714, 186.4285714286, 196.7142857143);
   --success-color: #26a269;
   --success-bg-color: #2ec27e;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(0, 0, 0, 0.04);
+  --list-row-active-bg-color: rgba(0, 0, 0, 0.08);
   --document-font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --monospace-font-family: "Monaco", "Menlo", "Courier New", monospace;
   --font-size-base: 10pt;
@@ -8600,9 +8997,9 @@ body.dark-theme .adw-card {
   --font-size-h2: 16pt;
   --font-size-h3: 14pt;
   --font-size-h4: 12pt;
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 6px;
+  --border-radius-default: 8px;
   --border-radius-large: 12px;
   --border-width: 1px;
   --spacing-xxs: 3px;
@@ -8666,14 +9063,19 @@ body.dark-theme .adw-card {
   --accent-fg-color: #ffffff;
   --accent-bg-hover-color: rgb(75.4934497817, 145.6965065502, 231.0065502183);
   --accent-bg-active-color: rgb(97.9868995633, 159.3930131004, 234.0131004367);
-  --destructive-color: rgb(243.2027027027, 121.2972972973, 126.5405405405);
-  --destructive-bg-color: #c01c28;
-  --destructive-fg-color: #ffffff;
-  --destructive-bg-hover-color: rgb(224.5818181818, 46.4181818182, 59.4545454545);
-  --destructive-bg-active-color: rgb(231.0727272727, 90.9272727273, 101.1818181818);
+  --destructive-color: #f66151;
+  --destructive-bg-color: #5c2525;
+  --destructive-fg-color: #f66151;
+  --destructive-border-color: #7a3535;
+  --destructive-bg-hover-color: rgb(110.1860465116, 44.3139534884, 44.3139534884);
+  --destructive-bg-active-color: rgb(128.3720930233, 51.6279069767, 51.6279069767);
   --success-color: #8ff0a4;
   --success-bg-color: #26a269;
   --success-fg-color: #ffffff;
+  --list-row-selected-bg-color: #3584e4;
+  --list-row-selected-fg-color: #ffffff;
+  --list-row-hover-bg-color: rgba(255, 255, 255, 0.06);
+  --list-row-active-bg-color: rgba(255, 255, 255, 0.1);
 }
 
 .adw-window {

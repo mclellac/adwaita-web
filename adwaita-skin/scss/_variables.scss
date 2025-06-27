@@ -45,7 +45,6 @@ $input-height-approx: 38px;
 // Light Theme Colors
 $background-color-light: $adw-light-1;
 $text-color-light: rgba($adw-dark-5, 0.8);
-// ... (rest of light theme SASS color variables remain the same) ...
 $text-color-secondary-light: rgba($adw-dark-5, 0.55);
 $heading-color-light: rgba($adw-dark-5, 0.9);
 $border-color-light: rgba($adw-dark-5, 0.15);
@@ -60,7 +59,7 @@ $headerbar-border-color-light: $border-color-light;
 $window-background-color-light: $adw-light-1;
 $button-background-color-light: $adw-light-2;
 $button-text-color-light: $text-color-light;
-$button-border-color-light: $border-color-light;
+$button-border-color-light: $border-color-light; // Standard button border
 $button-hover-background-color-light: $adw-light-3;
 $button-hover-border-color-light: color.adjust($border-color-light, $lightness: -10%);
 $button-hover-text-color-light: $text-color-light;
@@ -74,6 +73,16 @@ $flat-button-active-background-color-light: rgba($adw-dark-5, 0.1);
 $button-active-toggle-background-color-light: $adw-light-4;
 $button-active-toggle-border-color-light: color.adjust($border-color-light, $lightness: -20%);
 $button-active-toggle-text-color-light: $text-color-light;
+
+$destructive-button-background-color-light: #feebee; // A very light red, like Adwaita's $error_bg_color or similar
+$destructive-button-text-color-light: $adw-red-4;    // Darker red text for contrast ($adw-red-4: #c01c28;)
+$destructive-button-border-color-light: #f5c6c0;   // A slightly darker border than bg
+$destructive-button-hover-background-color-light: color.adjust($destructive-button-background-color-light, $lightness: -5%);
+$destructive-button-active-background-color-light: color.adjust($destructive-button-background-color-light, $lightness: -10%);
+
+$list-row-selected-background-color-light: $adw-blue-3; // Use accent color for selected rows
+$list-row-selected-text-color-light: $adw-light-1;     // White text on accent background
+
 $input-background-color-light: $adw-light-1;
 $input-text-color-light: $text-color-light;
 $input-border-color-light: $border-color-light;
@@ -90,24 +99,23 @@ $input-readonly-text-color-light: $text-color-secondary-light;
 $input-readonly-border-color-light: $border-color-light;
 
 // Dark Theme Colors
-$background-color-dark: #242424;
-$text-color-dark: $adw-light-1;
-// ... (rest of dark theme SASS color variables remain the same) ...
+$background-color-dark: #242424; // Adwaita dark bg: #242424
+$text-color-dark: $adw-light-1;  // Primary text on dark: #eeeeec (or $adw-light-1)
 $text-color-secondary-dark: rgba($adw-light-1, 0.7);
 $heading-color-dark: $adw-light-1;
-$border-color-dark: rgba($adw-light-1, 0.15);
+$border-color-dark: rgba($adw-light-1, 0.15); // Borders in dark theme
 $divider-color-dark: rgba($adw-light-1, 0.1);
 $focus-ring-color-fallback-dark: rgba($adw-blue-1, 0.6);
 $link-color-dark: $adw-blue-1;
 $link-hover-color-dark: $adw-blue-2;
 $link-visited-color-dark: $adw-purple-1;
-$headerbar-background-color-dark: #303030;
+$headerbar-background-color-dark: #303030; // Headerbar in dark
 $headerbar-text-color-dark: $text-color-dark;
 $headerbar-border-color-dark: $border-color-dark;
 $window-background-color-dark: $background-color-dark;
-$button-background-color-dark: $adw-dark-2;
+$button-background-color-dark: $adw-dark-2; // Button bg in dark: #383838 or $adw-dark-2
 $button-text-color-dark: $text-color-dark;
-$button-border-color-dark: $border-color-dark;
+$button-border-color-dark: $border-color-dark; // Standard button border in dark
 $button-hover-background-color-dark: $adw-dark-1;
 $button-hover-border-color-dark: color.adjust($border-color-dark, $lightness: 10%);
 $button-hover-text-color-dark: $text-color-dark;
@@ -121,7 +129,17 @@ $flat-button-active-background-color-dark: rgba($adw-light-1, 0.12);
 $button-active-toggle-background-color-dark: color.adjust($adw-dark-1, $lightness: 5%);
 $button-active-toggle-border-color-dark: color.adjust($border-color-dark, $lightness: 20%);
 $button-active-toggle-text-color-dark: $text-color-dark;
-$input-background-color-dark: $adw-dark-3;
+
+$destructive-button-background-color-dark: #5c2525; // A dark, desaturated red background
+$destructive-button-text-color-dark: $adw-red-1;      // Lighter red text for contrast ($adw-red-1: #f66151)
+$destructive-button-border-color-dark: #7a3535;     // A slightly darker border than bg
+$destructive-button-hover-background-color-dark: color.adjust($destructive-button-background-color-dark, $lightness: 5%);
+$destructive-button-active-background-color-dark: color.adjust($destructive-button-background-color-dark, $lightness: 10%);
+
+$list-row-selected-background-color-dark: $adw-blue-3; // Use accent color for selected rows (same as light)
+$list-row-selected-text-color-dark: $adw-light-1;     // White text on accent background (same as light)
+
+$input-background-color-dark: $adw-dark-3; // Input bg in dark: #303030 or $adw-dark-3
 $input-text-color-dark: $text-color-dark;
 $input-border-color-dark: $border-color-dark;
 $input-hover-background-color-dark: $adw-dark-3;
@@ -136,22 +154,43 @@ $input-readonly-background-color-dark: $adw-dark-2;
 $input-readonly-text-color-dark: $text-color-secondary-dark;
 $input-readonly-border-color-dark: $border-color-dark;
 
+
 // --- 3. SASS Variables for Specific Accent Colors (Direct SASS colors) ---
-// ... (accent SASS color variables $sass-accent-*-*-* remain the same) ...
-$sass-accent-blue-light-color: $adw-blue-4; $sass-accent-blue-light-bg: $adw-blue-3; $sass-accent-blue-light-fg: $adw-light-1; $sass-accent-blue-light-hover: color.adjust($sass-accent-blue-light-bg, $lightness: -5%); $sass-accent-blue-light-active: color.adjust($sass-accent-blue-light-bg, $lightness: -10%);
-$sass-accent-blue-dark-color: $adw-blue-2; $sass-accent-blue-dark-bg: $adw-blue-3; $sass-accent-blue-dark-fg: $adw-light-1; $sass-accent-blue-dark-hover: color.adjust($sass-accent-blue-dark-bg, $lightness: 5%); $sass-accent-blue-dark-active: color.adjust($sass-accent-blue-dark-bg, $lightness: 10%);
+// These are the "text" or "foreground" colors for accents, and the main background for "suggested-action" buttons
+$sass-accent-blue-light-color: $adw-blue-4;         // Text color for blue accent elements
+$sass-accent-blue-light-bg: $adw-blue-3;            // Background for suggested-action buttons (blue)
+$sass-accent-blue-light-fg: $adw-light-1;           // Text on suggested-action buttons (blue)
+$sass-accent-blue-light-hover: color.adjust($sass-accent-blue-light-bg, $lightness: -5%);
+$sass-accent-blue-light-active: color.adjust($sass-accent-blue-light-bg, $lightness: -10%);
+
+$sass-accent-blue-dark-color: $adw-blue-2;          // Text color for blue accent elements in dark
+$sass-accent-blue-dark-bg: $adw-blue-3;             // Background for suggested-action buttons (blue) in dark
+$sass-accent-blue-dark-fg: $adw-light-1;            // Text on suggested-action buttons (blue) in dark
+$sass-accent-blue-dark-hover: color.adjust($sass-accent-blue-dark-bg, $lightness: 5%);
+$sass-accent-blue-dark-active: color.adjust($sass-accent-blue-dark-bg, $lightness: 10%);
+
+// Destructive action "text" color (e.g., for flat destructive buttons)
+$sass-destructive-text-color-light: $adw-red-4; // $adw-red-4 is #c01c28
+$sass-destructive-text-color-dark: $adw-red-1;  // $adw-red-1 is #f66151
+
+// The existing $sass-accent-red-* variables are for the more intense red,
+// which might be used for error states or icons, not necessarily button backgrounds.
+// We'll use the new $destructive-button-* variables for destructive button backgrounds/borders/text.
+$sass-accent-red-light-color: $adw-red-4; $sass-accent-red-light-bg: $adw-red-3; $sass-accent-red-light-fg: $adw-light-1; $sass-accent-red-light-hover: color.adjust($sass-accent-red-light-bg, $lightness: -5%); $sass-accent-red-light-active: color.adjust($sass-accent-red-light-bg, $lightness: -10%);
+$sass-accent-red-dark-color: color.adjust($adw-red-2, $lightness: 15%); $sass-accent-red-dark-bg: $adw-red-4; $sass-accent-red-dark-fg: $adw-light-1; $sass-accent-red-dark-hover: color.adjust($sass-accent-red-dark-bg, $lightness: 10%); $sass-accent-red-dark-active: color.adjust($sass-accent-red-dark-bg, $lightness: 20%);
+
+// ... (rest of SASS accent variables remain the same) ...
 $sass-accent-green-light-color: $adw-green-5; $sass-accent-green-light-bg: $adw-green-4; $sass-accent-green-light-fg: $adw-light-1; $sass-accent-green-light-hover: color.adjust($sass-accent-green-light-bg, $lightness: -5%); $sass-accent-green-light-active: color.adjust($sass-accent-green-light-bg, $lightness: -10%);
 $sass-accent-green-dark-color: $adw-green-1; $sass-accent-green-dark-bg: $adw-green-5; $sass-accent-green-dark-fg: $adw-light-1; $sass-accent-green-dark-hover: color.adjust($sass-accent-green-dark-bg, $lightness: 10%); $sass-accent-green-dark-active: color.adjust($sass-accent-green-dark-bg, $lightness: 20%);
 $sass-accent-yellow-light-color: $adw-yellow-5; $sass-accent-yellow-light-bg: $adw-yellow-4; $sass-accent-yellow-light-fg: rgba($adw-dark-5, 0.8); $sass-accent-yellow-light-hover: color.adjust($sass-accent-yellow-light-bg, $lightness: -5%); $sass-accent-yellow-light-active: color.adjust($sass-accent-yellow-light-bg, $lightness: -10%);
 $sass-accent-yellow-dark-color: $adw-yellow-2; $sass-accent-yellow-dark-bg: $adw-yellow-5; $sass-accent-yellow-dark-fg: rgba($adw-dark-5, 0.8); $sass-accent-yellow-dark-hover: color.adjust($sass-accent-yellow-dark-bg, $lightness: 10%); $sass-accent-yellow-dark-active: color.adjust($sass-accent-yellow-dark-bg, $lightness: 20%);
 $sass-accent-orange-light-color: $adw-orange-4; $sass-accent-orange-light-bg: $adw-orange-3; $sass-accent-orange-light-fg: $adw-light-1; $sass-accent-orange-light-hover: $adw-orange-4; $sass-accent-orange-light-active: $adw-orange-5;
 $sass-accent-orange-dark-color: $adw-orange-1; $sass-accent-orange-dark-bg: $adw-orange-3; $sass-accent-orange-dark-fg: $adw-light-1; $sass-accent-orange-dark-hover: $adw-orange-2; $sass-accent-orange-dark-active: $adw-orange-1;
-$sass-accent-red-light-color: $adw-red-4; $sass-accent-red-light-bg: $adw-red-3; $sass-accent-red-light-fg: $adw-light-1; $sass-accent-red-light-hover: color.adjust($sass-accent-red-light-bg, $lightness: -5%); $sass-accent-red-light-active: color.adjust($sass-accent-red-light-bg, $lightness: -10%);
-$sass-accent-red-dark-color: color.adjust($adw-red-2, $lightness: 15%); $sass-accent-red-dark-bg: $adw-red-4; $sass-accent-red-dark-fg: $adw-light-1; $sass-accent-red-dark-hover: color.adjust($sass-accent-red-dark-bg, $lightness: 10%); $sass-accent-red-dark-active: color.adjust($sass-accent-red-dark-bg, $lightness: 20%);
 $sass-accent-purple-light-color: $adw-purple-4; $sass-accent-purple-light-bg: $adw-purple-3; $sass-accent-purple-light-fg: $adw-light-1; $sass-accent-purple-light-hover: $adw-purple-4; $sass-accent-purple-light-active: color.adjust($adw-purple-4, $lightness: -5%);
 $sass-accent-purple-dark-color: $adw-purple-1; $sass-accent-purple-dark-bg: $adw-purple-3; $sass-accent-purple-dark-fg: $adw-light-1; $sass-accent-purple-dark-hover: $adw-purple-2; $sass-accent-purple-dark-active: $adw-purple-1;
 $sass-accent-brown-light-color: $adw-brown-4; $sass-accent-brown-light-bg: $adw-brown-3; $sass-accent-brown-light-fg: $adw-light-1; $sass-accent-brown-light-hover: $adw-brown-4; $sass-accent-brown-light-active: $adw-brown-5;
 $sass-accent-brown-dark-color: $adw-brown-1; $sass-accent-brown-dark-bg: $adw-brown-3; $sass-accent-brown-dark-fg: $adw-light-1; $sass-accent-brown-dark-hover: $adw-brown-2; $sass-accent-brown-dark-active: $adw-brown-1;
+
 
 // --- 4. SASS Map for Accent Iteration (Using Quoted Keys) ---
 // ... (accent map $accent-color-definitions-map remains the same) ...
@@ -160,14 +199,13 @@ $accent-color-definitions-map: (
   "green": ( light: ( color: $sass-accent-green-light-color, bg: $sass-accent-green-light-bg, fg: $sass-accent-green-light-fg, hover: $sass-accent-green-light-hover, active: $sass-accent-green-light-active ), dark:  ( color: $sass-accent-green-dark-color,  bg: $sass-accent-green-dark-bg,  fg: $sass-accent-green-dark-fg,  hover: $sass-accent-green-dark-hover,  active: $sass-accent-green-dark-active  ) ),
   "yellow": ( light: ( color: $sass-accent-yellow-light-color, bg: $sass-accent-yellow-light-bg, fg: $sass-accent-yellow-light-fg, hover: $sass-accent-yellow-light-hover, active: $sass-accent-yellow-light-active ), dark:  ( color: $sass-accent-yellow-dark-color,  bg: $sass-accent-yellow-dark-bg,  fg: $sass-accent-yellow-dark-fg,  hover: $sass-accent-yellow-dark-hover,  active: $sass-accent-yellow-dark-active  ) ),
   "orange": ( light: ( color: $sass-accent-orange-light-color, bg: $sass-accent-orange-light-bg, fg: $sass-accent-orange-light-fg, hover: $sass-accent-orange-light-hover, active: $sass-accent-orange-light-active ), dark:  ( color: $sass-accent-orange-dark-color,  bg: $sass-accent-orange-dark-bg,  fg: $sass-accent-orange-dark-fg,  hover: $sass-accent-orange-dark-hover,  active: $sass-accent-orange-dark-active  ) ),
-  "red": ( light: ( color: $sass-accent-red-light-color, bg: $sass-accent-red-light-bg, fg: $sass-accent-red-light-fg, hover: $sass-accent-red-light-hover, active: $sass-accent-red-light-active ), dark:  ( color: $sass-accent-red-dark-color,  bg: $sass-accent-red-dark-bg,  fg: $sass-accent-red-dark-fg,  hover: $sass-accent-red-dark-hover,  active: $sass-accent-red-dark-active  ) ),
+  "red": ( light: ( color: $sass-accent-red-light-color, bg: $sass-accent-red-light-bg, fg: $sass-accent-red-light-fg, hover: $sass-accent-red-light-hover, active: $sass-accent-red-light-active ), dark:  ( color: $sass-accent-red-dark-color,  bg: $sass-accent-red-dark-bg,  fg: $sass-accent-red-dark-fg,  hover: $sass-accent-red-dark-hover,  active: $sass-accent-red-dark-active  ) ), // This 'red' is the strong one.
   "purple": ( light: ( color: $sass-accent-purple-light-color, bg: $sass-accent-purple-light-bg, fg: $sass-accent-purple-light-fg, hover: $sass-accent-purple-light-hover, active: $sass-accent-purple-light-active ), dark:  ( color: $sass-accent-purple-dark-color,  bg: $sass-accent-purple-dark-bg,  fg: $sass-accent-purple-dark-fg,  hover: $sass-accent-purple-dark-hover,  active: $sass-accent-purple-dark-active  ) ),
   "brown": ( light: ( color: $sass-accent-brown-light-color, bg: $sass-accent-brown-light-bg, fg: $sass-accent-brown-light-fg, hover: $sass-accent-brown-light-hover, active: $sass-accent-brown-light-active ), dark:  ( color: $sass-accent-brown-dark-color,  bg: $sass-accent-brown-dark-bg,  fg: $sass-accent-brown-dark-fg,  hover: $sass-accent-brown-dark-hover,  active: $sass-accent-brown-dark-active  ) )
 );
 
 // --- 5. CSS Custom Properties Definitions (Global Scope :root) ---
 :root {
-  // ... (:root CSS custom properties remain the same, but use math.round for font sizes) ...
   --body-bg-color: #{$background-color-light};
   --text-color: #{$text-color-light};
   --text-color-secondary: #{$text-color-secondary-light};
@@ -198,6 +236,7 @@ $accent-color-definitions-map: (
   --button-active-toggle-bg-color: #{$button-active-toggle-background-color-light};
   --button-active-toggle-border-color: #{$button-active-toggle-border-color-light};
   --button-active-toggle-text-color: #{$button-active-toggle-text-color-light};
+
   --input-bg-color: #{$input-background-color-light};
   --input-fg-color: #{$input-text-color-light};
   --input-border-color: #{$input-border-color-light};
@@ -212,34 +251,48 @@ $accent-color-definitions-map: (
   --input-readonly-bg-color: #{$input-readonly-background-color-light};
   --input-readonly-fg-color: #{$input-readonly-text-color-light};
   --input-readonly-border-color: #{$input-readonly-border-color-light};
-  --accent-color: #{$sass-accent-blue-light-color};
-  --accent-bg-color: #{$sass-accent-blue-light-bg};
-  --accent-fg-color: #{$sass-accent-blue-light-fg};
+
+  // Accent (Suggested Action)
+  --accent-color: #{$sass-accent-blue-light-color};       // e.g., for text color of flat suggested button
+  --accent-bg-color: #{$sass-accent-blue-light-bg};       // e.g., for background of solid suggested button
+  --accent-fg-color: #{$sass-accent-blue-light-fg};       // e.g., for text color on solid suggested button
   --accent-bg-hover-color: #{$sass-accent-blue-light-hover};
   --accent-bg-active-color: #{$sass-accent-blue-light-active};
-  --destructive-color: #{$sass-accent-red-light-color};
-  --destructive-bg-color: #{$sass-accent-red-light-bg};
-  --destructive-fg-color: #{$sass-accent-red-light-fg};
-  --destructive-bg-hover-color: #{$sass-accent-red-light-hover};
-  --destructive-bg-active-color: #{$sass-accent-red-light-active};
-  --success-color: #{$sass-accent-green-light-color};
-  --success-bg-color: #{$sass-accent-green-light-bg};
-  --success-fg-color: #{$sass-accent-green-light-fg};
+
+  // Destructive Action (for solid buttons, like in dialogs)
+  --destructive-color: #{$sass-destructive-text-color-light};         // e.g., for text color of flat destructive button
+  --destructive-bg-color: #{$destructive-button-background-color-light};
+  --destructive-fg-color: #{$destructive-button-text-color-light};
+  --destructive-border-color: #{$destructive-button-border-color-light}; // Specific for destructive buttons
+  --destructive-bg-hover-color: #{$destructive-button-hover-background-color-light};
+  --destructive-bg-active-color: #{$destructive-button-active-background-color-light};
+
+  // Success (used for things like success emphasis, not typically standard buttons)
+  --success-color: #{$sass-accent-green-light-color}; // Text color for success elements
+  --success-bg-color: #{$sass-accent-green-light-bg};   // Background for success elements
+  --success-fg-color: #{$sass-accent-green-light-fg};   // Text on success elements
+
+  // List Row States
+  --list-row-selected-bg-color: #{$list-row-selected-background-color-light};
+  --list-row-selected-fg-color: #{$list-row-selected-text-color-light};
+  // Add hover/active for list rows if not already covered by general button vars
+  --list-row-hover-bg-color: #{rgba($adw-dark-5, 0.04)}; // Similar to flat button hover
+  --list-row-active-bg-color: #{rgba($adw-dark-5, 0.08)}; // Similar to flat button active
 
   --document-font-family: 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --monospace-font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
   --font-size-base: #{$font-size-base-val};
-  --font-size-small: #{math.round($font-size-base-val * 0.8)}; // Use math.round
-  --font-size-large: #{math.round($font-size-base-val * 1.2)}; // Use math.round
-  --font-size-h1: #{math.round($font-size-base-val * 1.8)};    // Use math.round
-  --font-size-h2: #{math.round($font-size-base-val * 1.6)};    // Use math.round
-  --font-size-h3: #{math.round($font-size-base-val * 1.4)};    // Use math.round
-  --font-size-h4: #{math.round($font-size-base-val * 1.2)};    // Use math.round
+  --font-size-small: #{math.round($font-size-base-val * 0.8)};
+  --font-size-large: #{math.round($font-size-base-val * 1.2)};
+  --font-size-h1: #{math.round($font-size-base-val * 1.8)};
+  --font-size-h2: #{math.round($font-size-base-val * 1.6)};
+  --font-size-h3: #{math.round($font-size-base-val * 1.4)};
+  --font-size-h4: #{math.round($font-size-base-val * 1.2)};
 
-  --border-radius-small: 3px;
-  --border-radius-medium: 4px;
-  --border-radius-default: 6px;
-  --border-radius-large: 12px;
+  --border-radius-small: 4px;  // Slightly increased
+  --border-radius-medium: 6px; // Slightly increased
+  --border-radius-default: 8px; // Increased from 6px
+  --border-radius-large: 12px; // Stays the same
   --border-width: #{$input-border-width-val};
 
   --spacing-xxs: 3px;
@@ -285,6 +338,7 @@ $accent-color-definitions-map: (
     --button-active-toggle-bg-color: #{$button-active-toggle-background-color-dark};
     --button-active-toggle-border-color: #{$button-active-toggle-border-color-dark};
     --button-active-toggle-text-color: #{$button-active-toggle-text-color-dark};
+
     --input-bg-color: #{$input-background-color-dark};
     --input-fg-color: #{$input-text-color-dark};
     --input-border-color: #{$input-border-color-dark};
@@ -307,23 +361,26 @@ $accent-color-definitions-map: (
     --accent-bg-hover-color: #{$sass-accent-blue-dark-hover};
     --accent-bg-active-color: #{$sass-accent-blue-dark-active};
 
-    --destructive-color: #{$sass-accent-red-dark-color};
-    --destructive-bg-color: #{$sass-accent-red-dark-bg};
-    --destructive-fg-color: #{$sass-accent-red-dark-fg};
-    --destructive-bg-hover-color: #{$sass-accent-red-dark-hover};
-    --destructive-bg-active-color: #{$sass-accent-red-dark-active};
+    // Destructive Action (for solid buttons, like in dialogs)
+    --destructive-color: #{$sass-destructive-text-color-dark}; // e.g. for text color of flat destructive button
+    --destructive-bg-color: #{$destructive-button-background-color-dark};
+    --destructive-fg-color: #{$destructive-button-text-color-dark};
+    --destructive-border-color: #{$destructive-button-border-color-dark};
+    --destructive-bg-hover-color: #{$destructive-button-hover-background-color-dark};
+    --destructive-bg-active-color: #{$destructive-button-active-background-color-dark};
 
+    // Success (used for things like success emphasis, not typically standard buttons)
     --success-color: #{$sass-accent-green-dark-color};
     --success-bg-color: #{$sass-accent-green-dark-bg};
     --success-fg-color: #{$sass-accent-green-dark-fg};
 
+    // List Row States
+    --list-row-selected-bg-color: #{$list-row-selected-background-color-dark};
+    --list-row-selected-fg-color: #{$list-row-selected-text-color-dark};
+    --list-row-hover-bg-color: #{rgba($adw-light-1, 0.06)}; // Similar to flat button hover dark
+    --list-row-active-bg-color: #{rgba($adw-light-1, 0.10)}; // Similar to flat button active dark
+
     // TODO: Add specific accent color variable overrides for dark theme if Adw.js logic for this is removed
-    // For example, if accent is 'green':
-    // &.accent-green {
-    //   --accent-color: #{$sass-accent-green-dark-color};
-    //   --accent-bg-color: #{$sass-accent-green-dark-bg};
-    //   ...
-    // }
   }
 }
 
@@ -336,7 +393,7 @@ $focus-ring: var(--focus-ring-width) solid var(--focus-ring-color);
 
 $button-padding-vertical: var(--spacing-s);
 $button-padding-horizontal: var(--spacing-m);
-$button-border-radius: var(--border-radius-default);
+$button-border-radius: var(--border-radius-default); // References the updated --border-radius-default
 $button-border-width: var(--border-width);
 $circular-button-padding: var(--spacing-xs);
 $circular-button-border-radius: 50%;
@@ -345,7 +402,7 @@ $pill-button-border-radius: 100px;
 
 $input-padding-vertical: var(--spacing-s);
 $input-padding-horizontal: var(--spacing-m);
-$input-border-radius: var(--border-radius-default);
+$input-border-radius: var(--border-radius-default); // References the updated --border-radius-default
 $input-border-width: var(--border-width);
 
 // SASS variables for font sizes, mainly for reference or mixins if needed. CSS vars are primary.
@@ -357,5 +414,5 @@ $h4-font-size-sass: var(--font-size-h4);
 $heading-font-family: var(--document-font-family);
 // $heading-font-weight is already a SASS variable ($font-weight-bold)
 
-$destructive-color-sass: $sass-accent-red-light-color;
-$success-color-sass: $sass-accent-green-light-color;
+$destructive-color-sass: var(--destructive-color); // Updated to use the CSS var, which points to the text color
+$success-color-sass: var(--success-color); // Updated to use the CSS var

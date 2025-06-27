@@ -12,11 +12,9 @@
                 <img src="{{ url_for('static', filename=user_profile.profile_photo_url) if user_profile.profile_photo_url else default_avatar_url }}" alt="{{ user_profile.username }} avatar" class="adw-avatar__image">
             </span>
             <div class="adw-box vertical spacing-xs">
+                <h1 class="title-1" style="margin-bottom: {% if user_profile.full_name %}var(--spacing-xxs){% else %}0{% endif %};">{{ user_profile.full_name or user_profile.username }}</h1>
                 {% if user_profile.full_name %}
-                    <h1 class="adw-label title-1">{{ user_profile.full_name }}</h1>
-                    <h3 class="adw-label title-3 secondary-text">@{{ user_profile.username }}</h3>
-                {% else %}
-                    <h1 class="adw-label title-1">@{{ user_profile.username }}</h1>
+                <p class="adw-caption" style="margin-top: 0;">@{{ user_profile.username }}</p> {# Use adw-caption and remove inline color #}
                 {% endif %}
             </div>
         </div>

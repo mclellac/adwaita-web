@@ -87,17 +87,20 @@
 
     &.destructive-action {
         background-color: var(--destructive-bg-color);
-        border-color: var(--destructive-bg-color); // Or var(--destructive-border-color, var(--destructive-bg-color))
+        // Use the specific --destructive-border-color if available, otherwise fallback to bg color
+        border-color: var(--destructive-border-color, var(--destructive-bg-color));
         color: var(--destructive-fg-color);
 
         &:hover {
             background-color: var(--destructive-bg-hover-color);
-            border-color: var(--destructive-bg-hover-color);
+            // Use the specific --destructive-border-color for hover if available, else hover-bg
+            border-color: var(--destructive-border-color, var(--destructive-bg-hover-color));
         }
 
         &:active {
             background-color: var(--destructive-bg-active-color);
-            border-color: var(--destructive-bg-active-color);
+            // Use the specific --destructive-border-color for active if available, else active-bg
+            border-color: var(--destructive-border-color, var(--destructive-bg-active-color));
         }
     }
 
