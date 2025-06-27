@@ -1,0 +1,39 @@
+// Adwaita Skin - Main SCSS File
+
+// Core
+@import 'variables';
+@import 'mixins';
+@import 'base';
+
+// Components (to be adapted for skin usage)
+@import 'button';
+@import 'entry';
+@import 'headerbar';
+@import 'listbox';
+@import 'dialog';
+@import 'row_types';
+@import 'action_row';
+@import 'entry_row';
+@import 'expander_row';
+@import 'switch';
+@import 'checkbox';
+@import 'radio';
+@import 'label';
+@import 'icon';
+@import 'avatar';
+@import 'spinner';
+@import 'progressbar';
+@import 'toast';
+@import 'banner';
+@import 'popover';
+@import 'tabs';
+@import 'toolbar_view'; // May need significant refactoring or simplification
+@import 'viewswitcher'; // Styles for button parts
+
+// Layout
+@import 'box';
+@import 'clamp';
+@import 'window';
+
+// TODO: Add more specific skin styles or overrides if needed.
+// TODO: Review each imported file to ensure selectors are class-based and not web-component specific.

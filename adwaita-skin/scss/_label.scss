@@ -1,0 +1,69 @@
+// Styles for Adwaita Labels (Adwaita Skin Version)
+
+@import 'variables'; // Defines SASS color vars and CSS vars
+@import 'mixins';
+
+.adw-label {
+    display: inline;
+    font-family: var(--document-font-family); // Use CSS var
+    font-size: var(--font-size-base);       // Use CSS var
+    font-weight: $font-weight-normal;       // SASS var for static value
+    color: var(--text-color);
+    line-height: $line-height-base;         // SASS var for static value
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin-bottom: var(--spacing-xs);       // Default bottom margin if block or for layout spacing
+
+    &.selectable {
+        user-select: text;
+    }
+
+    &.muted {
+        color: var(--text-color-secondary);
+        font-size: var(--font-size-small); // Use CSS var
+    }
+
+    &.bold {
+        font-weight: $font-weight-bold; // SASS var for static value
+    }
+
+    &.title-1 {
+        font-size: var(--font-size-h1); // Use CSS var
+        font-weight: $font-weight-bold;
+        color: var(--heading-color);
+        line-height: $h1-line-height; // SASS var
+        margin-bottom: var(--spacing-m);
+    }
+
+    &.title-2 {
+        font-size: var(--font-size-h2); // Use CSS var
+        font-weight: $font-weight-bold;
+        color: var(--heading-color);
+        line-height: $h2-line-height; // SASS var
+        margin-bottom: var(--spacing-s);
+    }
+
+    &.title-3 {
+        font-size: var(--font-size-h3); // Use CSS var
+        font-weight: $font-weight-bold;
+        color: var(--heading-color);
+        line-height: $h3-line-height; // SASS var
+        margin-bottom: var(--spacing-xs);
+    }
+
+    &.title-4 {
+        font-size: var(--font-size-h4); // Use CSS var
+        font-weight: $font-weight-bold;
+        color: var(--heading-color);
+        line-height: $h4-line-height; // SASS var
+        margin-bottom: var(--spacing-xs);
+    }
+}
+
+label.adw-label {
+    cursor: default;
+}
+
+.adw-label-block {
+    display: block;
+}

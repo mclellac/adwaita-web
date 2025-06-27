@@ -1,0 +1,255 @@
+// scss/_row_types.scss
+@use "variables";
+
+// Common base for specialized rows if needed, but AdwRow already provides some.
+// These rows are typically used within an AdwListBox or a similar container.
+
+// --- AdwActionRow --- (Styles moved to _action_row.scss, which uses row-base mixin)
+/*
+.adw-action-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--spacing-m); // Gap between icon, text-content, chevron
+
+  .adw-action-row-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    // Styling for icon size, color can be added here or come from .icon class
+    // e.g., width: 24px; height: 24px;
+    svg { // Assuming SVG icons
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+    }
+  }
+
+  .adw-action-row-text-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden; // For text ellipsis on title/subtitle
+  }
+
+  .adw-action-row-title {
+    font-weight: normal; // Libadwaita titles in rows are often normal weight
+    color: var(--view-fg-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .adw-action-row-subtitle {
+    font-size: var(--font-size-small);
+    color: var(--view-fg-color);
+    opacity: 0.7; // Muted subtitle
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .adw-action-row-chevron {
+    flex-shrink: 0;
+    font-size: var(--font-size-large); // Make chevron a bit larger
+    opacity: 0.5;
+    // Example using text chevron, an SVG would be better for consistency
+    &::after {
+      content: "❯";
+    }
+  }
+
+  // When the row itself is interactive (e.g. has an onClick)
+  &.interactive {
+    &:hover {
+        // Standard row hover from AdwRow should apply
+    }
+    &:active {
+        // Standard row active state from AdwRow should apply
+    }
+  }
+}
+*/
+
+// --- AdwEntryRow ---
+.adw-entry-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--spacing-m);
+  justify-content: space-between; // Ensure proper spacing distribution
+
+  .adw-entry-row-text-content { // Assuming JS structure wraps title/subtitle in this
+    flex-grow: 0;
+    flex-shrink: 1;
+    // Add other properties from AdwComboRow's text-content if necessary:
+    // display: flex;
+    // flex-direction: column;
+    // justify-content: center;
+    // overflow: hidden;
+  }
+
+  // .adw-entry-row-title {
+  //   // Styles for actual title label if needed beyond what AdwLabel provides
+  // }
+
+  .adw-entry-row-entry {
+    flex-grow: 1;
+    // The AdwEntry component itself will have its styles
+  }
+}
+
+
+// --- AdwExpanderRow ---
+.adw-expander-row-wrapper {
+  // This wrapper contains the clickable row and the collapsible content.
+  // If AdwExpanderRow is used as a direct child of AdwListBox (i.e., it *is* an AdwRow),
+  // this wrapper's border is redundant as AdwListBox handles row separation.
+  // If AdwExpanderRow can be a standalone component, this border is appropriate for that context.
+  &:not(:last-child) {
+    // This border is for standalone usage. Inside AdwListBox, it should not apply or be overridden.
+    border-bottom: var(--border-width, 1px) solid var(--borders-color);
+  }
+}
+// Dark theme border for wrapper is handled by --borders-color if it's made theme-aware.
+// .dark-theme .adw-expander-row-wrapper:not(:last-child),
+// body.dark-theme .adw-expander-row-wrapper:not(:last-child) {
+//    border-bottom-color: var(--border-color-dark); // Should use --borders-color
+// }
+
+
+.adw-expander-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--spacing-m);
+  // padding: var(--spacing-m); // Padding is usually on the AdwRow base class
+
+  .adw-expander-row-text-content { // Similar to ActionRow's text content
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .adw-expander-row-title { /* Use AdwLabel styles */ }
+  .adw-expander-row-subtitle { /* Use AdwLabel styles, but ensure opacity is applied if AdwLabel doesn't do it by default */
+    font-size: var(--font-size-small);
+    opacity: 0.7;
+   }
+
+
+  .adw-expander-row-icon {
+    flex-shrink: 0;
+    transition: transform 0.15s ease-in-out;
+    font-size: var(--font-size-large);
+    opacity: 0.7;
+    // Consider using an SVG icon (e.g., 'pan-end-symbolic' or 'go-next-symbolic' rotated)
+    // for better Adwaita fidelity instead of a text chevron.
+    &::after {
+      content: "❯"; // Default: collapsed state
+    }
+  }
+
+  // When expanded
+  &.expanded .adw-expander-row-icon {
+    transform: rotate(90deg);
+  }
+}
+
+.adw-expander-row-content {
+  // display: none; // JS will toggle this or use max-height
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out, padding 0.2s ease-out, opacity 0.2s ease-out;
+  padding: 0 var(--spacing-m); // Horizontal padding when closed
+  opacity: 0;
+  visibility: hidden;
+
+  // Styles for the content area when expanded
+  &.expanded {
+    // display: block; // If not using max-height animation
+    max-height: 1000px; // Large enough for most content, for animation
+    padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m); // Full padding when open
+    opacity: 1;
+    visibility: visible;
+    // border-top: 1px solid var(--border-color-light); // Optional separator
+    // margin-left: var(--spacing-xl); // Optional indent for content
+  }
+}
+.dark-theme .adw-expander-row-content.expanded,
+body.dark-theme .adw-expander-row-content.expanded {
+    // border-top-color: var(--border-color-dark);
+}
+
+
+// --- AdwComboRow ---
+.adw-combo-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--spacing-m);
+  justify-content: space-between; // Ensure spacing if select doesn't grow significantly
+
+  .adw-combo-row-text-content { // Similar to ActionRow's text content
+    flex-grow: 0; // Title part should not grow
+    flex-shrink: 1; // Can shrink if needed
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .adw-combo-row-title { /* Use AdwLabel styles */ }
+  .adw-combo-row-subtitle { /* Use AdwLabel styles, ensure opacity */
+    font-size: var(--font-size-small);
+    opacity: 0.7;
+  }
+
+  .adw-combo-row-select {
+    // Reset default browser appearance if possible (tricky with select)
+    // -webkit-appearance: none; /* Not using this for now to keep native dropdown arrow */
+    // -moz-appearance: none;
+    // appearance: none;
+
+    background-color: transparent;
+    border: none; // Remove default border
+    border-bottom: 1px solid var(--borders-color); // Subtle bottom border, like .row-input for AdwEntry
+    border-radius: 0; // No border radius for a clean line
+    padding: var(--spacing-xxs) 0; // Minimal vertical padding to align text, horizontal spacing via row gap.
+                                   // Adjust if text is not vertically centered.
+    font-size: inherit; // Inherit font size from row
+    color: inherit; // Inherit text color
+    flex-grow: 1; // Take available space
+    min-width: 100px; // Prevent it from becoming too small
+    // Native select appearance is hard to override perfectly.
+    // For a true Adwaita GtkDropDown look, a custom component emulating <select> would be needed.
+    // This aims for a cleaner integration of the native <select>.
+
+    // Custom dropdown arrow if hiding native one (requires appearance: none)
+    // background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22currentColor%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M4.94%205.72a.75.75%200%200%201%201.06-.04l1.97%201.928%201.97-1.928a.75.75%200%201%201%201.02%201.1l-2.5%202.449a.75.75%200%200%201-1.02%200L4.98%206.78a.75.75%200%200%201-.04-1.06Z%22%2F%3E%3C%2Fsvg%3E");
+    // background-repeat: no-repeat;
+    // background-position: right var(--spacing-xs) center;
+    // padding-right: var(--spacing-l); // Make space for custom arrow if used
+
+    &:hover {
+      // No background change on hover for this style, border might change if desired
+      // border-bottom-color: var(--borders-hover-color, var(--borders-color));
+    }
+    &:focus { // Using :focus for select, focus-visible might not always trigger as expected on <select>
+      outline: none;
+      border-bottom-color: var(--accent-color); // Accent color for focused bottom border
+    }
+    &:disabled {
+        border-bottom-color: var(--borders-color); // Keep border for consistency
+        border-bottom-style: dashed; // Indicate disabled state with dashed line
+        opacity: var(--opacity-disabled, 0.5); // Standard disabled opacity
+        color: var(--disabled-fg-color); // Use disabled foreground color
+        background-color: transparent; // Ensure background remains transparent
+        cursor: not-allowed;
+    }
+  }
+}
+
+// Dark theme variables should handle color changes automatically.

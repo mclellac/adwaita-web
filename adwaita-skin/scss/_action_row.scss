@@ -1,0 +1,161 @@
+@use 'variables';
+@use 'mixins';
+
+.adw-action-row {
+  // AdwActionRow is an AdwPreferencesRow.
+  // It should inherit base row styles for padding, min-height, list separation.
+  // The AdwActionRow web component's shadow DOM root has .adw-action-row,
+  // so we apply row-base styles here.
+  @include mixins.row-base; // Applies common row styles like min-height, padding, border-bottom
+  // Override default vertical padding from row-base for ActionRow
+  // Aim for ~54px height for single-line, ~70px for two-line (title + subtitle)
+  // These values assume typical font sizes and line heights.
+  // Libadwaita uses 12px top/bottom for single line content area usually.
+  padding-top: 12px;
+  padding-bottom: 12px;
+  // background-color: var(--card-bg-color); // This was in old version. Rows usually take listbox bg.
+                                         // If used standalone on a card, card provides bg.
+                                         // If within a listbox on a card, listbox provides bg.
+  gap: var(--spacing-m); // Use gap for spacing prefix, content, and suffix
+
+  &.has-subtitle {
+    // Adjust padding for rows with subtitles to achieve ~70px height
+    // This often means slightly more padding if the text content height itself isn't enough.
+    // Given title + subtitle, their combined height + margin-top on subtitle will be significant.
+    // The 12px top/bottom might already be fine, or might need slight adjustment
+    // depending on actual rendered height of title+subtitle block.
+    // Let's start with the same and adjust if testing shows need.
+    // padding-top: 12px;
+    // padding-bottom: 12px;
+    // If row-base min-height is, e.g. 48px, this padding makes it at least 72px.
+    // Consider if min-height from row-base should be overridden or removed for ActionRow.
+  }
+
+  // If the row itself is clickable/activatable
+  &.activatable {
+    cursor: pointer;
+    // outline-offset: -2px; // For focus outline to be inset. row-base might handle this.
+
+    &:hover {
+      background-color: var(--list-row-hover-bg-color);
+    }
+    &:active {
+      background-color: var(--list-row-active-bg-color);
+    }
+    &:focus-visible {
+      // Standard focus: outline. row-base or listbox context might provide this.
+      // If not, enable it here:
+      outline: 2px solid var(--accent-color);
+      outline-offset: var(--focus-outline-offset, -2px);
+      border-radius: var(--row-border-radius, var(--border-radius-small));
+    }
+  }
+
+  .adw-action-row-prefix {
+    display: flex;
+    align-items: center;
+    // If prefix contains an icon, it should have proper color & size
+    .adw-icon {
+      color: var(--secondary-fg-color); // Icons in rows are often secondary
+      font-size: 16px; // Using font-size as a proxy for SVG size if SVGs use em/currentColor for dimensions
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  // Apply to suffix icons as well for consistent sizing
+  .adw-action-row-suffix {
+    .adw-icon { // General icons in suffix
+      color: var(--secondary-fg-color);
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    // Specific for chevron, e.g. opacity
+    .adw-action-row-chevron.adw-icon {
+      opacity: var(--icon-opacity); // Uses variable defined in _variables.scss
+    }
+  }
+
+  .adw-action-row-content { // This is the "box.title" from docs
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0; // For text ellipsis
+  }
+
+  .adw-action-row-title { // This is "label.title"
+    font-size: var(--font-size-base);
+    color: var(--window-fg-color); // Use window/view foreground color for titles
+    font-weight: normal; // Standard Adwaita row titles are normal weight
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .adw-action-row-subtitle { // This is "label.subtitle"
+    font-size: var(--font-size-small);
+    color: var(--secondary-fg-color); // Subtitles are secondary. This var likely includes opacity.
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: var(--spacing-xxs); // Small gap between title and subtitle
+  }
+
+  .adw-action-row-suffix {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    // Suffix elements like switches, buttons, or chevrons
+    // e.g. .adw-action-row-chevron for navigation arrow
+    .adw-action-row-chevron.adw-icon { // As used by AdwExpanderRow
+        color: var(--secondary-fg-color);
+        opacity: var(--icon-opacity, 0.7);
+    }
+  }
+
+  // Style for .property class (emphasize subtitle)
+  &.property {
+    .adw-action-row-title {
+      font-weight: normal; // Make title normal weight
+      color: var(--secondary-fg-color); // De-emphasize title
+    }
+    .adw-action-row-subtitle {
+      color: var(--primary-fg-color); // Emphasize subtitle
+      font-weight: normal; // Ensure it's not overly bold if it inherited something
+      opacity: 1; // Ensure full opacity if it was dimmed
+    }
+
+    &.monospace .adw-action-row-subtitle {
+      font-family: var(--font-family-monospace);
+    }
+  }
+  // For .monospace on its own (affects only subtitle as per docs)
+  &.monospace:not(.property) { // If not also a .property row
+    .adw-action-row-subtitle {
+        font-family: var(--font-family-monospace);
+    }
+  }
+
+
+  // When used within a listbox, the listbox handles borders/separators
+  // The @include mixins.row-base should handle this contextually if well-defined.
+  // For example, the mixin might make border-bottom: none if :last-child within a .adw-list-box.
+}
+
+// Variables that should be defined (e.g., in _variables.scss):
+// --primary-fg-color
+// --secondary-fg-color
+// --list-row-hover-bg-color
+// --list-row-active-bg-color
+// --accent-color
+// --border-radius-small (or --row-border-radius)
+// --focus-outline-offset
+// --icon-opacity
+// --font-family-monospace

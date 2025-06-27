@@ -1,0 +1,18 @@
+/* Error: Undefined variable.
+ *    ,
+ * 29 |     font-weight: $heading-font-weight;
+ *    |                  ^^^^^^^^^^^^^^^^^^^^
+ *    '
+ *   adwaita-skin/scss/_base.scss 29:18       @import
+ *   adwaita-skin/scss/adwaita-skin.scss 6:9  root stylesheet */
+
+body::before {
+  font-family: "Source Code Pro", "SF Mono", Monaco, Inconsolata, "Fira Mono",
+      "Droid Sans Mono", monospace, monospace;
+  white-space: pre;
+  display: block;
+  padding: 1em;
+  margin-bottom: 1em;
+  border-bottom: 2px solid black;
+  content: "Error: Undefined variable.\a    \2577 \a 29 \2502      font-weight: $heading-font-weight;\a    \2502                   ^^^^^^^^^^^^^^^^^^^^\a    \2575 \a   adwaita-skin/scss/_base.scss 29:18       @import\a   adwaita-skin/scss/adwaita-skin.scss 6:9  root stylesheet";
+}
