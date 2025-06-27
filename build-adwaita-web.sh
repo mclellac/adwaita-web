@@ -7,7 +7,6 @@ set -e
 # adwaita-web paths
 SASS_SOURCE_DIR="adwaita-web/scss"
 SASS_INPUT_FILE="${SASS_SOURCE_DIR}/style.scss"
-JS_INPUT_DIR="adwaita-web/js"
 DATA_INPUT_DIR="adwaita-web/data"
 FONTS_INPUT_DIR="adwaita-web/fonts"
 
@@ -154,7 +153,7 @@ APP_DEMO_FONTS_DIR="${APP_DEMO_STATIC_DIR}/fonts"
 # Create target directories in app-demo/static if they don't exist
 mkdir -p "${APP_DEMO_CSS_DIR}"
 mkdir -p "${APP_DEMO_JS_DIR}"
-mkdir -p "${APP_DEMO_DATA_DIR}" # Will contain 'icons/symbolic'
+mkdir -p "${APP_DEMO_DATA_DIR}"  # Will contain 'icons/symbolic'
 mkdir -p "${APP_DEMO_FONTS_DIR}" # Will contain 'mono' and 'sans'
 
 # Copy adwaita-web CSS
