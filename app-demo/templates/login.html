@@ -2,29 +2,25 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding-top: var(--spacing-xxl); padding-bottom: var(--spacing-xxl);">
-  <div style="width: 400px; display: flex; flex-direction: column; gap: var(--spacing-lg);"> {# Outer container for centering and width, with gap for button spacing #}
-    <h1 class="title-1" style="text-align: center;">Login</h1>
+<div class="adw-clamp content-clamp auth-form-container">
+    <h1 class="title-1 centered-title">Login</h1>
 
-    {# Flashed messages will be handled by base.html's script #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {# This block itself doesn't render anything visible here #}
-    {% endwith %}
+    {# Flashed messages are handled by base.html #}
 
-    <form method="POST" action="{{ url_for('login') }}" id="login-form" style="display: flex; flex-direction: column; gap: var(--spacing-m);">
+    <form method="POST" action="{{ url_for('login') }}" id="login-form" class="stacked-form">
       {{ form.hidden_tag() }} {# CSRF token #}
 
       <div class="adw-preferences-group" role="group" aria-labelledby="login-group-title">
         <div class="adw-preferences-group__title-container">
-             <h3 class="adw-preferences-group__title" id="login-group-title">Account Credentials</h3>
+             <h3 class="adw-preferences-group__title title-3" id="login-group-title">Account Credentials</h3>
         </div>
 
         {# Username Field #}
         <div class="adw-entry-row {{ 'has-error' if form.username.errors else '' }}">
+          <label for="{{ form.username.id or 'username_input' }}" class="adw-entry-row__title">{{ form.username.label.text }}</label>
           <div class="adw-entry-row-text-content">
-            <label for="{{ form.username.id or 'username_input' }}" class="adw-entry-row-title">{{ form.username.label.text }}</label>
             {% if form.username.errors %}
-              <div class="adw-entry-row-subtitle error-text">{{ form.username.errors|join(' ') }}</div>
+              <span class="adw-entry-row__subtitle error-text">{{ form.username.errors|join(' ') }}</span>
             {% endif %}
           </div>
           <input type="text"
@@ -38,10 +34,10 @@
 
         {# Password Field #}
         <div class="adw-entry-row {{ 'has-error' if form.password.errors else '' }}">
+          <label for="{{ form.password.id or 'password_input' }}" class="adw-entry-row__title">{{ form.password.label.text }}</label>
           <div class="adw-entry-row-text-content">
-            <label for="{{ form.password.id or 'password_input' }}" class="adw-entry-row-title">{{ form.password.label.text }}</label>
             {% if form.password.errors %}
-              <div class="adw-entry-row-subtitle error-text">{{ form.password.errors|join(' ') }}</div>
+              <span class="adw-entry-row__subtitle error-text">{{ form.password.errors|join(' ') }}</span>
             {% endif %}
           </div>
           <input type="password"
@@ -53,9 +49,7 @@
         </div>
       </div>
 
-      <button type="submit" class="adw-button suggested-action" style="width: 100%; margin-top: var(--spacing-m);">{{ form.submit.label.text }}</button>
+      <button type="submit" class="adw-button suggested-action full-width-button">{{ form.submit.label.text }}</button>
     </form>
-  </div>
 </div>
-{# Removed JavaScript for Enter key handling as it relied on adw-web component internals #}
 {% endblock %}

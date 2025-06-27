@@ -2,39 +2,8 @@
 
 {% block title %}Create New Post{% endblock %}
 
-{% block styles %}
-{{ super() }}
-<style>
-  /* Ensure labels for checkboxes are clickable and aligned */
-  .adw-checkbox-row label {
-    vertical-align: middle;
-    margin-left: var(--spacing-s); /* Spacing between checkbox and label text */
-  }
-  .adw-checkbox-row .adw-action-row__title { /* If using title slot for label */
-    margin-left: var(--spacing-s);
-  }
-  .adw-checkbox-row {
-    /* If you want the whole row to be clickable to toggle the checkbox: */
-    /* cursor: pointer; */
-  }
-  .adw-preferences-group .errors { /* Common error styling */
-    color: var(--error-color);
-    font-size: var(--font-size-small);
-    margin-top: var(--spacing-xxs);
-    padding-left: var(--spacing-m); /* Align with content if inside a listbox/row structure */
-  }
-  .adw-list-box.has-error {
-      /* Maybe a border or background to indicate error in the group */
-  }
-  .adw-entry-row.has-error, .adw-action-row.has-error {
-      /* Standard error indication for rows already applies via subtitle or Adwaita's own styling */
-  }
-  /* Styles for .adw-textarea-standalone have been moved to adwaita-web/scss/_entry.scss */
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="adw-clamp main-content-clamped">
+<div class="adw-clamp content-clamp">
   <div class="adw-preferences-page">
     <header class="adw-preferences-page__header">
       <h1 class="adw-preferences-page__title">Create New Post</h1>
@@ -44,56 +13,45 @@
 
         <div class="adw-preferences-group" role="group" aria-labelledby="post-details-title">
             <div class="adw-preferences-group__title-container">
-                <h3 class="adw-preferences-group__title" id="post-details-title">Post Details</h3>
+                <h3 class="adw-preferences-group__title title-3" id="post-details-title">Post Details</h3>
             </div>
 
             {# Title Entry Row #}
             <div class="adw-entry-row {{ 'has-error' if form.title.errors else '' }}">
-                <div class="adw-entry-row-text-content">
-                    <label for="{{ form.title.id or 'title_input' }}" class="adw-entry-row-title">{{ form.title.label.text }}</label>
-                    {% if form.title.errors %}<div class="adw-entry-row-subtitle error-text">{{ form.title.errors|join(' ') }}</div>{% endif %}
+                <label for="{{ form.title.id or 'title_input' }}" class="adw-entry-row__title">{{ form.title.label.text }}</label>
+                <div class="adw-entry-row-text-content"> {# This div is for subtitle/errors, input goes after title #}
+                    {% if form.title.errors %}<span class="adw-entry-row__subtitle error-text">{{ form.title.errors|join(' ') }}</span>{% endif %}
                 </div>
                 <input type="text" id="{{ form.title.id or 'title_input' }}" name="{{ form.title.name }}" value="{{ form.title.data or '' }}" class="adw-entry row-input" placeholder="Enter post title" {% if form.title.flags.required %}required{% endif %}>
             </div>
 
             {# Content Textarea in Expander Row #}
-            <div class="adw-expander-row {{ 'has-error' if form.content.errors else '' }} expanded"> {# Start expanded #}
-                <div class="adw-action-row activatable" role="button" tabindex="0" aria-expanded="true">
-                    <div class="adw-action-row__text">
-                        <div class="adw-action-row__title">{{ form.content.label.text }}</div>
-                        <div class="adw-action-row__subtitle">
-                            {% if form.content.errors %} {{ form.content.errors|join(' ') }}
-                            {% else %} Enter your post content below.
-                            {% endif %}
-                        </div>
-                    </div>
-                    <span class="adw-expander-row__chevron"></span>
+            {# For simplicity and because it's primary, not using expander for content on create form #}
+            <div class="adw-preferences-group" role="group" aria-labelledby="content-title">
+                 <div class="adw-preferences-group__title-container">
+                    <h3 class="adw-preferences-group__title title-3" id="content-title">{{ form.content.label.text }}</h3>
+                     {% if form.content.errors %}<div class="error-text form-field-error">{{ form.content.errors|join(' ') }}</div>{% endif %}
                 </div>
-                <div class="adw-expander-row-content expanded" style="padding: var(--spacing-s) 0;">
-                    <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-textarea" style="width: 100%; min-height: 250px; resize: vertical;" rows="15">{{ form.content.data or '' }}</textarea>
-                </div>
+                <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-textarea content-textarea" rows="15" placeholder="Enter your post content here...">{{ form.content.data or '' }}</textarea>
             </div>
         </div>
 
         <div class="adw-preferences-group" role="group" aria-labelledby="categories-title">
             <div class="adw-preferences-group__title-container">
-                <h3 class="adw-preferences-group__title" id="categories-title">{{ form.categories.label.text }}</h3>
+                <h3 class="adw-preferences-group__title title-3" id="categories-title">{{ form.categories.label.text }}</h3>
             </div>
             <div class="adw-list-box {{ 'has-error' if form.categories.errors else '' }}">
-                {# Iterate through category subfields (checkboxes) #}
                 {% for subfield in form.categories %}
-                <div class="adw-action-row adw-checkbox-row"> {# Assuming adw-checkbox-row might add specific styling to action row #}
-                    <div class="adw-action-row__text" style="display: flex; align-items: center;">
-                        {{ subfield(class="adw-checkbox") }} {# Render the actual checkbox input from WTForms #}
-                        {{ subfield.label(class="adw-label", style="margin-left: var(--spacing-s);") }} {# Render its label #}
+                <div class="adw-action-row adw-checkbox-row">
+                    <div class="adw-action-row__text checkbox-label-container">
+                        {{ subfield(class="adw-checkbox") }}
+                        {{ subfield.label(class="adw-label category-checkbox-label") }}
                     </div>
                 </div>
                 {% endfor %}
                 {% if form.categories.errors %}
                 <div class="adw-action-row error-row">
-                    <div class="adw-action-row__text">
-                        <div class="adw-action-row__subtitle error-text">{{ form.categories.errors|join('; ') }}</div>
-                    </div>
+                    <span class="adw-action-row__subtitle error-text">{{ form.categories.errors|join('; ') }}</span>
                 </div>
                 {% endif %}
             </div>
@@ -101,23 +59,22 @@
 
         <div class="adw-preferences-group" role="group" aria-labelledby="tags-title">
             <div class="adw-preferences-group__title-container">
-                <h3 class="adw-preferences-group__title" id="tags-title">Tags</h3>
+                <h3 class="adw-preferences-group__title title-3" id="tags-title">Tags</h3>
             </div>
-            {# Tags Entry Row #}
             <div class="adw-entry-row {{ 'has-error' if form.tags_string.errors else '' }}">
+                <label for="{{ form.tags_string.id or 'tags_input' }}" class="adw-entry-row__title">{{ form.tags_string.label.text }}</label>
                 <div class="adw-entry-row-text-content">
-                    <label for="{{ form.tags_string.id or 'tags_input' }}" class="adw-entry-row-title">{{ form.tags_string.label.text }}</label>
-                    <div class="adw-entry-row-subtitle">
-                        {% if form.tags_string.errors %} {{ form.tags_string.errors|join(' ') }}
+                    <span class="adw-entry-row__subtitle">
+                        {% if form.tags_string.errors %} <span class="error-text">{{ form.tags_string.errors|join(' ') }}</span>
                         {% else %} Comma-separated values.
                         {% endif %}
-                    </div>
+                    </span>
                 </div>
                 <input type="text" id="{{ form.tags_string.id or 'tags_input' }}" name="{{ form.tags_string.name }}" value="{{ form.tags_string.data or '' }}" class="adw-entry row-input" placeholder="e.g., tech, travel, food">
             </div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: var(--spacing-s); padding-top: var(--spacing-m); padding-bottom: var(--spacing-m);">
+        <div class="form-actions-container">
             {{ form.save_draft(class="adw-button") }}
             {{ form.publish(class="adw-button suggested-action") }}
         </div>
@@ -128,5 +85,5 @@
 
 {% block scripts %}
 {{ super() }}
-{# All custom JavaScript for form handling has been removed. #}
+{# JavaScript for expander row (if any) would go here or in a global JS file. For now, content is always visible. #}
 {% endblock %}

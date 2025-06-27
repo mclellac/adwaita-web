@@ -1,135 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>console.log(new Date().toISOString(), 'BASE.HTML: HEAD Start');</script>
-    {# Global JS Error and Unhandled Promise Rejection Handlers REMOVED #}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}My Libadwaita Blog{% endblock %}</title>
-    <script>console.log(new Date().toISOString(), 'BASE.HTML: Before new CSS link');</script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    {# Link to the new adwaita-skin.css. Path might need adjustment based on Flask static file setup. #}
-    {# Assuming adwaita-skin.css is in app-demo/static/css/ for now. #}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-skin.css') }}">
-    {# TODO: Verify the path to adwaita-skin.css. It might be better to serve it from ../../adwaita-skin/css/ #}
-    {# <link rel="stylesheet" href="../../adwaita-skin/css/adwaita-skin.css"> #}
-    <script>console.log(new Date().toISOString(), 'BASE.HTML: After new CSS link');</script>
-    <style>
-      /* General error text styling for form validation */
-      .form-error-text,
-      .error-row .adw-action-row__subtitle, /* Target subtitle within an error-row */
-      .adw-entry-row.has-error .adw-entry-row__subtitle, /* Target subtitle of entry row with error */
-      .errors /* Legacy class from create_post, ensure it uses Adwaita vars */ {
-        color: var(--error-fg-color, var(--destructive-color)); /* Use --error-fg-color, fallback to --destructive-color */
-        font-size: var(--font-size-small);
-      }
-      .adw-entry-row.has-error .adw-entry { /* Assuming .adw-entry is used for inputs */
-        border-color: var(--error-bg-color, var(--destructive-bg-color)); /* Highlight entry border */
-      }
-
-      /* Styles for flashed messages to align with Adwaita */
-      .flash-message-base {
-        padding: var(--spacing-m);
-        margin-bottom: var(--spacing-m);
-        border-radius: var(--border-radius-lg);
-        border: 1px solid transparent;
-        font-size: var(--font-size-body);
-      }
-      .flash-message-danger, .flash-message-error { /* Flask uses 'danger' for errors */
-        background-color: var(--error-bg-color, #e01b24);
-        color: var(--error-fg-color, #ffffff);
-        border-color: var(--error-shade-color, var(--destructive-color));
-      }
-      .flash-message-success {
-        background-color: var(--success-bg-color, #2ec27e);
-        color: var(--success-fg-color, #ffffff);
-        border-color: var(--success-shade-color, var(--success-color));
-      }
-      .flash-message-warning {
-        background-color: var(--warning-bg-color, #e5a50a);
-        color: var(--warning-fg-color, rgba(0,0,0,0.8));
-        border-color: var(--warning-shade-color, var(--warning-color));
-      }
-      .flash-message-info, .flash-message-message { /* Flask uses 'message' for info */
-        background-color: var(--accent-bg-color, #3584e4); /* Or a more neutral info color if available */
-        color: var(--accent-fg-color, #ffffff);
-        border-color: var(--accent-shade-color, var(--accent-color));
-      }
-    </style>
-    {# Removed Adw.config script and components.js script as they are for adwaita-web #}
-    <script>console.log(new Date().toISOString(), 'BASE.HTML: HEAD End');</script>
+    {# Any app-specific custom styles could go into a separate file if needed #}
+    {# e.g., <link rel="stylesheet" href="{{ url_for('static', filename='css/app-demo-custom.css') }}"> #}
 </head>
-<body> {# Removed adw-initializing and hidden #}
-    <script>console.log(new Date().toISOString(), 'BASE.HTML: BODY Start');</script>
-  {# Theme and accent preferences can be applied via a simple script or by setting a body class #}
-  {# For pure CSS, we might need a small script to toggle a 'dark' class on body, or rely on prefers-color-scheme #}
+<body>
   <script>
     (function() {
-      const theme = "{% if current_user and current_user.is_authenticated and current_user.theme %}{{ current_user.theme }}{% else %}default{% endif %}";
+      const theme = "{% if current_user and current_user.is_authenticated and current_user.theme %}{{ current_user.theme }}{% else %}system{% endif %}"; // Default to system
       const accent = "{% if current_user and current_user.is_authenticated and current_user.accent_color %}{{ current_user.accent_color }}{% else %}default{% endif %}";
 
-      if (theme === 'dark') {
-        document.documentElement.classList.add('theme-dark'); // Or document.body
+      let effectiveTheme = theme;
+      if (theme === 'system') {
+        effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+
+      if (effectiveTheme === 'dark') {
+        document.documentElement.classList.add('theme-dark');
+        document.documentElement.classList.remove('theme-light');
       } else {
+        document.documentElement.classList.add('theme-light');
         document.documentElement.classList.remove('theme-dark');
       }
-      // Accent color application might require setting CSS variables on :root or body
-      // This is a placeholder, actual implementation depends on how adwaita-skin handles accents.
-      // For now, we assume CSS variables are set in adwaita-skin.css based on .theme-dark or other selectors.
-      if (accent !== 'default') {
-        // document.documentElement.style.setProperty('--accent-color', accent); // Example
+
+      // For accent colors, Adwaita CSS typically handles this via body classes like accent-blue, accent-green etc.
+      // The following is a conceptual way to apply it if the CSS is structured for it.
+      // Ensure your adwaita-skin.css has rules for .accent-blue, .accent-red etc. on body or html.
+      const validAccents = ['blue', 'green', 'yellow', 'orange', 'red', 'purple', 'brown']; // Example list
+      if (accent !== 'default' && validAccents.includes(accent)) {
+        document.documentElement.classList.forEach(cls => {
+          if (cls.startsWith('accent-')) {
+            document.documentElement.classList.remove(cls);
+          }
+        });
+        document.documentElement.classList.add(`accent-${accent}`);
       }
     })();
   </script>
 
     <header class="adw-header-bar">
         <div class="adw-header-bar__start">
-            <h1 class="adw-header-bar__title">Blog CMS</h1>
-            <a href="{{ url_for('index') }}" class="adw-button">Home</a>
-            <a href="{{ url_for('about_page') }}" class="adw-button">About</a>
-            <a href="{{ url_for('contact_page') }}" class="adw-button">Contact</a>
-            <form action="{{ url_for('search_results') }}" method="GET" style="display: flex; align-items: center; gap: var(--spacing-xs); margin-left: var(--spacing-s);">
-                <input type="search" name="q" placeholder="Search posts..." value="{{ request.args.get('q', '') }}" class="adw-entry" style="min-width: 150px;">
-                <button type="submit" class="adw-button flat" aria-label="Search">Search</button>
-            </form>
+            {# <a href="{{ url_for('index') }}" class="adw-button icon-only" title="Home">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8.5 1.5A1.5 1.5 0 0 0 7 0H1.5A1.5 1.5 0 0 0 0 1.5v13A1.5 1.5 0 0 0 1.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 14.5 0H9a1.5 1.5 0 0 0-1.5 1.5H8.5zM8 15H1.5a.5.5 0 0 1-.5-.5V1.5a.5.5 0 0 1 .5-.5H7V.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-.5.5H8zM5 5.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H5.5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H5.5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1H5.5a.5.5 0 0 1-.5-.5z"/></svg>
+            </a> #}
+            <h1 class="adw-header-bar__title">Blog Demo</h1>
+        </div>
+        <div class="adw-header-bar__center">
+             <a href="{{ url_for('index') }}" class="adw-button flat">Home</a>
+             <a href="{{ url_for('about_page') }}" class="adw-button flat">About</a>
+             <a href="{{ url_for('contact_page') }}" class="adw-button flat">Contact</a>
         </div>
         <div class="adw-header-bar__end">
+            <form action="{{ url_for('search_results') }}" method="GET" style="display: flex; align-items: center; gap: var(--spacing-xs);">
+                <input type="search" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}" class="adw-entry" style="min-width: 150px;">
+                {# <button type="submit" class="adw-button icon-only flat" aria-label="Search">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                    </svg>
+                </button> #}
+            </form>
         {% if current_user.is_authenticated %}
-            <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat circular" title="View Profile" style="padding: var(--spacing-xxs); margin-right: var(--spacing-xs);">
+            <a href="{{ url_for('create_post') }}" class="adw-button suggested-action">New Post</a>
+            <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat circular" title="View Profile" style="padding: var(--spacing-xxs); margin-left: var(--spacing-xs);">
                 {% if current_user.profile_photo_url %}
                     <span class="adw-avatar size-small">
-                        <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Avatar" class="avatar-image">
+                        <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Avatar">
                     </span>
                 {% else %}
                     <span class="adw-avatar size-small">
                         <span class="adw-avatar-text">
                             {% set name_parts = current_user.username.split() %}
-                            {% if name_parts|length >= 1 and name_parts[0] %}
-                                {{ name_parts[0][0]|upper }}
-                            {% else %}
-                                U
-                            {% endif %}
+                            {{ name_parts[0][0]|upper if (name_parts|length >= 1 and name_parts[0]) else 'U' }}
                         </span>
                     </span>
                 {% endif %}
             </a>
-            <a href="{{ url_for('settings_page') }}" class="adw-button">Settings</a>
-            <a href="{{ url_for('logout') }}" class="adw-button">Logout</a>
-            <a href="{{ url_for('create_post') }}" class="adw-button suggested-action">New Post</a>
+            <a href="{{ url_for('settings_page') }}" class="adw-button flat" title="Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311a1.464 1.464 0 0 1 .872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1-.872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1-.872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1 .872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>
+            </a>
+            <a href="{{ url_for('logout') }}" class="adw-button flat">Logout</a>
         {% else %}
             <a href="{{ url_for('login') }}" class="adw-button">Login</a>
         {% endif %}
         </div>
     </header>
-    <main class="adw-page"> {# Assuming .adw-page provides basic page styling #}
-        <div id="flash-banner-container" style="position: sticky; top: 0; z-index: 1050; padding: var(--spacing-s) 0;">
-            {# Banners were injected by JS, which is removed. Static rendering below is the fallback. #}
-        </div>
-
+    <main class="adw-page">
+        {# Removed flash-banner-container as it wasn't being used by pure CSS approach #}
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-            <div id="manual-flash-messages" style="position: sticky; top: 0; z-index: 1050; padding: var(--spacing-m) var(--spacing-xl) 0;">
+            <div id="manual-flash-messages" style="position: sticky; top: var(--spacing-s); z-index: 1050; padding: 0 var(--spacing-xl) var(--spacing-m);">
               {% for category, message in messages %}
                 {% set category_class = 'flash-message-' ~ (category if category != 'message' else 'info') %}
                 <div class="flash-message-base {{ category_class }}" role="alert">
@@ -140,12 +104,10 @@
           {% endif %}
         {% endwith %}
 
-        <div class="main-content-clamped"> {# This class seems generic, likely fine #}
+        <div class="main-content-clamped">
             {% block content %}{% endblock %}
         </div>
     </main>
-    <script>console.log(new Date().toISOString(), 'BASE.HTML: After main content');</script>
     {% block scripts %}{% endblock %}
-    <script>console.log(new Date().toISOString(), 'BASE.HTML: BODY End');</script>
 </body>
 </html>
