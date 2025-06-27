@@ -1,0 +1,93 @@
+// SCSS for Adwaita ComboRow
+// Placeholder styles - to be refined based on official Adwaita design or more detailed specs.
+
+.adw-combo-row {
+    @extend .adw-action-row; // ComboRow often behaves like an ActionRow
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--list-row-padding-vertical, var(--spacing-s)) var(--list-row-padding-horizontal, var(--spacing-m));
+    min-height: var(--list-row-min-height, 48px); // Consistent with other rows
+    border-bottom: 1px solid var(--list-row-border-color, var(--border-color));
+    background-color: var(--list-row-bg-color, var(--window-bg-color));
+    color: var(--list-row-fg-color, var(--text-color));
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &.activatable {
+        &:hover {
+            background-color: var(--list-row-hover-bg-color, var(--hover-bg-color));
+        }
+        &:active {
+            background-color: var(--list-row-active-bg-color, var(--active-bg-color));
+        }
+    }
+
+    &__icon {
+        // Similar to .adw-action-row__icon
+        margin-right: var(--spacing-m);
+        color: var(--secondary-icon-color, var(--icon-color));
+        font-size: var(--icon-size-normal, 16px); // Ensure icon size consistency
+        flex-shrink: 0;
+    }
+
+    &__text-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden; // For text ellipsis if needed
+    }
+
+    &__title {
+        // Similar to .adwaita-action-row__title
+        font-weight: var(--font-weight-bold);
+        color: var(--list-row-title-color, var(--text-color));
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__subtitle {
+        // Similar to .adwaita-action-row__subtitle
+        font-size: var(--font-size-small);
+        color: var(--list-row-subtitle-color, var(--text-color-secondary));
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__selected-value {
+        // This is specific to ComboRow, shows the currently selected value
+        color: var(--list-row-selected-value-color, var(--text-color-secondary));
+        font-size: var(--font-size-small); // Or normal, depending on design
+        margin-left: auto; // Pushes it to the right if title/subtitle are also present
+        padding-left: var(--spacing-s); // Space between text content and selected value
+        text-align: right;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__button {
+        // Placeholder for a dropdown button or chevron if it's part of the combo row directly
+        // Often, this might be a separate adw-button placed as a suffix widget in an action row structure.
+        // If it's just a chevron, it could be similar to adw-action-row__chevron
+        flex-shrink: 0;
+        margin-left: var(--spacing-s);
+        // Example: using a simple chevron character, can be replaced with SVG icon
+        &::after {
+            content: '▼'; // Simple dropdown indicator
+            font-size: var(--font-size-small);
+            color: var(--icon-color);
+        }
+    }
+
+    // If used within a list context (e.g. adw-list-box)
+    .adw-list-box & {
+        // Specific overrides if needed when inside a list box
+    }
+}
