@@ -1,0 +1,58 @@
+// SCSS for Adwaita Preferences Page and Group (Pure CSS Adwaita Skin Version)
+@use 'variables';
+@use 'mixins';
+
+// Preferences Page: Overall container for a page within a preferences window/view
+.adw-preferences-page {
+  padding: var(--spacing-l) var(--spacing-xl); // Generous padding for a page
+  // background-color: var(--window-bg-color); // Usually inherits from parent view/window
+
+  // Header for the preferences page (if any)
+  .adw-preferences-page__header {
+    margin-bottom: var(--spacing-xl);
+    // border-bottom: 1px solid var(--border-color); // Optional separator
+    // padding-bottom: var(--spacing-l);
+  }
+
+  .adw-preferences-page__title {
+    font-size: var(--font-size-h1); // Large title for the page
+    font-weight: var(--heading-font-weight);
+    color: var(--heading-color);
+    margin: 0; // Reset default heading margin
+    // text-align: center; // Optional: if titles should be centered
+  }
+}
+
+// Preferences Group: A titled section within a preferences page
+.adw-preferences-group {
+  margin-bottom: var(--spacing-xl); // Space between groups
+
+  .adw-preferences-group__title-container {
+    // Styling for the container of the group title, if needed for alignment or borders
+    margin-bottom: var(--spacing-m);
+    // border-bottom: 1px solid var(--divider-color); // Optional separator for title
+    // padding-bottom: var(--spacing-s);
+  }
+
+  .adw-preferences-group__title {
+    font-size: var(--font-size-h3); // Smaller title for groups
+    font-weight: var(--heading-font-weight);
+    color: var(--heading-color);
+    margin: 0; // Reset default heading margin
+    // text-transform: uppercase; // Adwaita group titles are often uppercase and slightly lighter
+    // letter-spacing: 0.5px;
+    // opacity: 0.8;
+  }
+
+  // Content within a group is often an .adw-list-box or directly .adw-action-row, .adw-entry-row etc.
+  // If groups have a card-like appearance:
+  // background-color: var(--card-bg-color);
+  // border: 1px solid var(--card-border-color);
+  // border-radius: var(--card-border-radius);
+  // padding: var(--spacing-m); // If card-like, content might be padded this way instead of list-box
+}
+
+// Dark theme adjustments are handled by CSS variables in _variables.scss
+// No specific dark theme overrides needed here if variables are correctly themed.
+// .theme-dark .adw-preferences-page { ... }
+// .theme-dark .adw-preferences-group { ... }

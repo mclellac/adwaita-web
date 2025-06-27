@@ -3,17 +3,14 @@
 {% block title %}Server Error - {{ super() }}{% endblock %}
 
 {% block content %}
-<adw-clamp class="main-content-clamped" style="padding-top: var(--spacing-xxl); padding-bottom: var(--spacing-xxl);">
-    <adw-status-page
-        title="500 - Internal Server Error"
-        description="Sorry, something went wrong on our end. Please try again later."
-        icon-name="dialog-warning-symbolic"> {# Placeholder icon name #}
-
-        <div slot="icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">⚙️</div>
-
-        <div slot="actions">
-            <adw-button href="{{ url_for('index') }}" suggested>Go to Homepage</adw-button>
+<div class="adw-clamp main-content-clamped" style="padding-top: var(--spacing-xxl); padding-bottom: var(--spacing-xxl);">
+    <div class="adw-status-page">
+        <div class="adw-status-page-icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">⚙️</div>
+        <h2 class="adw-status-page-title">500 - Internal Server Error</h2>
+        <p class="adw-status-page-description">Sorry, something went wrong on our end. Please try again later.</p>
+        <div class="adw-status-page-actions">
+            <a href="{{ url_for('index') }}" class="adw-button suggested-action">Go to Homepage</a>
         </div>
-    </adw-status-page>
-</adw-clamp>
+    </div>
+</div>
 {% endblock %}

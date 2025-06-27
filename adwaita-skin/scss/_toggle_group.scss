@@ -1,0 +1,177 @@
+// SCSS for Adwaita Toggle Group (Pure CSS Adwaita Skin Version)
+@use 'variables';
+@use 'mixins';
+// Assumes _button.scss provides styles for .adw-button and .adw-button.active
+
+.adw-toggle-group {
+    display: inline-flex;
+    border-radius: var(--button-border-radius); // Group rounding, especially for linked style
+
+    // Default: individual buttons with their own styling, separated by a small gap
+    // This assumes .adw-button children will have their own borders/backgrounds.
+    // If buttons are flat by default, this might look like just spaced flat buttons.
+    gap: 1px; // Small gap to visually separate buttons if they have borders
+
+    // Linked style (Segmented button appearance)
+    &.linked {
+        // For the "joined buttons" look, often the group itself has no border/bg,
+        // or it has one that contains the buttons.
+        // Assuming buttons inside are styled by .adw-button.
+        // The .adw-button.flat might be common here.
+        border: var(--button-border-width) solid var(--button-border-color);
+        // background-color: var(--button-bg-color); // Optional: if group needs a background
+        overflow: hidden; // Important for child border radius clipping if group has border/bg
+
+        .adw-button {
+            border-radius: 0; // No individual rounding
+            border-right-width: 0; // Remove right border for all but last
+            // Ensure buttons don't have their own left/right borders if group provides the outer one
+            border-left-width: 0;
+            margin-left: 0; // Remove any default margins
+
+            // If buttons are not flat, they need to "lose" their individual side borders
+            // to merge. If they are flat, this is less of an issue.
+            // The current .adw-button is not flat by default.
+
+            &:first-child {
+                border-top-left-radius: var(--button-border-radius);
+                border-bottom-left-radius: var(--button-border-radius);
+                border-left-width: var(--button-border-width); // First button gets its left border
+            }
+
+            &:last-child {
+                border-top-right-radius: var(--button-border-radius);
+                border-bottom-right-radius: var(--button-border-radius);
+                border-right-width: var(--button-border-width); // Last button gets its right border
+            }
+
+            // Ensure borders between buttons are consistent
+            &:not(:last-child) {
+              border-right: var(--button-border-width) solid var(--button-border-color);
+            }
+
+
+            &:focus, &.focus, &:focus-visible {
+                position: relative; // Ensure focus ring is drawn correctly over adjacent buttons
+                z-index: 1;
+                 // Parent .adw-split-button handles main focus ring, remove from children if too noisy
+                outline: none;
+            }
+
+            // Active state for linked buttons (already handled by .adw-button.active)
+            &.active {
+                // border-color: var(--accent-bg-color); // Border matches accent bg if not flat
+                // If flat, the background will provide the visual.
+                // For non-flat active linked, it might need a stronger border or distinct look.
+                // z-index: 2; // Ensure active button is visually on top if borders overlap
+            }
+        }
+    }
+
+    // Flat style for the group itself (buttons inside might also be .flat)
+    &.flat {
+        background-color: transparent;
+        border: none; // No border for the group itself
+
+        // If not linked, flat buttons are just spaced out
+        &:not(.linked) {
+            gap: var(--spacing-xs);
+            .adw-button {
+                // Standard .adw-button.flat styling applies
+            }
+        }
+        // If .flat.linked, the .linked style needs to adapt:
+        &.linked {
+            border: none; // No outer border for flat linked group
+            .adw-button {
+                border-color: transparent; // No borders for internal flat linked buttons
+                &:not(:last-child) {
+                     border-right: var(--button-border-width) solid var(--divider-color); // Subtle separator for flat linked
+                }
+                &:not(.active) {
+                    background-color: transparent; // Ensure non-active are fully transparent
+                }
+                // .active state is handled by .adw-button.active (gets a background)
+            }
+        }
+    }
+
+    // Round style (pill shape for the group)
+    &.round {
+        border-radius: var(--pill-button-border-radius); // Fully rounded group
+        .adw-button {
+            border-radius: 0; // Individual buttons lose rounding if inside a pill group
+            &:first-child {
+                border-top-left-radius: var(--pill-button-border-radius);
+                border-bottom-left-radius: var(--pill-button-border-radius);
+            }
+            &:last-child {
+                border-top-right-radius: var(--pill-button-border-radius);
+                border-bottom-right-radius: var(--pill-button-border-radius);
+            }
+        }
+        // If flat and round, the active button might also get fully rounded
+        // This depends on how .adw-button.active and .adw-button.flat interact
+        // For a pill group, usually only the ends are rounded, active item is square within.
+    }
+
+    // Vertical orientation
+    &.vertical {
+        flex-direction: column;
+        border-radius: var(--button-border-radius); // Consistent radius for vertical group
+
+        &.linked {
+            .adw-button {
+                border-right-width: var(--button-border-width); // All get right border
+                border-bottom-width: 0; // Remove bottom border for all but last
+                border-left-width: var(--button-border-width); // All get left border
+
+                &:first-child {
+                    border-top-left-radius: var(--button-border-radius);
+                    border-top-right-radius: var(--button-border-radius);
+                    border-bottom-left-radius: 0;
+                    border-bottom-right-radius: 0;
+                }
+                &:last-child {
+                    border-bottom-left-radius: var(--button-border-radius);
+                    border-bottom-right-radius: var(--button-border-radius);
+                    border-bottom-width: var(--button-border-width);
+                }
+                 &:not(:last-child) {
+                    border-bottom: var(--button-border-width) solid var(--button-border-color);
+                }
+            }
+        }
+        &.round { // Vertical pill
+             border-radius: var(--pill-button-border-radius);
+            .adw-button {
+                &:first-child {
+                    border-top-left-radius: var(--pill-button-border-radius);
+                    border-top-right-radius: var(--pill-button-border-radius);
+                    border-bottom-left-radius: 0;
+                    border-bottom-right-radius: 0;
+                }
+                &:last-child {
+                    border-bottom-left-radius: var(--pill-button-border-radius);
+                    border-bottom-right-radius: var(--pill-button-border-radius);
+                    border-top-left-radius: 0;
+                    border-top-right-radius: 0;
+                }
+            }
+        }
+        &.flat.linked .adw-button:not(:last-child) {
+            border-right: var(--button-border-width) solid transparent; // No side border for flat vertical
+            border-bottom: var(--button-border-width) solid var(--divider-color); // Subtle separator
+        }
+    }
+}
+
+// No specific .adw-toggle-button class needed if .adw-button and .adw-button.active suffice.
+// The .active class on .adw-button should provide the "pressed" state.
+// Example:
+// .adw-button.active {
+//   background-color: var(--accent-bg-color);
+//   color: var(--accent-fg-color);
+//   border-color: var(--accent-bg-color);
+// }
+// This is already in _button.scss

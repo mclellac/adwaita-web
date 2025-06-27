@@ -163,11 +163,16 @@ body.dark-theme .adw-expander-row-content.expanded {
 
 // --- AdwComboRow ---
 .adw-combo-row {
-  display: flex;
-  align-items: center;
+  @include row-base; // Apply common row padding, min-height, etc.
+  display: flex; // Already part of row-base but good to be explicit if overriding/extending
+  align-items: center; // Already part of row-base
   width: 100%;
   gap: var(--spacing-m);
   justify-content: space-between; // Ensure spacing if select doesn't grow significantly
+
+  // Override default vertical padding from row-base if necessary,
+  // or ensure select element aligns well with it.
+  // For now, assume row-base padding is acceptable.
 
   .adw-combo-row-text-content { // Similar to ActionRow's text content
     flex-grow: 0; // Title part should not grow

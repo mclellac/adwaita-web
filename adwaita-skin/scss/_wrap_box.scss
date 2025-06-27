@@ -1,0 +1,70 @@
+// SCSS for Adwaita WrapBox (Pure CSS Adwaita Skin Version)
+@use 'variables'; // For CSS variables like --spacing-m, etc.
+
+.adw-wrap-box {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row; // Default Libadwaita orientation for GtkWrapBox is horizontal
+  gap: var(--spacing-m); // Default gap, corresponds to GtkBox spacing=NORMAL (around 12px)
+
+  // Orientation modifiers (though GtkWrapBox is primarily horizontal by default)
+  // Adding these for completeness if needed, but default is row.
+  &.horizontal { // Explicit horizontal, same as default
+    flex-direction: row;
+  }
+  &.vertical { // If a vertical wrapping layout is desired
+    flex-direction: column;
+    // For vertical, align-items might behave like justify-content on horizontal
+    // and justify-content might behave like align-items on horizontal.
+    // This can be confusing. Standard flexbox applies.
+  }
+
+  // Spacing (gap property handles both row and column gaps)
+  // Class names can map to spacing variables.
+  &.spacing-none { gap: 0; }
+  &.spacing-xxs { gap: var(--spacing-xxs); }
+  &.spacing-xs { gap: var(--spacing-xs); }
+  &.spacing-s { gap: var(--spacing-s); }
+  // .spacing-m is default (gap: var(--spacing-m))
+  &.spacing-l { gap: var(--spacing-l); }
+  &.spacing-xl { gap: var(--spacing-xl); }
+  &.spacing-xxl { gap: var(--spacing-xxl); }
+
+  // Alignment of items along the cross-axis (align-items)
+  // Default for flex is stretch if items don't have a size on cross-axis.
+  // Libadwaita GtkWrapBox default alignment is 'start'.
+  align-items: flex-start; // Default align-items for Adwaita-like wrapping
+
+  &.align-start { align-items: flex-start; }
+  &.align-center { align-items: center; }
+  &.align-end { align-items: flex-end; }
+  &.align-stretch { align-items: stretch; }
+  &.align-baseline { align-items: baseline; }
+
+  // Justification of lines along the cross-axis when there's extra space (align-content)
+  // This is important for multi-line wrapping.
+  // Libadwaita GtkWrapBox default is 'start'.
+  align-content: flex-start; // Default align-content
+
+  &.content-start { align-content: flex-start; }
+  &.content-center { align-content: center; }
+  &.content-end { align-content: flex-end; }
+  &.content-stretch { align-content: stretch; }
+  &.content-space-between { align-content: space-between; }
+  &.content-space-around { align-content: space-around; }
+  // &.content-space-evenly { align-content: space-evenly; } // Not in Gtk.Align
+
+  // Justification of items along the main-axis within a line (justify-content)
+  // Libadwaita GtkWrapBox default is 'start'.
+  justify-content: flex-start; // Default justify-content
+
+  &.justify-start { justify-content: flex-start; }
+  &.justify-center { justify-content: center; }
+  &.justify-end { justify-content: flex-end; }
+  // Other justify options like space-between might make sense depending on use case,
+  // but Adwaita widgets often pack to the start.
+}
+
+// No specific dark theme styles needed for AdwWrapBox itself,
+// as it's a layout container. Children handle their own theming.
+// Its background will be inherited or set by its parent container.

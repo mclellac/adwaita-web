@@ -31,9 +31,14 @@
 @import 'viewswitcher'; // Styles for button parts
 @import 'spin_button'; // Added
 @import 'status_page'; // Added
+@import 'preferences'; // Added
+@import 'switch_row'; // Added
+@import 'split_button'; // Added
+@import 'toggle_group'; // Added
 
 // Layout
 @import 'box';
+@import 'wrap_box'; // Added
 @import 'clamp';
 @import 'window';
 

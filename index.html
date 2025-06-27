@@ -61,9 +61,17 @@
         .icon-actions-open-menu-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/open-menu-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/open-menu-symbolic.svg"); }
         .icon-actions-document-new-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-new-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-new-symbolic.svg"); }
         .icon-actions-document-save-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-save-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-save-symbolic.svg"); }
+        .icon-actions-document-open-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-open-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-open-symbolic.svg"); }
+        .icon-actions-edit-delete-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/edit-delete-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/edit-delete-symbolic.svg"); }
+        .icon-actions-document-print-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-print-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-print-symbolic.svg"); }
+        .icon-devices-camera-photo-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/devices/camera-photo-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/devices/camera-photo-symbolic.svg"); }
+        .icon-actions-call-start-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/call-start-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/call-start-symbolic.svg"); }
+        .icon-actions-call-stop-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/call-stop-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/call-stop-symbolic.svg"); }
+        .icon-ui-pan-down-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-down-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-down-symbolic.svg"); }
+        .icon-actions-application-exit-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/application-exit-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/application-exit-symbolic.svg"); }
         .icon-status-dialog-error-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-error-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-error-symbolic.svg"); }
         .icon-ui-pan-up-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-up-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-up-symbolic.svg"); }
-        .icon-devices-camera-photo-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/devices/camera-photo-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/devices/camera-photo-symbolic.svg"); }
+        .icon-actions-media-playback-start-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/media-playback-start-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/media-playback-start-symbolic.svg"); }
         .icon-apps-help-contents-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/apps/help-contents-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/apps/help-contents-symbolic.svg");}
         .icon-status-emblem-ok-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/emblem-ok-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/emblem-ok-symbolic.svg");}
         .icon-actions-go-next-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/go-next-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/go-next-symbolic.svg");}
@@ -211,11 +219,34 @@
                         </div>
                     </div>
                 </div>
+                <div class="adw-row" style="align-items: center;">
+                    <span class="adw-label">Split Button:</span>
+                    <div class="adw-split-button" id="split-btn-1-wrapper">
+                        <button class="adw-split-button-action">Main Action</button>
+                        <button class="adw-split-button-dropdown" aria-label="More options"><span class="adw-icon icon-pan-down-symbolic"></span></button>
+                    </div>
+                    <div class="adw-split-button suggested-action" id="split-btn-2-wrapper" style="margin-left: var(--spacing-s);">
+                        <button class="adw-split-button-action"><span class="adw-icon icon-actions-document-save-symbolic"></span> Save</button>
+                        <button class="adw-split-button-dropdown" aria-label="More options"><span class="adw-icon icon-pan-down-symbolic"></span></button>
+                    </div>
+                    <div class="adw-split-button disabled" id="split-btn-3-wrapper" style="margin-left: var(--spacing-s);">
+                        <button class="adw-split-button-action">Disabled</button>
+                        <button class="adw-split-button-dropdown" aria-label="More options"><span class="adw-icon icon-pan-down-symbolic"></span></button>
+                    </div>
+                </div>
                  <div class="adw-row" style="align-items: center;">
                     <span class="adw-label">Toggle Buttons:</span>
-                    <button class="adw-button active">Toggle Me</button> {/* Use .active for toggled state */}
-                    <button class="adw-button icon-only" aria-label="Play"><span class="adw-icon icon-actions-media-playback-start-symbolic"></span></button>
+                    <button class="adw-button" id="toggle-btn-1">Toggle Me</button>
+                    <button class="adw-button active" id="toggle-btn-2" aria-label="Play"><span class="adw-icon icon-actions-media-playback-start-symbolic"></span></button>
                     <button class="adw-button" disabled>Disabled</button>
+                </div>
+                <div class="adw-row" style="align-items:center;">
+                    <span class="adw-label">Toggle Group (Linked):</span>
+                    <div class="adw-toggle-group linked" id="toggle-group-1">
+                        <button class="adw-button">Option 1</button>
+                        <button class="adw-button active">Option 2</button>
+                        <button class="adw-button">Option 3</button>
+                    </div>
                 </div>
             </div>
              <details>
@@ -319,6 +350,64 @@
                 </div>
             </div>
         </section>
+        <!-- Layout Components -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Layouts (Static Structures)</h2>
+            <h3 class="adw-label title-3">Box (Horizontal)</h3>
+            <div class="adw-box horizontal spacing-m" style="padding:var(--spacing-s); border:1px dashed var(--border-color);">
+                <button class="adw-button">Box Child 1</button>
+                <span class="adw-label">Box Child 2</span>
+                <input type="text" class="adw-entry" placeholder="Box Child 3">
+            </div>
+
+            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Clamp</h3>
+            <div class="adw-clamp" style="padding:var(--spacing-s); border:1px dashed var(--border-color); max-width: 40ch;">
+                <p class="adw-label body">This text is clamped to a maximum width of 40 characters. It will not grow wider than that, ensuring readability even if the parent container is very wide.</p>
+            </div>
+
+            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Flap (Static Structure)</h3>
+            <button class="adw-button" id="toggle-main-flap-static">Toggle Flap (No Action)</button>
+            <div class="adw-flap" id="main-flap-example-static" style="border: 1px solid var(--border-color); margin-top: var(--spacing-s); min-height: 150px; display: flex;">
+                <div class="adw-flap__flap-content adw-box vertical" style="padding: var(--spacing-m); background: var(--sidebar-bg-color); min-width:200px; border-right: 1px solid var(--border-color);">
+                    <h3 class="adw-label title-3">Flap Content</h3>
+                    <div class="adw-action-row"><span class="adw-action-row__title">Settings</span></div>
+                </div>
+                <div class="adw-flap__main-content adw-box vertical" style="padding: var(--spacing-m); flex-grow: 1;">
+                    <h3 class="adw-label title-3">Main Content (Flap Demo)</h3>
+                </div>
+            </div>
+
+            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">WrapBox</h3>
+            <div class="adw-wrap-box spacing-s align-center" style="padding:var(--spacing-s); border:1px dashed var(--border-color); min-height: 100px;">
+                <button class="adw-button">Button 1</button>
+                <button class="adw-button suggested-action">Button 2 (Suggested)</button>
+                <button class="adw-button destructive-action">Button 3 (Destructive)</button>
+                <span class="adw-label">Label 4</span>
+                <input type="text" class="adw-entry" placeholder="Entry 5">
+                <button class="adw-button">Button 6</button>
+                <button class="adw-button">Button 7</button>
+            </div>
+
+            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">BreakpointBin (Static Structure)</h3>
+            <p class="adw-label body" style="margin-bottom: var(--spacing-xs);">Shows different children based on width (CSS would handle this if possible, or JS). Below is a static representation of one state.</p>
+            <div class="adw-breakpoint-bin" style="padding:var(--spacing-s); border:1px dashed var(--border-color); min-height: 100px;">
+                <div class="adw-box vertical" data-name="small" style="background-color: var(--theme-color-red-2); padding: var(--spacing-m);">
+                    <h4 class="adw-label title-4">Small View (0px+)</h4>
+                    <p class="adw-label body">This is shown when the BreakpointBin is narrow.</p>
+                </div>
+                {# Other views would be hidden by CSS/JS in a real BreakpointBin #}
+            </div>
+             <details>
+                <summary>Show Layout Examples (Static HTML)</summary>
+                <pre><code>&lt;div class="adw-box horizontal spacing-m"&gt;...&lt;/div&gt;
+&lt;div class="adw-clamp" style="max-width: 40ch;"&gt;...&lt;/div&gt;
+&lt;div class="adw-flap"&gt;...&lt;/div&gt;
+&lt;div class="adw-wrap-box spacing-s align-center"&gt;...&lt;/div&gt;
+&lt;div class="adw-breakpoint-bin"&gt;...&lt;/div&gt;</code></pre>
+            </details>
+        </section>
+
+
         <div style="height: 200px;"></div> {/* Extra space at bottom */}
     </div>
     {/* Toast overlay removed as it's JS driven */}

@@ -1,30 +1,62 @@
 {% extends "base.html" %}
 {% block title %}Contact Us - {{ super() }}{% endblock %}
 {% block content %}
-<adw-clamp style="max-width: 700px; margin: 20px auto; padding: var(--spacing-l);">
-    <adw-box class="adw-box adw-box-vertical adw-box-spacing-l">
-        <h1 class="adw-title-1" style="text-align: center;">Contact Us</h1>
+<div class="adw-clamp" style="max-width: 700px; margin: 20px auto; padding: var(--spacing-l);">
+    <div class="adw-box vertical spacing-l">
+        <h1 class="adw-label title-1" style="text-align: center;">Contact Us</h1>
 
-        <adw-preferences-group title="Get in Touch">
-            <adw-action-row title="Email" subtitle="For general inquiries, please email us at: demo@example.com (not a real address)."></adw-action-row>
-            <adw-action-row title="Issues" subtitle="If you find a bug or have a feature request for Adwaita-Web, please check the main project repository."></adw-action-row>
-        </adw-preferences-group>
+        <div class="adw-preferences-group" role="group" aria-labelledby="contact-info-title">
+            <div class="adw-preferences-group__title-container">
+                <h3 class="adw-preferences-group__title" id="contact-info-title">Get in Touch</h3>
+            </div>
+            <div class="adw-action-row">
+                <div class="adw-action-row__text">
+                    <span class="adw-action-row__title">Email</span>
+                    <span class="adw-action-row__subtitle">For general inquiries, please email us at: demo@example.com (not a real address).</span>
+                </div>
+            </div>
+            <div class="adw-action-row">
+                 <div class="adw-action-row__text">
+                    <span class="adw-action-row__title">Issues</span>
+                    <span class="adw-action-row__subtitle">If you find a bug or have a feature request for Adwaita-Skin, please check the main project repository.</span>
+                </div>
+            </div>
+        </div>
 
         {# Placeholder for a future contact form #}
-        <adw-preferences-group title="Send a Message (Placeholder)">
-            <adw-entry-row title="Your Name" name="contact_name" placeholder="Enter your name"></adw-entry-row>
-            <adw-entry-row title="Your Email" name="contact_email" type="email" placeholder="Enter your email"></adw-entry-row>
-            <adw-action-row title="Message" class="content-entry-row">
-                 <textarea class="adw-textarea-standalone" name="contact_message" rows="5" placeholder="Your message here..." style="width: 100%; margin-top: var(--spacing-xs);"></textarea>
-            </adw-action-row>
-            <div style="display: flex; justify-content: flex-end; padding: var(--spacing-m) 0;">
-                <adw-button suggested disabled>Send (Disabled)</adw-button>
+        <div class="adw-preferences-group" role="group" aria-labelledby="contact-form-title">
+            <div class="adw-preferences-group__title-container">
+                <h3 class="adw-preferences-group__title" id="contact-form-title">Send a Message (Placeholder)</h3>
             </div>
-        </adw-preferences-group>
+            <div class="adw-entry-row">
+                <div class="adw-entry-row-text-content">
+                    <label for="contact_name_input" class="adw-entry-row-title">Your Name</label>
+                </div>
+                <input type="text" id="contact_name_input" name="contact_name" class="adw-entry row-input" placeholder="Enter your name">
+            </div>
+            <div class="adw-entry-row">
+                <div class="adw-entry-row-text-content">
+                    <label for="contact_email_input" class="adw-entry-row-title">Your Email</label>
+                </div>
+                <input type="email" id="contact_email_input" name="contact_email" class="adw-entry row-input" placeholder="Enter your email">
+            </div>
+            {# For textarea in a row-like structure, typically it might not strictly be an entry-row, but an action-row with a textarea in its suffix #}
+            <div class="adw-action-row content-entry-row"> {# Keep content-entry-row if it has specific styles or just use adw-action-row #}
+                <div class="adw-action-row__text">
+                     <label for="contact_message_input" class="adw-action-row__title">Message</label>
+                </div>
+                <div class="adw-action-row__suffix-widget" style="width:100%;">
+                    <textarea id="contact_message_input" name="contact_message" class="adw-textarea" rows="5" placeholder="Your message here..." style="width: 100%; margin-top: var(--spacing-xs);"></textarea>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; padding: var(--spacing-m) 0;">
+                <button class="adw-button suggested-action" disabled>Send (Disabled)</button>
+            </div>
+        </div>
 
         <div style="text-align: center; margin-top: var(--spacing-xl);">
-            <adw-button href="{{ url_for('index') }}">Back to Home</adw-button>
+            <a href="{{ url_for('index') }}" class="adw-button">Back to Home</a>
         </div>
-    </adw-box>
-</adw-clamp>
+    </div>
+</div>
 {% endblock %}
