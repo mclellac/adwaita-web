@@ -283,6 +283,7 @@ def create_app(config_overrides=None):
         _app.logger.debug(f"[SESSION_STATE] Session data: {dict(session)}")
         if current_user.is_authenticated:
             _app.logger.debug(f"[AUTH_STATE] User: {current_user.username} (ID: {current_user.id}) is authenticated.")
+            _app.logger.info(f"[THEME_CHECK] User {current_user.username}: theme='{current_user.theme}', accent_color='{current_user.accent_color}' before rendering index.") # Added log
         else:
             _app.logger.debug(f"[AUTH_STATE] User is anonymous.")
         page = request.args.get('page', 1, type=int)
@@ -877,6 +878,7 @@ def create_app(config_overrides=None):
     def save_theme_preference():
         _app.logger.debug(f"[API_ROUTE_ENTRY] Path: /api/settings/theme, Method: {request.method}, User: {current_user.username}")
         data = request.get_json()
+        _app.logger.info(f"API /api/settings/theme: Received data: {data} for user {current_user.username}") # Added log
         if not data or 'theme' not in data:
             _app.logger.warning(f"API /api/settings/theme: Missing theme data in request from {current_user.username}. Data: {data}")
             return jsonify({'status': 'error', 'message': 'Missing theme data'}), 400
@@ -888,7 +890,7 @@ def create_app(config_overrides=None):
         current_user.theme = new_theme
         try:
             db.session.commit()
-            _app.logger.info(f"Theme preference '{new_theme}' saved for user {current_user.username}.")
+            _app.logger.info(f"Theme preference '{new_theme}' saved for user {current_user.username}. current_user.theme is now: {current_user.theme}") # Added log
             return jsonify({'status': 'success', 'message': 'Theme updated successfully'})
         except Exception as e:
             db.session.rollback()
@@ -900,15 +902,17 @@ def create_app(config_overrides=None):
     def save_accent_color_preference():
         _app.logger.debug(f"[API_ROUTE_ENTRY] Path: /api/settings/accent_color, Method: {request.method}, User: {current_user.username}")
         data = request.get_json()
+        _app.logger.info(f"API /api/settings/accent_color: Received data: {data} for user {current_user.username}") # Added log
         if not data or 'accent_color' not in data:
             _app.logger.warning(f"API /api/settings/accent_color: Missing accent_color data in request from {current_user.username}. Data: {data}")
             return jsonify({'status': 'error', 'message': 'Missing accent_color data'}), 400
         new_accent_color = data['accent_color']
         _app.logger.info(f"User {current_user.username} attempting to set accent_color to: '{new_accent_color}'.")
+        # Add validation for accent_color if there's a predefined list in app.config, similar to ALLOWED_THEMES
         current_user.accent_color = new_accent_color
         try:
             db.session.commit()
-            _app.logger.info(f"Accent color preference '{new_accent_color}' saved for user {current_user.username}.")
+            _app.logger.info(f"Accent color preference '{new_accent_color}' saved for user {current_user.username}. current_user.accent_color is now: {current_user.accent_color}") # Added log
             return jsonify({'status': 'success', 'message': 'Accent color updated successfully'})
         except Exception as e:
             db.session.rollback()
