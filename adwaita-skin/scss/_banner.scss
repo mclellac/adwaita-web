@@ -1,0 +1,138 @@
+@use 'variables';
+@use 'mixins';
+
+.adw-banner {
+  // Banners are typically placed at the top of a view or window.
+  // They are not part of a listbox structure usually.
+  padding: var(--spacing-s) var(--spacing-m); // Slightly less vertical padding than rows
+  background-color: var(--banner-bg-color); // Use theme-defined default
+  color: var(--banner-fg-color); // Use theme-defined default
+  // No border-radius by default, as it usually spans full width.
+  // border-radius: var(--border-radius-default);
+  border-bottom: var(--border-width) solid var(--banner-border-color); // Use theme-defined default
+  // margin-bottom: var(--spacing-m); // Margin is context-dependent, parent should handle normally
+  box-sizing: border-box; // Ensure padding doesn't affect width calculation for fixed positioning
+
+  // Positioning: Fixed at the top, full width, overlaying content
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0; // Ensures full width
+  z-index: var(--z-index-banner, 1000); // Ensure it's above most other content
+
+  display: flex;
+  justify-content: space-between; // Pushes title and button apart
+  align-items: center;
+  gap: var(--spacing-m); // Gap between title and button if both are present
+
+  // Animation for reveal/hide
+  opacity: 0;
+  // Transform from slightly above its final position to slide down into view
+  transform: translateY(-100%); // Standard slide-in from top
+  transition: opacity var(--animation-duration-medium) var(--animation-ease-out-cubic),
+              transform var(--animation-duration-medium) var(--animation-ease-out-cubic);
+  // Ensure it's not clickable when hidden
+  visibility: hidden;
+  pointer-events: none;
+  // position: relative; // No longer relative, now fixed
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .adw-banner-title {
+    flex-grow: 1;
+    font-size: var(--font-size-base);
+    font-weight: normal;
+    text-align: center; // Center the title text
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    // The flex layout (justify-content: space-between) on .adw-banner
+    // will give this title the available space between start and the button group.
+    // Adding a small margin to ensure it doesn't touch button group if space is very tight.
+    margin-right: var(--spacing-s); // Only if there's a button group.
+    &:only-child { // If title is the only child (no button group)
+        margin-right: 0; // No margin needed
+    }
+  }
+
+  .adw-banner-button-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s); // Space between buttons in the group
+    flex-shrink: 0; // Prevent button group from shrinking
+  }
+
+  // Styling for buttons inside the .adw-banner-button-group
+  .adw-banner-button-group > .adw-button {
+    background-color: var(--banner-button-bg-color);
+    color: var(--banner-button-fg-color);
+    border: none;
+
+    &:hover {
+      background-color: var(--banner-button-hover-bg-color);
+    }
+    &:active, &.active {
+      background-color: var(--banner-button-active-bg-color);
+    }
+
+    &.flat { // Specific override for flat buttons in the group
+        background-color: var(--banner-button-bg-color);
+        color: var(--banner-button-fg-color);
+        &:hover {
+          background-color: var(--banner-button-hover-bg-color);
+        }
+        &:active, &.active {
+          background-color: var(--banner-button-active-bg-color);
+        }
+    }
+  }
+
+  // Type-specific overrides
+  &.adw-banner-error {
+    background-color: var(--banner-error-bg-color);
+    color: var(--banner-error-fg-color);
+    border-bottom-color: var(--banner-error-border-color);
+
+    // Override for buttons inside an ERROR banner's button group
+    .adw-banner-button-group > .adw-button {
+      background-color: var(--banner-error-button-bg-color);
+      color: var(--banner-error-button-fg-color);
+      border: none;
+
+      &:hover {
+        background-color: var(--banner-error-button-hover-bg-color);
+      }
+      &:active, &.active {
+        background-color: var(--banner-error-button-active-bg-color);
+      }
+
+      &.flat { // Specific override for flat buttons in the error group
+          background-color: var(--banner-error-button-bg-color);
+          color: var(--banner-error-button-fg-color);
+          &:hover {
+            background-color: var(--banner-error-button-hover-bg-color);
+          }
+          &:active, &.active {
+            background-color: var(--banner-error-button-active-bg-color);
+          }
+      }
+    }
+  }
+  // Add .adw-banner-info for specific info button styling if needed
+  // Add .adw-banner-warning, .adw-banner-success if those types are supported
+}
+
+// Variables that should be defined in _variables.scss (within theme mixins):
+// --banner-bg-color (for default/info)
+// --banner-fg-color (for default/info)
+// --banner-border-color (for default/info)
+// --banner-error-bg-color
+// --banner-error-fg-color
+// --banner-error-border-color
+// etc. for other types

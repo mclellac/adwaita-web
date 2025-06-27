@@ -1,0 +1,162 @@
+// Styles for Adwaita Entries (Input Fields) (Adwaita Skin Version)
+
+@use "sass:color";
+@import 'variables';
+@import 'mixins';
+
+.adw-entry {
+    display: inline-block;
+    width: auto;
+    padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+    border: var(--input-border-width) solid var(--input-border-color);
+    border-radius: var(--input-border-radius);
+    background-color: var(--input-bg-color);
+    color: var(--input-fg-color);
+    font-family: var(--document-font-family);
+    font-size: var(--font-size-base);
+    line-height: $line-height-base;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, background-color 0.15s ease-in-out;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    &::placeholder {
+        color: var(--input-placeholder-color);
+        opacity: 1; // Browsers like Firefox might have a default lower opacity
+    }
+
+    &:hover {
+        border-color: var(--input-hover-border-color);
+        background-color: var(--input-hover-bg-color);
+    }
+
+    &:focus, &:focus-visible {
+        outline: none;
+        border-color: var(--input-focus-border-color);
+        box-shadow: var(--focus-ring-width) solid var(--focus-ring-color);
+        background-color: var(--input-focus-bg-color);
+    }
+
+    &.disabled, &[disabled] {
+        cursor: not-allowed;
+        background-color: var(--input-disabled-bg-color) !important;
+        border-color: var(--input-disabled-border-color) !important;
+        color: var(--input-disabled-fg-color) !important;
+        opacity: var(--opacity-disabled);
+        box-shadow: none !important;
+
+        &::placeholder {
+            // The color of the placeholder will be dimmed by the input's opacity.
+            // Specific color changes for disabled placeholders are not reliably cross-browser with pure CSS.
+            // color: var(--input-disabled-placeholder-color); // If we define such a variable
+        }
+    }
+
+    &.readonly, &[readonly] {
+        background-color: var(--input-readonly-bg-color);
+        border-color: var(--input-readonly-border-color);
+        color: var(--input-readonly-fg-color);
+        cursor: default;
+
+        &:hover {
+             border-color: var(--input-readonly-border-color);
+        }
+        &:focus, &:focus-visible {
+            border-color: var(--input-readonly-border-color);
+            box-shadow: none;
+        }
+    }
+
+    &.error {
+        border-color: var(--destructive-bg-color);
+        // color: var(--destructive-color); // Optional
+
+        &:focus, &:focus-visible {
+            border-color: var(--destructive-bg-color);
+            // Use SASS variables for rgba as CSS vars cannot be reliably used in SASS rgba()
+            // $sass-accent-red-light-bg should be available from _variables.scss
+            box-shadow: var(--focus-ring-width) solid #{rgba($sass-accent-red-light-bg, 0.5)};
+            .theme-dark & {
+                 box-shadow: var(--focus-ring-width) solid #{rgba($sass-accent-red-dark-bg, 0.6)};
+            }
+        }
+    }
+
+    &.success {
+        border-color: var(--success-bg-color);
+        &:focus, &:focus-visible {
+            border-color: var(--success-bg-color);
+            box-shadow: var(--focus-ring-width) solid #{rgba($sass-accent-green-light-bg, 0.5)};
+            .theme-dark & {
+                box-shadow: var(--focus-ring-width) solid #{rgba($sass-accent-green-dark-bg, 0.6)};
+            }
+        }
+    }
+
+    &textarea,
+    &.textarea {
+        resize: vertical;
+        min-height: calc(var(--font-size-base) * #{$line-height-base} * 3);
+    }
+}
+
+input[type="search"].adw-entry {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    &::-webkit-search-decoration,
+    &::-webkit-search-cancel-button,
+    &::-webkit-search-results-button,
+    &::-webkit-search-results-decoration {
+        display: none;
+    }
+}
+
+.adw-entry-wrapper {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+
+    .adw-entry-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--input-placeholder-color);
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: $icon-size-base;
+        height: $icon-size-base;
+        pointer-events: none;
+
+        svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        &.interactive {
+            pointer-events: auto;
+            cursor: pointer;
+            color: var(--text-color-secondary);
+            &:hover {
+                color: var(--text-color);
+            }
+        }
+    }
+
+    .adw-entry {
+        &.with-icon-start {
+            padding-left: calc(var(--input-padding-horizontal) + #{$icon-size-base} + var(--spacing-xs));
+        }
+        &.with-icon-end {
+            padding-right: calc(var(--input-padding-horizontal) + #{$icon-size-base} + var(--spacing-xs));
+        }
+    }
+
+    .adw-entry-icon.start {
+        left: var(--input-padding-horizontal);
+    }
+    .adw-entry-icon.end {
+        right: var(--input-padding-horizontal);
+    }
+}

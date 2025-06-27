@@ -1,0 +1,90 @@
+// scss/_radio.scss
+@use 'variables';
+
+.adw-radio {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  gap: var(--spacing-s); // Use gap for spacing
+
+  input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .adw-radio-indicator {
+      border-color: var(--accent-color); // Use standalone accent for border
+
+      &:before { // Inner dot
+        content: "";
+        display: block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--accent-color); // Dot color also standalone accent
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    &:disabled + .adw-radio-indicator { // Disabled and Unchecked
+      background-color: var(--entry-disabled-bg-color);
+      border-color: var(--entry-disabled-border-color);
+      opacity: 1;
+      cursor: not-allowed;
+
+      &:before { // No inner dot
+        background-color: transparent;
+      }
+    }
+
+    &:disabled:checked + .adw-radio-indicator { // Disabled and Checked
+        border-color: var(--accent-color); // Still show accent border
+        opacity: var(--opacity-disabled); // But muted
+        &:before { // Inner dot
+            background-color: var(--accent-color); // Still show accent dot
+            // Opacity on parent mutes this too
+        }
+    }
+
+    &:focus-visible + .adw-radio-indicator {
+      outline: 2px solid var(--accent-color); // Focus uses standalone accent color
+      outline-offset: 2px;
+    }
+  }
+
+  .adw-radio-indicator {
+    width: 18px;
+    height: 18px;
+    border-width: 2px; // Adwaita radio often has a 2px border
+    border-style: solid;
+    border-color: var(--entry-border-color); // Use entry border color for consistency (or a specific radio border)
+    border-radius: 50%;
+    background-color: var(--view-bg-color);
+    position: relative;
+    transition: background-color 0.1s ease-out, border-color 0.1s ease-out;
+    flex-shrink: 0;
+  }
+
+  .adw-radio-label {
+    color: var(--view-fg-color);
+    line-height: 1.2;
+  }
+
+  // If the whole radio component is marked disabled
+  &[disabled] {
+    .adw-radio-label {
+      color: var(--disabled-fg-color);
+      cursor: not-allowed;
+    }
+    .adw-radio-indicator {
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Dark theme specific overrides are handled by variables.
