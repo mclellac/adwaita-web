@@ -252,6 +252,79 @@ $accent-color-definitions-map: (
 
   --opacity-disabled: 0.5;
   --focus-ring-width: 2px;
+
+  &.theme-dark {
+    // Dark Theme Overrides
+    --body-bg-color: #{$background-color-dark};
+    --text-color: #{$text-color-dark};
+    --text-color-secondary: #{$text-color-secondary-dark};
+    --heading-color: #{$heading-color-dark};
+    --border-color: #{$border-color-dark};
+    --divider-color: #{$divider-color-dark};
+    --focus-ring-color: #{$focus-ring-color-fallback-dark};
+    --link-color: #{$link-color-dark};
+    --link-hover-color: #{$link-hover-color-dark};
+    --link-visited-color: #{$link-visited-color-dark};
+    --headerbar-bg-color: #{$headerbar-background-color-dark};
+    --headerbar-fg-color: #{$headerbar-text-color-dark};
+    --headerbar-border-color: #{$headerbar-border-color-dark};
+    --window-bg-color: #{$window-background-color-dark};
+    --button-bg-color: #{$button-background-color-dark};
+    --button-fg-color: #{$button-text-color-dark};
+    --button-border-color: #{$button-border-color-dark};
+    --button-hover-bg-color: #{$button-hover-background-color-dark};
+    --button-hover-border-color: #{$button-hover-border-color-dark};
+    --button-hover-text-color: #{$button-hover-text-color-dark};
+    --button-active-bg-color: #{$button-active-background-color-dark};
+    --button-active-border-color: #{$button-active-border-color-dark};
+    --button-disabled-bg-color: #{$button-disabled-background-color-dark};
+    --button-disabled-fg-color: #{$button-disabled-text-color-dark};
+    --button-disabled-border-color: #{$button-disabled-border-color-dark};
+    --button-flat-hover-bg-color: #{$flat-button-hover-background-color-dark};
+    --button-flat-active-bg-color: #{$flat-button-active-background-color-dark};
+    --button-active-toggle-bg-color: #{$button-active-toggle-background-color-dark};
+    --button-active-toggle-border-color: #{$button-active-toggle-border-color-dark};
+    --button-active-toggle-text-color: #{$button-active-toggle-text-color-dark};
+    --input-bg-color: #{$input-background-color-dark};
+    --input-fg-color: #{$input-text-color-dark};
+    --input-border-color: #{$input-border-color-dark};
+    --input-hover-bg-color: #{$input-hover-background-color-dark};
+    --input-hover-border-color: #{$input-hover-border-color-dark};
+    --input-focus-bg-color: #{$input-focus-background-color-dark};
+    --input-focus-border-color: #{$input-focus-border-color-fallback-dark};
+    --input-placeholder-color: #{$input-placeholder-color-dark};
+    --input-disabled-bg-color: #{$input-disabled-background-color-dark};
+    --input-disabled-fg-color: #{$input-disabled-text-color-dark};
+    --input-disabled-border-color: #{$input-disabled-border-color-dark};
+    --input-readonly-bg-color: #{$input-readonly-background-color-dark};
+    --input-readonly-fg-color: #{$input-readonly-text-color-dark};
+    --input-readonly-border-color: #{$input-readonly-border-color-dark};
+
+    // Default accent for dark theme (blue)
+    --accent-color: #{$sass-accent-blue-dark-color};
+    --accent-bg-color: #{$sass-accent-blue-dark-bg};
+    --accent-fg-color: #{$sass-accent-blue-dark-fg};
+    --accent-bg-hover-color: #{$sass-accent-blue-dark-hover};
+    --accent-bg-active-color: #{$sass-accent-blue-dark-active};
+
+    --destructive-color: #{$sass-accent-red-dark-color};
+    --destructive-bg-color: #{$sass-accent-red-dark-bg};
+    --destructive-fg-color: #{$sass-accent-red-dark-fg};
+    --destructive-bg-hover-color: #{$sass-accent-red-dark-hover};
+    --destructive-bg-active-color: #{$sass-accent-red-dark-active};
+
+    --success-color: #{$sass-accent-green-dark-color};
+    --success-bg-color: #{$sass-accent-green-dark-bg};
+    --success-fg-color: #{$sass-accent-green-dark-fg};
+
+    // TODO: Add specific accent color variable overrides for dark theme if Adw.js logic for this is removed
+    // For example, if accent is 'green':
+    // &.accent-green {
+    //   --accent-color: #{$sass-accent-green-dark-color};
+    //   --accent-bg-color: #{$sass-accent-green-dark-bg};
+    //   ...
+    // }
+  }
 }
 
 // --- SCSS Variables that reference CSS Custom Properties ---
