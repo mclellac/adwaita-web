@@ -21,8 +21,11 @@
 {% endblock %}
 
 {% block content %}
-<adw-clamp style="max-width: 700px; margin: var(--spacing-xl) auto;">
-  <adw-preferences-page title="Edit Your Profile">
+<div class="adw-clamp" style="max-width: 700px; margin: var(--spacing-xl) auto;">
+  <div class="adw-preferences-page">
+    <header class="adw-preferences-page__header">
+        <h1 class="adw-preferences-page__title">Edit Your Profile</h1>
+    </header>
     <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data" id="edit-profile-form">
       {{ form.hidden_tag() }} {# CSRF token #}
 
@@ -32,71 +35,85 @@
       <input type="hidden" name="crop_width" id="crop_width">
       <input type="hidden" name="crop_height" id="crop_height">
 
-      <adw-preferences-group title="Public Information">
+      <div class="adw-preferences-group" role="group" aria-labelledby="profile-public-info-title">
+        <div class="adw-preferences-group__title-container">
+            <h3 class="adw-preferences-group__title" id="profile-public-info-title">Public Information</h3>
+        </div>
+
         {# Full Name Entry Row #}
-        <adw-entry-row title="{{ form.full_name.label.text }}"
-                         subtitle="{{ form.full_name.errors|join(' ') if form.full_name.errors else '' }}"
-                         class="{{ 'has-error' if form.full_name.errors else '' }}">
-          {{ form.full_name(placeholder="Your full name or display name") }}
-        </adw-entry-row>
+        <div class="adw-entry-row {{ 'has-error' if form.full_name.errors else '' }}">
+            <div class="adw-entry-row-text-content">
+                <label for="{{ form.full_name.id or 'full_name_input' }}" class="adw-entry-row-title">{{ form.full_name.label.text }}</label>
+                {% if form.full_name.errors %}<div class="adw-entry-row-subtitle error-text">{{ form.full_name.errors|join(' ') }}</div>{% endif %}
+            </div>
+            <input type="text" id="{{ form.full_name.id or 'full_name_input' }}" name="{{ form.full_name.name }}" value="{{ form.full_name.data or '' }}" class="adw-entry row-input" placeholder="Your full name or display name">
+        </div>
 
         {# Bio/Profile Info - Using adw-expander-row to contain the textarea #}
-        <adw-expander-row title="{{ form.profile_info.label.text }}"
-                            subtitle="{{ form.profile_info.errors|join(' ') if form.profile_info.errors else 'Tell us a bit about yourself. Supports basic HTML.' }}"
-                            class="{{ 'has-error' if form.profile_info.errors else '' }}">
-          <div slot="content" style="padding: var(--spacing-s) 0;">
-            {{ form.profile_info(rows="8", class="adw-textarea-standalone", style="width: 100%; min-height: 150px;") }}
-          </div>
-        </adw-expander-row>
+        <div class="adw-expander-row {{ 'has-error' if form.profile_info.errors else '' }}">
+            <div class="adw-action-row activatable" role="button" tabindex="0" aria-expanded="false"> {# Assuming JS will toggle aria-expanded and show content #}
+                <div class="adw-action-row__text">
+                    <div class="adw-action-row__title">{{ form.profile_info.label.text }}</div>
+                    <div class="adw-action-row__subtitle">
+                        {% if form.profile_info.errors %} {{ form.profile_info.errors|join(' ') }}
+                        {% else %} Tell us a bit about yourself. Supports basic HTML.
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="adw-expander-row__chevron"></span>
+            </div>
+            <div class="adw-expander-row-content" style="padding: var(--spacing-s) 0;">
+                 <textarea name="{{ form.profile_info.name }}" id="{{ form.profile_info.id or 'profile_info_input' }}" class="adw-textarea" rows="8" style="width: 100%; min-height: 150px;">{{ form.profile_info.data or '' }}</textarea>
+            </div>
+        </div>
 
         {# Location Entry Row #}
-        <adw-entry-row title="{{ form.location.label.text }}"
-                         subtitle="{{ form.location.errors|join(' ') if form.location.errors else '' }}"
-                         class="{{ 'has-error' if form.location.errors else '' }}">
-          {{ form.location(placeholder="e.g., City, Country") }}
-        </adw-entry-row>
+        <div class="adw-entry-row {{ 'has-error' if form.location.errors else '' }}">
+            <div class="adw-entry-row-text-content">
+                <label for="{{ form.location.id or 'location_input' }}" class="adw-entry-row-title">{{ form.location.label.text }}</label>
+                {% if form.location.errors %}<div class="adw-entry-row-subtitle error-text">{{ form.location.errors|join(' ') }}</div>{% endif %}
+            </div>
+            <input type="text" id="{{ form.location.id or 'location_input' }}" name="{{ form.location.name }}" value="{{ form.location.data or '' }}" class="adw-entry row-input" placeholder="e.g., City, Country">
+        </div>
 
         {# Website URL Entry Row #}
-        <adw-entry-row title="{{ form.website_url.label.text }}"
-                         subtitle="{{ form.website_url.errors|join(' ') if form.website_url.errors else '' }}"
-                         class="{{ 'has-error' if form.website_url.errors else '' }}">
-          {{ form.website_url(placeholder="https://example.com", type="url") }}
-        </adw-entry-row>
+        <div class="adw-entry-row {{ 'has-error' if form.website_url.errors else '' }}">
+            <div class="adw-entry-row-text-content">
+                <label for="{{ form.website_url.id or 'website_url_input' }}" class="adw-entry-row-title">{{ form.website_url.label.text }}</label>
+                {% if form.website_url.errors %}<div class="adw-entry-row-subtitle error-text">{{ form.website_url.errors|join(' ') }}</div>{% endif %}
+            </div>
+            <input type="url" id="{{ form.website_url.id or 'website_url_input' }}" name="{{ form.website_url.name }}" value="{{ form.website_url.data or '' }}" class="adw-entry row-input" placeholder="https://example.com">
+        </div>
 
-        {# is_profile_public Switch Row #}
-        {# For WTForms BooleanField to work with a custom widget/HTML structure like adw-switch-row,
-           we need to render the hidden input part of the BooleanField and then control the 'checked'
-           state of the adw-switch-row. The 'name' attribute must be on the actual input.
-           The adw-switch-row itself doesn't submit its state directly unless it's designed to wrap an input.
-           Let's assume adw-switch-row can take a standard input type="checkbox" or we manually manage it.
-           A simpler way that adw-switch-row often works is by having its own 'name' and 'value' and being 'checked'.
-           If adw-switch-row is a proper custom element that integrates with forms, setting its 'name' and 'checked' attributes should be enough.
-        #}
-        <adw-switch-row title="{{ form.is_profile_public.label.text }}"
-                          subtitle="{{ (form.is_profile_public.errors|join(' ') if form.is_profile_public.errors else 'Allow others to see your profile page.') }}"
-                          name="{{ form.is_profile_public.name }}"
-                          value="y" {# Standard value for checkbox being true, WTForms BooleanField expects 'y' or similar if not using default #}
-                          class="{{ 'has-error' if form.is_profile_public.errors else '' }}"
-                          {% if form.is_profile_public.data %}checked{% endif %}>
-            {# {{ form.is_profile_public() }} might render a standard checkbox, which we don't want to see.
-               We rely on the adw-switch-row to carry the name and checked state.
-               Flask-WTF's BooleanField will process the presence of 'form.is_profile_public.name' in form data.
-               If 'checked', the 'value' ('y') is sent. If not, nothing for this name is sent.
-            #}
-        </adw-switch-row>
+        {# is_profile_public Switch Row - Requires adw-skin CSS for .adw-switch-row and .adw-switch #}
+        <div class="adw-switch-row {{ 'has-error' if form.is_profile_public.errors else '' }}">
+            <div class="adw-action-row__text">
+                <label for="{{ form.is_profile_public.id or 'is_profile_public_input' }}" class="adw-action-row__title">{{ form.is_profile_public.label.text }}</label>
+                <div class="adw-action-row__subtitle">
+                    {% if form.is_profile_public.errors %} {{ form.is_profile_public.errors|join(' ') }}
+                    {% else %} Allow others to see your profile page.
+                    {% endif %}
+                </div>
+            </div>
+            <div class="adw-switch-row__switch">
+                {# Render the checkbox input directly and style it as a switch via CSS #}
+                <input type="checkbox" name="{{ form.is_profile_public.name }}" id="{{ form.is_profile_public.id or 'is_profile_public_input' }}" class="adw-switch" value="y" {% if form.is_profile_public.data %}checked{% endif %}>
+            </div>
+        </div>
+      </div>
 
-      </adw-preferences-group>
-
-      <adw-preferences-group title="Profile Photo">
-        <adw-list-box>
-          <adw-action-row
-            title="{{ form.profile_photo.label.text }}"
-            subtitle="Upload a new photo. Max 2MB. Recommended: Square aspect ratio.">
-            <div slot="suffix" style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-s);">
-              <adw-button appearance="outline" id="upload-photo-button">
-                <span slot="label">Choose Photo</span>
-              </adw-button>
-              {# The actual file input, hidden. WTForms handles its name and id. #}
+      <div class="adw-preferences-group" role="group" aria-labelledby="profile-photo-title">
+        <div class="adw-preferences-group__title-container">
+            <h3 class="adw-preferences-group__title" id="profile-photo-title">Profile Photo</h3>
+        </div>
+        <div class="adw-list-box"> {# Assuming adw-list-box for rows #}
+          <div class="adw-action-row">
+            <div class="adw-action-row__text">
+                <div class="adw-action-row__title">{{ form.profile_photo.label.text }}</div>
+                <div class="adw-action-row__subtitle">Upload a new photo. Max 2MB. Recommended: Square aspect ratio.</div>
+            </div>
+            <div class="adw-action-row__suffix-widget" style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-s);">
+              <button type="button" class="adw-button" id="upload-photo-button">Choose Photo</button>
               {{ form.profile_photo(id=(form.profile_photo.id or 'profile_photo_field'), style="display: none;") }}
 
               <div class="cropper-container-wrapper" id="cropper-wrapper" style="display: none;">
@@ -105,33 +122,40 @@
 
               {% if user_profile and user_profile.profile_photo_url %}
               <div style="margin-top: var(--spacing-s);">
-                <adw-label is_caption="true">Current photo:</adw-label>
-                <adw-avatar size="64" image-src="{{ url_for('static', filename=user_profile.profile_photo_url) if user_profile.profile_photo_url else default_avatar_url }}" text="{{ current_user.username }}"></adw-avatar>
+                <span class="adw-label caption">Current photo:</span>
+                <span class="adw-avatar size-64">
+                    <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ current_user.username }} avatar" class="adw-avatar__image">
+                </span>
               </div>
               {% elif default_avatar_url %}
               <div style="margin-top: var(--spacing-s);">
-                <adw-label is_caption="true">Default photo:</adw-label>
-                <adw-avatar size="64" image-src="{{ default_avatar_url }}" text="{{ current_user.username }}"></adw-avatar>
+                <span class="adw-label caption">Default photo:</span>
+                 <span class="adw-avatar size-64">
+                    <img src="{{ default_avatar_url }}" alt="Default avatar" class="adw-avatar__image">
+                </span>
               </div>
               {% endif %}
             </div>
-          </adw-action-row>
+          </div>
           {% if form.profile_photo.errors %}
-          <adw-action-row subtitle="{{ form.profile_photo.errors|join(' ') }}" class="error-row"></adw-action-row>
+          <div class="adw-action-row has-error"> {# Apply has-error to the row #}
+            <div class="adw-action-row__text">
+                <div class="adw-action-row__subtitle error-text">{{ form.profile_photo.errors|join(' ') }}</div>
+            </div>
+          </div>
           {% endif %}
-        </adw-list-box>
-      </adw-preferences-group>
-
-      <adw-action-row> {# This was adw-box before, adw-action-row is more standard for buttons at the bottom of a preferences page group/list #}
-        <div slot="suffix" style="display: flex; gap: var(--spacing-s); justify-content: flex-end; width: 100%;">
-            <adw-button flat href="{{ url_for('profile', username=current_user.username) }}">Cancel</adw-button>
-            <adw-button type="submit" suggested label="{{ form.submit.label.text if form.submit.label else 'Update Profile' }}"></adw-button>
-            {# {{ form.submit() }} is no longer needed if we use adw-button for submit #}
         </div>
-      </adw-action-row>
+      </div>
+
+      <div class="adw-action-row">
+        <div class="adw-action-row__suffix-widget" style="display: flex; gap: var(--spacing-s); justify-content: flex-end; width: 100%;">
+            <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat">Cancel</a>
+            <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text if form.submit.label else 'Update Profile' }}</button>
+        </div>
+      </div>
     </form>
-  </adw-preferences-page>
-</adw-clamp>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

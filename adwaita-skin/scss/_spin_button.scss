@@ -1,0 +1,158 @@
+// SCSS for Adwaita SpinButton (Pure CSS Adwaita Skin Version)
+@use 'variables'; // For CSS variables like --button-border-color, --accent-color etc.
+@use 'mixins';    // For any relevant mixins
+
+.adw-spin-button {
+  display: inline-flex;
+  align-items: center;
+  border: var(--input-border-width) solid var(--input-border-color); // Use input border vars
+  border-radius: var(--input-border-radius);
+  background-color: var(--input-bg-color); // Entry part background
+  overflow: hidden; // Keep buttons contained
+  font-size: var(--font-size-base); // Ensure consistent font sizing
+
+  &.disabled,
+  &[disabled] { // Apply disabled styles to the wrapper
+    opacity: var(--opacity-disabled);
+    pointer-events: none;
+    border-color: var(--input-disabled-border-color);
+
+    .adw-spin-button-entry {
+      background-color: var(--input-disabled-bg-color);
+      color: var(--input-disabled-fg-color);
+    }
+    .adw-spin-button-control.adw-button { // Also style internal buttons when wrapper is disabled
+        background-color: var(--button-disabled-bg-color);
+        color: var(--button-disabled-fg-color);
+        opacity: 1; // Reset individual button opacity as parent handles it
+    }
+  }
+
+  // Styling for the input element when it's part of adw-spin-button
+  // It should have .adw-entry and .adw-spin-button-entry classes
+  .adw-spin-button-entry.adw-entry {
+    // Override standard .adw-entry styles for integration
+    border: none;
+    border-radius: 0;
+    box-shadow: none; // No inner shadow from .adw-entry
+    background-color: transparent; // Spin button wrapper provides bg
+    padding-right: var(--spacing-xxs); // Minimal space before buttons
+    height: auto; // Let padding and line height define height
+    min-height: auto;
+    flex-grow: 1;
+    width: auto; // Allow it to shrink/grow appropriately
+
+    // No specific focus shadow on entry if wrapper handles focus
+    &:focus,
+    &:focus-visible {
+      box-shadow: none;
+    }
+  }
+
+  .adw-spin-button-buttons {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch; // Make button container take full height
+    box-sizing: border-box;
+
+    .adw-spin-button-control.adw-button {
+      background-color: var(--button-bg-color);
+      border: none;
+      border-radius: 0;
+      padding: var(--spacing-xxs) var(--spacing-xs);
+      min-height: 0;
+      height: 50%;
+      box-sizing: border-box;
+      line-height: 1;
+      box-shadow: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--button-fg-color); // Ensure button text/icon color
+
+      .adw-icon {
+        width: var(--icon-size-base); // Use variable for icon size
+        height: var(--icon-size-base);
+        margin: 0; // Reset icon margin
+      }
+
+      &:hover:not(:disabled) {
+        background-color: var(--button-hover-bg-color);
+      }
+      &:active:not(:disabled) {
+        background-color: var(--button-active-bg-color);
+      }
+      // Disabled state for individual buttons (if not handled by parent .disabled)
+      &:disabled {
+        background-color: var(--button-disabled-bg-color);
+        color: var(--button-disabled-fg-color);
+        opacity: 0.6; // More pronounced opacity for inner disabled controls
+      }
+    }
+
+    .adw-spin-button-up.adw-button {
+      border-bottom: var(--border-width) solid var(--button-border-color);
+    }
+  }
+
+  // Focus indication on the wrapper (when entry or buttons are focused)
+  &:focus-within {
+    border-color: var(--input-focus-border-color);
+    box-shadow: var(--focus-ring-width) solid var(--input-focus-border-color);
+    // outline: none; // Already on .adw-entry, ensure wrapper doesn't add another
+  }
+
+  // Variant for spin buttons used within rows (e.g., AdwSpinRow)
+  // Add .row-input to the .adw-spin-button element
+  &.row-input {
+    border-width: 0 0 1px 0; // Only bottom border
+    border-radius: 0;
+    background-color: transparent;
+
+    .adw-spin-button-entry.adw-entry {
+      background-color: transparent;
+      padding-left: 0;
+    }
+
+    .adw-spin-button-buttons {
+      .adw-spin-button-control.adw-button {
+        background-color: transparent;
+        color: var(--text-color-secondary);
+
+        &:hover:not(:disabled) {
+          background-color: var(--button-flat-hover-bg-color);
+          color: var(--text-color);
+        }
+        &:active:not(:disabled) {
+          background-color: var(--button-flat-active-bg-color);
+        }
+      }
+      .adw-spin-button-up.adw-button {
+        border-bottom-color: var(--border-color); // Match row border style
+      }
+    }
+
+    &:focus-within {
+      outline: none;
+      border-bottom-color: var(--input-focus-border-color); // Accent color for focused bottom border
+      border-bottom-width: 2px; // Thicker focus border for rows
+      box-shadow: none; // No outer box shadow for row variant
+    }
+
+    &.disabled,
+    &[disabled] {
+      border-bottom-style: dashed; // Standard for disabled row inputs
+      border-bottom-color: var(--input-disabled-border-color);
+      .adw-spin-button-entry.adw-entry,
+      .adw-spin-button-buttons .adw-spin-button-control.adw-button {
+        background-color: transparent !important; // Ensure transparent even when disabled
+        color: var(--input-disabled-fg-color) !important;
+      }
+    }
+  }
+}
+
+// Dark theme adjustments are mostly handled by CSS variables defined in _variables.scss
+// No specific overrides needed here if variables are correctly themed.
+// .theme-dark .adw-spin-button { ... }
+// .theme-dark .adw-spin-button.row-input { ... }

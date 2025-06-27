@@ -14,89 +14,48 @@
     <form method="POST" action="{{ url_for('login') }}" id="login-form" style="display: flex; flex-direction: column; gap: var(--spacing-m);">
       {{ form.hidden_tag() }} {# CSRF token #}
 
-      <adw-preferences-group title="Account Credentials">
-        {# Username Field - Set name directly on the custom element #}
-        <adw-entry-row title="{{ form.username.label.text }}"
-                         name="{{ form.username.name }}"  {# Name attribute for form submission #}
-                         id="{{ form.username.id or 'username-row' }}"
-                         required
-                         placeholder="Enter your username"
-                         value="{{ form.username.data or '' }}"
-                         subtitle="{{ form.username.errors|join(' ') if form.username.errors else '' }}"
-                         class="{{ 'has-error' if form.username.errors else '' }}">
-        </adw-entry-row>
+      <div class="adw-preferences-group" role="group" aria-labelledby="login-group-title">
+        <div class="adw-preferences-group__title-container">
+             <h3 class="adw-preferences-group__title" id="login-group-title">Account Credentials</h3>
+        </div>
 
-        {# Password Field - Set name directly on the custom element #}
-        <adw-password-entry-row title="{{ form.password.label.text }}"
-                                name="{{ form.password.name }}" {# Name attribute for form submission #}
-                                id="{{ form.password.id or 'password-row' }}"
-                                required
-                                placeholder="Enter your password"
-                                subtitle="{{ form.password.errors|join(' ') if form.password.errors else '' }}"
-                                class="{{ 'has-error' if form.password.errors else '' }}">
-        </adw-password-entry-row>
-      </adw-preferences-group>
+        {# Username Field #}
+        <div class="adw-entry-row {{ 'has-error' if form.username.errors else '' }}">
+          <div class="adw-entry-row-text-content">
+            <label for="{{ form.username.id or 'username_input' }}" class="adw-entry-row-title">{{ form.username.label.text }}</label>
+            {% if form.username.errors %}
+              <div class="adw-entry-row-subtitle error-text">{{ form.username.errors|join(' ') }}</div>
+            {% endif %}
+          </div>
+          <input type="text"
+                 name="{{ form.username.name }}"
+                 id="{{ form.username.id or 'username_input' }}"
+                 class="adw-entry row-input"
+                 required
+                 placeholder="Enter your username"
+                 value="{{ form.username.data or '' }}">
+        </div>
 
-      {# Ensure the submit button is a standard HTML button to help with Enter key submission #}
-      <button type="submit" class="adw-button suggested" style="width: 100%; margin-top: var(--spacing-m);">{{ form.submit.label.text }}</button>
+        {# Password Field #}
+        <div class="adw-entry-row {{ 'has-error' if form.password.errors else '' }}">
+          <div class="adw-entry-row-text-content">
+            <label for="{{ form.password.id or 'password_input' }}" class="adw-entry-row-title">{{ form.password.label.text }}</label>
+            {% if form.password.errors %}
+              <div class="adw-entry-row-subtitle error-text">{{ form.password.errors|join(' ') }}</div>
+            {% endif %}
+          </div>
+          <input type="password"
+                 name="{{ form.password.name }}"
+                 id="{{ form.password.id or 'password_input' }}"
+                 class="adw-entry row-input"
+                 required
+                 placeholder="Enter your password">
+        </div>
+      </div>
+
+      <button type="submit" class="adw-button suggested-action" style="width: 100%; margin-top: var(--spacing-m);">{{ form.submit.label.text }}</button>
     </form>
   </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const loginForm = document.getElementById('login-form');
-    const usernameRow = document.getElementById('{{ form.username.id or "username-row" }}');
-    const passwordRow = document.getElementById('{{ form.password.id or "password-row" }}');
-
-    // The AdwEntry (inside AdwEntryRow/AdwPasswordEntryRow) should handle its own value
-    // for form submission via its internal hidden input if 'name' is set on AdwEntryRow/AdwPasswordEntryRow.
-    // So, explicit JS syncing to manually created hidden inputs is removed.
-
-    // For Enter key submission:
-    // This ensures Enter key in the custom rows attempts submission.
-    const handleEnterKey = (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent any default action of the input itself
-            // loginForm.submit(); // Standard submit
-            // A more robust way to trigger form submission, including HTML5 validation:
-             if (loginForm.requestSubmit) {
-                loginForm.requestSubmit();
-            } else {
-                loginForm.submit();
-            }
-        }
-    };
-
-    // Try to attach to the internal <input> or <adw-entry> inside the shadow DOM of the rows
-    const attachEnterListener = (rowElement) => {
-        if (rowElement && rowElement.shadowRoot) {
-            // AdwEntryRow and AdwPasswordEntryRow both use an _internalEntry which is an AdwEntry.
-            // AdwEntry in turn has an _inputElement.
-            const internalAdwEntry = rowElement._internalEntry; // Accessing internal component instance
-            if (internalAdwEntry && internalAdwEntry.shadowRoot) {
-                const inputField = internalAdwEntry._inputElement; // Accessing internal input of AdwEntry
-                if (inputField) {
-                    inputField.addEventListener('keypress', handleEnterKey);
-                } else {
-                     console.warn('Could not find internal input field in AdwEntry for Enter key listener:', rowElement.id);
-                }
-            } else if (internalAdwEntry && internalAdwEntry.focus) { // If _inputElement is not exposed, try attaching to AdwEntry itself
-                internalAdwEntry.addEventListener('keypress', handleEnterKey);
-            }
-            else {
-                 console.warn('Could not find internal AdwEntry or its shadowRoot for Enter key listener:', rowElement.id);
-            }
-        } else if (rowElement) {
-            // Fallback if direct shadow DOM access isn't working as expected, try generic query
-            const genericInput = rowElement.querySelector('input, adw-entry');
-            if (genericInput) genericInput.addEventListener('keypress', handleEnterKey);
-        }
-    };
-
-    if (usernameRow) attachEnterListener(usernameRow);
-    if (passwordRow) attachEnterListener(passwordRow);
-
-});
-</script>
+{# Removed JavaScript for Enter key handling as it relied on adw-web component internals #}
 {% endblock %}
