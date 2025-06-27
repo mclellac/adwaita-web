@@ -115,7 +115,7 @@
         <!-- Accent Color Picker (Static Display) -->
         <section class="widget-showcase">
             <h2 class="adw-label title-2">Theme Controls (Static)</h2>
-            <div class="adw-box horizontal spacing-s" id="accent-color-picker-box" style="align-items: center; margin-bottom: var(--spacing-m); flex-wrap: wrap;">
+            <div class="adw-box adw-box-spacing-s" id="accent-color-picker-box" style="align-items: center; margin-bottom: var(--spacing-m); flex-wrap: wrap;">
                 <span class="adw-label">Accent Color (Examples):</span>
                 <button class="adw-button" data-accent-color-id="default">Default</button>
                 <button class="adw-button" data-accent-color-id="blue">Blue</button>
@@ -127,7 +127,7 @@
             </div>
              <details>
                 <summary>Show Accent Picker Code (Static HTML)</summary>
-                <pre><code>&lt;div class="adw-box horizontal spacing-s"&gt;
+                <pre><code>&lt;div class="adw-box adw-box-spacing-s"&gt;
     &lt;span class="adw-label"&gt;Accent Color (Examples):&lt;/span&gt;
     &lt;button class="adw-button"&gt;Default&lt;/button&gt;
     &lt;!-- ... more buttons ... --&gt;
@@ -171,7 +171,7 @@
         <!-- Icons Section -->
         <section class="widget-showcase">
             <h2 class="adw-label title-2">Icons (Placeholder Styling)</h2>
-            <div class="adw-box horizontal spacing-m" style="align-items: center; font-size: 24px;">
+            <div class="adw-box adw-box-spacing-m" style="align-items: center; font-size: 24px;">
                 <span class="adw-icon icon-actions-document-new-symbolic" aria-label="New Document"></span>
                 <span class="adw-icon icon-actions-document-save-symbolic" style="color: var(--accent-color);"></span>
                 <span class="adw-icon icon-status-dialog-error-symbolic" style="color: var(--error-color); font-size: 32px;"></span>
@@ -188,7 +188,7 @@
         <!-- Controls Section (Static HTML representations) -->
         <section class="widget-showcase">
             <h2 class="adw-label title-2">Controls (Static HTML)</h2>
-            <div class="adw-box vertical spacing-m">
+            <div class="adw-box adw-box-vertical adw-box-spacing-m">
                 <div class="adw-row"> {/* Assuming adw-row is a styled div */}
                     <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" checked> <span class="adw-label">Enable Feature</span></label>
                     <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" disabled> <span class="adw-label">Disabled Checkbox</span></label>
@@ -260,7 +260,7 @@
         <!-- Links Section -->
         <section class="widget-showcase">
             <h2 class="adw-label title-2">Links</h2>
-            <div class="adw-box vertical spacing-s">
+            <div class="adw-box adw-box-vertical adw-box-spacing-s">
                 <p class="adw-label body">Standard HTML links should inherit Adwaita styling:</p>
                 <a href="#">This is a standard link</a>
                 <p class="adw-label body" style="margin-top: var(--spacing-s);">A link within a sentence <a href="#">like this</a> should also be styled.</p>
@@ -310,7 +310,7 @@
         <!-- Dialogs (Static Structure, No JS interaction) -->
         <section class="widget-showcase">
             <h2 class="adw-label title-2">Dialogs (Static Structure)</h2>
-            <div class="adw-box horizontal spacing-s">
+            <div class="adw-box adw-box-spacing-s">
                 <button class="adw-button">Show Alert Dialog (No Action)</button>
             </div>
             <div class="adw-dialog" role="alertdialog" style="display: block; position:relative; margin-top: var(--spacing-m); max-width: 400px;"> {/* Inline for demo */}
@@ -354,7 +354,7 @@
         <section class="widget-showcase">
             <h2 class="adw-label title-2">Layouts (Static Structures)</h2>
             <h3 class="adw-label title-3">Box (Horizontal)</h3>
-            <div class="adw-box horizontal spacing-m" style="padding:var(--spacing-s); border:1px dashed var(--border-color);">
+            <div class="adw-box adw-box-spacing-m" style="padding:var(--spacing-s); border:1px dashed var(--border-color);">
                 <button class="adw-button">Box Child 1</button>
                 <span class="adw-label">Box Child 2</span>
                 <input type="text" class="adw-entry" placeholder="Box Child 3">
@@ -391,7 +391,7 @@
             <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">BreakpointBin (Static Structure)</h3>
             <p class="adw-label body" style="margin-bottom: var(--spacing-xs);">Shows different children based on width (CSS would handle this if possible, or JS). Below is a static representation of one state.</p>
             <div class="adw-breakpoint-bin" style="padding:var(--spacing-s); border:1px dashed var(--border-color); min-height: 100px;">
-                <div class="adw-box vertical" data-name="small" style="background-color: var(--theme-color-red-2); padding: var(--spacing-m);">
+                <div class="adw-box adw-box-vertical" data-name="small" style="background-color: var(--theme-color-red-2); padding: var(--spacing-m);">
                     <h4 class="adw-label title-4">Small View (0px+)</h4>
                     <p class="adw-label body">This is shown when the BreakpointBin is narrow.</p>
                 </div>
@@ -399,7 +399,7 @@
             </div>
              <details>
                 <summary>Show Layout Examples (Static HTML)</summary>
-                <pre><code>&lt;div class="adw-box horizontal spacing-m"&gt;...&lt;/div&gt;
+                <pre><code>&lt;div class="adw-box adw-box-spacing-m"&gt;...&lt;/div&gt;
 &lt;div class="adw-clamp" style="max-width: 40ch;"&gt;...&lt;/div&gt;
 &lt;div class="adw-flap"&gt;...&lt;/div&gt;
 &lt;div class="adw-wrap-box spacing-s align-center"&gt;...&lt;/div&gt;

@@ -47,7 +47,7 @@
         {% if post.author %}
         <section class="author-bio-section adw-card">
             <h3 class="title-3">About {{ post.author.full_name or post.author.username }}</h3>
-            <div class="adw-box horizontal spacing-m author-bio-content">
+            <div class="adw-box adw-box-spacing-m author-bio-content">
                 <span class="adw-avatar size-large"> {# Increased avatar size for bio section #}
                      <img src="{{ url_for('static', filename=post.author.profile_photo_url) if post.author.profile_photo_url else default_avatar_url }}" alt="{{ post.author.username }} avatar" class="adw-avatar__image">
                 </span>
@@ -67,7 +67,7 @@
 
         <section class="share-buttons-section">
             <h4 class="title-4">Share this post:</h4>
-            <div class="adw-box horizontal spacing-s share-buttons-container">
+            <div class="adw-box adw-box-spacing-s share-buttons-container">
                 <a href="https://twitter.com/intent/tweet?url={{ request.url_root[:-1] }}{{ url_for('view_post', post_id=post.id) }}&text={{ post.title|urlencode }}"
                     target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter" class="adw-button flat">Twitter</a>
                 <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url_root[:-1] }}{{ url_for('view_post', post_id=post.id) }}"
@@ -110,7 +110,7 @@
         {% if comments %}
             <div class="adw-list-box comments-list">
                 {% for comment in comments %}
-                <div class="adw-box vertical comment-card">
+                <div class="adw-box adw-box-vertical comment-card">
                     <div class="comment-header">
                         <div class="comment-author-info">
                             <span class="adw-avatar size-medium"> {# Consistent avatar size #}
