@@ -7,14 +7,15 @@ set -e
 # adwaita-web paths
 SASS_SOURCE_DIR="adwaita-web/scss"
 SASS_INPUT_FILE="${SASS_SOURCE_DIR}/style.scss"
+JS_INPUT_DIR="adwaita-web/js"
 DATA_INPUT_DIR="adwaita-web/data"
 FONTS_INPUT_DIR="adwaita-web/fonts"
 
-# adwaita-skin paths
-ADWAITA_SKIN_SASS_SOURCE_DIR="adwaita-skin/scss"
-ADWAITA_SKIN_SASS_INPUT_FILE="${ADWAITA_SKIN_SASS_SOURCE_DIR}/adwaita-skin.scss"
-ADWAITA_SKIN_CSS_OUTPUT_DIR="adwaita-skin/css" # This is the source dir for copying
-ADWAITA_SKIN_CSS_OUTPUT_FILE="${ADWAITA_SKIN_CSS_OUTPUT_DIR}/adwaita-skin.css"
+# adwaita-web paths
+ADWAITA_SKIN_SASS_SOURCE_DIR="adwaita-web/scss"
+ADWAITA_SKIN_SASS_INPUT_FILE="${ADWAITA_SKIN_SASS_SOURCE_DIR}/adwaita-web.scss"
+ADWAITA_SKIN_CSS_OUTPUT_DIR="adwaita-web/css" # This is the source dir for copying
+ADWAITA_SKIN_CSS_OUTPUT_FILE="${ADWAITA_SKIN_CSS_OUTPUT_DIR}/adwaita-web.css"
 
 BUILD_DIR="build"
 CSS_OUTPUT_DIR="${BUILD_DIR}/css" # For adwaita-web build artifacts
@@ -65,33 +66,33 @@ else
     echo "Output CSS file '${CSS_OUTPUT_FILE}' exists."
 fi
 
-# Compile SASS to CSS for adwaita-skin
-echo "--- Compiling SASS to CSS for adwaita-skin ---"
+# Compile SASS to CSS for adwaita-web
+echo "--- Compiling SASS to CSS for adwaita-web ---"
 mkdir -p "${ADWAITA_SKIN_CSS_OUTPUT_DIR}"
 adwaita_skin_sass_output_and_error=$(sass "${ADWAITA_SKIN_SASS_INPUT_FILE}" "${ADWAITA_SKIN_CSS_OUTPUT_FILE}" --style compressed 2>&1)
 adwaita_skin_sass_exit_code=$?
 
 if [ ${adwaita_skin_sass_exit_code} -ne 0 ]; then
-    echo "ERROR: adwaita-skin SASS compilation failed (exit code ${adwaita_skin_sass_exit_code})."
+    echo "ERROR: adwaita-web SASS compilation failed (exit code ${adwaita_skin_sass_exit_code})."
     echo "SASS Compiler Output:"
     echo "${adwaita_skin_sass_output_and_error}"
     if [ ${adwaita_skin_sass_exit_code} -eq 127 ]; then
         echo "NOTE: Exit code 127 often means 'command not found'. Is sass installed and in your PATH?"
     fi
-    echo "WARNING: adwaita-skin SASS compilation step did not succeed. CSS file may not be updated. Continuing script..."
+    echo "WARNING: adwaita-web SASS compilation step did not succeed. CSS file may not be updated. Continuing script..."
 else
     if [ -n "${adwaita_skin_sass_output_and_error}" ]; then
-        echo "adwaita-skin SASS Compilation Warnings (or other output):"
+        echo "adwaita-web SASS Compilation Warnings (or other output):"
         echo "${adwaita_skin_sass_output_and_error}"
     fi
-    echo "adwaita-skin SASS compilation successful: ${ADWAITA_SKIN_CSS_OUTPUT_FILE}"
+    echo "adwaita-web SASS compilation successful: ${ADWAITA_SKIN_CSS_OUTPUT_FILE}"
 fi
 
-# Verify the adwaita-skin output file
+# Verify the adwaita-web output file
 if [ ! -f "${ADWAITA_SKIN_CSS_OUTPUT_FILE}" ]; then
-    echo "WARNING: Output adwaita-skin CSS file '${ADWAITA_SKIN_CSS_OUTPUT_FILE}' was not created. SASS step likely failed or hung."
+    echo "WARNING: Output adwaita-web CSS file '${ADWAITA_SKIN_CSS_OUTPUT_FILE}' was not created. SASS step likely failed or hung."
 else
-    echo "Output adwaita-skin CSS file '${ADWAITA_SKIN_CSS_OUTPUT_FILE}' exists."
+    echo "Output adwaita-web CSS file '${ADWAITA_SKIN_CSS_OUTPUT_FILE}' exists."
 fi
 
 # Copy JavaScript files
@@ -164,12 +165,12 @@ else
     echo "WARNING: Built adwaita-web CSS file ${CSS_OUTPUT_FILE} not found. Skipping copy to app-demo."
 fi
 
-# Copy adwaita-skin CSS
+# Copy adwaita-web CSS
 if [ -f "${ADWAITA_SKIN_CSS_OUTPUT_FILE}" ]; then
-    cp "${ADWAITA_SKIN_CSS_OUTPUT_FILE}" "${APP_DEMO_CSS_DIR}/adwaita-skin.css"
-    echo "Copied ${ADWAITA_SKIN_CSS_OUTPUT_FILE} to ${APP_DEMO_CSS_DIR}/adwaita-skin.css"
+    cp "${ADWAITA_SKIN_CSS_OUTPUT_FILE}" "${APP_DEMO_CSS_DIR}/adwaita-web.css"
+    echo "Copied ${ADWAITA_SKIN_CSS_OUTPUT_FILE} to ${APP_DEMO_CSS_DIR}/adwaita-web.css"
 else
-    echo "WARNING: Built adwaita-skin CSS file '${ADWAITA_SKIN_CSS_OUTPUT_FILE}' not found. Skipping copy to app-demo."
+    echo "WARNING: Built adwaita-web CSS file '${ADWAITA_SKIN_CSS_OUTPUT_FILE}' not found. Skipping copy to app-demo."
 fi
 
 # Copy JS (entire JS_OUTPUT_DIR which includes components.js and components/ subdirectory)
