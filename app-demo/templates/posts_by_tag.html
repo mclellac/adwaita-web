@@ -1,95 +1,106 @@
 {% extends "base.html" %}
 
-{% block title %}Posts tagged with "{{ tag.name }}"{% endblock %}
+{% block title %}Posts tagged with "{{ tag.name }}" - {{ super() }}{% endblock %}
+
+{% block headerbar %}
+<adw-header-bar>
+    <adw-window-title slot="title" title="Tag: {{ tag.name }}"></adw-window-title>
+    <adw-button slot="start" icon-name="go-previous-symbolic" href="{{ url_for('index') }}" aria-label="Back to Home"></adw-button>
+</adw-header-bar>
+{% endblock %}
 
 {% block content %}
-<div class="adw-clamp" style="max-width: 900px; margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
-    <h1 class="page-title" style="text-align: center; margin-bottom: var(--spacing-l); font-size: var(--font-size-xxl, 1.5rem);">
-        Posts tagged with <mark>{{ tag.name }}</mark>
-    </h1>
+<adw-clamp class="adw-clamp-xl" style="padding-top: var(--spacing-l);">
+    <adw-box orientation="vertical" spacing="l">
 
-    <div style="text-align: center; margin-bottom: var(--spacing-m);">
-      <div class="adw-spinner size-large" id="tag-loading-spinner" style="display: none;"></div>
-    </div>
-
-    {% if posts %}
-        <div class="adw-list-box blog-posts-list">
-            {% for post in posts %}
-            <div class="adw-box vertical blog-post-card" style="margin-bottom: var(--spacing-l); padding: var(--spacing-m); border-radius: var(--border-radius-default); border: 1px solid var(--border-color); list-style-type: none;">
-                <h3 style="margin-top:0; margin-bottom: var(--spacing-xs);"><a href="{{ url_for('view_post', post_id=post.id) }}" class="post-title" style="text-decoration: none; color: var(--link-color);">{{ post.title }}</a></h3>
-                <p class="post-meta" style="font-size: var(--font-size-small); color: var(--text-color-secondary); margin-bottom: var(--spacing-s);">
-                    By: <a href="{{ url_for('profile', username=post.author.username) }}">{{ post.author.username if post.author else 'Unknown Author' }}</a>
-                    on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
-                </p>
-                {% if post.content %}
-                <p class="post-excerpt" style="margin-bottom: var(--spacing-s);">
-                    {{ post.content | striptags | truncate(200, True) }}
-                </p>
-                {% endif %}
-
-                {% if post.categories %}
-                <div class="post-categories-list" style="margin-bottom: var(--spacing-xs); display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs);">
-                    <span class="adw-label caption" style="font-weight: bold;">Categories:</span>
-                    {% for category in post.categories %}
-                        <a href="{{ url_for('posts_by_category', category_slug=category.slug) }}" class="adw-button flat small">{{ category.name }}</a>
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-                {% if post.tags %}
-                <div class="tags-summary" style="margin-bottom: var(--spacing-m); display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs);">
-                    <span class="adw-label caption" style="font-weight: bold;">Tags:</span>
-                    {# Use 'tag_item' as loop variable to avoid conflict with the page's 'tag' object #}
-                    {% for tag_item in post.tags %}
-                      <a href="{{ url_for('posts_by_tag', tag_slug=tag_item.slug) }}" class="adw-button flat small">{{ tag_item.name }}</a>
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-                <div style="margin-top: auto; padding-top: var(--spacing-s); display: flex; justify-content: flex-end;">
-                    <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button flat">Read More &raquo;</a>
-                </div>
-            </div>
-            {% endfor %}
+        <div style="text-align: center; margin-bottom: var(--spacing-m);">
+          <adw-spinner id="tag-loading-spinner" size="l" style="display: none;"></adw-spinner>
         </div>
-    {% else %}
-        <div class="adw-status-page">
-             <div class="adw-status-page-icon" style="font-size: 4.5rem; margin-bottom: var(--spacing-l); opacity: 0.7;">📄</div>
-             <h2 class="adw-status-page-title">No Posts Found</h2>
-             <p class="adw-status-page-description">There are no posts with the tag '{{ tag.name }}'.</p>
-             <div class="adw-status-page-actions">
-                <a href="{{ url_for('index') }}" class="adw-button">View All Posts</a>
-            </div>
-        </div>
-    {% endif %}
 
-    {% if pagination and pagination.pages > 1 %}
-    <nav aria-label="Page navigation" class="pagination-nav" style="margin-top: var(--spacing-xl); display: flex; justify-content: center; align-items: center; gap: var(--spacing-xs);">
-        {% if pagination.has_prev %}
-            <a href="{{ url_for('posts_by_tag', tag_slug=tag.slug, page=pagination.prev_num) }}" class="adw-button">&laquo; Previous</a>
-        {% else %}
-            <button class="adw-button" disabled>&laquo; Previous</button>
-        {% endif %}
-        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-            {% if page_num %}
-                {% if page_num == pagination.page %}
-                    <button class="adw-button suggested-action" aria-current="page">{{ page_num }}</button>
-                {% else %}
-                    <a href="{{ url_for('posts_by_tag', tag_slug=tag.slug, page=page_num) }}" class="adw-button">{{ page_num }}</a>
+        {% if posts %}
+            <adw-list-box class="blog-posts-list" selectable>
+                {% for post in posts %}
+                <adw-action-row href="{{ url_for('view_post', post_id=post.id) }}" activatable class="card-like-row">
+                    <span slot="title">{{ post.title }}</span>
+                    <span slot="subtitle">
+                        By: <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
+                        on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
+                        <br>
+                        {{ post.content | striptags | truncate(150, True) }}
+                    </span>
+                </adw-action-row>
+
+                {% if post.categories or post.tags %}
+                <adw-box orientation="vertical" spacing="s" style="padding-left: var(--spacing-xxl); padding-right: var(--spacing-m); padding-bottom: var(--spacing-m);">
+                    {% if post.categories %}
+                    <adw-box orientation="horizontal" spacing="xs" align="center" class="wrap-box">
+                        <adw-label is-caption style="font-weight: bold;">Categories:</adw-label>
+                        {% for category_item in post.categories %} {# Changed loop var to avoid conflict with block 'category' #}
+                            <adw-button text="{{ category_item.name }}" href="{{ url_for('posts_by_category', category_slug=category_item.slug) }}" flat class="tag-button"></adw-button>
+                        {% endfor %}
+                    </adw-box>
+                    {% endif %}
+                    {% if post.tags %}
+                    <adw-box orientation="horizontal" spacing="xs" align="center" class="wrap-box">
+                        <adw-label is-caption style="font-weight: bold;">Tags:</adw-label>
+                        {% for tag_item in post.tags %}
+                          <adw-button text="{{ tag_item.name }}" href="{{ url_for('posts_by_tag', tag_slug=tag_item.slug) }}" flat class="tag-button"></adw-button>
+                        {% endfor %}
+                    </adw-box>
+                    {% endif %}
+                </adw-box>
                 {% endif %}
-            {% else %}
-                <button class="adw-button flat" disabled style="cursor: default; min-width: auto; padding: var(--spacing-xs);">&hellip;</button>
+                {% endfor %}
+            </adw-list-box>
+
+            {% if pagination and pagination.pages > 1 %}
+            <adw-box orientation="horizontal" justify="center" style="margin-top: var(--spacing-l);">
+                <adw-toggle-group>
+                    {% if pagination.has_prev %}
+                        <adw-button icon-name="go-previous-symbolic" href="{{ url_for('posts_by_tag', tag_slug=tag.slug, page=pagination.prev_num) }}"></adw-button>
+                    {% else %}
+                        <adw-button icon-name="go-previous-symbolic" disabled></adw-button>
+                    {% endif %}
+
+                    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            {% if page_num == pagination.page %}
+                                <adw-button text="{{ page_num }}" suggested disabled aria-current="page"></adw-button>
+                            {% else %}
+                                <adw-button text="{{ page_num }}" href="{{ url_for('posts_by_tag', tag_slug=tag.slug, page=page_num) }}"></adw-button>
+                            {% endif %}
+                        {% elif loop.index != 1 and loop.index != pagination.pages + 2 %}
+                            <adw-button text="…" flat disabled style="pointer-events: none;"></adw-button>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if pagination.has_next %}
+                        <adw-button icon-name="go-next-symbolic" href="{{ url_for('posts_by_tag', tag_slug=tag.slug, page=pagination.next_num) }}"></adw-button>
+                    {% else %}
+                        <adw-button icon-name="go-next-symbolic" disabled></adw-button>
+                    {% endif %}
+                </adw-toggle-group>
+            </adw-box>
             {% endif %}
-        {% endfor %}
-        {% if pagination.has_next %}
-            <a href="{{ url_for('posts_by_tag', tag_slug=tag.slug, page=pagination.next_num) }}" class="adw-button">Next &raquo;</a>
         {% else %}
-            <button class="adw-button" disabled>Next &raquo;</button>
+            <adw-status-page icon-name="bookmark-new-symbolic" title="No Posts Found" description="There are no posts with the tag '{{ tag.name }}'.">
+                 <adw-button slot="actions" text="View All Posts" href="{{ url_for('index') }}"></adw-button>
+            </adw-status-page>
         {% endif %}
-    </nav>
-    {% endif %}
-    <div class="adw-box justify-center" style="margin-top: var(--spacing-xl);">
-         <a href="{{ url_for('index') }}" class="adw-button">Back to All Posts</a>
-    </div>
-</div>
+    </adw-box>
+</adw-clamp>
+
+<style>
+/* Custom styling for card-like rows if needed, and tag buttons */
+.card-like-row {
+    /* You might not need this if adw-action-row default styling is sufficient */
+}
+.tag-button {
+    /* font-size: var(--font-size-caption); */
+    /* padding: var(--spacing-xxs) var(--spacing-xs); */
+}
+.wrap-box {
+    flex-wrap: wrap;
+}
+</style>
 {% endblock %}
