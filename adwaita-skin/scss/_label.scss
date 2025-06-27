@@ -67,3 +67,10 @@ label.adw-label {
 .adw-label-block {
     display: block;
 }
+
+.adw-caption {
+    font-size: var(--font-size-small);
+    color: var(--text-color-secondary);
+    font-weight: $font-weight-normal;
+    // Add other properties if Libadwaita captions have specific line-height or margins
+}

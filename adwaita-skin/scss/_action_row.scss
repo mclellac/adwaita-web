@@ -147,6 +147,30 @@
   // When used within a listbox, the listbox handles borders/separators
   // The @include mixins.row-base should handle this contextually if well-defined.
   // For example, the mixin might make border-bottom: none if :last-child within a .adw-list-box.
+
+  // Destructive action rows (e.g., for logout buttons in a list)
+  // These typically just color the title red.
+  &.destructive-action {
+    .adw-action-row-title {
+      color: var(--destructive-color); // Uses the destructive text color
+    }
+
+    .adw-action-row-subtitle { // Ensure subtitle also gets a sensible color if not default
+        // color: var(--destructive-color-secondary, var(--text-color-secondary)); // Example
+    }
+
+    &:hover {
+      // Optional: could have a specific hover for destructive rows,
+      // e.g., a faint red background, but often they just rely on text color change.
+      // background-color: var(--list-row-destructive-hover-bg-color); // Example
+      .adw-action-row-title {
+        // color: var(--destructive-hover-color, var(--destructive-color));
+      }
+    }
+    &:active {
+      // background-color: var(--list-row-destructive-active-bg-color); // Example
+    }
+  }
 }
 
 // Variables that should be defined (e.g., in _variables.scss):

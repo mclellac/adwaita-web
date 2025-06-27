@@ -4,7 +4,7 @@
 {% block content %}
 <div style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding-top: var(--spacing-xxl); padding-bottom: var(--spacing-xxl);">
   <div style="width: 400px; display: flex; flex-direction: column; gap: var(--spacing-lg);"> {# Outer container for centering and width, with gap for button spacing #}
-    <h2 style="text-align: center; font-size: var(--font-size-h1);">Login</h2>
+    <h1 class="title-1" style="text-align: center;">Login</h1>
 
     {# Flashed messages will be handled by base.html's script #}
     {% with messages = get_flashed_messages(with_categories=true) %}
