@@ -5,23 +5,10 @@
 {% block styles %}
 {{ super() }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/2.0.0/cropper.min.css" integrity="sha512-hmRL32LGLwX7LqH1LXN6q6iI1Tw0KzC/a7h1r71tY9K1L34b4KcvMvP5p3+8sLp4sL/zCgU9XwXg_bsP21q9g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<style>
-  /* Additional styles for the cropper container if needed */
-  .cropper-container-wrapper {
-    margin-top: var(--spacing-s);
-    max-width: 100%; /* Ensure it fits within the layout */
-    width: 300px; /* Example fixed width */
-    height: 300px; /* Example fixed height */
-  }
-  .cropper-container-wrapper img {
-    display: block;
-    max-width: 100%; /* Ensure image is responsive within the cropper */
-  }
-</style>
 {% endblock %}
 
 {% block content %}
-<div class="adw-clamp" style="max-width: 700px; margin: var(--spacing-xl) auto;">
+<div class="adw-clamp content-clamp profile-edit-clamp">
   <div class="adw-preferences-page">
     <header class="adw-preferences-page__header">
         <h1 class="adw-preferences-page__title">Edit Your Profile</h1>
@@ -37,66 +24,58 @@
 
       <div class="adw-preferences-group" role="group" aria-labelledby="profile-public-info-title">
         <div class="adw-preferences-group__title-container">
-            <h3 class="adw-preferences-group__title" id="profile-public-info-title">Public Information</h3>
+            <h3 class="adw-preferences-group__title title-3" id="profile-public-info-title">Public Information</h3>
         </div>
 
         {# Full Name Entry Row #}
         <div class="adw-entry-row {{ 'has-error' if form.full_name.errors else '' }}">
+            <label for="{{ form.full_name.id or 'full_name_input' }}" class="adw-entry-row__title">{{ form.full_name.label.text }}</label>
             <div class="adw-entry-row-text-content">
-                <label for="{{ form.full_name.id or 'full_name_input' }}" class="adw-entry-row-title">{{ form.full_name.label.text }}</label>
-                {% if form.full_name.errors %}<div class="adw-entry-row-subtitle error-text">{{ form.full_name.errors|join(' ') }}</div>{% endif %}
+                {% if form.full_name.errors %}<span class="adw-entry-row__subtitle error-text">{{ form.full_name.errors|join(' ') }}</span>{% endif %}
             </div>
             <input type="text" id="{{ form.full_name.id or 'full_name_input' }}" name="{{ form.full_name.name }}" value="{{ form.full_name.data or '' }}" class="adw-entry row-input" placeholder="Your full name or display name">
         </div>
 
-        {# Bio/Profile Info - Using adw-expander-row to contain the textarea #}
-        <div class="adw-expander-row {{ 'has-error' if form.profile_info.errors else '' }}">
-            <div class="adw-action-row activatable" role="button" tabindex="0" aria-expanded="false"> {# Assuming JS will toggle aria-expanded and show content #}
-                <div class="adw-action-row__text">
-                    <div class="adw-action-row__title">{{ form.profile_info.label.text }}</div>
-                    <div class="adw-action-row__subtitle">
-                        {% if form.profile_info.errors %} {{ form.profile_info.errors|join(' ') }}
-                        {% else %} Tell us a bit about yourself. Supports basic HTML.
-                        {% endif %}
-                    </div>
-                </div>
-                <span class="adw-expander-row__chevron"></span>
+        {# Bio/Profile Info - Not using expander for direct editing #}
+        <div class="adw-preferences-group" role="group" aria-labelledby="profile-bio-title">
+            <div class="adw-preferences-group__title-container">
+                <h3 class="adw-preferences-group__title title-3" id="profile-bio-title">{{ form.profile_info.label.text }}</h3>
+                <p class="adw-label muted">Tell us a bit about yourself. Supports basic HTML.</p>
+                {% if form.profile_info.errors %}<div class="error-text form-field-error">{{ form.profile_info.errors|join(' ') }}</div>{% endif %}
             </div>
-            <div class="adw-expander-row-content" style="padding: var(--spacing-s) 0;">
-                 <textarea name="{{ form.profile_info.name }}" id="{{ form.profile_info.id or 'profile_info_input' }}" class="adw-textarea" rows="8" style="width: 100%; min-height: 150px;">{{ form.profile_info.data or '' }}</textarea>
-            </div>
+            <textarea name="{{ form.profile_info.name }}" id="{{ form.profile_info.id or 'profile_info_input' }}" class="adw-textarea content-textarea profile-bio-textarea" rows="8">{{ form.profile_info.data or '' }}</textarea>
         </div>
+
 
         {# Location Entry Row #}
         <div class="adw-entry-row {{ 'has-error' if form.location.errors else '' }}">
+            <label for="{{ form.location.id or 'location_input' }}" class="adw-entry-row__title">{{ form.location.label.text }}</label>
             <div class="adw-entry-row-text-content">
-                <label for="{{ form.location.id or 'location_input' }}" class="adw-entry-row-title">{{ form.location.label.text }}</label>
-                {% if form.location.errors %}<div class="adw-entry-row-subtitle error-text">{{ form.location.errors|join(' ') }}</div>{% endif %}
+                {% if form.location.errors %}<span class="adw-entry-row__subtitle error-text">{{ form.location.errors|join(' ') }}</span>{% endif %}
             </div>
             <input type="text" id="{{ form.location.id or 'location_input' }}" name="{{ form.location.name }}" value="{{ form.location.data or '' }}" class="adw-entry row-input" placeholder="e.g., City, Country">
         </div>
 
         {# Website URL Entry Row #}
         <div class="adw-entry-row {{ 'has-error' if form.website_url.errors else '' }}">
+            <label for="{{ form.website_url.id or 'website_url_input' }}" class="adw-entry-row__title">{{ form.website_url.label.text }}</label>
             <div class="adw-entry-row-text-content">
-                <label for="{{ form.website_url.id or 'website_url_input' }}" class="adw-entry-row-title">{{ form.website_url.label.text }}</label>
-                {% if form.website_url.errors %}<div class="adw-entry-row-subtitle error-text">{{ form.website_url.errors|join(' ') }}</div>{% endif %}
+                {% if form.website_url.errors %}<span class="adw-entry-row__subtitle error-text">{{ form.website_url.errors|join(' ') }}</span>{% endif %}
             </div>
             <input type="url" id="{{ form.website_url.id or 'website_url_input' }}" name="{{ form.website_url.name }}" value="{{ form.website_url.data or '' }}" class="adw-entry row-input" placeholder="https://example.com">
         </div>
 
-        {# is_profile_public Switch Row - Requires adw-skin CSS for .adw-switch-row and .adw-switch #}
+        {# is_profile_public Switch Row #}
         <div class="adw-switch-row {{ 'has-error' if form.is_profile_public.errors else '' }}">
             <div class="adw-action-row__text">
                 <label for="{{ form.is_profile_public.id or 'is_profile_public_input' }}" class="adw-action-row__title">{{ form.is_profile_public.label.text }}</label>
-                <div class="adw-action-row__subtitle">
-                    {% if form.is_profile_public.errors %} {{ form.is_profile_public.errors|join(' ') }}
+                <span class="adw-action-row__subtitle">
+                    {% if form.is_profile_public.errors %} <span class="error-text">{{ form.is_profile_public.errors|join(' ') }}</span>
                     {% else %} Allow others to see your profile page.
                     {% endif %}
-                </div>
+                </span>
             </div>
             <div class="adw-switch-row__switch">
-                {# Render the checkbox input directly and style it as a switch via CSS #}
                 <input type="checkbox" name="{{ form.is_profile_public.name }}" id="{{ form.is_profile_public.id or 'is_profile_public_input' }}" class="adw-switch" value="y" {% if form.is_profile_public.data %}checked{% endif %}>
             </div>
         </div>
@@ -104,33 +83,33 @@
 
       <div class="adw-preferences-group" role="group" aria-labelledby="profile-photo-title">
         <div class="adw-preferences-group__title-container">
-            <h3 class="adw-preferences-group__title" id="profile-photo-title">Profile Photo</h3>
+            <h3 class="adw-preferences-group__title title-3" id="profile-photo-title">Profile Photo</h3>
         </div>
-        <div class="adw-list-box"> {# Assuming adw-list-box for rows #}
-          <div class="adw-action-row">
+        <div class="adw-list-box">
+          <div class="adw-action-row profile-photo-action-row">
             <div class="adw-action-row__text">
                 <div class="adw-action-row__title">{{ form.profile_photo.label.text }}</div>
                 <div class="adw-action-row__subtitle">Upload a new photo. Max 2MB. Recommended: Square aspect ratio.</div>
             </div>
-            <div class="adw-action-row__suffix-widget" style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-s);">
+            <div class="adw-action-row__suffix-widget profile-photo-widget-container">
               <button type="button" class="adw-button" id="upload-photo-button">Choose Photo</button>
-              {{ form.profile_photo(id=(form.profile_photo.id or 'profile_photo_field'), style="display: none;") }}
+              {{ form.profile_photo(id=(form.profile_photo.id or 'profile_photo_field'), class="hidden-file-input") }}
 
-              <div class="cropper-container-wrapper" id="cropper-wrapper" style="display: none;">
+              <div class="cropper-container-wrapper" id="cropper-wrapper" hidden>
                 <img id="image-to-crop" src="#" alt="Image to crop">
               </div>
 
               {% if user_profile and user_profile.profile_photo_url %}
-              <div style="margin-top: var(--spacing-s);">
+              <div class="current-photo-display">
                 <span class="adw-label caption">Current photo:</span>
-                <span class="adw-avatar size-64">
+                <span class="adw-avatar size-large">
                     <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ current_user.username }} avatar" class="adw-avatar__image">
                 </span>
               </div>
               {% elif default_avatar_url %}
-              <div style="margin-top: var(--spacing-s);">
+              <div class="current-photo-display">
                 <span class="adw-label caption">Default photo:</span>
-                 <span class="adw-avatar size-64">
+                 <span class="adw-avatar size-large">
                     <img src="{{ default_avatar_url }}" alt="Default avatar" class="adw-avatar__image">
                 </span>
               </div>
@@ -138,20 +117,16 @@
             </div>
           </div>
           {% if form.profile_photo.errors %}
-          <div class="adw-action-row has-error"> {# Apply has-error to the row #}
-            <div class="adw-action-row__text">
-                <div class="adw-action-row__subtitle error-text">{{ form.profile_photo.errors|join(' ') }}</div>
-            </div>
+          <div class="adw-action-row error-row">
+            <span class="adw-action-row__subtitle error-text">{{ form.profile_photo.errors|join(' ') }}</span>
           </div>
           {% endif %}
         </div>
       </div>
 
-      <div class="adw-action-row">
-        <div class="adw-action-row__suffix-widget" style="display: flex; gap: var(--spacing-s); justify-content: flex-end; width: 100%;">
+      <div class="form-actions-container">
             <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat">Cancel</a>
             <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text if form.submit.label else 'Update Profile' }}</button>
-        </div>
       </div>
     </form>
   </div>
@@ -202,7 +177,7 @@
                   cropper = null;
               }
               if(imageToCrop) imageToCrop.src = '#';
-              if(cropperWrapper) cropperWrapper.style.display = 'none';
+              if(cropperWrapper) cropperWrapper.hidden = true;
               if(cropXField) cropXField.value = '';
               if(cropYField) cropYField.value = '';
               if(cropWidthField) cropWidthField.value = '';
@@ -215,7 +190,7 @@
             reader.onload = function(e) {
               try {
                 if(imageToCrop) imageToCrop.src = e.target.result;
-                if(cropperWrapper) cropperWrapper.style.display = 'block';
+                if(cropperWrapper) cropperWrapper.hidden = false;
                 if (cropper) {
                   cropper.destroy();
                 }
@@ -230,7 +205,7 @@
                 }
               } catch (cropperError) {
                 console.error("Error initializing Cropper:", cropperError);
-                if(cropperWrapper) cropperWrapper.style.display = 'none';
+                if(cropperWrapper) cropperWrapper.hidden = true;
               }
             };
             reader.onerror = function() {
@@ -244,7 +219,7 @@
                 cropper = null;
             }
             if(imageToCrop) imageToCrop.src = '#';
-            if(cropperWrapper) cropperWrapper.style.display = 'none';
+            if(cropperWrapper) cropperWrapper.hidden = true;
             if(cropXField) cropXField.value = '';
             if(cropYField) cropYField.value = '';
             if(cropWidthField) cropWidthField.value = '';
@@ -269,6 +244,8 @@
             if(cropWidthField) cropWidthField.value = cropData.width;
             if(cropHeightField) cropHeightField.value = cropData.height;
           } else {
+            // If no new photo was selected or cropper not active, clear crop fields
+            // This ensures old crop data isn't sent if the user didn't interact with cropper this time
             if(cropXField) cropXField.value = '';
             if(cropYField) cropYField.value = '';
             if(cropWidthField) cropWidthField.value = '';

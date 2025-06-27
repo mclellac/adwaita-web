@@ -3,12 +3,12 @@
 {% block title %}{{ post.title }}{% endblock %}
 
 {% block content %}
-<div class="adw-clamp" style="max-width: 800px; margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
+<div class="adw-clamp content-clamp post-view">
     <article class="post-article">
-        <header style="margin-bottom: var(--spacing-l);">
-            <h1>{{ post.title }}{% if not post.is_published and current_user == post.author %} <span style="color: var(--text-color-secondary); font-size: var(--font-size-large);">(Draft)</span>{% endif %}</h1>
-            <div class="post-meta-detail" style="color: var(--text-color-secondary); font-size: var(--font-size-small);">
-                <p style="margin-bottom: var(--spacing-xxs);">
+        <header class="post-header">
+            <h1 class="title-1">{{ post.title }}{% if not post.is_published and current_user == post.author %} <span class="draft-indicator">(Draft)</span>{% endif %}</h1>
+            <div class="post-meta-detail">
+                <p>
                     By: <a href="{{ url_for('profile', username=post.author.username) }}">{{ post.author.username if post.author else 'Unknown Author' }}</a>
                     {% if post.is_published and post.published_at %}
                         on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time> (Published)
@@ -17,90 +17,75 @@
                     {% endif %}
                 </p>
                 {% if post.updated_at and post.updated_at != post.created_at and (post.published_at is none or post.updated_at != post.published_at) %}
-                    <p><small>(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>)</small></p>
+                    <p class="last-updated"><small>(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>)</small></p>
                 {% endif %}
             </div>
 
             {% if post.categories %}
-            <div class="post-categories" style="margin-top: var(--spacing-s); display:flex; flex-wrap:wrap; gap:var(--spacing-xs); align-items:center;">
-                <span class="adw-label body"><strong>Categories:</strong></span>
+            <div class="post-terms post-categories">
+                <span class="adw-label caption bold-caption">Categories:</span>
                 {% for category in post.categories %}
-                    <a href="{{ url_for('posts_by_category', category_slug=category.slug) }}" class="adw-button flat small">{{ category.name }}</a>
+                    <a href="{{ url_for('posts_by_category', category_slug=category.slug) }}" class="adw-button flat small-button">{{ category.name }}</a>
                 {% endfor %}
             </div>
             {% endif %}
 
             {% if post.tags %}
-            <div class="post-tags" style="margin-top: var(--spacing-xs); display:flex; flex-wrap:wrap; gap:var(--spacing-xs); align-items:center;">
-                <span class="adw-label body"><strong>Tags:</strong></span>
+            <div class="post-terms post-tags">
+                <span class="adw-label caption bold-caption">Tags:</span>
                 {% for tag in post.tags %}
-                  <a href="{{ url_for('posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat small">{{ tag.name }}</a>
+                  <a href="{{ url_for('posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat small-button">{{ tag.name }}</a>
                 {% endfor %}
             </div>
             {% endif %}
         </header>
 
-        <div class="post-content" style="margin-top: var(--spacing-l); margin-bottom: var(--spacing-xl); line-height: 1.7;">
+        <div class="post-content">
             {{ post.content | safe }}
         </div>
 
         {% if post.author %}
-        <div class="author-bio-section" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl); padding: var(--spacing-l); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); background-color: var(--window-bg-color); box-shadow: var(--box-shadow-sm);">
-            <h3 style="margin-top:0; margin-bottom:var(--spacing-m);">About {{ post.author.full_name or post.author.username }}</h3>
-            <div class="adw-box horizontal spacing-m" style="align-items: flex-start;">
-                <span class="adw-avatar size-64">
-                     <img src="{{ url_for('static', filename=post.author.profile_photo_url) if post.author.profile_photo_url else url_for('static', filename='img/default_avatar.png') }}" alt="{{ post.author.username }} avatar" class="adw-avatar__image">
+        <section class="author-bio-section adw-card">
+            <h3 class="title-3">About {{ post.author.full_name or post.author.username }}</h3>
+            <div class="adw-box horizontal spacing-m author-bio-content">
+                <span class="adw-avatar size-large"> {# Increased avatar size for bio section #}
+                     <img src="{{ url_for('static', filename=post.author.profile_photo_url) if post.author.profile_photo_url else default_avatar_url }}" alt="{{ post.author.username }} avatar" class="adw-avatar__image">
                 </span>
-                <div style="display:flex; flex-direction: column; flex-grow:1;">
+                <div class="author-bio-text-content">
                     {% if post.author.profile_info %}
-                    <p class="author-bio-text" style="font-size: var(--font-size-base); color: var(--text-color); margin-top: 0; margin-bottom:var(--spacing-s); white-space: pre-wrap;">
+                    <p class="author-bio-text">
                         {{ post.author.profile_info | safe }}
                     </p>
                     {% else %}
-                    <p style="font-size: var(--font-size-base); color: var(--text-color-secondary); margin-top:0;">This author has not provided a bio yet.</p>
+                    <p class="author-bio-text-placeholder">This author has not provided a bio yet.</p>
                     {% endif %}
-                    <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-button flat" style="align-self: flex-start; margin-top: var(--spacing-s);">View Profile of {{ post.author.username }}</a>
+                    <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-button flat view-profile-button">View Profile of {{ post.author.username }}</a>
                 </div>
             </div>
-        </div>
+        </section>
         {% endif %}
 
-        <div class="share-buttons-section" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
-            <h4 style="margin-bottom: var(--spacing-s);">Share this post:</h4>
-            <div class="adw-box horizontal spacing-s" style="flex-wrap: wrap; gap: var(--spacing-s);">
+        <section class="share-buttons-section">
+            <h4 class="title-4">Share this post:</h4>
+            <div class="adw-box horizontal spacing-s share-buttons-container">
                 <a href="https://twitter.com/intent/tweet?url={{ request.url_root[:-1] }}{{ url_for('view_post', post_id=post.id) }}&text={{ post.title|urlencode }}"
-                    target="_blank" rel="noopener noreferrer"
-                    aria-label="Share on Twitter"
-                    class="adw-button flat">
-                    Twitter
-                </a>
+                    target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter" class="adw-button flat">Twitter</a>
                 <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url_root[:-1] }}{{ url_for('view_post', post_id=post.id) }}"
-                    target="_blank" rel="noopener noreferrer"
-                    aria-label="Share on Facebook"
-                    class="adw-button flat">
-                    Facebook
-                </a>
+                    target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook" class="adw-button flat">Facebook</a>
                 <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.url_root[:-1] }}{{ url_for('view_post', post_id=post.id) }}&title={{ post.title|urlencode }}&summary={{ (post.content|striptags|truncate(120))|urlencode }}"
-                    target="_blank" rel="noopener noreferrer"
-                    aria-label="Share on LinkedIn"
-                    class="adw-button flat">
-                    LinkedIn
-                </a>
+                    target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn" class="adw-button flat">LinkedIn</a>
                 <a href="mailto:?subject={{ post.title|urlencode }}&body=Check%20out%20this%20post%3A%20{{ request.url_root[:-1] }}{{ url_for('view_post', post_id=post.id) }}"
-                    aria-label="Share via Email"
-                    class="adw-button flat">
-                    Email
-                </a>
+                    aria-label="Share via Email" class="adw-button flat">Email</a>
             </div>
-        </div>
+        </section>
 
         {% if post.author == current_user %}
-        <div class="post-actions" style="margin-bottom: var(--spacing-l); display:flex; gap: var(--spacing-s);">
+        <div class="post-actions">
             <a href="{{ url_for('edit_post', post_id=post.id) }}" class="adw-button">Edit Post</a>
             <button id="open-delete-dialog-btn" class="adw-button destructive-action">Delete Post</button>
         </div>
 
-        <div class="adw-dialog" id="delete-confirm-dialog" role="alertdialog" aria-labelledby="delete-dialog-title" aria-modal="true" style="display: none;"> {# Initially hidden #}
+        <div class="adw-dialog" id="delete-confirm-dialog" role="alertdialog" aria-labelledby="delete-dialog-title" aria-modal="true" hidden>
             <header class="adw-header-bar adw-dialog__header">
                  <h2 class="adw-header-bar__title" id="delete-dialog-title">Confirm Deletion</h2>
             </header>
@@ -109,8 +94,8 @@
             </div>
             <footer class="adw-dialog__actions">
                 <button id="cancel-delete-btn" class="adw-button flat">Cancel</button>
-                <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form" style="display: inline;"> {# Changed to inline for button flow #}
-                    {{ csrf_token() }}
+                <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form">
+                    {{ csrf_token() }} {# Flask-WTF CSRF token #}
                     <button id="confirm-delete-btn" type="submit" class="adw-button destructive-action">Delete</button>
                 </form>
             </footer>
@@ -118,28 +103,28 @@
         {% endif %}
     </article>
 
-    <hr style="margin: var(--spacing-xl) 0;">
+    <hr class="section-divider">
 
     <section class="comments-section" aria-labelledby="comments-heading">
-        <h2 id="comments-heading" style="margin-bottom:var(--spacing-l);">Comments ({{ comments|length }})</h2>
+        <h2 id="comments-heading" class="title-2">Comments ({{ comments|length }})</h2>
         {% if comments %}
-            <div class="adw-list-box">
+            <div class="adw-list-box comments-list">
                 {% for comment in comments %}
-                <div class="adw-box vertical comment-card" style="padding: var(--spacing-m); border-bottom: 1px solid var(--border-color);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xs);">
-                        <div style="display:flex; align-items:center; gap:var(--spacing-s);">
-                            <span class="adw-avatar size-32">
-                               <img src="{{ url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else url_for('static', filename='img/default_avatar.png') }}" alt="{{ comment.author.username }} avatar" class="adw-avatar__image">
+                <div class="adw-box vertical comment-card">
+                    <div class="comment-header">
+                        <div class="comment-author-info">
+                            <span class="adw-avatar size-medium"> {# Consistent avatar size #}
+                               <img src="{{ url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else default_avatar_url }}" alt="{{ comment.author.username }} avatar" class="adw-avatar__image">
                             </span>
                             <strong><a href="{{ url_for('profile', username=comment.author.username) }}">{{ comment.author.username }}</a></strong>
                         </div>
-                        <small class="text-muted" style="font-size: 0.85em; color: var(--text-color-secondary);"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></small>
+                        <small class="comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></small>
                     </div>
-                    <p style="white-space: pre-wrap; margin-left: calc(32px + var(--spacing-s)); margin-bottom: var(--spacing-s);">{{ comment.text }}</p>
+                    <p class="comment-text">{{ comment.text }}</p>
                     {% if current_user.is_authenticated and (comment.author == current_user or post.author == current_user) %}
-                        <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" onsubmit="return confirm('Are you sure you want to delete this comment?');" style="margin-left: calc(32px + var(--spacing-s)); text-align: right;">
-                            {{ delete_form.hidden_tag() }}
-                            <button type="submit" class="adw-button destructive-action compact small">Delete Comment</button>
+                        <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" onsubmit="return confirm('Are you sure you want to delete this comment?');" class="comment-delete-form">
+                            {{ delete_form.hidden_tag() }} {# Assuming delete_form is passed for CSRF #}
+                            <button type="submit" class="adw-button destructive-action compact small-button">Delete Comment</button>
                         </form>
                     {% endif %}
                 </div>
@@ -151,46 +136,38 @@
     </section>
 
     {% if current_user.is_authenticated %}
-    <section class="comment-form-section" style="margin-top: var(--spacing-xl);" aria-labelledby="leave-comment-heading">
-        <div class="adw-preferences-group" role="group" aria-labelledby="leave-comment-heading-title">
+    <section class="comment-form-section" aria-labelledby="leave-comment-heading">
+        <div class="adw-preferences-group comment-form-container" role="group" aria-labelledby="leave-comment-heading-title">
              <div class="adw-preferences-group__title-container">
-                <h3 class="adw-preferences-group__title" id="leave-comment-heading-title">Leave a Comment</h3>
+                <h3 class="adw-preferences-group__title title-3" id="leave-comment-heading-title">Leave a Comment</h3>
             </div>
             <form method="POST" action="{{ url_for('view_post', post_id=post.id) }}">
-                {{ form.hidden_tag() }}
-                <div class="adw-list-box">
-                    <div class="adw-action-row"> {# This action row will contain the textarea #}
-                        <div class="adw-action-row__text">
-                             <label for="{{ form.text.id or 'comment_text_input' }}" class="adw-action-row__title">{{ form.text.label.text }}</label>
-                        </div>
-                         <div class="adw-action-row__suffix-widget" style="width:100%;">
-                            <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-textarea" style="width: 100%; min-height: 80px;" rows="4">{{ form.text.data or ''}}</textarea>
-                         </div>
+                {{ form.hidden_tag() }} {# Flask-WTF CSRF token #}
+                <div class="adw-list-box form-fields-box">
+                    <div class="adw-entry-row"> {# Using AdwEntryRow for better layout #}
+                         <label for="{{ form.text.id or 'comment_text_input' }}" class="adw-entry-row__title">{{ form.text.label.text }}</label>
+                         <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry-row__entry adw-textarea" rows="4">{{ form.text.data or ''}}</textarea>
                     </div>
                     {% if form.text.errors %}
-                    <div class="adw-action-row error-row">
-                        <div class="adw-action-row__text">
-                            <div class="adw-action-row__subtitle error-text">{{form.text.errors|join(' ')}}</div>
-                        </div>
+                    <div class="adw-action-row error-row"> {# Standard error display #}
+                        <span class="adw-action-row__subtitle error-text">{{form.text.errors|join(' ')}}</span>
                     </div>
                     {% endif %}
-                    <div class="adw-action-row">
-                        <div class="adw-action-row__suffix-widget" style="width:100%; display:flex; justify-content:flex-end;">
-                             <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text }}</button>
-                        </div>
+                    <div class="adw-action-row form-submit-row">
+                         <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text }}</button>
                     </div>
                 </div>
             </form>
         </div>
     </section>
     {% else %}
-    <div style="margin-top: var(--spacing-xl);">
+    <div class="login-prompt-comment">
         <p><a href="{{ url_for('login', next=request.url) }}">Login</a> to leave a comment.</p>
     </div>
     {% endif %}
 
 
-    <div class="adw-box justify-center" style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
+    <div class="adw-box justify-center navigation-buttons">
          <a href="{{ url_for('index') }}" class="adw-button">Back to Posts</a>
     </div>
 </div>
@@ -201,35 +178,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteDialogEl = document.getElementById('delete-confirm-dialog');
     const openDialogBtn = document.getElementById('open-delete-dialog-btn');
     const cancelBtn = document.getElementById('cancel-delete-btn');
-    // const confirmBtn = document.getElementById('confirm-delete-btn'); // This is now type="submit"
-    // const deleteForm = document.getElementById('delete-post-form'); // Form will submit directly
 
     if (openDialogBtn && deleteDialogEl) {
         openDialogBtn.addEventListener('click', (event) => {
             event.preventDefault();
-            deleteDialogEl.style.display = 'block'; // Show dialog
-            // Could add focus management here
-            // e.g. deleteDialogEl.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])').focus();
+            deleteDialogEl.removeAttribute('hidden'); // Show dialog using 'hidden' attribute
+            if (typeof deleteDialogEl.showModal === "function") { // Use <dialog>.showModal() if available
+                // deleteDialogEl.showModal(); // This would be ideal but might not be polyfilled/styled for all browsers without more work
+            }
+            // Basic focus management: focus the first focusable element in the dialog
+            const firstFocusable = deleteDialogEl.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (firstFocusable) {
+                firstFocusable.focus();
+            }
         });
     }
 
     if (cancelBtn && deleteDialogEl) {
         cancelBtn.addEventListener('click', () => {
-            deleteDialogEl.style.display = 'none'; // Hide dialog
-        });
-    }
-
-    // If the dialog is part of the DOM but hidden, make sure clicks outside don't submit underlying forms
-    // This is a basic way to handle "modal" behavior for a simple div dialog.
-    // A more robust solution would involve a proper backdrop or more advanced focus trapping.
-    if (deleteDialogEl) {
-        deleteDialogEl.addEventListener('click', (event) => {
-            if (event.target === deleteDialogEl) { // Clicked on the dialog backdrop itself (if styled to be a container)
-                 // deleteDialogEl.style.display = 'none'; // Optional: close on backdrop click
+            deleteDialogEl.setAttribute('hidden', 'true'); // Hide dialog
+            if (typeof deleteDialogEl.close === "function") {
+                // deleteDialogEl.close();
             }
         });
     }
-    // The form inside the dialog will submit as a normal form when its submit button is clicked.
+
+    // Optional: Close dialog on ESC key
+    if (deleteDialogEl) {
+        deleteDialogEl.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                deleteDialogEl.setAttribute('hidden', 'true');
+                 if (typeof deleteDialogEl.close === "function") {
+                    // deleteDialogEl.close();
+                }
+            }
+        });
+    }
 });
 </script>
 {% endblock %}
