@@ -34,63 +34,96 @@
 {% endblock %}
 
 {% block content %}
-<adw-clamp class="main-content-clamped">
-  <adw-preferences-page title="Create New Post">
+<div class="adw-clamp main-content-clamped">
+  <div class="adw-preferences-page">
+    <header class="adw-preferences-page__header">
+      <h1 class="adw-preferences-page__title">Create New Post</h1>
+    </header>
     <form method="POST" action="{{ url_for('create_post') }}" novalidate>
         {{ form.hidden_tag() }} {# CSRF token #}
 
-        <adw-preferences-group title="Post Details">
-            <adw-entry-row title="{{ form.title.label.text }}"
-                             subtitle="{{ form.title.errors|join(' ') if form.title.errors else '' }}"
-                             class="{{ 'has-error' if form.title.errors else '' }}">
-              {{ form.title(placeholder="Enter post title", required=form.title.flags.required) }}
-            </adw-entry-row>
+        <div class="adw-preferences-group" role="group" aria-labelledby="post-details-title">
+            <div class="adw-preferences-group__title-container">
+                <h3 class="adw-preferences-group__title" id="post-details-title">Post Details</h3>
+            </div>
 
-            {# Adopting a similar structure for content as in edit_profile for bio #}
-            <adw-expander-row title="{{ form.content.label.text }}"
-                                subtitle="{{ form.content.errors|join(' ') if form.content.errors else 'Enter your post content below.' }}"
-                                class="{{ 'has-error' if form.content.errors else '' }}"
-                                expanded="true"> {# Start expanded for main content area #}
-              <div slot="content" style="padding: var(--spacing-s) 0;">
-                {{ form.content(class='adw-textarea-standalone', style='width: 100%; min-height: 250px; resize: vertical;', rows='15') }}
-              </div>
-            </adw-expander-row>
-        </adw-preferences-group>
+            {# Title Entry Row #}
+            <div class="adw-entry-row {{ 'has-error' if form.title.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.title.id or 'title_input' }}" class="adw-entry-row-title">{{ form.title.label.text }}</label>
+                    {% if form.title.errors %}<div class="adw-entry-row-subtitle error-text">{{ form.title.errors|join(' ') }}</div>{% endif %}
+                </div>
+                <input type="text" id="{{ form.title.id or 'title_input' }}" name="{{ form.title.name }}" value="{{ form.title.data or '' }}" class="adw-entry row-input" placeholder="Enter post title" {% if form.title.flags.required %}required{% endif %}>
+            </div>
 
-        <adw-preferences-group title="{{ form.categories.label.text }}">
-            <adw-list-box class="{{ 'has-error' if form.categories.errors else '' }}">
+            {# Content Textarea in Expander Row #}
+            <div class="adw-expander-row {{ 'has-error' if form.content.errors else '' }} expanded"> {# Start expanded #}
+                <div class="adw-action-row activatable" role="button" tabindex="0" aria-expanded="true">
+                    <div class="adw-action-row__text">
+                        <div class="adw-action-row__title">{{ form.content.label.text }}</div>
+                        <div class="adw-action-row__subtitle">
+                            {% if form.content.errors %} {{ form.content.errors|join(' ') }}
+                            {% else %} Enter your post content below.
+                            {% endif %}
+                        </div>
+                    </div>
+                    <span class="adw-expander-row__chevron"></span>
+                </div>
+                <div class="adw-expander-row-content expanded" style="padding: var(--spacing-s) 0;">
+                    <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-textarea" style="width: 100%; min-height: 250px; resize: vertical;" rows="15">{{ form.content.data or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="adw-preferences-group" role="group" aria-labelledby="categories-title">
+            <div class="adw-preferences-group__title-container">
+                <h3 class="adw-preferences-group__title" id="categories-title">{{ form.categories.label.text }}</h3>
+            </div>
+            <div class="adw-list-box {{ 'has-error' if form.categories.errors else '' }}">
                 {# Iterate through category subfields (checkboxes) #}
                 {% for subfield in form.categories %}
-                <adw-action-row class="adw-checkbox-row">
-                    {# Render the actual checkbox input from WTForms, and its label #}
-                    {{ subfield(style="margin-right: var(--spacing-s); vertical-align: middle;") }}
-                    {{ subfield.label(style="vertical-align: middle;") }}
-                </adw-action-row>
+                <div class="adw-action-row adw-checkbox-row"> {# Assuming adw-checkbox-row might add specific styling to action row #}
+                    <div class="adw-action-row__text" style="display: flex; align-items: center;">
+                        {{ subfield(class="adw-checkbox") }} {# Render the actual checkbox input from WTForms #}
+                        {{ subfield.label(class="adw-label", style="margin-left: var(--spacing-s);") }} {# Render its label #}
+                    </div>
+                </div>
                 {% endfor %}
                 {% if form.categories.errors %}
-                {# Display overall errors for the category group, if any, as a subtitle in a separate row #}
-                <adw-action-row subtitle="{{ form.categories.errors|join('; ') }}" class="error-row"></adw-action-row>
+                <div class="adw-action-row error-row">
+                    <div class="adw-action-row__text">
+                        <div class="adw-action-row__subtitle error-text">{{ form.categories.errors|join('; ') }}</div>
+                    </div>
+                </div>
                 {% endif %}
-            </adw-list-box>
-        </adw-preferences-group>
+            </div>
+        </div>
 
-        <adw-preferences-group title="Tags">
-            <adw-entry-row title="{{ form.tags_string.label.text }}"
-                             subtitle="{{ form.tags_string.errors|join(' ') if form.tags_string.errors else 'Comma-separated values.' }}"
-                             class="{{ 'has-error' if form.tags_string.errors else '' }}">
-              {{ form.tags_string(placeholder="e.g., tech, travel, food") }}
-            </adw-entry-row>
-        </adw-preferences-group>
+        <div class="adw-preferences-group" role="group" aria-labelledby="tags-title">
+            <div class="adw-preferences-group__title-container">
+                <h3 class="adw-preferences-group__title" id="tags-title">Tags</h3>
+            </div>
+            {# Tags Entry Row #}
+            <div class="adw-entry-row {{ 'has-error' if form.tags_string.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.tags_string.id or 'tags_input' }}" class="adw-entry-row-title">{{ form.tags_string.label.text }}</label>
+                    <div class="adw-entry-row-subtitle">
+                        {% if form.tags_string.errors %} {{ form.tags_string.errors|join(' ') }}
+                        {% else %} Comma-separated values.
+                        {% endif %}
+                    </div>
+                </div>
+                <input type="text" id="{{ form.tags_string.id or 'tags_input' }}" name="{{ form.tags_string.name }}" value="{{ form.tags_string.data or '' }}" class="adw-entry row-input" placeholder="e.g., tech, travel, food">
+            </div>
+        </div>
 
         <div style="display: flex; justify-content: flex-end; gap: var(--spacing-s); padding-top: var(--spacing-m); padding-bottom: var(--spacing-m);">
-            {# Render WTForms SubmitFields directly, they will be styled as adw-button by default if no class or adw-button class is applied #}
-            {# Or, use adw-button tags and ensure their names match the form fields for backend detection #}
             {{ form.save_draft(class="adw-button") }}
-            {{ form.publish(class="adw-button suggested") }}
+            {{ form.publish(class="adw-button suggested-action") }}
         </div>
     </form>
-  </adw-preferences-page>
-</adw-clamp>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

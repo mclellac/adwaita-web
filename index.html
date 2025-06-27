@@ -194,10 +194,22 @@
                     <label class="adw-radio-wrapper"><input type="radio" name="my-radio-group" class="adw-radio" value="gamma" disabled> <span class="adw-label">Gamma</span></label>
                 </div>
                 <div class="adw-row" style="align-items: center;">
-                    <label for="spin-btn-1-input" class="adw-label">Spin Button:</label>
-                    <div class="adw-spin-button"><button class="adw-button icon-only flat">-</button><input type="number" id="spin-btn-1-input" class="adw-entry" value="5" min="0" max="10" step="1"><button class="adw-button icon-only flat">+</button></div>
-                    <label class="adw-label">Disabled Spin:</label>
-                    <div class="adw-spin-button disabled"><button class="adw-button icon-only flat" disabled>-</button><input type="number" class="adw-entry" value="3" disabled><button class="adw-button icon-only flat" disabled>+</button></div>
+                    <span class="adw-label">Spin Button:</span> {# Changed label to span as it's not for an input directly here #}
+                    <div class="adw-spin-button" id="spin-btn-1-wrapper">
+                        <input type="number" id="spin-btn-1-input" class="adw-entry adw-spin-button-entry" value="5" min="0" max="10" step="1">
+                        <div class="adw-spin-button-buttons">
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-up" aria-label="Increase value"><span class="adw-icon icon-ui-pan-up-symbolic"></span></button>
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-down" aria-label="Decrease value"><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
+                        </div>
+                    </div>
+                    <span class="adw-label" style="margin-left: var(--spacing-m);">Disabled Spin:</span>
+                    <div class="adw-spin-button disabled" id="spin-btn-2-wrapper">
+                        <input type="number" id="spin-btn-2-input" class="adw-entry adw-spin-button-entry" value="3" disabled>
+                        <div class="adw-spin-button-buttons">
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-up" aria-label="Increase value" disabled><span class="adw-icon icon-ui-pan-up-symbolic"></span></button>
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-down" aria-label="Decrease value" disabled><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
+                        </div>
+                    </div>
                 </div>
                  <div class="adw-row" style="align-items: center;">
                     <span class="adw-label">Toggle Buttons:</span>
@@ -299,9 +311,12 @@
 
             <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Status Page</h3>
             <div class="adw-status-page">
-                <span class="adw-icon icon-status-emblem-ok-symbolic adw-status-page__icon" style="font-size: 48px;"></span>
-                <h4 class="adw-label title-1 adw-status-page__title">All Done!</h4>
-                <p class="adw-label body adw-status-page__description">You have completed all tasks.</p>
+                <span class="adw-icon icon-status-emblem-ok-symbolic adw-status-page-icon" style="font-size: 4.5rem;"></span> {# Ensured adw-status-page-icon class #}
+                <h4 class="adw-label title-1 adw-status-page-title">All Done!</h4> {# Ensured adw-status-page-title class #}
+                <p class="adw-label body adw-status-page-description">You have completed all tasks.</p> {# Ensured adw-status-page-description class #}
+                <div class="adw-status-page-actions">
+                    <button class="adw-button suggested-action">Example Action</button>
+                </div>
             </div>
         </section>
         <div style="height: 200px;"></div> {/* Extra space at bottom */}

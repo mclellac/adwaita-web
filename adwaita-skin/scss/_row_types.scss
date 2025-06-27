@@ -73,33 +73,9 @@
 }
 */
 
-// --- AdwEntryRow ---
-.adw-entry-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: var(--spacing-m);
-  justify-content: space-between; // Ensure proper spacing distribution
-
-  .adw-entry-row-text-content { // Assuming JS structure wraps title/subtitle in this
-    flex-grow: 0;
-    flex-shrink: 1;
-    // Add other properties from AdwComboRow's text-content if necessary:
-    // display: flex;
-    // flex-direction: column;
-    // justify-content: center;
-    // overflow: hidden;
-  }
-
-  // .adw-entry-row-title {
-  //   // Styles for actual title label if needed beyond what AdwLabel provides
-  // }
-
-  .adw-entry-row-entry {
-    flex-grow: 1;
-    // The AdwEntry component itself will have its styles
-  }
-}
+// --- AdwEntryRow --- (Styles for this are now primarily in _entry_row.scss)
+// The _entry_row.scss file contains a more complete port from adwaita-web.
+// Leaving this empty to avoid conflicts, assuming _entry_row.scss is imported in main SCSS.
 
 
 // --- AdwExpanderRow ---

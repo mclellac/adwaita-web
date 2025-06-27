@@ -1,0 +1,73 @@
+// SCSS for Adwaita Status Page (Pure CSS Adwaita Skin Version)
+@use 'variables'; // For CSS variables like --spacing-xl, --text-color etc.
+@use 'mixins';    // For any relevant mixins
+
+.adw-status-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-xxl) var(--spacing-xl);
+  height: 100%; // Take full height of its container if possible
+  box-sizing: border-box;
+  color: var(--text-color); // Use default text color from variables
+  background-color: var(--window-bg-color); // Or specific status page bg if different
+
+  // Icon styling within the status page
+  .adw-status-page-icon.adw-icon { // Assuming .adw-icon is used for icons
+    font-size: 4.5rem; // Large icon size
+    margin-bottom: var(--spacing-l);
+    // opacity: 0.7; // Original had opacity, can be themed via a variable if needed
+    color: var(--text-color-secondary); // Often icons are subtly colored
+  }
+
+  // Title styling
+  .adw-status-page-title {
+    // Can use .adw-label class with title-level modifiers or define explicitly
+    font-size: var(--font-size-h2); // Or a specific status page title size variable
+    font-weight: var(--heading-font-weight, 700);
+    margin-top: 0; // Reset default heading margin
+    margin-bottom: var(--spacing-s);
+    color: var(--heading-color); // Use heading color from variables
+  }
+
+  // Description styling
+  .adw-status-page-description {
+    font-size: var(--font-size-large);
+    color: var(--text-color); // Use text color
+    opacity: 0.7; // Standard Adwaita subtitle/description opacity
+    max-width: 450px; // Prevent description from becoming too wide
+    line-height: $line-height-base * 1.1; // Slightly more line height for readability
+    margin-top: 0;
+    margin-bottom: var(--spacing-xl); // Space before actions
+  }
+
+  // Container for action buttons
+  .adw-status-page-actions {
+    display: flex;
+    flex-direction: column; // Stack buttons vertically by default
+    align-items: center; // Center buttons if they don't take full width
+    gap: var(--spacing-s); // Gap between action buttons
+
+    // If actions should be horizontal on wider screens, use a media query or make it default
+    // e.g., &.horizontal { flex-direction: row; }
+    // or based on available width. For now, defaulting to column.
+  }
+}
+
+// Dark theme adjustments are handled by CSS variables.
+// .theme-dark .adw-status-page {
+//   color: var(--text-color); // Will use dark theme's text color
+//   background-color: var(--window-bg-color); // Will use dark theme's window bg
+//
+//   .adw-status-page-icon.adw-icon {
+//     color: var(--text-color-secondary);
+//   }
+//   .adw-status-page-title {
+//     color: var(--heading-color);
+//   }
+//   .adw-status-page-description {
+//     color: var(--text-color);
+//   }
+// }
