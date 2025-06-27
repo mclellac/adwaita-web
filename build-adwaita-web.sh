@@ -143,7 +143,7 @@ fi
 
 echo "--- Copying Built Assets to app-demo/static ---"
 
-APP_DEMO_STATIC_DIR="app-demo/static"
+APP_DEMO_STATIC_DIR="./app-demo/static"
 
 # Define target directories in app-demo/static
 APP_DEMO_CSS_DIR="${APP_DEMO_STATIC_DIR}/css"
