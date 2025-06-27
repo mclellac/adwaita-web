@@ -2,96 +2,68 @@
 
 {% block title %}Settings - {{ super() }}{% endblock %}
 
+{% block headerbar %}
+<adw-header-bar>
+    <adw-window-title slot="title" title="Settings"></adw-window-title>
+    <adw-button slot="start" icon-name="go-previous-symbolic" href="{{ url_for('index') }}" aria-label="Back to Home"></adw-button>
+</adw-header-bar>
+{% endblock %}
+
 {% block content %}
-<div class="adw-preferences-view" style="max-width: 700px; margin: var(--spacing-xl) auto;">
-  <div class="adw-preferences-page">
-    <header class="adw-preferences-page__header">
-      <h1 class="adw-preferences-page__title">Settings</h1>
-    </header>
+<adw-preferences-view>
+    <adw-preferences-page title="Settings">
 
-    <div class="adw-preferences-group" role="group" aria-labelledby="appearance-settings-title">
-      <div class="adw-preferences-group__title-container">
-        <h3 class="adw-preferences-group__title" id="appearance-settings-title">Appearance</h3>
-      </div>
+        <adw-preferences-group title="Appearance">
+            <adw-combo-row id="theme-combo-row" title="Theme" subtitle="Select your preferred interface theme">
+                <select slot="suffix" name="theme">
+                    {% set current_theme = current_user.theme or 'system' %}
+                    <option value="system" {% if current_theme == 'system' %}selected{% endif %}>System Default</option>
+                    <option value="light" {% if current_theme == 'light' %}selected{% endif %}>Light</option>
+                    <option value="dark" {% if current_theme == 'dark' %}selected{% endif %}>Dark</option>
+                </select>
+            </adw-combo-row>
 
-      {# Theme Combo Row #}
-      <div class="adw-combo-row">
-        <div class="adw-combo-row-text-content">
-          <label for="theme-select" class="adw-combo-row-title">Theme</label>
-          <span class="adw-combo-row-subtitle">Select your preferred interface theme</span>
-        </div>
-        <select id="theme-select" name="theme" class="adw-combo-row-select">
-          {% set current_theme = current_user.theme or 'system' %}
-          <option value="system" {% if current_theme == 'system' %}selected{% endif %}>System Default</option>
-          <option value="light" {% if current_theme == 'light' %}selected{% endif %}>Light</option>
-          <option value="dark" {% if current_theme == 'dark' %}selected{% endif %}>Dark</option>
-        </select>
-      </div>
+            <adw-combo-row id="accent-color-combo-row" title="Accent Color" subtitle="Choose a site-wide accent color">
+                <select slot="suffix" name="accent_color">
+                    {% set current_accent = current_user.accent_color or 'default' %}
+                    {# These values should align with what Adw.setAccentColor() expects #}
+                    <option value="default" {% if current_accent == 'default' %}selected{% endif %}>Default (Blue)</option>
+                    <option value="green" {% if current_accent == 'green' %}selected{% endif %}>Green</option>
+                    <option value="orange" {% if current_accent == 'orange' %}selected{% endif %}>Orange</option>
+                    <option value="purple" {% if current_accent == 'purple' %}selected{% endif %}>Purple</option>
+                    <option value="red" {% if current_accent == 'red' %}selected{% endif %}>Red</option>
+                    <option value="yellow" {% if current_accent == 'yellow' %}selected{% endif %}>Yellow</option>
+                    <option value="pink" {% if current_accent == 'pink' %}selected{% endif %}>Pink</option>
+                </select>
+            </adw-combo-row>
+        </adw-preferences-group>
 
-      {# Accent Color Combo Row #}
-      <div class="adw-combo-row">
-        <div class="adw-combo-row-text-content">
-          <label for="accent-color-select" class="adw-combo-row-title">Accent Color</label>
-          <span class="adw-combo-row-subtitle">Choose a site-wide accent color</span>
-        </div>
-        <select id="accent-color-select" name="accent_color" class="adw-combo-row-select">
-          {% set current_accent = current_user.accent_color or 'default' %}
-          <option value="default" {% if current_accent == 'default' %}selected{% endif %}>Default (Blue)</option>
-          <option value="green" {% if current_accent == 'green' %}selected{% endif %}>Green</option>
-          <option value="orange" {% if current_accent == 'orange' %}selected{% endif %}>Orange</option>
-          <option value="purple" {% if current_accent == 'purple' %}selected{% endif %}>Purple</option>
-          <option value="red" {% if current_accent == 'red' %}selected{% endif %}>Red</option>
-          <option value="yellow" {% if current_accent == 'yellow' %}selected{% endif %}>Yellow</option>
-          <option value="pink" {% if current_accent == 'pink' %}selected{% endif %}>Pink</option>
-        </select>
-      </div>
-    </div>
+        <adw-preferences-group title="Account">
+            <adw-action-row title="Change Password" subtitle="Update your account password" href="{{ url_for('change_password_page') }}" activatable></adw-action-row>
+            <adw-action-row title="Logout" subtitle="Sign out of your account" href="{{ url_for('logout') }}" activatable class="destructive-action"></adw-action-row>
+        </adw-preferences-group>
 
-    <div class="adw-preferences-group" role="group" aria-labelledby="account-settings-title">
-      <div class="adw-preferences-group__title-container">
-        <h3 class="adw-preferences-group__title" id="account-settings-title">Account</h3>
-      </div>
-      <div class="adw-list-box">
-        <a href="{{ url_for('change_password_page') }}" class="adw-action-row activatable">
-          <div class="adw-action-row__text">
-            <span class="adw-action-row__title">Change Password</span>
-            <span class="adw-action-row__subtitle">Update your account password</span>
-          </div>
-          <span class="adw-action-row__chevron"></span>
-        </a>
-        <a href="{{ url_for('logout') }}" class="adw-action-row activatable destructive-action">
-          <div class="adw-action-row__text">
-            <span class="adw-action-row__title">Logout</span>
-            <span class="adw-action-row__subtitle">Sign out of your account</span>
-          </div>
-          <span class="adw-action-row__chevron"></span>
-        </a>
-      </div>
-    </div>
-
-  </div>
-</div>
+    </adw-preferences-page>
+</adw-preferences-view>
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
-{# Removed link to non-existent settings.js.
-   The theme selection is handled by base.html script.
-   Accent color selection would require new JS to post to API and update CSS vars/body class.
-#}
 <script>
-// Minimal JS to handle theme/accent changes via API if desired in the future.
-// For now, these selects don't automatically apply changes without a form submission or dedicated JS.
 document.addEventListener('DOMContentLoaded', function() {
-    const themeSelect = document.getElementById('theme-select');
-    const accentSelect = document.getElementById('accent-color-select');
+    const themeComboRow = document.getElementById('theme-combo-row');
+    const accentComboRow = document.getElementById('accent-color-combo-row');
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-    if (themeSelect) {
+    if (themeComboRow) {
+        const themeSelect = themeComboRow.querySelector('select');
         themeSelect.addEventListener('change', function() {
             const newTheme = this.value;
             console.log('Theme changed to:', newTheme);
-            // Example API call (currently only base.html handles initial load)
+            if (Adw && typeof Adw.setTheme === 'function') {
+                Adw.setTheme(newTheme); // This should handle localStorage and class updates
+            }
+
             if (csrfToken) {
                 fetch("{{ url_for('save_theme_preference') }}", {
                     method: 'POST',
@@ -104,26 +76,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     console.log('Theme save response:', data);
-                    if (data.status === 'success') {
-                        // Update body class for immediate effect
-                        document.documentElement.classList.remove('theme-dark', 'theme-light'); // Clear existing
-                        if (newTheme === 'dark') {
-                            document.documentElement.classList.add('theme-dark');
-                        } else if (newTheme === 'light') {
-                            // document.documentElement.classList.add('theme-light'); // Assuming default is light
-                        }
-                        // Optionally show a toast or confirmation
-                    }
+                    if (data.message) Adw.createToast(data.message, { type: data.status });
                 })
-                .catch(error => console.error('Error saving theme:', error));
+                .catch(error => {
+                    console.error('Error saving theme:', error);
+                    Adw.createToast('Error saving theme preference.', { type: 'error' });
+                });
             }
         });
     }
 
-    if (accentSelect) {
+    if (accentComboRow) {
+        const accentSelect = accentComboRow.querySelector('select');
         accentSelect.addEventListener('change', function() {
             const newAccent = this.value;
             console.log('Accent color changed to:', newAccent);
+            if (Adw && typeof Adw.setAccentColor === 'function') {
+                Adw.setAccentColor(newAccent); // This should handle localStorage and class updates
+            }
+
             if (csrfToken) {
                 fetch("{{ url_for('save_accent_color_preference') }}", {
                     method: 'POST',
@@ -136,10 +107,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     console.log('Accent save response:', data);
-                    // TODO: Add JS to dynamically update accent color CSS variables on :root or body
-                    // This part is more complex as it depends on how adwaita-skin.css exposes accent variables.
+                     if (data.message) Adw.createToast(data.message, { type: data.status });
                 })
-                .catch(error => console.error('Error saving accent color:', error));
+                .catch(error => {
+                    console.error('Error saving accent color:', error);
+                    Adw.createToast('Error saving accent color preference.', { type: 'error' });
+                });
             }
         });
     }
