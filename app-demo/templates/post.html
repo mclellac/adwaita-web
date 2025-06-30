@@ -164,6 +164,25 @@
     </div>
     {% endif %}
 
+    {% if related_posts %}
+    <section class="related-posts-section" aria-labelledby="related-posts-heading" style="margin-top: var(--spacing-xl);">
+        <h2 id="related-posts-heading" class="adw-title-2">Related Posts</h2>
+        <div class="adw-list-box">
+            {% for related_post in related_posts %}
+            <a href="{{ url_for('view_post', post_id=related_post.id) }}" class="adw-action-row activatable">
+                <div class="adw-action-row-content">
+                    <span class="adw-action-row-title">{{ related_post.title }}</span>
+                    {% if related_post.author %}
+                    <span class="adw-action-row-subtitle">By {{ related_post.author.username }}</span>
+                    {% endif %}
+                </div>
+                <span class="adw-action-row__chevron"></span>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
     <div class="adw-box adw-box-spacing-s" style="justify-content: center; margin-top: var(--spacing-xl);">
          <a href="{{ url_for('index') }}" class="adw-button"><span class="adw-icon icon-actions-go-previous-symbolic"></span> Back to Posts</a>
     </div>
