@@ -411,3 +411,80 @@ hr.section-divider {
 .theme-dark .login-prompt-comment {
      background-color: var(--theme-color-secondary-container, var(--background-secondary-color-dark));
 }
+
+/* Accent Color Overrides */
+/* :root is equivalent to html but with higher specificity for overrides if needed */
+/* Adwaita-skin's _variables.scss likely defines default --accent-color, --accent-bg-color, --accent-fg-color (blue) */
+/* We override these when a specific accent class is present on html or :root */
+
+/* Green Accent */
+:root.accent-green {
+  --accent-color: #26a269; /* GNOME Green 5 (slightly darker for better contrast as main accent) */
+  --accent-bg-color: #2ec27e; /* GNOME Green 4 (as used in Adw.ColorScheme) */
+  --accent-fg-color: #ffffff;
+}
+.theme-dark:root.accent-green { /* Ensure dark theme also gets these if not automatically derived */
+  --accent-color: #2ec27e;
+  --accent-bg-color: #2ec27e;
+  --accent-fg-color: #ffffff;
+}
+
+/* Orange Accent */
+:root.accent-orange {
+  --accent-color: #e95420; /* GNOME Orange 5 */
+  --accent-bg-color: #f87c00; /* GNOME Orange 4 */
+  --accent-fg-color: #ffffff;
+}
+.theme-dark:root.accent-orange {
+  --accent-color: #f87c00;
+  --accent-bg-color: #f87c00;
+  --accent-fg-color: #ffffff; /* Or sometimes a dark color depending on the orange shade */
+}
+
+/* Purple Accent */
+:root.accent-purple {
+  --accent-color: #613583; /* GNOME Purple 5 */
+  --accent-bg-color: #7854ab; /* GNOME Purple 4 */
+  --accent-fg-color: #ffffff;
+}
+.theme-dark:root.accent-purple {
+  --accent-color: #7854ab;
+  --accent-bg-color: #7854ab;
+  --accent-fg-color: #ffffff;
+}
+
+/* Red Accent */
+:root.accent-red {
+  --accent-color: #a51d2d; /* GNOME Red 5 */
+  --accent-bg-color: #c01c28; /* GNOME Red 4 */
+  --accent-fg-color: #ffffff;
+}
+.theme-dark:root.accent-red {
+  --accent-color: #c01c28;
+  --accent-bg-color: #c01c28;
+  --accent-fg-color: #ffffff;
+}
+
+/* Yellow Accent */
+:root.accent-yellow {
+  --accent-color: #e5a50a; /* GNOME Yellow 5 */
+  --accent-bg-color: #f6d32d; /* GNOME Yellow 4 */
+  --accent-fg-color: rgba(0, 0, 0, 0.8); /* Dark text for yellow */
+}
+.theme-dark:root.accent-yellow {
+  --accent-color: #f6d32d;
+  --accent-bg-color: #f6d32d;
+  --accent-fg-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Pink Accent */
+:root.accent-pink {
+  --accent-color: #b9255f; /* GNOME Pink 5 */
+  --accent-bg-color: #d2386c; /* GNOME Pink 4 */
+  --accent-fg-color: #ffffff;
+}
+.theme-dark:root.accent-pink {
+  --accent-color: #d2386c;
+  --accent-bg-color: #d2386c;
+  --accent-fg-color: #ffffff;
+}

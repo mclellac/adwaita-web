@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="adw-clamp content-clamp profile-edit-clamp">
-  <div class="adw-preferences-page">
+  <div class="adw-preferences-page" role="main">
     <header class="adw-preferences-page__header">
         <h1 class="adw-preferences-page__title">Edit Your Profile</h1>
     </header>
@@ -22,93 +22,95 @@
       <input type="hidden" name="crop_width" id="crop_width">
       <input type="hidden" name="crop_height" id="crop_height">
 
-      <div class="adw-preferences-group" role="group" aria-labelledby="profile-public-info-title">
+      <section class="adw-preferences-group" role="group" aria-labelledby="profile-public-info-title">
         <div class="adw-preferences-group__title-container">
-            <h3 class="adw-preferences-group__title title-3" id="profile-public-info-title">Public Information</h3>
+            <h2 class="adw-preferences-group__title" id="profile-public-info-title">Public Information</h2>
         </div>
-
-        {# Full Name Entry Row #}
-        <div class="adw-entry-row {{ 'has-error' if form.full_name.errors else '' }}">
-            <label for="{{ form.full_name.id or 'full_name_input' }}" class="adw-entry-row__title">{{ form.full_name.label.text }}</label>
-            <div class="adw-entry-row-text-content">
-                {% if form.full_name.errors %}<span class="adw-entry-row__subtitle error-text">{{ form.full_name.errors|join(' ') }}</span>{% endif %}
+        <div class="adw-list-box">
+            {# Full Name Entry Row #}
+            <div class="adw-entry-row {{ 'has-error' if form.full_name.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.full_name.id or 'full_name_input' }}" class="adw-entry-row-title">{{ form.full_name.label.text }}</label>
+                    {% if form.full_name.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.full_name.errors|join(' ') }}</span>{% endif %}
+                </div>
+                <input type="text" id="{{ form.full_name.id or 'full_name_input' }}" name="{{ form.full_name.name }}" value="{{ form.full_name.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Your full name or display name">
             </div>
-            <input type="text" id="{{ form.full_name.id or 'full_name_input' }}" name="{{ form.full_name.name }}" value="{{ form.full_name.data or '' }}" class="adw-entry row-input" placeholder="Your full name or display name">
+
+            {# Bio/Profile Info - Using a simple textarea within its own group-like structure or just a styled div #}
+            {# For Adwaita styling, textareas might not have a specific "row" but rather be part of a group content #}
+            <div class="adw-action-row"> {# Using action row for layout, can be a generic div too #}
+                 <div class="adw-action-row__text" style="width:100%;">
+                    <label for="{{ form.profile_info.id or 'profile_info_input' }}" class="adw-action-row__title">{{ form.profile_info.label.text }}</label>
+                    <span class="adw-action-row__subtitle">Tell us a bit about yourself. Supports basic HTML.</span>
+                     {% if form.profile_info.errors %}<div class="error-text form-field-error adw-action-row__subtitle">{{ form.profile_info.errors|join(' ') }}</div>{% endif %}
+                    <textarea name="{{ form.profile_info.name }}" id="{{ form.profile_info.id or 'profile_info_input' }}" class="adw-textarea content-textarea profile-bio-textarea" rows="6" style="margin-top: var(--spacing-xs); width: 100%;">{{ form.profile_info.data or '' }}</textarea>
+                 </div>
+            </div>
+
+
+            {# Location Entry Row #}
+            <div class="adw-entry-row {{ 'has-error' if form.location.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.location.id or 'location_input' }}" class="adw-entry-row-title">{{ form.location.label.text }}</label>
+                    {% if form.location.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.location.errors|join(' ') }}</span>{% endif %}
+                </div>
+                <input type="text" id="{{ form.location.id or 'location_input' }}" name="{{ form.location.name }}" value="{{ form.location.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="e.g., City, Country">
+            </div>
+
+            {# Website URL Entry Row #}
+            <div class="adw-entry-row {{ 'has-error' if form.website_url.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.website_url.id or 'website_url_input' }}" class="adw-entry-row-title">{{ form.website_url.label.text }}</label>
+                    {% if form.website_url.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.website_url.errors|join(' ') }}</span>{% endif %}
+                </div>
+                <input type="url" id="{{ form.website_url.id or 'website_url_input' }}" name="{{ form.website_url.name }}" value="{{ form.website_url.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="https://example.com">
+            </div>
+
+            {# is_profile_public Switch Row #}
+            <div class="adw-switch-row {{ 'has-error' if form.is_profile_public.errors else '' }}">
+                <div class="adw-action-row__text">
+                    <label for="{{ form.is_profile_public.id or 'is_profile_public_input' }}" class="adw-action-row__title">{{ form.is_profile_public.label.text }}</label>
+                    <span class="adw-action-row__subtitle">
+                        {% if form.is_profile_public.errors %} <span class="error-text">{{ form.is_profile_public.errors|join(' ') }}</span>
+                        {% else %} Allow others to see your profile page.
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="adw-switch-row__switch">
+                    <input type="checkbox" name="{{ form.is_profile_public.name }}" id="{{ form.is_profile_public.id or 'is_profile_public_input' }}" class="adw-switch" value="y" {% if form.is_profile_public.data %}checked{% endif %}>
+                </div>
+            </div>
         </div>
+      </section>
 
-        {# Bio/Profile Info - Not using expander for direct editing #}
-        <div class="adw-preferences-group" role="group" aria-labelledby="profile-bio-title">
-            <div class="adw-preferences-group__title-container">
-                <h3 class="adw-preferences-group__title title-3" id="profile-bio-title">{{ form.profile_info.label.text }}</h3>
-                <p class="adw-label muted">Tell us a bit about yourself. Supports basic HTML.</p>
-                {% if form.profile_info.errors %}<div class="error-text form-field-error">{{ form.profile_info.errors|join(' ') }}</div>{% endif %}
-            </div>
-            <textarea name="{{ form.profile_info.name }}" id="{{ form.profile_info.id or 'profile_info_input' }}" class="adw-textarea content-textarea profile-bio-textarea" rows="8">{{ form.profile_info.data or '' }}</textarea>
-        </div>
-
-
-        {# Location Entry Row #}
-        <div class="adw-entry-row {{ 'has-error' if form.location.errors else '' }}">
-            <label for="{{ form.location.id or 'location_input' }}" class="adw-entry-row__title">{{ form.location.label.text }}</label>
-            <div class="adw-entry-row-text-content">
-                {% if form.location.errors %}<span class="adw-entry-row__subtitle error-text">{{ form.location.errors|join(' ') }}</span>{% endif %}
-            </div>
-            <input type="text" id="{{ form.location.id or 'location_input' }}" name="{{ form.location.name }}" value="{{ form.location.data or '' }}" class="adw-entry row-input" placeholder="e.g., City, Country">
-        </div>
-
-        {# Website URL Entry Row #}
-        <div class="adw-entry-row {{ 'has-error' if form.website_url.errors else '' }}">
-            <label for="{{ form.website_url.id or 'website_url_input' }}" class="adw-entry-row__title">{{ form.website_url.label.text }}</label>
-            <div class="adw-entry-row-text-content">
-                {% if form.website_url.errors %}<span class="adw-entry-row__subtitle error-text">{{ form.website_url.errors|join(' ') }}</span>{% endif %}
-            </div>
-            <input type="url" id="{{ form.website_url.id or 'website_url_input' }}" name="{{ form.website_url.name }}" value="{{ form.website_url.data or '' }}" class="adw-entry row-input" placeholder="https://example.com">
-        </div>
-
-        {# is_profile_public Switch Row #}
-        <div class="adw-switch-row {{ 'has-error' if form.is_profile_public.errors else '' }}">
-            <div class="adw-action-row__text">
-                <label for="{{ form.is_profile_public.id or 'is_profile_public_input' }}" class="adw-action-row__title">{{ form.is_profile_public.label.text }}</label>
-                <span class="adw-action-row__subtitle">
-                    {% if form.is_profile_public.errors %} <span class="error-text">{{ form.is_profile_public.errors|join(' ') }}</span>
-                    {% else %} Allow others to see your profile page.
-                    {% endif %}
-                </span>
-            </div>
-            <div class="adw-switch-row__switch">
-                <input type="checkbox" name="{{ form.is_profile_public.name }}" id="{{ form.is_profile_public.id or 'is_profile_public_input' }}" class="adw-switch" value="y" {% if form.is_profile_public.data %}checked{% endif %}>
-            </div>
-        </div>
-      </div>
-
-      <div class="adw-preferences-group" role="group" aria-labelledby="profile-photo-title">
+      <section class="adw-preferences-group" role="group" aria-labelledby="profile-photo-title">
         <div class="adw-preferences-group__title-container">
-            <h3 class="adw-preferences-group__title title-3" id="profile-photo-title">Profile Photo</h3>
+            <h2 class="adw-preferences-group__title" id="profile-photo-title">Profile Photo</h2>
         </div>
         <div class="adw-list-box">
           <div class="adw-action-row profile-photo-action-row">
             <div class="adw-action-row__text">
-                <div class="adw-action-row__title">{{ form.profile_photo.label.text }}</div>
-                <div class="adw-action-row__subtitle">Upload a new photo. Max 2MB. Recommended: Square aspect ratio.</div>
+                <span class="adw-action-row__title">{{ form.profile_photo.label.text }}</span>
+                <span class="adw-action-row__subtitle">Upload a new photo. Max 2MB. Recommended: Square aspect ratio.</span>
             </div>
-            <div class="adw-action-row__suffix-widget profile-photo-widget-container">
+            <div class="adw-action-row-suffix profile-photo-widget-container" style="display: flex; flex-direction: column; align-items: flex-end; gap: var(--spacing-s);">
               <button type="button" class="adw-button" id="upload-photo-button">Choose Photo</button>
-              {{ form.profile_photo(id=(form.profile_photo.id or 'profile_photo_field'), class="hidden-file-input") }}
+              {{ form.profile_photo(id=(form.profile_photo.id or 'profile_photo_field'), class="hidden-file-input", style="display:none;") }}
 
-              <div class="cropper-container-wrapper" id="cropper-wrapper" hidden>
-                <img id="image-to-crop" src="#" alt="Image to crop">
+              <div class="cropper-container-wrapper" id="cropper-wrapper" style="width: 150px; height: 150px; {{ 'display:none;' if not (form.profile_photo.data or image_to_crop_src) else '' }}">
+                <img id="image-to-crop" src="#" alt="Image to crop" style="max-width: 100%; max-height: 100%;">
               </div>
 
               {% if user_profile and user_profile.profile_photo_url %}
-              <div class="current-photo-display">
-                <span class="adw-label caption">Current photo:</span>
+              <div class="current-photo-display" style="display: flex; align-items: center; gap: var(--spacing-xs);">
+                <span class="adw-label caption">Current:</span>
                 <span class="adw-avatar size-large">
                     <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ current_user.username }} avatar" class="adw-avatar__image">
                 </span>
               </div>
               {% elif default_avatar_url %}
-              <div class="current-photo-display">
-                <span class="adw-label caption">Default photo:</span>
+              <div class="current-photo-display" style="display: flex; align-items: center; gap: var(--spacing-xs);">
+                <span class="adw-label caption">Default:</span>
                  <span class="adw-avatar size-large">
                     <img src="{{ default_avatar_url }}" alt="Default avatar" class="adw-avatar__image">
                 </span>
@@ -117,14 +119,14 @@
             </div>
           </div>
           {% if form.profile_photo.errors %}
-          <div class="adw-action-row error-row">
+          <div class="adw-action-row error-row"> {# Ensure this row is styled to show errors #}
             <span class="adw-action-row__subtitle error-text">{{ form.profile_photo.errors|join(' ') }}</span>
           </div>
           {% endif %}
         </div>
-      </div>
+      </section>
 
-      <div class="form-actions-container">
+      <div class="form-actions-container" style="display: flex; justify-content: flex-end; gap: var(--spacing-s); padding-top: var(--spacing-l);">
             <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat">Cancel</a>
             <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text if form.submit.label else 'Update Profile' }}</button>
       </div>
@@ -156,7 +158,6 @@
           photoInput.click(); // Trigger the hidden file input
         } catch (e) {
           console.error("Error triggering photo input click:", e);
-          // Optionally, display a user-friendly message here
         }
       });
     }
@@ -167,22 +168,18 @@
           const files = event.target.files;
           if (files && files.length > 0) {
             const file = files[0];
-            // Client-side file type check for early feedback
             const allowedTypes = ['image/png', 'image/jpeg', 'image/gif'];
             if (!allowedTypes.includes(file.type)) {
               console.warn("Invalid file type selected:", file.type);
-              photoInput.value = ''; // Reset file input
-              if (cropper) {
-                  cropper.destroy();
-                  cropper = null;
-              }
+              photoInput.value = '';
+              if (cropper) { cropper.destroy(); cropper = null; }
               if(imageToCrop) imageToCrop.src = '#';
-              if(cropperWrapper) cropperWrapper.hidden = true;
+              if(cropperWrapper) cropperWrapper.style.display = 'none';
               if(cropXField) cropXField.value = '';
               if(cropYField) cropYField.value = '';
               if(cropWidthField) cropWidthField.value = '';
               if(cropHeightField) cropHeightField.value = '';
-              alert("Invalid file type. Please select a PNG, JPG, or GIF image."); // Simple alert for now
+              alert("Invalid file type. Please select a PNG, JPG, or GIF image.");
               return;
             }
 
@@ -190,14 +187,12 @@
             reader.onload = function(e) {
               try {
                 if(imageToCrop) imageToCrop.src = e.target.result;
-                if(cropperWrapper) cropperWrapper.hidden = false;
-                if (cropper) {
-                  cropper.destroy();
-                }
+                if(cropperWrapper) cropperWrapper.style.display = 'block';
+                if (cropper) { cropper.destroy(); }
                 if(imageToCrop){
                   cropper = new Cropper(imageToCrop, {
-                    aspectRatio: 1 / 1, // For a square avatar
-                    viewMode: 1,        // Restrict crop box to canvas
+                    aspectRatio: 1 / 1,
+                    viewMode: 1,
                     responsive: true,
                   });
                 } else {
@@ -205,59 +200,42 @@
                 }
               } catch (cropperError) {
                 console.error("Error initializing Cropper:", cropperError);
-                if(cropperWrapper) cropperWrapper.hidden = true;
+                if(cropperWrapper) cropperWrapper.style.display = 'none';
               }
             };
-            reader.onerror = function() {
-              console.error("FileReader error:", reader.error);
-            };
+            reader.onerror = function() { console.error("FileReader error:", reader.error); };
             reader.readAsDataURL(file);
           } else {
-            // No file selected, or selection cancelled
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
+            if (cropper) { cropper.destroy(); cropper = null; }
             if(imageToCrop) imageToCrop.src = '#';
-            if(cropperWrapper) cropperWrapper.hidden = true;
+            if(cropperWrapper) cropperWrapper.style.display = 'none';
             if(cropXField) cropXField.value = '';
             if(cropYField) cropYField.value = '';
             if(cropWidthField) cropWidthField.value = '';
             if(cropHeightField) cropHeightField.value = '';
           }
-        } catch (e) {
-          console.error("Error in photoInput change event:", e);
-        }
+        } catch (e) { console.error("Error in photoInput change event:", e); }
       });
-    } else {
-        console.warn("Profile photo input field not found.");
-    }
-
+    } else { console.warn("Profile photo input field not found."); }
 
     if (form) {
       form.addEventListener('submit', function(event) {
         try {
           if (cropper && photoInput && photoInput.files && photoInput.files.length > 0) {
-            const cropData = cropper.getData(true); // Get rounded data
+            const cropData = cropper.getData(true);
             if(cropXField) cropXField.value = cropData.x;
             if(cropYField) cropYField.value = cropData.y;
             if(cropWidthField) cropWidthField.value = cropData.width;
             if(cropHeightField) cropHeightField.value = cropData.height;
           } else {
-            // If no new photo was selected or cropper not active, clear crop fields
-            // This ensures old crop data isn't sent if the user didn't interact with cropper this time
             if(cropXField) cropXField.value = '';
             if(cropYField) cropYField.value = '';
             if(cropWidthField) cropWidthField.value = '';
             if(cropHeightField) cropHeightField.value = '';
           }
-        } catch (e) {
-          console.error("Error in form submit event for cropper data:", e);
-        }
+        } catch (e) { console.error("Error in form submit event for cropper data:", e); }
       });
-    } else {
-        console.warn("Edit profile form not found.");
-    }
+    } else { console.warn("Edit profile form not found."); }
   });
 </script>
 {% endblock %}
