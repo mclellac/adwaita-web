@@ -344,8 +344,46 @@ def create_app(config_overrides=None):
                 flash_form_errors(form)
         comments = post.comments.all()
         _app.logger.debug(f"Fetched {len(comments)} comments for post {post_id}.")
+
+        related_posts = []
+        if post.is_published and post.tags:
+            try:
+                tag_ids = [tag.id for tag in post.tags]
+                _app.logger.debug(f"Finding related posts for post {post_id} based on tag IDs: {tag_ids}")
+                # Find other published posts that share at least one tag, exclude current post, limit results.
+                # Order by how many tags they share (more complex) or just by recency.
+                # For simplicity, let's find posts sharing any of the tags and order by recency.
+                # This might bring posts with only one common tag.
+                # A more advanced query could count common tags.
+
+                # SQLAlchemy way to find posts sharing tags:
+                # Post.query.filter(Post.tags.any(Tag.id.in_(tag_ids)), Post.id != post.id, Post.is_published == True) ...
+
+                # Simpler approach: Iterate through tags, collect posts, then unique and sort.
+                candidate_posts = {} # Using dict to ensure uniqueness by post.id
+                for tag in post.tags:
+                    # Query posts for this tag, excluding the current post
+                    posts_with_tag = Post.query.join(Post.tags).filter(
+                        Tag.id == tag.id,
+                        Post.id != post.id,
+                        Post.is_published == True
+                    ).all()
+                    for p in posts_with_tag:
+                        candidate_posts[p.id] = p
+
+                # Sort candidates by published_at date (descending)
+                # Take top N (e.g., 3 or 4)
+                # Ensure candidate_posts.values() is converted to a list for sorting if it's not already
+                sorted_candidates = sorted(list(candidate_posts.values()), key=lambda p: p.published_at or p.created_at, reverse=True)
+                related_posts = sorted_candidates[:4] # Get up to 4 related posts
+                _app.logger.debug(f"Found {len(related_posts)} related posts for post {post_id}.")
+
+            except Exception as e:
+                _app.logger.error(f"Error finding related posts for post {post_id}: {e}", exc_info=True)
+                related_posts = [] # Ensure it's an empty list on error
+
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
-        rendered_template = render_template('post.html', post=post, form=form, comments=comments, delete_form=delete_form)
+        rendered_template = render_template('post.html', post=post, form=form, comments=comments, delete_form=delete_form, related_posts=related_posts)
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
         return rendered_template
@@ -779,6 +817,27 @@ def create_app(config_overrides=None):
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
         return rendered_template
+
+@_app.route('/dashboard')
+@login_required
+def dashboard():
+    _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_ENTRY_DEBUG] {request.path} - Start")
+    _app.logger.debug(f"[ROUTE_ENTRY] Path: /dashboard, Method: {request.method}, User: {current_user.username}")
+
+    user_posts = Post.query.filter_by(user_id=current_user.id).order_by(Post.updated_at.desc()).all()
+    _app.logger.debug(f"Fetched {len(user_posts)} posts for user {current_user.username} for dashboard.")
+
+    # For delete confirmation, we might need a generic form or handle it via GET link + confirmation page for simplicity here
+    # Or reuse the DeletePostForm if we make it generic enough or handle it with JS + API later.
+    # For now, direct delete links will be simpler in the template, but less safe (GET should not change state).
+    # A better approach is to have a small form per delete button.
+    # The existing delete_post route is POST only.
+
+    _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+    rendered_template = render_template('dashboard.html', user_posts=user_posts)
+    _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+    _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+    return rendered_template
 
     @_app.route('/settings')
     @login_required

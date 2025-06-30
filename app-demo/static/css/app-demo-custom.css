@@ -228,13 +228,31 @@
 }
 
 /* Ensure textarea styled like adw-entry if .adw-textarea is used with .adw-entry */
-textarea.adw-entry.adw-textarea {
-    /* Most styles should be inherited from .adw-entry.
-       Specific overrides for textarea if needed: */
-    line-height: $line-height-base; /* from _variables.scss SASS var */
-    min-height: 120px; /* Example min height */
-    resize: vertical;
+textarea.adw-entry.adw-textarea,
+textarea.adw-textarea { /* General styling for adw-textarea */
+    /* Most styles should be inherited from .adw-entry if both classes are used.
+       Specific overrides for textarea: */
+    line-height: 1.5; /* A common default, adjust if needed */
+    min-height: 120px; /* Example min height for multi-line text */
+    resize: vertical; /* Allow vertical resizing */
+    padding: var(--spacing-s) var(--spacing-m); /* Consistent padding with entries */
+    border-radius: var(--input-border-radius, var(--border-radius-default));
+    border: 1px solid var(--input-border-color, var(--border-color));
+    background-color: var(--input-bg-color, var(--window-bg-color));
+    color: var(--input-fg-color, var(--text-color));
+    font-family: var(--document-font-family); /* Ensure correct font */
+    font-size: var(--font-size-base);
 }
+
+textarea.adw-entry.adw-textarea:focus,
+textarea.adw-textarea:focus {
+    border-color: var(--input-focus-border-color, var(--accent-color));
+    /* Adwaita entries often get a 2px bottom border or an outline on focus.
+       For textarea, a consistent border color change is usually fine. */
+    outline: none; /* Remove default browser outline if custom focus is handled by border */
+     /* box-shadow: 0 0 0 2px var(--accent-bg-color); /* Example focus ring, if desired */
+}
+
 
 /* Styles for prose content within post-content or comments */
 .styled-text-content p,
@@ -411,6 +429,59 @@ hr.section-divider {
 .theme-dark .login-prompt-comment {
      background-color: var(--theme-color-secondary-container, var(--background-secondary-color-dark));
 }
+
+/* Adwaita Font Integration */
+@font-face {
+    font-family: 'AdwaitaSans';
+    src: url('../fonts/sans/AdwaitaSans-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'AdwaitaSans';
+    src: url('../fonts/sans/AdwaitaSans-Italic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+/* Assuming AdwaitaSans doesn't have specific bold/italic-bold files,
+   the browser will typically faux-bold/italic if needed.
+   If specific bold files were available, they would be added here. */
+
+@font-face {
+    font-family: 'AdwaitaMono';
+    src: url('../fonts/mono/AdwaitaMono-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'AdwaitaMono';
+    src: url('../fonts/mono/AdwaitaMono-Italic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'AdwaitaMono';
+    src: url('../fonts/mono/AdwaitaMono-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'AdwaitaMono';
+    src: url('../fonts/mono/AdwaitaMono-BoldItalic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+:root {
+    --document-font-family: 'AdwaitaSans', 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --monospace-font-family: 'AdwaitaMono', 'Monaco', 'Menlo', 'Courier New', monospace;
+}
+
 
 /* Accent Color Overrides */
 /* :root is equivalent to html but with higher specificity for overrides if needed */
