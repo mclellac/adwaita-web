@@ -1,120 +1,93 @@
-# Entry
+# Entry CSS Styling (Adwaita Skin)
 
-Entries are input fields that allow users to enter a single line of text. Adwaita-Web provides `Adw.createEntry()` for JavaScript creation and the `<adw-entry>` Web Component.
+Entries are input fields that allow users to enter a single line of text. Adwaita Skin provides CSS classes to style standard HTML `<input>` elements (and potentially `<textarea>` for multi-line, though specific textarea styling might need verification) to look like Adwaita entries.
 
-For multi-line text input, a standard `<textarea>` styled appropriately or a custom component would be used.
+## HTML Structure and CSS Classes
 
-## JavaScript Factory: `Adw.createEntry()`
+To style an HTML `<input>` element as an Adwaita entry, apply the base class `adw-entry`.
 
-Creates an Adwaita-styled text entry field.
+**Basic Text Entry:**
 
-**Signature:**
+```html
+<input type="text" class="adw-entry" placeholder="Enter text here...">
+```
+
+**Supported Input Types:**
+
+The `.adw-entry` class can be applied to various `<input>` types, and the browser's default appearance for that type will be styled:
+*   `type="text"`
+*   `type="password"`
+*   `type="email"`
+*   `type="search"`
+*   `type="url"`
+*   `type="tel"`
+*   `type="number"` (Note: for more styled number input with steppers, see SpinButton styling if available)
+
+```html
+<input type="password" class="adw-entry" placeholder="Password">
+<input type="search" class="adw-entry" placeholder="Search...">
+```
+
+## Modifier Classes and States
+
+*   `.disabled` or `disabled` attribute: To make an entry appear and behave as disabled.
+    ```html
+    <input type="text" class="adw-entry" value="Cannot edit" disabled>
+    <input type="text" class="adw-entry disabled" value="CSS Disabled">
+    ```
+    *Note: Using the `disabled` attribute on the `<input>` element is standard and preferred.*
+
+*   Focus State: Entries will typically show a focus ring (often using the accent color) when they are focused by the user. This is handled by `:focus` or `:focus-visible` pseudo-classes in the CSS.
+
+*   Placeholder text is styled according to Adwaita guidelines.
+
+## Examples
+
+**Simple Text Entry:**
+```html
+<div>
+  <label for="username-entry">Username:</label>
+  <input type="text" id="username-entry" class="adw-entry" name="username" placeholder="e.g., jdoe">
+</div>
+```
+
+**Password Entry:**
+```html
+<div>
+  <label for="password-entry">Password:</label>
+  <input type="password" id="password-entry" class="adw-entry" name="password" placeholder="Enter your password">
+</div>
+```
+
+**Search Entry:**
+Some Adwaita themes might have specific styling for search entries (e.g., rounded corners, embedded search icon). Check `adwaita-web/examples/` or `scss/_entry.scss` if specific search variants are available via additional classes.
+```html
+<input type="search" class="adw-entry" placeholder="Search items...">
+```
+
+## Styling & Theming
+
+*   **SCSS Source:** `scss/_entry.scss`
+*   **CSS Variables:** Entry styles are influenced by general theme variables from `scss/_variables.scss` (e.g., for background color, text color, border color, focus outline color).
+    *   `--entry-bg-color` (or general `--view-bg-color`)
+    *   `--entry-fg-color` (or general `--view-fg-color`)
+    *   `--entry-border-color` (or general `--borders-color`)
+    *   `--entry-focus-border-color` (often related to `--accent-color`)
+    *   `--entry-placeholder-color`
+
+Refer to `scss/_variables.scss` and `scss/_entry.scss` for a full list of CSS variables that can be used for customization.
+
+## Interactivity
+
+All entry-related logic (e.g., reading values, validation, handling `input` or `change` events) must be implemented with your own JavaScript. Adwaita Skin only provides the visual styling.
 
 ```javascript
-Adw.createEntry(options = {}) -> HTMLInputElement
+// Example: Getting the value of an entry
+const usernameInput = document.getElementById('username-entry');
+usernameInput.addEventListener('input', function() {
+  console.log('Username changed to:', usernameInput.value);
+});
 ```
-
-**Parameters:**
-
-*   `options` (Object, optional): Configuration options:
-    *   `placeholder` (String, optional): Placeholder text to display when the entry is empty.
-    *   `value` (String, optional): Initial value for the entry.
-    *   `onInput` (Function, optional): Callback function executed when the `input` event occurs on the entry.
-    *   `disabled` (Boolean, optional): If `true`, disables the entry. Defaults to `false`.
-    *   `name` (String, optional): The `name` attribute for the input element, useful for forms.
-    *   `type` (String, optional): The `type` attribute for the input element (e.g., "text", "password", "email", "search"). Defaults to "text".
-
-**Returns:**
-
-*   `(HTMLInputElement)`: The created `<input>` element.
-
-**Example:**
-
-```html
-<div id="js-entry-container" style="display: flex; flex-direction: column; gap: 10px; max-width: 300px;"></div>
-<script>
-  const container = document.getElementById('js-entry-container');
-
-  // Simple text entry
-  const nameEntry = Adw.createEntry({
-    placeholder: "Enter your name",
-    name: "username"
-  });
-  container.appendChild(Adw.createLabel("Name:", {for: nameEntry.id || undefined})); // Assuming id might be auto-generated
-  container.appendChild(nameEntry);
-
-  // Password entry
-  const passwordEntry = Adw.createEntry({
-    placeholder: "Enter password",
-    type: "password",
-    name: "password"
-  });
-  container.appendChild(Adw.createLabel("Password:"));
-  container.appendChild(passwordEntry);
-  passwordEntry.addEventListener('input', (event) => {
-    console.log("Password input:", event.target.value);
-  });
-
-
-  // Disabled entry with initial value
-  const disabledEntry = Adw.createEntry({
-    value: "Cannot change this",
-    disabled: true
-  });
-  container.appendChild(Adw.createLabel("Disabled:"));
-  container.appendChild(disabledEntry);
-</script>
-```
-
-## Web Component: `<adw-entry>`
-
-A declarative way to use Adwaita text entry fields.
-
-**HTML Tag:** `<adw-entry>`
-
-**Attributes:**
-
-*   `placeholder` (String, optional): Placeholder text.
-*   `value` (String, optional): Initial value. Can be dynamically updated.
-*   `disabled` (Boolean, optional): Disables the entry.
-*   `name` (String, optional): The `name` attribute for the input, useful in forms.
-*   `type` (String, optional): The input type (e.g., "text", "password", "email", "search"). Defaults to "text".
-*   `required` (Boolean, optional): Standard HTML `required` attribute.
-
-**Properties:**
-
-*   `value`: Gets or sets the current value of the entry.
-
-**Events:**
-
-*   Standard input events like `input`, `change`, `focus`, `blur` can be listened to.
-
-**Example:**
-
-```html
-<div style="display: flex; flex-direction: column; gap: 10px; max-width: 300px;">
-  <label for="wc-name">Name (WC):</label>
-  <adw-entry id="wc-name" placeholder="Your Full Name" name="fullname"></adw-entry>
-
-  <label for="wc-email">Email (WC):</label>
-  <adw-entry id="wc-email" type="email" placeholder="user@example.com" name="email_address" required></adw-entry>
-
-  <adw-entry value="Initial Value" disabled></adw-entry>
-</div>
-
-<script>
-  const wcNameEntry = document.getElementById('wc-name');
-  wcNameEntry.addEventListener('input', () => {
-    console.log("WC Name Entry value:", wcNameEntry.value);
-  });
-</script>
-```
-
-## Styling
-
-*   Primary SCSS: `scss/_entry.scss`
-*   Variables: Uses general theme variables from `scss/_variables.scss` (e.g., `--view-bg-color`, `--view-fg-color`, `--borders-color`, `--accent-bg-color` for focus outline).
-*   Focus styling is typically an outline using the accent color.
 
 ---
-Next: [HeaderBar](./headerbar.md)
+Next: [ListBox CSS Styling](./listbox.md)

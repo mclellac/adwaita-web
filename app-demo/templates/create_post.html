@@ -3,78 +3,83 @@
 {% block title %}Create New Post{% endblock %}
 
 {% block content %}
-<div class="adw-clamp content-clamp">
-  <div class="adw-preferences-page">
-    <header class="adw-preferences-page__header">
-      <h1 class="adw-preferences-page__title">Create New Post</h1>
+<div class="form-container"> {# Replaced adw-clamp and content-clamp #}
+  <div class="adw-preferences-page"> {# This can be kept for overall page structure if desired #}
+    <header class="adw-preferences-page__header" style="text-align: center; margin-bottom: var(--spacing-l);">
+      <h1 class="adw-title-1">Create New Post</h1> {# Changed to adw-title-1 #}
     </header>
-    <form method="POST" action="{{ url_for('create_post') }}" novalidate>
+    <form method="POST" action="{{ url_for('create_post') }}" novalidate class="stacked-form">
         {{ form.hidden_tag() }} {# CSRF token #}
 
-        <div class="adw-preferences-group" role="group" aria-labelledby="post-details-title">
-            <div class="adw-preferences-group__title-container">
-                <h3 class="adw-preferences-group__title title-3" id="post-details-title">Post Details</h3>
-            </div>
+        <section class="adw-list-box form-section"> {# Using list-box for sections #}
+            <header class="adw-list-box-header">
+                <h3 class="adw-title-2" id="post-details-title">Post Details</h3> {# Changed from preferences-group title #}
+            </header>
 
             {# Title Entry Row #}
             <div class="adw-entry-row {{ 'has-error' if form.title.errors else '' }}">
-                <label for="{{ form.title.id or 'title_input' }}" class="adw-entry-row__title">{{ form.title.label.text }}</label>
-                <div class="adw-entry-row-text-content"> {# This div is for subtitle/errors, input goes after title #}
-                    {% if form.title.errors %}<span class="adw-entry-row__subtitle error-text">{{ form.title.errors|join(' ') }}</span>{% endif %}
-                </div>
-                <input type="text" id="{{ form.title.id or 'title_input' }}" name="{{ form.title.name }}" value="{{ form.title.data or '' }}" class="adw-entry row-input" placeholder="Enter post title" {% if form.title.flags.required %}required{% endif %}>
+                <label for="{{ form.title.id or 'title_input' }}" class="adw-entry-row-title">{{ form.title.label.text }}</label>
+                <input type="text" id="{{ form.title.id or 'title_input' }}" name="{{ form.title.name }}" value="{{ form.title.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Enter post title" {% if form.title.flags.required %}required{% endif %}>
             </div>
+            {% if form.title.errors %}
+            <div class="adw-row form-field-error">
+                <span class="adw-label caption error-text">{{ form.title.errors|join(' ') }}</span>
+            </div>
+            {% endif %}
 
-            {# Content Textarea in Expander Row #}
-            {# For simplicity and because it's primary, not using expander for content on create form #}
-            <div class="adw-preferences-group" role="group" aria-labelledby="content-title">
-                 <div class="adw-preferences-group__title-container">
-                    <h3 class="adw-preferences-group__title title-3" id="content-title">{{ form.content.label.text }}</h3>
-                     {% if form.content.errors %}<div class="error-text form-field-error">{{ form.content.errors|join(' ') }}</div>{% endif %}
-                </div>
-                <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-textarea content-textarea" rows="15" placeholder="Enter your post content here...">{{ form.content.data or '' }}</textarea>
-            </div>
-        </div>
-
-        <div class="adw-preferences-group" role="group" aria-labelledby="categories-title">
-            <div class="adw-preferences-group__title-container">
-                <h3 class="adw-preferences-group__title title-3" id="categories-title">{{ form.categories.label.text }}</h3>
-            </div>
-            <div class="adw-list-box {{ 'has-error' if form.categories.errors else '' }}">
-                {% for subfield in form.categories %}
-                <div class="adw-action-row adw-checkbox-row">
-                    <div class="adw-action-row__text checkbox-label-container">
-                        {{ subfield(class="adw-checkbox") }}
-                        {{ subfield.label(class="adw-label category-checkbox-label") }}
-                    </div>
-                </div>
-                {% endfor %}
-                {% if form.categories.errors %}
-                <div class="adw-action-row error-row">
-                    <span class="adw-action-row__subtitle error-text">{{ form.categories.errors|join('; ') }}</span>
+            {# Content Textarea #}
+            <div class="form-field-row {{ 'has-error' if form.content.errors else '' }}" style="margin-top: var(--spacing-s);">
+                <label for="{{ form.content.id or 'content_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
+                <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-entry adw-textarea" rows="10" placeholder="Enter your post content here...">{{ form.content.data or '' }}</textarea>
+                {% if form.content.errors %}
+                <div class="form-field-error" style="margin-top: var(--spacing-xs);">
+                    <span class="adw-label caption error-text">{{ form.content.errors|join(' ') }}</span>
                 </div>
                 {% endif %}
             </div>
-        </div>
+        </section>
 
-        <div class="adw-preferences-group" role="group" aria-labelledby="tags-title">
-            <div class="adw-preferences-group__title-container">
-                <h3 class="adw-preferences-group__title title-3" id="tags-title">Tags</h3>
-            </div>
-            <div class="adw-entry-row {{ 'has-error' if form.tags_string.errors else '' }}">
-                <label for="{{ form.tags_string.id or 'tags_input' }}" class="adw-entry-row__title">{{ form.tags_string.label.text }}</label>
-                <div class="adw-entry-row-text-content">
-                    <span class="adw-entry-row__subtitle">
-                        {% if form.tags_string.errors %} <span class="error-text">{{ form.tags_string.errors|join(' ') }}</span>
-                        {% else %} Comma-separated values.
-                        {% endif %}
-                    </span>
+        <section class="adw-list-box form-section">
+            <header class="adw-list-box-header">
+                <h3 class="adw-title-2" id="categories-title">{{ form.categories.label.text }}</h3>
+            </header>
+            <div class="checkbox-list {{ 'has-error' if form.categories.errors else '' }}">
+                {% for subfield in form.categories %}
+                <div class="adw-row checkbox-list-item"> {# Simpler row for checkboxes #}
+                    <label class="adw-checkbox-wrapper">
+                        {{ subfield(class="adw-checkbox") }}
+                        <span class="adw-label">{{ subfield.label.text }}</span>
+                    </label>
                 </div>
-                <input type="text" id="{{ form.tags_string.id or 'tags_input' }}" name="{{ form.tags_string.name }}" value="{{ form.tags_string.data or '' }}" class="adw-entry row-input" placeholder="e.g., tech, travel, food">
+                {% endfor %}
             </div>
-        </div>
+            {% if form.categories.errors %}
+            <div class="adw-row form-field-error">
+                <span class="adw-label caption error-text">{{ form.categories.errors|join('; ') }}</span>
+            </div>
+            {% endif %}
+        </section>
 
-        <div class="form-actions-container">
+        <section class="adw-list-box form-section">
+             <header class="adw-list-box-header">
+                <h3 class="adw-title-2" id="tags-title">Tags</h3>
+            </header>
+            <div class="adw-entry-row {{ 'has-error' if form.tags_string.errors else '' }}">
+                <label for="{{ form.tags_string.id or 'tags_input' }}" class="adw-entry-row-title">{{ form.tags_string.label.text }}</label>
+                <input type="text" id="{{ form.tags_string.id or 'tags_input' }}" name="{{ form.tags_string.name }}" value="{{ form.tags_string.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="e.g., tech, travel, food">
+            </div>
+            {% if form.tags_string.errors %}
+            <div class="adw-row form-field-error">
+                <span class="adw-label caption error-text">{{ form.tags_string.errors|join(' ') }}</span>
+            </div>
+            {% else %}
+            <div class="adw-row form-field-description">
+                 <span class="adw-label caption">Comma-separated values.</span>
+            </div>
+            {% endif %}
+        </section>
+
+        <div class="form-actions-container" style="margin-top: var(--spacing-l); display: flex; justify-content: flex-end; gap: var(--spacing-s);">
             {{ form.save_draft(class="adw-button") }}
             {{ form.publish(class="adw-button suggested-action") }}
         </div>

@@ -1,6 +1,14 @@
-# Adwaita-Web Widgets
+# Adwaita Skin - Styled HTML Elements
 
-This section provides detailed documentation for individual Adwaita-Web widgets. Each widget page covers its JavaScript factory function, Web Component usage, styling details, and examples.
+This section provides documentation for applying Adwaita Skin CSS classes to standard HTML elements to achieve the appearance of various Adwaita widgets. Each page aims to detail the necessary HTML structure and the specific CSS classes required.
+
+**Important Note:** This documentation is currently being updated to reflect the pure CSS nature of Adwaita Skin. Many of the individual pages listed below may still contain outdated information referring to JavaScript APIs or Web Components, which are no longer part of Adwaita Skin.
+
+For the most accurate and current usage, especially for pages not yet explicitly updated:
+1.  Refer to the HTML structure and CSS classes used in the example files in the `adwaita-web/examples/` directory.
+2.  Consult the SCSS files in `adwaita-web/scss/` to understand how styles are defined and which classes are available (e.g., `_button.scss`, `_listbox.scss`).
+
+Adwaita Skin is a **pure CSS library**. All interactivity must be implemented using your own JavaScript. The documentation will focus on the HTML and CSS needed for styling.
 
 ## Available Widgets
 
