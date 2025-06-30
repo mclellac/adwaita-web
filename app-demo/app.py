@@ -719,6 +719,36 @@ def create_app(config_overrides=None):
                         _app.logger.debug(f"Image thumbnail generated. Size: {img.size}")
                         img.save(save_path)
                         _app.logger.info(f"Profile photo for {current_user.username} saved to {save_path}")
+
+                        # Delete old photo if it exists
+                        if current_user.profile_photo_url:
+                            old_photo_path_rel = current_user.profile_photo_url
+                            # Construct absolute path carefully. Assuming UPLOAD_FOLDER is relative to app root or an absolute path.
+                            # For app-demo, UPLOAD_FOLDER is 'app-demo/static/uploads/profile_pics'
+                            # and profile_photo_url is 'uploads/profile_pics/filename.ext'
+                            # So, the base for relative path is 'app-demo/static'
+                            # This needs to be robust. Assuming app.root_path is the project root.
+                            # Let's assume profile_photo_url is relative to the 'static' folder.
+                            # A safer way: current_user.profile_photo_url is 'uploads/profile_pics/filename.ext'
+                            # UPLOAD_FOLDER is 'app-demo/static/uploads/profile_pics'
+                            # We need the filename part from old_photo_path_rel
+                            old_filename = os.path.basename(old_photo_path_rel)
+                            old_photo_abs_path = os.path.join(_app.config['UPLOAD_FOLDER'], old_filename)
+
+                            # Check if the constructed path is still within the UPLOAD_FOLDER to prevent path traversal issues.
+                            # This is a basic check. A more robust check would involve os.path.realpath and comparison.
+                            if os.path.commonprefix((os.path.realpath(old_photo_abs_path), os.path.realpath(_app.config['UPLOAD_FOLDER']))) == os.path.realpath(_app.config['UPLOAD_FOLDER']):
+                                if os.path.exists(old_photo_abs_path):
+                                    try:
+                                        os.remove(old_photo_abs_path)
+                                        _app.logger.info(f"Old profile photo {old_photo_abs_path} deleted for user {current_user.username}.")
+                                    except OSError as oe:
+                                        _app.logger.error(f"Error deleting old profile photo {old_photo_abs_path}: {oe}", exc_info=True)
+                                else:
+                                    _app.logger.warning(f"Old profile photo {old_photo_abs_path} not found for deletion.")
+                            else:
+                                _app.logger.error(f"Security: Attempt to delete file outside upload folder blocked: {old_photo_abs_path}")
+
                         current_user.profile_photo_url = os.path.join('uploads/profile_pics', unique_filename)
                         photo_saved_successfully = True
                     except Exception as e:

@@ -32,7 +32,7 @@
       // For accent colors, Adwaita CSS typically handles this via body classes like accent-blue, accent-green etc.
       // The following is a conceptual way to apply it if the CSS is structured for it.
       // Ensure your adwaita-skin.css has rules for .accent-blue, .accent-red etc. on body or html.
-      const validAccents = ['blue', 'green', 'yellow', 'orange', 'red', 'purple', 'brown'];
+      const validAccents = ['default', 'blue', 'green', 'yellow', 'orange', 'red', 'purple', 'pink']; // Updated list
       let accentClassFound = false;
       document.documentElement.classList.forEach(cls => {
         if (cls.startsWith('accent-')) {

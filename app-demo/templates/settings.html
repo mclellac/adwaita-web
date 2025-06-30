@@ -2,31 +2,40 @@
 
 {% block title %}Settings - {{ super() }}{% endblock %}
 
-{% block headerbar %}
-<adw-header-bar>
-    <adw-window-title slot="title" title="Settings"></adw-window-title>
-    <adw-button slot="start" icon-name="go-previous-symbolic" href="{{ url_for('index') }}" aria-label="Back to Home"></adw-button>
-</adw-header-bar>
-{% endblock %}
+{# The headerbar is already in base.html, this specific one can be simplified or removed if base.html's is sufficient #}
+{# For now, let's assume base.html handles the main header, and this content block is for the page content itself #}
 
 {% block content %}
-<adw-preferences-view>
-    <adw-preferences-page title="Settings">
+<div class="adw-preferences-page" role="main">
+    <header class="adw-preferences-page__header">
+        <h1 class="adw-preferences-page__title">Settings</h1>
+    </header>
 
-        <adw-preferences-group title="Appearance">
-            <adw-combo-row id="theme-combo-row" title="Theme" subtitle="Select your preferred interface theme">
-                <select slot="suffix" name="theme">
+    <section class="adw-preferences-group" aria-labelledby="appearance-group-title">
+        <div class="adw-preferences-group__title-container">
+            <h2 class="adw-preferences-group__title" id="appearance-group-title">Appearance</h2>
+        </div>
+        <div class="adw-list-box"> {# Rows are typically within a list-box for borders etc. #}
+            <div class="adw-combo-row" id="theme-combo-row">
+                <div class="adw-combo-row-text-content">
+                    <span class="adw-combo-row-title">Theme</span>
+                    <span class="adw-combo-row-subtitle">Select your preferred interface theme</span>
+                </div>
+                <select name="theme" class="adw-combo-row-select">
                     {% set current_theme = current_user.theme or 'system' %}
                     <option value="system" {% if current_theme == 'system' %}selected{% endif %}>System Default</option>
                     <option value="light" {% if current_theme == 'light' %}selected{% endif %}>Light</option>
                     <option value="dark" {% if current_theme == 'dark' %}selected{% endif %}>Dark</option>
                 </select>
-            </adw-combo-row>
+            </div>
 
-            <adw-combo-row id="accent-color-combo-row" title="Accent Color" subtitle="Choose a site-wide accent color">
-                <select slot="suffix" name="accent_color">
+            <div class="adw-combo-row" id="accent-color-combo-row">
+                <div class="adw-combo-row-text-content">
+                    <span class="adw-combo-row-title">Accent Color</span>
+                    <span class="adw-combo-row-subtitle">Choose a site-wide accent color</span>
+                </div>
+                <select name="accent_color" class="adw-combo-row-select">
                     {% set current_accent = current_user.accent_color or 'default' %}
-                    {# These values should align with what Adw.setAccentColor() expects #}
                     <option value="default" {% if current_accent == 'default' %}selected{% endif %}>Default (Blue)</option>
                     <option value="green" {% if current_accent == 'green' %}selected{% endif %}>Green</option>
                     <option value="orange" {% if current_accent == 'orange' %}selected{% endif %}>Orange</option>
@@ -35,16 +44,33 @@
                     <option value="yellow" {% if current_accent == 'yellow' %}selected{% endif %}>Yellow</option>
                     <option value="pink" {% if current_accent == 'pink' %}selected{% endif %}>Pink</option>
                 </select>
-            </adw-combo-row>
-        </adw-preferences-group>
+            </div>
+        </div>
+    </section>
 
-        <adw-preferences-group title="Account">
-            <adw-action-row title="Change Password" subtitle="Update your account password" href="{{ url_for('change_password_page') }}" activatable></adw-action-row>
-            <adw-action-row title="Logout" subtitle="Sign out of your account" href="{{ url_for('logout') }}" activatable class="destructive-action"></adw-action-row>
-        </adw-preferences-group>
+    <section class="adw-preferences-group" aria-labelledby="account-group-title">
+        <div class="adw-preferences-group__title-container">
+            <h2 class="adw-preferences-group__title" id="account-group-title">Account</h2>
+        </div>
+        <div class="adw-list-box">
+            <a href="{{ url_for('change_password_page') }}" class="adw-action-row activatable">
+                <div class="adw-action-row__text">
+                    <span class="adw-action-row__title">Change Password</span>
+                    <span class="adw-action-row__subtitle">Update your account password</span>
+                </div>
+                <span class="adw-action-row__chevron"></span>
+            </a>
+            <a href="{{ url_for('logout') }}" class="adw-action-row activatable destructive-action">
+                <div class="adw-action-row__text">
+                    <span class="adw-action-row__title">Logout</span>
+                    <span class="adw-action-row__subtitle">Sign out of your account</span>
+                </div>
+                <span class="adw-action-row__chevron"></span>
+            </a>
+        </div>
+    </section>
 
-    </adw-preferences-page>
-</adw-preferences-view>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -56,67 +82,69 @@ document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
     if (themeComboRow) {
-        const themeSelect = themeComboRow.querySelector('select');
-        themeSelect.addEventListener('change', function() {
-            const newTheme = this.value;
-            console.log('Theme changed to:', newTheme);
-            // Removed: Adw.setTheme(newTheme); - base.html handles class changes on reload
+        const themeSelect = themeComboRow.querySelector('select.adw-combo-row-select');
+        if (themeSelect) {
+            themeSelect.addEventListener('change', function() {
+                const newTheme = this.value;
+                console.log('Theme changed to:', newTheme);
 
-            if (csrfToken) {
-                fetch("{{ url_for('save_theme_preference') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify({ theme: newTheme })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Theme save response:', data);
-                    if (data.message) alert(data.message);
-                    if (data.status === 'success') {
-                        location.reload(); // Reload to apply theme changes via base.html script
-                    }
-                })
-                .catch(error => {
-                    console.error('Error saving theme:', error);
-                    alert('Error saving theme preference.');
-                });
-            }
-        });
+                if (csrfToken) {
+                    fetch("{{ url_for('save_theme_preference') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ theme: newTheme })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Theme save response:', data);
+                        if (data.message && data.status !== 'success') alert(data.message); // Show alert only on error
+                        if (data.status === 'success') {
+                            location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving theme:', error);
+                        alert('Error saving theme preference.');
+                    });
+                }
+            });
+        }
     }
 
     if (accentComboRow) {
-        const accentSelect = accentComboRow.querySelector('select');
-        accentSelect.addEventListener('change', function() {
-            const newAccent = this.value;
-            console.log('Accent color changed to:', newAccent);
-            // Removed: Adw.setAccentColor(newAccent); - base.html handles class changes on reload
+        const accentSelect = accentComboRow.querySelector('select.adw-combo-row-select');
+        if (accentSelect) {
+            accentSelect.addEventListener('change', function() {
+                const newAccent = this.value;
+                console.log('Accent color changed to:', newAccent);
 
-            if (csrfToken) {
-                fetch("{{ url_for('save_accent_color_preference') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify({ accent_color: newAccent })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Accent save response:', data);
-                    if (data.message) alert(data.message);
-                    if (data.status === 'success') {
-                        location.reload(); // Reload to apply accent changes via base.html script
-                    }
-                })
-                .catch(error => {
-                    console.error('Error saving accent color:', error);
-                    alert('Error saving accent color preference.');
-                });
-            }
-        });
+                if (csrfToken) {
+                    fetch("{{ url_for('save_accent_color_preference') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ accent_color: newAccent })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Accent save response:', data);
+                        if (data.message && data.status !== 'success') alert(data.message);
+                        if (data.status === 'success') {
+                            location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving accent color:', error);
+                        alert('Error saving accent color preference.');
+                    });
+                }
+            });
+        }
     }
 });
 </script>
