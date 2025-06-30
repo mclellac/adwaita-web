@@ -380,7 +380,29 @@ $accent-color-definitions-map: (
     --list-row-hover-bg-color: #{rgba($adw-light-1, 0.06)}; // Similar to flat button hover dark
     --list-row-active-bg-color: #{rgba($adw-light-1, 0.10)}; // Similar to flat button active dark
 
-    // TODO: Add specific accent color variable overrides for dark theme if Adw.js logic for this is removed
+    // Specific accent color variable overrides for dark theme
+    @each $name, $themes in $accent-color-definitions-map {
+      &.accent-#{$name} {
+        $accent-dark: map-get($themes, dark);
+        --accent-color: #{map-get($accent-dark, color)};
+        --accent-bg-color: #{map-get($accent-dark, bg)};
+        --accent-fg-color: #{map-get($accent-dark, fg)};
+        --accent-bg-hover-color: #{map-get($accent-dark, hover)};
+        --accent-bg-active-color: #{map-get($accent-dark, active)};
+      }
+    }
+  }
+
+  // Specific accent color variable overrides for light theme (when .accent-color class is present)
+  @each $name, $themes in $accent-color-definitions-map {
+    &.accent-#{$name}:not(.theme-dark) { // Apply only if not also theme-dark
+      $accent-light: map-get($themes, light);
+      --accent-color: #{map-get($accent-light, color)};
+      --accent-bg-color: #{map-get($accent-light, bg)};
+      --accent-fg-color: #{map-get($accent-light, fg)};
+      --accent-bg-hover-color: #{map-get($accent-light, hover)};
+      --accent-bg-active-color: #{map-get($accent-light, active)};
+    }
   }
 }
 
