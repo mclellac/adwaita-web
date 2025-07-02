@@ -630,8 +630,8 @@ def create_app(config_overrides=None):
     _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
     rendered_template = render_template('edit_post.html', form=form, post=post, delete_form=delete_form)
     _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
-        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
-        return rendered_template
+    _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+    return rendered_template
 
     @_app.route('/login', methods=['GET', 'POST'])
     def login():
