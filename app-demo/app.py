@@ -17,6 +17,7 @@ import uuid
 import bleach
 import urllib.parse
 import re # For robust slugify
+from markupsafe import Markup # For escaping JS
 
 # Globally defined extensions, to be initialized with an app instance
 db = SQLAlchemy()
@@ -268,6 +269,28 @@ def create_app(config_overrides=None):
             s = s.unescape()
         s = str(s)
         return urllib.parse.quote_plus(s)
+
+    @_app.template_filter('escapejs')
+    def escapejs_filter(value):
+        """Escape strings for use in JavaScript string literals."""
+        if value is None:
+            return ''
+        if not isinstance(value, str):
+            value = str(value)
+
+        # Basic escaping for common problematic characters in JS strings.
+        # This is not exhaustive for all contexts but covers typical needs for confirm dialogs.
+        # Using markupsafe.Markup to ensure Jinja2 doesn't re-escape it if autoescape is on.
+        escaped = value.replace('\\', '\\\\')  # Must be first
+        escaped = escaped.replace("'", "\\'")
+        escaped = escaped.replace('"', '\\"')
+        escaped = escaped.replace('\n', '\\n')
+        escaped = escaped.replace('\r', '\\r')
+        escaped = escaped.replace('/', '\\/') # Often good to escape for <script> tags, though not strictly needed for confirm()
+        # For truly robust JS escaping, especially for complex data or inline event handlers,
+        # consider a library or more comprehensive escaping.
+        # For now, this handles the immediate issue in the confirm dialog.
+        return Markup(escaped)
 
     @_app.context_processor
     def inject_global_template_variables():
