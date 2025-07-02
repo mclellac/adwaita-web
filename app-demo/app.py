@@ -384,6 +384,10 @@ def create_app(config_overrides=None):
             )
         }
 
+    @_app.context_processor
+    def inject_current_year():
+        return {'current_year': datetime.now(timezone.utc).year}
+
     @_app.route('/')
     def index():
         _app.logger.info(
@@ -597,19 +601,19 @@ def create_app(config_overrides=None):
             can_delete = False
             if comment.author == current_user:
                 _app.logger.debug(
-                    f"User {current_user.username} is the author of comment {comment_id}. "
+                    f"User {current_user.username} is author of comment {comment_id}. "
                     f"Allowing delete."
                 )
                 can_delete = True
             elif comment.post.author == current_user:
                 _app.logger.debug(
-                    f"User {current_user.username} is the author of post {post_id}. "
+                    f"User {current_user.username} is author of post {post_id}. "
                     f"Allowing delete of comment {comment_id}."
                 )
                 can_delete = True
             if not can_delete:
                 _app.logger.warning(
-                    f"User {current_user.username} is not authorized to delete "
+                    f"User {current_user.username} not authorized to delete "
                     f"comment {comment_id}. Author: {comment.author.username}, "
                     f"Post Author: {comment.post.author.username}."
                 )
@@ -638,7 +642,8 @@ def create_app(config_overrides=None):
                 f"Errors: {delete_form.errors}"
             )
             flash(
-                'Failed to delete comment. Invalid request or session expired.', 'danger'
+                'Failed to delete comment. Invalid request or session expired.',
+                'danger'
             )
             comment_for_redirect = Comment.query.get(comment_id)
             if comment_for_redirect:
@@ -711,7 +716,7 @@ def create_app(config_overrides=None):
                 for key, value in request.form.items()
             }
             _app.logger.debug(
-                f"[FORM_SUBMISSION] Create post form submitted by {current_user.username}. "
+                f"[FORM_SUBMISSION] Create post form by {current_user.username}. "
                 f"Data (truncated): {log_form_data}"
             )
         if form.validate_on_submit():
@@ -722,7 +727,10 @@ def create_app(config_overrides=None):
                 f"{len(raw_content)}"
             )
             content = bleach.clean(
-                raw_content, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True
+                raw_content,
+                tags=ALLOWED_TAGS,
+                attributes=ALLOWED_ATTRIBUTES,
+                strip=True
             )
             _app.logger.debug(f"Sanitized content length for new post: {len(content)}")
             is_published_intent = form.publish.data
@@ -738,13 +746,13 @@ def create_app(config_overrides=None):
                 if is_published_intent:
                     new_post.published_at = datetime.now(timezone.utc)
                     _app.logger.info(
-                        f"Post '{title}' by {current_user.username} will be published at "
-                        f"{new_post.published_at}."
+                        f"Post '{title}' by {current_user.username} to be published "
+                        f"at {new_post.published_at}."
                     )
                 else:
                     new_post.published_at = None
                     _app.logger.info(
-                        f"Post '{title}' by {current_user.username} will be saved as a draft."
+                        f"Post '{title}' by {current_user.username} saved as draft."
                     )
                 db.session.add(new_post)
                 _update_post_relations(new_post, form, db.session)
@@ -767,12 +775,12 @@ def create_app(config_overrides=None):
                     f"(publish intent: {is_published_intent}): {e}", exc_info=True
                 )
                 flash(
-                    f'Error creating post: Could not save to database. Details: {str(e)}',
+                    f'Error creating post: DB save failed. Details: {str(e)}',
                     'danger'
                 )
         elif request.method == 'POST':
             _app.logger.warning(
-                f"Post creation form validation failed for user {current_user.username}. "
+                f"Post creation form validation failed for {current_user.username}. "
                 f"Errors: {form.errors}"
             )
             flash(
@@ -800,8 +808,9 @@ def create_app(config_overrides=None):
         return rendered_template
 
     def _update_post_relations(post_instance, form, db_session):
+        post_id_str = str(post_instance.id) if post_instance.id else 'NEW'
         _app.logger.debug(
-            f"Updating relations for post ID: {post_instance.id if post_instance.id else 'NEW'}"
+            f"Updating relations for post ID: {post_id_str}"
         )
         selected_categories = form.categories.data
         _app.logger.debug(
@@ -828,7 +837,7 @@ def create_app(config_overrides=None):
                     tag = Tag(name=tag_name)
                     db_session.add(tag)
                 else:
-                    _app.logger.debug(f"Found existing tag '{tag.name}' (ID: {tag.id}).")
+                    _app.logger.debug(f"Found tag '{tag.name}' (ID: {tag.id}).")
                 post_instance.tags.append(tag)
                 _app.logger.debug(f"Associated tag '{tag.name}' with post.")
         else:
@@ -848,8 +857,8 @@ def create_app(config_overrides=None):
         )
         if post.author != current_user:
             _app.logger.warning(
-                f"User {current_user.username} is not authorized to delete post {post_id} "
-                f"(Author: {post.author.username}). Aborting with 403."
+                f"User {current_user.username} not authorized to delete post "
+                f"{post_id} (Author: {post.author.username}). Aborting with 403."
             )
             abort(403)
         try:
@@ -863,7 +872,7 @@ def create_app(config_overrides=None):
         except Exception as e:
             db.session.rollback()
             _app.logger.error(
-                f"Error deleting post ID: {post_id} by user {current_user.username}: {e}",
+                f"Error deleting post ID {post_id} by {current_user.username}: {e}",
                 exc_info=True
             )
             flash('Error deleting post. Please try again.', 'danger')
@@ -883,8 +892,8 @@ def create_app(config_overrides=None):
 
         if post.author != current_user:
             _app.logger.warning(
-                f"User {current_user.username} is not authorized to edit post {post_id} "
-                f"(Author: {post.author.username}). Aborting with 403."
+                f"User {current_user.username} not authorized to edit post "
+                f"{post_id} (Author: {post.author.username}). Aborting with 403."
             )
             abort(403)
 
@@ -893,7 +902,8 @@ def create_app(config_overrides=None):
 
         if form.validate_on_submit():
             _app.logger.info(
-                f"User {current_user.username} updating post '{post.title}' (ID: {post_id})."
+                f"User {current_user.username} updating post '{post.title}' "
+                f"(ID: {post_id})."
             )
             post.title = form.title.data
             raw_content = form.content.data
@@ -901,10 +911,13 @@ def create_app(config_overrides=None):
                 f"Raw content length for edited post {post_id}: {len(raw_content)}"
             )
             post.content = bleach.clean(
-                raw_content, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True
+                raw_content,
+                tags=ALLOWED_TAGS,
+                attributes=ALLOWED_ATTRIBUTES,
+                strip=True
             )
             _app.logger.debug(
-                f"Sanitized content length for edited post {post_id}: {len(post.content)}"
+                f"Sanitized content length for post {post_id}: {len(post.content)}"
             )
             is_published_intent = form.publish.data
             _app.logger.info(
@@ -921,14 +934,14 @@ def create_app(config_overrides=None):
             else:
                 post.published_at = None
                 _app.logger.info(
-                    f"Post {post_id} is being saved as a draft. Cleared/nulled published_at."
+                    f"Post {post_id} saved as draft. Cleared/nulled published_at."
                 )
             _update_post_relations(post, form, db.session)
             try:
                 db.session.commit()
                 _app.logger.info(
-                    f"Post ID: {post.id} ('{post.title}', Published: {post.is_published}) "
-                    f"updated successfully by {current_user.username}."
+                    f"Post ID {post.id} ('{post.title}', Pub: {post.is_published}) "
+                    f"updated by {current_user.username}."
                 )
                 if post.is_published:
                     flash('Post updated and published successfully!', 'success')
@@ -939,7 +952,7 @@ def create_app(config_overrides=None):
                 db.session.rollback()
                 _app.logger.error(
                     f"Error updating post {post.id} ('{post.title}') by "
-                    f"{current_user.username} (publish intent: {is_published_intent}): {e}",
+                    f"{current_user.username} (publish: {is_published_intent}): {e}",
                     exc_info=True
                 )
                 flash(f'Error updating post: {e}', 'danger')
@@ -947,7 +960,7 @@ def create_app(config_overrides=None):
         elif request.method == 'POST':
             _app.logger.warning(
                 f"Edit post form validation failed for post {post_id} "
-                f"by user {current_user.username}. Errors: {form.errors}"
+                f"by {current_user.username}. Errors: {form.errors}"
             )
             flash_form_errors(form)
 
@@ -978,7 +991,7 @@ def create_app(config_overrides=None):
     @_app.route('/login', methods=['GET', 'POST'])
     def login():
         _app.logger.debug(
-            f"[ROUTE_ENTRY] Path: /login, Method: {request.method}, IP: {request.remote_addr}"
+            f"[ROUTE_ENTRY] /login, M: {request.method}, IP: {request.remote_addr}"
         )
         if current_user.is_authenticated:
             _app.logger.debug(
@@ -1041,7 +1054,7 @@ def create_app(config_overrides=None):
     @login_required
     def logout():
         _app.logger.debug(
-            f"[ROUTE_ENTRY] Path: /logout, Method: {request.method}, User: {current_user.username}"
+            f"[ROUTE_ENTRY] /logout, M: {request.method}, User: {current_user.username}"
         )
         user_id_before_logout = current_user.id
         username_before_logout = current_user.username
@@ -1063,7 +1076,7 @@ def create_app(config_overrides=None):
         )
         user_profile = User.query.filter_by(username=username).first_or_404()
         _app.logger.debug(
-            f"Displaying profile for user '{user_profile.username}' (ID: {user_profile.id})."
+            f"Displaying profile for '{user_profile.username}' (ID: {user_profile.id})."
         )
         if not user_profile.is_profile_public and user_profile != current_user:
             _app.logger.warning(
@@ -1094,8 +1107,8 @@ def create_app(config_overrides=None):
                 page=page, per_page=per_page, error_out=False
             )
             _app.logger.debug(
-                f"Found {len(posts_pagination.items)} posts for profile '{user_profile.username}' "
-                f"on page {page} (total matching criteria: {posts_pagination.total})."
+                f"Found {len(posts_pagination.items)} posts for "
+                f"'{user_profile.username}' p{page} (total: {posts_pagination.total})."
             )
         except Exception as e:
             _app.logger.error(
@@ -1140,8 +1153,8 @@ def create_app(config_overrides=None):
                 form.profile_photo.data.filename if form.profile_photo.data else 'None'
             )
             _app.logger.debug(
-                f"[FORM_SUBMISSION] Edit profile form submitted by {current_user.username}. "
-                f"Data (text truncated, photo by filename): {log_form_data}"
+                f"[FORM_SUBMISSION] Edit profile form by {current_user.username}. "
+                f"Data (text trunc, photo by filename): {log_form_data}"
             )
         if form.validate_on_submit():
             _app.logger.info(f"User {current_user.username} updating profile.")
@@ -1176,14 +1189,16 @@ def create_app(config_overrides=None):
                         f"Profile photo for {current_user.username} too large: "
                         f"{file.content_length} bytes."
                     )
+                    max_size_mb = (
+                        _app.config['MAX_PROFILE_PHOTO_SIZE_BYTES'] // 1024 // 1024
+                    )
                     flash(
-                        f"Profile photo is too large. Maximum size is "
-                        f"{_app.config['MAX_PROFILE_PHOTO_SIZE_BYTES'] // 1024 // 1024}MB.",
+                        f"Profile photo too large. Max size: {max_size_mb}MB.",
                         'danger'
                     )
                 elif not allowed_file(file.filename):
                     _app.logger.warning(
-                        f"Invalid file type for profile photo by {current_user.username}: "
+                        f"Invalid file type for photo by {current_user.username}: "
                         f"{file.filename}"
                     )
                     flash(
@@ -1204,15 +1219,16 @@ def create_app(config_overrides=None):
                         )
                         img = Image.open(file.stream)
                         _app.logger.debug(
-                            f"Profile photo opened with Pillow. Original size: {img.size}"
+                            f"Profile photo opened (Pillow). Original: {img.size}"
                         )
                         crop_x_str = request.form.get('crop_x')
                         crop_y_str = request.form.get('crop_y')
                         crop_width_str = request.form.get('crop_width')
                         crop_height_str = request.form.get('crop_height')
-                        if crop_x_str and crop_y_str and crop_width_str and crop_height_str:
+                        if (crop_x_str and crop_y_str and
+                                crop_width_str and crop_height_str):
                             _app.logger.debug(
-                                f"Crop parameters received: X={crop_x_str}, Y={crop_y_str}, "
+                                f"Crop params: X={crop_x_str}, Y={crop_y_str}, "
                                 f"W={crop_width_str}, H={crop_height_str}"
                             )
                             try:
@@ -1257,7 +1273,8 @@ def create_app(config_overrides=None):
                         )
                         img.save(save_path)
                         _app.logger.info(
-                            f"Profile photo for {current_user.username} saved to {save_path}"
+                            f"Profile photo for {current_user.username} saved: "
+                            f"{save_path}"
                         )
 
                         if current_user.profile_photo_url:
@@ -1304,7 +1321,7 @@ def create_app(config_overrides=None):
                         photo_saved_successfully = True
                     except Exception as e:
                         _app.logger.error(
-                            f"Error processing profile photo for {current_user.username}: {e}",
+                            f"Error processing photo for {current_user.username}: {e}",
                             exc_info=True
                         )
                         flash(f'Error processing profile photo: {e}', 'danger')
@@ -1327,14 +1344,14 @@ def create_app(config_overrides=None):
             except Exception as e:
                 db.session.rollback()
                 _app.logger.error(
-                    f"Error saving profile changes to DB for {current_user.username}: {e}",
+                    f"Error saving profile to DB for {current_user.username}: {e}",
                     exc_info=True
                 )
                 flash(f'Error saving profile changes: {e}', 'danger')
             return redirect(url_for('profile', username=current_user.username))
         elif request.method == 'POST':
             _app.logger.warning(
-                f"Edit profile form validation failed for user {current_user.username}. "
+                f"Edit profile form validation failed for {current_user.username}. "
                 f"Errors: {form.errors}"
             )
             flash_form_errors(form)
@@ -1451,26 +1468,26 @@ def create_app(config_overrides=None):
                     current_user.set_password(form.new_password.data)
                     db.session.commit()
                     _app.logger.info(
-                        f"Password changed successfully for user {current_user.username}."
+                        f"Password changed for user {current_user.username}."
                     )
                     flash('Your password has been updated successfully!', 'success')
                     return redirect(url_for('settings_page'))
                 except Exception as e:
                     db.session.rollback()
                     _app.logger.error(
-                        f"Error saving new password for user {current_user.username}: {e}",
+                        f"Error saving new password for {current_user.username}: {e}",
                         exc_info=True
                     )
                     flash('Error changing password. Please try again.', 'danger')
             else:
                 _app.logger.warning(
-                    f"Invalid current password provided by user {current_user.username} "
-                    f"during password change attempt."
+                    f"Invalid current password by user {current_user.username} "
+                    f"during password change."
                 )
                 flash('Invalid current password.', 'danger')
         elif request.method == 'POST':
             _app.logger.warning(
-                f"Change password form validation failed for user {current_user.username}. "
+                f"Change password form validation failed for {current_user.username}. "
                 f"Errors: {form.errors}"
             )
             flash_form_errors(form)
@@ -1517,8 +1534,8 @@ def create_app(config_overrides=None):
                 )
                 posts = pagination.items
                 _app.logger.debug(
-                    f"Search for '{query}' found {len(posts)} published posts on page {page}. "
-                    f"Total results: {pagination.total}"
+                    f"Search for '{query}' found {len(posts)} posts on page {page}. "
+                    f"Total: {pagination.total}"
                 )
             except Exception as e:
                 _app.logger.error(
@@ -1552,7 +1569,7 @@ def create_app(config_overrides=None):
             f"[ROUTE_ENTRY_DEBUG] {request.path} - Start"
         )
         _app.logger.debug(
-            f"[ROUTE_ENTRY] Path: /about, Method: {request.method}, IP: {request.remote_addr}"
+            f"[ROUTE_ENTRY] /about, M: {request.method}, IP: {request.remote_addr}"
         )
         _app.logger.debug("Displaying About page.")
         _app.logger.info(
@@ -1577,7 +1594,7 @@ def create_app(config_overrides=None):
             f"[ROUTE_ENTRY_DEBUG] {request.path} - Start"
         )
         _app.logger.debug(
-            f"[ROUTE_ENTRY] Path: /contact, Method: {request.method}, IP: {request.remote_addr}"
+            f"[ROUTE_ENTRY] /contact, M: {request.method}, IP: {request.remote_addr}"
         )
         _app.logger.debug("Displaying Contact page.")
         _app.logger.info(
@@ -1610,7 +1627,9 @@ def create_app(config_overrides=None):
         page = request.args.get('page', 1, type=int)
         per_page = _app.config['POSTS_PER_PAGE']
         try:
-            query = Post.query.filter(Post.tags.contains(tag), Post.is_published).order_by(
+            query = Post.query.filter(
+                Post.tags.contains(tag), Post.is_published
+            ).order_by(
                 Post.published_at.desc(), Post.created_at.desc()
             )
             pagination = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -1652,21 +1671,21 @@ def create_app(config_overrides=None):
         )
         data = request.get_json()
         _app.logger.info(
-            f"API /api/settings/theme: Received data: {data} for user {current_user.username}"
+            f"API /api/settings/theme: Data: {data} for {current_user.username}"
         )
         if not data or 'theme' not in data:
             _app.logger.warning(
-                f"API /api/settings/theme: Missing theme data in request from "
+                f"API /api/settings/theme: Missing theme data from "
                 f"{current_user.username}. Data: {data}"
             )
             return jsonify({'status': 'error', 'message': 'Missing theme data'}), 400
         new_theme = data['theme']
         _app.logger.info(
-            f"User {current_user.username} attempting to set theme to: '{new_theme}'."
+            f"User {current_user.username} setting theme to: '{new_theme}'."
         )
         if new_theme not in _app.config['ALLOWED_THEMES']:
             _app.logger.warning(
-                f"API /api/settings/theme: Invalid theme value '{new_theme}' "
+                f"API /api/settings/theme: Invalid theme '{new_theme}' "
                 f"from {current_user.username}."
             )
             return jsonify({'status': 'error', 'message': 'Invalid theme value'}), 400
@@ -1674,10 +1693,11 @@ def create_app(config_overrides=None):
         try:
             db.session.commit()
             _app.logger.info(
-                f"Theme preference '{new_theme}' saved for user {current_user.username}. "
-                f"current_user.theme is now: {current_user.theme}"
+                f"Theme '{new_theme}' saved for {current_user.username}. "
+                f"current_user.theme: {current_user.theme}"
             )
-            return jsonify({'status': 'success', 'message': 'Theme updated successfully'})
+            return jsonify({'status': 'success',
+                            'message': 'Theme updated successfully'})
         except Exception as e:
             db.session.rollback()
             _app.logger.error(
@@ -1692,40 +1712,43 @@ def create_app(config_overrides=None):
     @login_required
     def save_accent_color_preference():
         _app.logger.debug(
-            f"[API_ROUTE_ENTRY] Path: /api/settings/accent_color, Method: {request.method}, "
+            f"[API_ROUTE_ENTRY] /api/settings/accent_color, M: {request.method}, "
             f"User: {current_user.username}"
         )
         data = request.get_json()
         _app.logger.info(
-            f"API /api/settings/accent_color: Received data: {data} "
-            f"for user {current_user.username}"
+            f"API /api/settings/accent_color: Data: {data} for {current_user.username}"
         )
         if not data or 'accent_color' not in data:
             _app.logger.warning(
-                f"API /api/settings/accent_color: Missing accent_color data in request from "
+                f"API /api/settings/accent_color: Missing accent_color data from "
                 f"{current_user.username}. Data: {data}"
             )
-            return jsonify({'status': 'error', 'message': 'Missing accent_color data'}), 400
+            return jsonify(
+                {'status': 'error', 'message': 'Missing accent_color data'}
+            ), 400
         new_accent_color = data['accent_color']
         _app.logger.info(
-            f"User {current_user.username} attempting to set accent_color to: '{new_accent_color}'."
+            f"User {current_user.username} setting accent_color to: "
+            f"'{new_accent_color}'."
         )
         current_user.accent_color = new_accent_color
         try:
             db.session.commit()
             _app.logger.info(
-                f"Accent color preference '{new_accent_color}' saved for user {current_user.username}. "
-                f"current_user.accent_color is now: {current_user.accent_color}"
+                f"Accent color '{new_accent_color}' saved for {current_user.username}. "
+                f"current_user.accent_color: {current_user.accent_color}"
             )
-            return jsonify({'status': 'success', 'message': 'Accent color updated successfully'})
+            return jsonify({'status': 'success',
+                            'message': 'Accent color updated successfully'})
         except Exception as e:
             db.session.rollback()
             _app.logger.error(
-                f"[DB_ERROR] /api/settings/accent_color - Error saving accent_color for "
+                f"[DB_ERROR] /api/settings/accent_color - Error saving accent for "
                 f"{current_user.username}: {e}", exc_info=True
             )
             return jsonify(
-                {'status': 'error', 'message': 'Failed to save accent color preference'}
+                {'status': 'error', 'message': 'Failed to save accent color'}
             ), 500
 
     @_app.errorhandler(403)
