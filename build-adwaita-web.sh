@@ -49,7 +49,9 @@ mkdir -p "${ADWAITA_WEB_COMPILED_CSS_DIR}"
 
 # Compile SASS to CSS
 echo "--- Compiling SASS to CSS (${SASS_INPUT_FILE} -> ${COMPILED_CSS_FILE_PATH}) ---"
-sass_output_and_error=$(sass "${SASS_INPUT_FILE}" "${COMPILED_CSS_FILE_PATH}" --style compressed 2>&1)
+# Explicitly use the Dart Sass installed via npm
+SASS_EXEC="/home/jules/.nvm/versions/node/v22.16.0/bin/sass"
+sass_output_and_error=$($SASS_EXEC "${SASS_INPUT_FILE}" "${COMPILED_CSS_FILE_PATH}" --style compressed 2>&1)
 sass_exit_code=$?
 
 if [ ${sass_exit_code} -ne 0 ]; then

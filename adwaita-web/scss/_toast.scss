@@ -1,6 +1,6 @@
 // scss/_toast.scss
-@import 'variables';
-@import 'mixins';
+@use 'variables';
+@use 'mixins';
 
 .adw-toast {
   // Base style for a toast notification.

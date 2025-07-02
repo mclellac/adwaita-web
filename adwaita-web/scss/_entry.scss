@@ -1,6 +1,6 @@
 // Styles for Adwaita Entries (Input Fields) (Adwaita Skin Version)
 // Adapted from adwaita-web/scss/_entry.scss
-// @use "sass:color"; // Removed for Ruby Sass compatibility
+@use "sass:color";
 @import 'variables'; // Defines CSS vars like --input-bg-color, --borders-color, --accent-color, etc.
 @import 'mixins';    // May contain reusable mixins
 

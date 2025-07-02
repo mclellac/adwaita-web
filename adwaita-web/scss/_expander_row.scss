@@ -1,5 +1,5 @@
-@import 'variables';
-@import 'mixins'; // Assuming this provides .row-base and potentially other helpers
+@use 'variables';
+@use 'mixins'; // Assuming this provides .row-base and potentially other helpers
 
 .adw-expander-row {
   // The AdwExpanderRow element itself is a container for the header and content.
