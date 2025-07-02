@@ -53,28 +53,27 @@
     })();
   </script>
 
-    <header class="adw-header-bar">
-        <div class="adw-header-bar__start">
-            {# <a href="{{ url_for('index') }}" class="adw-button icon-only" title="Home">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8.5 1.5A1.5 1.5 0 0 0 7 0H1.5A1.5 1.5 0 0 0 0 1.5v13A1.5 1.5 0 0 0 1.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 14.5 0H9a1.5 1.5 0 0 0-1.5 1.5H8.5zM8 15H1.5a.5.5 0 0 1-.5-.5V1.5a.5.5 0 0 1 .5-.5H7V.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-.5.5H8zM5 5.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H5.5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H5.5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1H5.5a.5.5 0 0 1-.5-.5z"/></svg>
-            </a> #}
-            <h1 class="adw-header-bar__title">Blog Demo</h1>
-        </div>
-        <div class="adw-header-bar__center">
-             <a href="{{ url_for('index') }}" class="adw-button flat">Home</a>
-             <a href="{{ url_for('about_page') }}" class="adw-button flat">About</a>
-             <a href="{{ url_for('contact_page') }}" class="adw-button flat">Contact</a>
-        </div>
-        <div class="adw-header-bar__end">
-            <form action="{{ url_for('search_results') }}" method="GET" style="display: flex; align-items: center; gap: var(--spacing-xs);">
-                <input type="search" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}" class="adw-entry">
-                <button type="submit" class="adw-button flat circular" aria-label="Search">
-                    <span class="adw-icon icon-actions-system-search-symbolic"></span>
-                </button>
-            </form>
+<header class="adw-header-bar">
+    <div class="adw-header-bar__start">
+        <a href="{{ url_for('index') }}" class="adw-header-bar__title site-title-link">Blog Demo</a>
+    </div>
+    <div class="adw-header-bar__center">
+        {# Optionally, a view-specific title could be injected here using a block #}
+        {% block header_title %}{% endblock %}
+    </div>
+    <div class="adw-header-bar__end">
+        {% block header_actions_start %}{% endblock %} {# For buttons like "Edit Profile" #}
+        <form action="{{ url_for('search_results') }}" method="GET" class="header-search-form">
+            <input type="search" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}" class="adw-entry">
+            <button type="submit" class="adw-button flat circular" aria-label="Search">
+                <span class="adw-icon icon-actions-system-search-symbolic"></span>
+            </button>
+        </form>
+
         {% if current_user.is_authenticated %}
             <a href="{{ url_for('create_post') }}" class="adw-button suggested-action">New Post</a>
-            <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat circular" title="View Profile">
+
+            <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat circular profile-avatar-button" title="View Profile">
                 {% if current_user.profile_photo_url %}
                     <span class="adw-avatar size-small">
                         <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Avatar">
@@ -82,22 +81,46 @@
                 {% else %}
                     <span class="adw-avatar size-small">
                         <span class="adw-avatar-text">
-                            {% set name_parts = current_user.username.split() %}
-                            {{ name_parts[0][0]|upper if (name_parts|length >= 1 and name_parts[0]) else 'U' }}
+                            {{ current_user.username[0]|upper if current_user.username else 'U' }}
                         </span>
                     </span>
                 {% endif %}
             </a>
-            <a href="{{ url_for('dashboard') }}" class="adw-button flat" title="Dashboard">My Posts</a>
-            <a href="{{ url_for('settings_page') }}" class="adw-button flat circular" title="Settings">
-                <span class="adw-icon icon-ui-settings-symbolic"></span>
-            </a>
+            <a href="{{ url_for('dashboard') }}" class="adw-button flat" title="My Posts">Dashboard</a>
+            <a href="{{ url_for('settings_page') }}" class="adw-button flat" title="Settings">Settings</a>
             <a href="{{ url_for('logout') }}" class="adw-button flat">Logout</a>
         {% else %}
+            {# About and Contact are moved to footer for logged-out users too for consistency #}
             <a href="{{ url_for('login') }}" class="adw-button">Login</a>
         {% endif %}
-        </div>
-    </header>
+    </div>
+</header>
+
+<style>
+.adw-header-bar__start .site-title-link {
+    text-decoration: none;
+    color: inherit;
+    font-weight: bold; /* Make it look more like a title */
+}
+.adw-header-bar__start .site-title-link:hover,
+.adw-header-bar__start .site-title-link:focus {
+    text-decoration: none;
+}
+.adw-header-bar__end {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s, 8px); /* Default gap if var not defined */
+}
+.header-search-form {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs, 4px); /* Default gap */
+}
+.profile-avatar-button img, .profile-avatar-button .adw-avatar-text {
+    vertical-align: middle;
+}
+</style>
+
     <div class="page-content-wrapper"> {# Replaced adw-page for more control #}
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -123,6 +146,66 @@
             {% block content %}{% endblock %}
         </main>
     </div>
+
+    <footer class="app-footer adw-toolbar">
+        <div class="adw-toolbar__start">
+            <span class="adw-label caption">&copy; {% now "utc", "%Y" %} Blog Demo.</span>
+        </div>
+        <div class="adw-toolbar__center">
+            {# Optional: social links or other footer content #}
+        </div>
+        <div class="adw-toolbar__end">
+            <a href="{{ url_for('about_page') }}" class="adw-button flat">About</a>
+            <a href="{{ url_for('contact_page') }}" class="adw-button flat">Contact</a>
+        </div>
+    </footer>
+
+    <style>
+    .app-footer {
+        border-top: 1px solid var(--border-color, #cccccc);
+        padding: var(--spacing-s, 8px) var(--spacing-m, 12px);
+        margin-top: var(--spacing-xl, 24px);
+        background-color: var(--window-bg-color, white);
+    }
+    /* Ensure footer items have good spacing */
+    .app-footer .adw-toolbar__end {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-s, 8px);
+    }
+
+    /* Basic CSS-only Expander Row */
+    .adw-css-expander-row summary.adw-action-row {
+        list-style: none; /* Remove default marker */
+        position: relative;
+        /* Ensure chevron is included in padding calculation if using padding-right on summary */
+    }
+    .adw-css-expander-row summary.adw-action-row::-webkit-details-marker {
+        display: none; /* Hide WebKit default marker */
+    }
+    .adw-css-expander-row summary.adw-action-row::after { /* Custom chevron */
+        content: '';
+        display: inline-block;
+        width: 0.5em;
+        height: 0.5em;
+        border-right: 0.15em solid currentColor;
+        border-bottom: 0.15em solid currentColor;
+        transform: rotate(45deg); /* Default: pointing down-right (like Adwaita's pan-end-symbolic) */
+        transition: transform 0.2s ease-out;
+        position: absolute;
+        right: var(--spacing-l, 12px); /* Adwaita action row typically has padding, place chevron within it */
+        top: 50%;
+        margin-top: -0.35em; /* Adjust vertical based on chevron size and border */
+        opacity: 0.7;
+    }
+    .adw-css-expander-row[open] > summary.adw-action-row::after {
+        transform: rotate(-135deg); /* Pointing up-right */
+    }
+    .adw-css-expander-row .adw-expander-row-content {
+        /* Content is already styled inline in profile.html, this is just a placeholder */
+    }
+    </style>
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

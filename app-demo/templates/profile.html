@@ -2,104 +2,161 @@
 
 {% block title %}Profile: {{ user_profile.username }}{% endblock %}
 
-{% block headerbar %}
-<adw-header-bar>
-    <adw-window-title slot="title" title="{{ user_profile.username }}'s Profile"></adw-window-title>
-    <adw-button slot="start" icon-name="go-previous-symbolic" href="{{ url_for('index') }}" aria-label="Back to Home"></adw-button>
+{% block header_title %}
+    {# This will be placed in the adw-header-bar__center by base.html #}
+    {# We might want a back button or other actions specific to this page in the main header,
+       but the base header already has site navigation. For now, just a title. #}
+    <h1 class="adw-header-bar__title">{{ user_profile.username }}'s Profile</h1>
+{% endblock %}
+
+{% block header_actions_start %}
     {% if current_user == user_profile %}
-    <adw-button slot="end" text="Edit Profile" href="{{ url_for('edit_profile') }}" suggested></adw-button>
+        <a href="{{ url_for('edit_profile') }}" class="adw-button suggested-action">Edit Profile</a>
     {% endif %}
-</adw-header-bar>
 {% endblock %}
 
 {% block content %}
-<adw-clamp class="adw-clamp-xl">
-    <adw-box orientation="vertical" spacing="l" style="padding-top: var(--spacing-l);">
+<div class="adw-clamp adw-clamp-xl">
+    <div class="adw-box adw-box-vertical adw-box-spacing-l" style="padding-top: var(--spacing-l);">
 
         {# User Header Info #}
-        <adw-box orientation="horizontal" spacing="xl" align="center">
-            <adw-avatar image="{{ url_for('static', filename=user_profile.profile_photo_url) if user_profile.profile_photo_url else default_avatar_url }}" text="{{ user_profile.username }}" size="96"></adw-avatar>
-            <adw-box orientation="vertical" spacing="xs">
-                <adw-label title-level="1">{{ user_profile.full_name or user_profile.username }}</adw-label>
-                {% if user_profile.full_name %}
-                <adw-label is-caption>@{{ user_profile.username }}</adw-label>
+        <div class="adw-box adw-box-spacing-xl align-center"> {# Horizontal by default #}
+            <div class="adw-avatar size-huge"> {# size-huge for 96px from _avatar.scss comments #}
+                {% if user_profile.profile_photo_url %}
+                <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ user_profile.username }} avatar">
+                {% else %}
+                <img src="{{ default_avatar_url }}" alt="{{ user_profile.username }} default avatar">
                 {% endif %}
-            </adw-box>
-        </adw-box>
+            </div>
+            <div class="adw-box adw-box-vertical adw-box-spacing-xs">
+                <h1 class="adw-label title-1">{{ user_profile.full_name or user_profile.username }}</h1>
+                {% if user_profile.full_name %}
+                <span class="adw-label adw-caption">@{{ user_profile.username }}</span>
+                {% endif %}
+            </div>
+        </div>
 
         {# Profile Details Group #}
-        <adw-preferences-group title="About {{user_profile.username}}">
-            {% if user_profile.profile_info %}
-            <adw-expander-row title="Bio" subtitle="View user's biography">
-                <div style="padding: var(--spacing-m); white-space: pre-wrap;">
-                    {{ user_profile.profile_info | safe }}
-                </div>
-            </adw-expander-row>
-            {% else %}
-            <adw-action-row title="Bio" subtitle="No bio provided."></adw-action-row>
-            {% endif %}
-
-            {% if user_profile.location %}
-            <adw-action-row title="Location" subtitle="{{ user_profile.location }}"></adw-action-row>
-            {% endif %}
-
-            {% if user_profile.website_url %}
-                {% if user_profile.website_url.startswith('http://') or user_profile.website_url.startswith('https://') %}
-                <adw-action-row title="Website" subtitle="{{ user_profile.website_url }}" href="{{ user_profile.website_url }}" target="_blank" activatable></adw-action-row>
+        <div class="adw-preferences-group" role="group" aria-labelledby="profile-details-title-{{user_profile.id}}">
+             <div class="adw-preferences-group__title-container">
+                <h2 class="adw-preferences-group__title title-2" id="profile-details-title-{{user_profile.id}}">About {{user_profile.username}}</h2>
+            </div>
+            <div class="adw-list-box">
+                {% if user_profile.profile_info %}
+                <details class="adw-css-expander-row">
+                    <summary class="adw-action-row">
+                        <span class="adw-action-row__text">
+                            <span class="adw-action-row__title">Bio</span>
+                            <span class="adw-action-row__subtitle">View user's biography</span>
+                        </span>
+                        {# Custom chevron will be applied via CSS to summary::after #}
+                    </summary>
+                    <div class="adw-expander-row-content" style="padding: var(--spacing-m); white-space: pre-wrap; border-top: 1px solid var(--borders-color, #ddd); margin-top: -1px;">
+                        {{ user_profile.profile_info | safe }}
+                    </div>
+                </details>
                 {% else %}
-                <adw-action-row title="Website" subtitle="{{ user_profile.website_url }} (Not a valid link)"></adw-action-row>
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">Bio</span>
+                    <span class="adw-action-row__subtitle">No bio provided.</span>
+                </div>
                 {% endif %}
-            {% endif %}
 
-            {% if current_user == user_profile %}
-            <adw-action-row title="Profile Privacy" subtitle="{{ 'Public' if user_profile.is_profile_public else 'Private (Only you can see full details)' }}"></adw-action-row>
-            {% endif %}
-        </adw-preferences-group>
+                {% if user_profile.location %}
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">Location</span>
+                    <span class="adw-action-row__subtitle">{{ user_profile.location }}</span>
+                </div>
+                {% endif %}
+
+                {% if user_profile.website_url %}
+                    {% if user_profile.website_url.startswith('http://') or user_profile.website_url.startswith('https://') %}
+                    <a href="{{ user_profile.website_url }}" target="_blank" class="adw-action-row activatable">
+                        <span class="adw-action-row__title">Website</span>
+                        <span class="adw-action-row__subtitle">{{ user_profile.website_url }}</span>
+                        <span class="adw-action-row__chevron"></span>
+                    </a>
+                    {% else %}
+                    <div class="adw-action-row">
+                        <span class="adw-action-row__title">Website</span>
+                        <span class="adw-action-row__subtitle">{{ user_profile.website_url }} (Not a valid link)</span>
+                    </div>
+                    {% endif %}
+                {% endif %}
+
+                {% if current_user == user_profile %}
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">Profile Privacy</span>
+                    <span class="adw-action-row__subtitle">{{ 'Public' if user_profile.is_profile_public else 'Private (Only you can see full details)' }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
 
         {# User Posts Section #}
-        <adw-preferences-group title="Posts by {{ user_profile.username }}">
+        <div class="adw-preferences-group" role="group" aria-labelledby="user-posts-title-{{user_profile.id}}">
+            <div class="adw-preferences-group__title-container">
+                <h2 class="adw-preferences-group__title title-2" id="user-posts-title-{{user_profile.id}}">Posts by {{ user_profile.username }}</h2>
+            </div>
             {% if posts_pagination and posts_pagination.items %}
-                <adw-list-box selectable>
+                <div class="adw-list-box"> {# Removed selectable as it might imply JS interaction not present #}
                     {% for post in posts_pagination.items %}
-                    <adw-action-row href="{{ url_for('view_post', post_id=post.id) }}" title="{{ post.title }}{% if not post.is_published and current_user == post.author %} (Draft){% endif %}" subtitle="{% if post.is_published and post.published_at %}Published: {{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC{% elif not post.is_published %}Draft - Last updated: {{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC{% else %}Created: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC{% endif %}" activatable></adw-action-row>
+                    <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-action-row activatable">
+                        <div class="adw-action-row__text">
+                            <span class="adw-action-row__title">{{ post.title }}{% if not post.is_published and current_user == post.author %} (Draft){% endif %}</span>
+                            <span class="adw-action-row__subtitle">{% if post.is_published and post.published_at %}Published: {{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC{% elif not post.is_published %}Draft - Last updated: {{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC{% else %}Created: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC{% endif %}</span>
+                        </div>
+                        <span class="adw-action-row__chevron"></span>
+                    </a>
                     {% endfor %}
-                </adw-list-box>
+                </div>
 
                 {# Pagination Controls - Using Adwaita ToggleGroup for a more native feel #}
                 {% if posts_pagination.pages > 1 %}
-                <adw-box orientation="horizontal" justify="center" style="margin-top: var(--spacing-l);">
-                    <adw-toggle-group>
+                <div class="adw-box adw-box-horizontal justify-center" style="margin-top: var(--spacing-l);">
+                    <div class="adw-toggle-group">
                         {% if posts_pagination.has_prev %}
-                            <adw-button icon-name="go-previous-symbolic" href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.prev_num) }}"></adw-button>
+                            <a href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
+                                <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                            </a>
                         {% else %}
-                            <adw-button icon-name="go-previous-symbolic" disabled></adw-button>
+                            <button class="adw-button icon-only" disabled aria-label="Previous page">
+                                <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                            </button>
                         {% endif %}
 
                         {% for page_num in posts_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
                             {% if page_num %}
                                 {% if page_num == posts_pagination.page %}
-                                    <adw-button text="{{ page_num }}" suggested disabled aria-current="page"></adw-button>
+                                    <button class="adw-button suggested-action" disabled aria-current="page">{{ page_num }}</button>
                                 {% else %}
-                                    <adw-button text="{{ page_num }}" href="{{ url_for('profile', username=user_profile.username, page=page_num) }}"></adw-button>
+                                    <a href="{{ url_for('profile', username=user_profile.username, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
-                            {% elif loop.index != 1 and loop.index != posts_pagination.pages + 2 %} {# Avoid ellipsis at very start/end if not needed #}
-                                <adw-button text="…" flat disabled style="pointer-events: none;"></adw-button>
+                            {% elif loop.index != 1 and loop.index != posts_pagination.pages + posts_pagination.iter_pages()|length %}
+                                <button class="adw-button flat" disabled style="pointer-events: none;">…</button>
                             {% endif %}
                         {% endfor %}
 
                         {% if posts_pagination.has_next %}
-                            <adw-button icon-name="go-next-symbolic" href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.next_num) }}"></adw-button>
+                             <a href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
+                                <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                            </a>
                         {% else %}
-                            <adw-button icon-name="go-next-symbolic" disabled></adw-button>
+                            <button class="adw-button icon-only" disabled aria-label="Next page">
+                                <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                            </button>
                         {% endif %}
-                    </adw-toggle-group>
-                </adw-box>
+                    </div>
+                </div>
                 {% endif %}
             {% else %}
-                <adw-status-page icon-name="document-new-symbolic" title="No Posts Yet" description="{{ user_profile.username }} has not made any posts.">
-                </adw-status-page>
+                <div class="adw-status-page">
+                    <span class="adw-icon icon-content-document-new-symbolic adw-status-page-icon" style="font-size: 3rem;"></span>
+                    <h3 class="adw-status-page-title">No Posts Yet</h3>
+                    <p class="adw-status-page-description">{{ user_profile.username }} has not made any posts.</p>
+                </div>
             {% endif %}
-        </adw-preferences-group>
-    </adw-box>
-</adw-clamp>
+        </div>
+    </div>
+</div>
 {% endblock %}
