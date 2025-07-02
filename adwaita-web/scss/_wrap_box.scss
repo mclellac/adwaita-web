@@ -1,5 +1,5 @@
 // SCSS for Adwaita WrapBox (Pure CSS Adwaita Skin Version)
-@import 'variables'; // For CSS variables like --spacing-m, etc.
+@use 'variables'; // For CSS variables like --spacing-m, etc.
 
 .adw-wrap-box {
   display: flex;

@@ -1,6 +1,6 @@
 // SCSS for Adwaita SpinButton (Pure CSS Adwaita Skin Version)
-@import 'variables'; // For CSS variables like --button-border-color, --accent-color etc.
-@import 'mixins';    // For any relevant mixins
+@use 'variables'; // For CSS variables like --button-border-color, --accent-color etc.
+@use 'mixins';    // For any relevant mixins
 
 .adw-spin-button {
   display: inline-flex;

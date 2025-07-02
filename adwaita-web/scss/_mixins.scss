@@ -1,5 +1,5 @@
 // SCSS Mixins
-@import 'variables'; // To access variables if needed within mixins
+@use 'variables'; // To access variables if needed within mixins
 
 // Base styling for list rows / preference rows
 @mixin row-base {

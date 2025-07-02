@@ -1,6 +1,6 @@
 // SCSS for Adwaita Preferences Page and Group (Pure CSS Adwaita Skin Version)
-@import 'variables';
-@import 'mixins';
+@use 'variables';
+@use 'mixins';
 
 // Preferences Page: Overall container for a page within a preferences window/view
 .adw-preferences-page {

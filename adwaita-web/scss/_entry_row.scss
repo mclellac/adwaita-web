@@ -1,6 +1,6 @@
 // scss/_entry_row.scss
-@import 'variables';
-@import 'mixins';
+@use 'variables';
+@use 'mixins';
 
 // AdwEntryRow is an AdwPreferencesRow
 // It typically exists within an .adw-list-box, which provides padding and separators.
@@ -10,7 +10,7 @@
   // Inherits .adw-row styles (display: flex, align-items: center, min-height, padding etc.)
   // from being slotted into AdwRow or if AdwEntryRow's own shadow DOM root has .adw-row.
   // The JS for AdwEntryRow creates a div with .adw-row and .adw-entry-row
-  @include row-base; // Applies common row styles like min-height, padding
+  @include mixins.row-base; // Applies common row styles like min-height, padding
   gap: var(--spacing-m); // Standard gap between elements in a row
   padding-top: var(--spacing-s);    // Override default vertical padding from row-base (9px)
   padding-bottom: var(--spacing-s); // Override default vertical padding from row-base (9px)

@@ -1,6 +1,6 @@
 // SCSS for Adwaita Split Button (Pure CSS Adwaita Skin Version)
-@import 'variables';
-@import 'mixins';
+@use 'variables';
+@use 'mixins';
 
 .adw-split-button {
   display: inline-flex; // Behaves like a single button unit

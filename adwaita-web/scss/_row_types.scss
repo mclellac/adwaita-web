@@ -1,5 +1,5 @@
 // scss/_row_types.scss
-@import "variables";
+@use "variables";
 
 // Common base for specialized rows if needed, but AdwRow already provides some.
 // These rows are typically used within an AdwListBox or a similar container.

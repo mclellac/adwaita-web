@@ -1,5 +1,5 @@
 // scss/_window.scss
-@import "variables";
+@use "variables";
 
 .adw-window {
   background-color: var(--window-bg-color);

@@ -1,6 +1,6 @@
 // scss/_listbox.scss
 
-@import 'variables';
+@use 'variables';
 
 .adw-list-box {
   background-color: var(--card-bg-color); // Changed to --card-bg-color for boxed list appearance
