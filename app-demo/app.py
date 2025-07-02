@@ -585,56 +585,50 @@ def create_app(config_overrides=None):
             _app.logger.warning(f"User {current_user.username} is not authorized to edit post {post_id} (Author: {post.author.username}). Aborting with 403.")
             abort(403)
         form = PostForm(obj=post)
-    delete_form = DeletePostForm(prefix=f"del-eff-post-{post.id}-") # EFF for Edit Form Page
+    delete_form = DeletePostForm(prefix=f"del-eff-post-{post.id}-") # For the delete button
 
+    if form.validate_on_submit(): # Handles POST and validation for the edit form
+        _app.logger.info(f"User {current_user.username} updating post '{post.title}' (ID: {post_id}).")
+        post.title = form.title.data
+        raw_content = form.content.data
+        _app.logger.debug(f"Raw content length for edited post {post_id}: {len(raw_content)}")
+        post.content = bleach.clean(raw_content, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+        _app.logger.debug(f"Sanitized content length for edited post {post_id}: {len(post.content)}")
+        is_published_intent = form.publish.data
+        _app.logger.info(f"Updating post {post_id}. Publish intent: {is_published_intent}. Current published state: {post.is_published}")
+        post.is_published = is_published_intent
+        if is_published_intent:
+            if post.published_at is None:
+                post.published_at = datetime.now(timezone.utc)
+                _app.logger.info(f"Post {post_id} is being published at {post.published_at}.")
+        else:
+            post.published_at = None
+            _app.logger.info(f"Post {post_id} is being saved as a draft. Cleared/nulled published_at.")
+        _update_post_relations(post, form, db.session)
+        try:
+            db.session.commit()
+            _app.logger.info(f"Post ID: {post.id} ('{post.title}', Published: {post.is_published}) updated successfully by {current_user.username}.")
+            if post.is_published:
+                flash('Post updated and published successfully!', 'success')
+            else:
+                flash('Post updated and saved as draft successfully!', 'success')
+            return redirect(url_for('view_post', post_id=post.id))
+        except Exception as e:
+            db.session.rollback()
+            _app.logger.error(f"Error updating post {post.id} ('{post.title}') by {current_user.username} (publish intent: {is_published_intent}): {e}", exc_info=True)
+            flash(f'Error updating post: {e}', 'danger')
+    elif request.method == 'POST': # If POST but validate_on_submit failed for the edit form
+        _app.logger.warning(f"Edit post form validation failed for post {post_id} by {current_user.username}. Errors: {form.errors}")
+        flash_form_errors(form)
+
+    # For GET request, populate tags_string if not already populated by form obj
         if request.method == 'GET':
-            _app.logger.debug(f"Displaying edit form for post {post_id} to user {current_user.username}.")
-            if not form.tags_string.data:
+        if not form.tags_string.data and post.tags:
                 form.tags_string.data = ', '.join([tag.name for tag in post.tags])
                 _app.logger.debug(f"Populated tags_string for GET: '{form.tags_string.data}'")
 
-    # Note: The delete_post route handles its own POST request.
-    # This route's form.validate_on_submit() is for the edit form itself.
-    if request.method == 'POST' and 'title' in request.form: # Check if it's an edit submission
-            log_form_data = {key: (value[:200] + '...' if isinstance(value, str) and len(value) > 200 else value)
-                             for key, value in request.form.items()}
-            _app.logger.debug(f"[FORM_SUBMISSION] Edit post form submitted for post {post_id}. Data (truncated): {log_form_data}")
-        if form.validate_on_submit():
-            _app.logger.info(f"User {current_user.username} updating post '{post.title}' (ID: {post_id}).")
-            post.title = form.title.data
-            raw_content = form.content.data
-            _app.logger.debug(f"Raw content length for edited post {post_id}: {len(raw_content)}")
-            post.content = bleach.clean(raw_content, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
-            _app.logger.debug(f"Sanitized content length for edited post {post_id}: {len(post.content)}")
-            is_published_intent = form.publish.data
-            _app.logger.info(f"Updating post {post_id}. Publish intent: {is_published_intent}. Current published state: {post.is_published}")
-            post.is_published = is_published_intent
-            if is_published_intent:
-                if post.published_at is None:
-                    post.published_at = datetime.now(timezone.utc)
-                    _app.logger.info(f"Post {post_id} is being published at {post.published_at}.")
-            else:
-                post.published_at = None
-                _app.logger.info(f"Post {post_id} is being saved as a draft. Cleared/nulled published_at.")
-            _update_post_relations(post, form, db.session)
-            try:
-                db.session.commit()
-                _app.logger.info(f"Post ID: {post.id} ('{post.title}', Published: {post.is_published}) updated successfully by {current_user.username}.")
-                if post.is_published:
-                    flash('Post updated and published successfully!', 'success')
-                else:
-                    flash('Post updated and saved as draft successfully!', 'success')
-                return redirect(url_for('view_post', post_id=post.id))
-            except Exception as e:
-                db.session.rollback()
-                _app.logger.error(f"Error updating post {post.id} ('{post.title}') by {current_user.username} (publish intent: {is_published_intent}): {e}", exc_info=True)
-                flash(f'Error updating post: {e}', 'danger')
-        elif request.method == 'POST':
-            _app.logger.warning(f"Edit post form validation failed for post {post_id} by {current_user.username}. Errors: {form.errors}")
-            flash_form_errors(form)
-
-        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
-        rendered_template = render_template('edit_post.html', form=form, post=post, delete_form=delete_form)
+    _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+    rendered_template = render_template('edit_post.html', form=form, post=post, delete_form=delete_form)
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
         return rendered_template
