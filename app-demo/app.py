@@ -818,26 +818,26 @@ def create_app(config_overrides=None):
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
         return rendered_template
 
-@_app.route('/dashboard')
-@login_required
-def dashboard():
-    _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_ENTRY_DEBUG] {request.path} - Start")
-    _app.logger.debug(f"[ROUTE_ENTRY] Path: /dashboard, Method: {request.method}, User: {current_user.username}")
+    @_app.route('/dashboard')
+    @login_required
+    def dashboard():
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_ENTRY_DEBUG] {request.path} - Start")
+        _app.logger.debug(f"[ROUTE_ENTRY] Path: /dashboard, Method: {request.method}, User: {current_user.username}")
 
-    user_posts = Post.query.filter_by(user_id=current_user.id).order_by(Post.updated_at.desc()).all()
-    _app.logger.debug(f"Fetched {len(user_posts)} posts for user {current_user.username} for dashboard.")
+        user_posts = Post.query.filter_by(user_id=current_user.id).order_by(Post.updated_at.desc()).all()
+        _app.logger.debug(f"Fetched {len(user_posts)} posts for user {current_user.username} for dashboard.")
 
-    # For delete confirmation, we might need a generic form or handle it via GET link + confirmation page for simplicity here
-    # Or reuse the DeletePostForm if we make it generic enough or handle it with JS + API later.
-    # For now, direct delete links will be simpler in the template, but less safe (GET should not change state).
-    # A better approach is to have a small form per delete button.
-    # The existing delete_post route is POST only.
+        # For delete confirmation, we might need a generic form or handle it via GET link + confirmation page for simplicity here
+        # Or reuse the DeletePostForm if we make it generic enough or handle it with JS + API later.
+        # For now, direct delete links will be simpler in the template, but less safe (GET should not change state).
+        # A better approach is to have a small form per delete button.
+        # The existing delete_post route is POST only.
 
-    _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
-    rendered_template = render_template('dashboard.html', user_posts=user_posts)
-    _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
-    _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
-    return rendered_template
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
+        rendered_template = render_template('dashboard.html', user_posts=user_posts)
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
+        return rendered_template
 
     @_app.route('/settings')
     @login_required
