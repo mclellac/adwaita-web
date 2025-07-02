@@ -50,7 +50,7 @@
   .adw-toolbar-view-content {
     flex-grow: 1;
     overflow-y: auto; // Main content is usually scrollable
-    // padding: var(--spacing-l); // Content padding, if not handled by the slotted content itself
+    padding: var(--spacing-xl); // Provide default padding for the main content area
   }
 }
 
