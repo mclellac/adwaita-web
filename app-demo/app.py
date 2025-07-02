@@ -96,6 +96,9 @@ class CommentForm(FlaskForm):
 class DeleteCommentForm(FlaskForm):
     submit = SubmitField('Delete')
 
+class DeletePostForm(FlaskForm):
+    submit = SubmitField('Delete Post')
+
 # Helper
 def allowed_file(filename):
     from flask import current_app
@@ -570,7 +573,7 @@ def create_app(config_overrides=None):
             db.session.rollback()
             _app.logger.error(f"Error deleting post ID: {post_id} by user {current_user.username}: {e}", exc_info=True)
             flash('Error deleting post. Please try again.', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
 
     @_app.route('/posts/<int:post_id>/edit', methods=['GET', 'POST'])
     @login_required
@@ -582,12 +585,17 @@ def create_app(config_overrides=None):
             _app.logger.warning(f"User {current_user.username} is not authorized to edit post {post_id} (Author: {post.author.username}). Aborting with 403.")
             abort(403)
         form = PostForm(obj=post)
+    delete_form = DeletePostForm(prefix=f"del-eff-post-{post.id}-") # EFF for Edit Form Page
+
         if request.method == 'GET':
             _app.logger.debug(f"Displaying edit form for post {post_id} to user {current_user.username}.")
             if not form.tags_string.data:
                 form.tags_string.data = ', '.join([tag.name for tag in post.tags])
                 _app.logger.debug(f"Populated tags_string for GET: '{form.tags_string.data}'")
-        if request.method == 'POST':
+
+    # Note: The delete_post route handles its own POST request.
+    # This route's form.validate_on_submit() is for the edit form itself.
+    if request.method == 'POST' and 'title' in request.form: # Check if it's an edit submission
             log_form_data = {key: (value[:200] + '...' if isinstance(value, str) and len(value) > 200 else value)
                              for key, value in request.form.items()}
             _app.logger.debug(f"[FORM_SUBMISSION] Edit post form submitted for post {post_id}. Data (truncated): {log_form_data}")
@@ -624,8 +632,9 @@ def create_app(config_overrides=None):
         elif request.method == 'POST':
             _app.logger.warning(f"Edit post form validation failed for post {post_id} by {current_user.username}. Errors: {form.errors}")
             flash_form_errors(form)
+
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
-        rendered_template = render_template('edit_post.html', form=form, post=post)
+        rendered_template = render_template('edit_post.html', form=form, post=post, delete_form=delete_form)
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
         return rendered_template
@@ -848,16 +857,11 @@ def create_app(config_overrides=None):
         _app.logger.debug(f"[ROUTE_ENTRY] Path: /dashboard, Method: {request.method}, User: {current_user.username}")
 
         user_posts = Post.query.filter_by(user_id=current_user.id).order_by(Post.updated_at.desc()).all()
+        delete_forms = {post.id: DeletePostForm(prefix=f"del-post-{post.id}-") for post in user_posts}
         _app.logger.debug(f"Fetched {len(user_posts)} posts for user {current_user.username} for dashboard.")
 
-        # For delete confirmation, we might need a generic form or handle it via GET link + confirmation page for simplicity here
-        # Or reuse the DeletePostForm if we make it generic enough or handle it with JS + API later.
-        # For now, direct delete links will be simpler in the template, but less safe (GET should not change state).
-        # A better approach is to have a small form per delete button.
-        # The existing delete_post route is POST only.
-
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
-        rendered_template = render_template('dashboard.html', user_posts=user_posts)
+        rendered_template = render_template('dashboard.html', user_posts=user_posts, delete_forms=delete_forms)
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
         return rendered_template
