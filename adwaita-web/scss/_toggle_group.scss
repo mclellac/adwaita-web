@@ -1,6 +1,6 @@
 // SCSS for Adwaita Toggle Group (Pure CSS Adwaita Skin Version)
-@use 'variables';
-@use 'mixins';
+@import 'variables';
+@import 'mixins';
 // Assumes _button.scss provides styles for .adw-button and .adw-button.active
 
 .adw-toggle-group {
