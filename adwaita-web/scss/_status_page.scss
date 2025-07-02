@@ -1,6 +1,6 @@
 // SCSS for Adwaita Status Page (Pure CSS Adwaita Skin Version)
-@use 'variables'; // For CSS variables like --spacing-xl, --text-color etc.
-@use 'mixins';    // For any relevant mixins
+@import 'variables'; // For CSS variables like --spacing-xl, --text-color etc.
+@import 'mixins';    // For any relevant mixins
 
 .adw-status-page {
   display: flex;

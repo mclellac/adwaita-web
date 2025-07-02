@@ -1,9 +1,9 @@
 // SCSS for Adwaita Switch Row (Pure CSS Adwaita Skin Version)
-@use 'variables';
-@use 'mixins';
+@import 'variables';
+@import 'mixins';
 
 .adw-switch-row {
-  @include mixins.row-base; // Includes display: flex, align-items: center, padding, min-height
+  @include row-base; // Includes display: flex, align-items: center, padding, min-height
   justify-content: space-between; // Pushes title/subtitle to start and switch to end
   gap: var(--spacing-m);
 

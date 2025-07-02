@@ -1,5 +1,5 @@
 // scss/_icon.scss
-@use 'variables';
+@import 'variables';
 
 .adw-icon {
   display: inline-flex; // Use inline-flex for better alignment control

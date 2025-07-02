@@ -1,5 +1,5 @@
-@use 'variables';
-@use 'mixins';
+@import 'variables';
+@import 'mixins';
 
 .adw-banner {
   // Banners are typically placed at the top of a view or window.
