@@ -622,14 +622,14 @@ def create_app(config_overrides=None):
         flash_form_errors(form)
 
     # For GET request, populate tags_string if not already populated by form obj
-        if request.method == 'GET':
-        if not form.tags_string.data and post.tags:
-                form.tags_string.data = ', '.join([tag.name for tag in post.tags])
-                _app.logger.debug(f"Populated tags_string for GET: '{form.tags_string.data}'")
+    if request.method == 'GET': # Unindented this line
+        if not form.tags_string.data and post.tags: # Indented this line under the above 'if'
+            form.tags_string.data = ', '.join([tag.name for tag in post.tags])
+            _app.logger.debug(f"Populated tags_string for GET: '{form.tags_string.data}'")
 
     _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - Before render_template")
     rendered_template = render_template('edit_post.html', form=form, post=post, delete_form=delete_form)
-        _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
+    _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_RENDER_DEBUG] {request.path} - After render_template")
         _app.logger.info(f"{datetime.now(timezone.utc).isoformat()} [ROUTE_EXIT_DEBUG] {request.path} - End")
         return rendered_template
 
