@@ -1,8 +1,7 @@
-// Base styles, theming, and global resets for Adwaita Skin
+// Base styles and global resets for Adwaita Skin
 
-@use "sass:map";
-@import 'variables';
-@import 'mixins';
+@import 'variables'; // Import variables first
+@import 'mixins';    // Then mixins
 
 // --- Global Resets & Defaults ---
 *,
@@ -15,20 +14,20 @@ body {
     margin: 0;
     font-family: var(--document-font-family);
     font-size: var(--font-size-base);
-    font-weight: $font-weight-normal;
-    line-height: $line-height-base;
+    font-weight: $font-weight-normal; // Use SASS variable for base font-weight
+    line-height: $line-height-base;   // Use SASS variable for base line-height
     color: var(--text-color);
     background-color: var(--body-bg-color);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+    overflow-x: hidden; // Prevent horizontal scrollbars from minor overflows
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: var(--heading-font-family);
-    font-weight: $heading-font-weight;
+    font-family: var(--heading-font-family); // Use CSS var for heading font family
+    font-weight: $heading-font-weight;       // Use SASS var for heading font-weight
     color: var(--heading-color);
-    line-height: $heading-line-height;
+    line-height: $heading-line-height;       // Use SASS var for heading line-height
     margin-top: var(--spacing-m);
     margin-bottom: var(--spacing-s);
 }
@@ -37,8 +36,8 @@ h1 { font-size: var(--h1-font-size); }
 h2 { font-size: var(--h2-font-size); }
 h3 { font-size: var(--h3-font-size); }
 h4 { font-size: var(--h4-font-size); }
-h5 { font-size: var(--font-size-large); }
-h6 { font-size: var(--font-size-base); }
+h5 { font-size: var(--font-size-large); } // Corresponds to var(--h5-font-size) if defined, or use a general large size
+h6 { font-size: var(--font-size-base); }  // Corresponds to var(--h6-font-size) if defined, or use base size
 
 p {
     margin-top: 0;
@@ -48,269 +47,30 @@ p {
 a {
     color: var(--link-color);
     text-decoration: none;
+
     &:hover {
         color: var(--link-hover-color);
         text-decoration: underline;
     }
+    // Consider adding :visited styles if defined in your variables
+    // &:visited {
+    //   color: var(--link-visited-color);
+    // }
 }
 
 hr {
     border: 0;
     border-top: var(--border-width) solid var(--divider-color);
-    margin: var(--spacing-l) 0;
+    margin: var(--spacing-l) 0; // Using a larger spacing for horizontal rules
 }
 
-// --- Adwaita Theming ---
-// Default theme variables are set on :root in _variables.scss (which defaults to light theme values)
-
-.theme-light {
-    // Explicitly set light theme variables. This overrides :root if :root was different.
-    // If :root already holds light theme values, this reinforces them.
-    --body-bg-color: #{$background-color-light};
-    --text-color: #{$text-color-light};
-    --text-color-secondary: #{$text-color-secondary-light};
-    --heading-color: #{$heading-color-light};
-    --border-color: #{$border-color-light};
-    --divider-color: #{$divider-color-light};
-    --focus-ring-color: #{$focus-ring-color-fallback-light}; // Fallback, overridden by accent
-    --link-color: #{$link-color-light};
-    --link-hover-color: #{$link-hover-color-light};
-    --link-visited-color: #{$link-visited-color-light};
-    --headerbar-bg-color: #{$headerbar-background-color-light};
-    --headerbar-fg-color: #{$headerbar-text-color-light};
-    --headerbar-border-color: #{$headerbar-border-color-light};
-    --window-bg-color: #{$window-background-color-light};
-    --button-bg-color: #{$button-background-color-light};
-    --button-fg-color: #{$button-text-color-light};
-    --button-border-color: #{$button-border-color-light};
-    --button-hover-bg-color: #{$button-hover-background-color-light};
-    --button-hover-border-color: #{$button-hover-border-color-light};
-    --button-hover-text-color: #{$button-hover-text-color-light};
-    --button-active-bg-color: #{$button-active-background-color-light};
-    --button-active-border-color: #{$button-active-border-color-light};
-    --button-disabled-bg-color: #{$button-disabled-background-color-light};
-    --button-disabled-fg-color: #{$button-disabled-text-color-light};
-    --button-disabled-border-color: #{$button-disabled-border-color-light};
-    --button-flat-hover-bg-color: #{$flat-button-hover-background-color-light};
-    --button-flat-active-bg-color: #{$flat-button-active-background-color-light};
-    --button-active-toggle-bg-color: #{$button-active-toggle-background-color-light};
-    --button-active-toggle-border-color: #{$button-active-toggle-border-color-light};
-    --button-active-toggle-text-color: #{$button-active-toggle-text-color-light};
-    --input-bg-color: #{$input-background-color-light};
-    --input-fg-color: #{$input-text-color-light};
-    --input-border-color: #{$input-border-color-light};
-    --input-hover-bg-color: #{$input-hover-background-color-light};
-    --input-hover-border-color: #{$input-hover-border-color-light};
-    --input-focus-bg-color: #{$input-focus-background-color-light};
-    --input-focus-border-color: #{$input-focus-border-color-fallback-light}; // Fallback
-    --input-placeholder-color: #{$input-placeholder-color-light};
-    --input-disabled-bg-color: #{$input-disabled-background-color-light};
-    --input-disabled-fg-color: #{$input-disabled-text-color-light};
-    --input-disabled-border-color: #{$input-disabled-border-color-light};
-    --input-readonly-bg-color: #{$input-readonly-background-color-light};
-    --input-readonly-fg-color: #{$input-readonly-text-color-light};
-    --input-readonly-border-color: #{$input-readonly-border-color-light};
-    --accent-color: #{$sass-accent-blue-light-color}; // Default blue accent for light
-    --accent-bg-color: #{$sass-accent-blue-light-bg};
-    --accent-fg-color: #{$sass-accent-blue-light-fg};
-    --accent-bg-hover-color: #{$sass-accent-blue-light-hover};
-    --accent-bg-active-color: #{$sass-accent-blue-light-active};
-    --destructive-color: #{$sass-accent-red-light-color};
-    --destructive-bg-color: #{$sass-accent-red-light-bg};
-    --destructive-fg-color: #{$sass-accent-red-light-fg};
-    --destructive-bg-hover-color: #{$sass-accent-red-light-hover};
-    --destructive-bg-active-color: #{$sass-accent-red-light-active};
-    --success-color: #{$sass-accent-green-light-color};
-    --success-bg-color: #{$sass-accent-green-light-bg};
-    --success-fg-color: #{$sass-accent-green-light-fg};
-}
-
-.theme-dark {
-    --body-bg-color: #{$background-color-dark};
-    --text-color: #{$text-color-dark};
-    --text-color-secondary: #{$text-color-secondary-dark};
-    --heading-color: #{$heading-color-dark};
-    --border-color: #{$border-color-dark};
-    --divider-color: #{$divider-color-dark};
-    --focus-ring-color: #{$focus-ring-color-fallback-dark}; // Fallback
-    --link-color: #{$link-color-dark};
-    --link-hover-color: #{$link-hover-color-dark};
-    --link-visited-color: #{$link-visited-color-dark};
-    --headerbar-bg-color: #{$headerbar-background-color-dark};
-    --headerbar-fg-color: #{$headerbar-text-color-dark};
-    --headerbar-border-color: #{$headerbar-border-color-dark};
-    --window-bg-color: #{$window-background-color-dark};
-    --button-bg-color: #{$button-background-color-dark};
-    --button-fg-color: #{$button-text-color-dark};
-    --button-border-color: #{$button-border-color-dark};
-    --button-hover-bg-color: #{$button-hover-background-color-dark};
-    --button-hover-border-color: #{$button-hover-border-color-dark};
-    --button-hover-text-color: #{$button-hover-text-color-dark};
-    --button-active-bg-color: #{$button-active-background-color-dark};
-    --button-active-border-color: #{$button-active-border-color-dark};
-    --button-disabled-bg-color: #{$button-disabled-background-color-dark};
-    --button-disabled-fg-color: #{$button-disabled-text-color-dark};
-    --button-disabled-border-color: #{$button-disabled-border-color-dark};
-    --button-flat-hover-bg-color: #{$flat-button-hover-background-color-dark};
-    --button-flat-active-bg-color: #{$flat-button-active-background-color-dark};
-    --button-active-toggle-bg-color: #{$button-active-toggle-background-color-dark};
-    --button-active-toggle-border-color: #{$button-active-toggle-border-color-dark};
-    --button-active-toggle-text-color: #{$button-active-toggle-text-color-dark};
-    --input-bg-color: #{$input-background-color-dark};
-    --input-fg-color: #{$input-text-color-dark};
-    --input-border-color: #{$input-border-color-dark};
-    --input-hover-bg-color: #{$input-hover-background-color-dark};
-    --input-hover-border-color: #{$input-hover-border-color-dark};
-    --input-focus-bg-color: #{$input-focus-background-color-dark};
-    --input-focus-border-color: #{$input-focus-border-color-fallback-dark}; // Fallback
-    --input-placeholder-color: #{$input-placeholder-color-dark};
-    --input-disabled-bg-color: #{$input-disabled-background-color-dark};
-    --input-disabled-fg-color: #{$input-disabled-text-color-dark};
-    --input-disabled-border-color: #{$input-disabled-border-color-dark};
-    --input-readonly-bg-color: #{$input-readonly-background-color-dark};
-    --input-readonly-fg-color: #{$input-readonly-text-color-dark};
-    --input-readonly-border-color: #{$input-readonly-border-color-dark};
-    --accent-color: #{$sass-accent-blue-dark-color}; // Default blue accent for dark
-    --accent-bg-color: #{$sass-accent-blue-dark-bg};
-    --accent-fg-color: #{$sass-accent-blue-dark-fg};
-    --accent-bg-hover-color: #{$sass-accent-blue-dark-hover};
-    --accent-bg-active-color: #{$sass-accent-blue-dark-active};
-    --destructive-color: #{$sass-accent-red-dark-color};
-    --destructive-bg-color: #{$sass-accent-red-dark-bg};
-    --destructive-fg-color: #{$sass-accent-red-dark-fg};
-    --destructive-bg-hover-color: #{$sass-accent-red-dark-hover};
-    --destructive-bg-active-color: #{$sass-accent-red-dark-active};
-    --success-color: #{$sass-accent-green-dark-color};
-    --success-bg-color: #{$sass-accent-green-dark-bg};
-    --success-fg-color: #{$sass-accent-green-dark-fg};
-}
-
-@media (prefers-color-scheme: dark) {
-    body:not(.theme-light):not(.theme-dark) { // Apply if no explicit theme class is set
-        // Set all dark theme CSS variables directly
-        --body-bg-color: #{$background-color-dark};
-        --text-color: #{$text-color-dark};
-        --text-color-secondary: #{$text-color-secondary-dark};
-        --heading-color: #{$heading-color-dark};
-        --border-color: #{$border-color-dark};
-        --divider-color: #{$divider-color-dark};
-        --focus-ring-color: #{$focus-ring-color-fallback-dark};
-        --link-color: #{$link-color-dark};
-        --link-hover-color: #{$link-hover-color-dark};
-        --link-visited-color: #{$link-visited-color-dark};
-        --headerbar-bg-color: #{$headerbar-background-color-dark};
-        --headerbar-fg-color: #{$headerbar-text-color-dark};
-        --headerbar-border-color: #{$headerbar-border-color-dark};
-        --window-bg-color: #{$window-background-color-dark};
-        --button-bg-color: #{$button-background-color-dark};
-        --button-fg-color: #{$button-text-color-dark};
-        --button-border-color: #{$button-border-color-dark};
-        --button-hover-bg-color: #{$button-hover-background-color-dark};
-        --button-hover-border-color: #{$button-hover-border-color-dark};
-        --button-hover-text-color: #{$button-hover-text-color-dark};
-        --button-active-bg-color: #{$button-active-background-color-dark};
-        --button-active-border-color: #{$button-active-border-color-dark};
-        --button-disabled-bg-color: #{$button-disabled-background-color-dark};
-        --button-disabled-fg-color: #{$button-disabled-text-color-dark};
-        --button-disabled-border-color: #{$button-disabled-border-color-dark};
-        --button-flat-hover-bg-color: #{$flat-button-hover-background-color-dark};
-        --button-flat-active-bg-color: #{$flat-button-active-background-color-dark};
-        --button-active-toggle-bg-color: #{$button-active-toggle-background-color-dark};
-        --button-active-toggle-border-color: #{$button-active-toggle-border-color-dark};
-        --button-active-toggle-text-color: #{$button-active-toggle-text-color-dark};
-        --input-bg-color: #{$input-background-color-dark};
-        --input-fg-color: #{$input-text-color-dark};
-        --input-border-color: #{$input-border-color-dark};
-        --input-hover-bg-color: #{$input-hover-background-color-dark};
-        --input-hover-border-color: #{$input-hover-border-color-dark};
-        --input-focus-bg-color: #{$input-focus-background-color-dark};
-        --input-focus-border-color: #{$input-focus-border-color-fallback-dark};
-        --input-placeholder-color: #{$input-placeholder-color-dark};
-        --input-disabled-bg-color: #{$input-disabled-background-color-dark};
-        --input-disabled-fg-color: #{$input-disabled-text-color-dark};
-        --input-disabled-border-color: #{$input-disabled-border-color-dark};
-        --input-readonly-bg-color: #{$input-readonly-background-color-dark};
-        --input-readonly-fg-color: #{$input-readonly-text-color-dark};
-        --input-readonly-border-color: #{$input-readonly-border-color-dark};
-        --accent-color: #{$sass-accent-blue-dark-color};
-        --accent-bg-color: #{$sass-accent-blue-dark-bg};
-        --accent-fg-color: #{$sass-accent-blue-dark-fg};
-        --accent-bg-hover-color: #{$sass-accent-blue-dark-hover};
-        --accent-bg-active-color: #{$sass-accent-blue-dark-active};
-        --destructive-color: #{$sass-accent-red-dark-color};
-        --destructive-bg-color: #{$sass-accent-red-dark-bg};
-        --destructive-fg-color: #{$sass-accent-red-dark-fg};
-        --destructive-bg-hover-color: #{$sass-accent-red-dark-hover};
-        --destructive-bg-active-color: #{$sass-accent-red-dark-active};
-        --success-color: #{$sass-accent-green-dark-color};
-        --success-bg-color: #{$sass-accent-green-dark-bg};
-        --success-fg-color: #{$sass-accent-green-dark-fg};
-    }
-}
-
-// --- Accent Color Application ---
-@each $name, $palettes_data in $accent-color-definitions-map {
-    .accent-#{$name} {
-        &:not(.theme-dark) { // Applies to .theme-light or body without .theme-dark
-            $light-palette: map.get($palettes_data, light);
-            $light-color: map.get($light-palette, color);
-            $light-bg: map.get($light-palette, bg);
-            $light-fg: map.get($light-palette, fg);
-            $light-hover: map.get($light-palette, hover);
-            $light-active: map.get($light-palette, active);
-
-            --accent-color: #{$light-color};
-            --accent-bg-color: #{$light-bg};
-            --accent-fg-color: #{$light-fg};
-            --accent-bg-hover-color: #{$light-hover};
-            --accent-bg-active-color: #{$light-active};
-            --focus-ring-color: #{rgba($light-color, 0.5)};
-            --input-focus-border-color: #{$light-color};
-        }
-        &.theme-dark {
-            $dark-palette: map.get($palettes_data, dark);
-            $dark-color: map.get($dark-palette, color);
-            $dark-bg: map.get($dark-palette, bg);
-            $dark-fg: map.get($dark-palette, fg);
-            $dark-hover: map.get($dark-palette, hover);
-            $dark-active: map.get($dark-palette, active);
-
-            --accent-color: #{$dark-color};
-            --accent-bg-color: #{$dark-bg};
-            --accent-fg-color: #{$dark-fg};
-            --accent-bg-hover-color: #{$dark-hover};
-            --accent-bg-active-color: #{$dark-active};
-            --focus-ring-color: #{rgba($dark-color, 0.6)};
-            --input-focus-border-color: #{$dark-color};
-        }
-    }
-}
-
-// Default focus/input border colors if no specific accent class is present on the themed element
-.theme-light:not([class*="accent-"]) {
-    --focus-ring-color: #{rgba($sass-accent-blue-light-color, 0.5)};
-    --input-focus-border-color: #{$sass-accent-blue-light-color};
-}
-.theme-dark:not([class*="accent-"]) {
-    --focus-ring-color: #{rgba($sass-accent-blue-dark-color, 0.6)};
-    --input-focus-border-color: #{$sass-accent-blue-dark-color};
-}
-
-// Fallback for when no theme class is set on body, relying on prefers-color-scheme
-body:not([class*="theme-"]):not([class*="accent-"]) {
-     @media (prefers-color-scheme: light) {
-        --focus-ring-color: #{rgba($sass-accent-blue-light-color, 0.5)};
-        --input-focus-border-color: #{$sass-accent-blue-light-color};
-     }
-     @media (prefers-color-scheme: dark) {
-        // The main prefers-color-scheme:dark block above should handle general var setting.
-        // This just ensures accent-related defaults for focus are set if no accent class.
-        --focus-ring-color: #{rgba($sass-accent-blue-dark-color, 0.6)};
-        --input-focus-border-color: #{$sass-accent-blue-dark-color};
-     }
-}
-
-// Utility classes
+// Utility classes that were in adwaita-skin.css
 .adw-text-center { text-align: center; }
 .adw-text-left   { text-align: left; }
 .adw-text-right  { text-align: right; }
+
+// Note: The .theme-light, .theme-dark, @media (prefers-color-scheme: dark),
+// and accent color loop blocks have been removed from here as they are
+// now generated by _variables.scss based on the SASS variables.
+// _variables.scss is responsible for outputting all CSS Custom Properties
+// to :root, .theme-dark, and .accent-* classes.
