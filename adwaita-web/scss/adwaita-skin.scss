@@ -43,5 +43,8 @@
 @import 'clamp';
 @import 'window';
 
+// App-demo specific styles
+@import 'app-demo-specific';
+
 // TODO: Add more specific skin styles or overrides if needed.
 // TODO: Review each imported file to ensure selectors are class-based and not web-component specific.

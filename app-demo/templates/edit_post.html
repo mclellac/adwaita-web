@@ -73,7 +73,7 @@
             </div>
         </div>
 
-        <div class="form-actions-container" style="display: flex; justify-content: space-between; align-items: center; margin-top: var(--spacing-l);">
+        <div class="form-actions-container form-actions-space-between">
             {# Existing buttons on one side #}
             <div class="adw-box adw-box-spacing-s">
                 <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button flat">Cancel</a>
@@ -83,7 +83,7 @@
 
             {# Delete button on the other side #}
             {% if delete_form %}
-            <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" class="inline-form" onsubmit="return confirm('Are you sure you want to permanently delete this post? \\n\\n\'{{ post.title|escapejs }}\'');" style="margin: 0;">
+            <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" class="delete-post-form-inline" onsubmit="return confirm('Are you sure you want to permanently delete this post? \\n\\n\'{{ post.title|escapejs }}\'');">
                 {{ delete_form.hidden_tag() }} {# CSRF token #}
                 <button type="submit" class="adw-button destructive-action">Delete Post</button>
             </form>

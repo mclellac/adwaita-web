@@ -7,8 +7,6 @@
     <title>{% block title %}My Libadwaita Blog{% endblock %}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-skin.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/app-icons.css') }}"> {# Added app-specific icons CSS #}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/app-demo-custom.css') }}"> {# Added app-specific custom CSS #}
 </head>
 <body>
   <script>
@@ -96,31 +94,6 @@
     </div>
 </header>
 
-<style>
-.adw-header-bar__start .site-title-link {
-    text-decoration: none;
-    color: inherit;
-    font-weight: bold; /* Make it look more like a title */
-}
-.adw-header-bar__start .site-title-link:hover,
-.adw-header-bar__start .site-title-link:focus {
-    text-decoration: none;
-}
-.adw-header-bar__end {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-s, 8px); /* Default gap if var not defined */
-}
-.header-search-form {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs, 4px); /* Default gap */
-}
-.profile-avatar-button img, .profile-avatar-button .adw-avatar-text {
-    vertical-align: middle;
-}
-</style>
-
     <div class="page-content-wrapper"> {# Replaced adw-page for more control #}
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -159,52 +132,6 @@
             <a href="{{ url_for('contact_page') }}" class="adw-button flat">Contact</a>
         </div>
     </footer>
-
-    <style>
-    .app-footer {
-        border-top: 1px solid var(--border-color, #cccccc);
-        padding: var(--spacing-s, 8px) var(--spacing-m, 12px);
-        margin-top: var(--spacing-xl, 24px);
-        background-color: var(--window-bg-color, white);
-    }
-    /* Ensure footer items have good spacing */
-    .app-footer .adw-toolbar__end {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-s, 8px);
-    }
-
-    /* Basic CSS-only Expander Row */
-    .adw-css-expander-row summary.adw-action-row {
-        list-style: none; /* Remove default marker */
-        position: relative;
-        /* Ensure chevron is included in padding calculation if using padding-right on summary */
-    }
-    .adw-css-expander-row summary.adw-action-row::-webkit-details-marker {
-        display: none; /* Hide WebKit default marker */
-    }
-    .adw-css-expander-row summary.adw-action-row::after { /* Custom chevron */
-        content: '';
-        display: inline-block;
-        width: 0.5em;
-        height: 0.5em;
-        border-right: 0.15em solid currentColor;
-        border-bottom: 0.15em solid currentColor;
-        transform: rotate(45deg); /* Default: pointing down-right (like Adwaita's pan-end-symbolic) */
-        transition: transform 0.2s ease-out;
-        position: absolute;
-        right: var(--spacing-l, 12px); /* Adwaita action row typically has padding, place chevron within it */
-        top: 50%;
-        margin-top: -0.35em; /* Adjust vertical based on chevron size and border */
-        opacity: 0.7;
-    }
-    .adw-css-expander-row[open] > summary.adw-action-row::after {
-        transform: rotate(-135deg); /* Pointing up-right */
-    }
-    .adw-css-expander-row .adw-expander-row-content {
-        /* Content is already styled inline in profile.html, this is just a placeholder */
-    }
-    </style>
 
     {% block scripts %}{% endblock %}
 </body>

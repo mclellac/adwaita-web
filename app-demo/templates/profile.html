@@ -17,7 +17,7 @@
 
 {% block content %}
 <div class="adw-clamp adw-clamp-xl">
-    <div class="adw-box adw-box-vertical adw-box-spacing-l" style="padding-top: var(--spacing-l);">
+    <div class="adw-box adw-box-vertical adw-box-spacing-l profile-page-main-box">
 
         {# User Header Info #}
         <div class="adw-box adw-box-spacing-xl align-center"> {# Horizontal by default #}
@@ -51,7 +51,7 @@
                         </span>
                         {# Custom chevron will be applied via CSS to summary::after #}
                     </summary>
-                    <div class="adw-expander-row-content" style="padding: var(--spacing-m); white-space: pre-wrap; border-top: 1px solid var(--borders-color, #ddd); margin-top: -1px;">
+                    <div class="adw-expander-row-content">
                         {{ user_profile.profile_info | safe }}
                     </div>
                 </details>
@@ -113,7 +113,7 @@
 
                 {# Pagination Controls - Using Adwaita ToggleGroup for a more native feel #}
                 {% if posts_pagination.pages > 1 %}
-                <div class="adw-box adw-box-horizontal justify-center" style="margin-top: var(--spacing-l);">
+                <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
                     <div class="adw-toggle-group">
                         {% if posts_pagination.has_prev %}
                             <a href="{{ url_for('profile', username=user_profile.username, page=posts_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
@@ -133,7 +133,7 @@
                                     <a href="{{ url_for('profile', username=user_profile.username, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
                             {% elif loop.index != 1 and loop.index != posts_pagination.pages + posts_pagination.iter_pages()|length %}
-                                <button class="adw-button flat" disabled style="pointer-events: none;">…</button>
+                                <button class="adw-button flat" disabled>…</button>
                             {% endif %}
                         {% endfor %}
 
@@ -151,7 +151,7 @@
                 {% endif %}
             {% else %}
                 <div class="adw-status-page">
-                    <span class="adw-icon icon-content-document-new-symbolic adw-status-page-icon" style="font-size: 3rem;"></span>
+                    <span class="adw-icon icon-content-document-new-symbolic adw-status-page-icon app-status-page-icon"></span>
                     <h3 class="adw-status-page-title">No Posts Yet</h3>
                     <p class="adw-status-page-description">{{ user_profile.username }} has not made any posts.</p>
                 </div>

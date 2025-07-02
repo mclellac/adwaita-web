@@ -49,8 +49,8 @@ mkdir -p "${ADWAITA_WEB_COMPILED_CSS_DIR}"
 
 # Compile SASS to CSS
 echo "--- Compiling SASS to CSS (${SASS_INPUT_FILE} -> ${COMPILED_CSS_FILE_PATH}) ---"
-# Explicitly use the Dart Sass installed via npm
-SASS_EXEC="/home/jules/.nvm/versions/node/v22.16.0/bin/sass"
+# Use SASS from PATH (installed globally via npm)
+SASS_EXEC="sass"
 sass_output_and_error=$($SASS_EXEC "${SASS_INPUT_FILE}" "${COMPILED_CSS_FILE_PATH}" --style compressed 2>&1)
 sass_exit_code=$?
 
@@ -58,13 +58,12 @@ if [ ${sass_exit_code} -ne 0 ]; then
     echo "ERROR: SASS compilation failed (exit code ${sass_exit_code})."
     echo "SASS Compiler Output:"
     echo "${sass_output_and_error}"
-    if [ ${sass_exit_code} -eq 127 ]; then
+    if [ ${sass_exit_code} -eq 127 ]; then # Should not happen now if sass is in PATH
         echo "NOTE: Exit code 127 often means 'command not found'. Is sass installed and in your PATH?"
     fi
-    # exit 1 # Allow script to continue for now to see other potential errors.
     echo "WARNING: SASS compilation step did not succeed. CSS file may not be updated. Continuing script..."
 else
-    if [ -n "${sass_output_and_error}" ]; then
+    if [ -n "${sass_output_and_error}" ]; then # Print warnings or other output if any
         echo "SASS Compilation Warnings (or other output):"
         echo "${sass_output_and_error}"
     fi
