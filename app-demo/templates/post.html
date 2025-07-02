@@ -23,7 +23,7 @@
 
             {% if post.categories %}
             <div class="post-terms post-categories">
-                <span class="adw-label caption" style="font-weight: bold;">Categories:</span>
+                <strong class="adw-label caption post-meta-terms-label">Categories:</strong>
                 {% for category in post.categories %}
                     <a href="{{ url_for('posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact">{{ category.name }}</a>
                 {% endfor %}
@@ -32,7 +32,7 @@
 
             {% if post.tags %}
             <div class="post-terms post-tags">
-                <span class="adw-label caption" style="font-weight: bold;">Tags:</span>
+                <strong class="adw-label caption post-meta-terms-label">Tags:</strong>
                 {% for tag in post.tags %}
                   <a href="{{ url_for('posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact">{{ tag.name }}</a>
                 {% endfor %}
@@ -81,7 +81,7 @@
         </section>
 
         {% if post.author == current_user %}
-        <div class="post-actions adw-box adw-box-spacing-s" style="justify-content: flex-end; margin-top: var(--spacing-l);">
+        <div class="post-actions-container adw-box adw-box-spacing-s">
             <a href="{{ url_for('edit_post', post_id=post.id) }}" class="adw-button">Edit Post</a>
             <button id="open-delete-dialog-btn" class="adw-button destructive-action">Delete Post</button>
         </div>
@@ -95,7 +95,7 @@
             </div>
             <footer class="adw-dialog__actions">
                 <button id="cancel-delete-btn" class="adw-button flat">Cancel</button>
-                <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form" style="display: inline;">
+                <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form" class="delete-post-form-inline">
                     {{ csrf_token() }} {# Flask-WTF CSRF token #}
                     <button id="confirm-delete-btn" type="submit" class="adw-button destructive-action">Delete</button>
                 </form>
@@ -112,19 +112,19 @@
             <div class="adw-list-box comments-list">
                 {% for comment in comments %}
                 <article class="adw-card comment-card"> {# Changed div to article, added adw-card #}
-                    <header class="comment-header adw-box adw-box-spacing-s" style="align-items: center;">
+                    <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
                         <span class="adw-avatar size-medium">
                            {% set comment_avatar = url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else url_for('static', filename='img/default_avatar.png') %}
                            <img src="{{ comment_avatar }}" alt="{{ comment.author.username }} avatar" class="adw-avatar__image">
                         </span>
                         <div class="comment-author-meta">
-                             <a href="{{ url_for('profile', username=comment.author.username) }}" class="adw-link" style="font-weight: bold;">{{ comment.author.username }}</a>
+                             <a href="{{ url_for('profile', username=comment.author.username) }}" class="adw-link comment-author-link-strong">{{ comment.author.username }}</a>
                             <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></small>
                         </div>
                     </header>
                     <p class="comment-text styled-text-content">{{ comment.text }}</p> {# Added styled-text-content #}
                     {% if current_user.is_authenticated and (comment.author == current_user or post.author == current_user) %}
-                        <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" onsubmit="return confirm('Are you sure you want to delete this comment?');" class="comment-delete-form" style="text-align: right; margin-top: var(--spacing-s);">
+                        <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" onsubmit="return confirm('Are you sure you want to delete this comment?');" class="comment-delete-form-container">
                             {{ delete_form.hidden_tag() }} {# Assuming delete_form is passed for CSRF #}
                             <button type="submit" class="adw-button destructive-action compact">Delete Comment</button>
                         </form>
@@ -144,16 +144,16 @@
         </header>
         <form method="POST" action="{{ url_for('view_post', post_id=post.id) }}" class="stacked-form">
             {{ form.hidden_tag() }} {# Flask-WTF CSRF token #}
-            <div class="form-field-row {{ 'has-error' if form.text.errors else '' }}"> {# More standard form field structure #}
+            <div class="form-field-row comment-form-field-row {{ 'has-error' if form.text.errors else '' }}"> {# More standard form field structure #}
                  <label for="{{ form.text.id or 'comment_text_input' }}" class="adw-label">{{ form.text.label.text }}</label>
-                 <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry adw-textarea" rows="4" style="margin-top: var(--spacing-xs);">{{ form.text.data or ''}}</textarea>
+                 <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry adw-textarea" rows="4">{{ form.text.data or ''}}</textarea>
             </div>
             {% if form.text.errors %}
             <div class="form-field-error">
                 <span class="adw-label caption error-text">{{form.text.errors|join(' ')}}</span>
             </div>
             {% endif %}
-            <div class="form-actions-container" style="border-top: none; padding-top: var(--spacing-s);">
+            <div class="form-actions-container comment-form-actions">
                  <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text }}</button>
             </div>
         </form>
@@ -165,7 +165,7 @@
     {% endif %}
 
     {% if related_posts %}
-    <section class="related-posts-section" aria-labelledby="related-posts-heading" style="margin-top: var(--spacing-xl);">
+    <section class="related-posts-section related-posts-container" aria-labelledby="related-posts-heading">
         <h2 id="related-posts-heading" class="adw-title-2">Related Posts</h2>
         <div class="adw-list-box">
             {% for related_post in related_posts %}
@@ -183,7 +183,7 @@
     </section>
     {% endif %}
 
-    <div class="adw-box adw-box-spacing-s" style="justify-content: center; margin-top: var(--spacing-xl);">
+    <div class="adw-box adw-box-spacing-s back-to-posts-container">
          <a href="{{ url_for('index') }}" class="adw-button"><span class="adw-icon icon-actions-go-previous-symbolic"></span> Back to Posts</a>
     </div>
 </div>

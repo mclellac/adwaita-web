@@ -5,7 +5,7 @@
 {% block content %}
 <div class="form-container"> {# Replaced adw-clamp and content-clamp #}
   <div class="adw-preferences-page"> {# This can be kept for overall page structure if desired #}
-    <header class="adw-preferences-page__header" style="text-align: center; margin-bottom: var(--spacing-l);">
+    <header class="adw-preferences-page__header form-page-header">
       <h1 class="adw-title-1">Create New Post</h1> {# Changed to adw-title-1 #}
     </header>
     <form method="POST" action="{{ url_for('create_post') }}" novalidate class="stacked-form">
@@ -28,11 +28,11 @@
             {% endif %}
 
             {# Content Textarea #}
-            <div class="form-field-row {{ 'has-error' if form.content.errors else '' }}" style="margin-top: var(--spacing-s);">
-                <label for="{{ form.content.id or 'content_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
+            <div class="form-field-row content-field-row {{ 'has-error' if form.content.errors else '' }}">
+                <label for="{{ form.content.id or 'content_input' }}" class="adw-label form-field-label-block">{{ form.content.label.text }}</label>
                 <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-entry adw-textarea" rows="10" placeholder="Enter your post content here...">{{ form.content.data or '' }}</textarea>
                 {% if form.content.errors %}
-                <div class="form-field-error" style="margin-top: var(--spacing-xs);">
+                <div class="form-field-error">
                     <span class="adw-label caption error-text">{{ form.content.errors|join(' ') }}</span>
                 </div>
                 {% endif %}
@@ -79,7 +79,7 @@
             {% endif %}
         </section>
 
-        <div class="form-actions-container" style="margin-top: var(--spacing-l); display: flex; justify-content: flex-end; gap: var(--spacing-s);">
+        <div class="form-actions-container form-actions-end">
             {{ form.save_draft(class="adw-button") }}
             {{ form.publish(class="adw-button suggested-action") }}
         </div>

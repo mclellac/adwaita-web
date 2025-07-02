@@ -1,0 +1,302 @@
+// Styles moved from app-demo/templates/base.html
+
+// Header styles
+.adw-header-bar__start .site-title-link {
+    text-decoration: none;
+    color: inherit;
+    font-weight: var(--heading-font-weight, 700); // Use CSS var, fallback to bold
+}
+.adw-header-bar__start .site-title-link:hover,
+.adw-header-bar__start .site-title-link:focus {
+    text-decoration: none;
+}
+.adw-header-bar__end {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s);
+}
+.header-search-form {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+.profile-avatar-button img, .profile-avatar-button .adw-avatar-text {
+    vertical-align: middle;
+}
+
+// Footer styles
+.app-footer {
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-s) var(--spacing-m);
+    margin-top: var(--spacing-xl);
+    background-color: var(--window-bg-color); // Adwaita window background
+}
+
+.app-footer .adw-toolbar__end {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-s);
+}
+
+// Basic CSS-only Expander Row (used in profile.html)
+.adw-css-expander-row {
+    summary.adw-action-row {
+        list-style: none; // Remove default marker
+        position: relative;
+        // Ensure chevron is included in padding calculation if using padding-right on summary
+        // (Assuming .adw-action-row itself has appropriate padding)
+
+        &::-webkit-details-marker {
+            display: none; // Hide WebKit default marker
+        }
+
+        // Custom chevron
+        &::after {
+            content: '';
+            display: inline-block;
+            width: 0.5em;
+            height: 0.5em;
+            border-right: 0.15em solid currentColor;
+            border-bottom: 0.15em solid currentColor;
+            transform: rotate(45deg); // Default: pointing down-right
+            transition: transform 0.2s ease-out;
+            position: absolute;
+            right: var(--spacing-m); // Adjusted to use spacing var, closer to Adwaita standard
+            top: 50%;
+            margin-top: -0.35em; // Adjust vertical based on chevron size and border
+            opacity: 0.7;
+        }
+    }
+
+    &[open] > summary.adw-action-row::after {
+        transform: rotate(-135deg); // Pointing up-right
+    }
+
+    .adw-expander-row-content {
+        padding: var(--spacing-m);
+        white-space: pre-wrap; // For preserving formatting in bio
+        border-top: 1px solid var(--divider-color); // Use Adwaita divider color
+        margin-top: -1px; // Collapses border with summary when open
+    }
+}
+
+// --- Styles from index.html ---
+.page-title-centered {
+    text-align: center;
+    margin-bottom: var(--spacing-l);
+}
+
+.meta-section {
+    margin-top: var(--spacing-xs);
+}
+
+.meta-label-strong {
+    font-weight: bold; // Or use SASS var $font-weight-bold
+}
+
+.app-status-page-icon { // For specific sizing if default adw-status-page-icon isn't enough
+    font-size: 3rem; // Was inline
+}
+
+.pagination-controls {
+    margin-top: var(--spacing-l);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-xs);
+
+    .adw-button.flat[disabled],
+    .adw-button[disabled] { // General disabled button styling for ellipsis
+        pointer-events: none; // Already default for disabled, but can be explicit
+        // color: var(--text-color-secondary); // Optional: make ellipsis more muted
+    }
+    .adw-button.active { // Ensure active pagination button is bold if not already default
+        font-weight: bold;
+    }
+}
+
+
+// --- Styles from post.html ---
+.post-meta-terms-label { // For "Categories:", "Tags:" labels in post view
+    font-weight: bold;
+}
+
+.post-actions-container {
+    display: flex; // Added display flex
+    justify-content: flex-end;
+    margin-top: var(--spacing-l);
+    gap: var(--spacing-s); // Added gap for buttons
+}
+
+// For the form that contains only a delete button
+.delete-post-form-inline {
+    display: inline; // For forms that are just a button
+    margin: 0; // Reset margin for inline forms
+}
+
+.comment-header-box {
+    align-items: center;
+    // gap: var(--spacing-s); // If direct children of adw-box need gap
+}
+
+.comment-author-link-strong {
+    font-weight: bold;
+}
+
+.comment-delete-form-container {
+    text-align: right;
+    margin-top: var(--spacing-s);
+}
+
+.comment-form-field-row { // Specific to comment text area if needed beyond global .form-field-row
+    // margin-top: var(--spacing-xs); // This was too little, form-field-row default is --spacing-s
+}
+.comment-form-actions { // Styles for the container of the submit button in comment form
+    border-top: none; // Overriding default list-box header style perhaps
+    padding-top: var(--spacing-s);
+}
+
+.related-posts-container {
+    margin-top: var(--spacing-xl);
+}
+
+.back-to-posts-container {
+    display: flex; // Added
+    justify-content: center;
+    margin-top: var(--spacing-xl);
+}
+
+// --- Styles from create_post.html & edit_post.html (some may be general form styles) ---
+.form-page-header { // For centered headers on form pages like create_post
+    text-align: center;
+    margin-bottom: var(--spacing-l);
+}
+
+// General form field structure if not using adw-entry-row or adw-action-row
+.form-field-row {
+    margin-top: var(--spacing-s); // Default top margin for a form field row
+    &.content-field-row { // Specific for the larger content textarea
+         // margin-top: var(--spacing-s); // Already set by .form-field-row
+    }
+    .form-field-label-block { // For labels that should be block display
+        display: block;
+        margin-bottom: var(--spacing-xs);
+    }
+    .form-field-error-container { // Container for error messages for these rows
+        margin-top: var(--spacing-xs);
+    }
+}
+
+.form-actions-container { // General form actions (save, publish, cancel etc.)
+    margin-top: var(--spacing-l);
+    display: flex;
+    align-items: center; // Align items vertically
+    gap: var(--spacing-s);
+
+    &.form-actions-end { // Aligns buttons to the right
+        justify-content: flex-end;
+    }
+    &.form-actions-space-between { // For edit_post.html like layout
+        justify-content: space-between;
+    }
+}
+
+// --- Styles from profile.html ---
+.profile-page-main-box {
+    padding-top: var(--spacing-l);
+}
+
+.profile-pagination-box { // For the adw-box containing pagination controls
+    margin-top: var(--spacing-l);
+    // display: flex; justify-content: center; // Handled by .adw-box.justify-center
+}
+
+// Prose styling for user-generated content (post content, comments, bio)
+.styled-text-content {
+    line-height: 1.6;
+
+    p {
+        margin-bottom: var(--spacing-m);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        margin-top: var(--spacing-l);
+        margin-bottom: var(--spacing-s);
+        font-weight: var(--heading-font-weight, 700);
+    }
+    h1 { font-size: var(--font-size-h1); }
+    h2 { font-size: var(--font-size-h2); }
+    h3 { font-size: var(--font-size-h3); }
+    h4 { font-size: var(--font-size-h4); }
+
+    ul, ol {
+        margin-bottom: var(--spacing-m);
+        padding-left: var(--spacing-l);
+    }
+    li {
+        margin-bottom: var(--spacing-xs);
+    }
+
+    blockquote {
+        margin: var(--spacing-m) 0;
+        padding: var(--spacing-s) var(--spacing-m);
+        border-left: 4px solid var(--border-color);
+        background-color: var(--button-bg-color); // A slightly off-bg color
+        color: var(--text-color-secondary);
+        font-style: italic;
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    pre {
+        background-color: var(--headerbar-bg-color); // Use a distinct background
+        color: var(--text-color);
+        padding: var(--spacing-m);
+        border-radius: var(--border-radius-medium);
+        overflow-x: auto;
+        font-family: var(--monospace-font-family);
+        font-size: 0.9em; // Slightly smaller for code blocks
+        line-height: 1.4;
+    }
+    code { // Inline code
+        font-family: var(--monospace-font-family);
+        // Using a subtle, semi-transparent version of a base dark color for light theme
+        background-color: rgba($adw-dark-5, 0.05);
+        padding: 0.1em 0.3em;
+        border-radius: var(--border-radius-small);
+        font-size: 0.9em;
+    }
+    :root.theme-dark .styled-text-content code {
+        // Using a subtle, semi-transparent version of a base light color for dark theme
+        background-color: rgba($adw-light-1, 0.08);
+    }
+    pre code { // Reset for code inside pre
+      background-color: transparent;
+      padding: 0;
+      border-radius: 0;
+      font-size: inherit; // Inherit from pre
+    }
+
+    a {
+        color: var(--link-color);
+        text-decoration: underline;
+        &:hover {
+            color: var(--link-hover-color);
+        }
+    }
+
+    hr {
+        border: none;
+        border-top: 1px solid var(--divider-color);
+        margin: var(--spacing-l) 0;
+    }
+    // Add more styling for tables, images etc. as needed
+}
+
+// Ensure section dividers are styled subtly
+hr.section-divider {
+    border: none;
+    border-top: 1px solid var(--divider-color);
+    margin: var(--spacing-xl) 0; // Larger margin for section breaks
+}
