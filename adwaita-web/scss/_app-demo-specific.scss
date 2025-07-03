@@ -1,4 +1,5 @@
 // Styles moved from app-demo/templates/base.html
+@use 'variables'; // Added to access SASS variables like $adw-dark-5
 
 // Header styles
 .adw-header-bar__start .site-title-link {
@@ -262,14 +263,14 @@
     code { // Inline code
         font-family: var(--monospace-font-family);
         // Using a subtle, semi-transparent version of a base dark color for light theme
-        background-color: rgba($adw-dark-5, 0.05);
+        background-color: rgba(variables.$adw-dark-5, 0.05);
         padding: 0.1em 0.3em;
         border-radius: var(--border-radius-small);
         font-size: 0.9em;
     }
     :root.theme-dark .styled-text-content code {
         // Using a subtle, semi-transparent version of a base light color for dark theme
-        background-color: rgba($adw-light-1, 0.08);
+        background-color: rgba(variables.$adw-light-1, 0.08);
     }
     pre code { // Reset for code inside pre
       background-color: transparent;

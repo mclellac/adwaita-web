@@ -1,5 +1,6 @@
 // scss/_row_types.scss
 @use "variables";
+@use "mixins";
 
 // Common base for specialized rows if needed, but AdwRow already provides some.
 // These rows are typically used within an AdwListBox or a similar container.
@@ -163,7 +164,7 @@ body.dark-theme .adw-expander-row-content.expanded {
 
 // --- AdwComboRow ---
 .adw-combo-row {
-  @include row-base; // Apply common row padding, min-height, etc.
+  @include mixins.row-base; // Apply common row padding, min-height, etc.
   display: flex; // Already part of row-base but good to be explicit if overriding/extending
   align-items: center; // Already part of row-base
   width: 100%;
