@@ -74,26 +74,26 @@
         </div>
 
         <div class="form-actions-container form-actions-space-between">
-            {# Existing buttons on one side #}
-            <div class="adw-box adw-box-spacing-s">
+            <div class="actions-start"> <!-- Group for left-aligned buttons -->
                 <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button flat">Cancel</a>
-                {{ form.save_draft(class="adw-button " ~ ('suggested-action' if post.is_published else '')) }}
-                {{ form.publish(class="adw-button " ~ ('suggested-action' if not post.is_published else '')) }}
+                {% if delete_form %}
+                {# Button to trigger the dialog for delete #}
+                <button type="button" id="open-edit-delete-post-dialog-btn" class="adw-button destructive-action">Delete Post</button>
+                {% endif %}
             </div>
-
-            {# Delete button on the other side #}
-            {% if delete_form %}
-            {# The actual form that will be submitted by the dialog's confirm button #}
-            <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form-{{ post.id }}" class="delete-post-form-inline" style="display: none;">
-                {{ delete_form.hidden_tag() }} {# CSRF token #}
-            </form>
-            {# Button to trigger the dialog #}
-            <button type="button" id="open-edit-delete-post-dialog-btn" class="adw-button destructive-action">Delete Post</button>
-            {% endif %}
+            <div class="actions-end"> <!-- Group for right-aligned buttons -->
+                {{ form.save_draft(class="adw-button") }}
+                {{ form.publish(class="adw-button suggested-action") }}
+            </div>
         </div>
     </form> {# This is the main edit form, ensure it closes before the dialog #}
 
     {% if delete_form %}
+    {# The actual form that will be submitted by the dialog's confirm button - ensure it's outside the main form or handled carefully #}
+    {# This form is not directly part of the flex layout, it's for the dialog action #}
+    <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form-{{ post.id }}" class="delete-post-form-inline" style="display: none;">
+        {{ delete_form.hidden_tag() }} {# CSRF token #}
+    </form>
     <adw-dialog id="edit-delete-post-confirm-dialog" title="Confirm Deletion">
         <div slot="content">
             <p class="adw-label body">Are you sure you want to permanently delete this post titled "<strong>{{ post.title|escape }}</strong>"? This action cannot be undone.</p>

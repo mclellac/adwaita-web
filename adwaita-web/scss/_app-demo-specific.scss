@@ -152,8 +152,11 @@
     // margin-top: var(--spacing-xs); // This was too little, form-field-row default is --spacing-s
 }
 .comment-form-actions { // Styles for the container of the submit button in comment form
+    @extend .form-actions-container; // Inherit flex, gap, margin-top
+    @extend .form-actions-end;     // Inherit justify-content: flex-end for right alignment
     border-top: none; // Overriding default list-box header style perhaps
-    padding-top: var(--spacing-s);
+    padding-top: var(--spacing-s); // Keep specific padding
+    margin-top: var(--spacing-s); // Ensure it has some top margin if not inherited via @extend
 }
 
 .related-posts-container {
@@ -432,7 +435,7 @@ body {
 
 .edit-profile-form-actions { // Specific for the action buttons on the edit profile form
     @extend .form-actions-container; // Inherits display:flex, gap, margin-top
-    @extend .form-actions-end;       // Inherits justify-content: flex-end
+    // .form-actions-space-between will be added in HTML for alignment logic
     padding-top: var(--spacing-l);   // Adds specific padding needed for this form
 }
 
