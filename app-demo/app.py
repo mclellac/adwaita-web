@@ -1371,115 +1371,78 @@ def create_app(config_overrides=None):
                         unique_filename = f"{uuid.uuid4()}.{ext}"
                         upload_folder_path = _app.config['UPLOAD_FOLDER']
                         save_path = os.path.join(upload_folder_path, unique_filename)
+
+                        _app.logger.info(f"Ensuring upload directory exists: {upload_folder_path}")
                         os.makedirs(upload_folder_path, exist_ok=True)
-                        _app.logger.debug(
-                            f"Attempting to save profile photo to: {save_path}"
-                        )
+
+                        _app.logger.info(f"Attempting to process and save profile photo for {current_user.username} to: {save_path}")
+
+                        file.stream.seek(0) # Rewind stream
                         img = Image.open(file.stream)
-                        _app.logger.debug(
-                            f"Profile photo opened (Pillow). Original: {img.size}"
-                        )
+                        _app.logger.info(f"Photo opened with Pillow for {current_user.username}. Format: {img.format}, Size: {img.size}")
+
+                        # Cropping logic
                         crop_x_str = request.form.get('crop_x')
                         crop_y_str = request.form.get('crop_y')
                         crop_width_str = request.form.get('crop_width')
                         crop_height_str = request.form.get('crop_height')
-                        if (crop_x_str and crop_y_str and
-                                crop_width_str and crop_height_str):
-                            _app.logger.debug(
-                                f"Crop params: X={crop_x_str}, Y={crop_y_str}, "
-                                f"W={crop_width_str}, H={crop_height_str}"
-                            )
+                        if (crop_x_str and crop_y_str and crop_width_str and crop_height_str):
+                            _app.logger.info(f"Crop params for {current_user.username}: X={crop_x_str}, Y={crop_y_str}, W={crop_width_str}, H={crop_height_str}")
                             try:
                                 crop_x = int(float(crop_x_str))
                                 crop_y = int(float(crop_y_str))
                                 crop_width = int(float(crop_width_str))
                                 crop_height = int(float(crop_height_str))
                                 if crop_width > 0 and crop_height > 0:
-                                    img = img.crop(
-                                        (crop_x, crop_y,
-                                         crop_x + crop_width, crop_y + crop_height)
-                                    )
-                                    _app.logger.debug(f"Image cropped to: {img.size}")
+                                    img = img.crop((crop_x, crop_y, crop_x + crop_width, crop_y + crop_height))
+                                    _app.logger.info(f"Image cropped for {current_user.username} to: {img.size}")
                                 else:
-                                    _app.logger.warning(
-                                        "Invalid crop dimensions (<=0). "
-                                        "Photo processed without cropping."
-                                    )
-                                    flash(
-                                        "Invalid crop dimensions provided. "
-                                        "Photo processed without cropping.",
-                                        'warning'
-                                    )
+                                    _app.logger.warning(f"Invalid crop dimensions (<=0) for {current_user.username}. Photo processed without cropping.")
+                                    flash("Invalid crop dimensions provided. Photo processed without cropping.", 'warning')
                             except ValueError as ve:
-                                _app.logger.warning(
-                                    f"Invalid crop coordinates: {ve}. "
-                                    f"Photo processed without cropping."
-                                )
-                                flash(
-                                    "Invalid crop coordinates provided. "
-                                    "Photo processed without cropping.",
-                                    'warning'
-                                )
+                                _app.logger.warning(f"Invalid crop coordinates for {current_user.username}: {ve}. Photo processed without cropping.")
+                                flash("Invalid crop coordinates provided. Photo processed without cropping.", 'warning')
                         else:
-                            _app.logger.debug(
-                                "No crop parameters provided or some are missing. "
-                                "Processing photo without explicit cropping."
-                            )
+                            _app.logger.info(f"No crop parameters for {current_user.username}. Processing without explicit crop.")
+
                         img.thumbnail((200, 200))
-                        _app.logger.debug(
-                            f"Image thumbnail generated. Size: {img.size}"
-                        )
+                        _app.logger.info(f"Image thumbnail generated for {current_user.username}. New size: {img.size}")
+
+                        _app.logger.info(f"Attempting img.save() for {current_user.username} at {save_path}")
                         img.save(save_path)
-                        _app.logger.info(
-                            f"Profile photo for {current_user.username} saved: "
-                            f"{save_path}"
-                        )
+                        _app.logger.info(f"img.save() call completed for {current_user.username}.")
 
-                        if current_user.profile_photo_url:
-                            old_filename = os.path.basename(
-                                current_user.profile_photo_url
-                            )
-                            old_photo_abs_path = os.path.join(
-                                _app.config['UPLOAD_FOLDER'], old_filename
-                            )
-                            real_upload_folder = os.path.realpath(
-                                _app.config['UPLOAD_FOLDER']
-                            )
-                            if os.path.commonprefix(
-                                (os.path.realpath(old_photo_abs_path),
-                                 real_upload_folder)
-                            ) == real_upload_folder:
-                                if os.path.exists(old_photo_abs_path):
-                                    try:
-                                        os.remove(old_photo_abs_path)
-                                        _app.logger.info(
-                                            f"Old profile photo {old_photo_abs_path} "
-                                            f"deleted for user {current_user.username}."
-                                        )
-                                    except OSError as oe:
-                                        _app.logger.error(
-                                            f"Error deleting old profile photo "
-                                            f"{old_photo_abs_path}: {oe}",
-                                            exc_info=True
-                                        )
+                        if os.path.exists(save_path):
+                            _app.logger.info(f"SUCCESS: Profile photo for {current_user.username} saved and found at {save_path}")
+
+                            if current_user.profile_photo_url:
+                                old_filename = os.path.basename(current_user.profile_photo_url)
+                                if old_filename and old_filename != '.':
+                                    old_photo_abs_path = os.path.join(_app.config['UPLOAD_FOLDER'], old_filename)
+                                    real_upload_folder = os.path.realpath(_app.config['UPLOAD_FOLDER'])
+                                    if os.path.commonprefix((os.path.realpath(old_photo_abs_path), real_upload_folder)) == real_upload_folder:
+                                        if os.path.exists(old_photo_abs_path):
+                                            try:
+                                                os.remove(old_photo_abs_path)
+                                                _app.logger.info(f"Old photo {old_photo_abs_path} deleted for {current_user.username}.")
+                                            except OSError as oe:
+                                                _app.logger.error(f"Error deleting old photo {old_photo_abs_path}: {oe}", exc_info=True)
+                                        else:
+                                            _app.logger.warning(f"Old photo {old_photo_abs_path} not found for deletion for {current_user.username}.")
+                                    else:
+                                        _app.logger.error(f"Security: Attempt to delete outside upload folder: {old_photo_abs_path}")
                                 else:
-                                    _app.logger.warning(
-                                        f"Old profile photo {old_photo_abs_path} "
-                                        f"not found for deletion."
-                                    )
-                            else:
-                                _app.logger.error(
-                                    f"Security: Attempt to delete file outside upload "
-                                    f"folder blocked: {old_photo_abs_path}"
-                                )
+                                    _app.logger.warning(f"Old profile_photo_url for {current_user.username} had invalid basename: '{old_filename}'")
 
-                        current_user.profile_photo_url = os.path.join(
-                            'uploads/profile_pics', unique_filename
-                        )
-                        photo_saved_successfully = True
+                            current_user.profile_photo_url = os.path.join('uploads/profile_pics', unique_filename)
+                            photo_saved_successfully = True
+                            _app.logger.info(f"User {current_user.username} profile_photo_url updated to: {current_user.profile_photo_url}")
+                        else:
+                            _app.logger.error(f"FAILURE: Profile photo for {current_user.username} NOT FOUND at {save_path} after img.save().")
+                            flash('Error saving photo: File could not be written to disk.', 'danger')
+                            # photo_saved_successfully remains False
                     except Exception as e:
-                        _app.logger.error(
-                            f"Error processing photo for {current_user.username}: {e}",
+                        _app.logger.error(f"Exception during photo processing for {current_user.username}: {e}",
                             exc_info=True
                         )
                         flash(f'Error processing profile photo: {e}', 'danger')
