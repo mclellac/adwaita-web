@@ -499,4 +499,110 @@ $app-sidebar-breakpoint: 768px; // Breakpoint for mobile/tablet view
         // On small screens, content area takes full width as sidebar is an overlay
         // No specific width change needed if sidebar is position:fixed
     }
+
+// Styles for post items in index.html to make them more card-like
+.blog-post-card {
+  background-color: var(--card-background-color, var(--window-bg-color)); // Fallback to window-bg
+  border-radius: var(--card-border-radius, var(--border-radius-large));
+  border: 1px solid var(--card-border-color, var(--borders-color));
+  box-shadow: var(--card-box-shadow, 0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.05));
+  margin-bottom: var(--spacing-m); // Space between cards
+  padding: var(--spacing-m); // Internal padding for the card content
+
+  // Adjustments for when adw-action-row is used as a card base
+  &.adw-action-row {
+    // Override default action row padding if custom card padding is preferred
+    // padding-top: var(--spacing-m);
+    // padding-bottom: var(--spacing-m);
+    // padding-left: var(--spacing-m);
+    // padding-right: var(--spacing-m);
+
+    .adw-action-row-title {
+      font-size: var(--font-size-h3); // Make title a bit larger for cards
+      // color: var(--card-title-color, var(--heading-color));
+    }
+    .adw-action-row-subtitle {
+      // Ensure subtitle color is appropriate for card background
+      // color: var(--card-subtitle-color, var(--text-color));
+    }
+    // Remove the default bottom border from action rows when they are cards
+    border-bottom: none;
+    &:last-child { // Ensure last card also has no bottom border from listbox context
+        border-bottom: none;
+    }
+  }
+
+  &:hover {
+    // background-color: var(--card-hover-background-color, var(--hover-bg-color));
+    border-color: var(--card-hover-border-color, var(--accent-color));
+    box-shadow: var(--card-hover-box-shadow, 0 2px 4px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.07));
+  }
+}
+
+// Ensure the .blog-posts-list.flat (which is an adw-list-box) has no internal row separators
+// if .blog-post-card provides its own borders/visual separation.
+.blog-posts-list.adw-list-box.flat {
+    .adw-action-row.blog-post-card { // Target only our cards within this specific list
+        border-bottom: none; // Remove default action row separator
+        & + .adw-action-row.blog-post-card { // If there's another card after this one
+            // margin-top: var(--spacing-m); // Already handled by margin-bottom on card
+        }
+    }
+    // Remove default listbox background and borders if cards handle it all
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+}
+
+.comment-card {
+  // Similar to blog-post-card, but perhaps slightly less emphasis or different padding
+  background-color: var(--card-background-color, var(--window-bg-color));
+  border-radius: var(--card-border-radius, var(--border-radius-default)); // Default radius for comments might be smaller
+  border: 1px solid var(--card-border-color, var(--borders-color));
+  // box-shadow: var(--card-box-shadow, 0 1px 2px rgba(0,0,0,0.05)); // Optional: less shadow for comments
+  margin-bottom: var(--spacing-s); // Space between comment cards
+  padding: var(--spacing-s); // Internal padding
+
+  .comment-header {
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .comment-text {
+    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-size-base); // Ensure comment text is base size
+    line-height: var(--line-height-base);
+  }
+
+  .comment-actions {
+    // Styles for the container of reply/flag/delete buttons
+    border-top: 1px solid var(--divider-color);
+    padding-top: var(--spacing-xs);
+    margin-top: var(--spacing-s);
+  }
+
+  // Styling for nested reply forms if they appear directly within a card
+  .reply-form-container {
+    border-top: 1px dashed var(--divider-color); // Dashed line for reply form section
+    padding-top: var(--spacing-s);
+    margin-top: var(--spacing-s);
+    .adw-textarea {
+        min-height: 60px; // Smaller textarea for replies
+    }
+  }
+}
+
+// Ensure the .comments-list.flat (which is an adw-list-box) has no internal row separators
+// if .comment-card provides its own borders/visual separation.
+.comments-list.adw-list-box.flat {
+    .comment-card { // Target only our cards within this specific list
+        border-bottom: none; // Remove default action row separator if it were one
+        & + .comment-card {
+            // margin-top: var(--spacing-s); // Already handled by margin-bottom on card
+        }
+    }
+    // Remove default listbox background and borders if cards handle it all
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
 }

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Create New Post{% endblock %}
+{% block page_title %}Create New Post{% endblock %}
 
 {% block header_title %}Create New Post{% endblock %}
 
@@ -43,18 +43,18 @@
             <header class="adw-list-box-header">
                 <h3 class="adw-title-2" id="categories-title">{{ form.categories.label.text }}</h3>
             </header>
-            <div class="checkbox-list {{ 'has-error' if form.categories.errors else '' }}">
+            <div class="{{ 'has-error' if form.categories.errors else '' }}">
                 {% for subfield in form.categories %}
-                <div class="adw-row checkbox-list-item"> {# Simpler row for checkboxes #}
-                    <label class="adw-checkbox-wrapper">
+                <div class="adw-action-row adw-checkbox-row">
+                     <div class="adw-action-row__text checkbox-label-container"> {# Match edit_post.html structure #}
                         {{ subfield(class="adw-checkbox") }}
-                        <span class="adw-label">{{ subfield.label.text }}</span>
-                    </label>
+                        {{ subfield.label(class="adw-label category-checkbox-label") }}
+                    </div>
                 </div>
                 {% endfor %}
             </div>
             {% if form.categories.errors %}
-            <div class="adw-row form-field-error">
+            <div class="adw-action-row error-row form-field-error"> {# Use action-row for error display consistency #}
                 <span class="adw-label caption error-text">{{ form.categories.errors|join('; ') }}</span>
             </div>
             {% endif %}

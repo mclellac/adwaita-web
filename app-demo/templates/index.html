@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Blog Posts{% endblock %}
+{% block page_title %}Blog Posts{% endblock %}
 
 {% block content %}
 {# adw-clamp is already on main in base.html, so content-clamp might be redundant unless for very specific styling #}
 <h1 class="adw-title-1 page-title-centered">All Blog Posts</h1>
 
 {% if posts %}
-    <div class="adw-list-box blog-posts-list"> {# blog-posts-list for custom spacing/styles if needed #}
+    <div class="adw-list-box blog-posts-list flat"> {# Added flat to list-box, cards will provide their own bg/border #}
         {% for post in posts %}
-        <div class="adw-action-row activatable blog-post-item"> {# Added activatable for hover/focus states #}
+        <div class="adw-action-row activatable blog-post-card"> {# Changed blog-post-item to blog-post-card #}
             <div class="adw-action-row-content">
                 <h3 class="adw-action-row-title">
                     <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-link">{{ post.title }}</a>
@@ -65,34 +65,36 @@
 {% endif %}
 
 {% if pagination and pagination.pages > 1 %}
-<nav aria-label="Page navigation" class="pagination-controls">
-    {% if pagination.has_prev %}
-        <a href="{{ url_for('index', page=pagination.prev_num) }}" class="adw-button flat">
-            <span class="adw-icon icon-actions-go-previous-symbolic"></span> Previous
-        </a>
-    {% else %}
-        <button class="adw-button flat" disabled><span class="adw-icon icon-actions-go-previous-symbolic"></span> Previous</button>
-    {% endif %}
-
-    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-        {% if page_num %}
-            {% if page_num == pagination.page %}
-                <button class="adw-button active" aria-current="page">{{ page_num }}</button> {# .active class handles bold #}
-            {% else %}
-                <a href="{{ url_for('index', page=page_num) }}" class="adw-button flat">{{ page_num }}</a>
-            {% endif %}
+<nav aria-label="Page navigation" class="pagination-controls adw-box horizontal justify-center" style="margin-top: var(--spacing-l);">
+    <div class="adw-toggle-group">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('index', page=pagination.prev_num) }}" class="adw-button">
+                <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+            </a>
         {% else %}
-            <button class="adw-button flat" disabled>&hellip;</button> {# disabled handles pointer-events #}
+            <button class="adw-button" disabled><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
         {% endif %}
-    {% endfor %}
 
-    {% if pagination.has_next %}
-        <a href="{{ url_for('index', page=pagination.next_num) }}" class="adw-button flat">
-            Next <span class="adw-icon icon-actions-go-next-symbolic"></span>
-        </a>
-    {% else %}
-        <button class="adw-button flat" disabled>Next <span class="adw-icon icon-actions-go-next-symbolic"></span></button>
-    {% endif %}
+        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                    <button class="adw-button suggested" aria-current="page" disabled>{{ page_num }}</button>
+                {% else %}
+                    <a href="{{ url_for('index', page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                {% endif %}
+            {% elif loop.index != 1 and loop.index != pagination.pages + 2 %}
+                 <button class="adw-button flat" disabled style="pointer-events: none;">&hellip;</button>
+            {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+            <a href="{{ url_for('index', page=pagination.next_num) }}" class="adw-button">
+                <span class="adw-icon icon-actions-go-next-symbolic"></span>
+            </a>
+        {% else %}
+            <button class="adw-button" disabled><span class="adw-icon icon-actions-go-next-symbolic"></span></button>
+        {% endif %}
+    </div>
 </nav>
 {% endif %}
 {% endblock %}
