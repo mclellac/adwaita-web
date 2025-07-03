@@ -45,4 +45,57 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+
+    // Active state for sidebar navigation links
+    const currentPath = window.location.pathname;
+    const sidebarNav = document.querySelector('.app-sidebar .sidebar-nav');
+
+    if (sidebarNav) {
+        const navLinks = sidebarNav.querySelectorAll('a.adw-action-row');
+        let bestMatch = null;
+        let longestMatchLength = 0;
+
+        navLinks.forEach(link => {
+            link.classList.remove('active'); // Clear any existing active states
+            const linkPath = new URL(link.href).pathname;
+
+            // Exact match or if current path starts with link path (for parent section highlighting)
+            if (currentPath === linkPath) {
+                // Exact match is highest priority
+                bestMatch = link;
+                longestMatchLength = linkPath.length + 1000; // Prioritize exact match heavily
+            } else if (currentPath.startsWith(linkPath) && linkPath !== '/') { // Avoid '/' matching everything
+                 // Check if this is a better parent match than previous
+                if (linkPath.length > longestMatchLength) {
+                    bestMatch = link;
+                    longestMatchLength = linkPath.length;
+                }
+            } else if (linkPath === '/' && currentPath.startsWith('/index')) {
+                // Special case: if link is '/' and current path is effectively home (e.g. /index or /index.html)
+                // This might need adjustment based on actual Flask routing for index
+                if (linkPath.length > longestMatchLength) {
+                    bestMatch = link;
+                    longestMatchLength = linkPath.length;
+                }
+            }
+        });
+
+        if (bestMatch) {
+            bestMatch.classList.add('active');
+        } else {
+            // Fallback: if no other match, and there's a plain "/" link (Home), make it active if on homepage.
+            // This logic might be redundant if currentPath === '/' already handled it.
+            // Check specific case for index.html or default route.
+            // The Flask url_for('index') usually generates just '/', so currentPath === linkPath should handle it.
+            // If Flask index is e.g. /index.html, the startsWith logic might be more complex.
+            // For now, rely on exact match or startsWith for typical Flask routing.
+            // If on true root "/" and no other match, find the home link specifically.
+            if (currentPath === '/') {
+                const homeLink = sidebarNav.querySelector('a[href="/"]'); // Assuming home link href is exactly "/"
+                if (homeLink) {
+                    homeLink.classList.add('active');
+                }
+            }
+        }
+    }
 });
