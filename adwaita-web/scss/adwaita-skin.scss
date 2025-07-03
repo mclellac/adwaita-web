@@ -1,51 +1,51 @@
 // Adwaita Skin - Main SCSS File
 
 // Core
-@import 'variables';
-@import 'mixins';
-@import 'base';
+@use 'variables';
+@use 'mixins';
+@use 'base';
 
 // Components (to be adapted for skin usage)
-@import 'button';
-@import 'entry';
-@import 'headerbar';
-@import 'listbox';
-@import 'dialog';
-@import 'row_types';
-@import 'action_row';
-@import 'entry_row';
-@import 'expander_row';
-@import 'switch';
-@import 'checkbox';
-@import 'radio';
-@import 'label';
-@import 'icon';
-@import 'avatar';
-@import 'spinner';
-@import 'progressbar';
-@import 'toast';
-@import 'toast_overlay';
-@import 'banner';
-@import 'popover';
-@import 'tabs';
-@import 'toolbar_view'; // May need significant refactoring or simplification
-@import 'viewswitcher'; // Styles for button parts
-@import 'spin_button'; // Added
-@import 'status_page'; // Added
-@import 'preferences'; // Added
-@import 'switch_row'; // Added
-@import 'split_button'; // Added
-@import 'toggle_group'; // Added
-@import 'combo_row'; // Added for settings page
+@use 'button';
+@use 'entry';
+@use 'headerbar';
+@use 'listbox';
+@use 'dialog';
+@use 'row_types';
+@use 'action_row';
+@use 'entry_row';
+@use 'expander_row';
+@use 'switch';
+@use 'checkbox';
+@use 'radio';
+@use 'label';
+@use 'icon';
+@use 'avatar';
+@use 'spinner';
+@use 'progressbar';
+@use 'toast';
+@use 'toast_overlay';
+@use 'banner';
+@use 'popover';
+@use 'tabs';
+@use 'toolbar_view'; // May need significant refactoring or simplification
+@use 'viewswitcher'; // Styles for button parts
+@use 'spin_button'; // Added
+@use 'status_page'; // Added
+@use 'preferences'; // Added
+@use 'switch_row'; // Added
+@use 'split_button'; // Added
+@use 'toggle_group'; // Added
+@use 'combo_row'; // Added for settings page
 
 // Layout
-@import 'box';
-@import 'wrap_box'; // Added
-@import 'clamp';
-@import 'window';
+@use 'box';
+@use 'wrap_box'; // Added
+@use 'clamp';
+@use 'window';
 
 // App-demo specific styles
-@import 'app-demo-specific';
+@use 'app-demo-specific';
 
 // TODO: Add more specific skin styles or overrides if needed.
 // TODO: Review each imported file to ensure selectors are class-based and not web-component specific.

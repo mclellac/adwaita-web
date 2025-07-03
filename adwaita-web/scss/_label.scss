@@ -1,15 +1,15 @@
 // Styles for Adwaita Labels (Adwaita Skin Version)
 
-@import 'variables'; // Defines SASS color vars and CSS vars (Reverted for debugging)
-@import 'mixins'; // (Reverted for debugging)
+@use 'variables'; // Defines SASS color vars and CSS vars (Reverted for debugging)
+@use 'mixins'; // (Reverted for debugging)
 
 .adw-label {
     display: inline;
     font-family: var(--document-font-family); // Use CSS var
     font-size: var(--font-size-base);       // Use CSS var
-    font-weight: $font-weight-normal;       // SASS var for static value
+    font-weight: variables.$font-weight-normal;       // SASS var for static value
     color: var(--text-color);
-    line-height: $line-height-base;         // SASS var for static value
+    line-height: variables.$line-height-base;         // SASS var for static value
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     margin-bottom: var(--spacing-xs);       // Default bottom margin if block or for layout spacing
@@ -24,38 +24,38 @@
     }
 
     &.bold {
-        font-weight: $font-weight-bold; // SASS var for static value
+        font-weight: variables.$font-weight-bold; // SASS var for static value
     }
 
     &.title-1 {
         font-size: var(--font-size-h1); // Use CSS var
-        font-weight: $font-weight-bold;
+        font-weight: variables.$font-weight-bold;
         color: var(--heading-color);
-        line-height: $h1-line-height; // SASS var
+        line-height: variables.$h1-line-height; // SASS var
         margin-bottom: var(--spacing-m);
     }
 
     &.title-2 {
         font-size: var(--font-size-h2); // Use CSS var
-        font-weight: $font-weight-bold;
+        font-weight: variables.$font-weight-bold;
         color: var(--heading-color);
-        line-height: $h2-line-height; // SASS var
+        line-height: variables.$h2-line-height; // SASS var
         margin-bottom: var(--spacing-s);
     }
 
     &.title-3 {
         font-size: var(--font-size-h3); // Use CSS var
-        font-weight: $font-weight-bold;
+        font-weight: variables.$font-weight-bold;
         color: var(--heading-color);
-        line-height: $h3-line-height; // SASS var
+        line-height: variables.$h3-line-height; // SASS var
         margin-bottom: var(--spacing-xs);
     }
 
     &.title-4 {
         font-size: var(--font-size-h4); // Use CSS var
-        font-weight: $font-weight-bold;
+        font-weight: variables.$font-weight-bold;
         color: var(--heading-color);
-        line-height: $h4-line-height; // SASS var
+        line-height: variables.$h4-line-height; // SASS var
         margin-bottom: var(--spacing-xs);
     }
 }
@@ -71,6 +71,6 @@ label.adw-label {
 .adw-caption {
     font-size: var(--font-size-small);
     color: var(--text-color-secondary);
-    font-weight: $font-weight-normal;
+    font-weight: variables.$font-weight-normal;
     // Add other properties if Libadwaita captions have specific line-height or margins
 }

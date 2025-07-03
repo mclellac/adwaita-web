@@ -1,8 +1,8 @@
 // Styles for Adwaita Buttons (Adwaita Skin Version)
 
 @use "sass:color"; // For color.adjust if needed, though direct var() usage is preferred
-@import 'variables'; // Defines SASS color vars like $sass-accent-blue-light-color and CSS vars like --button-bg-color
-@import 'mixins'; // Reverted for debugging build hang
+@use 'variables'; // Defines SASS color vars like $sass-accent-blue-light-color and CSS vars like --button-bg-color
+@use 'mixins'; // Reverted for debugging build hang
 
 .adw-button {
     display: inline-flex;
@@ -15,8 +15,8 @@
     color: var(--button-fg-color);
     font-family: var(--document-font-family);
     font-size: var(--font-size-base);
-    font-weight: $font-weight-bold; // SASS var for static value
-    line-height: $line-height-base;   // SASS var for static value
+    font-weight: variables.$font-weight-bold; // SASS var for static value
+    line-height: variables.$line-height-base;   // SASS var for static value
     text-align: center;
     text-decoration: none;
     white-space: nowrap;
@@ -56,8 +56,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: $icon-size-base; // SASS var
-        height: $icon-size-base; // SASS var
+        width: variables.$icon-size-base; // SASS var
+        height: variables.$icon-size-base; // SASS var
         fill: currentColor;
 
         &:first-child:not(:last-child) {
@@ -140,15 +140,15 @@
 
     &.circular {
         padding: var(--circular-button-padding); // SASS var that points to CSS var
-        border-radius: $circular-button-border-radius; // SASS var
+        border-radius: variables.$circular-button-border-radius; // SASS var
         width: var(--circular-button-size); // SASS var that points to CSS var
         height: var(--circular-button-size);
         min-width: var(--circular-button-size);
 
         .adw-icon, .icon, svg {
             margin: 0;
-            width: $icon-size-large; // SASS var
-            height: $icon-size-large; // SASS var
+            width: variables.$icon-size-large; // SASS var
+            height: variables.$icon-size-large; // SASS var
         }
     }
 
@@ -191,6 +191,6 @@ input[type="reset"].adw-button {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    line-height: $line-height-base; // SASS var
+    line-height: variables.$line-height-base; // SASS var
     font-family: var(--document-font-family); // CSS var
 }

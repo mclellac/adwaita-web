@@ -59,8 +59,8 @@
     border: none;
 
     .adw-icon { // Assuming icon is passed as a child, e.g. <span class="adw-icon icon-pan-down-symbolic"></span>
-      width: $icon-size-base * 0.75; // Smaller arrow icon
-      height: $icon-size-base * 0.75;
+      width: variables.$icon-size-base * 0.75; // Smaller arrow icon
+      height: variables.$icon-size-base * 0.75;
       // fill is currentColor by default for icons
     }
 

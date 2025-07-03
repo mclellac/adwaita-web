@@ -1,7 +1,7 @@
 // Base styles and global resets for Adwaita Skin
 
-@import 'variables'; // Import variables first
-@import 'mixins';    // Then mixins
+@use 'variables'; // Import variables first
+@use 'mixins';    // Then mixins
 
 // --- Global Resets & Defaults ---
 *,
@@ -14,8 +14,8 @@ body {
     margin: 0;
     font-family: var(--document-font-family);
     font-size: var(--font-size-base);
-    font-weight: $font-weight-normal; // Use SASS variable for base font-weight
-    line-height: $line-height-base;   // Use SASS variable for base line-height
+    font-weight: variables.$font-weight-normal; // Use SASS variable for base font-weight
+    line-height: variables.$line-height-base;   // Use SASS variable for base line-height
     color: var(--text-color);
     background-color: var(--body-bg-color);
     -webkit-font-smoothing: antialiased;
@@ -25,9 +25,9 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--heading-font-family); // Use CSS var for heading font family
-    font-weight: $heading-font-weight;       // Use SASS var for heading font-weight
+    font-weight: variables.$heading-font-weight;       // Use SASS var for heading font-weight
     color: var(--heading-color);
-    line-height: $heading-line-height;       // Use SASS var for heading line-height
+    line-height: variables.$heading-line-height;       // Use SASS var for heading line-height
     margin-top: var(--spacing-m);
     margin-bottom: var(--spacing-s);
 }

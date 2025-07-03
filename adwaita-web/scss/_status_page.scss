@@ -38,7 +38,7 @@
     color: var(--text-color); // Use text color
     opacity: 0.7; // Standard Adwaita subtitle/description opacity
     max-width: 450px; // Prevent description from becoming too wide
-    line-height: $line-height-base * 1.1; // Slightly more line height for readability
+    line-height: variables.$line-height-base * 1.1; // Slightly more line height for readability
     margin-top: 0;
     margin-bottom: var(--spacing-xl); // Space before actions
   }
