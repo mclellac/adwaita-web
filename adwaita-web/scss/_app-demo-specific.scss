@@ -445,3 +445,68 @@ body {
     @extend .form-actions-end;       // Inherits justify-content: flex-end
     padding-top: var(--spacing-l);   // Adds specific padding needed for this form
 }
+
+// --- Responsive Sidebar Styles ---
+$app-sidebar-breakpoint: 768px; // Breakpoint for mobile/tablet view
+
+.app-sidebar-toggle {
+    display: none; // Hidden by default on larger screens
+}
+
+// Default (Desktop / Large Screen) Styles have already been defined for .app-sidebar, .app-body-container etc.
+// .app-sidebar { width: 240px; ... }
+// .app-body-container { display: flex; ... }
+
+@media (max-width: #{$app-sidebar-breakpoint - 1px}) {
+    .app-sidebar-toggle {
+        display: inline-flex; // Show hamburger button
+    }
+
+    .profile-avatar-button { // Hide profile button in header start on small screens to make space for hamburger
+        display: none;
+    }
+
+    .app-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0; // Should align below header if header is fixed. Assuming header is part of normal flow for this.
+        // If header is position:fixed, then top should be var(--header-height, 56px) or similar.
+        // For now, assuming it covers the whole screen, including under a non-fixed header.
+        // Let's adjust if header is fixed. The header is part of the body's flex column.
+        // So, the sidebar overlay should start from the very top of the viewport.
+        height: 100%;
+        z-index: 1000; // Ensure it's above content
+        transform: translateX(-100%);
+        transition: transform 0.25s ease-in-out;
+        box-shadow: var(--dialog-box-shadow); // Give it some shadow like a dialog when overlayed
+
+        &.sidebar-open {
+            transform: translateX(0);
+        }
+    }
+
+    // Optional: Add a backdrop when sidebar is open on mobile
+    .app-sidebar-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.3);
+        z-index: 999; // Below sidebar, above content
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease-in-out, visibility 0s 0.25s linear;
+
+        &.active {
+            opacity: 1;
+            visibility: visible;
+            transition-delay: 0s;
+        }
+    }
+
+    .app-content-area {
+        // On small screens, content area takes full width as sidebar is an overlay
+        // No specific width change needed if sidebar is position:fixed
+    }
+}
