@@ -98,7 +98,7 @@
             <footer class="adw-dialog__actions">
                 <button id="cancel-delete-btn" class="adw-button flat">Cancel</button>
                 <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form" class="delete-post-form-inline">
-                    {{ csrf_token() }} {# Flask-WTF CSRF token #}
+                    {{ delete_post_form.hidden_tag() }} {# Use form instance for CSRF #}
                     <button id="confirm-delete-btn" type="submit" class="adw-button destructive-action">Delete</button>
                 </form>
             </footer>
@@ -108,7 +108,7 @@
 
     <hr class="section-divider">
 
-    {% macro render_comment_thread(comment, post, delete_form, current_user, form, loop_depth=0) %}
+    {% macro render_comment_thread(comment, post, delete_comment_form, current_user, form, loop_depth=0) %}
     <article class="adw-card comment-card" id="comment-{{ comment.id }}" style="margin-left: {{ loop_depth * 30 }}px;">
         <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
             <span class="adw-avatar size-medium">
@@ -140,7 +140,7 @@
             {# Delete Button #}
             {% if current_user.is_authenticated and (comment.author == current_user or post.author == current_user or current_user.is_admin) %}
             <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" onsubmit="return confirm('Are you sure you want to delete this comment?');" style="display: inline;">
-                {{ delete_form.hidden_tag() }} {# Assuming delete_form is passed for CSRF #}
+                {{ delete_comment_form.hidden_tag() }} {# Use the passed form #}
                 <button type="submit" class="adw-button destructive-action compact">Delete</button>
             </form>
             {% endif %}
@@ -164,7 +164,7 @@
         {% if post.comments.first() %}
             <div class="adw-list-box comments-list flat"> {# Made list-box flat as cards provide bg/border #}
                 {% for comment in post.comments %} {# Iterates over top-level comments #}
-                    {{ render_comment_thread(comment, post, delete_form, current_user, form) }}
+                    {{ render_comment_thread(comment, post, delete_comment_form, current_user, form) }}
                 {% endfor %}
             </div>
         {% else %}

@@ -1,5 +1,6 @@
 // Adwaita Skin - Main SCSS File
 
+@use 'fonts'; // Import custom font faces first
 // Core
 @use 'variables';
 @use 'mixins';
@@ -20,6 +21,7 @@
 @use 'radio';
 @use 'label';
 @use 'icon';
+@use 'symbolic_icons'; // Import for CSS-class based symbolic icons
 @use 'avatar';
 @use 'spinner';
 @use 'progressbar';
