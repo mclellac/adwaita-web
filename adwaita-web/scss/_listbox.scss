@@ -3,22 +3,36 @@
 @use 'variables';
 
 .adw-list-box {
-  background-color: var(--card-bg-color); // Changed to --card-bg-color for boxed list appearance
-  border: var(--border-width) solid var(--borders-color); // Use theme-aware --borders-color
+  background-color: var(--window-bg-color); // Use window background for the listbox itself
+  border: var(--border-width) solid var(--borders-color);
   border-radius: var(--border-radius-default);
   overflow: hidden; // Ensures rows inside respect the border radius
 
-  .adw-row { // Target .adw-row directly as children
+  > .adw-row { // Target direct children .adw-row
     display: flex;
     align-items: center;
     padding: var(--spacing-m);
-    border-bottom: var(--border-width) solid var(--list-separator-color); // Use standard list separator color
+    // border-bottom is now handled by :not(:last-child)
     transition: background-color 0.1s ease-out, color 0.1s ease-out, outline-offset 0.1s ease-out;
-    cursor: default; // Default cursor, change if rows are interactive
-    outline-offset: -2px; // For focus outline to be inset
+    cursor: default;
+    outline-offset: -2px;
+    background-color: var(--list-row-bg-color); // Apply the new row background color
+
+    // Separator only between rows
+    &:not(:last-child) {
+      border-bottom: var(--border-width) solid var(--list-separator-color);
+    }
+
+    // Rounded corners for first and last rows
+    &:first-child {
+      border-top-left-radius: var(--border-radius-default);
+      border-top-right-radius: var(--border-radius-default);
+    }
 
     &:last-child {
-      border-bottom: none;
+      border-bottom-left-radius: var(--border-radius-default);
+      border-bottom-right-radius: var(--border-radius-default);
+      border-bottom: none; // Ensure no bottom border on the very last row
     }
 
     &:hover:not(.activated):not(.selected):not(:disabled) {
