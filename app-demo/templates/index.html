@@ -20,9 +20,12 @@
                         on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
                     </p>
                     {% if post.content %}
-                    <p class="post-excerpt">
-                        {{ post.content | striptags | truncate(150, True) }}
-                    </p>
+                    <div class="post-excerpt styled-text-content"> {# Apply styled-text-content for potential formatting #}
+                        {# This will render HTML then truncate. For true HTML excerpt, logic would be more complex. #}
+                        {# For now, let's render a portion then allow CSS to hide overflow, or truncate HTML carefully. #}
+                        {# A simpler plain text excerpt from rendered markdown: #}
+                        {{ (post.content | markdown_to_html_and_sanitize | striptags | truncate(350, True)) if post.content else '' }}
+                    </div>
                     {% endif %}
 
                     {% if post.categories %}
