@@ -53,6 +53,9 @@
 
 <header class="adw-header-bar">
     <div class="adw-header-bar__start">
+        <button class="adw-button flat circular app-sidebar-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="app-sidebar">
+            <span class="adw-icon icon-actions-open-menu-symbolic"></span>
+        </button>
         {# Profile button moves to start for authenticated users #}
         {% if current_user.is_authenticated %}
             <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat circular profile-avatar-button" title="View Profile">
@@ -101,7 +104,7 @@
 </header>
 
 <div class="app-body-container"> {# NEW: Main container for sidebar + content #}
-    <aside class="app-sidebar">
+    <aside class="app-sidebar" id="app-sidebar"> {# Added id for ARIA #}
         {# Sidebar navigation will go here #}
         <nav class="sidebar-nav adw-list-box flat" aria-label="Main Navigation">
             {% block sidebar_nav %}
@@ -171,6 +174,51 @@
         </div>
     </footer>
 
-    {% block scripts %}{% endblock %}
+    {% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarToggle = document.querySelector('.app-sidebar-toggle');
+            const sidebar = document.getElementById('app-sidebar'); // Using ID for specificity
+            const backdrop = document.querySelector('.app-sidebar-backdrop');
+
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function () {
+                    const isOpen = sidebar.classList.toggle('sidebar-open');
+                    sidebarToggle.setAttribute('aria-expanded', isOpen);
+                    if (backdrop) {
+                        backdrop.classList.toggle('active', isOpen);
+                    }
+                });
+            }
+
+            if (backdrop && sidebar) {
+                backdrop.addEventListener('click', function () {
+                    sidebar.classList.remove('sidebar-open');
+                    sidebarToggle.setAttribute('aria-expanded', 'false');
+                    backdrop.classList.remove('active');
+                });
+            }
+
+            // Optional: Close sidebar when a nav link is clicked (if sidebar contains direct links)
+            if (sidebar) {
+                const sidebarLinks = sidebar.querySelectorAll('.sidebar-nav a.adw-action-row');
+                sidebarLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        // Only close if sidebar is in overlay mode (i.e., sidebar-open class would be present)
+                        // And if the click is not on something that opens a submenu (not applicable here yet)
+                        if (sidebar.classList.contains('sidebar-open')) { // Check if it's in overlay mode
+                           if (window.innerWidth < 768) { // Match the SCSS breakpoint
+                                sidebar.classList.remove('sidebar-open');
+                                if (sidebarToggle) sidebarToggle.setAttribute('aria-expanded', 'false');
+                                if (backdrop) backdrop.classList.remove('active');
+                           }
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+    {% endblock %}
+    <div class="app-sidebar-backdrop"></div> {# Added for mobile sidebar overlay #}
 </body>
 </html>
