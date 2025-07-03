@@ -500,59 +500,110 @@ $app-sidebar-breakpoint: 768px; // Breakpoint for mobile/tablet view
         // No specific width change needed if sidebar is position:fixed
     }
 
-// Styles for post items in index.html to make them more card-like
-.blog-post-card {
-  background-color: var(--card-background-color, var(--window-bg-color)); // Fallback to window-bg
+.blog-posts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); // Responsive grid
+  gap: var(--spacing-l); // Gap between cards
+  padding: var(--spacing-s) 0; // Padding around the grid
+}
+
+// Styles for individual post cards on index.html
+.blog-post-item-card.adw-card { // Assuming adw-card provides base card styles or we define them here
+  background-color: var(--card-background-color, var(--window-bg-color));
   border-radius: var(--card-border-radius, var(--border-radius-large));
   border: 1px solid var(--card-border-color, var(--borders-color));
   box-shadow: var(--card-box-shadow, 0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.05));
-  margin-bottom: var(--spacing-m); // Space between cards
-  padding: var(--spacing-m); // Internal padding for the card content
+  padding: var(--spacing-m);
+  display: flex;
+  flex-direction: column; // Stack header, excerpt, footer vertically
 
-  // Adjustments for when adw-action-row is used as a card base
-  &.adw-action-row {
-    // Override default action row padding if custom card padding is preferred
-    // padding-top: var(--spacing-m);
-    // padding-bottom: var(--spacing-m);
-    // padding-left: var(--spacing-m);
-    // padding-right: var(--spacing-m);
+  .blog-post-card__header {
+    margin-bottom: var(--spacing-s);
+    .blog-post-card__title {
+      margin-bottom: var(--spacing-xxs);
+      a { // Ensure link inherits color and has no underline by default if it's part of title
+        color: inherit;
+        text-decoration: none;
+        &:hover { text-decoration: underline; }
+      }
+    }
+    .blog-post-card__meta {
+      font-size: var(--font-size-small);
+      color: var(--text-color-secondary);
+    }
+  }
 
-    .adw-action-row-title {
-      font-size: var(--font-size-h3); // Make title a bit larger for cards
-      // color: var(--card-title-color, var(--heading-color));
+  .blog-post-card__excerpt {
+    margin-bottom: var(--spacing-m);
+    flex-grow: 1; // Allow excerpt to take available space
+    // CSS to limit lines for HTML content (might need JS for perfect cross-browser)
+    // For simplicity, we rely on the truncate(600) in template for now.
+    // If rendered HTML is too long, this CSS can help:
+    // display: -webkit-box;
+    // -webkit-line-clamp: 5; // Show ~5 lines
+    // -webkit-box-orient: vertical;
+    // overflow: hidden;
+    // text-overflow: ellipsis;
+    // max-height: calc(var(--line-height-base) * var(--font-size-base) * 5); // Approx 5 lines height
+
+    p:last-child { margin-bottom: 0; } // Common reset for excerpts
+  }
+
+  .blog-post-card__footer {
+    margin-top: auto; // Push footer to bottom if card has fixed height or content is short
+    padding-top: var(--spacing-s);
+    border-top: 1px solid var(--divider-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-s);
+
+    .blog-post-card__terms {
+      display: flex;
+      flex-direction: column; // Stack categories and tags
+      gap: var(--spacing-xs);
+      .meta-section { margin-top: 0; } // Reset top margin if already spaced by flex gap
     }
-    .adw-action-row-subtitle {
-      // Ensure subtitle color is appropriate for card background
-      // color: var(--card-subtitle-color, var(--text-color));
-    }
-    // Remove the default bottom border from action rows when they are cards
-    border-bottom: none;
-    &:last-child { // Ensure last card also has no bottom border from listbox context
-        border-bottom: none;
+    .read-more-link.adw-button.flat {
+      // Ensure it's visually distinct if needed
     }
   }
 
   &:hover {
-    // background-color: var(--card-hover-background-color, var(--hover-bg-color));
     border-color: var(--card-hover-border-color, var(--accent-color));
     box-shadow: var(--card-hover-box-shadow, 0 2px 4px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.07));
   }
 }
 
-// Ensure the .blog-posts-list.flat (which is an adw-list-box) has no internal row separators
-// if .blog-post-card provides its own borders/visual separation.
-.blog-posts-list.adw-list-box.flat {
-    .adw-action-row.blog-post-card { // Target only our cards within this specific list
-        border-bottom: none; // Remove default action row separator
-        & + .adw-action-row.blog-post-card { // If there's another card after this one
-            // margin-top: var(--spacing-m); // Already handled by margin-bottom on card
-        }
-    }
-    // Remove default listbox background and borders if cards handle it all
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
+// Remove styles for .blog-posts-list.adw-list-box.flat as it's replaced by .blog-posts-container
+// (Or keep if .blog-posts-list is still used elsewhere with .blog-post-card)
+// For now, assuming .blog-posts-list.flat is no longer the primary container for these cards.
+// If .adw-card class itself is not defined in Adwaita core SASS, we'd need base .adw-card styles:
+// .adw-card { /* base styles like padding, border-radius, bg, border, shadow etc. */ }
+// This assumes .adw-card provides some base that blog-post-item-card extends/customizes.
+// If not, blog-post-item-card should have all necessary card properties.
+
 }
+
+.blog-content-card.adw-card { // For single post view main content area
+  background-color: var(--card-background-color, var(--window-bg-color));
+  border-radius: var(--card-border-radius, var(--border-radius-large));
+  border: 1px solid var(--card-border-color, var(--borders-color));
+  box-shadow: var(--card-box-shadow, 0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.05));
+  padding: var(--spacing-l); // Larger padding for main content card
+  margin-bottom: var(--spacing-xl); // Space before author bio/comments
+
+  .post-header {
+    margin-bottom: var(--spacing-l);
+  }
+  .post-content { // This is .styled-text-content
+    margin-bottom: var(--spacing-l);
+  }
+  .share-buttons-section, .post-actions-container {
+    margin-top: var(--spacing-l);
+    padding-top: var(--spacing-l);
+    border-top: 1px solid var(--divider-color);
+  }
 }
 
 .comment-card {
