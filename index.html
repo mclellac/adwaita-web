@@ -387,8 +387,17 @@
                 <div class="adw-row"> {/* Assuming adw-row is a styled div */}
                     <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" checked> <span class="adw-label">Enable Feature</span></label>
                     <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" disabled> <span class="adw-label">Disabled Checkbox</span></label>
-                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch"> <span class="adw-label visually-hidden">Switch 1</span></label>
-                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch" checked disabled> <span class="adw-label visually-hidden">Switch 2</span></label>
+                    <label class="adw-switch">
+                        <input type="checkbox">
+                        <span class="adw-switch-slider"></span>
+                    </label>
+                    <span class="adw-label" style="margin-left: var(--spacing-xs);">Switch 1</span>
+
+                    <label class="adw-switch" style="margin-left: var(--spacing-m);">
+                        <input type="checkbox" checked disabled>
+                        <span class="adw-switch-slider"></span>
+                    </label>
+                    <span class="adw-label" style="margin-left: var(--spacing-xs);">Switch 2 (Disabled)</span>
                 </div>
                 <div class="adw-row">
                     <span class="adw-label">Radio Group:</span>
@@ -539,7 +548,10 @@
                         <div class="adw-action-row__subtitle">A descriptive subtitle for the switch.</div>
                     </div>
                     <div class="adw-switch-row__switch">
-                        <label class="adw-switch"><input type="checkbox" checked> <span class="adw-label visually-hidden">Enable Setting Toggle</span></label>
+                        <label class="adw-switch">
+                            <input type="checkbox" checked>
+                            <span class="adw-switch-slider"></span>
+                        </label>
                     </div>
                 </div>
                  <div class="adw-switch-row disabled" style="margin-top: var(--spacing-s);">
@@ -547,7 +559,10 @@
                         <div class="adw-action-row__title">Disabled Switch Row</div>
                     </div>
                     <div class="adw-switch-row__switch">
-                        <label class="adw-switch"><input type="checkbox" disabled> <span class="adw-label visually-hidden">Disabled Toggle</span></label>
+                        <label class="adw-switch">
+                            <input type="checkbox" disabled>
+                            <span class="adw-switch-slider"></span>
+                        </label>
                     </div>
                 </div>
 
@@ -788,7 +803,7 @@
                     <h4 class="adw-label title-4">Small View (0px+)</h4>
                     <p class="adw-label body">This is shown when the BreakpointBin is narrow.</p>
                 </div>
-                {# Other views would be hidden by CSS/JS in a real BreakpointBin #}
+                <!-- Other views would be hidden by CSS/JS in a real BreakpointBin -->
             </div>
 
             <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Bin</h3>
