@@ -2,12 +2,7 @@
 
 {% block title %}Profile: {{ user_profile.username }}{% endblock %}
 
-{% block header_title %}
-    {# This will be placed in the adw-header-bar__center by base.html #}
-    {# We might want a back button or other actions specific to this page in the main header,
-       but the base header already has site navigation. For now, just a title. #}
-    <h1 class="adw-header-bar__title">{{ user_profile.username }}'s Profile</h1>
-{% endblock %}
+{% block header_title %}{{ user_profile.username }}'s Profile{% endblock %}
 
 {% block header_actions_start %}
     {% if current_user == user_profile %}
