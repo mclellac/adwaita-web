@@ -2,7 +2,7 @@
 
 @use "sass:color"; // For color.adjust if needed, though direct var() usage is preferred
 @import 'variables'; // Defines SASS color vars like $sass-accent-blue-light-color and CSS vars like --button-bg-color
-@import 'mixins';
+@import 'mixins'; // Reverted for debugging build hang
 
 .adw-button {
     display: inline-flex;

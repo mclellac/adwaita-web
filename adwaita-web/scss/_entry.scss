@@ -1,8 +1,8 @@
 // Styles for Adwaita Entries (Input Fields) (Adwaita Skin Version)
 // Adapted from adwaita-web/scss/_entry.scss
 @use "sass:color";
-@import 'variables'; // Defines CSS vars like --input-bg-color, --borders-color, --accent-color, etc.
-@import 'mixins';    // May contain reusable mixins
+@import 'variables'; // Defines CSS vars like --input-bg-color, --borders-color, --accent-color, etc. (Reverted for debugging)
+@import 'mixins';    // May contain reusable mixins (Reverted for debugging)
 
 // Define default values for local entry variables, these can be overridden by specific contexts (like entry-row)
 // by setting these variables on the .adw-entry element itself or a parent.
