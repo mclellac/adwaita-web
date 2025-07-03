@@ -122,7 +122,7 @@
         </header>
         <p class="comment-text styled-text-content">{{ comment.text }}</p> {# Assuming comment.text is plain text for now, or apply markdown filter if comments can be markdown #}
 
-        <div class="comment-actions adw-box adw-box-spacing-xs" style="margin-top: var(--spacing-xs);">
+        <div class="comment-actions"> {# Removed adw-box, adw-box-spacing-xs, and inline style #}
             {% if current_user.is_authenticated %}
             <button class="adw-button flat compact reply-button" data-comment-id="{{ comment.id }}" data-comment-author="{{ comment.author.username }}">Reply</button>
             {% endif %}
