@@ -1,7 +1,8 @@
 // Adwaita Named Colors - SCSS Variables and CSS Custom Properties
 
 @use "sass:color";
-@use "sass:math"; // Import sass:math for math.round()
+@use "sass:math";
+@use "sass:map";
 
 // --- 1. SASS Variables for Adwaita Palette ---
 $adw-blue-1: #99c1f1;
@@ -383,12 +384,12 @@ $accent-color-definitions-map: (
     // Specific accent color variable overrides for dark theme
     @each $name, $themes in $accent-color-definitions-map {
       &.accent-#{$name} {
-        $accent-dark: map-get($themes, dark);
-        --accent-color: #{map-get($accent-dark, color)};
-        --accent-bg-color: #{map-get($accent-dark, bg)};
-        --accent-fg-color: #{map-get($accent-dark, fg)};
-        --accent-bg-hover-color: #{map-get($accent-dark, hover)};
-        --accent-bg-active-color: #{map-get($accent-dark, active)};
+        $accent-dark: map.get($themes, dark);
+        --accent-color: #{map.get($accent-dark, color)};
+        --accent-bg-color: #{map.get($accent-dark, bg)};
+        --accent-fg-color: #{map.get($accent-dark, fg)};
+        --accent-bg-hover-color: #{map.get($accent-dark, hover)};
+        --accent-bg-active-color: #{map.get($accent-dark, active)};
       }
     }
   }
@@ -396,12 +397,12 @@ $accent-color-definitions-map: (
   // Specific accent color variable overrides for light theme (when .accent-color class is present)
   @each $name, $themes in $accent-color-definitions-map {
     &.accent-#{$name}:not(.theme-dark) { // Apply only if not also theme-dark
-      $accent-light: map-get($themes, light);
-      --accent-color: #{map-get($accent-light, color)};
-      --accent-bg-color: #{map-get($accent-light, bg)};
-      --accent-fg-color: #{map-get($accent-light, fg)};
-      --accent-bg-hover-color: #{map-get($accent-light, hover)};
-      --accent-bg-active-color: #{map-get($accent-light, active)};
+      $accent-light: map.get($themes, light);
+      --accent-color: #{map.get($accent-light, color)};
+      --accent-bg-color: #{map.get($accent-light, bg)};
+      --accent-fg-color: #{map.get($accent-light, fg)};
+      --accent-bg-hover-color: #{map.get($accent-light, hover)};
+      --accent-bg-active-color: #{map.get($accent-light, active)};
     }
   }
 }

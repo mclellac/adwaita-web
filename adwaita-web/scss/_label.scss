@@ -1,7 +1,7 @@
 // Styles for Adwaita Labels (Adwaita Skin Version)
 
-@import 'variables'; // Defines SASS color vars and CSS vars
-@import 'mixins';
+@import 'variables'; // Defines SASS color vars and CSS vars (Reverted for debugging)
+@import 'mixins'; // (Reverted for debugging)
 
 .adw-label {
     display: inline;
