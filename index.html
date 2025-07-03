@@ -4,28 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adwaita Skin - CSS Demo</title>
-    <link rel="stylesheet" href="adwaita-web/css/adwaita-skin.css">
+    <link rel="stylesheet" href="build/css/adwaita-skin.css">
     <style>
-        body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; font-family: var(--document-font-family); color: var(--text-color); background-color: var(--window-bg-color); }
-        .adw-header-bar { /* Basic header bar structure */
+        /* Basic Reset & Document Setup */
+        html { scroll-behavior: smooth; }
+        :root {
+            /* Adwaita Switch variables (Light Theme) - based on typical Adwaita */
+            /* These are here as they might not be in the main adwaita-skin.css if _switch.scss uses vars not globally defined */
+            --switch-knob-bg-color: #ffffff;
+            --switch-slider-off-bg-color: #9a9996; /* adw-light-5 */
+        }
+        :root.theme-dark {
+            /* Adwaita Switch variables (Dark Theme) */
+            --switch-knob-bg-color: #242424;
+            --switch-slider-off-bg-color: #5e5c64; /* adw-dark-2 */
+        }
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: var(--document-font-family);
+            color: var(--text-color);
+            background-color: var(--window-bg-color);
+            overflow: hidden; /* Prevent body scroll, individual areas will scroll */
+        }
+
+        /* Header Bar Enhancements */
+        .adw-header-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: var(--spacing-s) var(--spacing-m); /* Adapting from adw-header-bar styles */
+            padding: var(--spacing-s) var(--spacing-m);
             background-color: var(--headerbar-bg-color);
             border-bottom: 1px solid var(--headerbar-border-color);
+            flex-shrink: 0; /* Header should not shrink */
+            position: sticky; /* Make header sticky */
+            top: 0;
+            z-index: 1001; /* Ensure header is above sidebar backdrop but below open sidebar */
         }
         .adw-header-bar__start, .adw-header-bar__center, .adw-header-bar__end {
             display: flex;
             align-items: center;
             gap: var(--spacing-s);
         }
+         .adw-header-bar__start .page-sidebar-toggle {
+            margin-right: var(--spacing-xs); /* Space between toggle and title on mobile */
+        }
         .adw-header-bar__center {
             flex-grow: 1;
             justify-content: center;
             text-align: center;
         }
-         .adw-header-bar__title { /* from _headerbar.scss */
+        .adw-header-bar__title { /* from _headerbar.scss */
             font-size: var(--headerbar-title-font-size, var(--font-size-large));
             font-weight: var(--headerbar-title-font-weight, $font-weight-bold);
             color: var(--headerbar-title-color, var(--text-color));
@@ -38,12 +69,114 @@
             margin: 0;
         }
 
-        .main-content-area { padding: var(--spacing-l); overflow-y: auto; flex-grow: 1; }
-        .widget-showcase { margin-bottom: var(--spacing-l); }
-        .widget-showcase > .adw-label.title-1 { margin-bottom: var(--spacing-m); } /* Assuming title-level translates to classes */
+        /* New Page Layout Styles */
+        .page-body-container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden; /* Important for child elements to scroll correctly */
+        }
+
+        .page-sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background-color: var(--sidebar-bg-color, var(--headerbar-bg-color)); /* Fallback to headerbar bg */
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding-top: var(--spacing-s);
+            padding-bottom: var(--spacing-s);
+            height: calc(100vh - var(--headerbar-height, 57px)); /* Adjust based on actual header height */
+            position: sticky; /* Sticky sidebar */
+            top: var(--headerbar-height, 57px); /* Stick below the header */
+        }
+        .page-sidebar .adw-list-box.flat {
+            border: none;
+            border-radius: 0;
+            background-color: transparent;
+        }
+        .page-sidebar .adw-action-row {
+            border-bottom: none; /* No internal borders for sidebar rows */
+        }
+        .page-sidebar .adw-action-row:hover {
+             background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06); /* Subtle hover */
+        }
+        /* Active state for sidebar links (set by JS) */
+        .page-sidebar .adw-action-row.active {
+            background-color: rgba(var(--accent-color-rgb, 51, 153, 255), 0.15); /* Subtle accent selection */
+        }
+        .page-sidebar .adw-action-row.active .adw-action-row__title {
+            color: var(--accent-color, #3584e4);
+            font-weight: bold;
+        }
+
+
+        .page-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 var(--spacing-l) var(--spacing-l) var(--spacing-l); /* Padding around content sections */
+            height: calc(100vh - var(--headerbar-height, 57px)); /* Adjust based on actual header height */
+        }
+        .page-content .widget-showcase {
+            margin-bottom: var(--spacing-xl); /* Increased bottom margin for sections */
+            padding-top: var(--spacing-xl); /* Add some top padding for anchor scrolling, accounts for sticky header */
+        }
+         .page-content .widget-showcase:first-child {
+             padding-top: var(--spacing-l); /* First section might need less if header gives space */
+        }
+
+
+        .page-sidebar-toggle {
+            display: none; /* Hidden by default, shown on mobile */
+        }
+        .page-sidebar-backdrop {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.3);
+            z-index: 999; /* Below sidebar, above content (but below header) */
+        }
+
+
+        /* Responsive Sidebar Styles */
+        @media (max-width: 768px) {
+            .page-sidebar-toggle {
+                display: inline-flex; /* Show hamburger button */
+            }
+            .page-sidebar {
+                position: fixed; /* Change from sticky to fixed for overlay behavior */
+                left: 0;
+                top: 0; /* Cover entire viewport */
+                height: 100vh;
+                z-index: 1002; /* Above sticky header when open */
+                transform: translateX(-100%);
+                transition: transform 0.25s ease-in-out;
+                box-shadow: var(--dialog-box-shadow, 0 4px 12px rgba(0,0,0,0.15));
+                padding-top: calc(var(--headerbar-height, 57px) + var(--spacing-s)); /* Content starts below where header would be */
+            }
+            .page-sidebar.open {
+                transform: translateX(0);
+            }
+            .page-sidebar-backdrop.active {
+                display: block;
+                z-index: 1001; /* Ensure backdrop is above sticky header but below open sidebar */
+            }
+            .page-content {
+                /* Content area takes full width, sidebar overlays */
+                padding: var(--spacing-l) var(--spacing-m); /* Adjust padding for smaller screens */
+                 /* padding-top accounts for sticky header */
+            }
+        }
+
+        /* General Widget Showcase Enhancements (already existed, minor review) */
+        .widget-showcase > .adw-label.title-1, /* Matches new h1 */
+        .widget-showcase > h2.adw-label.title-2 { /* Matches new h2 */
+             margin-bottom: var(--spacing-m);
+        }
         .button-group .adw-button { margin-right: var(--spacing-s); margin-bottom: var(--spacing-s); }
 
-        /* Basic icon placeholder styling */
+        /* Basic icon placeholder styling (ensure paths are correct if used directly) */
         .adw-icon {
             display: inline-block;
             width: 16px; /* Default icon size, adjust as needed */
@@ -57,66 +190,139 @@
             mask-position: center;
         }
         /* Example for a specific icon if using mask-image and individual SVGs are not directly in CSS */
-        .icon-actions-go-previous-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/go-previous-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/go-previous-symbolic.svg"); }
-        .icon-actions-open-menu-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/open-menu-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/open-menu-symbolic.svg"); }
-        .icon-actions-document-new-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-new-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-new-symbolic.svg"); }
-        .icon-actions-document-save-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-save-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-save-symbolic.svg"); }
-        .icon-actions-document-open-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-open-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-open-symbolic.svg"); }
-        .icon-actions-edit-delete-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/edit-delete-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/edit-delete-symbolic.svg"); }
-        .icon-actions-document-print-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-print-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-print-symbolic.svg"); }
-        .icon-devices-camera-photo-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/devices/camera-photo-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/devices/camera-photo-symbolic.svg"); }
-        .icon-actions-call-start-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/call-start-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/call-start-symbolic.svg"); }
-        .icon-actions-call-stop-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/call-stop-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/call-stop-symbolic.svg"); }
-        .icon-ui-pan-down-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-down-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-down-symbolic.svg"); }
-        .icon-actions-application-exit-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/application-exit-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/application-exit-symbolic.svg"); }
-        .icon-status-dialog-error-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-error-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-error-symbolic.svg"); }
-        .icon-ui-pan-up-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-up-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-up-symbolic.svg"); }
-        .icon-actions-media-playback-start-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/media-playback-start-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/media-playback-start-symbolic.svg"); }
-        .icon-apps-help-contents-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/apps/help-contents-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/apps/help-contents-symbolic.svg");}
-        .icon-status-emblem-ok-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/emblem-ok-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/emblem-ok-symbolic.svg");}
-        .icon-actions-go-next-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/go-next-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/go-next-symbolic.svg");}
-        .icon-status-dialog-information-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-information-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-information-symbolic.svg");}
-        .icon-status-dialog-warning-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-warning-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-warning-symbolic.svg");}
-        .icon-actions-go-up-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/go-up-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/go-up-symbolic.svg");}
-        .icon-actions-go-down-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/go-down-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/go-down-symbolic.svg");}
-        .icon-emoji-face-smile-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/emoji/face-smile-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/emoji/face-smile-symbolic.svg");}
-        .icon-actions-edit-select-all-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/edit-select-all-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/edit-select-all-symbolic.svg");}
-        .icon-emoji-face-plain-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/emoji/face-plain-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/emoji/face-plain-symbolic.svg");}
-        .icon-categories-applications-graphics-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-graphics-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-graphics-symbolic.svg");}
-        .icon-categories-applications-multimedia-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-multimedia-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-multimedia-symbolic.svg");}
-        .icon-categories-applications-utilities-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-utilities-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-utilities-symbolic.svg");}
-
+        .icon-actions-go-previous-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/go-previous-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/go-previous-symbolic.svg"); }
+        .icon-actions-open-menu-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/open-menu-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/open-menu-symbolic.svg"); }
+        .icon-actions-document-new-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/document-new-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/document-new-symbolic.svg"); }
+        .icon-actions-document-save-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/document-save-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/document-save-symbolic.svg"); }
+        .icon-actions-document-open-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/document-open-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/document-open-symbolic.svg"); }
+        .icon-actions-edit-delete-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/edit-delete-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/edit-delete-symbolic.svg"); }
+        .icon-actions-document-print-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/document-print-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/document-print-symbolic.svg"); }
+        .icon-devices-camera-photo-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/devices/camera-photo-symbolic.svg"); mask-image: url("build/data/icons/symbolic/devices/camera-photo-symbolic.svg"); }
+        .icon-actions-call-start-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/call-start-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/call-start-symbolic.svg"); }
+        .icon-actions-call-stop-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/call-stop-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/call-stop-symbolic.svg"); }
+        .icon-ui-pan-down-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/ui/pan-down-symbolic.svg"); mask-image: url("build/data/icons/symbolic/ui/pan-down-symbolic.svg"); }
+        .icon-actions-application-exit-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/application-exit-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/application-exit-symbolic.svg"); }
+        .icon-status-dialog-error-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/status/dialog-error-symbolic.svg"); mask-image: url("build/data/icons/symbolic/status/dialog-error-symbolic.svg"); }
+        .icon-ui-pan-up-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/ui/pan-up-symbolic.svg"); mask-image: url("build/data/icons/symbolic/ui/pan-up-symbolic.svg"); }
+        .icon-actions-media-playback-start-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/media-playback-start-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/media-playback-start-symbolic.svg"); }
+        .icon-apps-help-contents-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/apps/help-contents-symbolic.svg"); mask-image: url("build/data/icons/symbolic/apps/help-contents-symbolic.svg");}
+        .icon-status-emblem-ok-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/status/emblem-ok-symbolic.svg"); mask-image: url("build/data/icons/symbolic/status/emblem-ok-symbolic.svg");}
+        .icon-actions-go-next-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/go-next-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/go-next-symbolic.svg");}
+        .icon-status-dialog-information-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/status/dialog-information-symbolic.svg"); mask-image: url("build/data/icons/symbolic/status/dialog-information-symbolic.svg");}
+        .icon-status-dialog-warning-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/status/dialog-warning-symbolic.svg"); mask-image: url("build/data/icons/symbolic/status/dialog-warning-symbolic.svg");}
+        .icon-actions-go-up-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/go-up-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/go-up-symbolic.svg");}
+        .icon-actions-go-down-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/go-down-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/go-down-symbolic.svg");}
+        .icon-emoji-face-smile-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/emoji/face-smile-symbolic.svg"); mask-image: url("build/data/icons/symbolic/emoji/face-smile-symbolic.svg");}
+        .icon-actions-edit-select-all-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/edit-select-all-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/edit-select-all-symbolic.svg");}
+        .icon-emoji-face-plain-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/emoji/face-plain-symbolic.svg"); mask-image: url("build/data/icons/symbolic/emoji/face-plain-symbolic.svg");}
+        .icon-categories-applications-graphics-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/categories/applications-graphics-symbolic.svg"); mask-image: url("build/data/icons/symbolic/categories/applications-graphics-symbolic.svg");}
+        .icon-categories-applications-multimedia-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/categories/applications-multimedia-symbolic.svg"); mask-image: url("build/data/icons/symbolic/categories/applications-multimedia-symbolic.svg");}
+        .icon-categories-applications-utilities-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/categories/applications-utilities-symbolic.svg"); mask-image: url("build/data/icons/symbolic/categories/applications-utilities-symbolic.svg");}
+        .icon-window-close-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/window-close-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/window-close-symbolic.svg");}
+        .icon-actions-view-reveal-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/view-reveal-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/view-reveal-symbolic.svg");} /* For password peek */
     </style>
 </head>
 <body>
     <header class="adw-header-bar" id="main-header-bar">
         <div class="adw-header-bar__start">
-            <button class="adw-button icon-only flat" id="header-back-button" aria-label="Back"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
+            <button class="adw-button icon-only flat page-sidebar-toggle" id="page-sidebar-toggle" aria-label="Toggle Sidebar" aria-expanded="false">
+                <span class="adw-icon icon-actions-open-menu-symbolic"></span>
+            </button>
+            <!-- <button class="adw-button icon-only flat" id="header-back-button" aria-label="Back"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button> -->
         </div>
         <div class="adw-header-bar__center">
             <div>
-                <h1 class="adw-header-bar__title">Adwaita Widgets</h1>
-                <div class="adw-header-bar__subtitle">CSS Demo</div>
+                <h1 class="adw-header-bar__title">Adwaita Web Showcase</h1>
+                <div class="adw-header-bar__subtitle">CSS &amp; Widget Demo</div>
             </div>
         </div>
         <div class="adw-header-bar__end">
-            <button class="adw-button flat" id="theme-toggle-button">Toggle Theme</button>
-            <button class="adw-button icon-only flat" id="header-menu-button" aria-label="Menu"><span class="adw-icon icon-actions-open-menu-symbolic"></span></button>
+            <button class="adw-button flat" id="theme-toggle-button">Toggle Dark</button> <!-- Text will be updated by JS -->
+            <!-- <button class="adw-button icon-only flat" id="header-menu-button" aria-label="Menu"><span class="adw-icon icon-actions-open-menu-symbolic"></span></button> -->
         </div>
     </header>
+    <div class="page-sidebar-backdrop" id="page-sidebar-backdrop"></div>
 
-    <div class="main-content-area">
-        <div class="adw-label title-1">Adwaita Skin CSS Showcase</div>
-        <p class="adw-label body" style="margin-bottom: var(--spacing-l);">
-            This page demonstrates various HTML elements styled with Adwaita Skin CSS.
-            Interactivity requiring JavaScript from Adwaita Web has been removed or simplified.
-        </p>
+    <div class="page-body-container">
+        <nav class="page-sidebar" id="page-sidebar">
+            <div class="adw-list-box flat" id="sidebar-nav-list">
+                <a href="#info-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Introduction</span></span>
+                </a>
 
-        <!-- Accent Color Picker (Static Display) -->
-        <section class="widget-showcase">
-            <h2 class="adw-label title-2">Theme Controls (Static)</h2>
-            <div class="adw-box adw-box-spacing-s" id="accent-color-picker-box" style="align-items: center; margin-bottom: var(--spacing-m); flex-wrap: wrap;">
-                <span class="adw-label">Accent Color (Examples):</span>
+                <div class="adw-label title-4" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-xs); color: var(--text-color-secondary);">General</div>
+                <a href="#theme-controls-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Theme Controls</span></span>
+                </a>
+                <a href="#icons-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Icons</span></span>
+                </a>
+                <a href="#links-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Links</span></span>
+                </a>
+
+                <div class="adw-label title-4" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-xs); color: var(--text-color-secondary);">Actions & Input</div>
+                <a href="#buttons-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Buttons</span></span>
+                </a>
+                <a href="#controls-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Input Controls</span></span>
+                </a>
+                <!-- Placeholder for Entry section if made separate -->
+                <!-- <a href="#entry-section" class="adw-action-row activatable"><span class="adw-action-row__text"><span class="adw-action-row__title">Entry</span></span></a> -->
+
+
+                <div class="adw-label title-4" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-xs); color: var(--text-color-secondary);">Display & Info</div>
+                <a href="#labels-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Labels</span></span>
+                </a>
+                <a href="#indicators-status-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Indicators & Status</span></span>
+                </a>
+                <a href="#toast-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Toasts</span></span>
+                </a>
+                <a href="#banner-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Banner</span></span>
+                </a>
+
+                <div class="adw-label title-4" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-xs); color: var(--text-color-secondary);">Rows & Lists</div>
+                <a href="#rows-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">List Rows</span></span>
+                </a>
+
+                <div class="adw-label title-4" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-xs); color: var(--text-color-secondary);">Dialogs</div>
+                <a href="#dialogs-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Dialogs</span></span>
+                </a>
+
+                <div class="adw-label title-4" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-xs); color: var(--text-color-secondary);">Layout & Containers</div>
+                <a href="#layouts-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">Layout Widgets</span></span>
+                </a>
+
+                <div class="adw-label title-4" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-xs); color: var(--text-color-secondary);">Navigation & Views</div>
+                <a href="#nav-views-section" class="adw-action-row activatable">
+                    <span class="adw-action-row__text"><span class="adw-action-row__title">View & Nav Widgets</span></span>
+                </a>
+            </div>
+        </nav>
+        <main class="page-content" id="page-content">
+            <section id="info-section" class="widget-showcase" style="padding-top: var(--spacing-l);">
+                <h1 class="adw-label title-1">Adwaita Web CSS Showcase</h1>
+                <p class="adw-label body">
+                    This page demonstrates various HTML elements styled with Adwaita Web CSS.
+                    The library aims to provide styles that mimic the GTK Adwaita theme.
+                    Interactivity is provided by custom page JavaScript or from `toast.js` and `app-layout.js` if applicable.
+                    The `components.js` file, which might contain Web Component definitions or JS factories, was not found during the build.
+                </p>
+            </section>
+
+            <!-- Accent Color Picker (Static Display) -->
+            <section class="widget-showcase" id="theme-controls-section">
+                <h2 class="adw-label title-2">Theme Controls (Static)</h2>
+                <div class="adw-box adw-box-spacing-s" id="accent-color-picker-box" style="align-items: center; margin-bottom: var(--spacing-m); flex-wrap: wrap;">
+                    <span class="adw-label">Accent Color (Examples):</span>
                 <button class="adw-button" data-accent-color-id="default">Default</button>
                 <button class="adw-button" data-accent-color-id="blue">Blue</button>
                 <button class="adw-button" data-accent-color-id="green">Green</button>
@@ -136,7 +342,7 @@
         </section>
 
         <!-- Buttons Section -->
-        <section class="widget-showcase">
+        <section class="widget-showcase" id="buttons-section">
             <h2 class="adw-label title-2">Buttons</h2>
             <div class="button-group">
                 <button class="adw-button" id="btn-click-me">Click Me!</button>
@@ -169,7 +375,7 @@
         </section>
 
         <!-- Icons Section -->
-        <section class="widget-showcase">
+        <section class="widget-showcase" id="icons-section">
             <h2 class="adw-label title-2">Icons (Placeholder Styling)</h2>
             <div class="adw-box adw-box-spacing-m" style="align-items: center; font-size: 24px;">
                 <span class="adw-icon icon-actions-document-new-symbolic" aria-label="New Document"></span>
@@ -186,14 +392,23 @@
         </section>
 
         <!-- Controls Section (Static HTML representations) -->
-        <section class="widget-showcase">
+        <section class="widget-showcase" id="controls-section">
             <h2 class="adw-label title-2">Controls (Static HTML)</h2>
             <div class="adw-box adw-box-vertical adw-box-spacing-m">
                 <div class="adw-row"> {/* Assuming adw-row is a styled div */}
                     <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" checked> <span class="adw-label">Enable Feature</span></label>
                     <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" disabled> <span class="adw-label">Disabled Checkbox</span></label>
-                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch"> <span class="adw-label visually-hidden">Switch 1</span></label>
-                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch" checked disabled> <span class="adw-label visually-hidden">Switch 2</span></label>
+                    <label class="adw-switch">
+                        <input type="checkbox">
+                        <span class="adw-switch-slider"></span>
+                    </label>
+                    <span class="adw-label" style="margin-left: var(--spacing-xs);">Switch 1</span>
+
+                    <label class="adw-switch" style="margin-left: var(--spacing-m);">
+                        <input type="checkbox" checked disabled>
+                        <span class="adw-switch-slider"></span>
+                    </label>
+                    <span class="adw-label" style="margin-left: var(--spacing-xs);">Switch 2 (Disabled)</span>
                 </div>
                 <div class="adw-row">
                     <span class="adw-label">Radio Group:</span>
@@ -202,7 +417,7 @@
                     <label class="adw-radio-wrapper"><input type="radio" name="my-radio-group" class="adw-radio" value="gamma" disabled> <span class="adw-label">Gamma</span></label>
                 </div>
                 <div class="adw-row" style="align-items: center;">
-                    <span class="adw-label">Spin Button:</span> {# Changed label to span as it's not for an input directly here #}
+                    <span class="adw-label">Spin Button:</span> <!-- Changed label to span as it's not for an input directly here -->
                     <div class="adw-spin-button" id="spin-btn-1-wrapper">
                         <input type="number" id="spin-btn-1-input" class="adw-entry adw-spin-button-entry" value="5" min="0" max="10" step="1">
                         <div class="adw-spin-button-buttons">
@@ -248,6 +463,29 @@
                         <button class="adw-button">Option 3</button>
                     </div>
                 </div>
+
+                <h3 class="adw-label title-3" style="margin-top:var(--spacing-l);">Entries</h3>
+                <div class="adw-row" style="align-items: center; max-width: 500px;">
+                    <label for="text-entry-example" class="adw-label" style="margin-right: var(--spacing-s);">Text Entry:</label>
+                    <input type="text" class="adw-entry" id="text-entry-example" placeholder="Enter some text">
+                </div>
+                <div class="adw-row" style="align-items: center; margin-top: var(--spacing-s); max-width: 500px;">
+                    <label for="password-entry-example" class="adw-label" style="margin-right: var(--spacing-s);">Password:</label>
+                    <input type="password" class="adw-entry" id="password-entry-example" placeholder="Enter password">
+                </div>
+                <div class="adw-row" style="align-items: center; margin-top: var(--spacing-s); max-width: 500px;">
+                    <label for="search-entry-example" class="adw-label" style="margin-right: var(--spacing-s);">Search:</label>
+                    <input type="search" class="adw-entry" id="search-entry-example" placeholder="Search...">
+                </div>
+                <div class="adw-row" style="align-items: center; margin-top: var(--spacing-s); max-width: 500px;">
+                    <label for="disabled-entry-example" class="adw-label" style="margin-right: var(--spacing-s);">Disabled:</label>
+                    <input type="text" class="adw-entry" id="disabled-entry-example" placeholder="Disabled" value="Cannot edit" disabled>
+                </div>
+                 <div class="adw-row" style="align-items: center; margin-top: var(--spacing-s); max-width: 500px;">
+                    <label for="number-entry-example" class="adw-label" style="margin-right: var(--spacing-s);">Number:</label>
+                    <input type="number" class="adw-entry" id="number-entry-example" placeholder="Enter a number" value="42">
+                </div>
+
             </div>
              <details>
                 <summary>Show Controls Examples (Static HTML)</summary>
@@ -258,7 +496,7 @@
         </section>
 
         <!-- Links Section -->
-        <section class="widget-showcase">
+        <section class="widget-showcase" id="links-section">
             <h2 class="adw-label title-2">Links</h2>
             <div class="adw-box adw-box-vertical adw-box-spacing-s">
                 <p class="adw-label body">Standard HTML links should inherit Adwaita styling:</p>
@@ -270,7 +508,7 @@
         </section>
 
         <!-- Rows Section -->
-        <section class="widget-showcase">
+        <section class="widget-showcase" id="rows-section">
             <h2 class="adw-label title-2">Rows</h2>
             <div class="adw-list-box">
                 <div class="adw-action-row activatable">
@@ -291,45 +529,214 @@
                     <label class="adw-entry-row__title" for="username-entry">Username</label>
                     <input type="text" class="adw-entry" id="username-entry" placeholder="Enter your username">
                 </div>
-                <div class="adw-expander-row">
-                    <div class="adw-action-row"> {/* Expander uses an action row for its header */}
+                <div class="adw-expander-row" id="expander-example-1">
+                    <div class="adw-action-row adw-expander-row-header">
                         <div class="adw-action-row__text">
                             <div class="adw-action-row__title">Expandable Section</div>
                             <div class="adw-action-row__subtitle">Click to see more</div>
                         </div>
-                         <span class="adw-expander-row__chevron"><!-- Chevron via CSS --></span>
+                        <span class="adw-icon adw-expander-row-chevron"></span>
                     </div>
-                    <div class="adw-expander-row__content" style="display:none;"> {/* Content hidden by default */}
+                    <div class="adw-expander-row-content-area">
                         <p class="adw-label body" style="padding: var(--spacing-m);">Content for the first expander.</p>
                         <div class="adw-action-row"><div class="adw-action-row__title">Nested Item</div></div>
                     </div>
                 </div>
+
+                <!-- PasswordEntryRow -->
+                <div class="adw-entry-row adw-password-entry-row" style="margin-top: var(--spacing-s);">
+                    <label class="adw-entry-row__title" for="password-row-entry">Password Row</label>
+                    <input type="password" class="adw-entry" id="password-row-entry" placeholder="Enter password">
+                    <button class="adw-button icon-only flat adw-password-entry-row__peek-button" aria-label="Show password">
+                        <span class="adw-icon icon-actions-view-reveal-symbolic"></span> <!-- Placeholder icon, update if available -->
+                    </button>
+                </div>
+
+                <!-- SwitchRow -->
+                <div class="adw-switch-row" style="margin-top: var(--spacing-s);">
+                    <div class="adw-action-row__text">
+                        <div class="adw-action-row__title">Enable Setting</div>
+                        <div class="adw-action-row__subtitle">A descriptive subtitle for the switch.</div>
+                    </div>
+                    <div class="adw-switch-row__switch">
+                        <label class="adw-switch">
+                            <input type="checkbox" checked>
+                            <span class="adw-switch-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                 <div class="adw-switch-row disabled" style="margin-top: var(--spacing-s);">
+                    <div class="adw-action-row__text">
+                        <div class="adw-action-row__title">Disabled Switch Row</div>
+                    </div>
+                    <div class="adw-switch-row__switch">
+                        <label class="adw-switch">
+                            <input type="checkbox" disabled>
+                            <span class="adw-switch-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+
+                <!-- ComboRow -->
+                <div class="adw-combo-row" style="margin-top: var(--spacing-s);">
+                     <div class="adw-action-row__text">
+                        <div class="adw-action-row__title">Choose Option</div>
+                        <div class="adw-action-row__subtitle">Select from the list.</div>
+                    </div>
+                    <select class="adw-combo-row__select adw-entry">
+                        <option value="1">Option 1</option>
+                        <option value="2" selected>Option 2 (Default)</option>
+                        <option value="3">Option 3 is a bit longer</option>
+                    </select>
+                </div>
+
+                <!-- SpinRow -->
+                <div class="adw-spin-row" style="margin-top: var(--spacing-s);">
+                    <div class="adw-action-row__text">
+                        <div class="adw-action-row__title">Adjust Value</div>
+                    </div>
+                    <div class="adw-spin-button adw-spin-row__spin-button">
+                        <input type="number" class="adw-entry adw-spin-button-entry" value="5" min="0" max="10">
+                        <div class="adw-spin-button-buttons">
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-up" aria-label="Increase value"><span class="adw-icon icon-ui-pan-up-symbolic"></span></button>
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-down" aria-label="Decrease value"><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ButtonRow -->
+                <div class="adw-button-row" style="margin-top: var(--spacing-s);">
+                    <button class="adw-button">Cancel</button>
+                    <button class="adw-button suggested-action">Apply</button>
+                </div>
+                <div class="adw-button-row centered" style="margin-top: var(--spacing-s);">
+                    <button class="adw-button flat">Centered Action 1</button>
+                    <button class="adw-button">Centered Action 2</button>
+                </div>
+
             </div>
         </section>
 
         <!-- Dialogs (Static Structure, No JS interaction) -->
-        <section class="widget-showcase">
-            <h2 class="adw-label title-2">Dialogs (Static Structure)</h2>
-            <div class="adw-box adw-box-spacing-s">
-                <button class="adw-button">Show Alert Dialog (No Action)</button>
+        <section class="widget-showcase" id="dialogs-section">
+            <h2 class="adw-label title-2">Dialogs</h2>
+            <div class="adw-box adw-box-spacing-s" style="margin-bottom: var(--spacing-m);">
+                <button class="adw-button" id="show-dialog-button">Show Simple Dialog</button>
             </div>
-            <div class="adw-dialog" role="alertdialog" style="display: block; position:relative; margin-top: var(--spacing-m); max-width: 400px;"> {/* Inline for demo */}
+
+            <div class="adw-dialog-backdrop" id="simple-dialog-backdrop"></div>
+            <div class="adw-dialog" id="simple-dialog" role="alertdialog" aria-labelledby="simple-dialog-title" aria-describedby="simple-dialog-desc" style="display: none;">
                 <header class="adw-header-bar">
-                    <h2 class="adw-header-bar__title">Confirm Action</h2>
+                    <h2 class="adw-header-bar__title" id="simple-dialog-title">Confirm Action</h2>
                 </header>
                 <div class="adw-dialog__content">
-                    <p class="adw-label body">Are you sure you want to proceed with this action?</p>
+                    <p class="adw-label body" id="simple-dialog-desc">Are you sure you want to proceed with this action? This is a basic dialog implementation for demo purposes.</p>
                 </div>
                 <footer class="adw-dialog__actions">
-                    <button class="adw-button">Cancel</button>
-                    <button class="adw-button destructive-action">Confirm</button>
+                    <button class="adw-button" id="dialog-cancel-button">Cancel</button>
+                    <button class="adw-button destructive-action" id="dialog-confirm-button">Confirm</button>
                 </footer>
             </div>
+             <details>
+                <summary>Show Dialog HTML Structure</summary>
+                <pre><code>&lt;div class="adw-dialog-backdrop" id="simple-dialog-backdrop"&gt;&lt;/div&gt;
+&lt;div class="adw-dialog" id="simple-dialog" role="alertdialog"&gt;
+  &lt;header class="adw-header-bar"&gt;
+    &lt;h2 class="adw-header-bar__title"&gt;Dialog Title&lt;/h2&gt;
+  &lt;/header&gt;
+  &lt;div class="adw-dialog__content"&gt;
+    &lt;p&gt;Dialog message...&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;footer class="adw-dialog__actions"&gt;
+    &lt;button class="adw-button"&gt;Cancel&lt;/button&gt;
+    &lt;button class="adw-button suggested-action"&gt;OK&lt;/button&gt;
+  &lt;/footer&gt;
+&lt;/div&gt;</code></pre>
+            </details>
         </section>
 
         <!-- Other Misc Components -->
-        <section class="widget-showcase">
-            <h2 class="adw-label title-2">Miscellaneous</h2>
+        <section class="widget-showcase" id="labels-section">
+            <h2 class="adw-label title-2">Labels</h2>
+            <p><span class="adw-label title-1">Title 1 Label</span></p>
+            <p><span class="adw-label title-2">Title 2 Label</span></p>
+            <p><span class="adw-label title-3">Title 3 Label</span></p>
+            <p><span class="adw-label title-4">Title 4 Label</span></p>
+            <p><span class="adw-label">Body Label (Default)</span> - Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <p><span class="adw-label bold">Body Bold Label</span> - Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <p><span class="adw-label muted">Muted Label</span> - Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+            <p><span class="adw-label adw-caption">Caption Label</span> - Nisi ut aliquip ex ea commodo consequat.</p>
+            <p><span class="adw-label selectable">This label is selectable.</span> Duis aute irure dolor in reprehenderit.</p>
+             <details>
+                <summary>Show Label Examples</summary>
+                <pre><code>&lt;p&gt;&lt;span class="adw-label title-1"&gt;Title 1&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="adw-label"&gt;Body Label&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="adw-label muted"&gt;Muted Label&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="adw-label adw-caption"&gt;Caption&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="adw-label selectable"&gt;Selectable&lt;/span&gt;&lt;/p&gt;</code></pre>
+            </details>
+        </section>
+
+        <section class="widget-showcase" id="toast-section">
+            <h2 class="adw-label title-2">Toasts</h2>
+            <p class="adw-label body">Click buttons to show toasts. Assumes <code>Adw.createToast()</code> is available from <code>toast.js</code>.</p>
+            <div class="adw-box adw-box-spacing-s" style="margin-top: var(--spacing-m);">
+                <button class="adw-button" id="show-simple-toast">Show Simple Toast</button>
+                <button class="adw-button" id="show-action-toast">Show Toast with Action</button>
+            </div>
+            <div id="toast-demo-container" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1500; display: flex; flex-direction: column; gap: 10px; pointer-events: none;">
+                <!-- Toasts will be appended here by JS -->
+            </div>
+             <details>
+                <summary>Show Toast Examples</summary>
+                <pre><code>&lt;!-- Container for toasts (usually fixed position) --&gt;
+&lt;div id="toast-demo-container" style="position: fixed; ..."&gt;&lt;/div&gt;
+
+&lt;button id="show-simple-toast"&gt;Show Simple Toast&lt;/button&gt;
+
+&lt;script&gt;
+  // Assuming Adw.createToast and a way to manage showing them.
+  // The demo JS will handle appending to #toast-demo-container.
+&lt;/script&gt;
+                </code></pre>
+            </details>
+        </section>
+
+        <section class="widget-showcase" id="banner-section">
+            <h2 class="adw-label title-2">Banners</h2>
+            <p class="adw-label body">Click buttons to show/hide a banner. This is a custom JS implementation for demo.</p>
+
+            <div class="adw-banner" id="demo-banner" style="position: relative; display: none; margin-bottom: var(--spacing-m); width: 100%;">
+                <span class="adw-banner-title" id="demo-banner-title">This is an informational banner.</span>
+                <div class="adw-banner-button-group">
+                    <button class="adw-button flat" id="demo-banner-action-btn">Action</button>
+                    <button class="adw-button icon-only flat" id="demo-banner-close-btn" aria-label="Close banner">
+                        <span class="adw-icon icon-window-close-symbolic"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="adw-box adw-box-spacing-s">
+                <button class="adw-button" id="show-info-banner-btn">Show Info Banner</button>
+                <button class="adw-button" id="show-warning-banner-btn">Show Warning Banner</button>
+            </div>
+            <details>
+                <summary>Show Banner HTML Example</summary>
+                <pre><code>&lt;div class="adw-banner" id="demo-banner"&gt;
+  &lt;span class="adw-banner-title"&gt;Banner Title&lt;/span&gt;
+  &lt;div class="adw-banner-button-group"&gt;
+    &lt;button class="adw-button flat"&gt;Action&lt;/button&gt;
+    &lt;button class="adw-button icon-only flat" aria-label="Close"&gt;
+      &lt;span class="adw-icon icon-close-symbolic"&gt;&lt;/span&gt;
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </details>
+        </section>
+
+        <section class="widget-showcase" id="indicators-status-section">
+            <h2 class="adw-label title-2">Indicators & Status</h2>
             <h3 class="adw-label title-3">Progress Bar</h3>
             <div class="adw-progress-bar" style="margin-bottom: var(--spacing-s);"><div style="width: 60%;"></div></div>
             <div class="adw-progress-bar indeterminate"><div class="adw-progress-bar__pulse"></div></div>
@@ -342,16 +749,16 @@
 
             <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Status Page</h3>
             <div class="adw-status-page">
-                <span class="adw-icon icon-status-emblem-ok-symbolic adw-status-page-icon" style="font-size: 4.5rem;"></span> {# Ensured adw-status-page-icon class #}
-                <h4 class="adw-label title-1 adw-status-page-title">All Done!</h4> {# Ensured adw-status-page-title class #}
-                <p class="adw-label body adw-status-page-description">You have completed all tasks.</p> {# Ensured adw-status-page-description class #}
+                <span class="adw-icon icon-status-emblem-ok-symbolic adw-status-page-icon" style="font-size: 4.5rem;"></span>
+                <h4 class="adw-label title-1 adw-status-page-title">All Done!</h4>
+                <p class="adw-label body adw-status-page-description">You have completed all tasks.</p>
                 <div class="adw-status-page-actions">
                     <button class="adw-button suggested-action">Example Action</button>
                 </div>
             </div>
         </section>
         <!-- Layout Components -->
-        <section class="widget-showcase">
+        <section class="widget-showcase" id="layouts-section">
             <h2 class="adw-label title-2">Layouts (Static Structures)</h2>
             <h3 class="adw-label title-3">Box (Horizontal)</h3>
             <div class="adw-box adw-box-spacing-m" style="padding:var(--spacing-s); border:1px dashed var(--border-color);">
@@ -365,17 +772,29 @@
                 <p class="adw-label body">This text is clamped to a maximum width of 40 characters. It will not grow wider than that, ensuring readability even if the parent container is very wide.</p>
             </div>
 
-            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Flap (Static Structure)</h3>
-            <button class="adw-button" id="toggle-main-flap-static">Toggle Flap (No Action)</button>
-            <div class="adw-flap" id="main-flap-example-static" style="border: 1px solid var(--border-color); margin-top: var(--spacing-s); min-height: 150px; display: flex;">
-                <div class="adw-flap__flap-content adw-box vertical" style="padding: var(--spacing-m); background: var(--sidebar-bg-color); min-width:200px; border-right: 1px solid var(--border-color);">
-                    <h3 class="adw-label title-3">Flap Content</h3>
-                    <div class="adw-action-row"><span class="adw-action-row__title">Settings</span></div>
+            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Flap</h3>
+            <button class="adw-button" id="toggle-demo-flap">Toggle Flap</button>
+            <div class="adw-flap folded" id="demo-flap" style="border: 1px solid var(--border-color); margin-top: var(--spacing-s); min-height: 200px; display: flex; position: relative; overflow: hidden;">
+                <div class="adw-flap__flap-content adw-box vertical" style="padding: var(--spacing-m); background: var(--sidebar-bg-color); min-width:220px; border-right: 1px solid var(--border-color); transition: transform 0.25s ease-in-out, min-width 0.25s ease-in-out; position: absolute; height: 100%; left:0; transform: translateX(-100%);">
+                    <h4 class="adw-label title-4">Flap Content</h4>
+                    <div class="adw-action-row activatable"><span class="adw-action-row__title">Navigation Item 1</span></div>
+                    <div class="adw-action-row activatable"><span class="adw-action-row__title">Navigation Item 2</span></div>
+                    <div class="adw-action-row activatable"><span class="adw-action-row__title">Settings</span></div>
                 </div>
-                <div class="adw-flap__main-content adw-box vertical" style="padding: var(--spacing-m); flex-grow: 1;">
-                    <h3 class="adw-label title-3">Main Content (Flap Demo)</h3>
+                <div class="adw-flap__main-content adw-box vertical" style="padding: var(--spacing-m); flex-grow: 1; transition: margin-left 0.25s ease-in-out; margin-left: 0;">
+                    <h4 class="adw-label title-4">Main Content Area</h4>
+                    <p class="adw-label body">This is the main content. When the flap is open, this area might reflow or the flap might overlay it, depending on CSS implementation.</p>
                 </div>
             </div>
+            <style>
+                .adw-flap:not(.folded) .adw-flap__flap-content {
+                    transform: translateX(0);
+                }
+                /* Example for reflowing content, adjust as needed based on actual adwaita-skin.css behavior */
+                /* .adw-flap:not(.folded) .adw-flap__main-content {
+                    margin-left: 220px;
+                } */
+            </style>
 
             <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">WrapBox</h3>
             <div class="adw-wrap-box spacing-s align-center" style="padding:var(--spacing-s); border:1px dashed var(--border-color); min-height: 100px;">
@@ -395,8 +814,14 @@
                     <h4 class="adw-label title-4">Small View (0px+)</h4>
                     <p class="adw-label body">This is shown when the BreakpointBin is narrow.</p>
                 </div>
-                {# Other views would be hidden by CSS/JS in a real BreakpointBin #}
+                <!-- Other views would be hidden by CSS/JS in a real BreakpointBin -->
             </div>
+
+            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Bin</h3>
+            <div class="adw-bin" style="padding:var(--spacing-s); border:1px dashed var(--border-color); background-color: var(--theme-color-grey-1); width: 200px; height: 100px;">
+                <button class="adw-button suggested-action">Button inside a Bin</button>
+            </div>
+
              <details>
                 <summary>Show Layout Examples (Static HTML)</summary>
                 <pre><code>&lt;div class="adw-box adw-box-spacing-m"&gt;...&lt;/div&gt;
@@ -407,9 +832,489 @@
             </details>
         </section>
 
+        <section class="widget-showcase" id="nav-views-section">
+            <h2 class="adw-label title-2">Navigation & View Widgets</h2>
+
+            <h3 class="adw-label title-3" style="margin-top:var(--spacing-l);">ViewSwitcher</h3>
+            <div class="adw-view-switcher" id="demo-view-switcher">
+                <div class="adw-view-switcher-bar">
+                    <button class="adw-button active" data-view-target="view-switcher-page-1">Page 1</button>
+                    <button class="adw-button" data-view-target="view-switcher-page-2">Page 2 (Inputs)</button>
+                    <button class="adw-button" data-view-target="view-switcher-page-3">Another Page</button>
+                </div>
+                <div class="adw-view-switcher-content">
+                    <div class="adw-view-switcher-page active-view" id="view-switcher-page-1">
+                        <h4 class="adw-label title-4" style="margin-top:var(--spacing-m);">Content for Page 1</h4>
+                        <p class="adw-label body">This is the first page shown by the ViewSwitcher. It can contain any HTML content.</p>
+                        <img src="images/light.png" alt="Light theme screenshot" style="max-width: 100%; height: auto; border-radius: var(--border-radius-default); margin-top: var(--spacing-s);">
+                    </div>
+                    <div class="adw-view-switcher-page" id="view-switcher-page-2" style="display:none;">
+                        <h4 class="adw-label title-4" style="margin-top:var(--spacing-m);">Content for Page 2</h4>
+                        <p class="adw-label body">This page demonstrates inputs within a view.</p>
+                        <div class="adw-entry-row">
+                            <label class="adw-entry-row__title" for="vs-entry-1">Sample Input:</label>
+                            <input type="text" class="adw-entry" id="vs-entry-1" placeholder="Enter data">
+                        </div>
+                        <div class="adw-switch-row" style="margin-top: var(--spacing-s);">
+                            <div class="adw-action-row__text">
+                                <div class="adw-action-row__title">A Toggle Switch</div>
+                            </div>
+                            <div class="adw-switch-row__switch">
+                                <label class="adw-switch"><input type="checkbox"> <span class="adw-label visually-hidden">Toggle</span></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="adw-view-switcher-page" id="view-switcher-page-3" style="display:none;">
+                        <h4 class="adw-label title-4" style="margin-top:var(--spacing-m);">Content for Another Page (Page 3)</h4>
+                        <p class="adw-label body">More arbitrary content here to show switching capability.</p>
+                        <div class="adw-spinner active" style="margin-top: var(--spacing-m);"></div>
+                    </div>
+                </div>
+            </div>
+            <details style="margin-top: var(--spacing-s);">
+                <summary>Show ViewSwitcher HTML Example</summary>
+                <pre><code>&lt;div class="adw-view-switcher"&gt;
+  &lt;div class="adw-view-switcher-bar"&gt;
+    &lt;button class="adw-button active" data-view-target="page-id-1"&gt;View 1&lt;/button&gt;
+    &lt;button class="adw-button" data-view-target="page-id-2"&gt;View 2&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="adw-view-switcher-content"&gt;
+    &lt;div class="adw-view-switcher-page active-view" id="page-id-1"&gt;...&lt;/div&gt;
+    &lt;div class="adw-view-switcher-page" id="page-id-2" style="display:none;"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </details>
+        </section>
+
 
         <div style="height: 200px;"></div> {/* Extra space at bottom */}
+        </main>
     </div>
     {/* Toast overlay removed as it's JS driven */}
+
+    <script src="build/js/app-layout.js"></script>
+    <script src="build/js/toast.js"></script>
+    <script id="custom-page-script">
+        // Custom JavaScript for index.html interactivity will go here
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Adwaita Web Demo page loaded.");
+
+            // Theme Toggle Logic
+            const themeToggleButton = document.getElementById('theme-toggle-button');
+            if (themeToggleButton) {
+                const applyTheme = (theme) => {
+                    if (theme === 'dark') {
+                        document.documentElement.classList.add('theme-dark');
+                        document.documentElement.classList.remove('theme-light');
+                        themeToggleButton.textContent = "Toggle Light";
+                    } else {
+                        document.documentElement.classList.add('theme-light');
+                        document.documentElement.classList.remove('theme-dark');
+                        themeToggleButton.textContent = "Toggle Dark";
+                    }
+                };
+                const toggleThemeAndStore = () => {
+                    let currentTheme = document.documentElement.classList.contains('theme-dark') ? 'dark' : 'light';
+                    let newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    applyTheme(newTheme);
+                    try { localStorage.setItem('theme', newTheme); } catch (e) { console.warn("LocalStorage not available for theme persistence."); }
+                };
+                themeToggleButton.addEventListener('click', toggleThemeAndStore);
+                let preferredTheme = 'light';
+                try {
+                    const savedTheme = localStorage.getItem('theme');
+                    if (savedTheme) { preferredTheme = savedTheme; }
+                    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) { preferredTheme = 'dark'; }
+                } catch (e) { console.warn("LocalStorage or matchMedia not available for theme preference."); }
+                applyTheme(preferredTheme);
+            } else {
+                console.warn("Theme toggle button #theme-toggle-button not found.");
+            }
+
+            // Sidebar Toggle Logic
+            const sidebarToggleButton = document.getElementById('page-sidebar-toggle');
+            const sidebar = document.getElementById('page-sidebar');
+            const sidebarBackdrop = document.getElementById('page-sidebar-backdrop');
+            if (sidebarToggleButton && sidebar && sidebarBackdrop) {
+                const toggleSidebar = (forceState) => {
+                    let openState = (typeof forceState === 'boolean') ? forceState : !sidebar.classList.contains('open');
+                    sidebar.classList.toggle('open', openState);
+                    sidebarToggleButton.setAttribute('aria-expanded', openState.toString());
+                    sidebarBackdrop.classList.toggle('active', openState);
+                };
+                sidebarToggleButton.addEventListener('click', (event) => { event.stopPropagation(); toggleSidebar(); });
+                sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
+                const sidebarLinks = sidebar.querySelectorAll('#sidebar-nav-list .adw-action-row');
+                sidebarLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (sidebar.classList.contains('open') && window.innerWidth <= 768) toggleSidebar(false);
+                    });
+                });
+                const updateActiveLink = () => {
+                    const currentHash = window.location.hash || (sidebarLinks.length > 0 ? sidebarLinks[0].getAttribute('href') : "");
+                    sidebarLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === currentHash));
+                    const activeLink = sidebar.querySelector('.adw-action-row.active');
+                    if (activeLink) activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                };
+                window.addEventListener('hashchange', updateActiveLink, false);
+                setTimeout(updateActiveLink, 100); // Initial call
+            } else {
+                console.warn("Sidebar elements not fully found.");
+            }
+
+            // Accent Color Picker JS
+            const accentColorPickerBox = document.getElementById('accent-color-picker-box');
+            if (accentColorPickerBox) {
+                const accentButtons = accentColorPickerBox.querySelectorAll('.adw-button[data-accent-color-id]');
+                const rootElement = document.documentElement;
+                const knownAccents = ["blue", "green", "yellow", "orange", "red", "purple", "brown"]; // Define known accents
+
+                const applyAccentColor = (accentName) => {
+                    // Remove previous accent classes
+                    knownAccents.forEach(acc => rootElement.classList.remove(`accent-${acc}`));
+
+                    if (accentName && accentName !== 'default') {
+                        rootElement.classList.add(`accent-${accentName}`);
+                    }
+                    // Store preference
+                    try { localStorage.setItem('theme-accent', accentName || 'default'); } catch (e) { console.warn("LocalStorage not available for accent persistence.");}
+
+                    // Update active button state
+                    accentButtons.forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.accentColorId === (accentName || 'default'));
+                    });
+                };
+
+                accentButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        applyAccentColor(button.dataset.accentColorId);
+                    });
+                });
+
+                // Load saved accent on page load
+                try {
+                    const savedAccent = localStorage.getItem('theme-accent');
+                    applyAccentColor(savedAccent || 'default');
+                } catch (e) {
+                    console.warn("LocalStorage not available for accent preference loading.");
+                    applyAccentColor('default');
+                }
+            } else {
+                console.warn("Accent color picker box not found.");
+            }
+
+            // Expander Row JS
+            const expanderRows = document.querySelectorAll('.adw-expander-row');
+            expanderRows.forEach(expander => {
+                const header = expander.querySelector('.adw-expander-row-header');
+                const content = expander.querySelector('.adw-expander-row-content-area');
+                if (header && content) {
+                    const toggleExpander = () => {
+                        const isExpanded = header.classList.toggle('expanded');
+                        content.classList.toggle('visible', isExpanded);
+                        if (isExpanded) {
+                            content.style.maxHeight = content.scrollHeight + "px";
+                            // Recalculate after a short delay if content loads asynchronously or images affect scrollHeight
+                            setTimeout(() => {
+                                if (header.classList.contains('expanded')) { // Check if still expanded
+                                   content.style.maxHeight = content.scrollHeight + "px";
+                                }
+                            }, 100); // Adjust delay as needed
+                        } else {
+                            content.style.maxHeight = "0px"; // Explicitly set to 0px for transition out
+                        }
+                    };
+                    header.addEventListener('click', toggleExpander);
+
+                    // Initialize based on if header already has 'expanded'
+                    if (header.classList.contains('expanded')) {
+                        content.classList.add('visible');
+                        // Set initial maxHeight after a very short delay to allow rendering for scrollHeight calculation
+                        setTimeout(() => {
+                             if (content.classList.contains('visible')) content.style.maxHeight = content.scrollHeight + "px";
+                        }, 50);
+                    } else {
+                        content.style.maxHeight = "0px"; // Ensure it's collapsed initially
+                    }
+                }
+            });
+
+            // Dialog JS
+            const showDialogButton = document.getElementById('show-dialog-button');
+            const simpleDialog = document.getElementById('simple-dialog');
+            const simpleDialogBackdrop = document.getElementById('simple-dialog-backdrop');
+            const dialogCancelButton = document.getElementById('dialog-cancel-button');
+            const dialogConfirmButton = document.getElementById('dialog-confirm-button');
+
+            const openSimpleDialog = () => {
+                if (simpleDialog && simpleDialogBackdrop) {
+                    document.body.style.overflow = 'hidden'; // Prevent background scroll
+                    simpleDialog.style.display = 'block';
+                    simpleDialogBackdrop.style.display = 'block';
+                    setTimeout(() => {
+                        simpleDialog.classList.add('open');
+                        simpleDialogBackdrop.classList.add('open');
+                        if(dialogCancelButton) dialogCancelButton.focus();
+                    }, 20);
+                }
+            };
+
+            const closeSimpleDialog = () => {
+                if (simpleDialog && simpleDialogBackdrop) {
+                    document.body.style.overflow = ''; // Restore background scroll
+                    simpleDialog.classList.remove('open');
+                    simpleDialogBackdrop.classList.remove('open');
+                    setTimeout(() => {
+                        simpleDialog.style.display = 'none';
+                        simpleDialogBackdrop.style.display = 'none';
+                        if(showDialogButton) showDialogButton.focus();
+                    }, 200);
+                }
+            };
+
+            if (showDialogButton) showDialogButton.addEventListener('click', openSimpleDialog);
+            if (dialogCancelButton) dialogCancelButton.addEventListener('click', closeSimpleDialog);
+            if (dialogConfirmButton) {
+                dialogConfirmButton.addEventListener('click', () => {
+                    console.log("Dialog confirmed by user.");
+                    closeSimpleDialog();
+                });
+            }
+            if (simpleDialogBackdrop) simpleDialogBackdrop.addEventListener('click', closeSimpleDialog);
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && simpleDialog && simpleDialog.classList.contains('open')) {
+                    closeSimpleDialog();
+                }
+                // Basic focus trapping for dialog
+                if (event.key === 'Tab' && simpleDialog && simpleDialog.classList.contains('open')) {
+                    const focusableElements = Array.from(simpleDialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(el => el.offsetParent !== null);
+                    if (focusableElements.length === 0) return;
+                    const firstElement = focusableElements[0];
+                    const lastElement = focusableElements[focusableElements.length - 1];
+                    if (event.shiftKey) { // Shift + Tab
+                        if (document.activeElement === firstElement) {
+                            lastElement.focus(); event.preventDefault();
+                        }
+                    } else { // Tab
+                        if (document.activeElement === lastElement) {
+                            firstElement.focus(); event.preventDefault();
+                        }
+                    }
+                }
+            });
+
+            // Password Peek JS
+            document.querySelectorAll('.adw-password-entry-row').forEach(row => {
+                const peekButton = row.querySelector('.adw-password-entry-row__peek-button');
+                const input = row.querySelector('input.adw-entry');
+                if (peekButton && input) {
+                    peekButton.addEventListener('click', () => {
+                        const isPassword = input.type === 'password';
+                        input.type = isPassword ? 'text' : 'password';
+                        // Ideally, also toggle an icon on the peek button
+                    });
+                }
+            });
+
+            // Flap JS
+            const toggleDemoFlapButton = document.getElementById('toggle-demo-flap');
+            const demoFlap = document.getElementById('demo-flap');
+            if (toggleDemoFlapButton && demoFlap) {
+                toggleDemoFlapButton.addEventListener('click', () => {
+                    demoFlap.classList.toggle('folded');
+                });
+            }
+
+            // ViewSwitcher JS
+            const viewSwitchers = document.querySelectorAll('.adw-view-switcher');
+            viewSwitchers.forEach(switcher => {
+                const buttons = switcher.querySelectorAll('.adw-view-switcher-bar .adw-button');
+                const content = switcher.querySelector('.adw-view-switcher-content');
+                if (!content) return;
+                const pages = content.querySelectorAll('.adw-view-switcher-page');
+
+                buttons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const targetId = button.dataset.viewTarget;
+                        buttons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        pages.forEach(page => {
+                            page.style.display = (page.id === targetId) ? '' : 'none';
+                            page.classList.toggle('active-view', page.id === targetId);
+                        });
+                    });
+                });
+            });
+
+            // TabView JS
+            const tabViews = document.querySelectorAll('.adw-tab-view');
+            tabViews.forEach(tabView => {
+                const tabBar = tabView.querySelector('.adw-tab-bar');
+                const pagesContainer = tabView.querySelector('.adw-tab-view-pages-container');
+                if (!tabBar || !pagesContainer) return;
+
+                let tabCounter = tabBar.querySelectorAll('.adw-tab-button[data-tab-target]').length;
+
+                const setActiveTab = (targetId) => {
+                    tabBar.querySelectorAll('.adw-tab-button[data-tab-target]').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.tabTarget === targetId);
+                    });
+                    pagesContainer.querySelectorAll('.adw-tab-page').forEach(page => {
+                        const isActive = page.id === targetId;
+                        page.style.display = isActive ? '' : 'none';
+                        page.classList.toggle('active-view', isActive);
+                    });
+                };
+
+                const addTab = (id, title, contentHTML, closable = true, makeActive = true) => {
+                    tabCounter++;
+                    const newTabId = id || `demo-tab-page-${tabView.id}-${tabCounter}`;
+                    const newTabTitle = title || `Tab ${tabCounter}`;
+
+                    const newButton = document.createElement('button');
+                    newButton.className = 'adw-tab-button';
+                    newButton.dataset.tabTarget = newTabId;
+
+                    const labelSpan = document.createElement('span');
+                    labelSpan.className = 'adw-tab-button-label';
+                    labelSpan.textContent = newTabTitle;
+                    newButton.appendChild(labelSpan);
+
+                    if (closable) {
+                        const closeButton = document.createElement('span');
+                        closeButton.className = 'adw-tab-button-close adw-button icon-only flat';
+                        closeButton.setAttribute('aria-label', `Close ${newTabTitle} Tab`);
+                        closeButton.innerHTML = `<span class="adw-icon icon-window-close-symbolic"></span>`;
+                        closeButton.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            removeTab(newTabId);
+                        });
+                        newButton.appendChild(closeButton);
+                    } else {
+                         newButton.dataset.nonClosable = "true";
+                    }
+
+                    newButton.addEventListener('click', () => setActiveTab(newTabId));
+
+                    const newTabPage = document.createElement('div');
+                    newTabPage.className = 'adw-tab-page';
+                    newTabPage.id = newTabId;
+                    newTabPage.style.display = 'none';
+                    newTabPage.style.padding = 'var(--spacing-m)';
+                    newTabPage.innerHTML = contentHTML || `<h4 class="adw-label title-4">Content of ${newTabTitle}</h4><p>Dynamically added content for ${newTabId}.</p>`;
+
+                    const newTabButtonAnchor = tabBar.querySelector('.adw-tab-bar-new-tab-button');
+                    if (newTabButtonAnchor) {
+                        tabBar.insertBefore(newButton, newTabButtonAnchor);
+                    } else {
+                        tabBar.appendChild(newButton);
+                    }
+                    pagesContainer.appendChild(newTabPage);
+
+                    if (makeActive || tabBar.querySelectorAll('.adw-tab-button.active[data-tab-target]').length === 0) {
+                        setActiveTab(newTabId);
+                    }
+                    return newTabId;
+                };
+
+                const removeTab = (tabId) => {
+                    const buttonToRemove = tabBar.querySelector(`.adw-tab-button[data-tab-target="${tabId}"]`);
+                    const pageToRemove = pagesContainer.querySelector(`#${tabId}`);
+
+                    if (buttonToRemove && pageToRemove) {
+                        const wasActive = buttonToRemove.classList.contains('active');
+                        const allTabs = Array.from(tabBar.querySelectorAll('.adw-tab-button[data-tab-target]'));
+                        const currentIndex = allTabs.indexOf(buttonToRemove);
+
+                        buttonToRemove.remove();
+                        pageToRemove.remove();
+
+                        if (wasActive) {
+                            const remainingTabs = Array.from(tabBar.querySelectorAll('.adw-tab-button[data-tab-target]'));
+                            if (remainingTabs.length > 0) {
+                                const newActiveIndex = Math.min(Math.max(0, currentIndex -1), remainingTabs.length - 1);
+                                setActiveTab(remainingTabs[newActiveIndex].dataset.tabTarget);
+                            } else {
+                                console.log("All tabs closed for TabView:", tabView.id || "demo-tab-view");
+                            }
+                        }
+                    }
+                };
+
+                tabBar.querySelectorAll('.adw-tab-button[data-tab-target]').forEach(button => {
+                    button.addEventListener('click', () => {
+                        setActiveTab(button.dataset.tabTarget);
+                    });
+                    const closeBtn = button.querySelector('.adw-tab-button-close');
+                    if (closeBtn && button.dataset.nonClosable !== "true") {
+                        closeBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            removeTab(button.dataset.tabTarget);
+                        });
+                    }
+                });
+
+                const newTabBtnElement = tabBar.querySelector('.adw-tab-bar-new-tab-button');
+                if (newTabBtnElement) {
+                    newTabBtnElement.addEventListener('click', () => {
+                         addTab(null, null, `<p>Content for a newly added dynamic tab.</p>`, true, true);
+                    });
+                }
+
+                const initialActiveButton = tabBar.querySelector('.adw-tab-button.active[data-tab-target]');
+                if (initialActiveButton) {
+                    setActiveTab(initialActiveButton.dataset.tabTarget);
+                } else {
+                    const firstTab = tabBar.querySelector('.adw-tab-button[data-tab-target]');
+                    if (firstTab) setActiveTab(firstTab.dataset.tabTarget);
+                }
+            });
+
+            // Toast JS
+            const toastDemoContainer = document.getElementById('toast-demo-container');
+            if (toastDemoContainer && typeof Adw !== 'undefined' && Adw.createToast) {
+                const showDemoToast = (toastElement) => {
+                    if (!toastElement) return;
+                    toastDemoContainer.appendChild(toastElement);
+                    toastElement.style.pointerEvents = 'auto';
+
+                    /* Adw.createToast is expected to handle its own dismissal.
+                       If not, manual timeout or event listeners would be needed here. */
+                };
+
+                const simpleToastBtn = document.getElementById('show-simple-toast');
+                if (simpleToastBtn) {
+                    simpleToastBtn.addEventListener('click', () => {
+                        const myToast = Adw.createToast("File saved successfully!");
+                        showDemoToast(myToast);
+                    });
+                }
+
+                const actionToastBtn = document.getElementById('show-action-toast');
+                if (actionToastBtn) {
+                    actionToastBtn.addEventListener('click', () => {
+                        const actionToast = Adw.createToast("Update available.", {
+                            actionName: "Install",
+                            timeout: 5000,
+                            onAction: (toast) => {
+                                console.log("Install action clicked!");
+                                if (toast && typeof toast.dismiss === 'function') {
+                                    toast.dismiss();
+                                } else if (toast && toast.parentElement) {
+                                    toast.remove();
+                                }
+                            }
+                        });
+                        showDemoToast(actionToast);
+                    });
+                }
+            } else {
+                if (!toastDemoContainer) console.warn("Toast demo container not found.");
+                if (typeof Adw === 'undefined' || !Adw.createToast) console.warn("Adw.createToast function not found. Toast examples will not work.");
+            }
+
+        });
+    </script>
 </body>
 </html>

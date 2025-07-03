@@ -310,6 +310,51 @@ $accent-color-definitions-map: (
   // RGB versions of key colors for rgba() usage if needed by components
   --text-color-rgb: 0,0,0; // Default for light theme (black)
   --accent-color-rgb: 53,132,228; // Default Adwaita blue (from $adw-blue-3)
+
+  // Dialog specific variables
+  --dialog-bg-color: var(--window-bg-color, #{$window-background-color-light});
+  --dialog-fg-color: var(--text-color, #{$text-color-light});
+  --dialog-backdrop-color: rgba(0,0,0,0.4);
+  --dialog-box-shadow: 0 6px 24px -4px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.05); // More Adwaita-like shadow
+  --window-radius: 12px; // Ensure this is consistently used or dialog has its own
+  --dialog-border-radius: var(--window-radius, 12px);
+  --z-index-dialog: 1050;
+  --z-index-dialog-backdrop: 1040;
+
+  // Toast variables
+  --toast-bg-color: #{rgba($adw-dark-3, 0.95)}; // Dark, slightly transparent
+  --toast-fg-color: #{$adw-light-1};
+  --toast-box-shadow: var(--dialog-box-shadow); // Can reuse dialog shadow or define specific
+  --toast-max-width: 400px;
+  --toast-min-height: 36px;
+  --z-index-toast-overlay: 1500;
+
+  // Banner variables (default/info)
+  --banner-bg-color: var(--headerbar-bg-color); // Often similar to header
+  --banner-fg-color: var(--headerbar-fg-color);
+  --banner-border-color: var(--border-color);
+  --banner-button-bg-color: transparent; // Flat like headerbar buttons
+  --banner-button-fg-color: var(--accent-color); // Action button often accented
+  --banner-button-hover-bg-color: var(--button-flat-hover-bg-color);
+  --banner-button-active-bg-color: var(--button-flat-active-bg-color);
+  --z-index-banner: 1000; // Below dialogs, above content
+
+  // Banner type colors (examples)
+  --banner-warning-bg-color: #{color.mix($adw-yellow-4, $background-color-light, 85%)};
+  --banner-warning-fg-color: #{rgba($adw-dark-5, 0.9)};
+  --banner-warning-border-color: #{color.mix($adw-yellow-5, $border-color-light, 70%)};
+  --banner-warning-button-fg-color: #{$adw-yellow-5};
+
+  --banner-error-bg-color: #{color.mix($adw-red-4, $background-color-light, 85%)};
+  --banner-error-fg-color: #{rgba($adw-dark-5, 0.9)};
+  --banner-error-border-color: #{color.mix($adw-red-5, $border-color-light, 70%)};
+  --banner-error-button-fg-color: #{$adw-red-5};
+
+  // Switch variables - Light Theme
+  --switch-knob-bg-color: #{$adw-light-1};
+  --switch-slider-off-bg-color: #{$adw-light-5}; // A grey color for the off state track
+  --switch-slider-disabled-off-bg-color: var(--button-disabled-bg-color);
+  --switch-knob-disabled-bg-color: var(--button-disabled-fg-color); // Or a more specific grey
   // TODO: Add specific RGBs for each named accent color if needed.
 
   &.theme-dark {
@@ -402,6 +447,38 @@ $accent-color-definitions-map: (
     --text-color-rgb: 255,255,255; // Default for dark theme (white)
     // --accent-color-rgb: ...; // This would need to change if default accent is different in dark
                                 // Or be set by the accent-* loop above if accents have specific RGBs
+
+    // Dialog specific variables for dark theme
+    --dialog-bg-color: var(--window-bg-color, #{$window-background-color-dark});
+    --dialog-fg-color: var(--text-color, #{$text-color-dark});
+    --dialog-backdrop-color: rgba(0,0,0,0.5);
+    --dialog-box-shadow: 0 6px 24px -4px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.1);
+
+    // Toast variables for dark theme
+    --toast-bg-color: #{rgba($adw-dark-1, 0.95)}; // Slightly lighter than default dark toast for visibility
+    --toast-fg-color: #{$adw-light-1};
+
+    // Banner variables for dark theme
+    --banner-bg-color: var(--headerbar-bg-color);
+    --banner-fg-color: var(--headerbar-fg-color);
+    --banner-border-color: var(--border-color);
+    --banner-button-fg-color: var(--accent-color);
+
+    --banner-warning-bg-color: #{color.mix($adw-yellow-3, $background-color-dark, 85%)};
+    --banner-warning-fg-color: #{$adw-light-1};
+    --banner-warning-border-color: #{color.mix($adw-yellow-4, $border-color-dark, 70%)};
+    --banner-warning-button-fg-color: #{$adw-yellow-2};
+
+    --banner-error-bg-color: #{color.mix($adw-red-3, $background-color-dark, 85%)};
+    --banner-error-fg-color: #{$adw-light-1};
+    --banner-error-border-color: #{color.mix($adw-red-4, $border-color-dark, 70%)};
+    --banner-error-button-fg-color: #{$adw-red-1};
+
+    // Switch variables - Dark Theme
+    --switch-knob-bg-color: #{$adw-light-2}; // Usually a light knob on dark track
+    --switch-slider-off-bg-color: #{$adw-dark-1}; // Darker grey for off state track
+    --switch-slider-disabled-off-bg-color: var(--button-disabled-bg-color);
+    --switch-knob-disabled-bg-color: var(--button-disabled-fg-color);
   }
 
   // Specific accent color variable overrides for light theme (when .accent-color class is present)
