@@ -26,7 +26,7 @@
                         By: <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
                         on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
                         <br>
-                        {{ post.content | striptags | truncate(150, True) }}
+                        {{ (post.content | markdown_to_html_and_sanitize | striptags | truncate(150, True)) if post.content else '' }}
                     </span>
                 </adw-action-row>
 
