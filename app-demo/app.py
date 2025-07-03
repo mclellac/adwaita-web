@@ -30,7 +30,7 @@ from flask_wtf import CSRFProtect, FlaskForm
 import markdown # For Markdown support
 from markupsafe import Markup  # For escaping JS
 from PIL import Image
-from sqlalchemy import desc, or_
+from sqlalchemy import desc, or_, select, func # Added select, func
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from wtforms import (
@@ -290,10 +290,10 @@ class CommentFlag(db.Model):
     resolver = db.relationship('User', foreign_keys=[resolver_user_id])
 
 Comment.is_flagged_active = db.column_property(
-    db.session.query(CommentFlag.id).filter(
+    select(func.count(CommentFlag.id) > 0).where(
         CommentFlag.comment_id == Comment.id,
         CommentFlag.is_resolved == False # noqa E712
-    ).exists()
+    ).correlate_except(CommentFlag).scalar_subquery()
 )
 
 class SiteSetting(db.Model):
