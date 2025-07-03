@@ -6,8 +6,9 @@
   // It should inherit base row styles for padding, min-height, list separation.
   // The AdwActionRow web component's shadow DOM root has .adw-action-row,
   // so we apply row-base styles here.
-  @include mixins.row-base; // Applies common row styles like min-height, padding, border-bottom
-  border-bottom: none; // Remove unconditional border; listbox will add it if needed.
+  @include mixins.row-base; // Applies common row styles like min-height, padding
+  background-color: var(--list-row-bg-color); // Use the new variable for row background
+  border-bottom: none; // Ensure no individual border, listbox handles separators.
   // Override default vertical padding from row-base for ActionRow
   // Aim for ~54px height for single-line, ~70px for two-line (title + subtitle)
   // These values assume typical font sizes and line heights.

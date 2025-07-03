@@ -279,6 +279,8 @@ $accent-color-definitions-map: (
   // Add hover/active for list rows if not already covered by general button vars
   --list-row-hover-bg-color: #{rgba($adw-dark-5, 0.04)}; // Similar to flat button hover
   --list-row-active-bg-color: #{rgba($adw-dark-5, 0.08)}; // Similar to flat button active
+  --list-row-bg-color: #{$adw-light-2}; // Default for light theme, slightly off-white
+  --list-separator-color: #{rgba($adw-dark-5, 0.1)}; // For light theme
 
   --document-font-family: 'AdwaitaSansWeb', 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --monospace-font-family: 'AdwaitaMonoWeb', 'Monaco', 'Menlo', 'Courier New', monospace;
@@ -385,6 +387,8 @@ $accent-color-definitions-map: (
     --list-row-selected-fg-color: #{$list-row-selected-text-color-dark};
     --list-row-hover-bg-color: #{rgba($adw-light-1, 0.06)}; // Similar to flat button hover dark
     --list-row-active-bg-color: #{rgba($adw-light-1, 0.10)}; // Similar to flat button active dark
+    --list-row-bg-color: #{color.adjust($background-color-dark, $lightness: 4%)}; // Slightly lighter than main dark bg
+    --list-separator-color: #{rgba($adw-light-1, 0.1)}; // For dark theme
 
     // Specific accent color variable overrides for dark theme
     @each $name, $themes in $accent-color-definitions-map {
