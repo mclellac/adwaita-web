@@ -32,6 +32,9 @@ ROOT_INDEX_CSS_TARGET_PATH="${BUILD_CSS_DIR}/${COMPILED_CSS_FILENAME}"
 APP_DEMO_STATIC_DIR="app-demo/static"
 APP_DEMO_CSS_DIR="${APP_DEMO_STATIC_DIR}/css"
 APP_DEMO_CSS_TARGET_PATH="${APP_DEMO_CSS_DIR}/${COMPILED_CSS_FILENAME}"
+APP_DEMO_JS_DIR="${APP_DEMO_STATIC_DIR}/js"
+APP_DEMO_DATA_DIR="${APP_DEMO_STATIC_DIR}/data"
+APP_DEMO_FONTS_DIR="${APP_DEMO_STATIC_DIR}/fonts"
 
 echo "--- Starting Build Script ---"
 
@@ -51,23 +54,22 @@ mkdir -p "${ADWAITA_WEB_COMPILED_CSS_DIR}"
 echo "--- Compiling SASS to CSS (${SASS_INPUT_FILE} -> ${COMPILED_CSS_FILE_PATH}) ---"
 # Use SASS from PATH (installed globally via npm)
 SASS_EXEC="sass"
-sass_output_and_error=$($SASS_EXEC "${SASS_INPUT_FILE}" "${COMPILED_CSS_FILE_PATH}" --style compressed 2>&1)
-sass_exit_code=$?
+# Modified to let SASS output directly to stderr for better error visibility with set -e
+$SASS_EXEC "${SASS_INPUT_FILE}" "${COMPILED_CSS_FILE_PATH}" --style compressed
+sass_exit_code=$? # This will be 0 if the above command succeeded due to set -e
 
 if [ ${sass_exit_code} -ne 0 ]; then
+    # This block might not be reached if set -e causes exit on sass failure.
+    # The actual error from sass should have printed to stderr.
     echo "ERROR: SASS compilation failed (exit code ${sass_exit_code})."
-    echo "SASS Compiler Output:"
-    echo "${sass_output_and_error}"
-    if [ ${sass_exit_code} -eq 127 ]; then # Should not happen now if sass is in PATH
+    if [ ${sass_exit_code} -eq 127 ]; then
         echo "NOTE: Exit code 127 often means 'command not found'. Is sass installed and in your PATH?"
     fi
-    echo "WARNING: SASS compilation step did not succeed. CSS file may not be updated. Continuing script..."
+    # No need to echo sass_output_and_error as it's not captured this way.
 else
-    if [ -n "${sass_output_and_error}" ]; then # Print warnings or other output if any
-        echo "SASS Compilation Warnings (or other output):"
-        echo "${sass_output_and_error}"
-    fi
-    echo "SASS compilation successful: ${COMPILED_CSS_FILE_PATH}"
+    # If sass succeeded, sass_exit_code would be 0.
+    # Warnings from SASS might still be printed to stderr and visible.
+    echo "SASS compilation successful (or SASS reported warnings but still exited 0): ${COMPILED_CSS_FILE_PATH}"
 fi
 
 # Verify the compiled CSS file
@@ -79,33 +81,58 @@ else
 fi
 
 
-# Copy JavaScript files to BUILD directory
-echo "--- Copying JavaScript Files to ${BUILD_JS_DIR} ---"
+# Copy JavaScript files directly to APP_DEMO_JS_DIR and also to BUILD_JS_DIR for consistency if build dir is used later
+echo "--- Copying JavaScript Files ---"
+# Debug lines removed
+mkdir -p "${APP_DEMO_JS_DIR}" # Ensure target directory exists
+mkdir -p "${BUILD_JS_DIR}"    # Ensure build directory exists
+
 if [ -f "${JS_INPUT_DIR}/components.js" ]; then
     cp "${JS_INPUT_DIR}/components.js" "${BUILD_JS_DIR}/components.js"
     echo "Copied ${JS_INPUT_DIR}/components.js to ${BUILD_JS_DIR}/components.js"
+    cp "${JS_INPUT_DIR}/components.js" "${APP_DEMO_JS_DIR}/components.js"
+    echo "Copied ${JS_INPUT_DIR}/components.js to ${APP_DEMO_JS_DIR}/components.js"
 else
     echo "WARNING: Main JS file ${JS_INPUT_DIR}/components.js not found."
 fi
 
-# Copy app-layout.js if it exists
+# Copy app-layout.js
 if [ -f "${JS_INPUT_DIR}/app-layout.js" ]; then
     cp "${JS_INPUT_DIR}/app-layout.js" "${BUILD_JS_DIR}/app-layout.js"
     echo "Copied ${JS_INPUT_DIR}/app-layout.js to ${BUILD_JS_DIR}/app-layout.js"
+    cp "${JS_INPUT_DIR}/app-layout.js" "${APP_DEMO_JS_DIR}/app-layout.js"
+    echo "Copied ${JS_INPUT_DIR}/app-layout.js to ${APP_DEMO_JS_DIR}/app-layout.js"
 else
     echo "WARNING: JS file ${JS_INPUT_DIR}/app-layout.js not found."
 fi
 
+# Copy toast.js
+if [ -f "${JS_INPUT_DIR}/toast.js" ]; then
+    cp "${JS_INPUT_DIR}/toast.js" "${BUILD_JS_DIR}/toast.js"
+    echo "Copied ${JS_INPUT_DIR}/toast.js to ${BUILD_JS_DIR}/toast.js"
+    cp "${JS_INPUT_DIR}/toast.js" "${APP_DEMO_JS_DIR}/toast.js"
+    echo "Copied ${JS_INPUT_DIR}/toast.js to ${APP_DEMO_JS_DIR}/toast.js"
+else
+    echo "WARNING: JS file ${JS_INPUT_DIR}/toast.js not found."
+fi
+
 JS_COMPONENTS_SOURCE_DIR="${JS_INPUT_DIR}/components"
-JS_COMPONENTS_DEST_DIR="${BUILD_JS_DIR}/components"
+JS_COMPONENTS_DEST_DIR_BUILD="${BUILD_JS_DIR}/components"
+JS_COMPONENTS_DEST_DIR_APP_DEMO="${APP_DEMO_JS_DIR}/components"
 if [ -d "${JS_COMPONENTS_SOURCE_DIR}" ]; then
-    cp -r "${JS_COMPONENTS_SOURCE_DIR}/." "${JS_COMPONENTS_DEST_DIR}/"
-    echo "Copied JS components from ${JS_COMPONENTS_SOURCE_DIR} to ${JS_COMPONENTS_DEST_DIR}"
+    mkdir -p "${JS_COMPONENTS_DEST_DIR_BUILD}"
+    cp -r "${JS_COMPONENTS_SOURCE_DIR}/." "${JS_COMPONENTS_DEST_DIR_BUILD}/"
+    echo "Copied JS components from ${JS_COMPONENTS_SOURCE_DIR} to ${JS_COMPONENTS_DEST_DIR_BUILD}"
+
+    mkdir -p "${JS_COMPONENTS_DEST_DIR_APP_DEMO}"
+    cp -r "${JS_COMPONENTS_SOURCE_DIR}/." "${JS_COMPONENTS_DEST_DIR_APP_DEMO}/"
+    echo "Copied JS components from ${JS_COMPONENTS_SOURCE_DIR} to ${JS_COMPONENTS_DEST_DIR_APP_DEMO}"
 else
     echo "WARNING: JS components directory ${JS_COMPONENTS_SOURCE_DIR} not found."
 fi
 
 # Copy data files (e.g., icons) to BUILD directory
+# This section remains as is, assuming data and fonts don't have the same issue.
 echo "--- Copying Data Files to ${BUILD_DATA_DIR} ---"
 DATA_ICONS_SOURCE_DIR="${DATA_INPUT_DIR}/icons/symbolic"
 DATA_ICONS_DEST_DIR="${BUILD_DATA_DIR}/icons/symbolic"
@@ -148,9 +175,7 @@ fi
 
 
 echo "--- Copying Other Built Assets to app-demo/static ---"
-APP_DEMO_JS_DIR="${APP_DEMO_STATIC_DIR}/js"
-APP_DEMO_DATA_DIR="${APP_DEMO_STATIC_DIR}/data"
-APP_DEMO_FONTS_DIR="${APP_DEMO_STATIC_DIR}/fonts"
+# Definitions for APP_DEMO_JS_DIR, APP_DEMO_DATA_DIR, APP_DEMO_FONTS_DIR moved to the top.
 
 mkdir -p "${APP_DEMO_JS_DIR}/components"
 mkdir -p "${APP_DEMO_DATA_DIR}/icons/symbolic"

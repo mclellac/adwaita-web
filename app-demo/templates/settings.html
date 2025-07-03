@@ -106,13 +106,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (window.Adw && Adw.createToast) {
                                 Adw.createToast(data.message || 'Theme saved! Reloading...', { timeout: 2000 });
                             }
-                            // Reload after a short delay to let user see toast
-                            setTimeout(() => location.reload(), 500);
+                            setTimeout(() => location.reload(), 500); // Reload after a short delay
                         } else {
                             if (window.Adw && Adw.createToast) {
                                 Adw.createToast(data.message || 'Failed to save theme.', { type: 'error' });
                             } else {
-                                alert(data.message || 'Failed to save theme.');
+                                alert(data.message || 'Failed to save theme.'); // Fallback
                             }
                         }
                     })
@@ -121,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (window.Adw && Adw.createToast) {
                             Adw.createToast('Error saving theme preference.', { type: 'error' });
                         } else {
-                            alert('Error saving theme preference.');
+                            alert('Error saving theme preference.'); // Fallback
                         }
                     });
                 }
@@ -152,13 +151,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (window.Adw && Adw.createToast) {
                                 Adw.createToast(data.message || 'Accent color saved! Reloading...', { timeout: 2000 });
                             }
-                             // Reload after a short delay to let user see toast
-                            setTimeout(() => location.reload(), 500);
+                            setTimeout(() => location.reload(), 500); // Reload after a short delay
                         } else {
                             if (window.Adw && Adw.createToast) {
                                 Adw.createToast(data.message || 'Failed to save accent color.', { type: 'error' });
                             } else {
-                                alert(data.message || 'Failed to save accent color.');
+                                alert(data.message || 'Failed to save accent color.'); // Fallback
                             }
                         }
                     })
@@ -167,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (window.Adw && Adw.createToast) {
                             Adw.createToast('Error saving accent color preference.', { type: 'error' });
                         } else {
-                            alert('Error saving accent color preference.');
+                            alert('Error saving accent color preference.'); // Fallback
                         }
                     });
                 }

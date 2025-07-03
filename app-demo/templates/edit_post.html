@@ -83,25 +83,24 @@
 
             {# Delete button on the other side #}
             {% if delete_form %}
-            {# The actual form that will be submitted #}
+            {# The actual form that will be submitted by the dialog's confirm button #}
             <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form-{{ post.id }}" class="delete-post-form-inline" style="display: none;">
                 {{ delete_form.hidden_tag() }} {# CSRF token #}
             </form>
             {# Button to trigger the dialog #}
-            <button type="button" id="open-delete-post-dialog-btn" class="adw-button destructive-action">Delete Post</button>
+            <button type="button" id="open-edit-delete-post-dialog-btn" class="adw-button destructive-action">Delete Post</button>
             {% endif %}
         </div>
     </form> {# This is the main edit form, ensure it closes before the dialog #}
 
     {% if delete_form %}
-    <adw-dialog id="delete-post-confirm-dialog" title="Confirm Deletion">
+    <adw-dialog id="edit-delete-post-confirm-dialog" title="Confirm Deletion">
         <div slot="content">
             <p class="adw-label body">Are you sure you want to permanently delete this post titled "<strong>{{ post.title|escape }}</strong>"? This action cannot be undone.</p>
         </div>
         <div slot="buttons">
-            <button id="cancel-delete-post-btn" class="adw-button flat">Cancel</button>
-            {# This button will now submit the hidden form #}
-            <button id="confirm-delete-post-btn" class="adw-button destructive-action">Delete</button>
+            <button id="cancel-edit-delete-post-btn" class="adw-button flat">Cancel</button>
+            <button id="confirm-edit-delete-post-btn" class="adw-button destructive-action">Delete</button>
         </div>
     </adw-dialog>
     {% endif %}
@@ -112,33 +111,5 @@
 
 {% block scripts %}
 {{ super() }}
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const deletePostDialogEl = document.getElementById('delete-post-confirm-dialog');
-    const openDialogBtn = document.getElementById('open-delete-post-dialog-btn');
-    const cancelBtn = document.getElementById('cancel-delete-post-btn');
-    const confirmBtn = document.getElementById('confirm-delete-post-btn');
-    const deleteForm = document.getElementById('delete-post-form-{{ post.id }}');
-
-    if (openDialogBtn && deletePostDialogEl) {
-        openDialogBtn.addEventListener('click', (event) => {
-            event.preventDefault(); // Prevent any default button action
-            deletePostDialogEl.open();
-        });
-    }
-
-    if (cancelBtn && deletePostDialogEl) {
-        cancelBtn.addEventListener('click', () => {
-            deletePostDialogEl.close();
-        });
-    }
-
-    if (confirmBtn && deletePostDialogEl && deleteForm) {
-        confirmBtn.addEventListener('click', () => {
-            deleteForm.submit(); // Submit the actual delete form
-            deletePostDialogEl.close(); // Close dialog (though page will navigate)
-        });
-    }
-});
-</script>
+{# JavaScript for dialogs will be moved to adwaita-web/js/app-layout.js #}
 {% endblock %}
