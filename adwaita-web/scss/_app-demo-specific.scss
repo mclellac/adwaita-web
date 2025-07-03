@@ -300,3 +300,110 @@ hr.section-divider {
     border-top: 1px solid var(--divider-color);
     margin: var(--spacing-xl) 0; // Larger margin for section breaks
 }
+
+// --- New Sidebar Layout Styles ---
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    overflow: hidden; // Prevent body scroll, individual areas will scroll
+}
+
+.adw-header-bar {
+    flex-shrink: 0; // Header should not shrink
+}
+
+.app-body-container {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden; // Important for child elements to scroll correctly
+    // background-color: var(--window-pane-bg-color, var(--window-bg-color)); // A slightly different bg if sidebar is distinct
+}
+
+.app-sidebar {
+    width: 240px; // Common sidebar width
+    flex-shrink: 0;
+    background-color: var(--headerbar-bg-color); // Sidebar often has a slightly different bg, like headerbar
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+
+    .sidebar-nav {
+        &.adw-list-box.flat { // Make sidebar nav list box truly flat and part of sidebar
+            border: none;
+            border-radius: 0;
+            background-color: transparent; // Inherit sidebar background
+        }
+        .adw-action-row {
+            // Ensure rows in sidebar nav look good
+            padding-left: var(--spacing-m); // Default listbox row padding is var(--spacing-m)
+            padding-right: var(--spacing-m);
+            // No border-bottom needed if listbox is flat and bg is uniform
+            border-bottom: none;
+
+            &:hover {
+                background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06); // Subtle hover
+            }
+            &.selected, // TODO: Need a way to mark current page as selected in sidebar
+            &.active { // Assuming .active might be used by JS for current page
+                background-color: rgba(var(--accent-color-rgb, 0,100,200), 0.15); // Subtle accent selection
+                .adw-action-row-title {
+                    color: var(--accent-color);
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+}
+
+.app-content-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; // Main content area scrolls
+    background-color: var(--window-bg-color); // Standard window background for content
+
+    .page-content-wrapper {
+        flex-grow: 1; // Allows main content to push footer down
+        // Padding for actual page content is often here or on main.adw-clamp
+        // For now, rely on main.adw-clamp's implicit behavior or specific page content containers
+        // like adw-preferences-page.
+    }
+
+    .main-content { // Ensure main content within adw-clamp has some breathing room from top
+        padding-top: var(--spacing-xl);
+        padding-bottom: var(--spacing-xl); // Space before footer
+    }
+
+
+    .app-footer {
+        flex-shrink: 0; // Footer should not shrink
+        // background-color: var(--headerbar-bg-color); // Footer often matches header/sidebar bg
+        // border-top: 1px solid var(--border-color); // Already has border-top
+    }
+}
+
+// Ensure .adw-clamp within .app-content-area doesn't get too wide if sidebar is present
+// This might need adjustment based on final look
+.app-content-area > .page-content-wrapper > .adw-clamp.main-content {
+    // max-width: calc(100% - var(--spacing-xl) * 2); // Ensure clamp respects padding of content area
+    // The clamp itself has a max-width, so this might not be needed.
+}
+
+// Add :root definitions for --text-color-rgb and --accent-color-rgb for rgba() usage
+// These should ideally be in _variables.scss
+:root {
+    --text-color-rgb: 0,0,0; // Default for light theme (black)
+    --accent-color-rgb: 53,132,228; // Default Adwaita blue
+}
+:root.theme-dark {
+    --text-color-rgb: 255,255,255; // Default for dark theme (white)
+    // Accent color RGB might need to change for dark theme if the accent color itself changes significantly
+    // For now, assume blue is the same, just perceived differently.
+}
+// TODO: Add specific RGBs for each named accent color if needed for sidebar selection state.
