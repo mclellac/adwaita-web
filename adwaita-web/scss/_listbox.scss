@@ -128,16 +128,15 @@
 // Flat style: no outer border, often used when listbox fills a container
 .adw-list-box.flat {
   border: none;
-  border-radius: 0; // Or keep radius if desired, but typically flat means no outer decoration
-  // Row separators might need to be stronger if no outer border
-  // .adw-row { // Target .adw-row
-  //   border-bottom-color: var(--border-color-light-stronger); // Define if needed
-  // }
+  border-radius: 0;
+
+  // Rows within a flat listbox should not have separators by default
+  .adw-row {
+    border-bottom: none;
+  }
 }
-// Dark theme for flat listbox
-.dark-theme .adw-list-box.flat,
-body.dark-theme .adw-list-box.flat {
-  // .adw-row { // Target .adw-row
-  //   border-bottom-color: var(--border-color-dark-stronger); // Define if needed
-  // }
-}
+// Dark theme for flat listbox - specific overrides for flat listbox children if needed,
+// but the general .adw-list-box.flat .adw-row rule above should cover it.
+// .dark-theme .adw-list-box.flat,
+// body.dark-theme .adw-list-box.flat {
+// }
