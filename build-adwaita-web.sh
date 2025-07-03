@@ -87,6 +87,15 @@ if [ -f "${JS_INPUT_DIR}/components.js" ]; then
 else
     echo "WARNING: Main JS file ${JS_INPUT_DIR}/components.js not found."
 fi
+
+# Copy app-layout.js if it exists
+if [ -f "${JS_INPUT_DIR}/app-layout.js" ]; then
+    cp "${JS_INPUT_DIR}/app-layout.js" "${BUILD_JS_DIR}/app-layout.js"
+    echo "Copied ${JS_INPUT_DIR}/app-layout.js to ${BUILD_JS_DIR}/app-layout.js"
+else
+    echo "WARNING: JS file ${JS_INPUT_DIR}/app-layout.js not found."
+fi
+
 JS_COMPONENTS_SOURCE_DIR="${JS_INPUT_DIR}/components"
 JS_COMPONENTS_DEST_DIR="${BUILD_JS_DIR}/components"
 if [ -d "${JS_COMPONENTS_SOURCE_DIR}" ]; then

@@ -395,18 +395,7 @@ body {
     // The clamp itself has a max-width, so this might not be needed.
 }
 
-// Add :root definitions for --text-color-rgb and --accent-color-rgb for rgba() usage
-// These should ideally be in _variables.scss
-:root {
-    --text-color-rgb: 0,0,0; // Default for light theme (black)
-    --accent-color-rgb: 53,132,228; // Default Adwaita blue
-}
-:root.theme-dark {
-    --text-color-rgb: 255,255,255; // Default for dark theme (white)
-    // Accent color RGB might need to change for dark theme if the accent color itself changes significantly
-    // For now, assume blue is the same, just perceived differently.
-}
-// TODO: Add specific RGBs for each named accent color if needed for sidebar selection state.
+// RGB variables moved to _variables.scss
 
 // --- Styles from edit_profile.html ---
 .profile-bio-textarea { // Applied to the textarea for user's biography
