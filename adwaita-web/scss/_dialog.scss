@@ -1,77 +1,52 @@
 @use 'variables';
 
 .adw-dialog {
-  background-color: var(--dialog-bg-color, var(--window-bg-color)); // Use defined var, fallback to window
-  color: var(--dialog-fg-color, var(--text-color)); // Use defined var, fallback to text
-  border-radius: var(--dialog-border-radius, var(--window-radius, 12px)); // Use defined var
-  box-shadow: var(--dialog-box-shadow);
-  padding: 0; // Padding handled by inner elements
+  background-color: var(--dialog-bg-color);
+  color: var(--dialog-fg-color);
+  border-radius: var(--window-radius);
+  box-shadow: var(--dialog-box-shadow); // Use the new theme-aware variable
+  padding: var(--spacing-l);
   width: 90%;
   max-width: 550px;
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0.95);
-  z-index: var(--z-index-dialog, 1050); // Use defined var
+  z-index: var(--z-index-dialog);
   opacity: 0;
   transition: opacity 0.15s ease-out, transform 0.15s ease-out;
-  display: flex; // For vertical layout of header, content, actions
-  flex-direction: column;
-  overflow: hidden; // Prevent content from breaking border-radius
 
   &.open {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
   }
 
-  // Styling for a direct .adw-header-bar used as the dialog's header
-  > .adw-header-bar {
-    flex-shrink: 0;
-    border-bottom: 1px solid var(--border-color);
-    border-top-left-radius: var(--dialog-border-radius, var(--window-radius, 12px)); // Match dialog's radius
-    border-top-right-radius: var(--dialog-border-radius, var(--window-radius, 12px)); // Match dialog's radius
-    // Header bar's own padding should be sufficient.
-    // Ensure its background color is var(--headerbar-bg-color)
-    background-color: var(--headerbar-bg-color); // Explicitly set for dialog context
-    // Ensure title within header bar is styled correctly (usually handled by headerbar's own CSS)
-     .adw-header-bar__title { // If overriding is needed for dialog header context
-        color: var(--headerbar-fg-color); // Ensure it uses headerbar fg
-     }
+  .adw-dialog-title {
+    font-size: var(--font-size-h3);
+    margin-bottom: var(--spacing-m);
+    font-weight: bold;
+    color: var(--dialog-fg-color); // Changed to dialog's fg color
   }
 
-  // Fallback for a simple title if not using a full header bar (demo page uses header bar)
-  // .adw-dialog-title {
-  //   font-size: var(--font-size-h3);
-  //   padding: var(--spacing-m) var(--spacing-l);
-  //   font-weight: bold;
-  //   color: var(--dialog-fg-color);
-  //   border-bottom: 1px solid var(--border-color);
-  // }
-
-  .adw-dialog__content {
-    padding: var(--spacing-l);
-    line-height: 1.6;
-    flex-grow: 1; // Allow content to take up available space
-    overflow-y: auto; // Make content scrollable if it exceeds dialog height
-    // max-height: calc(80vh - 120px); // Example: constrain height relative to viewport, accounting for header/footer
+  .adw-dialog-content {
+    margin-bottom: var(--spacing-l);
+    line-height: 1.6; // Added for better readability of text content
+    // Consider other typography improvements if needed globally
   }
 
-  .adw-dialog__actions {
+  .adw-dialog-buttons {
     display: flex;
-    justify-content: flex-end; // Align buttons to the right
-    gap: var(--spacing-s); // Standard gap for dialog buttons
-    padding: var(--spacing-m) var(--spacing-l);
-    border-top: 1px solid var(--border-color);
-    background-color: var(--headerbar-bg-color); // Dialog action areas often have a slightly different bg
-    border-bottom-left-radius: var(--dialog-border-radius, var(--window-radius, 12px));
-    border-bottom-right-radius: var(--dialog-border-radius, var(--window-radius, 12px));
-    flex-shrink: 0;
+    justify-content: flex-end;
+    gap: var(--spacing-m); // Increased gap for buttons
 
     .adw-button {
-      margin-left: 0; // Remove any default left margin from buttons
+      margin-left: 0;
+      // Buttons in dialogs sometimes are less padded if space is tight
     }
   }
 }
+
+// Dark theme box-shadow override is no longer needed as --dialog-box-shadow handles it.
 
 .adw-dialog-backdrop {
   position: fixed;
@@ -79,8 +54,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: var(--dialog-backdrop-color, rgba(0,0,0,0.4)); // Use defined var
-  z-index: var(--z-index-dialog-backdrop, 1040); // Use defined var
+  background-color: var(--dialog-backdrop-color); // Use new variable
+  z-index: var(--z-index-dialog-backdrop);
   opacity: 0;
   transition: opacity 0.15s ease-out;
 

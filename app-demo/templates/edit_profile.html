@@ -126,9 +126,13 @@
         </div>
       </section>
 
-      <div class="edit-profile-form-actions">
-            <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat">Cancel</a>
-            <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text if form.submit.label else 'Update Profile' }}</button>
+      <div class="edit-profile-form-actions form-actions-space-between">
+            <div class="actions-start">
+                <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat">Cancel</a>
+            </div>
+            <div class="actions-end">
+                <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text if form.submit.label else 'Update Profile' }}</button>
+            </div>
       </div>
     </form>
   </div>
