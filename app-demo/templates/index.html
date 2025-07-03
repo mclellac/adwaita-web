@@ -7,27 +7,27 @@
 <h1 class="adw-title-1 page-title-centered">All Blog Posts</h1>
 
 {% if posts %}
-    <div class="adw-list-box blog-posts-list flat"> {# Added flat to list-box, cards will provide their own bg/border #}
+    <div class="blog-posts-container"> {# Changed from adw-list-box to a generic container for cards #}
         {% for post in posts %}
-        <div class="adw-action-row activatable blog-post-card"> {# Changed blog-post-item to blog-post-card #}
-            <div class="adw-action-row-content">
-                <h3 class="adw-action-row-title">
+        <article class="adw-card blog-post-item-card">
+            <header class="blog-post-card__header">
+                <h2 class="adw-title-2 blog-post-card__title">
                     <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-link">{{ post.title }}</a>
-                </h3>
-                <div class="adw-action-row-subtitle blog-post-item__meta">
-                    <p class="post-meta">
-                        By: <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
-                        on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
-                    </p>
-                    {% if post.content %}
-                    <div class="post-excerpt styled-text-content"> {# Apply styled-text-content for potential formatting #}
-                        {# This will render HTML then truncate. For true HTML excerpt, logic would be more complex. #}
-                        {# For now, let's render a portion then allow CSS to hide overflow, or truncate HTML carefully. #}
-                        {# A simpler plain text excerpt from rendered markdown: #}
-                        {{ (post.content | markdown_to_html_and_sanitize | striptags | truncate(350, True)) if post.content else '' }}
-                    </div>
-                    {% endif %}
-
+                </h2>
+                <div class="blog-post-card__meta adw-label caption">
+                    By: <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
+                    on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
+                </div>
+            </header>
+            {% if post.content %}
+            <div class="blog-post-card__excerpt styled-text-content">
+                {# Rendered HTML excerpt, truncated by CSS if too long, or use a JS solution for smarter HTML truncation #}
+                {# For now, rendering a portion of Markdown. This should be improved for proper HTML excerpt. #}
+                {{ (post.content | truncate(600) | markdown_to_html_and_sanitize ) if post.content else '' }}
+            </div>
+            {% endif %}
+            <footer class="blog-post-card__footer">
+                <div class="blog-post-card__terms">
                     {% if post.categories %}
                     <div class="post-categories-list meta-section">
                         <strong class="adw-label caption meta-label-strong">Categories:</strong>
@@ -36,7 +36,6 @@
                         {% endfor %}
                     </div>
                     {% endif %}
-
                     {% if post.tags %}
                     <div class="tags-summary meta-section">
                         <strong class="adw-label caption meta-label-strong">Tags:</strong>
@@ -46,14 +45,9 @@
                     </div>
                     {% endif %}
                 </div>
-            </div>
-            <div class="adw-action-row-suffix">
-                {# Using an icon button for details might be more Adwaita-like in a row context #}
-                <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button flat circular" aria-label="View Details">
-                    <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                </a>
-            </div>
-        </div>
+                <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button flat read-more-link">Read More <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
+            </footer>
+        </article>
         {% endfor %}
     </div>
 {% else %}

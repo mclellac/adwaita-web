@@ -20,49 +20,47 @@
         </div>
 
         {% if posts %}
-            <adw-list-box class="blog-posts-list" selectable>
+            <div class="blog-posts-container"> {# Use new card container #}
                 {% for post in posts %}
-                {# Using adw-expander-row for a card-like appearance, non-expandable but with title/subtitle and content area #}
-                {# Or a custom styled adw-box could be used if adw-expander-row is not fitting #}
-                <adw-action-row href="{{ url_for('view_post', post_id=post.id) }}" activatable class="card-like-row">
-                    <div slot="prefix">
-                        {# Optionally, an icon or avatar could go here #}
+                <article class="adw-card blog-post-item-card">
+                    <header class="blog-post-card__header">
+                        <h2 class="adw-title-2 blog-post-card__title">
+                            <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-link">{{ post.title }}</a>
+                        </h2>
+                        <div class="blog-post-card__meta adw-label caption">
+                            By: <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
+                            on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
+                        </div>
+                    </header>
+                    {% if post.content %}
+                    <div class="blog-post-card__excerpt styled-text-content">
+                        {{ (post.content | truncate(600) | markdown_to_html_and_sanitize ) if post.content else '' }}
                     </div>
-                    <span slot="title">{{ post.title }}</span>
-                    <span slot="subtitle">
-                        By: <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
-                        on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
-                        <br>
-                        {{ (post.content | markdown_to_html_and_sanitize | striptags | truncate(150, True)) if post.content else '' }}
-                    </span>
-                    {# Suffix slot could be used for 'Read More' or other actions, but direct navigation is fine for action row #}
-                </adw-action-row>
-
-                {# For categories and tags, they might be better placed inside the post view, or styled differently here #}
-                {# If keeping them, simple adw-box with adw-buttons: #}
-                {% if post.categories or post.tags %}
-                <adw-box orientation="vertical" spacing="s" style="padding-left: var(--spacing-xxl); padding-right: var(--spacing-m); padding-bottom: var(--spacing-m);">
-                    {% if post.categories %}
-                    <adw-box orientation="horizontal" spacing="xs" align="center" class="wrap-box">
-                        <adw-label is-caption style="font-weight: bold;">Categories:</adw-label>
-                        {% for category in post.categories %}
-                            <adw-button text="{{ category.name }}" href="{{ url_for('posts_by_category', category_slug=category.slug) }}" flat class="tag-button"></adw-button>
-                        {% endfor %}
-                    </adw-box>
                     {% endif %}
-                    {% if post.tags %}
-                    <adw-box orientation="horizontal" spacing="xs" align="center" class="wrap-box">
-                        <adw-label is-caption style="font-weight: bold;">Tags:</adw-label>
-                        {% for tag_item in post.tags %}
-                          <adw-button text="{{ tag_item.name }}" href="{{ url_for('posts_by_tag', tag_slug=tag_item.slug) }}" flat class="tag-button"></adw-button>
-                        {% endfor %}
-                    </adw-box>
-                    {% endif %}
-                </adw-box>
-                {% endif %}
-
+                    <footer class="blog-post-card__footer">
+                        <div class="blog-post-card__terms">
+                            {% if post.categories %}
+                            <div class="post-categories-list meta-section">
+                                <strong class="adw-label caption meta-label-strong">Categories:</strong>
+                                {% for category in post.categories %}
+                                    <a href="{{ url_for('posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact">{{ category.name }}</a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if post.tags %}
+                            <div class="tags-summary meta-section">
+                                <strong class="adw-label caption meta-label-strong">Tags:</strong>
+                                {% for tag_item in post.tags %}
+                                  <a href="{{ url_for('posts_by_tag', tag_slug=tag_item.slug) }}" class="adw-button flat compact">{{ tag_item.name }}</a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button flat read-more-link">Read More <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
+                    </footer>
+                </article>
                 {% endfor %}
-            </adw-list-box>
+            </div>
 
             {% if pagination and pagination.pages > 1 %}
             <adw-box orientation="horizontal" justify="center" style="margin-top: var(--spacing-l);">

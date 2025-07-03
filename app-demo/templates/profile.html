@@ -94,15 +94,33 @@
                 <h2 class="adw-preferences-group__title title-2" id="user-posts-title-{{user_profile.id}}">Posts by {{ user_profile.username }}</h2>
             </div>
             {% if posts_pagination and posts_pagination.items %}
-                <div class="adw-list-box"> {# Removed selectable as it might imply JS interaction not present #}
+                <div class="blog-posts-container"> {# Use new card container #}
                     {% for post in posts_pagination.items %}
-                    <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-action-row activatable">
-                        <div class="adw-action-row__text">
-                            <span class="adw-action-row__title">{{ post.title }}{% if not post.is_published and current_user == post.author %} (Draft){% endif %}</span>
-                            <span class="adw-action-row__subtitle">{% if post.is_published and post.published_at %}Published: {{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC{% elif not post.is_published %}Draft - Last updated: {{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC{% else %}Created: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC{% endif %}</span>
-                        </div>
-                        <span class="adw-action-row__chevron"></span>
-                    </a>
+                    <article class="adw-card blog-post-item-card">
+                        <header class="blog-post-card__header">
+                            <h2 class="adw-title-2 blog-post-card__title">
+                                <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-link">
+                                    {{ post.title }}{% if not post.is_published and current_user == post.author %} <span class="adw-label caption">(Draft)</span>{% endif %}
+                                </a>
+                            </h2>
+                            <div class="blog-post-card__meta adw-label caption">
+                                {% if post.is_published and post.published_at %}
+                                    Published: <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                                {% elif not post.is_published %}
+                                    Draft - Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                                {% else %}
+                                    Created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                                {% endif %}
+                            </div>
+                        </header>
+                        {# No excerpt shown on profile post list for brevity, or could add a short one #}
+                        <footer class="blog-post-card__footer">
+                             <div class="blog-post-card__terms">
+                                {# Terms (categories/tags) could be added here if desired #}
+                            </div>
+                            <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button flat read-more-link">View Post <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
+                        </footer>
+                    </article>
                     {% endfor %}
                 </div>
 
