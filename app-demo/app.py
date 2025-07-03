@@ -484,7 +484,7 @@ def create_app(config_overrides=None):
             html_content,
             tags=ALLOWED_TAGS,
             attributes=ALLOWED_ATTRIBUTES,
-            styles=ALLOWED_STYLES, # Usually empty, but included for completeness
+            # styles=ALLOWED_STYLES, # Removed: kwarg not supported by current bleach version or empty
             strip=True
         )
         return Markup(sanitized_html)
