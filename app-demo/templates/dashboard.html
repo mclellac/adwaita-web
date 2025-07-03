@@ -2,11 +2,11 @@
 
 {% block title %}My Posts - Dashboard{% endblock %}
 
+{% block header_title %}My Posts Dashboard{% endblock %}
+
 {% block content %}
 <div class="adw-preferences-page" role="main"> {# Using preferences-page for consistent page styling #}
-    <header class="adw-preferences-page__header">
-        <h1 class="adw-preferences-page__title">My Posts Dashboard</h1>
-    </header>
+    {# Header title is now handled by the block in base.html #}
 
     {% if user_posts %}
     <div class="adw-list-box">

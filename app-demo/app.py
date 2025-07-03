@@ -27,9 +27,10 @@ from flask_login import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect, FlaskForm
+import markdown # For Markdown support
 from markupsafe import Markup  # For escaping JS
 from PIL import Image
-from sqlalchemy import desc, or_
+from sqlalchemy import desc, or_, select, func # Added select, func
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from wtforms import (
@@ -134,12 +135,23 @@ class CommentForm(FlaskForm):
         validators=[DataRequired(), Length(min=1, max=2000)]
     )
     submit = SubmitField('Post Comment')
+    parent_id = StringField(validators=[Optional()]) # Hidden field, validated as string
 
 class DeleteCommentForm(FlaskForm):
     submit = SubmitField('Delete')
 
 class DeletePostForm(FlaskForm):
     submit = SubmitField('Delete Post')
+
+class FlagCommentForm(FlaskForm):
+    # Reason field could be added if desired, for now, just a button press
+    submit = SubmitField('Flag Comment')
+
+class SiteSettingsForm(FlaskForm):
+    site_title = StringField('Site Title', validators=[DataRequired(), Length(min=1, max=120)])
+    posts_per_page = StringField('Posts Per Page', validators=[DataRequired()]) # Validated as int in route
+    allow_registrations = BooleanField('Allow New User Registrations')
+    submit = SubmitField('Save Settings')
 
 # Helper
 def allowed_file(filename):
@@ -162,6 +174,7 @@ class User(UserMixin, db.Model):
     is_profile_public = db.Column(db.Boolean, default=True, nullable=False)
     theme = db.Column(db.String(80), nullable=True, default='system')
     accent_color = db.Column(db.String(80), nullable=True, default='default')
+    is_admin = db.Column(db.Boolean, default=False, nullable=False) # Admin flag
     posts = db.relationship(
         'Post', backref='author', lazy=True, order_by=desc("created_at")
     )
@@ -245,10 +258,83 @@ class Comment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
     author = db.relationship('User', backref=db.backref('comments', lazy='dynamic'))
+    # For threaded comments
+    parent_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
+    replies = db.relationship(
+        'Comment',
+        backref=db.backref('parent', remote_side=[id]),
+        lazy='dynamic',
+        order_by=created_at.asc() # Show replies in chronological order
+    )
 
 Post.comments = db.relationship(
-    'Comment', backref='post', lazy='dynamic', order_by=desc(Comment.created_at)
+    'Comment',
+    primaryjoin="and_(Post.id==Comment.post_id, Comment.parent_id==None)", # Only top-level comments
+    backref='post',
+    lazy='dynamic',
+    order_by=desc(Comment.created_at)
 )
+
+class CommentFlag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=False)
+    flagger_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    reason = db.Column(db.String(255), nullable=True) # Optional reason
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    is_resolved = db.Column(db.Boolean, default=False, nullable=False)
+    resolved_at = db.Column(db.DateTime, nullable=True)
+    resolver_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+
+    comment = db.relationship('Comment', backref=db.backref('flags', lazy='dynamic'))
+    flagger = db.relationship('User', foreign_keys=[flagger_user_id])
+    resolver = db.relationship('User', foreign_keys=[resolver_user_id])
+
+Comment.is_flagged_active = db.column_property(
+    select(func.count(CommentFlag.id) > 0).where(
+        CommentFlag.comment_id == Comment.id,
+        CommentFlag.is_resolved == False # noqa E712
+    ).correlate_except(CommentFlag).scalar_subquery()
+)
+
+class SiteSetting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False)
+    value = db.Column(db.Text, nullable=True)
+    value_type = db.Column(db.String(50), nullable=False, default='string') # e.g., string, int, bool
+
+    def __repr__(self):
+        return f'<SiteSetting {self.key}={self.value}>'
+
+    @staticmethod
+    def get(key, default=None):
+        setting = SiteSetting.query.filter_by(key=key).first()
+        if setting:
+            if setting.value_type == 'int':
+                try:
+                    return int(setting.value)
+                except (ValueError, TypeError):
+                    return default
+            elif setting.value_type == 'bool':
+                return setting.value.lower() in ['true', '1', 'yes', 'on']
+            return setting.value
+        return default
+
+    @staticmethod
+    def set(key, value, value_type='string'):
+        setting = SiteSetting.query.filter_by(key=key).first()
+        if not setting:
+            setting = SiteSetting(key=key)
+            db.session.add(setting)
+
+        if value_type == 'bool':
+            setting.value = 'true' if value else 'false'
+        elif value_type == 'int':
+            setting.value = str(int(value))
+        else: # string
+            setting.value = str(value)
+        setting.value_type = value_type
+        db.session.commit()
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -381,12 +467,27 @@ def create_app(config_overrides=None):
             'current_user': current_user,
             'default_avatar_url': url_for(
                 'static', filename='img/default_avatar.png'
-            )
+            ),
+            'site_settings': SiteSetting # Make SiteSetting model available to all templates
         }
 
     @_app.context_processor
     def inject_current_year():
         return {'current_year': datetime.now(timezone.utc).year}
+
+    @_app.template_filter('markdown_to_html_and_sanitize')
+    def markdown_to_html_and_sanitize(text):
+        if not text:
+            return ""
+        html_content = markdown.markdown(text, extensions=['fenced_code', 'tables', 'sane_lists'])
+        sanitized_html = bleach.clean(
+            html_content,
+            tags=ALLOWED_TAGS,
+            attributes=ALLOWED_ATTRIBUTES,
+            # styles=ALLOWED_STYLES, # Removed: kwarg not supported by current bleach version or empty
+            strip=True
+        )
+        return Markup(sanitized_html)
 
     @_app.route('/')
     def index():
@@ -501,17 +602,35 @@ def create_app(config_overrides=None):
                     f"post {post_id}."
                 )
                 try:
+                    parent_id_val = form.parent_id.data
+                    parent_id_int = int(parent_id_val) if parent_id_val and parent_id_val.isdigit() else None
+
+                    _app.logger.info(
+                        f"User {current_user.username} submitting comment on "
+                        f"post {post_id}. Parent ID from form: '{parent_id_val}', Parsed as: {parent_id_int}."
+                    )
+
                     comment = Comment(
-                        text=form.text.data, author=current_user, post_id=post_id
+                        text=form.text.data,
+                        author=current_user,
+                        post_id=post_id,
+                        parent_id=parent_id_int
                     )
                     db.session.add(comment)
                     db.session.commit()
                     _app.logger.info(
-                        f"Comment (ID: {comment.id}) by {current_user.username} "
+                        f"Comment (ID: {comment.id}, Parent ID: {comment.parent_id}) by {current_user.username} "
                         f"added to post {post_id}."
                     )
                     flash('Comment posted successfully!', 'success')
-                    return redirect(url_for('view_post', post_id=post_id))
+                    # Redirect to the post, potentially with a fragment to the new comment
+                    return redirect(url_for('view_post', post_id=post_id, _anchor=f"comment-{comment.id}"))
+                except ValueError:
+                    _app.logger.error(
+                        f"Invalid parent_id format '{form.parent_id.data}' for comment by "
+                        f"{current_user.username} on post {post_id}."
+                    )
+                    flash('Error posting comment: Invalid parent comment ID.', 'danger')
                 except Exception as e:
                     db.session.rollback()
                     _app.logger.error(
@@ -611,11 +730,18 @@ def create_app(config_overrides=None):
                     f"Allowing delete of comment {comment_id}."
                 )
                 can_delete = True
+            elif current_user.is_admin:
+                _app.logger.debug(
+                    f"User {current_user.username} is admin. "
+                    f"Allowing delete of comment {comment_id}."
+                )
+                can_delete = True
+
             if not can_delete:
                 _app.logger.warning(
                     f"User {current_user.username} not authorized to delete "
                     f"comment {comment_id}. Author: {comment.author.username}, "
-                    f"Post Author: {comment.post.author.username}."
+                    f"Post Author: {comment.post.author.username}, Admin: {current_user.is_admin}."
                 )
                 abort(403)
             try:
@@ -721,18 +847,13 @@ def create_app(config_overrides=None):
             )
         if form.validate_on_submit():
             title = form.title.data
-            raw_content = form.content.data
+            # Content is now stored as raw Markdown
+            content = form.content.data
             _app.logger.debug(
-                f"Raw content length for new post by {current_user.username}: "
-                f"{len(raw_content)}"
+                f"Raw Markdown content length for new post by {current_user.username}: "
+                f"{len(content)}"
             )
-            content = bleach.clean(
-                raw_content,
-                tags=ALLOWED_TAGS,
-                attributes=ALLOWED_ATTRIBUTES,
-                strip=True
-            )
-            _app.logger.debug(f"Sanitized content length for new post: {len(content)}")
+            # Sanitization will happen after Markdown conversion during display
             is_published_intent = form.publish.data
             try:
                 _app.logger.info(
@@ -906,19 +1027,12 @@ def create_app(config_overrides=None):
                 f"(ID: {post_id})."
             )
             post.title = form.title.data
-            raw_content = form.content.data
+            # Content is now stored as raw Markdown
+            post.content = form.content.data
             _app.logger.debug(
-                f"Raw content length for edited post {post_id}: {len(raw_content)}"
+                f"Raw Markdown content length for edited post {post_id}: {len(post.content)}"
             )
-            post.content = bleach.clean(
-                raw_content,
-                tags=ALLOWED_TAGS,
-                attributes=ALLOWED_ATTRIBUTES,
-                strip=True
-            )
-            _app.logger.debug(
-                f"Sanitized content length for post {post_id}: {len(post.content)}"
-            )
+            # Sanitization will happen after Markdown conversion during display
             is_published_intent = form.publish.data
             _app.logger.info(
                 f"Updating post {post_id}. Publish intent: {is_published_intent}. "
@@ -1117,13 +1231,37 @@ def create_app(config_overrides=None):
             )
             flash("Error loading posts for this profile.", "danger")
             posts_pagination = None
+
+        # Fetch user's comments for display on profile
+        comments_page = request.args.get('comments_page', 1, type=int)
+        comments_per_page = 5 # Or another config value
+        comments_query = Comment.query.filter_by(user_id=user_profile.id).order_by(
+            Comment.created_at.desc()
+        )
+        try:
+            comments_pagination = comments_query.paginate(
+                page=comments_page, per_page=comments_per_page, error_out=False
+            )
+            _app.logger.debug(
+                f"Found {len(comments_pagination.items)} comments by "
+                f"'{user_profile.username}' for comments_page {comments_page} (total: {comments_pagination.total})."
+            )
+        except Exception as e:
+            _app.logger.error(
+                f"Error fetching comments for profile {user_profile.username}: {e}",
+                exc_info=True
+            )
+            flash("Error loading comments for this profile.", "danger")
+            comments_pagination = None
+
         _app.logger.info(
             f"{datetime.now(timezone.utc).isoformat()} "
             f"[ROUTE_RENDER_DEBUG] {request.path} - Before render_template"
         )
         rendered_template = render_template(
             'profile.html', user_profile=user_profile,
-            posts_pagination=posts_pagination
+            posts_pagination=posts_pagination,
+            comments_pagination=comments_pagination
         )
         _app.logger.info(
             f"{datetime.now(timezone.utc).isoformat()} "
@@ -1708,6 +1846,61 @@ def create_app(config_overrides=None):
                 {'status': 'error', 'message': 'Failed to save theme preference'}
             ), 500
 
+    @_app.route('/comment/<int:comment_id>/flag', methods=['POST'])
+    @login_required
+    def flag_comment(comment_id):
+        _app.logger.debug(
+            f"[ROUTE_ENTRY] Path: /comment/{comment_id}/flag, Method: {request.method}, User: {current_user.username}"
+        )
+        comment = Comment.query.get_or_404(comment_id)
+        form = FlagCommentForm()
+
+        if form.validate_on_submit():
+            # Check if user has already flagged this comment actively
+            existing_flag = CommentFlag.query.filter_by(
+                comment_id=comment_id,
+                flagger_user_id=current_user.id,
+                is_resolved=False
+            ).first()
+
+            if existing_flag:
+                _app.logger.info(
+                    f"User {current_user.username} already actively flagged comment {comment_id}. Ignoring."
+                )
+                flash('You have already flagged this comment.', 'info')
+            elif comment.author == current_user:
+                _app.logger.info(
+                    f"User {current_user.username} attempted to flag their own comment {comment_id}. Denying."
+                )
+                flash("You cannot flag your own comment.", "warning")
+            else:
+                try:
+                    # reason = form.reason.data # If a reason field were added to the form
+                    new_flag = CommentFlag(
+                        comment_id=comment.id,
+                        flagger_user_id=current_user.id
+                        # reason=reason
+                    )
+                    db.session.add(new_flag)
+                    db.session.commit()
+                    _app.logger.info(
+                        f"Comment {comment_id} flagged by user {current_user.username}."
+                    )
+                    flash('Comment flagged for review.', 'success')
+                except Exception as e:
+                    db.session.rollback()
+                    _app.logger.error(
+                        f"Error flagging comment {comment_id} by user {current_user.username}: {e}", exc_info=True
+                    )
+                    flash('Error flagging comment. Please try again.', 'danger')
+        else:
+            _app.logger.warning(
+                f"Flag comment form validation failed for comment {comment_id}. Errors: {form.errors}"
+            )
+            flash_form_errors(form)
+
+        return redirect(url_for('view_post', post_id=comment.post_id, _anchor=f"comment-{comment.id}"))
+
     @_app.route('/api/settings/accent_color', methods=['POST'])
     @login_required
     def save_accent_color_preference():
@@ -1750,6 +1943,113 @@ def create_app(config_overrides=None):
             return jsonify(
                 {'status': 'error', 'message': 'Failed to save accent color'}
             ), 500
+
+    @_app.route('/admin/flags', methods=['GET'])
+    @login_required
+    def admin_view_flags():
+        _app.logger.debug(
+            f"[ROUTE_ENTRY] Path: /admin/flags, Method: {request.method}, User: {current_user.username}"
+        )
+        if not current_user.is_admin:
+            _app.logger.warning(
+                f"Non-admin user {current_user.username} attempted to access /admin/flags."
+            )
+            abort(403)
+
+        page = request.args.get('page', 1, type=int)
+        per_page = 15 # Or from app.config
+
+        # Fetch unresolved flags, ordered by most recent first
+        flags_query = CommentFlag.query.filter_by(is_resolved=False).order_by(
+            CommentFlag.created_at.desc()
+        )
+        flag_pagination = flags_query.paginate(page=page, per_page=per_page, error_out=False)
+        active_flags = flag_pagination.items
+
+        _app.logger.info(f"Admin {current_user.username} viewing flagged comments page {page}. Found {len(active_flags)} active flags.")
+
+        return render_template('admin_flags.html', active_flags=active_flags, flag_pagination=flag_pagination)
+
+    @_app.route('/admin/flag/<int:flag_id>/resolve', methods=['POST'])
+    @login_required
+    def admin_resolve_flag(flag_id):
+        _app.logger.debug(
+            f"[ROUTE_ENTRY] Path: /admin/flag/{flag_id}/resolve, Method: {request.method}, User: {current_user.username}"
+        )
+        if not current_user.is_admin:
+            abort(403)
+
+        flag = CommentFlag.query.get_or_404(flag_id)
+        if flag.is_resolved:
+            flash('This flag has already been resolved.', 'info')
+            return redirect(url_for('admin_view_flags'))
+
+        try:
+            flag.is_resolved = True
+            flag.resolved_at = datetime.now(timezone.utc)
+            flag.resolver_user_id = current_user.id
+            db.session.commit()
+            _app.logger.info(f"Admin {current_user.username} resolved flag ID {flag_id} for comment ID {flag.comment_id}.")
+            flash(f'Flag for comment "{flag.comment.text[:30]}..." resolved.', 'success')
+        except Exception as e:
+            db.session.rollback()
+            _app.logger.error(f"Error resolving flag {flag_id} by admin {current_user.username}: {e}", exc_info=True)
+            flash('Error resolving flag.', 'danger')
+        return redirect(url_for('admin_view_flags'))
+
+    # Note: Deleting a comment via admin powers is already handled by the modified delete_comment route
+    # If a separate "delete comment via flag UI" is needed, it would call that or have its own logic.
+
+    @_app.route('/admin/site-settings', methods=['GET', 'POST'])
+    @login_required
+    def admin_site_settings():
+        _app.logger.debug(
+            f"[ROUTE_ENTRY] Path: /admin/site-settings, Method: {request.method}, User: {current_user.username}"
+        )
+        if not current_user.is_admin:
+            _app.logger.warning(
+                f"Non-admin user {current_user.username} attempted to access /admin/site-settings."
+            )
+            abort(403)
+
+        form = SiteSettingsForm()
+        if form.validate_on_submit():
+            _app.logger.info(f"Admin {current_user.username} updating site settings.")
+            try:
+                SiteSetting.set('site_title', form.site_title.data, 'string')
+
+                try:
+                    ppp_val = int(form.posts_per_page.data)
+                    if ppp_val <= 0:
+                        flash("Posts Per Page must be a positive integer.", "danger")
+                    else:
+                        SiteSetting.set('posts_per_page', ppp_val, 'int')
+                except ValueError:
+                    flash("Invalid value for Posts Per Page. Must be an integer.", "danger")
+
+                SiteSetting.set('allow_registrations', form.allow_registrations.data, 'bool')
+
+                # Update app config directly for posts_per_page for immediate effect if valid
+                if 'ppp_val' in locals() and ppp_val > 0 : # Check if ppp_val was successfully set
+                     _app.config['POSTS_PER_PAGE'] = ppp_val
+                     _app.logger.info(f"App config POSTS_PER_PAGE updated to: {ppp_val}")
+
+                flash('Site settings updated successfully!', 'success')
+                _app.logger.info(f"Site settings updated by admin {current_user.username}.")
+                return redirect(url_for('admin_site_settings'))
+            except Exception as e:
+                _app.logger.error(f"Error updating site settings: {e}", exc_info=True)
+                flash('An error occurred while saving settings.', 'danger')
+
+        elif request.method == 'POST': # Form validation failed
+             flash_form_errors(form)
+
+        # Populate form with current settings for GET request or if validation failed
+        form.site_title.data = SiteSetting.get('site_title', 'My Libadwaita Blog')
+        form.posts_per_page.data = str(SiteSetting.get('posts_per_page', _app.config.get('POSTS_PER_PAGE', 10)))
+        form.allow_registrations.data = SiteSetting.get('allow_registrations', False)
+
+        return render_template('admin_site_settings.html', form=form)
 
     @_app.errorhandler(403)
     def forbidden_page(error):

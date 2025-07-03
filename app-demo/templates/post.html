@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}{{ post.title }}{% endblock %}
+{% block page_title %}{{ post.title }}{% endblock %}
 
 {% block header_title %}{{ post.title }}{% endblock %}
 
 {% block content %}
 <div class="post-view"> {# Removed adw-clamp content-clamp as base.html provides clamp #}
-    <article class="post-article">
+    <article class="post-article adw-card blog-content-card"> {# Added adw-card and specific class #}
         <header class="post-header">
             <h1 class="adw-title-1">{{ post.title }}{% if not post.is_published and current_user == post.author %} <span class="adw-label caption draft-indicator">(Draft)</span>{% endif %}</h1>
             <div class="post-meta-detail">
@@ -43,7 +43,7 @@
         </header>
 
         <div class="post-content styled-text-content"> {# Added styled-text-content for prose styling #}
-            {{ post.content | safe }}
+            {{ post.content | markdown_to_html_and_sanitize }}
         </div>
 
         {% if post.author %}
@@ -108,30 +108,63 @@
 
     <hr class="section-divider">
 
+    {% macro render_comment_thread(comment, post, delete_form, current_user, form, loop_depth=0) %}
+    <article class="adw-card comment-card" id="comment-{{ comment.id }}" style="margin-left: {{ loop_depth * 30 }}px;">
+        <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
+            <span class="adw-avatar size-medium">
+               {% set comment_avatar = url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else default_avatar_url %}
+               <img src="{{ comment_avatar }}" alt="{{ comment.author.username }} avatar" class="adw-avatar__image">
+            </span>
+            <div class="comment-author-meta">
+                 <a href="{{ url_for('profile', username=comment.author.username) }}" class="adw-link comment-author-link-strong">{{ comment.author.username }}</a>
+                <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></small>
+            </div>
+        </header>
+        <p class="comment-text styled-text-content">{{ comment.text }}</p> {# Assuming comment.text is plain text for now, or apply markdown filter if comments can be markdown #}
+
+        <div class="comment-actions adw-box adw-box-spacing-xs" style="margin-top: var(--spacing-xs);">
+            {% if current_user.is_authenticated %}
+            <button class="adw-button flat compact reply-button" data-comment-id="{{ comment.id }}" data-comment-author="{{ comment.author.username }}">Reply</button>
+            {% endif %}
+            {# Flag Button #}
+            {% if current_user.is_authenticated and comment.author != current_user %}
+                {% if comment.is_flagged_active %}
+                    <button class="adw-button flat compact" disabled title="This comment has been flagged">Flagged</button>
+                {% else %}
+                    <form method="POST" action="{{ url_for('flag_comment', comment_id=comment.id) }}" style="display: inline;">
+                        {{ form.hidden_tag() }} {# Use the main comment form's CSRF for simplicity, or pass a dedicated FlagCommentForm #}
+                        <button type="submit" class="adw-button flat compact" title="Flag this comment for review">Flag</button>
+                    </form>
+                {% endif %}
+            {% endif %}
+            {# Delete Button #}
+            {% if current_user.is_authenticated and (comment.author == current_user or post.author == current_user or current_user.is_admin) %}
+            <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" onsubmit="return confirm('Are you sure you want to delete this comment?');" style="display: inline;">
+                {{ delete_form.hidden_tag() }} {# Assuming delete_form is passed for CSRF #}
+                <button type="submit" class="adw-button destructive-action compact">Delete</button>
+            </form>
+            {% endif %}
+        </div>
+        <div class="reply-form-container" id="reply-form-for-{{ comment.id }}" style="display: none; margin-top: var(--spacing-s);">
+            {# Reply form will be injected here by JS or this is a template for it #}
+        </div>
+
+        {% if comment.replies %}
+            <div class="comment-replies" style="margin-top: var(--spacing-s);">
+                {% for reply in comment.replies %}
+                    {{ render_comment_thread(reply, post, delete_form, current_user, form, loop_depth + 1) }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </article>
+    {% endmacro %}
+
     <section class="comments-section" aria-labelledby="comments-heading">
-        <h2 id="comments-heading" class="adw-title-2">Comments ({{ comments|length }})</h2>
-        {% if comments %}
-            <div class="adw-list-box comments-list">
-                {% for comment in comments %}
-                <article class="adw-card comment-card"> {# Changed div to article, added adw-card #}
-                    <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
-                        <span class="adw-avatar size-medium">
-                           {% set comment_avatar = url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else url_for('static', filename='img/default_avatar.png') %}
-                           <img src="{{ comment_avatar }}" alt="{{ comment.author.username }} avatar" class="adw-avatar__image">
-                        </span>
-                        <div class="comment-author-meta">
-                             <a href="{{ url_for('profile', username=comment.author.username) }}" class="adw-link comment-author-link-strong">{{ comment.author.username }}</a>
-                            <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></small>
-                        </div>
-                    </header>
-                    <p class="comment-text styled-text-content">{{ comment.text }}</p> {# Added styled-text-content #}
-                    {% if current_user.is_authenticated and (comment.author == current_user or post.author == current_user) %}
-                        <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" onsubmit="return confirm('Are you sure you want to delete this comment?');" class="comment-delete-form-container">
-                            {{ delete_form.hidden_tag() }} {# Assuming delete_form is passed for CSRF #}
-                            <button type="submit" class="adw-button destructive-action compact">Delete Comment</button>
-                        </form>
-                    {% endif %}
-                </article>
+        <h2 id="comments-heading" class="adw-title-2">Comments ({{ post.comments.count() }})</h2> {# Use post.comments.count() for top-level #}
+        {% if post.comments.first() %}
+            <div class="adw-list-box comments-list flat"> {# Made list-box flat as cards provide bg/border #}
+                {% for comment in post.comments %} {# Iterates over top-level comments #}
+                    {{ render_comment_thread(comment, post, delete_form, current_user, form) }}
                 {% endfor %}
             </div>
         {% else %}
@@ -144,8 +177,9 @@
          <header class="adw-list-box-header">
             <h3 id="leave-comment-heading" class="adw-title-3">Leave a Comment</h3>
         </header>
-        <form method="POST" action="{{ url_for('view_post', post_id=post.id) }}" class="stacked-form">
+        <form method="POST" action="{{ url_for('view_post', post_id=post.id) }}" class="stacked-form" id="main-comment-form">
             {{ form.hidden_tag() }} {# Flask-WTF CSRF token #}
+            {{ form.parent_id(id="main_parent_id_input", type="hidden") }} {# Hidden field for parent_id #}
             <div class="form-field-row comment-form-field-row {{ 'has-error' if form.text.errors else '' }}"> {# More standard form field structure #}
                  <label for="{{ form.text.id or 'comment_text_input' }}" class="adw-label">{{ form.text.label.text }}</label>
                  <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry adw-textarea" rows="4">{{ form.text.data or ''}}</textarea>
@@ -238,6 +272,77 @@ document.addEventListener('DOMContentLoaded', () => {
                 // if (typeof deleteDialogEl.close === "function") { // For native <dialog>
                 //    deleteDialogEl.close();
                 // }
+            }
+        });
+    }
+});
+
+// Threaded comments reply script
+document.addEventListener('DOMContentLoaded', () => {
+    const mainCommentForm = document.getElementById('main-comment-form');
+    if (!mainCommentForm) return; // If no comment form, do nothing
+
+    const mainParentIdInput = document.getElementById('main_parent_id_input');
+    const mainCommentTextArea = mainCommentForm.querySelector('textarea[name="text"]');
+    const mainCommentSubmitButton = mainCommentForm.querySelector('button[type="submit"]');
+    const mainCommentLabel = mainCommentForm.querySelector('label[for="' + (mainCommentTextArea ? mainCommentTextArea.id : '') + '"]');
+    const originalFormContainer = mainCommentForm.parentElement; // Store original parent
+
+    document.querySelectorAll('.reply-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const commentId = button.dataset.commentId;
+            const commentAuthor = button.dataset.commentAuthor || 'user';
+            const replyFormContainer = document.getElementById(`reply-form-for-${commentId}`);
+
+            if (!replyFormContainer) return;
+
+            // Detach form from current parent before appending to new one
+            if (mainCommentForm.parentElement) {
+                mainCommentForm.parentElement.removeChild(mainCommentForm);
+            }
+
+            replyFormContainer.appendChild(mainCommentForm);
+            if(mainParentIdInput) mainParentIdInput.value = commentId;
+            if(mainCommentSubmitButton) mainCommentSubmitButton.textContent = 'Post Reply';
+            if(mainCommentLabel) mainCommentLabel.textContent = `Reply to ${commentAuthor}`;
+            if(mainCommentTextArea) {
+                mainCommentTextArea.placeholder = `Replying to ${commentAuthor}...`;
+                mainCommentTextArea.focus();
+            }
+            replyFormContainer.style.display = 'block';
+
+            // Hide other reply forms that might have been opened
+            document.querySelectorAll('.reply-form-container').forEach(container => {
+                if (container.id !== replyFormContainer.id) {
+                    container.style.display = 'none';
+                    // Do not clear their content if they didn't have the main form
+                }
+            });
+        });
+    });
+
+    // Logic to move the form back if user clicks the main "Leave a Comment" section header
+    const mainCommentSectionHeader = document.getElementById('leave-comment-heading');
+    if(mainCommentSectionHeader && originalFormContainer) {
+        mainCommentSectionHeader.addEventListener('click', (event) => {
+            // Prevent if the click is on the form itself if it's already there
+            if (originalFormContainer.contains(event.target) && event.target !== mainCommentSectionHeader) {
+                return;
+            }
+
+            if (mainCommentForm.parentElement !== originalFormContainer) {
+                if (mainCommentForm.parentElement) { // Detach if attached elsewhere
+                    mainCommentForm.parentElement.removeChild(mainCommentForm);
+                }
+                originalFormContainer.appendChild(mainCommentForm);
+                if(mainParentIdInput) mainParentIdInput.value = '';
+                if(mainCommentSubmitButton) mainCommentSubmitButton.textContent = 'Post Comment';
+                if(mainCommentLabel) mainCommentLabel.textContent = 'Comment';
+                if(mainCommentTextArea) mainCommentTextArea.placeholder = 'Enter your comment here...';
+
+                document.querySelectorAll('.reply-form-container').forEach(container => {
+                    container.style.display = 'none';
+                });
             }
         });
     }

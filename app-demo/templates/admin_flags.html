@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Flagged Comments{% endblock %}
+
+{% block header_title %}Flagged Comments{% endblock %}
+
+{% block content %}
+<div class="adw-preferences-page">
+    <header class="adw-preferences-page__header">
+        <h1 class="adw-preferences-page__title">Review Flagged Comments</h1>
+        <p class="adw-preferences-page__description">
+            Manage comments that have been flagged by users.
+        </p>
+    </header>
+
+    {% if active_flags %}
+    <div class="adw-list-box flagged-comments-list">
+        {% for flag in active_flags %}
+        <div class="adw-action-row"> {# Using action row to display each flagged item #}
+            <div class="adw-action-row-content" style="display: flex; flex-direction: column; align-items: flex-start;">
+                <h4 class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">
+                    <a href="{{ url_for('view_post', post_id=flag.comment.post_id, _anchor='comment-' ~ flag.comment_id) }}" target="_blank" class="adw-link">
+                        Comment by {{ flag.comment.author.username }} on post "{{ flag.comment.post.title }}"
+                    </a>
+                </h4>
+                <blockquote class="flagged-comment-text styled-text-content" style="font-size: var(--font-size-small); color: var(--text-color-secondary); border-left: 3px solid var(--warning-color); padding-left: var(--spacing-s); margin-left: 0; margin-bottom: var(--spacing-xs);">
+                    "{{ flag.comment.text | truncate(150, True) }}"
+                </blockquote>
+                <small class="adw-label caption">
+                    Flagged by: {{ flag.flagger.username }} on {{ flag.created_at.strftime('%Y-%m-%d %H:%M') }} UTC
+                    {% if flag.reason %}(Reason: {{ flag.reason }}){% endif %}
+                </small>
+            </div>
+            <div class="adw-action-row-suffix adw-box adw-box-spacing-s">
+                {# Form to Resolve Flag #}
+                <form method="POST" action="{{ url_for('admin_resolve_flag', flag_id=flag.id) }}" style="display: inline;">
+                    {{ csrf_token() }} {# Re-add CSRF if needed globally, or use a dedicated form object #}
+                    <button type="submit" class="adw-button">Mark as Resolved</button>
+                </form>
+                {# Form to Delete Comment directly from flags page #}
+                {# This uses the existing delete_comment route which now supports admin deletion #}
+                <form method="POST" action="{{ url_for('delete_comment', comment_id=flag.comment_id) }}" onsubmit="return confirm('Are you sure you want to PERMANENTLY DELETE this comment? This action cannot be undone.');" style="display: inline;">
+                     {{ csrf_token() }} {# Re-add CSRF if needed globally, or use a dedicated form object #}
+                    <button type="submit" class="adw-button destructive-action">Delete Comment</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if flag_pagination and flag_pagination.pages > 1 %}
+    <nav aria-label="Flagged comments navigation" class="pagination-controls adw-box horizontal justify-center" style="margin-top: var(--spacing-l);">
+        <div class="adw-toggle-group">
+            {% if flag_pagination.has_prev %}
+                <a href="{{ url_for('admin_view_flags', page=flag_pagination.prev_num) }}" class="adw-button">
+                    <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                </a>
+            {% else %}
+                <button class="adw-button" disabled><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
+            {% endif %}
+
+            {% for page_num in flag_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if page_num %}
+                    {% if page_num == flag_pagination.page %}
+                        <button class="adw-button suggested" aria-current="page" disabled>{{ page_num }}</button>
+                    {% else %}
+                        <a href="{{ url_for('admin_view_flags', page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                    {% endif %}
+                {% elif loop.index != 1 and loop.index != flag_pagination.pages + 2 %}
+                     <button class="adw-button flat" disabled style="pointer-events: none;">&hellip;</button>
+                {% endif %}
+            {% endfor %}
+
+            {% if flag_pagination.has_next %}
+                <a href="{{ url_for('admin_view_flags', page=flag_pagination.next_num) }}" class="adw-button">
+                    <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                </a>
+            {% else %}
+                <button class="adw-button" disabled><span class="adw-icon icon-actions-go-next-symbolic"></span></button>
+            {% endif %}
+        </div>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="adw-status-page">
+        <span class="adw-icon icon-content-info-symbolic adw-status-page-icon"></span>
+        <h2 class="adw-status-page-title">No Active Flags</h2>
+        <p class="adw-status-page-description">There are currently no comments flagged for review.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

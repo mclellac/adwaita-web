@@ -1,30 +1,33 @@
 {% extends "base.html" %}
 
-{% block title %}Blog Posts{% endblock %}
+{% block page_title %}Blog Posts{% endblock %}
 
 {% block content %}
 {# adw-clamp is already on main in base.html, so content-clamp might be redundant unless for very specific styling #}
 <h1 class="adw-title-1 page-title-centered">All Blog Posts</h1>
 
 {% if posts %}
-    <div class="adw-list-box blog-posts-list"> {# blog-posts-list for custom spacing/styles if needed #}
+    <div class="blog-posts-container"> {# Changed from adw-list-box to a generic container for cards #}
         {% for post in posts %}
-        <div class="adw-action-row activatable blog-post-item"> {# Added activatable for hover/focus states #}
-            <div class="adw-action-row-content">
-                <h3 class="adw-action-row-title">
+        <article class="adw-card blog-post-item-card">
+            <header class="blog-post-card__header">
+                <h2 class="adw-title-2 blog-post-card__title">
                     <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-link">{{ post.title }}</a>
-                </h3>
-                <div class="adw-action-row-subtitle blog-post-item__meta">
-                    <p class="post-meta">
-                        By: <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
-                        on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
-                    </p>
-                    {% if post.content %}
-                    <p class="post-excerpt">
-                        {{ post.content | striptags | truncate(150, True) }}
-                    </p>
-                    {% endif %}
-
+                </h2>
+                <div class="blog-post-card__meta adw-label caption">
+                    By: <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
+                    on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
+                </div>
+            </header>
+            {% if post.content %}
+            <div class="blog-post-card__excerpt styled-text-content">
+                {# Rendered HTML excerpt, truncated by CSS if too long, or use a JS solution for smarter HTML truncation #}
+                {# For now, rendering a portion of Markdown. This should be improved for proper HTML excerpt. #}
+                {{ (post.content | truncate(600) | markdown_to_html_and_sanitize ) if post.content else '' }}
+            </div>
+            {% endif %}
+            <footer class="blog-post-card__footer">
+                <div class="blog-post-card__terms">
                     {% if post.categories %}
                     <div class="post-categories-list meta-section">
                         <strong class="adw-label caption meta-label-strong">Categories:</strong>
@@ -33,7 +36,6 @@
                         {% endfor %}
                     </div>
                     {% endif %}
-
                     {% if post.tags %}
                     <div class="tags-summary meta-section">
                         <strong class="adw-label caption meta-label-strong">Tags:</strong>
@@ -43,14 +45,9 @@
                     </div>
                     {% endif %}
                 </div>
-            </div>
-            <div class="adw-action-row-suffix">
-                {# Using an icon button for details might be more Adwaita-like in a row context #}
-                <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button flat circular" aria-label="View Details">
-                    <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                </a>
-            </div>
-        </div>
+                <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button flat read-more-link">Read More <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
+            </footer>
+        </article>
         {% endfor %}
     </div>
 {% else %}
@@ -65,34 +62,36 @@
 {% endif %}
 
 {% if pagination and pagination.pages > 1 %}
-<nav aria-label="Page navigation" class="pagination-controls">
-    {% if pagination.has_prev %}
-        <a href="{{ url_for('index', page=pagination.prev_num) }}" class="adw-button flat">
-            <span class="adw-icon icon-actions-go-previous-symbolic"></span> Previous
-        </a>
-    {% else %}
-        <button class="adw-button flat" disabled><span class="adw-icon icon-actions-go-previous-symbolic"></span> Previous</button>
-    {% endif %}
-
-    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-        {% if page_num %}
-            {% if page_num == pagination.page %}
-                <button class="adw-button active" aria-current="page">{{ page_num }}</button> {# .active class handles bold #}
-            {% else %}
-                <a href="{{ url_for('index', page=page_num) }}" class="adw-button flat">{{ page_num }}</a>
-            {% endif %}
+<nav aria-label="Page navigation" class="pagination-controls adw-box horizontal justify-center" style="margin-top: var(--spacing-l);">
+    <div class="adw-toggle-group">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('index', page=pagination.prev_num) }}" class="adw-button">
+                <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+            </a>
         {% else %}
-            <button class="adw-button flat" disabled>&hellip;</button> {# disabled handles pointer-events #}
+            <button class="adw-button" disabled><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
         {% endif %}
-    {% endfor %}
 
-    {% if pagination.has_next %}
-        <a href="{{ url_for('index', page=pagination.next_num) }}" class="adw-button flat">
-            Next <span class="adw-icon icon-actions-go-next-symbolic"></span>
-        </a>
-    {% else %}
-        <button class="adw-button flat" disabled>Next <span class="adw-icon icon-actions-go-next-symbolic"></span></button>
-    {% endif %}
+        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                    <button class="adw-button suggested" aria-current="page" disabled>{{ page_num }}</button>
+                {% else %}
+                    <a href="{{ url_for('index', page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                {% endif %}
+            {% elif loop.index != 1 and loop.index != pagination.pages + 2 %}
+                 <button class="adw-button flat" disabled style="pointer-events: none;">&hellip;</button>
+            {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+            <a href="{{ url_for('index', page=pagination.next_num) }}" class="adw-button">
+                <span class="adw-icon icon-actions-go-next-symbolic"></span>
+            </a>
+        {% else %}
+            <button class="adw-button" disabled><span class="adw-icon icon-actions-go-next-symbolic"></span></button>
+        {% endif %}
+    </div>
 </nav>
 {% endif %}
 {% endblock %}
