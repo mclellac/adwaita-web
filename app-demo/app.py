@@ -1274,6 +1274,16 @@ def create_app(config_overrides=None):
             flash("Error loading comments for this profile.", "danger")
             comments_pagination = None
 
+        if user_profile.profile_photo_url:
+            try:
+                generated_photo_url = url_for('static', filename=user_profile.profile_photo_url, _external=False) # Keep it relative for typical use
+                _app.logger.info(f"Profile page for {user_profile.username}: Stored profile_photo_url: '{user_profile.profile_photo_url}'")
+                _app.logger.info(f"Profile page for {user_profile.username}: Generated static URL for photo: '{generated_photo_url}'")
+            except Exception as e_url_for:
+                _app.logger.error(f"Error generating URL for profile photo '{user_profile.profile_photo_url}': {e_url_for}")
+        else:
+            _app.logger.info(f"Profile page for {user_profile.username}: No profile_photo_url stored.")
+
         _app.logger.info(
             f"{datetime.now(timezone.utc).isoformat()} "
             f"[ROUTE_RENDER_DEBUG] {request.path} - Before render_template"
