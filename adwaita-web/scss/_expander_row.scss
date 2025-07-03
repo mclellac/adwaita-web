@@ -54,10 +54,24 @@
     // Let's keep a bottom border for now, assuming it's a general container.
     border-bottom: var(--border-width) solid var(--borders-color);
 
-    display: none; // Hidden by default
+    // Animation styles
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height var(--animation-duration-short, 0.2s) var(--animation-ease-out-sine, ease-out),
+                padding-top var(--animation-duration-short, 0.2s) var(--animation-ease-out-sine, ease-out),
+                padding-bottom var(--animation-duration-short, 0.2s) var(--animation-ease-out-sine, ease-out),
+                opacity var(--animation-duration-short, 0.15s) var(--animation-ease-out-sine, ease-out);
+    // Adjust padding to 0 when collapsed, and restore when visible
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+
 
     &.visible { // Class added by JS when expanded
-      display: block;
+      opacity: 1;
+      // max-height is set by JS to content.scrollHeight
+      padding-top: var(--spacing-m) !important; // Restore padding
+      padding-bottom: var(--spacing-m) !important; // Restore padding
     }
 
     // If the expander row is the last child in a listbox, its content area's bottom border

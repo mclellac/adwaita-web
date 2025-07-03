@@ -8,26 +8,15 @@
     <style>
         /* Basic Reset & Document Setup */
         html { scroll-behavior: smooth; }
-        :root { /* Light theme fallbacks for dialog if not in adwaita-skin.css */
-            --dialog-bg-color: var(--window-bg-color, #ffffff);
-            --dialog-backdrop-color: rgba(0,0,0,0.4);
-            --dialog-box-shadow: 0px 4px 12px rgba(0,0,0,0.15), 0px 0px 2px rgba(0,0,0,0.1);
-            --z-index-dialog: 1050;
-            --z-index-dialog-backdrop: 1040;
-
+        :root {
             /* Adwaita Switch variables (Light Theme) - based on typical Adwaita */
+            /* These are here as they might not be in the main adwaita-skin.css if _switch.scss uses vars not globally defined */
             --switch-knob-bg-color: #ffffff;
             --switch-slider-off-bg-color: #9a9996; /* adw-light-5 */
-            /* --switch-slider-disabled-off-bg-color is usually a variant of button-disabled-bg */
-            /* --switch-knob-disabled-bg-color is usually a variant of button-disabled-fg */
         }
-        :root.theme-dark { /* Dark theme fallbacks for dialog */
-            --dialog-bg-color: var(--window-bg-color, #242424);
-            --dialog-backdrop-color: rgba(0,0,0,0.5);
-            --dialog-box-shadow: 0px 4px 12px rgba(0,0,0,0.3), 0px 0px 2px rgba(0,0,0,0.25);
-
+        :root.theme-dark {
             /* Adwaita Switch variables (Dark Theme) */
-            --switch-knob-bg-color: #242424; /* Knob often matches window bg in dark */
+            --switch-knob-bg-color: #242424;
             --switch-slider-off-bg-color: #5e5c64; /* adw-dark-2 */
         }
         body {
@@ -718,7 +707,7 @@
             <h2 class="adw-label title-2">Banners</h2>
             <p class="adw-label body">Click buttons to show/hide a banner. This is a custom JS implementation for demo.</p>
 
-            <div class="adw-banner" id="demo-banner" style="display: none; margin-bottom: var(--spacing-m);">
+            <div class="adw-banner" id="demo-banner" style="position: relative; display: none; margin-bottom: var(--spacing-m); width: 100%;">
                 <span class="adw-banner-title" id="demo-banner-title">This is an informational banner.</span>
                 <div class="adw-banner-button-group">
                     <button class="adw-button flat" id="demo-banner-action-btn">Action</button>
@@ -1023,14 +1012,29 @@
                     const toggleExpander = () => {
                         const isExpanded = header.classList.toggle('expanded');
                         content.classList.toggle('visible', isExpanded);
-                        /* For CSS transition with max-height:
-                        if (isExpanded) content.style.maxHeight = content.scrollHeight + "px";
-                        else content.style.maxHeight = null; */
+                        if (isExpanded) {
+                            content.style.maxHeight = content.scrollHeight + "px";
+                            // Recalculate after a short delay if content loads asynchronously or images affect scrollHeight
+                            setTimeout(() => {
+                                if (header.classList.contains('expanded')) { // Check if still expanded
+                                   content.style.maxHeight = content.scrollHeight + "px";
+                                }
+                            }, 100); // Adjust delay as needed
+                        } else {
+                            content.style.maxHeight = "0px"; // Explicitly set to 0px for transition out
+                        }
                     };
                     header.addEventListener('click', toggleExpander);
-                    if (header.classList.contains('expanded')) { // Initialize if already expanded
+
+                    // Initialize based on if header already has 'expanded'
+                    if (header.classList.contains('expanded')) {
                         content.classList.add('visible');
-                        /* if (content.scrollHeight > 0) content.style.maxHeight = content.scrollHeight + "px"; */
+                        // Set initial maxHeight after a very short delay to allow rendering for scrollHeight calculation
+                        setTimeout(() => {
+                             if (content.classList.contains('visible')) content.style.maxHeight = content.scrollHeight + "px";
+                        }, 50);
+                    } else {
+                        content.style.maxHeight = "0px"; // Ensure it's collapsed initially
                     }
                 }
             });
