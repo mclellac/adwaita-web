@@ -29,13 +29,24 @@
                 </div>
 
                 {# Posts Per Page #}
-                <div class="adw-entry-row {{ 'has-error' if form.posts_per_page.errors else '' }}">
-                    <label for="{{ form.posts_per_page.id or 'posts_per_page_input' }}" class="adw-entry-row-title">{{ form.posts_per_page.label.text }}</label>
-                    <input type="number" id="{{ form.posts_per_page.id or 'posts_per_page_input' }}" name="{{ form.posts_per_page.name }}" value="{{ form.posts_per_page.data or '' }}" class="adw-entry adw-entry-row-entry" min="1">
-                     {% if form.posts_per_page.errors %}
-                        <span class="adw-label caption error-text adw-entry-row-subtitle">{{ form.posts_per_page.errors|join(' ') }}</span>
-                    {% endif %}
+                <adw-spin-row title="{{ form.posts_per_page.label.text }}"
+                              id="{{ form.posts_per_page.id or 'posts_per_page_input' }}"
+                              name="{{ form.posts_per_page.name }}"
+                              value="{{ form.posts_per_page.data or '5' }}"
+                              min="1"
+                              max="100"
+                              step="1"
+                              subtitle="Number of posts to display per page."
+                              class="{{ 'has-error' if form.posts_per_page.errors else '' }}">
+                </adw-spin-row>
+                {% if form.posts_per_page.errors %}
+                {# AdwSpinRow doesn't have a built-in error display slot like adw-entry-row's subtitle typically.
+                   We might need a separate row for errors or rely on flashed messages.
+                   For now, placing it below, though this might not align perfectly with HIG. #}
+                <div class="adw-row form-field-error" style="padding-left: var(--spacing-m);">
+                    <span class="adw-label caption error-text">{{ form.posts_per_page.errors|join(' ') }}</span>
                 </div>
+                {% endif %}
 
                 {# Allow New User Registrations #}
                 <div class="adw-switch-row {{ 'has-error' if form.allow_registrations.errors else '' }}">

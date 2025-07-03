@@ -1,0 +1,107 @@
+// SCSS for Symbolic Icons
+
+// Base styles for icons using mask-image are in .adw-icon
+// This file defines specific icons by mapping class names to SVG files.
+
+// Common properties for masked icons
+%symbolic-icon-base {
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  background-color: currentColor; // This colors the icon
+  // width and height are typically 1em from .adw-icon, mask-size can ensure full coverage
+  -webkit-mask-size: contain; // Or '100% 100%' or 'cover' depending on desired effect
+  mask-size: contain;
+}
+
+// Define specific icons
+// The path is relative to the final CSS file location (app-demo/static/css/)
+// which means we go up one level then into data/
+$icon-base-path: '../data/icons/symbolic/';
+
+.icon-actions-go-next-symbolic {
+  @extend %symbolic-icon-base;
+  -webkit-mask-image: url($icon-base-path + 'go-next-symbolic.svg');
+  mask-image: url($icon-base-path + 'go-next-symbolic.svg');
+}
+
+.icon-actions-go-previous-symbolic {
+  @extend %symbolic-icon-base;
+  -webkit-mask-image: url($icon-base-path + 'go-previous-symbolic.svg');
+  mask-image: url($icon-base-path + 'go-previous-symbolic.svg');
+}
+
+.icon-actions-open-menu-symbolic {
+  @extend %symbolic-icon-base;
+  -webkit-mask-image: url($icon-base-path + 'open-menu-symbolic.svg');
+  mask-image: url($icon-base-path + 'open-menu-symbolic.svg');
+}
+
+.icon-actions-system-search-symbolic {
+  @extend %symbolic-icon-base;
+  -webkit-mask-image: url($icon-base-path + 'system-search-symbolic.svg');
+  mask-image: url($icon-base-path + 'system-search-symbolic.svg');
+}
+
+.icon-actions-document-new-symbolic {
+  @extend %symbolic-icon-base;
+  -webkit-mask-image: url($icon-base-path + 'document-new-symbolic.svg');
+  mask-image: url($icon-base-path + 'document-new-symbolic.svg');
+}
+
+// Add more icons as needed by reviewing templates...
+// Examples:
+.icon-content-home-symbolic { // Placeholder, check if actually used
+  @extend %symbolic-icon-base;
+  -webkit-mask-image: url($icon-base-path + 'go-home-symbolic.svg'); // Assuming go-home-symbolic.svg exists
+  mask-image: url($icon-base-path + 'go-home-symbolic.svg');
+}
+
+.icon-actions-help-about-symbolic { // Placeholder
+  @extend %symbolic-icon-base;
+  -webkit-mask-image: url($icon-base-path + 'help-about-symbolic.svg');
+  mask-image: url($icon-base-path + 'help-about-symbolic.svg');
+}
+
+.icon-emblem-web-symbolic { // Placeholder
+  @extend %symbolic-icon-base;
+  -webkit-mask-image: url($icon-base-path + 'emblem-web-symbolic.svg');
+  mask-image: url($icon-base-path + 'emblem-web-symbolic.svg');
+}
+
+.icon-content-message-symbolic { // Used in profile.html for no comments
+    @extend %symbolic-icon-base;
+    -webkit-mask-image: url($icon-base-path + 'mail-unread-symbolic.svg'); // Example, actual might differ
+    mask-image: url($icon-base-path + 'mail-unread-symbolic.svg');
+}
+
+.icon-system-search-symbolic { // Used in search_results.html status page
+    @extend %symbolic-icon-base;
+    -webkit-mask-image: url($icon-base-path + 'system-search-symbolic.svg');
+    mask-image: url($icon-base-path + 'system-search-symbolic.svg');
+}
+
+.icon-edit-find-symbolic { // Used in search_results.html status page
+    @extend %symbolic-icon-base;
+    -webkit-mask-image: url($icon-base-path + 'edit-find-symbolic.svg');
+    mask-image: url($icon-base-path + 'edit-find-symbolic.svg');
+}
+// It's important that the SVG filenames here match exactly what's in adwaita-web/data/icons/symbolic/
+// and that these SVGs are suitable for masking (single color, good contrast).
+// Some icons seen in templates might be from a different set or need different names.
+// E.g., 'icon-ui-dashboard-symbolic', 'icon-ui-contact-symbolic' - these names might not map directly to files.
+// For now, I've added a few common ones. More can be added as identified.
+
+// A more robust system might involve a SASS list or map of icon names to filenames.
+// Example of icons used in status pages:
+.icon-empty-symbolic { // Used in posts_by_category.html status page
+    @extend %symbolic-icon-base;
+    -webkit-mask-image: url($icon-base-path + 'dialog-question-symbolic.svg'); // Example, actual might differ
+    mask-image: url($icon-base-path + 'dialog-question-symbolic.svg');
+}
+.icon-bookmark-new-symbolic { // Used in posts_by_tag.html status page
+    @extend %symbolic-icon-base;
+    -webkit-mask-image: url($icon-base-path + 'bookmark-new-symbolic.svg');
+    mask-image: url($icon-base-path + 'bookmark-new-symbolic.svg');
+}

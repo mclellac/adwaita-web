@@ -280,8 +280,8 @@ $accent-color-definitions-map: (
   --list-row-hover-bg-color: #{rgba($adw-dark-5, 0.04)}; // Similar to flat button hover
   --list-row-active-bg-color: #{rgba($adw-dark-5, 0.08)}; // Similar to flat button active
 
-  --document-font-family: 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --monospace-font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  --document-font-family: 'AdwaitaSansWeb', 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --monospace-font-family: 'AdwaitaMonoWeb', 'Monaco', 'Menlo', 'Courier New', monospace;
   --font-size-base: #{$font-size-base-val};
   --font-size-small: #{math.round($font-size-base-val * 0.8)};
   --font-size-large: #{math.round($font-size-base-val * 1.2)};

@@ -582,8 +582,9 @@ def create_app(config_overrides=None):
         else:
             _app.logger.debug(f"Viewing published post '{post.title}' (ID: {post_id}).")
         form = CommentForm()
-        delete_form = DeleteCommentForm()
-        if request.method == 'POST':
+        delete_comment_form = DeleteCommentForm() # Renamed for clarity
+        delete_post_form = DeletePostForm() # For deleting the post itself
+        if request.method == 'POST': # This block is for comment submission
             _app.logger.debug(
                 f"[FORM_SUBMISSION] Comment form submitted for post {post_id}. "
                 f"Data: {request.form}"
@@ -690,7 +691,9 @@ def create_app(config_overrides=None):
         )
         rendered_template = render_template(
             'post.html', post=post, form=form, comments=comments,
-            delete_form=delete_form, related_posts=related_posts
+            delete_comment_form=delete_comment_form, # Pass renamed form
+            delete_post_form=delete_post_form,   # Pass new form for post deletion
+            related_posts=related_posts
         )
         _app.logger.info(
             f"{datetime.now(timezone.utc).isoformat()} "
@@ -976,13 +979,30 @@ def create_app(config_overrides=None):
             f"User {current_user.username} attempting to delete post '{post.title}' "
             f"(ID: {post_id})."
         )
-        if post.author != current_user:
+        if not (post.author == current_user or current_user.is_admin):
             _app.logger.warning(
                 f"User {current_user.username} not authorized to delete post "
-                f"{post_id} (Author: {post.author.username}). Aborting with 403."
+                f"{post_id} (Author: {post.author.username}, Admin: {current_user.is_admin}). Aborting with 403."
             )
             abort(403)
         try:
+            # Manually delete associated comment flags first to avoid FK issues if CommentFlag -> Comment is not cascaded
+            flags_to_delete = CommentFlag.query.join(Comment).filter(Comment.post_id == post.id).all()
+            for flag in flags_to_delete:
+                db.session.delete(flag)
+            _app.logger.debug(f"Deleted {len(flags_to_delete)} flags associated with comments of post {post_id}.")
+
+            # Manually delete associated comments
+            # Fetch all comments regardless of parent_id for this post
+            all_comments_on_post = Comment.query.filter_by(post_id=post.id).all()
+            for comment in all_comments_on_post:
+                db.session.delete(comment)
+            _app.logger.debug(f"Deleted {len(all_comments_on_post)} comments associated with post {post_id}.")
+
+            # Post categories and tags are handled by association tables, SQLAlchemy should manage these deletions.
+            # If not, they might need explicit removal from post.categories and post.tags lists before deleting post.
+            # For now, assuming SQLAlchemy handles association table records.
+
             db.session.delete(post)
             db.session.commit()
             _app.logger.info(
