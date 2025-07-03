@@ -499,3 +499,23 @@ $app-sidebar-breakpoint: 768px; // Breakpoint for mobile/tablet view
         // No specific width change needed if sidebar is position:fixed
     }
 }
+
+// Toast Overlay Container
+.adw-toast-overlay {
+    position: fixed;
+    bottom: var(--spacing-l, 24px); // Positioned at the bottom
+    left: 50%;
+    transform: translateX(-50%); // Centered horizontally
+    z-index: var(--z-index-toast-overlay, 1500); // Ensure it's above most other content
+
+    display: flex;
+    flex-direction: column-reverse; // Toasts stack upwards from the bottom
+    gap: var(--spacing-s, 12px); // Spacing between toasts
+    align-items: center; // Center toasts horizontally if they have different widths
+
+    // Ensure it doesn't capture pointer events when empty
+    pointer-events: none;
+    & > .adw-toast {
+        pointer-events: auto; // Individual toasts should be interactive
+    }
+}

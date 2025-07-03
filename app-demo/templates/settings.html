@@ -102,14 +102,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(response => response.json())
                     .then(data => {
                         console.log('Theme save response:', data);
-                        if (data.message && data.status !== 'success') alert(data.message); // Show alert only on error
                         if (data.status === 'success') {
-                            location.reload();
+                            if (window.Adw && Adw.createToast) {
+                                Adw.createToast(data.message || 'Theme saved! Reloading...', { timeout: 2000 });
+                            }
+                            // Reload after a short delay to let user see toast
+                            setTimeout(() => location.reload(), 500);
+                        } else {
+                            if (window.Adw && Adw.createToast) {
+                                Adw.createToast(data.message || 'Failed to save theme.', { type: 'error' });
+                            } else {
+                                alert(data.message || 'Failed to save theme.');
+                            }
                         }
                     })
                     .catch(error => {
                         console.error('Error saving theme:', error);
-                        alert('Error saving theme preference.');
+                        if (window.Adw && Adw.createToast) {
+                            Adw.createToast('Error saving theme preference.', { type: 'error' });
+                        } else {
+                            alert('Error saving theme preference.');
+                        }
                     });
                 }
             });
@@ -135,14 +148,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(response => response.json())
                     .then(data => {
                         console.log('Accent save response:', data);
-                        if (data.message && data.status !== 'success') alert(data.message);
                         if (data.status === 'success') {
-                            location.reload();
+                            if (window.Adw && Adw.createToast) {
+                                Adw.createToast(data.message || 'Accent color saved! Reloading...', { timeout: 2000 });
+                            }
+                             // Reload after a short delay to let user see toast
+                            setTimeout(() => location.reload(), 500);
+                        } else {
+                            if (window.Adw && Adw.createToast) {
+                                Adw.createToast(data.message || 'Failed to save accent color.', { type: 'error' });
+                            } else {
+                                alert(data.message || 'Failed to save accent color.');
+                            }
                         }
                     })
                     .catch(error => {
                         console.error('Error saving accent color:', error);
-                        alert('Error saving accent color preference.');
+                        if (window.Adw && Adw.createToast) {
+                            Adw.createToast('Error saving accent color preference.', { type: 'error' });
+                        } else {
+                            alert('Error saving accent color preference.');
+                        }
                     });
                 }
             });

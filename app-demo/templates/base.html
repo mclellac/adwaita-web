@@ -177,7 +177,12 @@
     {% block scripts %}
     {# Theme and accent handling script is above, this is for other scripts #}
     <script src="{{ url_for('static', filename='js/app-layout.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/toast.js') }}" defer></script>
     {% endblock %}
+
+    <div id="adw-toast-overlay" class="adw-toast-overlay">
+        {# Toasts will be dynamically added here by JavaScript #}
+    </div>
     <div class="app-sidebar-backdrop"></div> {# Added for mobile sidebar overlay #}
 </body>
 </html>
