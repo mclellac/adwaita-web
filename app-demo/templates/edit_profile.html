@@ -2,6 +2,8 @@
 
 {% block title %}Edit Profile{% endblock %}
 
+{% block header_title %}Edit Your Profile{% endblock %}
+
 {% block styles %}
 {{ super() }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/2.0.0/cropper.min.css" integrity="sha512-hmRL32LGLwX7LqH1LXN6q6iI1Tw0KzC/a7h1r71tY9K1L34b4KcvMvP5p3+8sLp4sL/zCgU9XwXg_bsP21q9g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -10,9 +12,7 @@
 {% block content %}
 <div class="adw-clamp content-clamp profile-edit-clamp">
   <div class="adw-preferences-page" role="main">
-    <header class="adw-preferences-page__header">
-        <h1 class="adw-preferences-page__title">Edit Your Profile</h1>
-    </header>
+    {# Removed header from content as it's now in the main header bar #}
     <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data" id="edit-profile-form">
       {{ form.hidden_tag() }} {# CSRF token #}
 
@@ -39,11 +39,11 @@
             {# Bio/Profile Info - Using a simple textarea within its own group-like structure or just a styled div #}
             {# For Adwaita styling, textareas might not have a specific "row" but rather be part of a group content #}
             <div class="adw-action-row"> {# Using action row for layout, can be a generic div too #}
-                 <div class="adw-action-row__text" style="width:100%;">
+                 <div class="adw-action-row__text" style="width:100%;"> {# width:100% on text content of row might be aggressive, check if needed #}
                     <label for="{{ form.profile_info.id or 'profile_info_input' }}" class="adw-action-row__title">{{ form.profile_info.label.text }}</label>
                     <span class="adw-action-row__subtitle">Tell us a bit about yourself. Supports basic HTML.</span>
                      {% if form.profile_info.errors %}<div class="error-text form-field-error adw-action-row__subtitle">{{ form.profile_info.errors|join(' ') }}</div>{% endif %}
-                    <textarea name="{{ form.profile_info.name }}" id="{{ form.profile_info.id or 'profile_info_input' }}" class="adw-textarea content-textarea profile-bio-textarea" rows="6" style="margin-top: var(--spacing-xs); width: 100%;">{{ form.profile_info.data or '' }}</textarea>
+                    <textarea name="{{ form.profile_info.name }}" id="{{ form.profile_info.id or 'profile_info_input' }}" class="adw-textarea content-textarea profile-bio-textarea" rows="6">{{ form.profile_info.data or '' }}</textarea>
                  </div>
             </div>
 
@@ -93,23 +93,23 @@
                 <span class="adw-action-row__title">{{ form.profile_photo.label.text }}</span>
                 <span class="adw-action-row__subtitle">Upload a new photo. Max 2MB. Recommended: Square aspect ratio.</span>
             </div>
-            <div class="adw-action-row-suffix profile-photo-widget-container" style="display: flex; flex-direction: column; align-items: flex-end; gap: var(--spacing-s);">
+            <div class="adw-action-row-suffix profile-photo-widget-container">
               <button type="button" class="adw-button" id="upload-photo-button">Choose Photo</button>
-              {{ form.profile_photo(id=(form.profile_photo.id or 'profile_photo_field'), class="hidden-file-input", style="display:none;") }}
+              {{ form.profile_photo(id=(form.profile_photo.id or 'profile_photo_field'), class="hidden-file-input") }}
 
-              <div class="cropper-container-wrapper" id="cropper-wrapper" style="width: 150px; height: 150px; {{ 'display:none;' if not (form.profile_photo.data or image_to_crop_src) else '' }}">
+              <div class="cropper-container-wrapper {{ 'hidden' if not (form.profile_photo.data or image_to_crop_src) else '' }}" id="cropper-wrapper">
                 <img id="image-to-crop" src="#" alt="Image to crop" style="max-width: 100%; max-height: 100%;">
               </div>
 
               {% if user_profile and user_profile.profile_photo_url %}
-              <div class="current-photo-display" style="display: flex; align-items: center; gap: var(--spacing-xs);">
+              <div class="current-photo-display">
                 <span class="adw-label caption">Current:</span>
                 <span class="adw-avatar size-large">
                     <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ current_user.username }} avatar" class="adw-avatar__image">
                 </span>
               </div>
               {% elif default_avatar_url %}
-              <div class="current-photo-display" style="display: flex; align-items: center; gap: var(--spacing-xs);">
+              <div class="current-photo-display">
                 <span class="adw-label caption">Default:</span>
                  <span class="adw-avatar size-large">
                     <img src="{{ default_avatar_url }}" alt="Default avatar" class="adw-avatar__image">
@@ -126,7 +126,7 @@
         </div>
       </section>
 
-      <div class="form-actions-container" style="display: flex; justify-content: flex-end; gap: var(--spacing-s); padding-top: var(--spacing-l);">
+      <div class="edit-profile-form-actions">
             <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat">Cancel</a>
             <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text if form.submit.label else 'Update Profile' }}</button>
       </div>

@@ -53,22 +53,7 @@
 
 <header class="adw-header-bar">
     <div class="adw-header-bar__start">
-        <a href="{{ url_for('index') }}" class="adw-header-bar__title site-title-link">Blog Demo</a>
-    </div>
-    <div class="adw-header-bar__center">
-        {# Optionally, a view-specific title could be injected here using a block #}
-        {% block header_title %}{% endblock %}
-    </div>
-    <div class="adw-header-bar__end">
-        {% block header_actions_start %}{% endblock %} {# For buttons like "Edit Profile" #}
-        <form action="{{ url_for('search_results') }}" method="GET" class="header-search-form">
-            <input type="search" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}" class="adw-entry">
-            <button type="submit" class="adw-button flat circular" aria-label="Search">
-                <span class="adw-icon icon-actions-system-search-symbolic"></span>
-            </button>
-        </form>
-
-        {# Header items - simplified as per request #}
+        {# Profile button moves to start for authenticated users #}
         {% if current_user.is_authenticated %}
             <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat circular profile-avatar-button" title="View Profile">
                 {% if current_user.profile_photo_url %}
@@ -83,6 +68,30 @@
                     </span>
                 {% endif %}
             </a>
+        {% else %}
+            {# Placeholder if needed when user is not authenticated, or leave start empty #}
+            {# For example, a site icon could go here, but Home is in sidebar #}
+            {# <a href="{{ url_for('index') }}" class="adw-button flat circular"><span class="adw-icon icon-emblem-web-symbolic"></span></a> #}
+        {% endif %}
+        {# Site title link removed from here, will be handled by centered title logic #}
+    </div>
+    <div class="adw-header-bar__center adw-header-bar-center-box"> {# Added adw-header-bar-center-box class #}
+        <h1 class="adw-header-bar__title">
+            {% block header_title %}Blog Demo{% endblock %} {# Default centered title is Blog Demo #}
+        </h1>
+    </div>
+    <div class="adw-header-bar__end">
+        {% block header_actions_start %}{% endblock %} {# For buttons like "Edit Profile", keep this for contextual actions #}
+
+        {# Search, Settings, Login/Logout remain at the end #}
+        <form action="{{ url_for('search_results') }}" method="GET" class="header-search-form">
+            <input type="search" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}" class="adw-entry">
+            <button type="submit" class="adw-button flat circular" aria-label="Search">
+                <span class="adw-icon icon-actions-system-search-symbolic"></span>
+            </button>
+        </form>
+
+        {% if current_user.is_authenticated %}
             <a href="{{ url_for('settings_page') }}" class="adw-button flat" title="Settings">Settings</a>
             <a href="{{ url_for('logout') }}" class="adw-button flat">Logout</a>
         {% else %}

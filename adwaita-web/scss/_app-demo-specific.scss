@@ -407,3 +407,41 @@ body {
     // For now, assume blue is the same, just perceived differently.
 }
 // TODO: Add specific RGBs for each named accent color if needed for sidebar selection state.
+
+// --- Styles from edit_profile.html ---
+.profile-bio-textarea { // Applied to the textarea for user's biography
+    margin-top: var(--spacing-xs);
+    width: 100%; // Make textarea take full width of its container
+}
+
+.profile-photo-widget-container { // Container for photo upload button and cropper preview
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; // Align items to the right (end of the row)
+    gap: var(--spacing-s);
+}
+
+.hidden-file-input { // For the actual <input type="file">
+    display: none;
+}
+
+.cropper-container-wrapper { // Wrapper for the Cropper.js preview area
+    width: 150px;
+    height: 150px;
+    // Conditional display (hidden/shown by JS) is handled by adding/removing a 'hidden' class or direct style by JS
+    &.hidden { // Add this class via JS to hide it initially or when no image
+        display: none;
+    }
+}
+
+.current-photo-display { // Container for showing current avatar next to upload options
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.edit-profile-form-actions { // Specific for the action buttons on the edit profile form
+    @extend .form-actions-container; // Inherits display:flex, gap, margin-top
+    @extend .form-actions-end;       // Inherits justify-content: flex-end
+    padding-top: var(--spacing-l);   // Adds specific padding needed for this form
+}

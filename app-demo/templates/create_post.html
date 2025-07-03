@@ -2,12 +2,12 @@
 
 {% block title %}Create New Post{% endblock %}
 
+{% block header_title %}Create New Post{% endblock %}
+
 {% block content %}
 <div class="form-container"> {# Replaced adw-clamp and content-clamp #}
   <div class="adw-preferences-page"> {# This can be kept for overall page structure if desired #}
-    <header class="adw-preferences-page__header form-page-header">
-      <h1 class="adw-title-1">Create New Post</h1> {# Changed to adw-title-1 #}
-    </header>
+    {# Removed header from content as it's now in the main header bar #}
     <form method="POST" action="{{ url_for('create_post') }}" novalidate class="stacked-form">
         {{ form.hidden_tag() }} {# CSRF token #}
 

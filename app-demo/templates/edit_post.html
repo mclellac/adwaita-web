@@ -2,12 +2,12 @@
 
 {% block title %}Edit Post: {{ post.title }}{% endblock %}
 
+{% block header_title %}Edit Post: {{ post.title }}{% endblock %}
+
 {% block content %}
 <div class="adw-clamp content-clamp">
   <div class="adw-preferences-page">
-    <header class="adw-preferences-page__header">
-      <h1 class="adw-preferences-page__title">Edit Post: {{ post.title }}</h1>
-    </header>
+    {# Removed header from content as it's now in the main header bar #}
     <form method="POST" action="{{ url_for('edit_post', post_id=post.id) }}" novalidate>
         {{ form.hidden_tag() }} {# CSRF token #}
 
