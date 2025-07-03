@@ -9,6 +9,7 @@ greenlet==3.2.3
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
+Markdown>=3.3 # For Markdown support
 pillow==11.2.1
 psycopg2-binary==2.9.10
 SQLAlchemy==2.0.41

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{% block title %}My Libadwaita Blog{% endblock %}</title>
+    <title>{% block page_title %}{% endblock %}{% if self.page_title() %} - {% endif %}{{ site_settings.get('site_title', 'My Libadwaita Blog') }}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-skin.css') }}">
 </head>
@@ -80,7 +80,7 @@
     </div>
     <div class="adw-header-bar__center adw-header-bar-center-box"> {# Added adw-header-bar-center-box class #}
         <h1 class="adw-header-bar__title">
-            {% block header_title %}Blog Demo{% endblock %} {# Default centered title is Blog Demo #}
+            {% block header_title %}{{ site_settings.get('site_title', 'Blog Demo') }}{% endblock %}
         </h1>
     </div>
     <div class="adw-header-bar__end">
@@ -121,6 +121,14 @@
                 {# <span class="adw-action-row-prefix"><span class="adw-icon icon-ui-dashboard-symbolic"></span></span> #}
                 <span class="adw-action-row-title">Dashboard</span>
             </a>
+            {% if current_user.is_admin %}
+            <a href="{{ url_for('admin_view_flags') }}" class="adw-action-row activatable">
+                <span class="adw-action-row-title">Review Flags</span>
+            </a>
+            <a href="{{ url_for('admin_site_settings') }}" class="adw-action-row activatable">
+                <span class="adw-action-row-title">Site Settings</span>
+            </a>
+            {% endif %}
             {% endif %}
             <a href="{{ url_for('about_page') }}" class="adw-action-row activatable">
                 {# <span class="adw-action-row-prefix"><span class="adw-icon icon-actions-help-about-symbolic"></span></span> #}
