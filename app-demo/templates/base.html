@@ -177,7 +177,7 @@
     {% block scripts %}
     {# Theme and accent handling script is above, this is for other scripts #}
     <script src="{{ url_for('static', filename='js/app-layout.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/toast.js') }}" defer></script>
+    {# toast.js will be included via the build process of adwaita-web's JS #}
     {% endblock %}
 
     <div id="adw-toast-overlay" class="adw-toast-overlay">

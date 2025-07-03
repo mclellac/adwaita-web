@@ -88,18 +88,21 @@
             <button id="open-delete-dialog-btn" class="adw-button destructive-action">Delete Post</button>
         </div>
 
-        <adw-dialog id="delete-confirm-dialog" title="Confirm Deletion">
-            <div slot="content">
+        <div class="adw-dialog" id="delete-confirm-dialog" role="alertdialog" aria-labelledby="delete-dialog-title" aria-modal="true" hidden>
+            <header class="adw-header-bar adw-dialog__header">
+                 <h2 class="adw-header-bar__title" id="delete-dialog-title">Confirm Deletion</h2>
+            </header>
+            <div class="adw-dialog__content">
                 <p class="adw-label body">Are you sure you want to delete this post? This action cannot be undone.</p>
             </div>
-            <div slot="buttons">
+            <footer class="adw-dialog__actions">
                 <button id="cancel-delete-btn" class="adw-button flat">Cancel</button>
-                <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form" class="delete-post-form-inline" style="display: inline;">
+                <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form" class="delete-post-form-inline">
                     {{ csrf_token() }} {# Flask-WTF CSRF token #}
                     <button id="confirm-delete-btn" type="submit" class="adw-button destructive-action">Delete</button>
                 </form>
-            </div>
-        </adw-dialog>
+            </footer>
+        </div>
         {% endif %}
     </article>
 
@@ -110,7 +113,7 @@
         {% if comments %}
             <div class="adw-list-box comments-list">
                 {% for comment in comments %}
-                <article class="adw-card comment-card comment-item" data-comment-id="{{ comment.id }}"> {# Added comment-item and data-comment-id #}
+                <article class="adw-card comment-card"> {# Changed div to article, added adw-card #}
                     <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
                         <span class="adw-avatar size-medium">
                            {% set comment_avatar = url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else url_for('static', filename='img/default_avatar.png') %}
@@ -123,10 +126,9 @@
                     </header>
                     <p class="comment-text styled-text-content">{{ comment.text }}</p> {# Added styled-text-content #}
                     {% if current_user.is_authenticated and (comment.author == current_user or post.author == current_user) %}
-                        {# Removed onsubmit, added class and data attribute for JS targeting #}
-                        <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" class="comment-delete-form-container delete-comment-form" data-comment-id="{{ comment.id }}">
+                        <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}" onsubmit="return confirm('Are you sure you want to delete this comment?');" class="comment-delete-form-container">
                             {{ delete_form.hidden_tag() }} {# Assuming delete_form is passed for CSRF #}
-                            <button type="button" class="adw-button destructive-action compact open-delete-comment-dialog-btn" data-comment-id="{{ comment.id }}">Delete Comment</button>
+                            <button type="submit" class="adw-button destructive-action compact">Delete Comment</button>
                         </form>
                     {% endif %}
                 </article>
@@ -136,20 +138,6 @@
             <p class="adw-label body">No comments yet.</p>
         {% endif %}
     </section>
-
-    {# Hidden dialog template for comment deletion, to be cloned by JS #}
-    <template id="delete-comment-dialog-template">
-        <adw-dialog title="Confirm Comment Deletion">
-            <div slot="content">
-                <p class="adw-label body">Are you sure you want to delete this comment? This action cannot be undone.</p>
-            </div>
-            <div slot="buttons">
-                <button class="adw-button flat dialog-cancel-btn">Cancel</button>
-                <button class="adw-button destructive-action dialog-confirm-delete-comment-btn">Delete</button>
-            </div>
-        </adw-dialog>
-    </template>
-
 
     {% if current_user.is_authenticated %}
     <section class="comment-form-section adw-list-box form-section" aria-labelledby="leave-comment-heading">
@@ -203,66 +191,56 @@
 </div>
 
 <script>
+// Delete post dialog script
 document.addEventListener('DOMContentLoaded', () => {
-    // Post Deletion Dialog
-    const deletePostDialogEl = document.getElementById('delete-confirm-dialog');
-    const openDeletePostDialogBtn = document.getElementById('open-delete-dialog-btn');
-    const cancelDeletePostBtn = document.getElementById('cancel-delete-btn');
-    // const confirmDeletePostBtn = document.getElementById('confirm-delete-btn'); // Form submission handles this
+    const deleteDialogEl = document.getElementById('delete-confirm-dialog');
+    const openDialogBtn = document.getElementById('open-delete-dialog-btn');
+    const cancelBtn = document.getElementById('cancel-delete-btn');
+    const confirmBtn = document.getElementById('confirm-delete-btn'); // Get the confirm button
 
-    if (openDeletePostDialogBtn && deletePostDialogEl) {
-        openDeletePostDialogBtn.addEventListener('click', (event) => {
+    if (openDialogBtn && deleteDialogEl) {
+        openDialogBtn.addEventListener('click', (event) => {
             event.preventDefault();
-            deletePostDialogEl.open();
-        });
-    }
-
-    if (cancelDeletePostBtn && deletePostDialogEl) {
-        cancelDeletePostBtn.addEventListener('click', () => {
-            deletePostDialogEl.close();
-        });
-    }
-    // No special listener for confirmDeletePostBtn needed if it's type="submit" for the form.
-    // The dialog will close on form submission due to page navigation.
-
-    // Comment Deletion Dialogs
-    const commentDeleteDialogTemplate = document.getElementById('delete-comment-dialog-template');
-
-    document.querySelectorAll('.open-delete-comment-dialog-btn').forEach(button => {
-        button.addEventListener('click', function(event) {
-            event.preventDefault();
-            const commentId = this.dataset.commentId;
-            const formToSubmit = document.querySelector(`.delete-comment-form[data-comment-id="${commentId}"]`);
-
-            if (!formToSubmit) {
-                console.error('Could not find delete form for comment ID:', commentId);
-                return;
+            deleteDialogEl.removeAttribute('hidden'); // Show dialog using 'hidden' attribute
+            if (typeof deleteDialogEl.showModal === "function") { // Use <dialog>.showModal() if available
+                // deleteDialogEl.showModal(); // This would be ideal but might not be polyfilled/styled for all browsers without more work
             }
-
-            // Clone the dialog from template
-            const dialogClone = commentDeleteDialogTemplate.content.firstElementChild.cloneNode(true);
-            document.body.appendChild(dialogClone); // Append to body so it can be shown
-
-            // Handle cancel
-            dialogClone.querySelector('.dialog-cancel-btn').addEventListener('click', () => {
-                dialogClone.close();
-                dialogClone.remove(); // Clean up
-            });
-
-            // Handle confirm
-            dialogClone.querySelector('.dialog-confirm-delete-comment-btn').addEventListener('click', () => {
-                formToSubmit.submit(); // Submit the specific form
-                dialogClone.close();
-                dialogClone.remove(); // Clean up (though page will likely reload)
-            });
-
-            dialogClone.addEventListener('close', () => { // Ensure removal on any close type
-                dialogClone.remove();
-            });
-
-            dialogClone.open();
+            // Basic focus management: focus the first focusable element in the dialog
+            const firstFocusable = deleteDialogEl.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (firstFocusable) {
+                firstFocusable.focus();
+            }
         });
-    });
+    }
+
+    if (cancelBtn && deleteDialogEl) {
+        cancelBtn.addEventListener('click', () => {
+            deleteDialogEl.setAttribute('hidden', 'true'); // Hide dialog
+            // if (typeof deleteDialogEl.close === "function") { // For native <dialog>
+            //     deleteDialogEl.close();
+            // }
+        });
+    }
+
+    if (confirmBtn && deleteDialogEl) { // Add event listener for confirm button
+        confirmBtn.addEventListener('click', () => {
+            // This will submit the form. The dialog will disappear on page reload.
+            // If it were an AJAX delete, we'd definitely hide it here:
+            // deleteDialogEl.setAttribute('hidden', 'true');
+        });
+    }
+
+    // Optional: Close dialog on ESC key
+    if (deleteDialogEl) {
+        deleteDialogEl.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                deleteDialogEl.setAttribute('hidden', 'true');
+                // if (typeof deleteDialogEl.close === "function") { // For native <dialog>
+                //    deleteDialogEl.close();
+                // }
+            }
+        });
+    }
 });
 </script>
 {% endblock %}
