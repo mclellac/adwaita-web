@@ -630,6 +630,10 @@ $app-sidebar-breakpoint: 768px; // Breakpoint for mobile/tablet view
 
   .comment-actions {
     // Styles for the container of reply/flag/delete buttons
+    display: flex;
+    justify-content: flex-end; // Right-align items
+    align-items: center;
+    gap: var(--spacing-s); // Consistent gap for action buttons
     border-top: 1px solid var(--divider-color);
     padding-top: var(--spacing-xs);
     margin-top: var(--spacing-s);
