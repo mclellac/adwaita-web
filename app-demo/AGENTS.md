@@ -46,6 +46,16 @@ PostgreSQL uses a file named `pg_hba.conf` to control client authentication.
 
 **To resolve:** Ensure you have set `POSTGRES_PASSWORD` (and other variables as needed) correctly for your PostgreSQL setup. Modifying `pg_hba.conf` on your PostgreSQL server to allow the connection type the application is attempting is an alternative solution but is outside the scope of what this application's code can control.
 
+## Static Assets (CSS, JS)
+
+The `app-demo` application sources its primary CSS (`adwaita-skin.css`) and JavaScript (e.g., `app-layout.js`) from the `adwaita-web` library. These assets are:
+1.  Developed and stored within the `adwaita-web/scss/` and `adwaita-web/js/` directories, respectively.
+2.  Compiled and/or copied into `app-demo/static/` by the `../build-adwaita-web.sh` script.
+
+**Do not directly place or modify source SCSS or JavaScript files in `app-demo/static/css/` or `app-demo/static/js/`.** Such changes will be ignored by `.gitignore` or overwritten by the build process. All styling and JavaScript development should occur within the `adwaita-web` directory.
+
+Refer to the root `AGENTS.md` and `adwaita-web/AGENTS.md` for more details on asset management and the role of `adwaita-web/scss/_app-demo-specific.scss` for styles unique to this application's layout.
+
 ## Adwaita Color Compliance
 
 Please ensure that all UI elements strictly use Adwaita named colors as specified in the [official Adwaita documentation](https://gnome.pages.gitlab.gnome.org/libadwaita/doc/1.5/named-colors.html). Do not use hardcoded hex values or other color names unless they are directly derived from or map to these Adwaita named colors. This applies to SCSS files, HTML templates, and any JavaScript that might manipulate styles.

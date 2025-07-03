@@ -307,6 +307,11 @@ $accent-color-definitions-map: (
   --opacity-disabled: 0.5;
   --focus-ring-width: 2px;
 
+  // RGB versions of key colors for rgba() usage if needed by components
+  --text-color-rgb: 0,0,0; // Default for light theme (black)
+  --accent-color-rgb: 53,132,228; // Default Adwaita blue (from $adw-blue-3)
+  // TODO: Add specific RGBs for each named accent color if needed.
+
   &.theme-dark {
     // Dark Theme Overrides
     --body-bg-color: #{$background-color-dark};
@@ -390,8 +395,13 @@ $accent-color-definitions-map: (
         --accent-fg-color: #{map.get($accent-dark, fg)};
         --accent-bg-hover-color: #{map.get($accent-dark, hover)};
         --accent-bg-active-color: #{map.get($accent-dark, active)};
+        // TODO: Update --accent-color-rgb if $accent-dark has its own RGB definition
       }
     }
+    // RGB versions for dark theme
+    --text-color-rgb: 255,255,255; // Default for dark theme (white)
+    // --accent-color-rgb: ...; // This would need to change if default accent is different in dark
+                                // Or be set by the accent-* loop above if accents have specific RGBs
   }
 
   // Specific accent color variable overrides for light theme (when .accent-color class is present)

@@ -4,7 +4,12 @@ This document provides instructions and guidelines for AI agents (like Jules) wo
 
 ## Overview
 
-`adwaita-skin` is a pure CSS implementation of the Adwaita design language, intended to provide Adwaita styling for standard HTML elements without relying on JavaScript-based web components. It is derived from the `adwaita-web` project.
+`adwaita-skin` (this directory, `adwaita-web`) provides CSS and potentially JavaScript components aiming to implement the Adwaita design language for web applications.
+
+**Directory Structure & Asset Placement:**
+*   **SCSS:** All SASS source files are located in `adwaita-web/scss/`. These are compiled into `adwaita-web/css/adwaita-skin.css` by the build script.
+*   **JavaScript:** Any JavaScript associated with the `adwaita-web` library itself (e.g., for interactive components or demo-specific enhancements like `app-layout.js`) should be placed in `adwaita-web/js/`. These are typically copied to `app-demo/static/js/` by the build script.
+*   **Static Assets:** Icons, fonts, and other static data used by the library are in `adwaita-web/data/` and `adwaita-web/fonts/`.
 
 ## Key Principles
 
