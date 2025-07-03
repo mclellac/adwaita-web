@@ -8,6 +8,28 @@
     <style>
         /* Basic Reset & Document Setup */
         html { scroll-behavior: smooth; }
+        :root { /* Light theme fallbacks for dialog if not in adwaita-skin.css */
+            --dialog-bg-color: var(--window-bg-color, #ffffff);
+            --dialog-backdrop-color: rgba(0,0,0,0.4);
+            --dialog-box-shadow: 0px 4px 12px rgba(0,0,0,0.15), 0px 0px 2px rgba(0,0,0,0.1);
+            --z-index-dialog: 1050;
+            --z-index-dialog-backdrop: 1040;
+
+            /* Adwaita Switch variables (Light Theme) - based on typical Adwaita */
+            --switch-knob-bg-color: #ffffff;
+            --switch-slider-off-bg-color: #9a9996; /* adw-light-5 */
+            /* --switch-slider-disabled-off-bg-color is usually a variant of button-disabled-bg */
+            /* --switch-knob-disabled-bg-color is usually a variant of button-disabled-fg */
+        }
+        :root.theme-dark { /* Dark theme fallbacks for dialog */
+            --dialog-bg-color: var(--window-bg-color, #242424);
+            --dialog-backdrop-color: rgba(0,0,0,0.5);
+            --dialog-box-shadow: 0px 4px 12px rgba(0,0,0,0.3), 0px 0px 2px rgba(0,0,0,0.25);
+
+            /* Adwaita Switch variables (Dark Theme) */
+            --switch-knob-bg-color: #242424; /* Knob often matches window bg in dark */
+            --switch-slider-off-bg-color: #5e5c64; /* adw-dark-2 */
+        }
         body {
             margin: 0;
             display: flex;
@@ -217,7 +239,7 @@
             <button class="adw-button icon-only flat page-sidebar-toggle" id="page-sidebar-toggle" aria-label="Toggle Sidebar" aria-expanded="false">
                 <span class="adw-icon icon-actions-open-menu-symbolic"></span>
             </button>
-            {-- <button class="adw-button icon-only flat" id="header-back-button" aria-label="Back"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button> --}
+            <!-- <button class="adw-button icon-only flat" id="header-back-button" aria-label="Back"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button> -->
         </div>
         <div class="adw-header-bar__center">
             <div>
@@ -226,8 +248,8 @@
             </div>
         </div>
         <div class="adw-header-bar__end">
-            <button class="adw-button flat" id="theme-toggle-button">Toggle Dark</button> {/* Text will be updated by JS */}
-            {-- <button class="adw-button icon-only flat" id="header-menu-button" aria-label="Menu"><span class="adw-icon icon-actions-open-menu-symbolic"></span></button> --}
+            <button class="adw-button flat" id="theme-toggle-button">Toggle Dark</button> <!-- Text will be updated by JS -->
+            <!-- <button class="adw-button icon-only flat" id="header-menu-button" aria-label="Menu"><span class="adw-icon icon-actions-open-menu-symbolic"></span></button> -->
         </div>
     </header>
     <div class="page-sidebar-backdrop" id="page-sidebar-backdrop"></div>
@@ -257,8 +279,8 @@
                 <a href="#controls-section" class="adw-action-row activatable">
                     <span class="adw-action-row__text"><span class="adw-action-row__title">Input Controls</span></span>
                 </a>
-                {-- Placeholder for Entry --}
-                {-- <a href="#entry-section" class="adw-action-row activatable"><span class="adw-action-row__text"><span class="adw-action-row__title">Entry</span></span></a> --}
+                <!-- Placeholder for Entry section if made separate -->
+                <!-- <a href="#entry-section" class="adw-action-row activatable"><span class="adw-action-row__text"><span class="adw-action-row__title">Entry</span></span></a> -->
 
 
                 <div class="adw-label title-4" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-xs); color: var(--text-color-secondary);">Display & Info</div>
@@ -406,7 +428,7 @@
                     <label class="adw-radio-wrapper"><input type="radio" name="my-radio-group" class="adw-radio" value="gamma" disabled> <span class="adw-label">Gamma</span></label>
                 </div>
                 <div class="adw-row" style="align-items: center;">
-                    <span class="adw-label">Spin Button:</span> {# Changed label to span as it's not for an input directly here #}
+                    <span class="adw-label">Spin Button:</span> <!-- Changed label to span as it's not for an input directly here -->
                     <div class="adw-spin-button" id="spin-btn-1-wrapper">
                         <input type="number" id="spin-btn-1-input" class="adw-entry adw-spin-button-entry" value="5" min="0" max="10" step="1">
                         <div class="adw-spin-button-buttons">
@@ -738,9 +760,9 @@
 
             <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Status Page</h3>
             <div class="adw-status-page">
-                <span class="adw-icon icon-status-emblem-ok-symbolic adw-status-page-icon" style="font-size: 4.5rem;"></span> {# Ensured adw-status-page-icon class #}
-                <h4 class="adw-label title-1 adw-status-page-title">All Done!</h4> {# Ensured adw-status-page-title class #}
-                <p class="adw-label body adw-status-page-description">You have completed all tasks.</p> {# Ensured adw-status-page-description class #}
+                <span class="adw-icon icon-status-emblem-ok-symbolic adw-status-page-icon" style="font-size: 4.5rem;"></span>
+                <h4 class="adw-label title-1 adw-status-page-title">All Done!</h4>
+                <p class="adw-label body adw-status-page-description">You have completed all tasks.</p>
                 <div class="adw-status-page-actions">
                     <button class="adw-button suggested-action">Example Action</button>
                 </div>
@@ -951,6 +973,47 @@
                 console.warn("Sidebar elements not fully found.");
             }
 
+            // Accent Color Picker JS
+            const accentColorPickerBox = document.getElementById('accent-color-picker-box');
+            if (accentColorPickerBox) {
+                const accentButtons = accentColorPickerBox.querySelectorAll('.adw-button[data-accent-color-id]');
+                const rootElement = document.documentElement;
+                const knownAccents = ["blue", "green", "yellow", "orange", "red", "purple", "brown"]; // Define known accents
+
+                const applyAccentColor = (accentName) => {
+                    // Remove previous accent classes
+                    knownAccents.forEach(acc => rootElement.classList.remove(`accent-${acc}`));
+
+                    if (accentName && accentName !== 'default') {
+                        rootElement.classList.add(`accent-${accentName}`);
+                    }
+                    // Store preference
+                    try { localStorage.setItem('theme-accent', accentName || 'default'); } catch (e) { console.warn("LocalStorage not available for accent persistence.");}
+
+                    // Update active button state
+                    accentButtons.forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.accentColorId === (accentName || 'default'));
+                    });
+                };
+
+                accentButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        applyAccentColor(button.dataset.accentColorId);
+                    });
+                });
+
+                // Load saved accent on page load
+                try {
+                    const savedAccent = localStorage.getItem('theme-accent');
+                    applyAccentColor(savedAccent || 'default');
+                } catch (e) {
+                    console.warn("LocalStorage not available for accent preference loading.");
+                    applyAccentColor('default');
+                }
+            } else {
+                console.warn("Accent color picker box not found.");
+            }
+
             // Expander Row JS
             const expanderRows = document.querySelectorAll('.adw-expander-row');
             expanderRows.forEach(expander => {
@@ -960,14 +1023,14 @@
                     const toggleExpander = () => {
                         const isExpanded = header.classList.toggle('expanded');
                         content.classList.toggle('visible', isExpanded);
-                        // For CSS transition with max-height:
-                        // if (isExpanded) content.style.maxHeight = content.scrollHeight + "px";
-                        // else content.style.maxHeight = null;
+                        /* For CSS transition with max-height:
+                        if (isExpanded) content.style.maxHeight = content.scrollHeight + "px";
+                        else content.style.maxHeight = null; */
                     };
                     header.addEventListener('click', toggleExpander);
                     if (header.classList.contains('expanded')) { // Initialize if already expanded
                         content.classList.add('visible');
-                        // if (content.scrollHeight > 0) content.style.maxHeight = content.scrollHeight + "px";
+                        /* if (content.scrollHeight > 0) content.style.maxHeight = content.scrollHeight + "px"; */
                     }
                 }
             });
@@ -1037,20 +1100,15 @@
                 }
             });
 
-            // Add other widget-specific JS below as needed
-
             // Password Peek JS
             document.querySelectorAll('.adw-password-entry-row').forEach(row => {
                 const peekButton = row.querySelector('.adw-password-entry-row__peek-button');
-                const input = row.querySelector('input[type="password"], input.adw-entry'); // More general selector
+                const input = row.querySelector('input.adw-entry');
                 if (peekButton && input) {
                     peekButton.addEventListener('click', () => {
                         const isPassword = input.type === 'password';
                         input.type = isPassword ? 'text' : 'password';
-                        // Ideally, also toggle an icon on the peek button if one exists for "view-off-symbolic" e.g.
-                        // const icon = peekButton.querySelector('.adw-icon');
-                        // if (icon) icon.classList.toggle('icon-actions-view-off-symbolic', isPassword); // Add new class
-                        // if (icon) icon.classList.toggle('icon-actions-view-reveal-symbolic', !isPassword);
+                        // Ideally, also toggle an icon on the peek button
                     });
                 }
             });
@@ -1215,16 +1273,10 @@
                 const showDemoToast = (toastElement) => {
                     if (!toastElement) return;
                     toastDemoContainer.appendChild(toastElement);
-                    toastElement.style.pointerEvents = 'auto'; // Make individual toast clickable
+                    toastElement.style.pointerEvents = 'auto';
 
-                    // Adw.createToast is expected to handle its own dismissal through its options.
-                    // If not, a manual timeout would be needed here.
-                    // Example: if toast doesn't auto-remove from DOM on hide:
-                    // toastElement.addEventListener('hidden', () => toastElement.remove(), { once: true });
-                    // For this demo, we assume Adw.createToast handles its lifecycle sufficiently
-                    // that it will become non-visible. We might need to remove it if it just sets opacity to 0.
-                    // The Adwaita Web `toast.js` has its own manager, so direct DOM manipulation might not be needed if Adw.ToastOverlay is used.
-                    // For now, this simple append will work if Adw.createToast returns a self-managing element.
+                    /* Adw.createToast is expected to handle its own dismissal.
+                       If not, manual timeout or event listeners would be needed here. */
                 };
 
                 const simpleToastBtn = document.getElementById('show-simple-toast');
@@ -1240,11 +1292,9 @@
                     actionToastBtn.addEventListener('click', () => {
                         const actionToast = Adw.createToast("Update available.", {
                             actionName: "Install",
-                            timeout: 5000, // 5 seconds
-                            onAction: (toast) => { // toast here is the toast element itself
+                            timeout: 5000,
+                            onAction: (toast) => {
                                 console.log("Install action clicked!");
-                                // Adw.createToast might handle its own removal on action,
-                                // or we might need to call a method like toast.dismiss() or toast.remove()
                                 if (toast && typeof toast.dismiss === 'function') {
                                     toast.dismiss();
                                 } else if (toast && toast.parentElement) {
