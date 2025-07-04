@@ -38,21 +38,23 @@
             </div>
             <div class="adw-list-box">
                 {% if user_profile.profile_info %}
-                <details class="adw-css-expander-row">
-                    <summary class="adw-action-row">
-                        <span class="adw-action-row__text">
-                            <span class="adw-action-row__title">Bio</span>
-                            <span class="adw-action-row__subtitle">View user's biography</span>
+                <div class="adw-expander-row profile-bio-expander"> {# Use div structure, add custom class for JS hook if needed #}
+                    <div class="adw-action-row activatable" role="button" tabindex="0" aria-expanded="false" aria-controls="profile-bio-content-{{user_profile.id}}">
+                        <span class="adw-action-row-text-content">
+                            <span class="adw-action-row-title">Biography</span>
+                            {# Subtitle can be removed or changed, e.g., to show a preview if desired later #}
                         </span>
-                        {# Custom chevron will be applied via CSS to summary::after #}
-                    </summary>
-                    <div class="adw-expander-row-content">
-                        {{ user_profile.profile_info | safe }}
+                        <span class="adw-expander-row-icon"></span> {# Standard chevron element #}
                     </div>
-                </details>
+                    <div class="adw-expander-row-content" id="profile-bio-content-{{user_profile.id}}" style="padding: var(--spacing-s) var(--spacing-m);">
+                        <div class="styled-text-content"> {# Wrap bio in styled-text-content for prose styling #}
+                             {{ user_profile.profile_info | safe }}
+                        </div>
+                    </div>
+                </div>
                 {% else %}
                 <div class="adw-action-row">
-                    <span class="adw-action-row__title">Bio</span>
+                    <span class="adw-action-row__title">Biography</span>
                     <span class="adw-action-row__subtitle">No bio provided.</span>
                 </div>
                 {% endif %}
@@ -321,4 +323,28 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Script for profile bio expander
+    const profileBioExpander = document.querySelector('.profile-bio-expander');
+    if (profileBioExpander) {
+        const header = profileBioExpander.querySelector('.adw-action-row.activatable');
+        const content = profileBioExpander.querySelector('.adw-expander-row-content');
+        const icon = profileBioExpander.querySelector('.adw-expander-row-icon');
+
+        if (header && content && icon) {
+            header.addEventListener('click', () => {
+                const isExpanded = header.getAttribute('aria-expanded') === 'true';
+                header.setAttribute('aria-expanded', !isExpanded);
+                content.classList.toggle('expanded', !isExpanded);
+                profileBioExpander.classList.toggle('expanded', !isExpanded); // For icon rotation
+            });
+        }
+    }
+});
+</script>
 {% endblock %}
