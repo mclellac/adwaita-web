@@ -569,6 +569,12 @@ $app-sidebar-breakpoint: 768px;
   @extend .profile-pagination-box; // Inherit styles from profile page pagination
 }
 
+// User Search Page
+.user-search-form {
+  // .adw-entry { flex-grow: 1; } // This is handled by inline style for now
+  // .adw-button {}
+}
+
 // Like Button & Count Styling
 .post-interaction-footer { // Used in post.html
   display: flex;

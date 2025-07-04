@@ -128,6 +128,44 @@ def activity_feed():
     return render_template('feed.html', posts=posts, pagination=pagination, followed_users_count=len(followed_user_ids))
 
 
+@general_bp.route('/users/find', methods=['GET'])
+@login_required # Recommended to require login for user searching
+def find_users():
+    query_param = request.args.get('q', '').strip()
+    page = request.args.get('page', 1, type=int)
+    # Using a different per_page for user lists, e.g., 15 or 20, can be configured
+    per_page = current_app.config.get('USERS_PER_PAGE', 15)
+
+    users_list, pagination = [], None
+
+    if query_param:
+        search_term = f"%{query_param}%"
+        current_app.logger.info(f"User {current_user.username} searching for users with query: '{query_param}', page: {page}.")
+        try:
+            # Search in username and full_name, case-insensitive
+            # Exclude the current user from search results
+            user_query = User.query.filter(
+                User.id != current_user.id, # Don't show self in results
+                or_(
+                    User.username.ilike(search_term),
+                    User.full_name.ilike(search_term)
+                )
+            ).order_by(User.username.asc())
+
+            pagination = user_query.paginate(page=page, per_page=per_page, error_out=False)
+            users_list = pagination.items
+            current_app.logger.debug(f"User search for '{query_param}' found {len(users_list)} users on page {page}. Total: {pagination.total}")
+        except Exception as e:
+            current_app.logger.error(f"Error during user search for query '{query_param}': {e}", exc_info=True)
+            flash("Error performing user search. Please try again.", "danger")
+    else:
+        current_app.logger.debug(f"User search page accessed without a query by {current_user.username}.")
+        # Optionally, could display some default list here, or just the search bar.
+        # For now, it will just show the search bar and an empty list if no query.
+
+    return render_template('user_search_results.html', query=query_param, users_list=users_list, pagination=pagination)
+
+
 # API routes for theme/accent settings
 @general_bp.route('/api/settings/theme', methods=['POST'])
 @login_required
