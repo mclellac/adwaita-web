@@ -77,7 +77,11 @@
                     </span>
                 </div>
                 <div class="adw-switch-row__switch">
-                    <input type="checkbox" name="{{ form.is_profile_public.name }}" id="{{ form.is_profile_public.id or 'is_profile_public_input' }}" class="adw-switch" value="y" {% if form.is_profile_public.data %}checked{% endif %}>
+                    {# Corrected structure for Adwaita switch styling #}
+                    <label class="adw-switch" for="{{ form.is_profile_public.id or 'is_profile_public_input' }}">
+                        <input type="checkbox" name="{{ form.is_profile_public.name }}" id="{{ form.is_profile_public.id or 'is_profile_public_input' }}" value="y" {% if form.is_profile_public.data %}checked{% endif %}>
+                        <span class="adw-switch-slider"></span>
+                    </label>
                 </div>
             </div>
         </div>

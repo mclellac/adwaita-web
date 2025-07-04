@@ -340,6 +340,12 @@ $accent-color-definitions-map: (
   // Card Background
   --card-bg-color: #{$card-background-color-light};
 
+  // Switch component variables (Light Theme)
+  --switch-slider-off-bg-color: #{rgba($adw-dark-5, 0.2)}; // Grey track for "off" state
+  --switch-knob-bg-color: #{$adw-light-1}; // White knob
+  --switch-slider-disabled-off-bg-color: #{rgba($adw-dark-5, 0.1)}; // More subtle grey for disabled "off"
+  --switch-knob-disabled-bg-color: #{$adw-light-3}; // Greyed-out knob for disabled
+
 
   &.theme-dark {
     // Dark Theme Overrides
@@ -439,6 +445,12 @@ $accent-color-definitions-map: (
     --listbox-box-shadow: var(--listbox-box-shadow-dark);
     --sidebar-bg-color: #{$headerbar-background-color-dark}; // Dark sidebar usually matches headerbar
     --card-bg-color: #{$card-background-color-dark};
+
+    // Switch component variables (Dark Theme)
+    --switch-slider-off-bg-color: #{rgba($adw-light-1, 0.2)}; // Light grey track for "off" state
+    --switch-knob-bg-color: #{$adw-light-3}; // Light grey knob (not pure white to avoid too high contrast)
+    --switch-slider-disabled-off-bg-color: #{rgba($adw-light-1, 0.1)}; // More subtle light grey for disabled "off"
+    --switch-knob-disabled-bg-color: #{$adw-dark-1}; // Darker grey knob for disabled
   }
 
   // Specific accent color variable overrides for light theme (when .accent-color class is present)
