@@ -265,40 +265,52 @@ body { overflow: hidden; }
     display: flex;
     flex-direction: column;
     .sidebar-nav {
+        // This targets the <nav class="adw-list-box flat sidebar-nav">
         &.adw-list-box.flat {
-            border: none; border-radius: 0; background-color: transparent;
-        }
-        .adw-action-row {
-            padding-left: var(--spacing-m);
-            padding-right: var(--spacing-m);
-            border-bottom: none;
-            &:hover { background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06); }
-            &.selected, &.active {
-                background-color: rgba(var(--accent-color-rgb, 0,100,200), 0.15);
-                .adw-action-row-title { color: var(--accent-color); font-weight: bold; }
+            border: none; // Remove default listbox border
+            border-radius: 0; // Remove default listbox radius
+            background-color: transparent; // Ensure it's transparent
+            padding-top: var(--spacing-s); // Add some padding at the top and bottom of the nav block
+            padding-bottom: var(--spacing-s);
+
+            .adw-action-row {
+                // Adjust padding if needed, default is var(--spacing-m)
+                // padding-left: var(--spacing-l); // Example: Increase padding if desired
+                // padding-right: var(--spacing-l);
+                border-bottom: none; // No separators between nav items
+                border-radius: var(--border-radius-medium); // Rounded corners for each nav item
+                margin: 0 var(--spacing-s) var(--spacing-xs) var(--spacing-s); // Margin around each item
+
+                &:hover {
+                    background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06);
+                }
+                // For selected state
+                &.selected {
+                    background-color: rgba(var(--accent-color-rgb, 53,132,228), 0.15); // Default to blueish accent for example
+                    .adw-action-row-title {
+                        color: var(--accent-color);
+                        font-weight: bold;
+                    }
+                    .adw-action-row-icon { // Ensure icon also gets accent color
+                        color: var(--accent-color);
+                    }
+                }
+                // Ensure default (non-selected) icon and title colors are standard
+                &:not(.selected) {
+                    .adw-action-row-title {
+                        color: var(--text-color);
+                        font-weight: normal; // Ensure non-selected titles are normal weight
+                    }
+                    .adw-action-row-icon {
+                        color: var(--text-color-secondary); // Or var(--text-color) if preferred
+                    }
+                }
             }
         }
-        ul { list-style: none; padding: var(--spacing-s) 0; margin: 0; }
-        li { margin: 0; }
-        a {
-            display: block;
-            padding: var(--spacing-s) var(--spacing-l);
-            text-decoration: none;
-            color: var(--text-color);
-            border-radius: var(--border-radius-medium);
-            margin: 0 var(--spacing-s) var(--spacing-xs) var(--spacing-s);
-            &:hover { background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06); }
-            &:focus-visible {
-                outline: 2px solid var(--accent-color);
-                outline-offset: -2px;
-                background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06);
-            }
-            &.active {
-                background-color: rgba(var(--accent-color-rgb, 0,100,200), 0.15);
-                color: var(--accent-color);
-                font-weight: bold;
-            }
-        }
+        // Remove old ul/li/a styles that are no longer applicable
+        // ul { /* ... */ } (removed)
+        // li { /* ... */ } (removed)
+        // a { /* ... */ } (removed, now covered by .adw-action-row)
     }
 }
 .app-content-area {

@@ -273,10 +273,12 @@
             </div>
             {% endif %}
 
-            {% set gallery_photos = user_profile.gallery_photos.order_by(UserPhoto.uploaded_at.desc()).all() %}
-            {% if gallery_photos %}
+            {% set gallery_photos_preview = user_profile.gallery_photos.order_by(UserPhoto.uploaded_at.desc()).limit(6).all() %}
+            {% set total_gallery_photos = user_profile.gallery_photos.count() %}
+
+            {% if gallery_photos_preview %}
                 <div class="profile-gallery-grid">
-                    {% for photo in gallery_photos %}
+                    {% for photo in gallery_photos_preview %}
                     <div class="adw-card gallery-photo-card">
                         <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo.image_filename) }}" alt="{{ photo.caption or 'Gallery image by ' ~ user_profile.username }}" class="gallery-photo-image">
                         {% if photo.caption %}
@@ -297,6 +299,13 @@
                     </div>
                     {% endfor %}
                 </div>
+                {% if total_gallery_photos > 0 %} {# Show view all button if there's at least one photo #}
+                <div class="adw-box justify-center" style="margin-top: var(--spacing-m);">
+                    <a href="{{ url_for('profile.view_gallery', username=user_profile.username) }}" class="adw-button">
+                        View All Photos ({{ total_gallery_photos }}) <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                    </a>
+                </div>
+                {% endif %}
             {% else %}
                 <div class="adw-status-page">
                     <span class="adw-icon icon-media-image-symbolic adw-status-page-icon app-status-page-icon"></span>

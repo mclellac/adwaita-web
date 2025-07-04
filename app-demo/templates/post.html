@@ -173,23 +173,24 @@
     </section>
 
     {% if current_user.is_authenticated %}
-    <section class="comment-form-section adw-list-box form-section" aria-labelledby="leave-comment-heading">
+    <section class="comment-form-section adw-list-box form-section" aria-labelledby="leave-comment-heading" style="margin-top: var(--spacing-l);">
          <header class="adw-list-box-header">
             <h3 id="leave-comment-heading" class="adw-title-3">Leave a Comment</h3>
         </header>
-        <form method="POST" action="{{ url_for('post.view_post', post_id=post.id) }}" class="stacked-form" id="main-comment-form">
+        <form method="POST" action="{{ url_for('post.view_post', post_id=post.id) }}" class="stacked-form" id="main-comment-form" style="padding: var(--spacing-m);">
             {{ form.hidden_tag() }} {# Flask-WTF CSRF token #}
             {{ form.parent_id(id="main_parent_id_input", type="hidden") }} {# Hidden field for parent_id #}
-            <div class="form-field-row comment-form-field-row {{ 'has-error' if form.text.errors else '' }}"> {# More standard form field structure #}
-                 <label for="{{ form.text.id or 'comment_text_input' }}" class="adw-label">{{ form.text.label.text }}</label>
-                 <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry adw-textarea" rows="4">{{ form.text.data or ''}}</textarea>
+
+            {# Using a structure similar to create_post for consistency #}
+            <div class="adw-action-row column-layout {{ 'has-error' if form.text.errors else '' }}">
+                <label for="{{ form.text.id or 'comment_text_input' }}" class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">{{ form.text.label.text }}</label>
+                {% if form.text.errors %}
+                    <span class="adw-action-row-subtitle error-text" style="margin-bottom: var(--spacing-xs);">{{form.text.errors|join(' ')}}</span>
+                {% endif %}
+                <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry" rows="4" style="width: 100%; min-height: 80px; box-sizing: border-box;">{{ form.text.data or ''}}</textarea>
             </div>
-            {% if form.text.errors %}
-            <div class="form-field-error">
-                <span class="adw-label caption error-text">{{form.text.errors|join(' ')}}</span>
-            </div>
-            {% endif %}
-            <div class="form-actions-container comment-form-actions">
+
+            <div class="form-actions-container form-actions-end comment-form-actions" style="margin-top: var(--spacing-m); padding: 0;"> {# Simplified padding as form has it now #}
                  <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text }}</button>
             </div>
         </form>

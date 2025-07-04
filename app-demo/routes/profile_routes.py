@@ -354,3 +354,21 @@ def delete_gallery_photo(photo_id):
         flash(f'Error deleting photo: {str(e)}', 'danger')
 
     return redirect(url_for('profile.view_profile', username=photo.user.username if photo.user else current_user.username))
+
+
+@profile_bp.route('/<username>/gallery')
+@login_required
+def view_gallery(username):
+    current_app.logger.debug(f"Accessing full gallery for {username}, requested by {current_user.username}")
+    user_profile = User.query.filter_by(username=username).first_or_404()
+
+    if not user_profile.is_profile_public and user_profile != current_user:
+        current_app.logger.warning(f"User {current_user.username} attempted to view private gallery of {user_profile.username}.")
+        flash("This profile's gallery is private.", "warning")
+        abort(403)
+
+    # Fetch all photos for the gallery page, ordered by newest first
+    gallery_photos = user_profile.gallery_photos.order_by(UserPhoto.uploaded_at.desc()).all()
+    current_app.logger.debug(f"Found {len(gallery_photos)} photos for {user_profile.username}'s full gallery page.")
+
+    return render_template('gallery_full.html', user_profile=user_profile, gallery_photos=gallery_photos)
