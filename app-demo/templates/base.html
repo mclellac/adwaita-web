@@ -138,8 +138,10 @@
                     {# Default 'info' or 'message' categories will use the base .adw-banner style #}
                     {% endif %}
                     <div class="{{ banner_class }} visible" role="alert" style="position: relative; top: auto; left: auto; right: auto; transform: none; opacity: 1; margin-top: var(--spacing-s);">
-                    <span class="adw-banner-title">{{ message }}</span>
-                    {# Optionally add a close button here that JS can hide #}
+                        <span class="adw-banner-title">{{ message }}</span>
+                        <button class="adw-button circular flat adw-banner-dismiss-button" aria-label="Close notification">
+                            <span class="adw-icon icon-actions-close-symbolic"></span>
+                        </button>
                     </div>
                 {% endfor %}
                 </div>
@@ -167,7 +169,8 @@
     {% block scripts %}
     {# Theme and accent handling script is above, this is for other scripts #}
     <script src="{{ url_for('static', filename='js/app-layout.js') }}" defer></script>
-    {# toast.js will be included via the build process of adwaita-web's JS #}
+     <script src="{{ url_for('static', filename='js/banner.js') }}" defer></script> {# Added banner.js #}
+     {# toast.js is also included by build script, Adw.createToast can be used directly if toast.js is loaded #}
     {% endblock %}
 
     <div id="adw-toast-overlay" class="adw-toast-overlay">

@@ -194,3 +194,28 @@ input[type="reset"].adw-button {
     line-height: variables.$line-height-base; // SASS var
     font-family: var(--document-font-family); // CSS var
 }
+
+// Small button variant
+.adw-button.small {
+    padding: var(--button-padding-small-y, var(--spacing-xxs)) var(--button-padding-small-x, var(--spacing-xs));
+    font-size: var(--button-font-size-small, var(--font-size-caption));
+    line-height: var(--button-line-height-small, 1.2);
+    min-height: auto; // Allow button to shrink vertically
+
+    .adw-icon {
+        // For small buttons, icon size might need to be adjusted relative to the button's font size
+        font-size: var(--button-icon-size-small, 1.2em); // Slightly larger than text for visibility, or 1em
+        &:first-child:not(:last-child) {
+             margin-right: var(--button-icon-spacing-small, var(--spacing-xxs));
+        }
+        &:last-child:not(:first-child) {
+            margin-left: var(--button-icon-spacing-small, var(--spacing-xxs));
+        }
+    }
+
+    // If circular and small, padding might need to be even smaller or icon size adjusted
+    &.circular {
+        // padding: var(--button-padding-circular-small, var(--spacing-xxs)); // Example
+        // .adw-icon { font-size: var(--button-icon-size-circular-small, 1em); }
+    }
+}

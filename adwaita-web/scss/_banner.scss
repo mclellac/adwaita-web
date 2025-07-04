@@ -126,6 +126,40 @@
   }
   // Add .adw-banner-info for specific info button styling if needed
   // Add .adw-banner-warning, .adw-banner-success if those types are supported
+
+  // Dismiss button - styled like a flat, circular, compact button
+  .adw-banner-dismiss-button {
+    // Inherits .adw-button styling if the element also has .adw-button
+    // These are overrides or specific settings for the dismiss context
+    background-color: transparent;
+    color: inherit; // Inherits text color from the banner
+    border: none;
+    border-radius: var(--button-border-radius-circular, 50%); // Ensure circular
+    padding: var(--button-padding-compact-y, var(--spacing-xxs)) var(--button-padding-compact-x, var(--spacing-xxs)); // Compact padding
+    min-width: auto; // Allow it to be small
+    line-height: 1; // Helps center the icon
+    opacity: 0.7;
+    cursor: pointer;
+    flex-shrink: 0; // Prevent shrinking
+
+    &:hover {
+      background-color: rgba(var(--banner-fg-color-rgb, var(--fg-color-rgb)), 0.1); // Use banner's text color for hover
+      opacity: 1;
+    }
+    &:active {
+      background-color: rgba(var(--banner-fg-color-rgb, var(--fg-color-rgb)), 0.15);
+    }
+
+    .adw-icon {
+      font-size: var(--icon-size-symbolic, 1em); // Standard symbolic icon size
+      // vertical-align: middle; // May help if line-height not enough
+    }
+
+    // Adjustments if it's inside the button group, which already has gap and alignment
+    .adw-banner-button-group & {
+      // Reset margins if any were applied directly, rely on gap from parent
+    }
+  }
 }
 
 // Variables that should be defined in _variables.scss (within theme mixins):

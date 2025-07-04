@@ -45,6 +45,7 @@
 @use 'wrap_box'; // Added
 @use 'clamp';
 @use 'window';
+@use 'card'; // Added card
 
 // App-demo specific styles
 @use 'app-demo-specific';

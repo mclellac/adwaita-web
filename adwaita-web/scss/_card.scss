@@ -1,0 +1,38 @@
+// adwaita-web/scss/_card.scss
+@use 'variables';
+@use 'mixins';
+
+.adw-card {
+  background-color: var(--card-background-color, var(--window-bg-color));
+  border-radius: var(--card-border-radius, var(--border-radius-large));
+  border: 1px solid var(--card-border-color, var(--borders-color)); // Using 'borders-color' from Adwaita variables
+  box-shadow: var(--card-box-shadow, var(--popover-box-shadow)); // Using popover-box-shadow as a sensible default
+  padding: var(--card-padding, var(--spacing-m));
+  display: flex; // Often cards are flex containers for their content
+  flex-direction: column; // Default to column layout
+
+  // Suggested variables to be defined in _variables.scss (theme mixins):
+  // --card-background-color
+  // --card-border-radius
+  // --card-border-color
+  // --card-box-shadow
+  // --card-padding
+  // --card-hover-border-color (optional)
+  // --card-hover-box-shadow (optional)
+
+  &.flat {
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  &.outlined {
+    // Keeps border, removes shadow if not desired with outline
+    box-shadow: none;
+  }
+
+  // Optional: Hover effects for cards if desired as a base feature
+  // &.interactive:hover {
+  //   border-color: var(--card-hover-border-color, var(--accent-color));
+  //   box-shadow: var(--card-hover-box-shadow, 0 2px 4px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.07));
+  // }
+}
