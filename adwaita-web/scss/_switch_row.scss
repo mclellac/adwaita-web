@@ -4,6 +4,9 @@
 
 .adw-switch-row {
   @include mixins.row-base; // Includes display: flex, align-items: center, padding, min-height
+  background-color: var(--list-row-bg-color); // Ensure switch rows use the standard row background
+  border-bottom: none; // Ensure no individual border, listbox handles separators if applicable.
+                       // row-base mixin might also handle this, but explicit is fine.
   justify-content: space-between; // Pushes title/subtitle to start and switch to end
   gap: var(--spacing-m);
 
