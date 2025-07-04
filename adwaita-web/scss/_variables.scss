@@ -25,6 +25,7 @@ $adw-dark-1: #77767b; $adw-dark-2: #5e5c64; $adw-dark-3: #3d3846; $adw-dark-4: #
 $adw-window-background-light: #fafafb; // Standard light window background
 $adw-sidebar-background-light: #f2f2f2; // Standard light sidebar background
 
+
 // --- General SCSS Variables (not CSS custom properties, used for calculations and defaults) ---
 $line-height-base: 1.5;
 $heading-line-height: 1.2;
@@ -158,6 +159,10 @@ $input-disabled-border-color-dark: $button-disabled-border-color-dark;
 $input-readonly-background-color-dark: $adw-dark-2;
 $input-readonly-text-color-dark: $text-color-secondary-dark;
 $input-readonly-border-color-dark: $border-color-dark;
+
+// Card specific SASS variables (can be composed from palette or specific)
+$card-background-color-light: $adw-light-1; // #ffffff for light theme cards
+$card-background-color-dark: $headerbar-background-color-dark; // #303030 for dark theme cards (same as headerbar)
 
 
 // --- 3. SASS Variables for Specific Accent Colors (Direct SASS colors) ---
@@ -332,6 +337,9 @@ $accent-color-definitions-map: (
   // Sidebar
   --sidebar-bg-color: #{$adw-sidebar-background-light};
 
+  // Card Background
+  --card-bg-color: #{$card-background-color-light};
+
 
   &.theme-dark {
     // Dark Theme Overrides
@@ -430,6 +438,7 @@ $accent-color-definitions-map: (
                                 // Or be set by the accent-* loop above if accents have specific RGBs
     --listbox-box-shadow: var(--listbox-box-shadow-dark);
     --sidebar-bg-color: #{$headerbar-background-color-dark}; // Dark sidebar usually matches headerbar
+    --card-bg-color: #{$card-background-color-dark};
   }
 
   // Specific accent color variable overrides for light theme (when .accent-color class is present)

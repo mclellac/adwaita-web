@@ -664,3 +664,65 @@ $app-sidebar-breakpoint: 768px; // Breakpoint for mobile/tablet view
     border: none;
     box-shadow: none;
 }
+
+// Updated Sidebar Navigation Styles
+.app-sidebar {
+    .sidebar-nav {
+        // Remove default listbox/actionrow styles if any were inherited by class name alone
+        &.adw-list-box { /* In case the class was not removed from HTML, override */
+            background-color: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0; // Remove any listbox padding
+            .adw-action-row { // Override action row styles if classes were not removed
+                padding: 0;
+                min-height: auto;
+                border-bottom: none;
+                &:hover { background-color: transparent; }
+            }
+        }
+
+        ul {
+            list-style: none;
+            padding: var(--spacing-s) 0; // Add some padding around the list itself
+            margin: 0;
+        }
+
+        li {
+            margin: 0; // Remove any default li margin
+        }
+
+        a {
+            display: block;
+            padding: var(--spacing-s) var(--spacing-l); // Standard sidebar item padding (e.g. 9px 18px)
+            text-decoration: none;
+            color: var(--text-color); // Standard text color
+            border-radius: var(--border-radius-medium); // Rounded corners for hover/active indication
+            margin: 0 var(--spacing-s) var(--spacing-xs) var(--spacing-s); // Margins around each link for spacing and to allow radius to show
+
+            &:hover {
+                background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06); // Subtle hover
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--accent-color);
+                outline-offset: -2px; // Inset
+                background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06);
+            }
+
+            &.active { // Style for the current page link
+                background-color: rgba(var(--accent-color-rgb, 0,100,200), 0.15); // Subtle accent selection
+                color: var(--accent-color);
+                font-weight: bold;
+            }
+        }
+    }
+    // Remove previous styles for .sidebar-nav.adw-list-box.flat .adw-action-row if they are too specific
+    // The above general ul/li/a styling should take precedence for the new structure.
+    // The old styling was:
+    // .sidebar-nav {
+    //     &.adw-list-box.flat { ... }
+    //     .adw-action-row { ... }
+    // }
+    // This is now superseded by the direct ul/li/a styling.
+}

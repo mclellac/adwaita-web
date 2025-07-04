@@ -177,7 +177,7 @@
          <header class="adw-list-box-header">
             <h3 id="leave-comment-heading" class="adw-title-3">Leave a Comment</h3>
         </header>
-        <form method="POST" action="{{ url_for('view_post', post_id=post.id) }}" class="stacked-form" id="main-comment-form">
+        <form method="POST" action="{{ url_for('post.view_post', post_id=post.id) }}" class="stacked-form" id="main-comment-form">
             {{ form.hidden_tag() }} {# Flask-WTF CSRF token #}
             {{ form.parent_id(id="main_parent_id_input", type="hidden") }} {# Hidden field for parent_id #}
             <div class="form-field-row comment-form-field-row {{ 'has-error' if form.text.errors else '' }}"> {# More standard form field structure #}
