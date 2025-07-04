@@ -91,3 +91,70 @@
 // --expander-content-bg-color: (e.g., var(--window-bg-color) or a slightly offset color like mix(var(--view-fg-color), var(--view-bg-color), 4%));
 // --icon-opacity: 0.7; (general icon opacity)
 // --list-border-radius: (used by listbox for its corners)
+
+
+// --- Basic CSS-only Expander Row (uses <details> and <summary>) ---
+// From _app-demo-specific.scss
+.adw-css-expander-row {
+    summary.adw-action-row {
+        list-style: none; // Remove default marker
+        position: relative;
+        // Assuming .adw-action-row itself has appropriate padding
+
+        &::-webkit-details-marker {
+            display: none; // Hide WebKit default marker
+        }
+
+        // Custom chevron for the CSS-only version
+        &::after {
+            content: '';
+            display: inline-block;
+            width: 0.5em;
+            height: 0.5em;
+            border-right: 0.15em solid currentColor;
+            border-bottom: 0.15em solid currentColor;
+            transform: rotate(45deg); // Default: pointing down-right (expanded look)
+            transition: transform 0.2s ease-out;
+            position: absolute;
+            right: var(--row-padding-horizontal, var(--spacing-m)); // Align with row padding
+            top: 50%;
+            margin-top: -0.35em; // Adjust vertical based on chevron size and border
+            opacity: var(--icon-opacity, 0.7);
+        }
+    }
+
+    // State when collapsed (details not open)
+    &:not([open]) > summary.adw-action-row::after {
+        transform: rotate(-45deg); // Pointing right (collapsed look for LTR)
+                                   // Adwaita usually points right when collapsed, down when open.
+                                   // Original app-demo had rotate(45deg) for collapsed (down-right),
+                                   // and rotate(-135deg) for open (up-right).
+                                   // Let's align with typical Adwaita: right for collapsed, down for open.
+                                   // A typical "pan-end-symbolic" icon is used.
+                                   // If using border-based chevron:
+                                   // Collapsed (pointing right): transform: rotate(-45deg);
+                                   // Expanded (pointing down): transform: rotate(45deg);
+    }
+     // State when open
+    &[open] > summary.adw-action-row::after {
+        transform: rotate(45deg); // Pointing down
+    }
+
+
+    .adw-expander-row-content { // Content for the CSS-only version
+        // padding: var(--spacing-m); // Original padding
+        // Let's use more standard content padding, similar to JS version
+        padding: var(--spacing-m) var(--spacing-l) var(--spacing-m) var(--spacing-xl);
+        white-space: pre-wrap; // For preserving formatting in bio (app-demo specific need)
+        border-top: 1px solid var(--divider-color, var(--borders-color));
+        // margin-top: -1px; // Collapses border with summary when open - this might not be needed if summary has no bottom border
+        background-color: var(--expander-content-bg-color, var(--window-bg-color));
+
+        // If the expander row is the last child in a listbox, its content area's bottom border
+        // might need to be removed or have its radius adjusted.
+        .adw-list-box > &.adw-css-expander-row:last-child & {
+            // This rule might be too complex or not needed if listbox handles its children's borders.
+            // For now, assume content has its own padding and background, and doesn't need special last-child border radius.
+        }
+    }
+}

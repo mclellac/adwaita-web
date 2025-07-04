@@ -39,48 +39,6 @@
     gap: var(--spacing-s);
 }
 
-// Basic CSS-only Expander Row (used in profile.html)
-.adw-css-expander-row {
-    summary.adw-action-row {
-        list-style: none; // Remove default marker
-        position: relative;
-        // Ensure chevron is included in padding calculation if using padding-right on summary
-        // (Assuming .adw-action-row itself has appropriate padding)
-
-        &::-webkit-details-marker {
-            display: none; // Hide WebKit default marker
-        }
-
-        // Custom chevron
-        &::after {
-            content: '';
-            display: inline-block;
-            width: 0.5em;
-            height: 0.5em;
-            border-right: 0.15em solid currentColor;
-            border-bottom: 0.15em solid currentColor;
-            transform: rotate(45deg); // Default: pointing down-right
-            transition: transform 0.2s ease-out;
-            position: absolute;
-            right: var(--spacing-m); // Adjusted to use spacing var, closer to Adwaita standard
-            top: 50%;
-            margin-top: -0.35em; // Adjust vertical based on chevron size and border
-            opacity: 0.7;
-        }
-    }
-
-    &[open] > summary.adw-action-row::after {
-        transform: rotate(-135deg); // Pointing up-right
-    }
-
-    .adw-expander-row-content {
-        padding: var(--spacing-m);
-        white-space: pre-wrap; // For preserving formatting in bio
-        border-top: 1px solid var(--divider-color); // Use Adwaita divider color
-        margin-top: -1px; // Collapses border with summary when open
-    }
-}
-
 // --- Styles from index.html ---
 .page-title-centered {
     text-align: center;
@@ -105,13 +63,15 @@
     justify-content: center;
     gap: var(--spacing-xs);
 
-    .adw-button.flat[disabled],
-    .adw-button[disabled] { // General disabled button styling for ellipsis
-        pointer-events: none; // Already default for disabled, but can be explicit
-        // color: var(--text-color-secondary); // Optional: make ellipsis more muted
-    }
-    .adw-button.active { // Ensure active pagination button is bold if not already default
-        font-weight: bold;
+    // .adw-button.flat[disabled],
+    // .adw-button[disabled] {
+    //     // Base .adw-button already handles disabled state (opacity, cursor, pointer-events)
+    //     // color: var(--text-color-secondary); // This would be an app-specific override if desired
+    // }
+    .adw-button.active { // Style for the active/current page button in pagination
+        font-weight: bold; // Make it bold
+        // Note: This does not use the .active state from _button.scss which changes background,
+        // as this is for indicating current item, not a toggle state.
     }
 }
 
@@ -391,13 +351,11 @@ $app-sidebar-breakpoint: 768px;
   gap: var(--spacing-l);
   padding: var(--spacing-s) 0;
 }
+
+// --- Card Styles (app-demo specific extensions/compositions of .adw-card) ---
 .blog-post-item-card.adw-card {
-  background-color: var(--card-background-color, var(--window-bg-color));
-  border-radius: var(--card-border-radius, var(--border-radius-large));
-  border: 1px solid var(--card-border-color, var(--borders-color));
-  box-shadow: var(--card-box-shadow, 0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.05));
-  padding: var(--spacing-m);
-  display: flex; flex-direction: column;
+  // Base styles like background, border, radius, shadow, padding are inherited from .adw-card
+  // display: flex; flex-direction: column; // This is default for .adw-card now
   .blog-post-card__header {
     margin-bottom: var(--spacing-s);
     .blog-post-card__title {
@@ -428,10 +386,8 @@ $app-sidebar-breakpoint: 768px;
 }
 
 .blog-content-card.adw-card {
-  background-color: var(--card-background-color, var(--window-bg-color));
-  border-radius: var(--card-border-radius, var(--border-radius-large));
-  border: 1px solid var(--card-border-color, var(--borders-color));
-  box-shadow: var(--card-box-shadow, 0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.05));
+  // Base styles inherited from .adw-card
+  // Overriding padding from base .adw-card if it was var(--spacing-m)
   padding: var(--spacing-l);
   margin-bottom: var(--spacing-xl);
   .post-header { margin-bottom: var(--spacing-l); }
@@ -441,12 +397,16 @@ $app-sidebar-breakpoint: 768px;
   }
 }
 
-.comment-card {
-  background-color: var(--card-background-color, var(--window-bg-color));
-  border-radius: var(--card-border-radius, var(--border-radius-default));
-  border: 1px solid var(--card-border-color, var(--borders-color));
-  margin-bottom: var(--spacing-s);
+.comment-card.adw-card { // Added .adw-card here
+  // Base styles inherited from .adw-card
+  // Overriding padding and border-radius from base .adw-card if needed
+  border-radius: var(--card-border-radius, var(--border-radius-default)); // Potentially smaller radius
   padding: var(--spacing-s);
+  margin-bottom: var(--spacing-s);
+  // No box-shadow by default if inheriting from a base .adw-card that has one,
+  // unless specifically added here or if .adw-card's shadow is desired.
+  // box-shadow: none; // If it should be flatter than base .adw-card
+
   .comment-header { margin-bottom: var(--spacing-xs); }
   .comment-text { margin-bottom: var(--spacing-xs); font-size: var(--font-size-base); line-height: var(--line-height-base); }
   .comment-actions {
@@ -488,12 +448,8 @@ $app-sidebar-breakpoint: 768px;
 .gallery-photo-actions {
     padding: var(--spacing-xs) var(--spacing-s);
     text-align: right;
-    .adw-button.small-button {
-        padding: var(--spacing-xxs) var(--spacing-xs);
-        font-size: var(--font-size-caption);
-        min-height: auto; line-height: 1.2;
-        .adw-icon { font-size: 1em; margin-right: var(--spacing-xxs); }
-    }
+    // .adw-button.small-button has been moved to _button.scss as .adw-button.small
+    // Ensure HTML is updated to use class="adw-button small"
 }
 .gallery-upload-form {
     .gallery-caption-textarea {

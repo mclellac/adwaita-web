@@ -288,7 +288,7 @@
                         <div class="adw-card__actions gallery-photo-actions">
                              <form method="POST" action="{{ url_for('profile.delete_gallery_photo', photo_id=photo.id) }}" style="display: inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="adw-button destructive-action flat small-button" onclick="return confirm('Are you sure you want to delete this photo?');">
+                                <button type="submit" class="adw-button destructive-action flat small" onclick="return confirm('Are you sure you want to delete this photo?');">
                                     <span class="adw-icon icon-actions-edit-delete-symbolic"></span> Delete
                                 </button>
                             </form>

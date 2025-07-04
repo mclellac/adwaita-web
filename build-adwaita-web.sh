@@ -116,6 +116,16 @@ else
     echo "WARNING: JS file ${JS_INPUT_DIR}/toast.js not found."
 fi
 
+# Copy banner.js
+if [ -f "${JS_INPUT_DIR}/banner.js" ]; then
+    cp "${JS_INPUT_DIR}/banner.js" "${BUILD_JS_DIR}/banner.js"
+    echo "Copied ${JS_INPUT_DIR}/banner.js to ${BUILD_JS_DIR}/banner.js"
+    cp "${JS_INPUT_DIR}/banner.js" "${APP_DEMO_JS_DIR}/banner.js"
+    echo "Copied ${JS_INPUT_DIR}/banner.js to ${APP_DEMO_JS_DIR}/banner.js"
+else
+    echo "WARNING: JS file ${JS_INPUT_DIR}/banner.js not found."
+fi
+
 JS_COMPONENTS_SOURCE_DIR="${JS_INPUT_DIR}/components"
 JS_COMPONENTS_DEST_DIR_BUILD="${BUILD_JS_DIR}/components"
 JS_COMPONENTS_DEST_DIR_APP_DEMO="${APP_DEMO_JS_DIR}/components"
