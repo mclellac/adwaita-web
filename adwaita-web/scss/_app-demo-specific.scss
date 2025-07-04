@@ -152,11 +152,15 @@
     // margin-top: var(--spacing-xs); // This was too little, form-field-row default is --spacing-s
 }
 .comment-form-actions { // Styles for the container of the submit button in comment form
-    @extend .form-actions-container; // Inherit flex, gap, margin-top
-    @extend .form-actions-end;     // Inherit justify-content: flex-end for right alignment
-    border-top: none; // Overriding default list-box header style perhaps
-    padding-top: var(--spacing-s); // Keep specific padding
-    margin-top: var(--spacing-s); // Ensure it has some top margin if not inherited via @extend
+    @extend .form-actions-container;
+    @extend .form-actions-end;
+    // This specific instance might need to override the background/border from .form-actions-container
+    // if it's meant to be transparent within its parent (e.g. a card or listbox).
+    // For now, it will inherit the white background from .form-actions-container.
+    // If it should be transparent:
+    // background-color: transparent;
+    // border-top: none;
+    // padding: var(--spacing-s) 0; // Reset padding if background/border removed
 }
 
 .related-posts-container {
@@ -192,14 +196,17 @@
 
 .form-actions-container { // General form actions (save, publish, cancel etc.)
     margin-top: var(--spacing-l);
+    padding: var(--spacing-m);
     display: flex;
-    align-items: center; // Align items vertically
+    align-items: center;
     gap: var(--spacing-s);
+    background-color: var(--list-row-bg-color);
+    border-top: 1px solid var(--border-color);
 
-    &.form-actions-end { // Aligns buttons to the right
+    &.form-actions-end {
         justify-content: flex-end;
     }
-    &.form-actions-space-between { // For edit_post.html like layout
+    &.form-actions-space-between {
         justify-content: space-between;
     }
 }
@@ -211,17 +218,12 @@
 
 .profile-pagination-box { // For the adw-box containing pagination controls
     margin-top: var(--spacing-l);
-    // display: flex; justify-content: center; // Handled by .adw-box.justify-center
 }
 
 // Prose styling for user-generated content (post content, comments, bio)
 .styled-text-content {
     line-height: 1.6;
-
-    p {
-        margin-bottom: var(--spacing-m);
-    }
-
+    p { margin-bottom: var(--spacing-m); }
     h1, h2, h3, h4, h5, h6 {
         margin-top: var(--spacing-l);
         margin-bottom: var(--spacing-s);
@@ -231,580 +233,282 @@
     h2 { font-size: var(--font-size-h2); }
     h3 { font-size: var(--font-size-h3); }
     h4 { font-size: var(--font-size-h4); }
-
     ul, ol {
         margin-bottom: var(--spacing-m);
         padding-left: var(--spacing-l);
     }
-    li {
-        margin-bottom: var(--spacing-xs);
-    }
-
+    li { margin-bottom: var(--spacing-xs); }
     blockquote {
         margin: var(--spacing-m) 0;
         padding: var(--spacing-s) var(--spacing-m);
         border-left: 4px solid var(--border-color);
-        background-color: var(--button-bg-color); // A slightly off-bg color
+        background-color: var(--button-bg-color);
         color: var(--text-color-secondary);
         font-style: italic;
-
-        p:last-child {
-            margin-bottom: 0;
-        }
+        p:last-child { margin-bottom: 0; }
     }
-
     pre {
-        background-color: var(--headerbar-bg-color); // Use a distinct background
+        background-color: var(--headerbar-bg-color);
         color: var(--text-color);
         padding: var(--spacing-m);
         border-radius: var(--border-radius-medium);
         overflow-x: auto;
         font-family: var(--monospace-font-family);
-        font-size: 0.9em; // Slightly smaller for code blocks
+        font-size: 0.9em;
         line-height: 1.4;
     }
-    code { // Inline code
+    code {
         font-family: var(--monospace-font-family);
-        // Using a subtle, semi-transparent version of a base dark color for light theme
         background-color: rgba(variables.$adw-dark-5, 0.05);
         padding: 0.1em 0.3em;
         border-radius: var(--border-radius-small);
         font-size: 0.9em;
     }
     :root.theme-dark .styled-text-content code {
-        // Using a subtle, semi-transparent version of a base light color for dark theme
         background-color: rgba(variables.$adw-light-1, 0.08);
     }
-    pre code { // Reset for code inside pre
+    pre code {
       background-color: transparent;
       padding: 0;
       border-radius: 0;
-      font-size: inherit; // Inherit from pre
+      font-size: inherit;
     }
-
     a {
         color: var(--link-color);
         text-decoration: underline;
-        &:hover {
-            color: var(--link-hover-color);
-        }
+        &:hover { color: var(--link-hover-color); }
     }
-
     hr {
         border: none;
         border-top: 1px solid var(--divider-color);
         margin: var(--spacing-l) 0;
     }
-    // Add more styling for tables, images etc. as needed
 }
 
-// Ensure section dividers are styled subtly
 hr.section-divider {
     border: none;
     border-top: 1px solid var(--divider-color);
-    margin: var(--spacing-xl) 0; // Larger margin for section breaks
+    margin: var(--spacing-xl) 0;
 }
 
 // --- New Sidebar Layout Styles ---
-html, body {
-    height: 100%;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-body {
-    overflow: hidden; // Prevent body scroll, individual areas will scroll
-}
-
-.adw-header-bar {
-    flex-shrink: 0; // Header should not shrink
-}
-
-.app-body-container {
-    display: flex;
-    flex-grow: 1;
-    overflow: hidden; // Important for child elements to scroll correctly
-    // background-color: var(--window-pane-bg-color, var(--window-bg-color)); // A slightly different bg if sidebar is distinct
-}
-
+html, body { height: 100%; margin: 0; display: flex; flex-direction: column; }
+body { overflow: hidden; }
+.adw-header-bar { flex-shrink: 0; }
+.app-body-container { display: flex; flex-grow: 1; overflow: hidden; }
 .app-sidebar {
-    width: 240px; // Common sidebar width
+    width: 240px;
     flex-shrink: 0;
-    background-color: var(--sidebar-bg-color); // Use the new sidebar background color variable
+    background-color: var(--sidebar-bg-color);
     border-right: 1px solid var(--border-color);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-
     .sidebar-nav {
-        &.adw-list-box.flat { // Make sidebar nav list box truly flat and part of sidebar
-            border: none;
-            border-radius: 0;
-            background-color: transparent; // Inherit sidebar background
+        &.adw-list-box.flat {
+            border: none; border-radius: 0; background-color: transparent;
         }
         .adw-action-row {
-            // Ensure rows in sidebar nav look good
-            padding-left: var(--spacing-m); // Default listbox row padding is var(--spacing-m)
+            padding-left: var(--spacing-m);
             padding-right: var(--spacing-m);
-            // No border-bottom needed if listbox is flat and bg is uniform
             border-bottom: none;
-
-            &:hover {
-                background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06); // Subtle hover
+            &:hover { background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06); }
+            &.selected, &.active {
+                background-color: rgba(var(--accent-color-rgb, 0,100,200), 0.15);
+                .adw-action-row-title { color: var(--accent-color); font-weight: bold; }
             }
-            &.selected, // TODO: Need a way to mark current page as selected in sidebar
-            &.active { // Assuming .active might be used by JS for current page
-                background-color: rgba(var(--accent-color-rgb, 0,100,200), 0.15); // Subtle accent selection
-                .adw-action-row-title {
-                    color: var(--accent-color);
-                    font-weight: bold;
-                }
+        }
+        ul { list-style: none; padding: var(--spacing-s) 0; margin: 0; }
+        li { margin: 0; }
+        a {
+            display: block;
+            padding: var(--spacing-s) var(--spacing-l);
+            text-decoration: none;
+            color: var(--text-color);
+            border-radius: var(--border-radius-medium);
+            margin: 0 var(--spacing-s) var(--spacing-xs) var(--spacing-s);
+            &:hover { background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06); }
+            &:focus-visible {
+                outline: 2px solid var(--accent-color);
+                outline-offset: -2px;
+                background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06);
+            }
+            &.active {
+                background-color: rgba(var(--accent-color-rgb, 0,100,200), 0.15);
+                color: var(--accent-color);
+                font-weight: bold;
             }
         }
     }
 }
-
 .app-content-area {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto; // Main content area scrolls
-    background-color: var(--window-bg-color); // Standard window background for content
-
-    .page-content-wrapper {
-        flex-grow: 1; // Allows main content to push footer down
-        // Padding for actual page content is often here or on main.adw-clamp
-        // For now, rely on main.adw-clamp's implicit behavior or specific page content containers
-        // like adw-preferences-page.
-    }
-
-    .main-content { // Ensure main content within adw-clamp has some breathing room from top
-        padding-top: var(--spacing-xl);
-        padding-bottom: var(--spacing-xl); // Space before footer
-    }
-
-
-    .app-footer {
-        flex-shrink: 0; // Footer should not shrink
-        // background-color: var(--headerbar-bg-color); // Footer often matches header/sidebar bg
-        // border-top: 1px solid var(--border-color); // Already has border-top
-    }
+    flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto;
+    background-color: var(--window-bg-color);
+    .page-content-wrapper { flex-grow: 1; }
+    .main-content { padding-top: var(--spacing-xl); padding-bottom: var(--spacing-xl); }
+    .app-footer { flex-shrink: 0; }
 }
-
-// Ensure .adw-clamp within .app-content-area doesn't get too wide if sidebar is present
-// This might need adjustment based on final look
-.app-content-area > .page-content-wrapper > .adw-clamp.main-content {
-    // max-width: calc(100% - var(--spacing-xl) * 2); // Ensure clamp respects padding of content area
-    // The clamp itself has a max-width, so this might not be needed.
-}
-
-// RGB variables moved to _variables.scss
 
 // --- Styles from edit_profile.html ---
-.profile-bio-textarea { // Applied to the textarea for user's biography
-    margin-top: var(--spacing-xs);
-    width: 100%; // Make textarea take full width of its container
+.profile-bio-textarea { margin-top: var(--spacing-xs); width: 100%; }
+.profile-photo-widget-container { display: flex; flex-direction: column; align-items: flex-end; gap: var(--spacing-s); }
+.hidden-file-input { display: none; }
+.cropper-container-wrapper {
+    width: 150px; height: 150px;
+    &.hidden { display: none; }
 }
-
-.profile-photo-widget-container { // Container for photo upload button and cropper preview
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end; // Align items to the right (end of the row)
-    gap: var(--spacing-s);
-}
-
-.hidden-file-input { // For the actual <input type="file">
-    display: none;
-}
-
-.cropper-container-wrapper { // Wrapper for the Cropper.js preview area
-    width: 150px;
-    height: 150px;
-    // Conditional display (hidden/shown by JS) is handled by adding/removing a 'hidden' class or direct style by JS
-    &.hidden { // Add this class via JS to hide it initially or when no image
-        display: none;
-    }
-}
-
-.current-photo-display { // Container for showing current avatar next to upload options
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-}
-
-.edit-profile-form-actions { // Specific for the action buttons on the edit profile form
-    @extend .form-actions-container; // Inherits display:flex, gap, margin-top
-    // .form-actions-space-between will be added in HTML for alignment logic
-    padding-top: var(--spacing-l);   // Adds specific padding needed for this form
+.current-photo-display { display: flex; align-items: center; gap: var(--spacing-xs); }
+.edit-profile-form-actions {
+    @extend .form-actions-container;
 }
 
 // --- Responsive Sidebar Styles ---
-$app-sidebar-breakpoint: 768px; // Breakpoint for mobile/tablet view
-
-.app-sidebar-toggle {
-    display: none; // Hidden by default on larger screens
-}
-
-// Default (Desktop / Large Screen) Styles have already been defined for .app-sidebar, .app-body-container etc.
-// .app-sidebar { width: 240px; ... }
-// .app-body-container { display: flex; ... }
-
+$app-sidebar-breakpoint: 768px;
+.app-sidebar-toggle { display: none; }
 @media (max-width: #{$app-sidebar-breakpoint - 1px}) {
-    .app-sidebar-toggle {
-        display: inline-flex; // Show hamburger button
-    }
-
-    .profile-avatar-button { // Hide profile button in header start on small screens to make space for hamburger
-        display: none;
-    }
-
+    .app-sidebar-toggle { display: inline-flex; }
+    .profile-avatar-button { display: none; }
     .app-sidebar {
-        position: fixed;
-        left: 0;
-        top: 0; // Should align below header if header is fixed. Assuming header is part of normal flow for this.
-        // If header is position:fixed, then top should be var(--header-height, 56px) or similar.
-        // For now, assuming it covers the whole screen, including under a non-fixed header.
-        // Let's adjust if header is fixed. The header is part of the body's flex column.
-        // So, the sidebar overlay should start from the very top of the viewport.
-        height: 100%;
-        z-index: 1000; // Ensure it's above content
+        position: fixed; left: 0; top: 0;
+        height: 100%; z-index: 1000;
         transform: translateX(-100%);
         transition: transform 0.25s ease-in-out;
-        box-shadow: var(--dialog-box-shadow); // Give it some shadow like a dialog when overlayed
-
-        &.sidebar-open {
-            transform: translateX(0);
-        }
+        box-shadow: var(--dialog-box-shadow);
+        &.sidebar-open { transform: translateX(0); }
     }
-
-    // Optional: Add a backdrop when sidebar is open on mobile
     .app-sidebar-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.3);
-        z-index: 999; // Below sidebar, above content
-        opacity: 0;
-        visibility: hidden;
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.3); z-index: 999;
+        opacity: 0; visibility: hidden;
         transition: opacity 0.25s ease-in-out, visibility 0s 0.25s linear;
-
-        &.active {
-            opacity: 1;
-            visibility: visible;
-            transition-delay: 0s;
-        }
+        &.active { opacity: 1; visibility: visible; transition-delay: 0s; }
     }
-
-    .app-content-area {
-        // On small screens, content area takes full width as sidebar is an overlay
-        // No specific width change needed if sidebar is position:fixed
-    }
+}
 
 .blog-posts-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); // Responsive grid
-  gap: var(--spacing-l); // Gap between cards
-  padding: var(--spacing-s) 0; // Padding around the grid
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--spacing-l);
+  padding: var(--spacing-s) 0;
 }
-
-// Styles for individual post cards on index.html
-.blog-post-item-card.adw-card { // Assuming adw-card provides base card styles or we define them here
+.blog-post-item-card.adw-card {
   background-color: var(--card-background-color, var(--window-bg-color));
   border-radius: var(--card-border-radius, var(--border-radius-large));
   border: 1px solid var(--card-border-color, var(--borders-color));
   box-shadow: var(--card-box-shadow, 0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.05));
   padding: var(--spacing-m);
-  display: flex;
-  flex-direction: column; // Stack header, excerpt, footer vertically
-
+  display: flex; flex-direction: column;
   .blog-post-card__header {
     margin-bottom: var(--spacing-s);
     .blog-post-card__title {
       margin-bottom: var(--spacing-xxs);
-      a { // Ensure link inherits color and has no underline by default if it's part of title
-        color: inherit;
-        text-decoration: none;
-        &:hover { text-decoration: underline; }
-      }
+      a { color: inherit; text-decoration: none; &:hover { text-decoration: underline; } }
     }
-    .blog-post-card__meta {
-      font-size: var(--font-size-small);
-      color: var(--text-color-secondary);
-    }
+    .blog-post-card__meta { font-size: var(--font-size-small); color: var(--text-color-secondary); }
   }
-
   .blog-post-card__excerpt {
-    margin-bottom: var(--spacing-m);
-    flex-grow: 1; // Allow excerpt to take available space
-    // CSS to limit lines for HTML content (might need JS for perfect cross-browser)
-    // For simplicity, we rely on the truncate(600) in template for now.
-    // If rendered HTML is too long, this CSS can help:
-    // display: -webkit-box;
-    // -webkit-line-clamp: 5; // Show ~5 lines
-    // -webkit-box-orient: vertical;
-    // overflow: hidden;
-    // text-overflow: ellipsis;
-    // max-height: calc(var(--line-height-base) * var(--font-size-base) * 5); // Approx 5 lines height
-
-    p:last-child { margin-bottom: 0; } // Common reset for excerpts
+    margin-bottom: var(--spacing-m); flex-grow: 1;
+    p:last-child { margin-bottom: 0; }
   }
-
   .blog-post-card__footer {
-    margin-top: auto; // Push footer to bottom if card has fixed height or content is short
+    margin-top: auto;
     padding-top: var(--spacing-s);
     border-top: 1px solid var(--divider-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--spacing-s);
-
+    display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-s);
     .blog-post-card__terms {
-      display: flex;
-      flex-direction: column; // Stack categories and tags
+      display: flex; flex-direction: column;
       gap: var(--spacing-xs);
-      .meta-section { margin-top: 0; } // Reset top margin if already spaced by flex gap
-    }
-    .read-more-link.adw-button.flat {
-      // Ensure it's visually distinct if needed
+      .meta-section { margin-top: 0; }
     }
   }
-
   &:hover {
     border-color: var(--card-hover-border-color, var(--accent-color));
     box-shadow: var(--card-hover-box-shadow, 0 2px 4px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.07));
   }
 }
 
-// Remove styles for .blog-posts-list.adw-list-box.flat as it's replaced by .blog-posts-container
-// (Or keep if .blog-posts-list is still used elsewhere with .blog-post-card)
-// For now, assuming .blog-posts-list.flat is no longer the primary container for these cards.
-// If .adw-card class itself is not defined in Adwaita core SASS, we'd need base .adw-card styles:
-// .adw-card { /* base styles like padding, border-radius, bg, border, shadow etc. */ }
-// This assumes .adw-card provides some base that blog-post-item-card extends/customizes.
-// If not, blog-post-item-card should have all necessary card properties.
-
-}
-
-.blog-content-card.adw-card { // For single post view main content area
+.blog-content-card.adw-card {
   background-color: var(--card-background-color, var(--window-bg-color));
   border-radius: var(--card-border-radius, var(--border-radius-large));
   border: 1px solid var(--card-border-color, var(--borders-color));
   box-shadow: var(--card-box-shadow, 0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.05));
-  padding: var(--spacing-l); // Larger padding for main content card
-  margin-bottom: var(--spacing-xl); // Space before author bio/comments
-
-  .post-header {
-    margin-bottom: var(--spacing-l);
-  }
-  .post-content { // This is .styled-text-content
-    margin-bottom: var(--spacing-l);
-  }
+  padding: var(--spacing-l);
+  margin-bottom: var(--spacing-xl);
+  .post-header { margin-bottom: var(--spacing-l); }
+  .post-content { margin-bottom: var(--spacing-l); }
   .share-buttons-section, .post-actions-container {
-    margin-top: var(--spacing-l);
-    padding-top: var(--spacing-l);
-    border-top: 1px solid var(--divider-color);
+    margin-top: var(--spacing-l); padding-top: var(--spacing-l); border-top: 1px solid var(--divider-color);
   }
 }
 
 .comment-card {
-  // Similar to blog-post-card, but perhaps slightly less emphasis or different padding
   background-color: var(--card-background-color, var(--window-bg-color));
-  border-radius: var(--card-border-radius, var(--border-radius-default)); // Default radius for comments might be smaller
+  border-radius: var(--card-border-radius, var(--border-radius-default));
   border: 1px solid var(--card-border-color, var(--borders-color));
-  // box-shadow: var(--card-box-shadow, 0 1px 2px rgba(0,0,0,0.05)); // Optional: less shadow for comments
-  margin-bottom: var(--spacing-s); // Space between comment cards
-  padding: var(--spacing-s); // Internal padding
-
-  .comment-header {
-    margin-bottom: var(--spacing-xs);
-  }
-
-  .comment-text {
-    margin-bottom: var(--spacing-xs);
-    font-size: var(--font-size-base); // Ensure comment text is base size
-    line-height: var(--line-height-base);
-  }
-
+  margin-bottom: var(--spacing-s);
+  padding: var(--spacing-s);
+  .comment-header { margin-bottom: var(--spacing-xs); }
+  .comment-text { margin-bottom: var(--spacing-xs); font-size: var(--font-size-base); line-height: var(--line-height-base); }
   .comment-actions {
-    // Styles for the container of reply/flag/delete buttons
-    display: flex;
-    justify-content: flex-end; // Right-align items
-    align-items: center;
-    gap: var(--spacing-s); // Consistent gap for action buttons
+    display: flex; justify-content: flex-end; align-items: center;
+    gap: var(--spacing-s);
     border-top: 1px solid var(--divider-color);
-    padding-top: var(--spacing-xs);
-    margin-top: var(--spacing-s);
+    padding-top: var(--spacing-xs); margin-top: var(--spacing-s);
   }
-
-  // Styling for nested reply forms if they appear directly within a card
   .reply-form-container {
-    border-top: 1px dashed var(--divider-color); // Dashed line for reply form section
-    padding-top: var(--spacing-s);
-    margin-top: var(--spacing-s);
-    .adw-textarea {
-        min-height: 60px; // Smaller textarea for replies
-    }
+    border-top: 1px dashed var(--divider-color);
+    padding-top: var(--spacing-s); margin-top: var(--spacing-s);
+    .adw-textarea { min-height: 60px; }
   }
 }
 
-// Ensure the .comments-list.flat (which is an adw-list-box) has no internal row separators
-// if .comment-card provides its own borders/visual separation.
 .comments-list.adw-list-box.flat {
-    .comment-card { // Target only our cards within this specific list
-        border-bottom: none; // Remove default action row separator if it were one
-        & + .comment-card {
-            // margin-top: var(--spacing-s); // Already handled by margin-bottom on card
-        }
-    }
-    // Remove default listbox background and borders if cards handle it all
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-}
-
-// Updated Sidebar Navigation Styles
-.app-sidebar {
-    .sidebar-nav {
-        // Remove default listbox/actionrow styles if any were inherited by class name alone
-        &.adw-list-box { /* In case the class was not removed from HTML, override */
-            background-color: transparent;
-            border: none;
-            border-radius: 0;
-            padding: 0; // Remove any listbox padding
-            .adw-action-row { // Override action row styles if classes were not removed
-                padding: 0;
-                min-height: auto;
-                border-bottom: none;
-                &:hover { background-color: transparent; }
-            }
-        }
-
-        ul {
-            list-style: none;
-            padding: var(--spacing-s) 0; // Add some padding around the list itself
-            margin: 0;
-        }
-
-        li {
-            margin: 0; // Remove any default li margin
-        }
-
-        a {
-            display: block;
-            padding: var(--spacing-s) var(--spacing-l); // Standard sidebar item padding (e.g. 9px 18px)
-            text-decoration: none;
-            color: var(--text-color); // Standard text color
-            border-radius: var(--border-radius-medium); // Rounded corners for hover/active indication
-            margin: 0 var(--spacing-s) var(--spacing-xs) var(--spacing-s); // Margins around each link for spacing and to allow radius to show
-
-            &:hover {
-                background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06); // Subtle hover
-            }
-
-            &:focus-visible {
-                outline: 2px solid var(--accent-color);
-                outline-offset: -2px; // Inset
-                background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06);
-            }
-
-            &.active { // Style for the current page link
-                background-color: rgba(var(--accent-color-rgb, 0,100,200), 0.15); // Subtle accent selection
-                color: var(--accent-color);
-                font-weight: bold;
-            }
-        }
-    }
-    // Remove previous styles for .sidebar-nav.adw-list-box.flat .adw-action-row if they are too specific
-    // The above general ul/li/a styling should take precedence for the new structure.
-    // The old styling was:
-    // .sidebar-nav {
-    //     &.adw-list-box.flat { ... }
-    //     .adw-action-row { ... }
-    // }
-    // This is now superseded by the direct ul/li/a styling.
+    .comment-card { border-bottom: none; }
+    background-color: transparent; border: none; box-shadow: none;
 }
 
 // Gallery Specific Styles (from profile.html)
-// Ensure these use SASS variables where available (e.g. $spacing-l instead of 16px)
-// and Adwaita CSS variables (e.g. var(--border-color))
-
 .profile-gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: var(--spacing-l); // Use Adwaita CSS variable
-    padding-top: var(--spacing-l); // Use Adwaita CSS variable
+    gap: var(--spacing-l);
+    padding-top: var(--spacing-l);
 }
-
-.gallery-photo-card { // This class is applied to an .adw-card element
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+.gallery-photo-card {
+    display: flex; flex-direction: column; overflow: hidden;
 }
-
 .gallery-photo-image {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-bottom: 1px solid var(--border-color); // Use Adwaita CSS variable
+    width: 100%; height: 150px; object-fit: cover;
+    border-bottom: 1px solid var(--border-color);
 }
-
-.gallery-photo-caption { // This is a div inside .adw-card
-    padding: var(--spacing-s); // Use Adwaita CSS variable
-    // background-color will be inherited from .adw-card
-    p {
-        margin: 0;
-        font-size: var(--font-size-caption); // Use Adwaita CSS variable
-        color: var(--text-color-secondary); // Use Adwaita CSS variable
-    }
+.gallery-photo-caption {
+    padding: var(--spacing-s);
+    p { margin: 0; font-size: var(--font-size-caption); color: var(--text-color-secondary); }
 }
-
-.gallery-photo-actions { // This is a div inside .adw-card
-    padding: var(--spacing-xs) var(--spacing-s); // Use Adwaita CSS variables
+.gallery-photo-actions {
+    padding: var(--spacing-xs) var(--spacing-s);
     text-align: right;
-    // background-color will be inherited from .adw-card
-
     .adw-button.small-button {
-        padding: var(--spacing-xxs) var(--spacing-xs); // Use Adwaita CSS variables
-        font-size: var(--font-size-caption); // Use Adwaita CSS variable
-        min-height: auto;
-        line-height: 1.2;
-
-        .adw-icon {
-            font-size: 1em;
-            margin-right: var(--spacing-xxs); // Use Adwaita CSS variable
-        }
+        padding: var(--spacing-xxs) var(--spacing-xs);
+        font-size: var(--font-size-caption);
+        min-height: auto; line-height: 1.2;
+        .adw-icon { font-size: 1em; margin-right: var(--spacing-xxs); }
     }
 }
-
-.gallery-upload-form { // This is the <form> element
-    .adw-entry-row,
-    .adw-action-row {
-        // Adwaita rows typically have internal padding, check if this is needed or if it's for the listbox container
-        // If these are direct children of adw-list-box, padding is handled by list-box.
-        // If form is outside list-box but mimicking rows, then padding here is fine.
-        // Assuming the form is inside an adw-list-box as per profile.html structure.
-        // So, this might be redundant if list-box provides padding.
-        // For safety, let's assume it might be used standalone or needs override:
-        // padding-left: var(--list-box-horizontal-padding, var(--spacing-m)); (using a more generic variable)
-        // padding-right: var(--list-box-horizontal-padding, var(--spacing-m));
-    }
-    .gallery-caption-textarea { // Specific class for the caption textarea in this form
+.gallery-upload-form {
+    .gallery-caption-textarea {
         font-family: var(--font-family-sans-serif);
         min-height: 60px;
-        margin-top: var(--spacing-xxs); // Small space above textarea if label is also in action-row__text
+        margin-top: var(--spacing-xxs);
     }
-    .form-actions-end { // This is a div wrapping the submit button
-        padding: var(--spacing-m); // Use Adwaita CSS variable
+    .form-actions-end {
+        padding: var(--spacing-m);
         text-align: right;
-        margin-top: 0; // Reset margin if it's part of a list structure
-        border-top: none; // Reset border if it's part of a list structure
+        background-color: transparent;
+        border-top: none;
+        margin-top: 0;
     }
 }
-
-.profile-gallery-upload-box { // This is an .adw-list-box containing the form
-    margin-bottom: var(--spacing-xl); // Use Adwaita CSS variable
-    // .adw-list-box already provides structure and padding for rows.
+.profile-gallery-upload-box {
+    margin-bottom: var(--spacing-xl);
 }
