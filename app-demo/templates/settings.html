@@ -8,10 +8,7 @@
 {# For now, let's assume base.html handles the main header, and this content block is for the page content itself #}
 
 {% block content %}
-<div class="adw-preferences-page" role="main">
-    <header class="adw-preferences-page__header">
-        <h1 class="adw-preferences-page__title">Settings</h1>
-    </header>
+<div class="adw-preferences-page" role="main" style="padding-top: var(--spacing-l);"> {# Keep adw-preferences-page, remove its header, add padding if needed #}
 
     <section class="adw-preferences-group" aria-labelledby="appearance-group-title">
         <div class="adw-preferences-group__title-container">

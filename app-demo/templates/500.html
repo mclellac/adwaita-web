@@ -1,15 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Server Error - {{ super() }}{% endblock %}
+{% block title %}Server Error{% endblock %}
 
-{% block headerbar %}
-<adw-header-bar>
-    <adw-window-title slot="title" title="Server Error"></adw-window-title>
-</adw-header-bar>
-{% endblock %}
+{% block header_title %}Server Error{% endblock %}
 
 {% block content %}
-<adw-status-page icon-name="dialog-warning-symbolic" title="500 - Internal Server Error" description="Sorry, something went wrong on our end. Please try again later.">
-    <adw-button slot="actions" text="Go to Homepage" href="{{ url_for('general.index') }}" suggested></adw-button>
-</adw-status-page>
+<div class="adw-status-page" style="padding-top: var(--spacing-xxl); padding-bottom: var(--spacing-xxl);">
+    <span class="adw-icon icon-dialog-warning-symbolic adw-status-page-icon app-status-page-icon"></span>
+    <h1 class="adw-status-page-title">500 - Internal Server Error</h1>
+    <p class="adw-status-page-description">Sorry, something went wrong on our end. Please try again later.</p>
+    <div class="adw-status-page-actions">
+        <a href="{{ url_for('general.index') }}" class="adw-button suggested-action">Go to Homepage</a>
+    </div>
+</div>
 {% endblock %}

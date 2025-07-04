@@ -5,15 +5,14 @@
 {% block header_title %}Create New Post{% endblock %}
 
 {% block content %}
-<div class="form-container"> {# Replaced adw-clamp and content-clamp #}
-  <div class="adw-preferences-page"> {# This can be kept for overall page structure if desired #}
-    {# Removed header from content as it's now in the main header bar #}
+<div class="adw-clamp"> {# Use adw-clamp from base.html for width constraint #}
+    <h1 class="adw-title-1 form-page-header" style="text-align: center; margin-bottom: var(--spacing-l);">Create New Post</h1>
     <form method="POST" action="{{ url_for('post.create_post') }}" novalidate class="stacked-form">
         {{ form.hidden_tag() }} {# CSRF token #}
 
-        <section class="adw-list-box form-section"> {# Using list-box for sections #}
+        <section class="adw-list-box form-section" style="margin-bottom: var(--spacing-l);">
             <header class="adw-list-box-header">
-                <h3 class="adw-title-2" id="post-details-title">Post Details</h3> {# Changed from preferences-group title #}
+                <h2 class="adw-title-2" id="post-details-title">Post Details</h2>
             </header>
 
             {# Title Entry Row #}
@@ -22,24 +21,22 @@
                 <input type="text" id="{{ form.title.id or 'title_input' }}" name="{{ form.title.name }}" value="{{ form.title.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Enter post title" {% if form.title.flags.required %}required{% endif %}>
             </div>
             {% if form.title.errors %}
-            <div class="adw-row form-field-error">
+            <div class="adw-row form-field-error" style="padding-left: var(--spacing-m); padding-right: var(--spacing-m);">
                 <span class="adw-label caption error-text">{{ form.title.errors|join(' ') }}</span>
             </div>
             {% endif %}
 
             {# Content Textarea #}
-            <div class="form-field-row content-field-row {{ 'has-error' if form.content.errors else '' }}">
-                <label for="{{ form.content.id or 'content_input' }}" class="adw-label form-field-label-block">{{ form.content.label.text }}</label>
-                <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-entry adw-textarea" rows="10" placeholder="Enter your post content here...">{{ form.content.data or '' }}</textarea>
+            <div class="adw-action-row column-layout {{ 'has-error' if form.content.errors else '' }}" style="padding-bottom: var(--spacing-m);">
+                <label for="{{ form.content.id or 'content_input' }}" class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
                 {% if form.content.errors %}
-                <div class="form-field-error">
-                    <span class="adw-label caption error-text">{{ form.content.errors|join(' ') }}</span>
-                </div>
+                    <span class="adw-action-row-subtitle error-text" style="margin-bottom: var(--spacing-xs);">{{ form.content.errors|join(' ') }}</span>
                 {% endif %}
+                <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-entry" rows="10" placeholder="Enter your post content here..." style="width: 100%; min-height: 150px; box-sizing: border-box;">{{ form.content.data or '' }}</textarea>
             </div>
         </section>
 
-        <section class="adw-list-box form-section">
+        <section class="adw-list-box form-section" style="margin-bottom: var(--spacing-l);">
             <header class="adw-list-box-header">
                 <h3 class="adw-title-2" id="categories-title">{{ form.categories.label.text }}</h3>
             </header>

@@ -2,44 +2,45 @@
 
 {% block title %}Edit Post: {{ post.title }}{% endblock %}
 
-{% block header_title %}Edit Post: {{ post.title }}{% endblock %}
+{% block header_title %}Edit Post{% endblock %} {# Keep it concise, post title is in the form #}
 
 {% block content %}
-<div class="adw-clamp content-clamp">
-  <div class="adw-preferences-page">
-    {# Removed header from content as it's now in the main header bar #}
-    <form method="POST" action="{{ url_for('post.edit_post', post_id=post.id) }}" novalidate>
+<div class="adw-clamp"> {# Use adw-clamp from base.html #}
+    <h1 class="adw-title-1 form-page-header" style="text-align: center; margin-bottom: var(--spacing-l);">Edit Post: {{ post.title | truncate(50, True) }}</h1>
+    <form method="POST" action="{{ url_for('post.edit_post', post_id=post.id) }}" novalidate class="stacked-form">
         {{ form.hidden_tag() }} {# CSRF token #}
 
-        <div class="adw-preferences-group" role="group" aria-labelledby="edit-post-details-title">
-            <div class="adw-preferences-group__title-container">
-                <h3 class="adw-preferences-group__title title-3" id="edit-post-details-title">Post Details</h3>
-            </div>
+        <section class="adw-list-box form-section" style="margin-bottom: var(--spacing-l);">
+            <header class="adw-list-box-header">
+                <h2 class="adw-title-2" id="edit-post-details-title">Post Details</h2>
+            </header>
 
             {# Title Entry Row #}
             <div class="adw-entry-row {{ 'has-error' if form.title.errors else '' }}">
-                <label for="{{ form.title.id or 'title_input' }}" class="adw-entry-row__title">{{ form.title.label.text }}</label>
                 <div class="adw-entry-row-text-content">
-                    {% if form.title.errors %}<span class="adw-entry-row__subtitle error-text">{{ form.title.errors|join(' ') }}</span>{% endif %}
+                    <label for="{{ form.title.id or 'title_input' }}" class="adw-entry-row-title">{{ form.title.label.text }}</label>
+                    {% if form.title.errors %}
+                        <span class="adw-entry-row-subtitle error-text">{{ form.title.errors|join(' ') }}</span>
+                    {% endif %}
                 </div>
-                <input type="text" id="{{ form.title.id or 'title_input' }}" name="{{ form.title.name }}" value="{{ form.title.data or '' }}" class="adw-entry row-input" placeholder="Enter post title" {% if form.title.flags.required %}required{% endif %}>
+                <input type="text" id="{{ form.title.id or 'title_input' }}" name="{{ form.title.name }}" value="{{ form.title.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Enter post title" {% if form.title.flags.required %}required{% endif %}>
             </div>
 
-            {# Content Textarea - simplified, not in expander for edit form #}
-            <div class="adw-preferences-group" role="group" aria-labelledby="edit-content-title">
-                 <div class="adw-preferences-group__title-container">
-                    <h3 class="adw-preferences-group__title title-3" id="edit-content-title">{{ form.content.label.text }}</h3>
-                     {% if form.content.errors %}<div class="error-text form-field-error">{{ form.content.errors|join(' ') }}</div>{% endif %}
-                </div>
-                <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-textarea content-textarea" rows="15">{{ form.content.data or '' }}</textarea>
+            {# Content Textarea #}
+            <div class="adw-action-row column-layout {{ 'has-error' if form.content.errors else '' }}" style="padding-bottom: var(--spacing-m);">
+                <label for="{{ form.content.id or 'content_input' }}" class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
+                {% if form.content.errors %}
+                    <span class="adw-action-row-subtitle error-text" style="margin-bottom: var(--spacing-xs);">{{ form.content.errors|join(' ') }}</span>
+                {% endif %}
+                <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-entry" rows="15" placeholder="Enter your post content here..." style="width: 100%; min-height: 200px; box-sizing: border-box;">{{ form.content.data or '' }}</textarea>
             </div>
-        </div>
+        </section>
 
-        <div class="adw-preferences-group" role="group" aria-labelledby="edit-categories-title">
-            <div class="adw-preferences-group__title-container">
-                <h3 class="adw-preferences-group__title title-3" id="edit-categories-title">{{ form.categories.label.text }}</h3>
-            </div>
-            <div class="adw-list-box {{ 'has-error' if form.categories.errors else '' }}">
+        <section class="adw-list-box form-section" style="margin-bottom: var(--spacing-l);">
+            <header class="adw-list-box-header">
+                <h2 class="adw-title-2" id="edit-categories-title">{{ form.categories.label.text }}</h2>
+            </header>
+            <div class="{{ 'has-error' if form.categories.errors else '' }}">
                 {% for subfield in form.categories %}
                 <div class="adw-action-row adw-checkbox-row">
                      <div class="adw-action-row__text checkbox-label-container">
@@ -48,68 +49,119 @@
                     </div>
                 </div>
                 {% endfor %}
-                {% if form.categories.errors %}
-                <div class="adw-action-row error-row">
-                    <span class="adw-action-row__subtitle error-text">{{ form.categories.errors|join('; ') }}</span>
-                </div>
-                {% endif %}
             </div>
-        </div>
+            {% if form.categories.errors %}
+            <div class="adw-action-row error-row form-field-error" style="padding-left: var(--spacing-m); padding-right: var(--spacing-m);">
+                <span class="adw-label caption error-text">{{ form.categories.errors|join('; ') }}</span>
+            </div>
+            {% endif %}
+        </section>
 
-        <div class="adw-preferences-group" role="group" aria-labelledby="edit-tags-title">
-            <div class="adw-preferences-group__title-container">
-                <h3 class="adw-preferences-group__title title-3" id="edit-tags-title">Tags</h3>
-            </div>
+        <section class="adw-list-box form-section" style="margin-bottom: var(--spacing-l);">
+             <header class="adw-list-box-header">
+                <h2 class="adw-title-2" id="edit-tags-title">Tags</h2>
+            </header>
             <div class="adw-entry-row {{ 'has-error' if form.tags_string.errors else '' }}">
-                <label for="{{ form.tags_string.id or 'tags_input' }}" class="adw-entry-row__title">{{ form.tags_string.label.text }}</label>
                 <div class="adw-entry-row-text-content">
-                    <span class="adw-entry-row__subtitle">
-                        {% if form.tags_string.errors %} <span class="error-text">{{ form.tags_string.errors|join(' ') }}</span>
-                        {% else %} Comma-separated values.
-                        {% endif %}
-                    </span>
+                    <label for="{{ form.tags_string.id or 'tags_input' }}" class="adw-entry-row-title">{{ form.tags_string.label.text }}</label>
+                    {% if form.tags_string.errors %}
+                        <span class="adw-entry-row-subtitle error-text">{{ form.tags_string.errors|join(' ') }}</span>
+                    {% else %}
+                         <span class="adw-entry-row-subtitle">Comma-separated values.</span>
+                    {% endif %}
                 </div>
-                <input type="text" id="{{ form.tags_string.id or 'tags_input' }}" name="{{ form.tags_string.name }}" value="{{ form.tags_string.data or '' }}" class="adw-entry row-input" placeholder="e.g., tech, travel, food">
+                <input type="text" id="{{ form.tags_string.id or 'tags_input' }}" name="{{ form.tags_string.name }}" value="{{ form.tags_string.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="e.g., tech, travel, food">
             </div>
-        </div>
+        </section>
 
-        <div class="form-actions-container form-actions-space-between">
-            <div class="actions-start"> <!-- Group for left-aligned buttons -->
+        <div class="form-actions-container form-actions-space-between" style="margin-top: var(--spacing-l);">
+            <div class="actions-start">
                 <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat">Cancel</a>
                 {% if delete_form %}
-                {# Button to trigger the dialog for delete #}
                 <button type="button" id="open-edit-delete-post-dialog-btn" class="adw-button destructive-action">Delete Post</button>
                 {% endif %}
             </div>
-            <div class="actions-end"> <!-- Group for right-aligned buttons -->
+            <div class="actions-end">
                 {{ form.save_draft(class="adw-button") }}
                 {{ form.publish(class="adw-button suggested-action") }}
             </div>
         </div>
-    </form> {# This is the main edit form, ensure it closes before the dialog #}
+    </form>
 
     {% if delete_form %}
-    {# The actual form that will be submitted by the dialog's confirm button - ensure it's outside the main form or handled carefully #}
-    {# This form is not directly part of the flex layout, it's for the dialog action #}
     <form method="POST" action="{{ url_for('post.delete_post', post_id=post.id) }}" id="delete-post-form-{{ post.id }}" class="delete-post-form-inline" style="display: none;">
-        {{ delete_form.hidden_tag() }} {# CSRF token #}
+        {{ delete_form.hidden_tag() }}
     </form>
-    <adw-dialog id="edit-delete-post-confirm-dialog" title="Confirm Deletion">
-        <div slot="content">
+    <div class="adw-dialog" id="edit-delete-post-confirm-dialog" role="alertdialog" aria-labelledby="delete-dialog-title-{{post.id}}" aria-modal="true" hidden>
+        <div class="adw-dialog-header">
+            <h3 class="adw-dialog-title" id="delete-dialog-title-{{post.id}}">Confirm Deletion</h3>
+            <button class="adw-button circular flat adw-dialog-close-button" aria-label="Close dialog">
+                <span class="adw-icon icon-actions-close-symbolic"></span>
+            </button>
+        </div>
+        <div class="adw-dialog-content">
             <p class="adw-label body">Are you sure you want to permanently delete this post titled "<strong>{{ post.title|escape }}</strong>"? This action cannot be undone.</p>
         </div>
-        <div slot="buttons">
+        <div class="adw-dialog-footer">
             <button id="cancel-edit-delete-post-btn" class="adw-button flat">Cancel</button>
             <button id="confirm-edit-delete-post-btn" class="adw-button destructive-action">Delete</button>
         </div>
-    </adw-dialog>
+    </div>
     {% endif %}
-
-  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
-{# JavaScript for dialogs will be moved to adwaita-web/js/app-layout.js #}
+{# JavaScript for dialogs. Assuming app-layout.js or a new components.js will handle dialog logic. #}
+{# For now, the basic JS to open/close this specific dialog if not handled globally: #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const openDialogBtn = document.getElementById('open-edit-delete-post-dialog-btn');
+    const dialog = document.getElementById('edit-delete-post-confirm-dialog');
+    const cancelBtn = document.getElementById('cancel-edit-delete-post-btn');
+    const confirmBtn = document.getElementById('confirm-edit-delete-post-btn');
+    const deleteForm = document.getElementById('delete-post-form-{{ post.id }}');
+    const closeDialogBtn = dialog ? dialog.querySelector('.adw-dialog-close-button') : null;
+
+    function showDialog(d) {
+        if (d) {
+            d.removeAttribute('hidden');
+            const firstFocusable = d.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (firstFocusable) {
+                firstFocusable.focus();
+            }
+        }
+    }
+
+    function hideDialog(d) {
+        if (d) {
+            d.setAttribute('hidden', '');
+        }
+    }
+
+    if (openDialogBtn && dialog) {
+        openDialogBtn.addEventListener('click', () => showDialog(dialog));
+    }
+    if (cancelBtn && dialog) {
+        cancelBtn.addEventListener('click', () => hideDialog(dialog));
+    }
+    if (closeDialogBtn && dialog) {
+        closeDialogBtn.addEventListener('click', () => hideDialog(dialog));
+    }
+    if (confirmBtn && deleteForm && dialog) {
+        confirmBtn.addEventListener('click', () => {
+            deleteForm.submit();
+            hideDialog(dialog);
+        });
+    }
+    if (dialog) {
+        dialog.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                hideDialog(dialog);
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

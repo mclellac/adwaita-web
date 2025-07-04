@@ -105,22 +105,42 @@
 
 <div class="app-body-container"> {# NEW: Main container for sidebar + content #}
     <aside class="app-sidebar" id="app-sidebar"> {# Added id for ARIA #}
-        <nav class="sidebar-nav" aria-label="Main Navigation">
-            <ul>
+        <nav class="adw-list-box flat sidebar-nav" aria-label="Main Navigation">
             {% block sidebar_nav %}
-                <li><a href="{{ url_for('general.index') }}" class="{{ 'active' if request.endpoint == 'general.index' else '' }}">Home</a></li>
+                <a href="{{ url_for('general.index') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.index' }}">
+                    <span class="adw-action-row-icon icon-actions-go-home-symbolic"></span>
+                    <span class="adw-action-row-title">Home</span>
+                </a>
             {% if current_user.is_authenticated %}
-                <li><a href="{{ url_for('post.create_post') }}" class="{{ 'active' if request.endpoint == 'post.create_post' else '' }}">New Post</a></li>
-                <li><a href="{{ url_for('general.dashboard') }}" class="{{ 'active' if request.endpoint == 'general.dashboard' else '' }}">Dashboard</a></li>
+                <a href="{{ url_for('post.create_post') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'post.create_post' }}">
+                    <span class="adw-action-row-icon icon-actions-document-new-symbolic"></span>
+                    <span class="adw-action-row-title">New Post</span>
+                </a>
+                <a href="{{ url_for('general.dashboard') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.dashboard' }}">
+                    <span class="adw-action-row-icon icon-apps-dashboard-symbolic"></span> {# Or a more generic icon #}
+                    <span class="adw-action-row-title">Dashboard</span>
+                </a>
             {% if current_user.is_admin %}
-                <li><a href="{{ url_for('admin.view_flags') }}" class="{{ 'active' if request.endpoint == 'admin.view_flags' else '' }}">Review Flags</a></li>
-                <li><a href="{{ url_for('admin.site_settings') }}" class="{{ 'active' if request.endpoint == 'admin.site_settings' else '' }}">Site Settings</a></li>
+                <a href="{{ url_for('admin.view_flags') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'admin.view_flags' }}">
+                    <span class="adw-action-row-icon icon-status-flag-symbolic"></span>
+                    <span class="adw-action-row-title">Review Flags</span>
+                </a>
+                <a href="{{ url_for('admin.site_settings') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'admin.site_settings' }}">
+                    <span class="adw-action-row-icon icon-actions-document-properties-symbolic"></span>
+                    <span class="adw-action-row-title">Site Settings</span>
+                </a>
             {% endif %}
             {% endif %}
-                <li><a href="{{ url_for('general.about_page') }}" class="{{ 'active' if request.endpoint == 'general.about_page' else '' }}">About</a></li>
-                <li><a href="{{ url_for('general.contact_page') }}" class="{{ 'active' if request.endpoint == 'general.contact_page' else '' }}">Contact</a></li>
+                {# Separator or Group for About/Contact if desired, or just continue list #}
+                <a href="{{ url_for('general.about_page') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.about_page' }}">
+                    <span class="adw-action-row-icon icon-actions-help-about-symbolic"></span>
+                    <span class="adw-action-row-title">About</span>
+                </a>
+                <a href="{{ url_for('general.contact_page') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.contact_page' }}">
+                    <span class="adw-action-row-icon icon-content-mail-symbolic"></span>
+                    <span class="adw-action-row-title">Contact</span>
+                </a>
             {% endblock sidebar_nav %}
-            </ul>
         </nav>
     </aside>
 

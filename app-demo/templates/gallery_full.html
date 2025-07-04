@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user_profile.username }}'s Photo Gallery{% endblock %}
+
+{% block header_title %}{{ user_profile.username }}'s Photo Gallery{% endblock %}
+
+{% block header_actions_start %}
+    <a href="{{ url_for('profile.view_profile', username=user_profile.username) }}" class="adw-button">
+        <span class="adw-icon icon-actions-go-previous-symbolic"></span> Back to Profile
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="adw-clamp adw-clamp-xl">
+    {% if gallery_photos %}
+        <adw-carousel show-nav-buttons indicator-style="dots" loop="true" style="margin-top: var(--spacing-l); border: 1px solid var(--border-color); border-radius: var(--border-radius-large); overflow: hidden;">
+            {% for photo in gallery_photos %}
+            <figure class="adw-carousel-slide" style="margin:0; padding:0; height: 500px; display:flex; flex-direction: column; align-items:center; justify-content:center; background-color: var(--window-bg-color);">
+                <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo.image_filename) }}"
+                     alt="{{ photo.caption or 'Gallery image by ' ~ user_profile.username }}"
+                     style="max-width: 100%; max-height: {% if photo.caption %}calc(100% - 40px){% else %}100%{% endif %}; object-fit: contain;">
+                {% if photo.caption %}
+                <figcaption style="padding: var(--spacing-s); text-align: center; color: var(--text-color-secondary); font-size: var(--font-size-small);">
+                    {{ photo.caption }}
+                </figcaption>
+                {% endif %}
+            </figure>
+            {% endfor %}
+        </adw-carousel>
+    {% else %}
+        <div class="adw-status-page" style="margin-top: var(--spacing-xl);">
+            <span class="adw-icon icon-media-image-symbolic adw-status-page-icon app-status-page-icon"></span>
+            <h3 class="adw-status-page-title">Empty Gallery</h3>
+            <p class="adw-status-page-description">{{ user_profile.username }} has not uploaded any photos to their gallery yet.</p>
+             {% if current_user == user_profile %}
+                <p class="adw-status-page-description">You can upload photos from your profile page.</p>
+            {% else %}
+                <p class="adw-status-page-description">Check back later!</p>
+            {% endif %}
+            <div class="adw-status-page-actions">
+                <a href="{{ url_for('profile.view_profile', username=user_profile.username) }}" class="adw-button">Back to Profile</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

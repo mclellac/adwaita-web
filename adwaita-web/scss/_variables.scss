@@ -287,7 +287,7 @@ $accent-color-definitions-map: (
   --list-row-selected-fg-color: var(--accent-fg-color); // Use current accent foreground
 
   // View and Row Backgrounds
-  --view-bg-color: #{$adw-window-background-light}; // #fafafb for views/listboxes
+  --view-bg-color: #{$adw-light-1}; // #ffffff for views/listboxes (changed from #fafafb)
   --list-row-bg-color: #{$adw-light-1}; // #ffffff for rows themselves (widgets)
   --list-row-hover-bg-color: #{rgba($adw-dark-5, 0.04)}; // Hover for rows
   --list-row-active-bg-color: #{rgba($adw-dark-5, 0.08)}; // Active for rows
