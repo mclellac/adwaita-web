@@ -3,12 +3,30 @@
 # This script handles the initial setup of the database,
 # including table creation and initial user setup.
 
+import os
+import sys
 import argparse
 import getpass  # For hidden password input
 
+# Adjust sys.path to allow imports from the app_demo package
+# when running this script directly.
+# This adds the parent directory of the script's directory (app-demo) to sys.path,
+# which is the project root.
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+import importlib
+
 # Import create_app and necessary models/db instance
-from app_demo import create_app, db # Post model not used in this script currently
-from app_demo.models import User
+# The actual directory/package name is 'app-demo'
+# We use importlib to load it because of the hyphen.
+app_module = importlib.import_module("app-demo")
+create_app = app_module.create_app
+db = app_module.db
+User = app_module.models.User
+
 
 def create_initial_user(flask_app):
     """

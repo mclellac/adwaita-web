@@ -88,8 +88,9 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
         If you are using the default application user `postgres` and have set its password to `postgres`, you might not need to create a new user, but ensure the `postgres` user has a password set in the database.
 
     *   **Initialize Database and Create Admin User**:
-        After configuring your environment variables and ensuring the database and user exist, run the setup script (ensure you are in the `app-demo` directory):
+        After configuring your environment variables and ensuring the database and user exist, navigate into the `app-demo` directory if you aren't already there. Then, run the setup script:
         ```bash
+        # Make sure you are in the app-demo directory
         python setup_db.py
         ```
         This script will:

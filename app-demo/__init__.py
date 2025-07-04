@@ -13,6 +13,10 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
+# Import models at the module level so they are registered with SQLAlchemy
+# and accessible via the package for scripts like setup_db.py
+from . import models # This will import app-demo/models.py
+
 def create_app(config_name=None):
     app = Flask(__name__, instance_relative_config=True)
 
@@ -60,9 +64,8 @@ def create_app(config_name=None):
     login_manager.login_message_category = 'info'
     csrf.init_app(app)
 
-    # Import models here to ensure they are registered with SQLAlchemy
-    # after db has been initialized with the app.
-    from . import models # This will import app-demo/models.py
+    # Models are imported at the module level now, no need to re-import here
+    # Ensure they are registered with SQLAlchemy (which happens when models.py is imported)
 
     @login_manager.user_loader
     def load_user(user_id_str):
