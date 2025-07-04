@@ -23,6 +23,7 @@ $adw-dark-1: #77767b; $adw-dark-2: #5e5c64; $adw-dark-3: #3d3846; $adw-dark-4: #
 
 // Adwaita specific shades not in the general palette
 $adw-window-background-light: #fafafb; // Standard light window background
+$adw-sidebar-background-light: #f2f2f2; // Standard light sidebar background
 
 // --- General SCSS Variables (not CSS custom properties, used for calculations and defaults) ---
 $line-height-base: 1.5;
@@ -328,6 +329,9 @@ $accent-color-definitions-map: (
   --listbox-box-shadow-dark: 0 0 0 1px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.25);
   --listbox-box-shadow: var(--listbox-box-shadow-light);
 
+  // Sidebar
+  --sidebar-bg-color: #{$adw-sidebar-background-light};
+
 
   &.theme-dark {
     // Dark Theme Overrides
@@ -425,6 +429,7 @@ $accent-color-definitions-map: (
     // --accent-color-rgb: ...; // This would need to change if default accent is different in dark
                                 // Or be set by the accent-* loop above if accents have specific RGBs
     --listbox-box-shadow: var(--listbox-box-shadow-dark);
+    --sidebar-bg-color: #{$headerbar-background-color-dark}; // Dark sidebar usually matches headerbar
   }
 
   // Specific accent color variable overrides for light theme (when .accent-color class is present)
