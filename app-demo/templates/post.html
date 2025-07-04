@@ -68,20 +68,6 @@
         </section>
         {% endif %}
 
-        <section class="share-buttons-section">
-            <h4 class="adw-title-4">Share this post:</h4>
-            <div class="adw-box adw-box-spacing-s share-buttons-container">
-                <a href="https://twitter.com/intent/tweet?url={{ request.url_root[:-1] }}{{ url_for('post.view_post', post_id=post.id) }}&text={{ post.title|urlencode }}"
-                    target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter" class="adw-button flat">Twitter</a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url_root[:-1] }}{{ url_for('post.view_post', post_id=post.id) }}"
-                    target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook" class="adw-button flat">Facebook</a>
-                <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.url_root[:-1] }}{{ url_for('post.view_post', post_id=post.id) }}&title={{ post.title|urlencode }}&summary={{ (post.content|striptags|truncate(120))|urlencode }}"
-                    target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn" class="adw-button flat">LinkedIn</a>
-                <a href="mailto:?subject={{ post.title|urlencode }}&body=Check%20out%20this%20post%3A%20{{ request.url_root[:-1] }}{{ url_for('post.view_post', post_id=post.id) }}"
-                    aria-label="Share via Email" class="adw-button flat">Email</a>
-            </div>
-        </section>
-
         {% if post.author == current_user %}
         <div class="post-actions-container adw-box adw-box-spacing-s">
             <a href="{{ url_for('post.edit_post', post_id=post.id) }}" class="adw-button">Edit Post</a>
