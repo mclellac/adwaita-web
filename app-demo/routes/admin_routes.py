@@ -103,7 +103,7 @@ def site_settings():
 
     # Populate form for GET request or if validation failed on POST
     if request.method == 'GET':
-        form.site_title.data = SiteSetting.get('site_title', 'My Adwaita Blog')
+        form.site_title.data = SiteSetting.get('site_title', 'Adwaita Social Demo') # Updated default
         form.posts_per_page.data = str(SiteSetting.get('posts_per_page', current_app.config.get('POSTS_PER_PAGE', 10)))
         form.allow_registrations.data = SiteSetting.get('allow_registrations', False)
 

@@ -279,6 +279,35 @@ class Notification(db.Model):
     def __repr__(self):
         return f'<Notification {self.id} type={self.type} user_id={self.user_id} is_read={self.is_read}>'
 
+class Activity(db.Model):
+    __tablename__ = 'activity'
+    id = db.Column(db.Integer, primary_key=True)
+    # User who performed the activity (actor)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    type = db.Column(db.String(50), nullable=False) # 'created_post', 'started_following', 'liked_post', 'commented_on_post'
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
+
+    # Target fields - store IDs of related objects
+    target_post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
+    # For 'started_following', this is the user being followed.
+    target_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    target_comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
+
+    # Relationships to fetch related objects
+    # The user who performed the activity (actor)
+    actor = db.relationship('User', foreign_keys=[user_id], backref=db.backref('activities', lazy='dynamic', order_by=lambda: desc(Activity.timestamp)))
+
+    target_post = db.relationship('Post', foreign_keys=[target_post_id])
+    # User being targeted by the activity (e.g., user being followed)
+    # Need a different backref name if User.activities is already taken by the actor's activities.
+    # Or, access this target user differently if not frequently needed as a direct backref on User.
+    # For now, let's assume we primarily query activities and then get target_user.
+    target_user = db.relationship('User', foreign_keys=[target_user_id])
+    target_comment = db.relationship('Comment', foreign_keys=[target_comment_id])
+
+    def __repr__(self):
+        return f'<Activity {self.id} type={self.type} user_id={self.user_id}>'
+
 
 class SiteSetting(db.Model):
     id = db.Column(db.Integer, primary_key=True)

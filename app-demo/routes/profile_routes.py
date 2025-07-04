@@ -401,6 +401,16 @@ def follow_user(username):
             db.session.add(notification)
             current_app.logger.info(f"Notification created for user {user_to_follow.username} about new follower {current_user.username}.")
 
+            # Create Activity entry for new follow
+            from ..models import Activity # Local import
+            activity = Activity(
+                user_id=current_user.id, # The user who performed the follow
+                type='started_following',
+                target_user_id=user_to_follow.id # The user who was followed
+            )
+            db.session.add(activity)
+            current_app.logger.info(f"Activity 'started_following' logged for user {current_user.username} targeting user {user_to_follow.username}.")
+
             db.session.commit()
             flash(f"You are now following {username}.", "success")
             current_app.logger.info(f"User {current_user.username} followed {username}.")

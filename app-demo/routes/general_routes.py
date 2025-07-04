@@ -98,34 +98,41 @@ def contact_page():
 def activity_feed():
     current_app.logger.info(f"Accessing activity feed for user {current_user.username}.")
     page = request.args.get('page', 1, type=int)
-    per_page = current_app.config.get('POSTS_PER_PAGE', 10) # Use existing config for posts per page
+    per_page = current_app.config.get('ACTIVITIES_PER_PAGE', 20) # New config for activities per page
 
-    # Get IDs of users the current user is following
-    followed_users = current_user.followed.all() # .all() executes the query
-    if not followed_users:
-        current_app.logger.debug(f"User {current_user.username} is not following anyone. Feed will be empty.")
-        posts, pagination = [], None
-        return render_template('feed.html', posts=posts, pagination=pagination, followed_users_count=0)
+    # Get users the current user is following
+    followed_users_list = current_user.followed.all() # .all() executes the query
 
-    followed_user_ids = [user.id for user in followed_users]
-    current_app.logger.debug(f"User {current_user.username} is following users with IDs: {followed_user_ids}.")
+    activities_list, pagination = [], None
+    followed_users_count = len(followed_users_list)
 
-    try:
-        # Query posts from followed users, only published, ordered by published_at then created_at
-        query = Post.query.filter(
-            Post.user_id.in_(followed_user_ids),
-            Post.is_published == True # noqa E712 (SQLAlchemy syntax for == True)
-        ).order_by(Post.published_at.desc(), Post.created_at.desc())
+    if not followed_users_list:
+        current_app.logger.debug(f"User {current_user.username} is not following anyone. Feed will be based on their own activities if desired, or empty.")
+        # Optionally, show user's own activities if they follow no one, or just show empty.
+        # For now, let's make it empty if not following anyone, for a cleaner "followed feed".
+        # To include own activities:
+        # activity_query = Activity.query.filter_by(user_id=current_user.id)...
+        pass # Will render with empty activities_list
+    else:
+        followed_user_ids = [user.id for user in followed_users_list]
+        current_app.logger.debug(f"User {current_user.username} is following users with IDs: {followed_user_ids}.")
 
-        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-        posts = pagination.items
-        current_app.logger.debug(f"Found {len(posts)} posts for feed page {page} for user {current_user.username}. Total: {pagination.total}")
-    except Exception as e:
-        current_app.logger.error(f"Error fetching posts for activity feed for user {current_user.username}: {e}", exc_info=True)
-        flash("Error loading your activity feed. Please try again later.", "danger")
-        posts, pagination = [], None
+        try:
+            from ..models import Activity # Local import
+            # Query activities from followed users, ordered by timestamp
+            activity_query = Activity.query.filter(
+                Activity.user_id.in_(followed_user_ids)
+            ).order_by(Activity.timestamp.desc())
 
-    return render_template('feed.html', posts=posts, pagination=pagination, followed_users_count=len(followed_user_ids))
+            pagination = activity_query.paginate(page=page, per_page=per_page, error_out=False)
+            activities_list = pagination.items
+            current_app.logger.debug(f"Found {len(activities_list)} activities for feed page {page} for user {current_user.username}. Total: {pagination.total}")
+        except Exception as e:
+            current_app.logger.error(f"Error fetching activities for feed for user {current_user.username}: {e}", exc_info=True)
+            flash("Error loading your activity feed. Please try again later.", "danger")
+            # activities_list and pagination will remain empty or None
+
+    return render_template('feed.html', activities_list=activities_list, pagination=pagination, followed_users_count=followed_users_count)
 
 
 @general_bp.route('/users/find', methods=['GET'])
