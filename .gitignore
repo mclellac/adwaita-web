@@ -1,7 +1,11 @@
 # Sass cache
 .sass-cache/
 
-# Generated Adwaita-Web assets
+# Compiled Adwaita Skin CSS (source location)
+adwaita-web/css/adwaita-skin.css
+adwaita-web/css/adwaita-skin.css.map
+
+# Generated Adwaita-Web assets (destination in app-demo)
 app-demo/static/css/*
 app-demo/static/js/*
 app-demo/static/fonts

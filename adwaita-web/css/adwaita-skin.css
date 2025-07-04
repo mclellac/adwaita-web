@@ -132,6 +132,7 @@
   --listbox-box-shadow-dark: 0 0 0 1px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.25);
   --listbox-box-shadow: var(--listbox-box-shadow-light);
   --sidebar-bg-color: #f2f2f2;
+  --card-bg-color: #ffffff;
 }
 :root.theme-dark {
   --body-bg-color: #242424;
@@ -202,6 +203,7 @@
   --text-color-rgb: 255,255,255;
   --listbox-box-shadow: var(--listbox-box-shadow-dark);
   --sidebar-bg-color: #303030;
+  --card-bg-color: #303030;
 }
 :root.theme-dark.accent-blue {
   --accent-color: #62a0ea;
@@ -3662,6 +3664,49 @@ body {
 }
 .comments-list.adw-list-box.flat .comment-card {
   border-bottom: none;
+}
+.app-sidebar .sidebar-nav.adw-list-box { /* In case the class was not removed from HTML, override */
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+.app-sidebar .sidebar-nav.adw-list-box .adw-action-row {
+  padding: 0;
+  min-height: auto;
+  border-bottom: none;
+}
+.app-sidebar .sidebar-nav.adw-list-box .adw-action-row:hover {
+  background-color: transparent;
+}
+.app-sidebar .sidebar-nav ul {
+  list-style: none;
+  padding: var(--spacing-s) 0;
+  margin: 0;
+}
+.app-sidebar .sidebar-nav li {
+  margin: 0;
+}
+.app-sidebar .sidebar-nav a {
+  display: block;
+  padding: var(--spacing-s) var(--spacing-l);
+  text-decoration: none;
+  color: var(--text-color);
+  border-radius: var(--border-radius-medium);
+  margin: 0 var(--spacing-s) var(--spacing-xs) var(--spacing-s);
+}
+.app-sidebar .sidebar-nav a:hover {
+  background-color: rgba(var(--text-color-rgb, 0, 0, 0), 0.06);
+}
+.app-sidebar .sidebar-nav a:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
+  background-color: rgba(var(--text-color-rgb, 0, 0, 0), 0.06);
+}
+.app-sidebar .sidebar-nav a.active {
+  background-color: rgba(var(--accent-color-rgb, 0, 100, 200), 0.15);
+  color: var(--accent-color);
+  font-weight: bold;
 }
 
 /*# sourceMappingURL=adwaita-skin.css.map */

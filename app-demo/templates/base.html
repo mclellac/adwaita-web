@@ -105,40 +105,22 @@
 
 <div class="app-body-container"> {# NEW: Main container for sidebar + content #}
     <aside class="app-sidebar" id="app-sidebar"> {# Added id for ARIA #}
-        {# Sidebar navigation will go here #}
-        <nav class="sidebar-nav adw-list-box flat" aria-label="Main Navigation">
+        <nav class="sidebar-nav" aria-label="Main Navigation">
+            <ul>
             {% block sidebar_nav %}
-            <a href="{{ url_for('general.index') }}" class="adw-action-row activatable">
-                {# <span class="adw-action-row-prefix"><span class="adw-icon icon-content-home-symbolic"></span></span> #}
-                <span class="adw-action-row-title">Home</span>
-            </a>
+                <li><a href="{{ url_for('general.index') }}" class="{{ 'active' if request.endpoint == 'general.index' else '' }}">Home</a></li>
             {% if current_user.is_authenticated %}
-            <a href="{{ url_for('post.create_post') }}" class="adw-action-row activatable">
-                {# <span class="adw-action-row-prefix"><span class="adw-icon icon-actions-document-new-symbolic"></span></span> #}
-                <span class="adw-action-row-title">New Post</span>
-            </a>
-            <a href="{{ url_for('general.dashboard') }}" class="adw-action-row activatable">
-                {# <span class="adw-action-row-prefix"><span class="adw-icon icon-ui-dashboard-symbolic"></span></span> #}
-                <span class="adw-action-row-title">Dashboard</span>
-            </a>
+                <li><a href="{{ url_for('post.create_post') }}" class="{{ 'active' if request.endpoint == 'post.create_post' else '' }}">New Post</a></li>
+                <li><a href="{{ url_for('general.dashboard') }}" class="{{ 'active' if request.endpoint == 'general.dashboard' else '' }}">Dashboard</a></li>
             {% if current_user.is_admin %}
-            <a href="{{ url_for('admin.view_flags') }}" class="adw-action-row activatable">
-                <span class="adw-action-row-title">Review Flags</span>
-            </a>
-            <a href="{{ url_for('admin.site_settings') }}" class="adw-action-row activatable">
-                <span class="adw-action-row-title">Site Settings</span>
-            </a>
+                <li><a href="{{ url_for('admin.view_flags') }}" class="{{ 'active' if request.endpoint == 'admin.view_flags' else '' }}">Review Flags</a></li>
+                <li><a href="{{ url_for('admin.site_settings') }}" class="{{ 'active' if request.endpoint == 'admin.site_settings' else '' }}">Site Settings</a></li>
             {% endif %}
             {% endif %}
-            <a href="{{ url_for('general.about_page') }}" class="adw-action-row activatable">
-                {# <span class="adw-action-row-prefix"><span class="adw-icon icon-actions-help-about-symbolic"></span></span> #}
-                <span class="adw-action-row-title">About</span>
-            </a>
-            <a href="{{ url_for('general.contact_page') }}" class="adw-action-row activatable">
-                {# <span class="adw-action-row-prefix"><span class="adw-icon icon-ui-contact-symbolic"></span></span> #}
-                <span class="adw-action-row-title">Contact</span>
-            </a>
+                <li><a href="{{ url_for('general.about_page') }}" class="{{ 'active' if request.endpoint == 'general.about_page' else '' }}">About</a></li>
+                <li><a href="{{ url_for('general.contact_page') }}" class="{{ 'active' if request.endpoint == 'general.contact_page' else '' }}">Contact</a></li>
             {% endblock sidebar_nav %}
+            </ul>
         </nav>
     </aside>
 
