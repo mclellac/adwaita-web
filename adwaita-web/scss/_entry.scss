@@ -7,8 +7,8 @@
 // Define default values for local entry variables, these can be overridden by specific contexts (like entry-row)
 // by setting these variables on the .adw-entry element itself or a parent.
 :root {
-  --entry-padding-vertical-default: var(--spacing-s);      // e.g., 9px (Increased from xs for better vertical margin)
-  --entry-padding-horizontal-default: var(--spacing-s);     // e.g., 9px
+  --entry-padding-vertical-default: var(--spacing-s);      // 9px
+  --entry-padding-horizontal-default: var(--spacing-m);    // 12px (Increased for better horizontal spacing)
   --entry-border-width-default: var(--border-width);
   --entry-border-color-default: var(--input-border-color, var(--borders-color)); // Use specific input border or general
   --entry-background-color-default: var(--input-bg-color, var(--view-bg-color)); // Adwaita entries often use view_bg_color
