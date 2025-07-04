@@ -56,27 +56,9 @@
         <button class="adw-button flat circular app-sidebar-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="app-sidebar">
             <span class="adw-icon icon-actions-open-menu-symbolic"></span>
         </button>
-        {# Profile button moves to start for authenticated users #}
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('profile.view_profile', username=current_user.username) }}" class="adw-button flat circular profile-avatar-button" title="View Profile">
-                {% if current_user.profile_photo_url %}
-                    <span class="adw-avatar size-small">
-                        <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Avatar">
-                    </span>
-                {% else %}
-                    <span class="adw-avatar size-small">
-                        <span class="adw-avatar-text">
-                            {{ current_user.username[0]|upper if current_user.username else 'U' }}
-                        </span>
-                    </span>
-                {% endif %}
-            </a>
-        {% else %}
-            {# Placeholder if needed when user is not authenticated, or leave start empty #}
-            {# For example, a site icon could go here, but Home is in sidebar #}
-            {# <a href="{{ url_for('index') }}" class="adw-button flat circular"><span class="adw-icon icon-emblem-web-symbolic"></span></a> #}
-        {% endif %}
-        {# Site title link removed from here, will be handled by centered title logic #}
+        {# Profile button removed from here #}
+        {# Placeholder if needed when user is not authenticated, or leave start empty #}
+        {# <a href="{{ url_for('general.index') }}" class="adw-button flat circular"><span class="adw-icon icon-emblem-web-symbolic"></span></a> #}
     </div>
     <div class="adw-header-bar__center adw-header-bar-center-box"> {# Added adw-header-bar-center-box class #}
         <h1 class="adw-header-bar__title">
@@ -105,6 +87,22 @@
 
 <div class="app-body-container"> {# NEW: Main container for sidebar + content #}
     <aside class="app-sidebar" id="app-sidebar"> {# Added id for ARIA #}
+        {% if current_user.is_authenticated %}
+        <div class="sidebar-profile-area">
+            <a href="{{ url_for('profile.view_profile', username=current_user.username) }}" class="sidebar-profile-avatar-link" title="View Profile">
+                <span class="adw-avatar size-large"> {# Changed to size-large #}
+                    {% if current_user.profile_photo_url %}
+                        <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Avatar">
+                    {% else %}
+                        <span class="adw-avatar-text">
+                            {{ current_user.username[0]|upper if current_user.username else 'U' }}
+                        </span>
+                    {% endif %}
+                </span>
+            </a>
+            <div class="sidebar-profile-name adw-label title-3">{{ current_user.full_name or current_user.username }}</div>
+        </div>
+        {% endif %}
         <nav class="adw-list-box flat sidebar-nav" aria-label="Main Navigation">
             {% block sidebar_nav %}
                 <a href="{{ url_for('general.index') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.index' }}">

@@ -13,20 +13,22 @@
 {% block content %}
 <div class="adw-clamp adw-clamp-xl">
     {% if gallery_photos %}
-        <adw-carousel show-nav-buttons indicator-style="dots" loop="true" style="margin-top: var(--spacing-l); border: 1px solid var(--border-color); border-radius: var(--border-radius-large); overflow: hidden;">
+        <div class="profile-gallery-grid" style="padding-top: var(--spacing-l); padding-bottom: var(--spacing-l);"> {# Re-use existing grid style #}
             {% for photo in gallery_photos %}
-            <figure class="adw-carousel-slide" style="margin:0; padding:0; height: 500px; display:flex; flex-direction: column; align-items:center; justify-content:center; background-color: var(--window-bg-color);">
+            <div class="adw-card gallery-photo-card">
                 <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo.image_filename) }}"
                      alt="{{ photo.caption or 'Gallery image by ' ~ user_profile.username }}"
-                     style="max-width: 100%; max-height: {% if photo.caption %}calc(100% - 40px){% else %}100%{% endif %}; object-fit: contain;">
+                     class="gallery-photo-image"
+                     style="height: 200px;"> {# Adjust height as needed for a larger grid #}
                 {% if photo.caption %}
-                <figcaption style="padding: var(--spacing-s); text-align: center; color: var(--text-color-secondary); font-size: var(--font-size-small);">
-                    {{ photo.caption }}
-                </figcaption>
+                <div class="adw-card__content gallery-photo-caption">
+                    <p class="adw-label body-2">{{ photo.caption }}</p>
+                </div>
                 {% endif %}
-            </figure>
+                {# Actions like delete could be added here if desired, similar to profile page, but maybe not for a public view #}
+            </div>
             {% endfor %}
-        </adw-carousel>
+        </div>
     {% else %}
         <div class="adw-status-page" style="margin-top: var(--spacing-xl);">
             <span class="adw-icon icon-media-image-symbolic adw-status-page-icon app-status-page-icon"></span>

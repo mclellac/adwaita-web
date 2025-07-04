@@ -31,9 +31,43 @@
   .adw-dialog-content {
     margin-bottom: var(--spacing-l);
     line-height: 1.6; // Added for better readability of text content
+    padding: 0 var(--spacing-m); // Add horizontal padding to content area itself for safety
     // Consider other typography improvements if needed globally
   }
 
+  .adw-dialog-header { // New style
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-s) var(--spacing-m);
+    border-bottom: 1px solid var(--border-color); // Similar to headerbar
+    margin: calc(var(--spacing-l) * -1); // Negative margin to counteract dialog's main padding for header
+    margin-bottom: var(--spacing-l); // Space below header
+    border-top-left-radius: var(--window-radius);
+    border-top-right-radius: var(--window-radius);
+
+    .adw-dialog-title { // Adjust if it's used within this header
+        margin-bottom: 0; // Remove margin if it's part of this flex layout
+        font-size: var(--font-size-h4); // Slightly smaller for dialog header
+    }
+    // .adw-dialog-close-button is handled by .adw-button.circular.flat
+  }
+
+  .adw-dialog-footer { // New style
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: var(--spacing-s) var(--spacing-m);
+    border-top: 1px solid var(--border-color); // Similar to toolbar
+    margin: calc(var(--spacing-l) * -1); // Negative margin
+    margin-top: var(--spacing-l); // Space above footer
+    border-bottom-left-radius: var(--window-radius);
+    border-bottom-right-radius: var(--window-radius);
+    gap: var(--spacing-s);
+  }
+
+  // This was the old buttons container, will be superseded by adw-dialog-footer
+  // but keep for compatibility or if used directly.
   .adw-dialog-buttons {
     display: flex;
     justify-content: flex-end;

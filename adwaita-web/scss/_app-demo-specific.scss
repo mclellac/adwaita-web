@@ -252,6 +252,37 @@ hr.section-divider {
 }
 
 // --- New Sidebar Layout Styles ---
+.sidebar-profile-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-l);
+    gap: var(--spacing-s);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-s); // Space before nav items
+
+    .sidebar-profile-avatar-link {
+        display: inline-block; // To prevent link taking full width
+        border-radius: 50%; // For focus outline if any
+        &:focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+    }
+
+    .adw-avatar.size-large { // Ensure it's sized if not by default via class alone
+        width: 64px;
+        height: 64px;
+        font-size: calc(64px / 2); // Adjust text size for avatar
+    }
+
+    .sidebar-profile-name {
+        font-weight: bold;
+        text-align: center;
+        // title-3 class is already applied, so font size should be correct
+    }
+}
+
 html, body { height: 100%; margin: 0; display: flex; flex-direction: column; }
 body { overflow: hidden; }
 .adw-header-bar { flex-shrink: 0; }
