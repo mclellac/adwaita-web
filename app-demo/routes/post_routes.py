@@ -41,7 +41,27 @@ def view_post(post_id):
 
             comment = Comment(text=form.text.data, user_id=current_user.id, post_id=post_id, parent_id=parent_id_int)
             db.session.add(comment)
-            db.session.commit()
+
+            # Notification for new comment
+            if post.author != current_user: # Don't notify for self-comments
+                from ..models import Notification # Local import
+                # Need to flush to get comment.id if it's new for related_comment_id
+                # However, if commit happens after this, it's fine. Or just add and commit will handle it.
+                # For simplicity, let's add and commit will populate IDs.
+                # If we needed comment.id *before* commit, a flush would be required.
+                # Here, we are creating the notification in the same transaction.
+                notification = Notification(
+                    user_id=post.author.id,
+                    actor_id=current_user.id,
+                    type='new_comment',
+                    related_post_id=post.id,
+                    related_comment_id=comment.id # This will be None until flush/commit if comment is new
+                                                  # SQLAlchemy handles this; it will use the ID after insert.
+                )
+                db.session.add(notification)
+                current_app.logger.info(f"Notification created for user {post.author.username} about new comment by {current_user.username} on post {post.id}.")
+
+            db.session.commit() # Commit comment and notification together
             current_app.logger.info(f"Comment (ID: {comment.id}) by {current_user.username} added to post {post_id}.")
             flash('Comment posted successfully!', 'success')
             return redirect(url_for('post.view_post', post_id=post_id, _anchor=f"comment-{comment.id}"))
