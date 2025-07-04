@@ -8,11 +8,14 @@ class Config:
         'a_default_very_secret_key_for_development_only_CHANGE_ME'
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    UPLOAD_FOLDER = 'app-demo/static/uploads/profile_pics' # Relative to instance? No, app root.
-                                                       # Will be made absolute in __init__.py
+    UPLOAD_FOLDER = 'static/uploads/profile_pics' # Relative to app root (app-demo/).
+                                                  # Will be made absolute in __init__.py to app-demo/static/uploads/profile_pics
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     MAX_PROFILE_PHOTO_SIZE_BYTES = 2 * 1024 * 1024  # 2MB
-    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # Max overall request size 5MB
+    GALLERY_UPLOAD_FOLDER = 'static/uploads/gallery_pics' # Relative to app root (app-demo/)
+                                                       # Will be made absolute in __init__.py
+    MAX_GALLERY_PHOTO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # Max overall request size 10MB (increased for gallery)
     POSTS_PER_PAGE = 10 # Default, can be overridden by SiteSetting
     ALLOWED_THEMES = {'light', 'dark', 'system'}
 

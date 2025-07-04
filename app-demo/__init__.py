@@ -42,6 +42,12 @@ def create_app(config_name=None):
     if not os.path.isabs(app.config['UPLOAD_FOLDER']):
         app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
 
+    if 'GALLERY_UPLOAD_FOLDER' in app.config and not os.path.isabs(app.config['GALLERY_UPLOAD_FOLDER']):
+        app.config['GALLERY_UPLOAD_FOLDER'] = os.path.join(app.root_path, app.config['GALLERY_UPLOAD_FOLDER'])
+        # Ensure the base gallery upload directory exists
+        os.makedirs(app.config['GALLERY_UPLOAD_FOLDER'], exist_ok=True)
+
+
     # Setup logging
     if not app.debug and not app.testing: # pragma: no cover
         # Could add more sophisticated logging here (file, email, etc.)
