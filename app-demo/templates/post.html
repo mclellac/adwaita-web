@@ -62,7 +62,7 @@
                     {% else %}
                     <p class="adw-label body author-bio-text-placeholder">This author has not provided a bio yet.</p>
                     {% endif %}
-                    <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-button flat view-profile-button">View Profile of {{ post.author.username }}</a>
+                    <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-button flat view-profile-button">View Profile of {{ post.author.username }}</a>
                 </div>
             </div>
         </section>
