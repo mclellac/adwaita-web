@@ -17,9 +17,36 @@ profile_bp = Blueprint('profile', __name__, url_prefix='/profile') # template_fo
 @profile_bp.route('/<username>')
 @login_required # Original app had this, implies viewing any profile requires login
 def view_profile(username):
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort
+from flask_login import current_user, login_required
+import os
+import uuid
+from PIL import Image # May not be used for gallery if not resizing initially
+from werkzeug.utils import secure_filename
+from flask_wtf.file import FileAllowed # For dynamic form validation
+import bleach # For cleaning profile_info
+from datetime import datetime # Added for age calculation
+
+from ..models import User, Post, Comment, UserPhoto # Assuming models are in models.py, Added UserPhoto
+from ..forms import ProfileEditForm, GalleryPhotoUploadForm # Assuming forms are in forms.py, Added GalleryPhotoUploadForm
+from .. import db # Assuming db is initialized in __init__.py
+from ..utils import allowed_file_util, flash_form_errors_util, ALLOWED_TAGS_CONFIG, ALLOWED_ATTRIBUTES_CONFIG
+
+profile_bp = Blueprint('profile', __name__, url_prefix='/profile') # template_folder defaults to 'templates' in app root
+
+@profile_bp.route('/<username>')
+@login_required # Original app had this, implies viewing any profile requires login
+def view_profile(username):
     current_app.logger.debug(f"Accessing profile for {username}, requested by {current_user.username}")
     user_profile = User.query.filter_by(username=username).first_or_404()
     current_app.logger.debug(f"Displaying profile for '{user_profile.username}' (ID: {user_profile.id}).")
+
+    calculated_age = None
+    if user_profile.birthdate:
+        today = datetime.today()
+        # Calculate age
+        calculated_age = today.year - user_profile.birthdate.year - \
+               ((today.month, today.day) < (user_profile.birthdate.month, user_profile.birthdate.day))
 
     if not user_profile.is_profile_public and user_profile != current_user:
         current_app.logger.warning(f"User {current_user.username} attempted to view private profile of {user_profile.username}.")
@@ -92,6 +119,7 @@ def view_profile(username):
     return render_template('profile.html', user_profile=user_profile,
                            posts_pagination=posts_pagination,
                            comments_pagination=comments_pagination,
+                           calculated_age=calculated_age, # Pass calculated age
                            gallery_upload_form=gallery_upload_form)
 
 
@@ -118,7 +146,7 @@ def edit_profile():
         # Update new fields
         current_user.address = form.address.data
         current_user.phone_number = form.phone_number.data
-        current_user.age = form.age.data
+        current_user.birthdate = form.birthdate.data # Updated to birthdate
 
         file = form.profile_photo.data
         photo_update_attempted = False

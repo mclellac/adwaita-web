@@ -9,6 +9,7 @@ from wtforms import (
     HiddenField, # Added for CommentForm parent_id if needed, StringField is fine too
     IntegerField
 )
+from wtforms.fields.html5 import DateField # Added for birthdate
 from wtforms.validators import DataRequired, EqualTo, Length, Optional, NumberRange
 from wtforms.widgets import CheckboxInput, ListWidget # Ensure ListWidget is imported if used by QuerySelectMultipleField
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
@@ -76,7 +77,7 @@ class ProfileEditForm(FlaskForm):
     # New fields for enhanced profile
     address = TextAreaField('Address', validators=[Optional(), Length(max=255)])
     phone_number = StringField('Phone Number', validators=[Optional(), Length(max=50)])
-    age = IntegerField('Age', validators=[Optional(), NumberRange(min=0, max=150)])
+    birthdate = DateField('Birthdate', validators=[Optional()])
 
     is_profile_public = BooleanField('Make Profile Public')
     submit = SubmitField('Update Profile')

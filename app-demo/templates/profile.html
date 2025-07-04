@@ -79,10 +79,10 @@
                 </div>
                 {% endif %}
 
-                {% if user_profile.age is not none %}
+                {% if calculated_age is not none %} {# Use calculated_age passed from route #}
                 <div class="adw-action-row">
                     <span class="adw-action-row__title">Age</span>
-                    <span class="adw-action-row__subtitle">{{ user_profile.age }}</span>
+                    <span class="adw-action-row__subtitle">{{ calculated_age }}</span>
                 </div>
                 {% endif %}
 
