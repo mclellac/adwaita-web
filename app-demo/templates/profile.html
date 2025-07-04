@@ -7,6 +7,18 @@
 {% block header_actions_start %}
     {% if current_user == user_profile %}
         <a href="{{ url_for('profile.edit_profile') }}" class="adw-button suggested-action">Edit Profile</a>
+    {% elif current_user.is_authenticated %} {# Only show follow/unfollow if logged in and not viewing own profile #}
+        {% if current_user.is_following(user_profile) %}
+            <form action="{{ url_for('profile.unfollow_user', username=user_profile.username) }}" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="adw-button">Unfollow</button>
+            </form>
+        {% else %}
+            <form action="{{ url_for('profile.follow_user', username=user_profile.username) }}" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="adw-button suggested-action">Follow</button>
+            </form>
+        {% endif %}
     {% endif %}
 {% endblock %}
 
@@ -28,6 +40,11 @@
                 {% if user_profile.full_name %}
                 <span class="adw-label adw-caption">@{{ user_profile.username }}</span>
                 {% endif %}
+                <div class="adw-box adw-box-horizontal adw-box-spacing-s profile-follow-stats">
+                    {# These could be links to separate follower/following list pages later #}
+                    <span class="adw-label body-2"><strong>{{ user_profile.followers.count() }}</strong> Followers</span>
+                    <span class="adw-label body-2"><strong>{{ user_profile.followed.count() }}</strong> Following</span>
+                </div>
             </div>
         </div>
 
@@ -56,6 +73,27 @@
                 <div class="adw-action-row">
                     <span class="adw-action-row__title">Biography</span>
                     <span class="adw-action-row__subtitle">No bio provided.</span>
+                </div>
+                {% endif %}
+
+                {% if user_profile.age is not none %}
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">Age</span>
+                    <span class="adw-action-row__subtitle">{{ user_profile.age }}</span>
+                </div>
+                {% endif %}
+
+                {% if user_profile.phone_number %}
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">Phone</span>
+                    <span class="adw-action-row__subtitle">{{ user_profile.phone_number }}</span>
+                </div>
+                {% endif %}
+
+                {% if user_profile.address %}
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">Address</span>
+                    <span class="adw-action-row__subtitle" style="white-space: pre-wrap;">{{ user_profile.address }}</span>
                 </div>
                 {% endif %}
 

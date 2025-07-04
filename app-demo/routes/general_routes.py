@@ -93,6 +93,41 @@ def contact_page():
     current_app.logger.debug("Displaying Contact page.")
     return render_template('contact.html')
 
+@general_bp.route('/feed')
+@login_required
+def activity_feed():
+    current_app.logger.info(f"Accessing activity feed for user {current_user.username}.")
+    page = request.args.get('page', 1, type=int)
+    per_page = current_app.config.get('POSTS_PER_PAGE', 10) # Use existing config for posts per page
+
+    # Get IDs of users the current user is following
+    followed_users = current_user.followed.all() # .all() executes the query
+    if not followed_users:
+        current_app.logger.debug(f"User {current_user.username} is not following anyone. Feed will be empty.")
+        posts, pagination = [], None
+        return render_template('feed.html', posts=posts, pagination=pagination, followed_users_count=0)
+
+    followed_user_ids = [user.id for user in followed_users]
+    current_app.logger.debug(f"User {current_user.username} is following users with IDs: {followed_user_ids}.")
+
+    try:
+        # Query posts from followed users, only published, ordered by published_at then created_at
+        query = Post.query.filter(
+            Post.user_id.in_(followed_user_ids),
+            Post.is_published == True # noqa E712 (SQLAlchemy syntax for == True)
+        ).order_by(Post.published_at.desc(), Post.created_at.desc())
+
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        posts = pagination.items
+        current_app.logger.debug(f"Found {len(posts)} posts for feed page {page} for user {current_user.username}. Total: {pagination.total}")
+    except Exception as e:
+        current_app.logger.error(f"Error fetching posts for activity feed for user {current_user.username}: {e}", exc_info=True)
+        flash("Error loading your activity feed. Please try again later.", "danger")
+        posts, pagination = [], None
+
+    return render_template('feed.html', posts=posts, pagination=pagination, followed_users_count=len(followed_user_ids))
+
+
 # API routes for theme/accent settings
 @general_bp.route('/api/settings/theme', methods=['POST'])
 @login_required

@@ -511,3 +511,32 @@ $app-sidebar-breakpoint: 768px;
 .profile-gallery-upload-box {
     margin-bottom: var(--spacing-xl);
 }
+
+// Profile Page Specific Styles
+// .profile-page-main-box {} // No specific styles needed yet
+
+.profile-follow-stats {
+  margin-top: var(--spacing-xs);
+  gap: var(--spacing-m); // For spacing between "Followers" and "Following"
+  .adw-label { // Target the labels within this specific container
+    color: var(--text-color-secondary); // Make it slightly less prominent
+  }
+}
+
+// .profile-bio-expander {} // No specific styles needed yet
+
+
+// Feed Page Specific Styles
+// .feed-posts-container {} // Mostly uses .blog-posts-container styles
+
+.blog-post-card-author-info { // Used in feed.html
+  margin-bottom: var(--spacing-s); // Space between author info and post title
+  // align-items: center; // adw-box default
+
+  .adw-avatar {
+    margin-right: var(--spacing-s); // Space between avatar and name
+  }
+  .adw-box-vertical { // Container for name and username
+    line-height: 1.3; // Adjust line height for compact display
+  }
+}

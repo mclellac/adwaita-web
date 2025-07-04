@@ -66,6 +66,33 @@
                 <input type="url" id="{{ form.website_url.id or 'website_url_input' }}" name="{{ form.website_url.name }}" value="{{ form.website_url.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="https://example.com">
             </div>
 
+            {# Address TextArea #}
+            <div class="adw-action-row">
+                <div class="adw-action-row__text" style="width:100%;">
+                   <label for="{{ form.address.id or 'address_input' }}" class="adw-action-row__title">{{ form.address.label.text }}</label>
+                   {% if form.address.errors %}<div class="error-text form-field-error adw-action-row__subtitle">{{ form.address.errors|join(' ') }}</div>{% endif %}
+                   <textarea name="{{ form.address.name }}" id="{{ form.address.id or 'address_input' }}" class="adw-textarea content-textarea" rows="3" placeholder="Your street address">{{ form.address.data or '' }}</textarea>
+                </div>
+           </div>
+
+            {# Phone Number Entry Row #}
+            <div class="adw-entry-row {{ 'has-error' if form.phone_number.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.phone_number.id or 'phone_number_input' }}" class="adw-entry-row-title">{{ form.phone_number.label.text }}</label>
+                    {% if form.phone_number.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.phone_number.errors|join(' ') }}</span>{% endif %}
+                </div>
+                <input type="tel" id="{{ form.phone_number.id or 'phone_number_input' }}" name="{{ form.phone_number.name }}" value="{{ form.phone_number.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Your phone number">
+            </div>
+
+            {# Age Entry Row (using type="number") #}
+            <div class="adw-entry-row {{ 'has-error' if form.age.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.age.id or 'age_input' }}" class="adw-entry-row-title">{{ form.age.label.text }}</label>
+                    {% if form.age.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.age.errors|join(' ') }}</span>{% endif %}
+                </div>
+                <input type="number" id="{{ form.age.id or 'age_input' }}" name="{{ form.age.name }}" value="{{ form.age.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Your age" min="0" max="150">
+            </div>
+
             {# is_profile_public Switch Row #}
             <div class="adw-switch-row {{ 'has-error' if form.is_profile_public.errors else '' }}">
                 <div class="adw-action-row__text">

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}My Feed{% endblock %}
+
+{% block header_title %}Activity Feed{% endblock %}
+
+{% block content %}
+<div class="adw-clamp adw-clamp-xl">
+    {% if posts and posts|length > 0 %}
+        <div class="blog-posts-container feed-posts-container"> {# Re-use blog-posts-container for card layout #}
+            {% for post in posts %}
+            <article class="adw-card blog-post-item-card">
+                <header class="blog-post-card__header">
+                    <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
+                        <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">
+                            <span class="adw-avatar size-m">
+                                {% if post.author.profile_photo_url %}
+                                <img src="{{ url_for('static', filename=post.author.profile_photo_url) }}" alt="{{ post.author.username }} avatar">
+                                {% else %}
+                                <img src="{{ default_avatar_url }}" alt="{{ post.author.username }} default avatar"> {# Assuming default_avatar_url is in context #}
+                                {% endif %}
+                            </span>
+                        </a>
+                        <div class="adw-box adw-box-vertical">
+                            <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">
+                                <strong class="adw-label body-1">{{ post.author.full_name or post.author.username }}</strong>
+                            </a>
+                             <span class="adw-label caption">@{{ post.author.username }}</span>
+                        </div>
+                    </div>
+                    <h2 class="adw-title-2 blog-post-card__title">
+                        <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-link">
+                            {{ post.title }}
+                        </a>
+                    </h2>
+                    <div class="blog-post-card__meta adw-label caption">
+                        {% if post.is_published and post.published_at %}
+                            Published: <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                        {% else %} {# Should not happen in feed as we filter for published, but good fallback #}
+                            Created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                        {% endif %}
+                    </div>
+                </header>
+                <div class="adw-card__content styled-text-content"> {# For prose styling on content #}
+                    {# Display a snippet or full content. For now, let's use a snippet. #}
+                    {{ post.content | truncate(300, True, '...') | markdown }}
+                </div>
+                <footer class="blog-post-card__footer">
+                     <div class="blog-post-card__terms">
+                        {% if post.categories %}
+                            <span class="adw-label caption">Categories:
+                            {% for cat in post.categories %}
+                                <a href="{{ url_for('post.posts_by_category', slug=cat.slug) }}" class="adw-link">{{ cat.name }}</a>{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                            </span>
+                        {% endif %}
+                        {% if post.tags %}
+                            <span class="adw-label caption">Tags:
+                            {% for tag in post.tags %}
+                                <a href="{{ url_for('post.posts_by_tag', slug=tag.slug) }}" class="adw-link">#{{ tag.name }}</a>{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                            </span>
+                        {% endif %}
+                    </div>
+                    <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat read-more-link">
+                        View Post & Comments <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                    </a>
+                </footer>
+            </article>
+            {% endfor %}
+        </div>
+
+        {# Pagination Controls #}
+        {% if pagination and pagination.pages > 1 %}
+        <div class="adw-box adw-box-horizontal justify-center profile-pagination-box"> {# Re-use class for styling if applicable #}
+            <div class="adw-toggle-group">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('general.activity_feed', page=pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
+                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                    </a>
+                {% else %}
+                    <button class="adw-button icon-only" disabled aria-label="Previous page">
+                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                    </button>
+                {% endif %}
+
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == pagination.page %}
+                            <button class="adw-button suggested-action" disabled aria-current="page">{{ page_num }}</button>
+                        {% else %}
+                            <a href="{{ url_for('general.activity_feed', page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                        {% endif %}
+                    {% elif loop.index != 1 and loop.index != pagination.pages + pagination.iter_pages()|length %}
+                        {# Placeholder for ellipsis if pages are skipped #}
+                        <button class="adw-button flat" disabled>…</button>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                     <a href="{{ url_for('general.activity_feed', page=pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
+                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                    </a>
+                {% else %}
+                    <button class="adw-button icon-only" disabled aria-label="Next page">
+                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    {% elif followed_users_count == 0 %}
+        <div class="adw-status-page">
+            <span class="adw-icon icon-status-user-available-symbolic adw-status-page-icon app-status-page-icon"></span>
+            <h3 class="adw-status-page-title">Your Feed is Empty</h3>
+            <p class="adw-status-page-description">You are not following anyone yet.</p>
+            <p class="adw-status-page-description">Find people to follow to see their posts here.</p>
+            {# Optional: Add a button to explore users or go to a search page #}
+            <a href="{{ url_for('general.index') }}" class="adw-button suggested-action" style="margin-top: var(--spacing-m);">Explore Posts</a>
+        </div>
+    {% else %}
+        <div class="adw-status-page">
+            <span class="adw-icon icon-content-document-multiple-symbolic adw-status-page-icon app-status-page-icon"></span>
+            <h3 class="adw-status-page-title">No Posts in Your Feed Yet</h3>
+            <p class="adw-status-page-description">The users you follow haven't posted anything yet, or there are no new posts.</p>
+            <p class="adw-status-page-description">Check back later or find more people to follow!</p>
+            <a href="{{ url_for('general.index') }}" class="adw-button" style="margin-top: var(--spacing-m);">Explore More Posts</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
