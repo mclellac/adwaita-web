@@ -41,9 +41,12 @@
                 <span class="adw-label adw-caption">@{{ user_profile.username }}</span>
                 {% endif %}
                 <div class="adw-box adw-box-horizontal adw-box-spacing-s profile-follow-stats">
-                    {# These could be links to separate follower/following list pages later #}
-                    <span class="adw-label body-2"><strong>{{ user_profile.followers.count() }}</strong> Followers</span>
-                    <span class="adw-label body-2"><strong>{{ user_profile.followed.count() }}</strong> Following</span>
+                    <a href="{{ url_for('profile.followers_list', username=user_profile.username) }}" class="adw-link">
+                        <span class="adw-label body-2"><strong>{{ user_profile.followers.count() }}</strong> Followers</span>
+                    </a>
+                    <a href="{{ url_for('profile.following_list', username=user_profile.username) }}" class="adw-link">
+                        <span class="adw-label body-2"><strong>{{ user_profile.followed.count() }}</strong> Following</span>
+                    </a>
                 </div>
             </div>
         </div>
