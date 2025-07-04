@@ -10,6 +10,6 @@
 
 {% block content %}
 <adw-status-page icon-name="dialog-warning-symbolic" title="500 - Internal Server Error" description="Sorry, something went wrong on our end. Please try again later.">
-    <adw-button slot="actions" text="Go to Homepage" href="{{ url_for('index') }}" suggested></adw-button>
+    <adw-button slot="actions" text="Go to Homepage" href="{{ url_for('general.index') }}" suggested></adw-button>
 </adw-status-page>
 {% endblock %}

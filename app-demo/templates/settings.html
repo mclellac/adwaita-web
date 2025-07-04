@@ -55,14 +55,14 @@
             <h2 class="adw-preferences-group__title" id="account-group-title">Account</h2>
         </div>
         <div class="adw-list-box">
-            <a href="{{ url_for('change_password_page') }}" class="adw-action-row activatable">
+            <a href="{{ url_for('auth.change_password_page') }}" class="adw-action-row activatable">
                 <div class="adw-action-row__text">
                     <span class="adw-action-row__title">Change Password</span>
                     <span class="adw-action-row__subtitle">Update your account password</span>
                 </div>
                 <span class="adw-action-row__chevron"></span>
             </a>
-            <a href="{{ url_for('logout') }}" class="adw-action-row activatable destructive-action">
+            <a href="{{ url_for('auth.logout') }}" class="adw-action-row activatable destructive-action">
                 <div class="adw-action-row__text">
                     <span class="adw-action-row__title">Logout</span>
                     <span class="adw-action-row__subtitle">Sign out of your account</span>
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Theme changed to:', newTheme);
 
                 if (csrfToken) {
-                    fetch("{{ url_for('save_theme_preference') }}", {
+                    fetch("{{ url_for('general.save_theme_preference') }}", {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Accent color changed to:', newAccent);
 
                 if (csrfToken) {
-                    fetch("{{ url_for('save_accent_color_preference') }}", {
+                    fetch("{{ url_for('general.save_accent_color_preference') }}", {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

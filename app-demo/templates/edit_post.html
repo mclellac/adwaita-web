@@ -8,7 +8,7 @@
 <div class="adw-clamp content-clamp">
   <div class="adw-preferences-page">
     {# Removed header from content as it's now in the main header bar #}
-    <form method="POST" action="{{ url_for('edit_post', post_id=post.id) }}" novalidate>
+    <form method="POST" action="{{ url_for('post.edit_post', post_id=post.id) }}" novalidate>
         {{ form.hidden_tag() }} {# CSRF token #}
 
         <div class="adw-preferences-group" role="group" aria-labelledby="edit-post-details-title">
@@ -75,7 +75,7 @@
 
         <div class="form-actions-container form-actions-space-between">
             <div class="actions-start"> <!-- Group for left-aligned buttons -->
-                <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button flat">Cancel</a>
+                <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat">Cancel</a>
                 {% if delete_form %}
                 {# Button to trigger the dialog for delete #}
                 <button type="button" id="open-edit-delete-post-dialog-btn" class="adw-button destructive-action">Delete Post</button>
@@ -91,7 +91,7 @@
     {% if delete_form %}
     {# The actual form that will be submitted by the dialog's confirm button - ensure it's outside the main form or handled carefully #}
     {# This form is not directly part of the flex layout, it's for the dialog action #}
-    <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" id="delete-post-form-{{ post.id }}" class="delete-post-form-inline" style="display: none;">
+    <form method="POST" action="{{ url_for('post.delete_post', post_id=post.id) }}" id="delete-post-form-{{ post.id }}" class="delete-post-form-inline" style="display: none;">
         {{ delete_form.hidden_tag() }} {# CSRF token #}
     </form>
     <adw-dialog id="edit-delete-post-confirm-dialog" title="Confirm Deletion">

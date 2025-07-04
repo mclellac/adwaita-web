@@ -7,7 +7,7 @@
 <div class="auth-form-container"> {# Removed adw-clamp content-clamp as base provides clamp #}
     <h1 class="adw-title-1 form-page-header">Login</h1>
 
-    <form method="POST" action="{{ url_for('login') }}" id="login-form" class="stacked-form">
+    <form method="POST" action="{{ url_for('auth.login') }}" id="login-form" class="stacked-form">
       {{ form.hidden_tag() }} {# CSRF token #}
 
       <div class="adw-list-box" role="group" aria-labelledby="login-group-title">

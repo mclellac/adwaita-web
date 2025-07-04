@@ -19,7 +19,7 @@
         <div class="adw-action-row"> {# Using action row to display each flagged item #}
             <div class="adw-action-row-content" style="display: flex; flex-direction: column; align-items: flex-start;">
                 <h4 class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">
-                    <a href="{{ url_for('view_post', post_id=flag.comment.post_id, _anchor='comment-' ~ flag.comment_id) }}" target="_blank" class="adw-link">
+                    <a href="{{ url_for('post.view_post', post_id=flag.comment.post_id, _anchor='comment-' ~ flag.comment_id) }}" target="_blank" class="adw-link">
                         Comment by {{ flag.comment.author.username }} on post "{{ flag.comment.post.title }}"
                     </a>
                 </h4>
@@ -33,13 +33,13 @@
             </div>
             <div class="adw-action-row-suffix adw-box adw-box-spacing-s">
                 {# Form to Resolve Flag #}
-                <form method="POST" action="{{ url_for('admin_resolve_flag', flag_id=flag.id) }}" style="display: inline;">
+                <form method="POST" action="{{ url_for('admin.resolve_flag', flag_id=flag.id) }}" style="display: inline;">
                     {{ csrf_token() }} {# Re-add CSRF if needed globally, or use a dedicated form object #}
                     <button type="submit" class="adw-button">Mark as Resolved</button>
                 </form>
                 {# Form to Delete Comment directly from flags page #}
                 {# This uses the existing delete_comment route which now supports admin deletion #}
-                <form method="POST" action="{{ url_for('delete_comment', comment_id=flag.comment_id) }}" onsubmit="return confirm('Are you sure you want to PERMANENTLY DELETE this comment? This action cannot be undone.');" style="display: inline;">
+                <form method="POST" action="{{ url_for('post.delete_comment', comment_id=flag.comment_id) }}" onsubmit="return confirm('Are you sure you want to PERMANENTLY DELETE this comment? This action cannot be undone.');" style="display: inline;">
                      {{ csrf_token() }} {# Re-add CSRF if needed globally, or use a dedicated form object #}
                     <button type="submit" class="adw-button destructive-action">Delete Comment</button>
                 </form>
@@ -52,7 +52,7 @@
     <nav aria-label="Flagged comments navigation" class="pagination-controls adw-box horizontal justify-center" style="margin-top: var(--spacing-l);">
         <div class="adw-toggle-group">
             {% if flag_pagination.has_prev %}
-                <a href="{{ url_for('admin_view_flags', page=flag_pagination.prev_num) }}" class="adw-button">
+                <a href="{{ url_for('admin.view_flags', page=flag_pagination.prev_num) }}" class="adw-button">
                     <span class="adw-icon icon-actions-go-previous-symbolic"></span>
                 </a>
             {% else %}
@@ -64,7 +64,7 @@
                     {% if page_num == flag_pagination.page %}
                         <button class="adw-button suggested" aria-current="page" disabled>{{ page_num }}</button>
                     {% else %}
-                        <a href="{{ url_for('admin_view_flags', page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                        <a href="{{ url_for('admin.view_flags', page=page_num) }}" class="adw-button">{{ page_num }}</a>
                     {% endif %}
                 {% elif loop.index != 1 and loop.index != flag_pagination.pages + 2 %}
                      <button class="adw-button flat" disabled style="pointer-events: none;">&hellip;</button>
@@ -72,7 +72,7 @@
             {% endfor %}
 
             {% if flag_pagination.has_next %}
-                <a href="{{ url_for('admin_view_flags', page=flag_pagination.next_num) }}" class="adw-button">
+                <a href="{{ url_for('admin.view_flags', page=flag_pagination.next_num) }}" class="adw-button">
                     <span class="adw-icon icon-actions-go-next-symbolic"></span>
                 </a>
             {% else %}

@@ -8,7 +8,7 @@
 <div class="form-container"> {# Replaced adw-clamp and content-clamp #}
   <div class="adw-preferences-page"> {# This can be kept for overall page structure if desired #}
     {# Removed header from content as it's now in the main header bar #}
-    <form method="POST" action="{{ url_for('create_post') }}" novalidate class="stacked-form">
+    <form method="POST" action="{{ url_for('post.create_post') }}" novalidate class="stacked-form">
         {{ form.hidden_tag() }} {# CSRF token #}
 
         <section class="adw-list-box form-section"> {# Using list-box for sections #}
