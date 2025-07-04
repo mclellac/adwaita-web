@@ -313,6 +313,18 @@ def like_post_route(post_id):
         flash('You have already liked this post.', 'info')
     else:
         if current_user.like_post(post):
+            # Create notification for the post author, if not self-like
+            if post.author != current_user:
+                from ..models import Notification # Local import
+                notification = Notification(
+                    user_id=post.author.id,
+                    actor_id=current_user.id,
+                    type='new_like',
+                    related_post_id=post.id
+                )
+                db.session.add(notification)
+                current_app.logger.info(f"Notification created for user {post.author.username} about new like on post {post.id} by {current_user.username}.")
+
             db.session.commit()
             flash('Post liked!', 'success')
             current_app.logger.info(f"User {current_user.username} liked post {post_id}.")

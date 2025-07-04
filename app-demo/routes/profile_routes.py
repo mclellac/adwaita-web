@@ -391,6 +391,16 @@ def follow_user(username):
         flash(f"You are already following {username}.", "info")
     else:
         if current_user.follow(user_to_follow):
+            # Create notification for the user who was followed
+            from ..models import Notification # Local import to avoid circular issues at top level
+            notification = Notification(
+                user_id=user_to_follow.id,
+                actor_id=current_user.id,
+                type='new_follower'
+            )
+            db.session.add(notification)
+            current_app.logger.info(f"Notification created for user {user_to_follow.username} about new follower {current_user.username}.")
+
             db.session.commit()
             flash(f"You are now following {username}.", "success")
             current_app.logger.info(f"User {current_user.username} followed {username}.")

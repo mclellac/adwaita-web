@@ -39,6 +39,12 @@ class User(UserMixin, db.Model):
     )
     # Relationship for posts liked by this user
     liked_posts = db.relationship('PostLike', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    notifications = db.relationship('Notification',
+                                    foreign_keys='Notification.user_id',
+                                    backref='user', lazy='dynamic',
+                                    order_by=lambda: desc(Notification.timestamp), # noqa
+                                    cascade='all, delete-orphan')
+
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -251,6 +257,27 @@ class PostLike(db.Model):
 
     def __repr__(self):
         return f'<PostLike user_id={self.user_id} post_id={self.post_id}>'
+
+
+class Notification(db.Model):
+    __tablename__ = 'notification'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Recipient
+    actor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True) # User who performed action
+    type = db.Column(db.String(50), nullable=False)  # e.g., 'new_follower', 'new_like', 'new_comment'
+    related_post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
+    related_comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    # Relationships to easily get related objects from a notification
+    # user is defined by backref from User.notifications
+    actor = db.relationship('User', foreign_keys=[actor_id])
+    related_post = db.relationship('Post', foreign_keys=[related_post_id])
+    related_comment = db.relationship('Comment', foreign_keys=[related_comment_id])
+
+    def __repr__(self):
+        return f'<Notification {self.id} type={self.type} user_id={self.user_id} is_read={self.is_read}>'
 
 
 class SiteSetting(db.Model):
