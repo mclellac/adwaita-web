@@ -11,6 +11,9 @@
   // from being slotted into AdwRow or if AdwEntryRow's own shadow DOM root has .adw-row.
   // The JS for AdwEntryRow creates a div with .adw-row and .adw-entry-row
   @include mixins.row-base; // Applies common row styles like min-height, padding
+  background-color: var(--list-row-bg-color); // Ensure entry rows use the standard row background
+  border-bottom: none; // Ensure no individual border, listbox handles separators if applicable.
+                       // row-base mixin might also handle this, but explicit is fine.
   gap: var(--spacing-m); // Standard gap between elements in a row
   padding-top: var(--spacing-s);    // Override default vertical padding from row-base (9px)
   padding-bottom: var(--spacing-s); // Override default vertical padding from row-base (9px)
