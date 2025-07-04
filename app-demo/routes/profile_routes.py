@@ -144,9 +144,16 @@ def edit_profile():
         current_user.is_profile_public = form.is_profile_public.data
 
         # Update new fields
-        current_user.address = form.address.data
-        current_user.phone_number = form.phone_number.data
-        current_user.birthdate = form.birthdate.data # Updated to birthdate
+        # current_user.address = form.address.data # Removed
+        # current_user.phone_number = form.phone_number.data # Removed
+        current_user.street_address = form.street_address.data
+        current_user.city = form.city.data
+        current_user.state_province = form.state_province.data
+        current_user.postal_code = form.postal_code.data
+        current_user.country = form.country.data
+        current_user.home_phone = form.home_phone.data
+        current_user.mobile_phone = form.mobile_phone.data
+        current_user.birthdate = form.birthdate.data
 
         file = form.profile_photo.data
         photo_update_attempted = False

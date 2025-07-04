@@ -17,8 +17,15 @@ class User(UserMixin, db.Model):
     website_url = db.Column(db.String(200), nullable=True)
 
     # New fields for enhanced profile
-    address = db.Column(db.String(255), nullable=True)
-    phone_number = db.Column(db.String(50), nullable=True)
+    # address = db.Column(db.String(255), nullable=True) # Removed
+    # phone_number = db.Column(db.String(50), nullable=True) # Removed
+    street_address = db.Column(db.String(255), nullable=True)
+    city = db.Column(db.String(100), nullable=True)
+    state_province = db.Column(db.String(100), nullable=True)
+    postal_code = db.Column(db.String(20), nullable=True)
+    country = db.Column(db.String(100), nullable=True)
+    home_phone = db.Column(db.String(50), nullable=True)
+    mobile_phone = db.Column(db.String(50), nullable=True)
     birthdate = db.Column(db.Date, nullable=True)  # Replaced age with birthdate
     # profile_info (Text type) is already suitable for an extensive bio
 

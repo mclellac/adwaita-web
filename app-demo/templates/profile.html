@@ -86,20 +86,53 @@
                 </div>
                 {% endif %}
 
-                {% if user_profile.phone_number %}
+                {# Detailed Address Fields #}
+                {% if user_profile.street_address %}
                 <div class="adw-action-row">
-                    <span class="adw-action-row__title">Phone</span>
-                    <span class="adw-action-row__subtitle">{{ user_profile.phone_number }}</span>
+                    <span class="adw-action-row__title">Street Address</span>
+                    <span class="adw-action-row__subtitle">{{ user_profile.street_address }}</span>
+                </div>
+                {% endif %}
+                {% if user_profile.city %}
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">City</span>
+                    <span class="adw-action-row__subtitle">{{ user_profile.city }}</span>
+                </div>
+                {% endif %}
+                {% if user_profile.state_province %}
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">State/Province</span>
+                    <span class="adw-action-row__subtitle">{{ user_profile.state_province }}</span>
+                </div>
+                {% endif %}
+                {% if user_profile.postal_code %}
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">Postal/Zip Code</span>
+                    <span class="adw-action-row__subtitle">{{ user_profile.postal_code }}</span>
+                </div>
+                {% endif %}
+                {% if user_profile.country %}
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">Country</span>
+                    <span class="adw-action-row__subtitle">{{ user_profile.country }}</span>
                 </div>
                 {% endif %}
 
-                {% if user_profile.address %}
+                {# Detailed Phone Fields #}
+                {% if user_profile.home_phone %}
                 <div class="adw-action-row">
-                    <span class="adw-action-row__title">Address</span>
-                    <span class="adw-action-row__subtitle" style="white-space: pre-wrap;">{{ user_profile.address }}</span>
+                    <span class="adw-action-row__title">Home Phone</span>
+                    <span class="adw-action-row__subtitle">{{ user_profile.home_phone }}</span>
+                </div>
+                {% endif %}
+                {% if user_profile.mobile_phone %}
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">Mobile Phone</span>
+                    <span class="adw-action-row__subtitle">{{ user_profile.mobile_phone }}</span>
                 </div>
                 {% endif %}
 
+                {# General Location (if still desired alongside detailed address) #}
                 {% if user_profile.location %}
                 <div class="adw-action-row">
                     <span class="adw-action-row__title">Location</span>
