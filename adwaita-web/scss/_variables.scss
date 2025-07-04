@@ -21,6 +21,9 @@ $adw-brown-1: #cdab8f; $adw-brown-2: #b5835a; $adw-brown-3: #986a44; $adw-brown-
 $adw-light-1: #ffffff; $adw-light-2: #f6f5f4; $adw-light-3: #deddda; $adw-light-4: #c0bfbc; $adw-light-5: #9a9996;
 $adw-dark-1: #77767b; $adw-dark-2: #5e5c64; $adw-dark-3: #3d3846; $adw-dark-4: #241f31; $adw-dark-5: #000000;
 
+// Adwaita specific shades not in the general palette
+$adw-window-background-light: #fafafb; // Standard light window background
+
 // --- General SCSS Variables (not CSS custom properties, used for calculations and defaults) ---
 $line-height-base: 1.5;
 $heading-line-height: 1.2;
@@ -44,21 +47,21 @@ $input-height-approx: 38px;
 
 // --- 2. SASS Variables for Theme-Specific Colors (Direct SASS colors) ---
 // Light Theme Colors
-$background-color-light: $adw-light-2; // Page background: off-white
+$background-color-light: $adw-window-background-light; // Use #fafafb
 $text-color-light: rgba($adw-dark-5, 0.8);
 $text-color-secondary-light: rgba($adw-dark-5, 0.55);
 $heading-color-light: rgba($adw-dark-5, 0.9);
 $border-color-light: rgba($adw-dark-5, 0.15);
 $divider-color-light: rgba($adw-dark-5, 0.1);
-$focus-ring-color-fallback-light: rgba($adw-blue-3, 0.5);
+$focus-ring-color-fallback-light: rgba($adw-blue-3, 0.5); // Will be updated later to use accent
 $link-color-light: $adw-blue-4;
 $link-hover-color-light: $adw-blue-5;
 $link-visited-color-light: $adw-purple-4;
-$headerbar-background-color-light: $adw-light-2; // Headerbar: off-white (same as new page bg)
+$headerbar-background-color-light: $adw-window-background-light; // Use #fafafb
 $headerbar-text-color-light: $text-color-light;
 $headerbar-border-color-light: $border-color-light;
-$window-background-color-light: $adw-light-2; // Window background: off-white
-$button-background-color-light: $adw-light-1; // Buttons: white
+$window-background-color-light: $adw-window-background-light; // Use #fafafb
+$button-background-color-light: $adw-light-1; // Use #ffffff for buttons
 $button-text-color-light: $text-color-light;
 $button-border-color-light: $border-color-light; // Standard button border
 $button-hover-background-color-light: $adw-light-3;
@@ -81,10 +84,10 @@ $destructive-button-border-color-light: #f5c6c0;   // A slightly darker border t
 $destructive-button-hover-background-color-light: color.adjust($destructive-button-background-color-light, $lightness: -5%);
 $destructive-button-active-background-color-light: color.adjust($destructive-button-background-color-light, $lightness: -10%);
 
-$list-row-selected-background-color-light: $adw-blue-3; // Use accent color for selected rows
+$list-row-selected-background-color-light: $adw-blue-3; // Will be updated later to use accent var
 $list-row-selected-text-color-light: $adw-light-1;     // White text on accent background
 
-$input-background-color-light: $adw-light-1;
+$input-background-color-light: $adw-light-1; // Use #ffffff for inputs
 $input-text-color-light: $text-color-light;
 $input-border-color-light: $border-color-light;
 $input-hover-background-color-light: $adw-light-1;
@@ -113,8 +116,8 @@ $link-visited-color-dark: $adw-purple-1;
 $headerbar-background-color-dark: #303030; // Headerbar in dark
 $headerbar-text-color-dark: $text-color-dark;
 $headerbar-border-color-dark: $border-color-dark;
-$window-background-color-dark: $background-color-dark;
-$button-background-color-dark: $adw-dark-3; // Button bg in dark: $adw-dark-3 (#3d3846)
+$window-background-color-dark: $background-color-dark; // #242424
+$button-background-color-dark: $adw-dark-3; // Use #3d3846 for buttons
 $button-text-color-dark: $text-color-dark;
 $button-border-color-dark: $border-color-dark; // Standard button border in dark
 $button-hover-background-color-dark: $adw-dark-1; // Hover can be a bit lighter
@@ -244,7 +247,7 @@ $accent-color-definitions-map: (
   --input-hover-bg-color: #{$input-hover-background-color-light};
   --input-hover-border-color: #{$input-hover-border-color-light};
   --input-focus-bg-color: #{$input-focus-background-color-light};
-  --input-focus-border-color: #{$input-focus-border-color-fallback-light};
+  --input-focus-border-color: var(--accent-color); // Use current accent color for input focus border
   --input-placeholder-color: #{$input-placeholder-color-light};
   --input-disabled-bg-color: #{$input-disabled-background-color-light};
   --input-disabled-fg-color: #{$input-disabled-text-color-light};
@@ -274,12 +277,12 @@ $accent-color-definitions-map: (
   --success-fg-color: #{$sass-accent-green-light-fg};   // Text on success elements
 
   // List Row States
-  --list-row-selected-bg-color: #{$list-row-selected-background-color-light};
-  --list-row-selected-fg-color: #{$list-row-selected-text-color-light};
+  --list-row-selected-bg-color: var(--accent-bg-color); // Use current accent background
+  --list-row-selected-fg-color: var(--accent-fg-color); // Use current accent foreground
 
   // View and Row Backgrounds
-  --view-bg-color: #{$adw-light-2}; // "Lesser white" background for views/listboxes
-  --list-row-bg-color: #{$adw-light-1}; // "White" for rows themselves (widgets)
+  --view-bg-color: #{$adw-window-background-light}; // #fafafb for views/listboxes
+  --list-row-bg-color: #{$adw-light-1}; // #ffffff for rows themselves (widgets)
   --list-row-hover-bg-color: #{rgba($adw-dark-5, 0.04)}; // Hover for rows
   --list-row-active-bg-color: #{rgba($adw-dark-5, 0.08)}; // Active for rows
   --list-separator-color: #{rgba($adw-dark-5, 0.1)}; // For light theme
@@ -320,6 +323,12 @@ $accent-color-definitions-map: (
   --accent-color-rgb: 53,132,228; // Default Adwaita blue (from $adw-blue-3)
   // TODO: Add specific RGBs for each named accent color if needed.
 
+  // Box shadows
+  --listbox-box-shadow-light: 0 0 0 1px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.03);
+  --listbox-box-shadow-dark: 0 0 0 1px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.25);
+  --listbox-box-shadow: var(--listbox-box-shadow-light);
+
+
   &.theme-dark {
     // Dark Theme Overrides
     --body-bg-color: #{$background-color-dark};
@@ -359,7 +368,7 @@ $accent-color-definitions-map: (
     --input-hover-bg-color: #{$input-hover-background-color-dark};
     --input-hover-border-color: #{$input-hover-border-color-dark};
     --input-focus-bg-color: #{$input-focus-background-color-dark};
-    --input-focus-border-color: #{$input-focus-border-color-fallback-dark};
+    --input-focus-border-color: var(--accent-color); // Use current accent color for input focus border in dark theme
     --input-placeholder-color: #{$input-placeholder-color-dark};
     --input-disabled-bg-color: #{$input-disabled-background-color-dark};
     --input-disabled-fg-color: #{$input-disabled-text-color-dark};
@@ -415,6 +424,7 @@ $accent-color-definitions-map: (
     --text-color-rgb: 255,255,255; // Default for dark theme (white)
     // --accent-color-rgb: ...; // This would need to change if default accent is different in dark
                                 // Or be set by the accent-* loop above if accents have specific RGBs
+    --listbox-box-shadow: var(--listbox-box-shadow-dark);
   }
 
   // Specific accent color variable overrides for light theme (when .accent-color class is present)

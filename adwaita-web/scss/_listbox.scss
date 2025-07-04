@@ -4,7 +4,8 @@
 
 .adw-list-box {
   background-color: var(--view-bg-color); // Use view background for the listbox itself
-  border: var(--border-width) solid var(--borders-color);
+  // border: var(--border-width) solid var(--borders-color); // Replaced by box-shadow
+  box-shadow: var(--listbox-box-shadow);
   border-radius: var(--border-radius-default);
   overflow: hidden; // Ensures rows inside respect the border radius
 
