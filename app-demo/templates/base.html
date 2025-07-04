@@ -114,6 +114,10 @@
                     <span class="adw-action-row-icon icon-content-view-grid-symbolic"></span>
                     <span class="adw-action-row-title">Feed</span>
                 </a>
+                <a href="{{ url_for('general.find_users') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.find_users' }}">
+                    <span class="adw-action-row-icon icon-actions-system-search-symbolic"></span>
+                    <span class="adw-action-row-title">Find Users</span>
+                </a>
                 <a href="{{ url_for('post.create_post') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'post.create_post' }}">
                     <span class="adw-action-row-icon icon-actions-document-new-symbolic"></span>
                     <span class="adw-action-row-title">New Post</span>
