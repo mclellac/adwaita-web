@@ -6,9 +6,10 @@ from wtforms import (
     StringField,
     SubmitField,
     TextAreaField,
-    HiddenField # Added for CommentForm parent_id if needed, StringField is fine too
+    HiddenField, # Added for CommentForm parent_id if needed, StringField is fine too
+    IntegerField
 )
-from wtforms.validators import DataRequired, EqualTo, Length, Optional
+from wtforms.validators import DataRequired, EqualTo, Length, Optional, NumberRange
 from wtforms.widgets import CheckboxInput, ListWidget # Ensure ListWidget is imported if used by QuerySelectMultipleField
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from .models import Category # Import Category from models.py
@@ -71,6 +72,12 @@ class ProfileEditForm(FlaskForm):
     profile_photo = FileField('Profile Photo (Max 2MB)', validators=[Optional()])
     location = StringField('Location', validators=[Optional(), Length(max=100)])
     website_url = StringField('Website URL', validators=[Optional(), Length(max=200)])
+
+    # New fields for enhanced profile
+    address = TextAreaField('Address', validators=[Optional(), Length(max=255)])
+    phone_number = StringField('Phone Number', validators=[Optional(), Length(max=50)])
+    age = IntegerField('Age', validators=[Optional(), NumberRange(min=0, max=150)])
+
     is_profile_public = BooleanField('Make Profile Public')
     submit = SubmitField('Update Profile')
 

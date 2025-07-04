@@ -15,6 +15,13 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(120), nullable=True)
     location = db.Column(db.String(100), nullable=True)
     website_url = db.Column(db.String(200), nullable=True)
+
+    # New fields for enhanced profile
+    address = db.Column(db.String(255), nullable=True)
+    phone_number = db.Column(db.String(50), nullable=True)
+    age = db.Column(db.Integer, nullable=True)
+    # profile_info (Text type) is already suitable for an extensive bio
+
     is_profile_public = db.Column(db.Boolean, default=True, nullable=False)
     theme = db.Column(db.String(80), nullable=True, default='system')
     accent_color = db.Column(db.String(80), nullable=True, default='default')
@@ -39,6 +46,56 @@ class User(UserMixin, db.Model):
 
     def get_id(self): # Already in UserMixin but can be explicit
         return str(self.id)
+
+    def follow(self, user):
+        if not self.is_following(user):
+            # Ensure user cannot follow themselves
+            if self == user:
+                return False # Or raise an error
+            # Create a FollowerLink instance
+            link = FollowerLink(follower_id=self.id, followed_id=user.id)
+            db.session.add(link)
+            return True
+        return False # Already following or self-follow attempt
+
+    def unfollow(self, user):
+        link = FollowerLink.query.filter_by(
+            follower_id=self.id,
+            followed_id=user.id
+        ).first()
+        if link:
+            db.session.delete(link)
+            return True
+        return False # Was not following
+
+    def is_following(self, user):
+        return FollowerLink.query.filter_by(
+            follower_id=self.id,
+            followed_id=user.id
+        ).count() > 0
+
+# Association table for the follow relationship
+class FollowerLink(db.Model):
+    __tablename__ = 'follower_link' # Explicit table name
+    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    followed_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    # Relationships to access User objects from FollowerLink if needed, though typically accessed via User model
+    # follower = db.relationship('User', foreign_keys=[follower_id], backref='following_links')
+    # followed = db.relationship('User', foreign_keys=[followed_id], backref='follower_links')
+
+
+# Add relationships to User model AFTER FollowerLink is defined
+User.followed = db.relationship(
+    'User', # Target class is User
+    secondary='follower_link', # Name of the association table
+    primaryjoin=(FollowerLink.follower_id == User.id), # Condition for User -> followed
+    secondaryjoin=(FollowerLink.followed_id == User.id), # Condition for followed -> User
+    backref=db.backref('followers', lazy='dynamic'), # How 'followers' access this User
+    lazy='dynamic' # Use dynamic for query capabilities
+)
+
 
 post_categories = db.Table(
     'post_categories',

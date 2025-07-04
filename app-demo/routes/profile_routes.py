@@ -115,6 +115,11 @@ def edit_profile():
         current_user.website_url = form.website_url.data
         current_user.is_profile_public = form.is_profile_public.data
 
+        # Update new fields
+        current_user.address = form.address.data
+        current_user.phone_number = form.phone_number.data
+        current_user.age = form.age.data
+
         file = form.profile_photo.data
         photo_update_attempted = False
         photo_saved_successfully = False
@@ -372,3 +377,50 @@ def view_gallery(username):
     current_app.logger.debug(f"Found {len(gallery_photos)} photos for {user_profile.username}'s full gallery page.")
 
     return render_template('gallery_full.html', user_profile=user_profile, gallery_photos=gallery_photos)
+
+
+@profile_bp.route('/follow/<username>', methods=['POST'])
+@login_required
+def follow_user(username):
+    user_to_follow = User.query.filter_by(username=username).first_or_404()
+    if user_to_follow == current_user:
+        flash("You cannot follow yourself.", "warning")
+        return redirect(url_for('profile.view_profile', username=username))
+
+    if current_user.is_following(user_to_follow):
+        flash(f"You are already following {username}.", "info")
+    else:
+        if current_user.follow(user_to_follow):
+            db.session.commit()
+            flash(f"You are now following {username}.", "success")
+            current_app.logger.info(f"User {current_user.username} followed {username}.")
+        else:
+            # This case should ideally be caught by is_following or self-check,
+            # but as a fallback from the model's own self-follow check.
+            flash(f"Could not follow {username}. An unexpected error occurred or it was a self-follow.", "danger")
+            db.session.rollback() # Rollback if model returned False for other reasons
+
+    return redirect(url_for('profile.view_profile', username=username))
+
+
+@profile_bp.route('/unfollow/<username>', methods=['POST'])
+@login_required
+def unfollow_user(username):
+    user_to_unfollow = User.query.filter_by(username=username).first_or_404()
+    if user_to_unfollow == current_user:
+        flash("You cannot unfollow yourself.", "warning") # Should not be possible via UI if buttons are correct
+        return redirect(url_for('profile.view_profile', username=username))
+
+    if not current_user.is_following(user_to_unfollow):
+        flash(f"You are not currently following {username}.", "info")
+    else:
+        if current_user.unfollow(user_to_unfollow):
+            db.session.commit()
+            flash(f"You have unfollowed {username}.", "success")
+            current_app.logger.info(f"User {current_user.username} unfollowed {username}.")
+        else:
+            # This case should ideally not be reached if is_following was true.
+            flash(f"Could not unfollow {username}. An unexpected error occurred.", "danger")
+            db.session.rollback()
+
+    return redirect(url_for('profile.view_profile', username=username))
