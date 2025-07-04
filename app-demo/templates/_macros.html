@@ -1,0 +1,26 @@
+{% macro like_button_and_count(post, current_user, csrf_token) %}
+<div class="like-section adw-box adw-box-horizontal adw-box-spacing-xs align-center">
+    {% if current_user.is_authenticated %}
+        {% if current_user.has_liked_post(post) %}
+            <form action="{{ url_for('post.unlike_post_route', post_id=post.id) }}" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="adw-button small flat destructive-action" aria-label="Unlike post">
+                    <span class="adw-icon icon-actions-object-select-symbolic"></span>
+                </button>
+            </form>
+        {% else %}
+            <form action="{{ url_for('post.like_post_route', post_id=post.id) }}" method="POST" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="adw-button small flat suggested-action" aria-label="Like post">
+                    <span class="adw-icon icon-actions-star-symbolic"></span>
+                </button>
+            </form>
+        {% endif %}
+    {% else %}
+        <a href="{{ url_for('auth.login', next=request.url) }}" class="adw-button small flat" aria-label="Login to like post">
+            <span class="adw-icon icon-actions-star-symbolic"></span>
+        </a>
+    {% endif %}
+    <span class="adw-label caption like-count">{{ post.likers.count() }}</span>
+</div>
+{% endmacro %}

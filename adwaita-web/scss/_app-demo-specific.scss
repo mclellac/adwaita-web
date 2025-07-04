@@ -568,3 +568,39 @@ $app-sidebar-breakpoint: 768px;
 .list-pagination-box { // For pagination on user list pages
   @extend .profile-pagination-box; // Inherit styles from profile page pagination
 }
+
+// Like Button & Count Styling
+.post-interaction-footer { // Used in post.html
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m); // Space between like section and other potential actions
+  // padding-top: var(--spacing-m); // Already applied inline, but good to have in SCSS if consistent
+  // margin-top: var(--spacing-m);
+  // border-top: 1px solid var(--border-color);
+}
+
+.like-section { // Used in post.html and the macro
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs); // Default gap from adw-box-spacing-xs
+
+  .adw-button.flat.small, .adw-button.small.flat { // Targeting buttons from macro
+    // Icons are fine, .small handles padding.
+    // No specific style needed unless destructive/suggested needs adjustment for small variant.
+  }
+  .like-count {
+    font-size: var(--font-size-caption);
+    color: var(--text-color-secondary);
+    // Vertical alignment should be fine with button due to align-items on parent
+  }
+}
+
+.card-secondary-actions.adw-card__actions { // Used in post cards
+  padding: var(--spacing-s) var(--spacing-m); // Standard card actions padding
+  border-top: 1px solid var(--divider-color); // Separator from main card footer
+  // justify-content: flex-start; // Default for adw-card__actions is space-between
+
+  .like-section {
+    // No additional styles needed here, inherits from above
+  }
+}

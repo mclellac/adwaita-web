@@ -37,6 +37,8 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan',
         order_by=lambda: desc(UserPhoto.uploaded_at) # Use lambda for UserPhoto ref
     )
+    # Relationship for posts liked by this user
+    liked_posts = db.relationship('PostLike', backref='user', lazy='dynamic', cascade='all, delete-orphan')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -73,6 +75,23 @@ class User(UserMixin, db.Model):
             follower_id=self.id,
             followed_id=user.id
         ).count() > 0
+
+    def like_post(self, post):
+        if not self.has_liked_post(post):
+            like = PostLike(user_id=self.id, post_id=post.id)
+            db.session.add(like)
+            return True
+        return False
+
+    def unlike_post(self, post):
+        like = PostLike.query.filter_by(user_id=self.id, post_id=post.id).first()
+        if like:
+            db.session.delete(like)
+            return True
+        return False
+
+    def has_liked_post(self, post):
+        return PostLike.query.filter_by(user_id=self.id, post_id=post.id).count() > 0
 
 # Association table for the follow relationship
 class FollowerLink(db.Model):
@@ -165,6 +184,8 @@ class Post(db.Model):
         lazy='dynamic',
         order_by=lambda: desc(Comment.created_at) # Use lambda for Comment ref
     )
+    # Relationship for likes on this post
+    likers = db.relationship('PostLike', backref='post', lazy='dynamic', cascade='all, delete-orphan')
 
 
 class Comment(db.Model):
@@ -217,6 +238,19 @@ Comment.is_flagged_active = db.column_property(
         CommentFlag.is_resolved == False # noqa E712, assuming this is for linters, keep if needed
     ).correlate_except(CommentFlag).scalar_subquery()
 )
+
+class PostLike(db.Model):
+    __tablename__ = 'post_like'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    # Add a unique constraint for (user_id, post_id)
+    __table_args__ = (db.UniqueConstraint('user_id', 'post_id', name='_user_post_uc'),)
+
+    def __repr__(self):
+        return f'<PostLike user_id={self.user_id} post_id={self.post_id}>'
 
 
 class SiteSetting(db.Model):
