@@ -9,7 +9,7 @@ from wtforms import (
     HiddenField, # Added for CommentForm parent_id if needed, StringField is fine too
     IntegerField
 )
-from wtforms.fields.html5 import DateField # Added for birthdate
+from wtforms.fields import DateField # Changed import for DateField
 from wtforms.validators import DataRequired, EqualTo, Length, Optional, NumberRange
 from wtforms.widgets import CheckboxInput, ListWidget # Ensure ListWidget is imported if used by QuerySelectMultipleField
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
