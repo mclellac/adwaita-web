@@ -331,7 +331,7 @@ body {
 .app-sidebar {
     width: 240px; // Common sidebar width
     flex-shrink: 0;
-    background-color: var(--headerbar-bg-color); // Sidebar often has a slightly different bg, like headerbar
+    background-color: var(--sidebar-bg-color); // Use the new sidebar background color variable
     border-right: 1px solid var(--border-color);
     overflow-y: auto;
     display: flex;
