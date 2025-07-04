@@ -43,7 +43,7 @@
         </header>
 
         <div class="post-content styled-text-content"> {# Added styled-text-content for prose styling #}
-            {{ post.content | markdown_to_html_and_sanitize }}
+            {{ post.content | markdown_to_html }}
         </div>
 
         {% if post.author %}
