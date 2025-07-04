@@ -44,7 +44,11 @@
 
   display: inline-block; // Or block if it should take full width by default
   width: auto; // Default, can be overridden by parent or utility classes
-  padding: var(--_entry-padding-vertical) var(--_entry-padding-horizontal);
+  // Ensure padding is applied directly and not easily overridden for the base component
+  padding-top: var(--_entry-padding-vertical) !important;
+  padding-bottom: var(--_entry-padding-vertical) !important;
+  padding-left: var(--_entry-padding-horizontal) !important;
+  padding-right: var(--_entry-padding-horizontal) !important;
   border-width: var(--_entry-border-width);
   border-style: solid;
   border-color: var(--_entry-border-color);
@@ -118,13 +122,15 @@
   // Variant for entries used within rows (e.g., AdwEntryRow / .adw-entry-row)
   // This class should be added to the <input class="adw-entry row-input">
   &.row-input {
+    // This variant is for use within AdwEntryRow, where the row itself provides horizontal padding.
+    // Text will align with other row content. Cursor will be at the start of this input's own border.
     --_entry-border-width: 0 0 1px 0; // Only bottom border
     --_entry-border-color: var(--input-border-color, var(--borders-color)); // Use standard border color for the line
     border-radius: 0; // No border radius for a clean line
     background-color: transparent; // Transparent background
     box-shadow: none; // Remove inset shadow
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 0 !important;  // Explicitly no horizontal padding for the input itself
+    padding-right: 0 !important; // Vertical padding is inherited (var(--_entry-padding-vertical))
     // Vertical padding might need adjustment to align text in row, use current --_entry-padding-vertical
 
     &:focus,
