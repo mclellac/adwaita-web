@@ -13,7 +13,7 @@
 <div class="adw-clamp content-clamp profile-edit-clamp">
   <div class="adw-preferences-page" role="main">
     {# Removed header from content as it's now in the main header bar #}
-    <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data" id="edit-profile-form">
+    <form method="POST" action="{{ url_for('profile.edit_profile') }}" enctype="multipart/form-data" id="edit-profile-form">
       {{ form.hidden_tag() }} {# CSRF token #}
 
       {# Hidden fields for crop data #}
@@ -128,7 +128,7 @@
 
       <div class="edit-profile-form-actions form-actions-space-between">
             <div class="actions-start">
-                <a href="{{ url_for('profile', username=current_user.username) }}" class="adw-button flat">Cancel</a>
+                <a href="{{ url_for('profile.view_profile', username=current_user.username) }}" class="adw-button flat">Cancel</a>
             </div>
             <div class="actions-end">
                 <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text if form.submit.label else 'Update Profile' }}</button>

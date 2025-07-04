@@ -13,7 +13,7 @@
         </p>
     </header>
 
-    <form method="POST" action="{{ url_for('admin_site_settings') }}" class="stacked-form">
+    <form method="POST" action="{{ url_for('admin.site_settings') }}" class="stacked-form">
         {{ form.hidden_tag() }} {# CSRF token #}
 
         <section class="adw-preferences-group" aria-labelledby="general-settings-title">

@@ -7,7 +7,7 @@
 {% block headerbar %}
 <adw-header-bar>
     <adw-window-title slot="title" title="{% if query %}Results for '{{ query }}'{% else %}Search Posts{% endif %}"></adw-window-title>
-    <adw-button slot="start" icon-name="go-previous-symbolic" href="{{ url_for('index') }}" aria-label="Back to Home"></adw-button>
+    <adw-button slot="start" icon-name="go-previous-symbolic" href="{{ url_for('general.index') }}" aria-label="Back to Home"></adw-button>
 </adw-header-bar>
 {% endblock %}
 
@@ -25,10 +25,10 @@
                 <article class="adw-card blog-post-item-card">
                     <header class="blog-post-card__header">
                         <h2 class="adw-title-2 blog-post-card__title">
-                            <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-link">{{ post.title }}</a>
+                            <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-link">{{ post.title }}</a>
                         </h2>
                         <div class="blog-post-card__meta adw-label caption">
-                            By: <a href="{{ url_for('profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
+                            By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
                             on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
                         </div>
                     </header>
@@ -43,7 +43,7 @@
                             <div class="post-categories-list meta-section">
                                 <strong class="adw-label caption meta-label-strong">Categories:</strong>
                                 {% for category in post.categories %}
-                                    <a href="{{ url_for('posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact">{{ category.name }}</a>
+                                    <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact">{{ category.name }}</a>
                                 {% endfor %}
                             </div>
                             {% endif %}
@@ -51,12 +51,12 @@
                             <div class="tags-summary meta-section">
                                 <strong class="adw-label caption meta-label-strong">Tags:</strong>
                                 {% for tag_item in post.tags %}
-                                  <a href="{{ url_for('posts_by_tag', tag_slug=tag_item.slug) }}" class="adw-button flat compact">{{ tag_item.name }}</a>
+                                  <a href="{{ url_for('post.posts_by_tag', tag_slug=tag_item.slug) }}" class="adw-button flat compact">{{ tag_item.name }}</a>
                                 {% endfor %}
                             </div>
                             {% endif %}
                         </div>
-                        <a href="{{ url_for('view_post', post_id=post.id) }}" class="adw-button flat read-more-link">Read More <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
+                        <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat read-more-link">Read More <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
                     </footer>
                 </article>
                 {% endfor %}
@@ -66,7 +66,7 @@
             <adw-box orientation="horizontal" justify="center" style="margin-top: var(--spacing-l);">
                 <adw-toggle-group>
                     {% if pagination.has_prev %}
-                        <adw-button icon-name="go-previous-symbolic" href="{{ url_for('search_results', q=query, page=pagination.prev_num) }}"></adw-button>
+                        <adw-button icon-name="go-previous-symbolic" href="{{ url_for('general.search_results', q=query, page=pagination.prev_num) }}"></adw-button>
                     {% else %}
                         <adw-button icon-name="go-previous-symbolic" disabled></adw-button>
                     {% endif %}
@@ -76,7 +76,7 @@
                             {% if page_num == pagination.page %}
                                 <adw-button text="{{ page_num }}" suggested disabled aria-current="page"></adw-button>
                             {% else %}
-                                <adw-button text="{{ page_num }}" href="{{ url_for('search_results', q=query, page=page_num) }}"></adw-button>
+                                <adw-button text="{{ page_num }}" href="{{ url_for('general.search_results', q=query, page=page_num) }}"></adw-button>
                             {% endif %}
                         {% elif loop.index != 1 and loop.index != pagination.pages + 2 %}
                             <adw-button text="…" flat disabled style="pointer-events: none;"></adw-button>
@@ -84,7 +84,7 @@
                     {% endfor %}
 
                     {% if pagination.has_next %}
-                        <adw-button icon-name="go-next-symbolic" href="{{ url_for('search_results', q=query, page=pagination.next_num) }}"></adw-button>
+                        <adw-button icon-name="go-next-symbolic" href="{{ url_for('general.search_results', q=query, page=pagination.next_num) }}"></adw-button>
                     {% else %}
                         <adw-button icon-name="go-next-symbolic" disabled></adw-button>
                     {% endif %}
@@ -93,11 +93,11 @@
             {% endif %}
         {% elif query %}
             <adw-status-page icon-name="system-search-symbolic" title="No Results Found" description="Sorry, no posts matched your search for '{{ query }}'. Try using different keywords.">
-                <adw-button slot="actions" text="Browse All Posts" href="{{ url_for('index') }}" suggested></adw-button>
+                <adw-button slot="actions" text="Browse All Posts" href="{{ url_for('general.index') }}" suggested></adw-button>
             </adw-status-page>
         {% else %}
             <adw-status-page icon-name="edit-find-symbolic" title="Search Posts" description="Please enter a term in the search bar above to find posts.">
-                 <adw-button slot="actions" text="Back to All Posts" href="{{ url_for('index') }}"></adw-button>
+                 <adw-button slot="actions" text="Back to All Posts" href="{{ url_for('general.index') }}"></adw-button>
             </adw-status-page>
         {% endif %}
     </adw-box>
