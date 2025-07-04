@@ -300,3 +300,44 @@ def posts_by_tag(tag_slug): # Renamed
         flash(f"Error loading posts for tag {tag.name}.", "danger")
         posts, pagination = [], None
     return render_template('posts_by_tag.html', tag=tag, posts=posts, pagination=pagination)
+
+
+@post_bp.route('/post/<int:post_id>/like', methods=['POST'])
+@login_required
+def like_post_route(post_id):
+    post = Post.query.get_or_404(post_id)
+    if not post.is_published and post.user_id != current_user.id: # Can't like unpublished posts unless own
+        abort(404)
+
+    if current_user.has_liked_post(post):
+        flash('You have already liked this post.', 'info')
+    else:
+        if current_user.like_post(post):
+            db.session.commit()
+            flash('Post liked!', 'success')
+            current_app.logger.info(f"User {current_user.username} liked post {post_id}.")
+        else:
+            flash('Could not like post. An unexpected error occurred.', 'danger')
+            db.session.rollback()
+
+    return redirect(request.referrer or url_for('post.view_post', post_id=post_id))
+
+
+@post_bp.route('/post/<int:post_id>/unlike', methods=['POST'])
+@login_required
+def unlike_post_route(post_id):
+    post = Post.query.get_or_404(post_id)
+    # No need to check is_published here, can unlike any post they previously liked
+
+    if not current_user.has_liked_post(post):
+        flash('You have not liked this post yet.', 'info')
+    else:
+        if current_user.unlike_post(post):
+            db.session.commit()
+            flash('Post unliked.', 'success')
+            current_app.logger.info(f"User {current_user.username} unliked post {post_id}.")
+        else:
+            flash('Could not unlike post. An unexpected error occurred.', 'danger')
+            db.session.rollback()
+
+    return redirect(request.referrer or url_for('post.view_post', post_id=post_id))

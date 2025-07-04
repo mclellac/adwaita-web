@@ -47,6 +47,11 @@
                 </div>
                 <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat read-more-link">Read More <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
             </footer>
+                        <div class="adw-card__actions card-secondary-actions"> {# New container for likes etc. #}
+                            {% from "_macros.html" import like_button_and_count %}
+                            {{ like_button_and_count(post, current_user, csrf_token()) }}
+                            {# Add other actions like comments count link here if desired #}
+                        </div>
         </article>
         {% endfor %}
     </div>
