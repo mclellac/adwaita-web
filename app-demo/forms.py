@@ -75,8 +75,15 @@ class ProfileEditForm(FlaskForm):
     website_url = StringField('Website URL', validators=[Optional(), Length(max=200)])
 
     # New fields for enhanced profile
-    address = TextAreaField('Address', validators=[Optional(), Length(max=255)])
-    phone_number = StringField('Phone Number', validators=[Optional(), Length(max=50)])
+    # address = TextAreaField('Address', validators=[Optional(), Length(max=255)]) # Removed
+    # phone_number = StringField('Phone Number', validators=[Optional(), Length(max=50)]) # Removed
+    street_address = StringField('Street Address', validators=[Optional(), Length(max=255)])
+    city = StringField('City', validators=[Optional(), Length(max=100)])
+    state_province = StringField('State/Province/Region', validators=[Optional(), Length(max=100)])
+    postal_code = StringField('Postal/Zip Code', validators=[Optional(), Length(max=20)])
+    country = StringField('Country', validators=[Optional(), Length(max=100)])
+    home_phone = StringField('Home Phone', validators=[Optional(), Length(max=50)])
+    mobile_phone = StringField('Mobile Phone', validators=[Optional(), Length(max=50)])
     birthdate = DateField('Birthdate', validators=[Optional()])
 
     is_profile_public = BooleanField('Make Profile Public')

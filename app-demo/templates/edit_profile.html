@@ -66,22 +66,67 @@
                 <input type="url" id="{{ form.website_url.id or 'website_url_input' }}" name="{{ form.website_url.name }}" value="{{ form.website_url.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="https://example.com">
             </div>
 
-            {# Address TextArea #}
-            <div class="adw-action-row">
-                <div class="adw-action-row__text" style="width:100%;">
-                   <label for="{{ form.address.id or 'address_input' }}" class="adw-action-row__title">{{ form.address.label.text }}</label>
-                   {% if form.address.errors %}<div class="error-text form-field-error adw-action-row__subtitle">{{ form.address.errors|join(' ') }}</div>{% endif %}
-                   <textarea name="{{ form.address.name }}" id="{{ form.address.id or 'address_input' }}" class="adw-textarea content-textarea" rows="3" placeholder="Your street address">{{ form.address.data or '' }}</textarea>
-                </div>
-           </div>
-
-            {# Phone Number Entry Row #}
-            <div class="adw-entry-row {{ 'has-error' if form.phone_number.errors else '' }}">
+            {# --- Street Address Entry Row --- #}
+            <div class="adw-entry-row {{ 'has-error' if form.street_address.errors else '' }}">
                 <div class="adw-entry-row-text-content">
-                    <label for="{{ form.phone_number.id or 'phone_number_input' }}" class="adw-entry-row-title">{{ form.phone_number.label.text }}</label>
-                    {% if form.phone_number.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.phone_number.errors|join(' ') }}</span>{% endif %}
+                    <label for="{{ form.street_address.id or 'street_address_input' }}" class="adw-entry-row-title">{{ form.street_address.label.text }}</label>
+                    {% if form.street_address.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.street_address.errors|join(' ') }}</span>{% endif %}
                 </div>
-                <input type="tel" id="{{ form.phone_number.id or 'phone_number_input' }}" name="{{ form.phone_number.name }}" value="{{ form.phone_number.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Your phone number">
+                {{ form.street_address(class="adw-entry adw-entry-row-entry", placeholder="e.g., 123 Main St") }}
+            </div>
+
+            {# --- City Entry Row --- #}
+            <div class="adw-entry-row {{ 'has-error' if form.city.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.city.id or 'city_input' }}" class="adw-entry-row-title">{{ form.city.label.text }}</label>
+                    {% if form.city.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.city.errors|join(' ') }}</span>{% endif %}
+                </div>
+                {{ form.city(class="adw-entry adw-entry-row-entry", placeholder="e.g., Anytown") }}
+            </div>
+
+            {# --- State/Province Entry Row --- #}
+            <div class="adw-entry-row {{ 'has-error' if form.state_province.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.state_province.id or 'state_province_input' }}" class="adw-entry-row-title">{{ form.state_province.label.text }}</label>
+                    {% if form.state_province.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.state_province.errors|join(' ') }}</span>{% endif %}
+                </div>
+                {{ form.state_province(class="adw-entry adw-entry-row-entry", placeholder="e.g., CA or Ontario") }}
+            </div>
+
+            {# --- Postal Code Entry Row --- #}
+            <div class="adw-entry-row {{ 'has-error' if form.postal_code.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.postal_code.id or 'postal_code_input' }}" class="adw-entry-row-title">{{ form.postal_code.label.text }}</label>
+                    {% if form.postal_code.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.postal_code.errors|join(' ') }}</span>{% endif %}
+                </div>
+                {{ form.postal_code(class="adw-entry adw-entry-row-entry", placeholder="e.g., 90210 or K1A 0B1") }}
+            </div>
+
+            {# --- Country Entry Row --- #}
+            <div class="adw-entry-row {{ 'has-error' if form.country.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.country.id or 'country_input' }}" class="adw-entry-row-title">{{ form.country.label.text }}</label>
+                    {% if form.country.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.country.errors|join(' ') }}</span>{% endif %}
+                </div>
+                {{ form.country(class="adw-entry adw-entry-row-entry", placeholder="e.g., USA or Canada") }}
+            </div>
+
+            {# --- Home Phone Entry Row --- #}
+            <div class="adw-entry-row {{ 'has-error' if form.home_phone.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.home_phone.id or 'home_phone_input' }}" class="adw-entry-row-title">{{ form.home_phone.label.text }}</label>
+                    {% if form.home_phone.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.home_phone.errors|join(' ') }}</span>{% endif %}
+                </div>
+                {{ form.home_phone(class="adw-entry adw-entry-row-entry", type="tel", placeholder="e.g., 555-123-4567") }}
+            </div>
+
+            {# --- Mobile Phone Entry Row --- #}
+            <div class="adw-entry-row {{ 'has-error' if form.mobile_phone.errors else '' }}">
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.mobile_phone.id or 'mobile_phone_input' }}" class="adw-entry-row-title">{{ form.mobile_phone.label.text }}</label>
+                    {% if form.mobile_phone.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.mobile_phone.errors|join(' ') }}</span>{% endif %}
+                </div>
+                {{ form.mobile_phone(class="adw-entry adw-entry-row-entry", type="tel", placeholder="e.g., 555-987-6543") }}
             </div>
 
             {# Birthdate Entry Row (using type="date") #}
