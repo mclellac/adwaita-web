@@ -276,10 +276,12 @@ $accent-color-definitions-map: (
   // List Row States
   --list-row-selected-bg-color: #{$list-row-selected-background-color-light};
   --list-row-selected-fg-color: #{$list-row-selected-text-color-light};
-  // Add hover/active for list rows if not already covered by general button vars
-  --list-row-hover-bg-color: #{rgba($adw-dark-5, 0.04)}; // Similar to flat button hover
-  --list-row-active-bg-color: #{rgba($adw-dark-5, 0.08)}; // Similar to flat button active
-  --list-row-bg-color: #{$adw-light-2}; // Default for light theme, slightly off-white
+
+  // View and Row Backgrounds
+  --view-bg-color: #{$adw-light-2}; // "Lesser white" background for views/listboxes
+  --list-row-bg-color: #{$adw-light-1}; // "White" for rows themselves (widgets)
+  --list-row-hover-bg-color: #{rgba($adw-dark-5, 0.04)}; // Hover for rows
+  --list-row-active-bg-color: #{rgba($adw-dark-5, 0.08)}; // Active for rows
   --list-separator-color: #{rgba($adw-dark-5, 0.1)}; // For light theme
 
   --document-font-family: 'AdwaitaSansWeb', 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -385,9 +387,12 @@ $accent-color-definitions-map: (
     // List Row States
     --list-row-selected-bg-color: #{$list-row-selected-background-color-dark};
     --list-row-selected-fg-color: #{$list-row-selected-text-color-dark};
-    --list-row-hover-bg-color: #{rgba($adw-light-1, 0.06)}; // Similar to flat button hover dark
-    --list-row-active-bg-color: #{rgba($adw-light-1, 0.10)}; // Similar to flat button active dark
-    --list-row-bg-color: #{color.adjust($background-color-dark, $lightness: 4%)}; // Slightly lighter than main dark bg
+
+    // View and Row Backgrounds (Dark Theme)
+    --view-bg-color: #{$headerbar-background-color-dark}; // Use #303030 for view/listbox background
+    --list-row-bg-color: #{$button-background-color-dark};   // Use #383838 for rows themselves
+    --list-row-hover-bg-color: #{rgba($adw-light-1, 0.06)}; // Hover for rows
+    --list-row-active-bg-color: #{rgba($adw-light-1, 0.10)}; // Active for rows
     --list-separator-color: #{rgba($adw-light-1, 0.1)}; // For dark theme
 
     // Specific accent color variable overrides for dark theme

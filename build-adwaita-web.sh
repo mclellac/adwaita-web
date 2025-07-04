@@ -55,7 +55,7 @@ echo "--- Compiling SASS to CSS (${SASS_INPUT_FILE} -> ${COMPILED_CSS_FILE_PATH}
 # Use SASS from PATH (installed globally via npm)
 SASS_EXEC="sass"
 # Modified to let SASS output directly to stderr for better error visibility with set -e
-$SASS_EXEC "${SASS_INPUT_FILE}" "${COMPILED_CSS_FILE_PATH}" --style compressed
+$SASS_EXEC "${SASS_INPUT_FILE}" "${COMPILED_CSS_FILE_PATH}" --style compressed --source-map
 sass_exit_code=$? # This will be 0 if the above command succeeded due to set -e
 
 if [ ${sass_exit_code} -ne 0 ]; then
@@ -159,6 +159,13 @@ echo "--- Copying CSS to final destinations ---"
 if [ -f "${COMPILED_CSS_FILE_PATH}" ]; then
     cp "${COMPILED_CSS_FILE_PATH}" "${ROOT_INDEX_CSS_TARGET_PATH}"
     echo "Copied ${COMPILED_CSS_FILE_PATH} to ${ROOT_INDEX_CSS_TARGET_PATH}"
+    # Also copy the map file
+    if [ -f "${COMPILED_CSS_FILE_PATH}.map" ]; then
+        cp "${COMPILED_CSS_FILE_PATH}.map" "${ROOT_INDEX_CSS_TARGET_PATH}.map"
+        echo "Copied ${COMPILED_CSS_FILE_PATH}.map to ${ROOT_INDEX_CSS_TARGET_PATH}.map"
+    else
+        echo "WARNING: Compiled CSS map file ${COMPILED_CSS_FILE_PATH}.map not found."
+    fi
 else
     echo "WARNING: Compiled CSS file ${COMPILED_CSS_FILE_PATH} not found. Skipping copy to ${BUILD_CSS_DIR}."
 fi
@@ -169,6 +176,13 @@ mkdir -p "${APP_DEMO_CSS_DIR}"
 if [ -f "${COMPILED_CSS_FILE_PATH}" ]; then
     cp "${COMPILED_CSS_FILE_PATH}" "${APP_DEMO_CSS_TARGET_PATH}"
     echo "Copied ${COMPILED_CSS_FILE_PATH} to ${APP_DEMO_CSS_TARGET_PATH}"
+    # Also copy the map file to app-demo
+    if [ -f "${COMPILED_CSS_FILE_PATH}.map" ]; then
+        cp "${COMPILED_CSS_FILE_PATH}.map" "${APP_DEMO_CSS_TARGET_PATH}.map"
+        echo "Copied ${COMPILED_CSS_FILE_PATH}.map to ${APP_DEMO_CSS_TARGET_PATH}.map"
+    else
+        echo "WARNING: Compiled CSS map file ${COMPILED_CSS_FILE_PATH}.map not found for app-demo."
+    fi
 else
     echo "WARNING: Compiled CSS file '${COMPILED_CSS_FILE_PATH}' not found. Skipping copy to app-demo."
 fi
