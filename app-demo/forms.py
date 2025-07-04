@@ -97,3 +97,17 @@ class SiteSettingsForm(FlaskForm):
     posts_per_page = StringField('Posts Per Page', validators=[DataRequired()])
     allow_registrations = BooleanField('Allow New User Registrations')
     submit = SubmitField('Save Settings')
+
+class GalleryPhotoUploadForm(FlaskForm):
+    photo = FileField(
+        'Photo (Max 5MB)',
+        validators=[
+            DataRequired(message="Please select a photo to upload."),
+            # FileAllowed will be added dynamically in the route using current_app.config
+        ]
+    )
+    caption = TextAreaField(
+        'Caption (Optional)',
+        validators=[Optional(), Length(max=500)]
+    )
+    submit = SubmitField('Upload Photo')

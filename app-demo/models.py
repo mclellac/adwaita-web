@@ -23,6 +23,13 @@ class User(UserMixin, db.Model):
         'Post', backref='author', lazy=True, order_by=lambda: desc(Post.created_at) # Use lambda for Post ref
     )
     comments = db.relationship('Comment', backref='author', lazy='dynamic') # Added from app.py's Comment.author relationship
+    gallery_photos = db.relationship(
+        'UserPhoto',
+        backref='user', # Changed from 'author' to 'user' to match UserPhoto.user relationship
+        lazy='dynamic',
+        cascade='all, delete-orphan',
+        order_by=lambda: desc(UserPhoto.uploaded_at) # Use lambda for UserPhoto ref
+    )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -120,6 +127,17 @@ class Comment(db.Model):
         order_by=created_at.asc()
     )
     # is_flagged_active property will be defined after CommentFlag model
+
+class UserPhoto(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    # image_filename stores path relative to GALLERY_UPLOAD_FOLDER, e.g. "user_id/image.jpg"
+    image_filename = db.Column(db.String(255), nullable=False)
+    caption = db.Column(db.Text, nullable=True)
+    uploaded_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+    def __repr__(self):
+        return f'<UserPhoto {self.image_filename} user_id={self.user_id}>'
 
 class CommentFlag(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -2,12 +2,13 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import current_user, login_required
 import os
 import uuid
-from PIL import Image
+from PIL import Image # May not be used for gallery if not resizing initially
 from werkzeug.utils import secure_filename
+from flask_wtf.file import FileAllowed # For dynamic form validation
 import bleach # For cleaning profile_info
 
-from ..models import User, Post, Comment # Assuming models are in models.py
-from ..forms import ProfileEditForm # Assuming forms are in forms.py
+from ..models import User, Post, Comment, UserPhoto # Assuming models are in models.py, Added UserPhoto
+from ..forms import ProfileEditForm, GalleryPhotoUploadForm # Assuming forms are in forms.py, Added GalleryPhotoUploadForm
 from .. import db # Assuming db is initialized in __init__.py
 from ..utils import allowed_file_util, flash_form_errors_util, ALLOWED_TAGS_CONFIG, ALLOWED_ATTRIBUTES_CONFIG
 
@@ -82,9 +83,16 @@ def view_profile(username):
     else:
         current_app.logger.info(f"Profile page for {user_profile.username}: No profile_photo_url stored.")
 
+    gallery_upload_form = None
+    if current_user == user_profile:
+        gallery_upload_form = GalleryPhotoUploadForm()
+        # Dynamically add FileAllowed validator if needed here, though it's mainly for POST
+        # For display, it's fine. The POST route /gallery/upload handles the validation.
+
     return render_template('profile.html', user_profile=user_profile,
                            posts_pagination=posts_pagination,
-                           comments_pagination=comments_pagination)
+                           comments_pagination=comments_pagination,
+                           gallery_upload_form=gallery_upload_form)
 
 
 @profile_bp.route('/edit', methods=['GET', 'POST'])
@@ -229,3 +237,120 @@ def edit_profile():
         flash_form_errors_util(form)
 
     return render_template('edit_profile.html', form=form, user_profile=current_user)
+
+
+@profile_bp.route('/gallery/upload', methods=['POST'])
+@login_required
+def upload_gallery_photo():
+    current_app.logger.debug(f"Accessing /profile/gallery/upload, User: {current_user.username}")
+    form = GalleryPhotoUploadForm()
+    # Dynamically add FileAllowed validator based on current_app.config
+    form.photo.validators.append(FileAllowed(current_app.config['ALLOWED_EXTENSIONS'], 'Images only!'))
+
+    if form.validate_on_submit():
+        file = form.photo.data
+        caption = form.caption.data
+        current_app.logger.info(f"Gallery photo upload attempt by {current_user.username}. Filename: {file.filename}")
+
+        # Check file size
+        file_size = file.content_length if hasattr(file, 'content_length') else request.content_length # request.content_length for overall
+        # For individual file size, it's better to read the stream if not directly available.
+        # However, file.content_length should be available with Flask-WTF's FileField.
+        # Let's assume file.content_length is reliable here.
+        # Fallback to checking actual file size after saving or by reading stream if needed.
+        # For now, we'll trust file.content_length or check request.content_length against a slightly higher threshold
+        # if it represents the whole request. The most robust is to check the actual file stream.
+
+        # A more accurate way to check file size:
+        file.stream.seek(0, os.SEEK_END)
+        actual_file_size = file.stream.tell()
+        file.stream.seek(0) # Reset stream position
+
+        if actual_file_size > current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES']:
+            max_size_mb = current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES'] // 1024 // 1024
+            flash(f"Gallery photo is too large. Maximum size is {max_size_mb}MB.", "danger")
+            current_app.logger.warning(f"Gallery photo for {current_user.username} too large: {actual_file_size} bytes.")
+            return redirect(url_for('profile.view_profile', username=current_user.username))
+
+        try:
+            original_filename = secure_filename(file.filename)
+            ext = original_filename.rsplit('.', 1)[-1].lower() if '.' in original_filename else ''
+            if not ext or ext not in current_app.config['ALLOWED_EXTENSIONS']: # Double check extension
+                flash(f"Invalid file type. Allowed types: {', '.join(current_app.config['ALLOWED_EXTENSIONS'])}.", 'warning')
+                current_app.logger.warning(f"Gallery photo for {current_user.username} invalid extension: {ext}")
+                return redirect(url_for('profile.view_profile', username=current_user.username))
+
+            unique_filename_stem = uuid.uuid4().hex
+            unique_filename = f"{unique_filename_stem}.{ext}"
+
+            user_gallery_folder_name = str(current_user.id)
+            # GALLERY_UPLOAD_FOLDER is absolute path to .../app-demo/static/uploads/gallery_pics
+            user_specific_folder_abs = os.path.join(current_app.config['GALLERY_UPLOAD_FOLDER'], user_gallery_folder_name)
+            os.makedirs(user_specific_folder_abs, exist_ok=True)
+
+            save_path = os.path.join(user_specific_folder_abs, unique_filename)
+            current_app.logger.info(f"Attempting to save gallery photo for {current_user.username} to: {save_path}")
+            file.save(save_path) # Flask-WTF FileField's data object has a save method
+
+            if os.path.exists(save_path):
+                current_app.logger.info(f"SUCCESS: Gallery photo for {current_user.username} saved to {save_path}")
+                # Path stored in DB is relative to GALLERY_UPLOAD_FOLDER e.g. "user_id/filename.ext"
+                db_image_path = os.path.join(user_gallery_folder_name, unique_filename).replace("\\", "/")
+
+                new_photo = UserPhoto(
+                    user_id=current_user.id,
+                    image_filename=db_image_path,
+                    caption=caption
+                )
+                db.session.add(new_photo)
+                db.session.commit()
+                flash('Photo uploaded to gallery successfully!', 'success')
+                current_app.logger.info(f"UserPhoto record created for {current_user.username}, path: {db_image_path}")
+            else:
+                current_app.logger.error(f"FAILURE: Gallery photo for {current_user.username} NOT FOUND at {save_path} after save call.")
+                flash('Error saving photo: File could not be written to disk.', 'danger')
+
+        except Exception as e:
+            current_app.logger.error(f"Exception during gallery photo processing for {current_user.username}: {e}", exc_info=True)
+            flash(f'Error processing gallery photo: {str(e)}', 'danger')
+
+    else: # Form validation failed
+        current_app.logger.warning(f"Gallery photo upload form validation failed for {current_user.username}. Errors: {form.errors}")
+        flash_form_errors_util(form) # Flash each error
+
+    return redirect(url_for('profile.view_profile', username=current_user.username))
+
+
+@profile_bp.route('/gallery/delete/<int:photo_id>', methods=['POST'])
+@login_required
+def delete_gallery_photo(photo_id):
+    current_app.logger.debug(f"Accessing /profile/gallery/delete/{photo_id}, User: {current_user.username}")
+    photo = UserPhoto.query.get_or_404(photo_id)
+
+    if photo.user_id != current_user.id and not current_user.is_admin: # Check ownership or admin
+        current_app.logger.warning(f"User {current_user.username} unauthorized attempt to delete photo ID {photo_id} owned by user ID {photo.user_id}.")
+        flash("You are not authorized to delete this photo.", "danger")
+        abort(403)
+
+    try:
+        # GALLERY_UPLOAD_FOLDER is absolute, photo.image_filename is "user_id/actual_file.ext"
+        image_full_path = os.path.join(current_app.config['GALLERY_UPLOAD_FOLDER'], photo.image_filename)
+        current_app.logger.info(f"Attempting to delete gallery photo file: {image_full_path} for photo ID {photo_id}")
+
+        if os.path.exists(image_full_path):
+            os.remove(image_full_path)
+            current_app.logger.info(f"Successfully deleted photo file: {image_full_path}")
+        else:
+            current_app.logger.warning(f"Photo file not found for deletion: {image_full_path} (Photo ID: {photo_id})")
+
+        db.session.delete(photo)
+        db.session.commit()
+        flash('Photo deleted from gallery successfully.', 'success')
+        current_app.logger.info(f"UserPhoto record ID {photo_id} deleted from DB by {current_user.username}.")
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error deleting gallery photo ID {photo_id} for user {current_user.username}: {e}", exc_info=True)
+        flash(f'Error deleting photo: {str(e)}', 'danger')
+
+    return redirect(url_for('profile.view_profile', username=photo.user.username if photo.user else current_user.username))

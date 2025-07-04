@@ -239,6 +239,77 @@
             {% endif %}
         </div>
 
+        {# User Photo Gallery Section #}
+        <div class="adw-preferences-group" role="group" aria-labelledby="user-gallery-title-{{user_profile.id}}">
+            <div class="adw-preferences-group__title-container">
+                <h2 class="adw-preferences-group__title title-2" id="user-gallery-title-{{user_profile.id}}">Photo Gallery</h2>
+            </div>
+
+            {% if current_user == user_profile %}
+            <div class="adw-list-box profile-gallery-upload-box">
+                <div class="adw-action-row">
+                    <h3 class="adw-action-row__title">Upload New Photo to Gallery</h3>
+                </div>
+                <form method="POST" action="{{ url_for('profile.upload_gallery_photo') }}" enctype="multipart/form-data" class="gallery-upload-form">
+                    {{ gallery_upload_form.hidden_tag() if gallery_upload_form else '' }} {# CSRF token #}
+                    <div class="adw-entry-row {{ 'has-error' if gallery_upload_form and gallery_upload_form.photo.errors else '' }}">
+                        <div class="adw-entry-row-text-content">
+                            <label for="{{ gallery_upload_form.photo.id if gallery_upload_form else 'gallery_photo_input' }}" class="adw-entry-row-title">{{ gallery_upload_form.photo.label.text if gallery_upload_form else 'Photo File' }}</label>
+                            {% if gallery_upload_form and gallery_upload_form.photo.errors %}<span class="adw-entry-row-subtitle error-text">{{ gallery_upload_form.photo.errors|join(' ') }}</span>{% endif %}
+                        </div>
+                        {{ gallery_upload_form.photo(class="adw-entry adw-entry-row-entry") if gallery_upload_form }}
+                    </div>
+                    <div class="adw-action-row">
+                        <div class="adw-action-row__text" style="width:100%;">
+                           <label for="{{ gallery_upload_form.caption.id if gallery_upload_form else 'gallery_caption_input' }}" class="adw-action-row__title">{{ gallery_upload_form.caption.label.text if gallery_upload_form else 'Caption' }}</label>
+                           {% if gallery_upload_form and gallery_upload_form.caption.errors %}<div class="error-text form-field-error adw-action-row__subtitle">{{ gallery_upload_form.caption.errors|join(' ') }}</div>{% endif %}
+                           {{ gallery_upload_form.caption(class="adw-textarea content-textarea gallery-caption-textarea", rows="2", placeholder="Optional caption...") if gallery_upload_form }}
+                        </div>
+                   </div>
+                   <div class="form-actions-end">
+                       {{ gallery_upload_form.submit(class="adw-button suggested-action") if gallery_upload_form }}
+                   </div>
+                </form>
+            </div>
+            {% endif %}
+
+            {% set gallery_photos = user_profile.gallery_photos.order_by(UserPhoto.uploaded_at.desc()).all() %}
+            {% if gallery_photos %}
+                <div class="profile-gallery-grid">
+                    {% for photo in gallery_photos %}
+                    <div class="adw-card gallery-photo-card">
+                        <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo.image_filename) }}" alt="{{ photo.caption or 'Gallery image by ' ~ user_profile.username }}" class="gallery-photo-image">
+                        {% if photo.caption %}
+                        <div class="adw-card__content gallery-photo-caption">
+                            <p class="adw-label body-2">{{ photo.caption }}</p>
+                        </div>
+                        {% endif %}
+                        {% if current_user == user_profile or current_user.is_admin %}
+                        <div class="adw-card__actions gallery-photo-actions">
+                             <form method="POST" action="{{ url_for('profile.delete_gallery_photo', photo_id=photo.id) }}" style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="adw-button destructive-action flat small-button" onclick="return confirm('Are you sure you want to delete this photo?');">
+                                    <span class="adw-icon icon-actions-edit-delete-symbolic"></span> Delete
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="adw-status-page">
+                    <span class="adw-icon icon-media-image-symbolic adw-status-page-icon app-status-page-icon"></span>
+                    <h3 class="adw-status-page-title">Empty Gallery</h3>
+                    <p class="adw-status-page-description">{{ user_profile.username }} has not uploaded any photos to their gallery yet.</p>
+                    {% if current_user != user_profile %}
+                    <p class="adw-status-page-description">Check back later!</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
     </div>
 </div>
+
 {% endblock %}
