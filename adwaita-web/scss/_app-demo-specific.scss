@@ -540,3 +540,31 @@ $app-sidebar-breakpoint: 768px;
     line-height: 1.3; // Adjust line height for compact display
   }
 }
+
+// User List Pages (Followers/Following)
+.user-list-container.adw-list-box {
+  // No specific overrides needed for the list-box itself yet,
+  // but available if list items need different overall container style.
+}
+
+.user-list-item-row.adw-action-row {
+  // Ensure consistent vertical alignment if content varies in height
+  .adw-action-row-start-content,
+  .adw-action-row-text-content,
+  .adw-action-row-end-content {
+    display: flex;
+    align-items: center; // Vertically center items within each part of the row
+  }
+
+  .adw-action-row-start-content { // Avatar
+    margin-right: var(--spacing-m);
+  }
+  .adw-action-row-end-content { // Follow/Unfollow button
+    margin-left: var(--spacing-m);
+    // Buttons are already .small
+  }
+}
+
+.list-pagination-box { // For pagination on user list pages
+  @extend .profile-pagination-box; // Inherit styles from profile page pagination
+}

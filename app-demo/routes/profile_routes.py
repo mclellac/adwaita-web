@@ -424,3 +424,56 @@ def unfollow_user(username):
             db.session.rollback()
 
     return redirect(url_for('profile.view_profile', username=username))
+
+
+@profile_bp.route('/<username>/followers')
+@login_required
+def followers_list(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    # Public profiles can show follower/following lists to any logged-in user.
+    # Private profiles only show to the owner.
+    if not user.is_profile_public and user != current_user:
+        current_app.logger.warning(f"User {current_user.username} attempted to view follower list of private profile {username}.")
+        flash("This user's connections are private.", "warning")
+        return redirect(url_for('profile.view_profile', username=username)) # Redirect to their profile
+
+    page = request.args.get('page', 1, type=int)
+    # Consider adding a specific config for USERS_PER_LIST_PAGE or use POSTS_PER_PAGE
+    per_page = current_app.config.get('POSTS_PER_PAGE', 15)
+
+    followers_query = user.followers.order_by(User.username.asc())
+    try:
+        pagination = followers_query.paginate(page=page, per_page=per_page, error_out=False)
+        users_list = pagination.items
+        current_app.logger.debug(f"Found {len(users_list)} followers for {username} on page {page}. Total: {pagination.total}")
+    except Exception as e:
+        current_app.logger.error(f"Error fetching followers for {username}: {e}", exc_info=True)
+        flash("Error loading followers list.", "danger")
+        users_list, pagination = [], None
+
+    return render_template('followers_list.html', user_profile=user, users_list=users_list, pagination=pagination, list_type="Followers")
+
+
+@profile_bp.route('/<username>/following')
+@login_required
+def following_list(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    if not user.is_profile_public and user != current_user:
+        current_app.logger.warning(f"User {current_user.username} attempted to view following list of private profile {username}.")
+        flash("This user's connections are private.", "warning")
+        return redirect(url_for('profile.view_profile', username=username))
+
+    page = request.args.get('page', 1, type=int)
+    per_page = current_app.config.get('POSTS_PER_PAGE', 15)
+
+    following_query = user.followed.order_by(User.username.asc())
+    try:
+        pagination = following_query.paginate(page=page, per_page=per_page, error_out=False)
+        users_list = pagination.items
+        current_app.logger.debug(f"Found {len(users_list)} users {username} is following on page {page}. Total: {pagination.total}")
+    except Exception as e:
+        current_app.logger.error(f"Error fetching following list for {username}: {e}", exc_info=True)
+        flash("Error loading following list.", "danger")
+        users_list, pagination = [], None
+
+    return render_template('following_list.html', user_profile=user, users_list=users_list, pagination=pagination, list_type="Following")
