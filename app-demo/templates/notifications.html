@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Your Notifications{% endblock %}
+
+{% block header_title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="adw-clamp adw-clamp-lg">
+    {% if notifications_list and notifications_list|length > 0 %}
+        <div class="adw-list-box notification-list-container">
+            {% for notification in notifications_list %}
+            <div class="adw-action-row notification-item-row {{ 'unread-notification' if not notification.is_read else '' }}">
+                <div class="adw-action-row-start-content">
+                    {# Icon based on notification type #}
+                    {% if notification.type == 'new_follower' %}
+                        <span class="adw-icon icon-status-user-available-symbolic notification-icon"></span>
+                    {% elif notification.type == 'new_like' %}
+                        <span class="adw-icon icon-actions-star-symbolic notification-icon"></span>
+                    {% elif notification.type == 'new_comment' %}
+                        <span class="adw-icon icon-content-message-symbolic notification-icon"></span>
+                    {% else %}
+                        <span class="adw-icon icon-emotes-face-smile-symbolic notification-icon"></span> {# Generic #}
+                    {% endif %}
+                </div>
+                <div class="adw-action-row-text-content">
+                    <span class="adw-action-row-title notification-text">
+                        {% if notification.type == 'new_follower' and notification.actor %}
+                            <a href="{{ url_for('profile.view_profile', username=notification.actor.username) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> started following you.
+                        {% elif notification.type == 'new_like' and notification.actor and notification.related_post %}
+                            <a href="{{ url_for('profile.view_profile', username=notification.actor.username) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> liked your post: <a href="{{ url_for('post.view_post', post_id=notification.related_post.id) }}" class="adw-link">{{ notification.related_post.title }}</a>.
+                        {% elif notification.type == 'new_comment' and notification.actor and notification.related_post %}
+                            {# Assuming related_comment_id might be used later for direct link to comment #}
+                            <a href="{{ url_for('profile.view_profile', username=notification.actor.username) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> commented on your post: <a href="{{ url_for('post.view_post', post_id=notification.related_post.id, _anchor='comment-' ~ notification.related_comment_id if notification.related_comment_id else 'post-comments-area') }}" class="adw-link">{{ notification.related_post.title }}</a>.
+                        {% else %}
+                            {{ notification.type | replace('_', ' ') | title }} {# Generic display #}
+                        {% endif %}
+                    </span>
+                    <span class="adw-action-row-subtitle notification-timestamp">
+                        <time datetime="{{ notification.timestamp.isoformat() }}">{{ notification.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                        {% if not notification.is_read %}
+                            <span class="unread-dot" title="Unread">•</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {# No end content needed for now, could be "Mark as read/unread" button later #}
+            </div>
+            {% endfor %}
+        </div>
+
+        {# Pagination Controls #}
+        {% if pagination and pagination.pages > 1 %}
+        <div class="adw-box adw-box-horizontal justify-center list-pagination-box" style="margin-top: var(--spacing-l);">
+            <div class="adw-toggle-group">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('notification.list_notifications', page=pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
+                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                    </a>
+                {% else %}
+                    <button class="adw-button icon-only" disabled aria-label="Previous page">
+                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                    </button>
+                {% endif %}
+
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == pagination.page %}
+                            <button class="adw-button suggested-action" disabled aria-current="page">{{ page_num }}</button>
+                        {% else %}
+                            <a href="{{ url_for('notification.list_notifications', page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                        {% endif %}
+                    {% elif loop.index != 1 and loop.index != pagination.pages + pagination.iter_pages()|length %}
+                        <button class="adw-button flat" disabled>…</button>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                     <a href="{{ url_for('notification.list_notifications', page=pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
+                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                    </a>
+                {% else %}
+                    <button class="adw-button icon-only" disabled aria-label="Next page">
+                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    {% else %}
+        <div class="adw-status-page">
+            <span class="adw-icon icon-status-weather-clear-night-symbolic adw-status-page-icon app-status-page-icon"></span> {# Example icon #}
+            <h3 class="adw-status-page-title">No Notifications Yet</h3>
+            <p class="adw-status-page-description">You currently have no notifications.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

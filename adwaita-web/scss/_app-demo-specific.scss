@@ -610,3 +610,48 @@ $app-sidebar-breakpoint: 768px;
     // No additional styles needed here, inherits from above
   }
 }
+
+// Notifications Styling
+.notification-list-container.adw-list-box {
+  .notification-item-row {
+    .notification-icon {
+      font-size: 1.2em; // Make icon slightly larger if default is too small
+      color: var(--text-color-secondary); // Subtle color for icons
+    }
+
+    &.unread-notification {
+      // Example: Give unread notifications a slightly different background
+      // background-color: var(--popover-bg-color); // Or a very light accent shade
+      // Or a border:
+      border-left: 3px solid var(--accent-bg-color); // Use accent color for left border
+      // Adjust padding if border is added, to not shift content too much
+      // padding-left: calc(var(--spacing-m) - 3px);
+      // The default padding of adw-action-row might be enough, or specific overrides for start/text/end content might be better.
+      // Let's try to make the text slightly bolder for unread.
+      .adw-action-row-title {
+        font-weight: bold; // Make title of unread notifications bold
+      }
+    }
+
+    .notification-timestamp {
+      display: flex; // To align dot with text
+      align-items: center;
+      gap: var(--spacing-xxs);
+
+      .unread-dot {
+        color: var(--accent-fg-color); // Use accent color for the dot
+        font-size: 1.5em; // Make dot larger
+        line-height: 1; // Ensure dot aligns well
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+// Badge in sidebar nav (base.html)
+.app-sidebar .adw-action-row .adw-badge {
+  // Default adw-badge styling should be fine.
+  // If specific adjustments are needed for sidebar context:
+  // margin-left: auto; // Push to the right if not already by flex behavior of action row
+  // font-size: 0.8em; // Make it smaller if default is too large for sidebar
+}

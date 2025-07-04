@@ -117,11 +117,16 @@ def create_app(config_name=None):
     # Context processors
     @app.context_processor
     def inject_global_template_variables():
+        unread_notifications_count = 0
+        if current_user.is_authenticated:
+            unread_notifications_count = models.Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+
         return {
             'current_user': current_user, # From flask_login
             'default_avatar_url': url_for('static', filename='img/default_avatar.png'),
             'site_settings': models.SiteSetting, # Make SiteSetting model available
-            'UserPhoto': models.UserPhoto      # Make UserPhoto model available for ordering
+            'UserPhoto': models.UserPhoto,      # Make UserPhoto model available for ordering
+            'unread_notifications_count': unread_notifications_count
         }
 
     @app.context_processor
@@ -143,6 +148,9 @@ def create_app(config_name=None):
 
     from .routes.admin_routes import admin_bp
     app.register_blueprint(admin_bp) # prefix is /admin from blueprint definition
+
+    from .routes.notification_routes import notification_bp
+    app.register_blueprint(notification_bp) # prefix is /notifications
 
     # Error handlers
     @app.errorhandler(403)
