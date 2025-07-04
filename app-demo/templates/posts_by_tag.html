@@ -32,7 +32,7 @@
                     </header>
                     {% if post.content %}
                     <div class="blog-post-card__excerpt styled-text-content">
-                     {{ (post.content | truncate(600) | markdown_to_html ) if post.content else '' }}
+                     {{ (post.content | truncate(600) | markdown ) if post.content else '' }}
                     </div>
                     {% endif %}
                     <footer class="blog-post-card__footer">
