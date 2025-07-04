@@ -61,8 +61,21 @@ def view_post(post_id):
                 db.session.add(notification)
                 current_app.logger.info(f"Notification created for user {post.author.username} about new comment by {current_user.username} on post {post.id}.")
 
-            db.session.commit() # Commit comment and notification together
+            # Create Activity entry for new comment
+            from ..models import Activity # Local import (already imported for like, but good practice if separated)
+            activity = Activity(
+                user_id=current_user.id, # The user who commented
+                type='commented_on_post',
+                target_post_id=post.id,
+                target_comment_id=comment.id # Will be populated after flush/commit
+            )
+            db.session.add(activity)
+            current_app.logger.info(f"Activity 'commented_on_post' logged for user {current_user.username} on post {post.id}, comment ID pending (will be {comment.id}).")
+
+            db.session.commit() # Commit comment, notification, and activity together
             current_app.logger.info(f"Comment (ID: {comment.id}) by {current_user.username} added to post {post_id}.")
+            if 'activity' in locals(): # Check if activity was created
+                 current_app.logger.info(f"Activity 'commented_on_post' (ID: {activity.id}) confirmed for user {current_user.username}, post ID {post.id}, comment ID {comment.id}.")
             flash('Comment posted successfully!', 'success')
             return redirect(url_for('post.view_post', post_id=post_id, _anchor=f"comment-{comment.id}"))
         except ValueError:
@@ -116,8 +129,23 @@ def create_post():
             db.session.add(new_post)
             # Update relations before commit, especially if new tags need to be created and flushed for ID
             update_post_relations_util(new_post, form, db.session)
+
+            # Create Activity entry for new post, if it's being published
+            if new_post.is_published:
+                from ..models import Activity # Local import
+                activity = Activity(
+                    user_id=current_user.id,
+                    type='created_post',
+                    target_post_id=new_post.id # Will be populated after flush/commit
+                )
+                db.session.add(activity)
+                current_app.logger.info(f"Activity 'created_post' logged for user {current_user.username}, post ID pending assignment (will be {new_post.id}).")
+
             db.session.commit()
             current_app.logger.info(f"Post '{new_post.title}' (ID: {new_post.id}, Published: {new_post.is_published}) created by {current_user.username}.")
+            if new_post.is_published and 'activity' in locals(): # Check if activity was created
+                 current_app.logger.info(f"Activity 'created_post' (ID: {activity.id}) confirmed for user {current_user.username}, post ID {new_post.id}.")
+
             flash_msg = 'Post published successfully!' if new_post.is_published else 'Post saved as draft successfully!'
             flash(flash_msg, 'success')
             return redirect(url_for('post.view_post', post_id=new_post.id))
@@ -344,6 +372,16 @@ def like_post_route(post_id):
                 )
                 db.session.add(notification)
                 current_app.logger.info(f"Notification created for user {post.author.username} about new like on post {post.id} by {current_user.username}.")
+
+            # Create Activity entry for new like
+            from ..models import Activity # Local import
+            activity = Activity(
+                user_id=current_user.id, # The user who liked the post
+                type='liked_post',
+                target_post_id=post.id
+            )
+            db.session.add(activity)
+            current_app.logger.info(f"Activity 'liked_post' logged for user {current_user.username} on post {post.id}.")
 
             db.session.commit()
             flash('Post liked!', 'success')

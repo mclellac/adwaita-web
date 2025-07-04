@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{% block page_title %}{% endblock %}{% if self.page_title() %} - {% endif %}{{ site_settings.get('site_title', 'My Libadwaita Blog') }}</title>
+    <title>{% block page_title %}{% endblock %}{% if self.page_title() %} - {% endif %}{{ site_settings.get('site_title', 'Adwaita Social Demo') }}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-skin.css') }}">
 </head>
@@ -62,7 +62,7 @@
     </div>
     <div class="adw-header-bar__center adw-header-bar-center-box"> {# Added adw-header-bar-center-box class #}
         <h1 class="adw-header-bar__title">
-            {% block header_title %}{{ site_settings.get('site_title', 'Blog Demo') }}{% endblock %}
+            {% block header_title %}{{ site_settings.get('site_title', 'Social Demo') }}{% endblock %}
         </h1>
     </div>
     <div class="adw-header-bar__end">
@@ -189,7 +189,7 @@
         <footer class="app-footer adw-toolbar">
     {# Footer content is now minimal as nav links moved to sidebar #}
         <div class="adw-toolbar__start">
-            <span class="adw-label caption">&copy; {{ current_year }} Blog Demo.</span>
+            <span class="adw-label caption">&copy; {{ current_year }} Social Demo.</span>
         </div>
         <div class="adw-toolbar__center">
             {# Optional: social links or other footer content #}
