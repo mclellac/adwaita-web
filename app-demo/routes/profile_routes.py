@@ -6,26 +6,7 @@ from PIL import Image # May not be used for gallery if not resizing initially
 from werkzeug.utils import secure_filename
 from flask_wtf.file import FileAllowed # For dynamic form validation
 import bleach # For cleaning profile_info
-
-from ..models import User, Post, Comment, UserPhoto # Assuming models are in models.py, Added UserPhoto
-from ..forms import ProfileEditForm, GalleryPhotoUploadForm # Assuming forms are in forms.py, Added GalleryPhotoUploadForm
-from .. import db # Assuming db is initialized in __init__.py
-from ..utils import allowed_file_util, flash_form_errors_util, ALLOWED_TAGS_CONFIG, ALLOWED_ATTRIBUTES_CONFIG
-
-profile_bp = Blueprint('profile', __name__, url_prefix='/profile') # template_folder defaults to 'templates' in app root
-
-@profile_bp.route('/<username>')
-@login_required # Original app had this, implies viewing any profile requires login
-def view_profile(username):
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort
-from flask_login import current_user, login_required
-import os
-import uuid
-from PIL import Image # May not be used for gallery if not resizing initially
-from werkzeug.utils import secure_filename
-from flask_wtf.file import FileAllowed # For dynamic form validation
-import bleach # For cleaning profile_info
-from datetime import datetime # Added for age calculation
+# datetime import moved into view_profile function
 
 from ..models import User, Post, Comment, UserPhoto # Assuming models are in models.py, Added UserPhoto
 from ..forms import ProfileEditForm, GalleryPhotoUploadForm # Assuming forms are in forms.py, Added GalleryPhotoUploadForm
