@@ -28,10 +28,11 @@
   margin-bottom: var(--spacing-xl); // Space between groups
 
   .adw-preferences-group__title-container {
-    // Styling for the container of the group title, if needed for alignment or borders
+    padding: var(--spacing-s) 0; // Ensure some vertical padding. Horizontal comes from page.
+    // If group titles are ever directly in a listbox, this might need horizontal padding too.
+    // For now, assuming it's on a page which has its own horizontal padding.
     margin-bottom: var(--spacing-m);
     // border-bottom: 1px solid var(--divider-color); // Optional separator for title
-    // padding-bottom: var(--spacing-s);
   }
 
   .adw-preferences-group__title {

@@ -148,6 +148,18 @@
   // .adw-row { // Target .adw-row
   //   border-bottom-color: var(--border-color-light-stronger); // Define if needed
   // }
+
+  // Header for a list box (if used)
+  .adw-list-box-header {
+    padding: var(--spacing-s) var(--spacing-m);
+    border-bottom: 1px solid var(--divider-color); // Common to have a separator
+
+    // Reset margins for headings directly inside a padded header
+    > h1, > h2, > h3, > h4, > h5, > h6 {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
 }
 // Dark theme for flat listbox
 .dark-theme .adw-list-box.flat,
