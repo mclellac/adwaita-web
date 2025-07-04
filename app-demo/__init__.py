@@ -120,7 +120,8 @@ def create_app(config_name=None):
         return {
             'current_user': current_user, # From flask_login
             'default_avatar_url': url_for('static', filename='img/default_avatar.png'),
-            'site_settings': models.SiteSetting # Make SiteSetting model available
+            'site_settings': models.SiteSetting, # Make SiteSetting model available
+            'UserPhoto': models.UserPhoto      # Make UserPhoto model available for ordering
         }
 
     @app.context_processor
