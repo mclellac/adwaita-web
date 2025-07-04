@@ -44,7 +44,7 @@ $input-height-approx: 38px;
 
 // --- 2. SASS Variables for Theme-Specific Colors (Direct SASS colors) ---
 // Light Theme Colors
-$background-color-light: $adw-light-1;
+$background-color-light: $adw-light-2; // Page background: off-white
 $text-color-light: rgba($adw-dark-5, 0.8);
 $text-color-secondary-light: rgba($adw-dark-5, 0.55);
 $heading-color-light: rgba($adw-dark-5, 0.9);
@@ -54,11 +54,11 @@ $focus-ring-color-fallback-light: rgba($adw-blue-3, 0.5);
 $link-color-light: $adw-blue-4;
 $link-hover-color-light: $adw-blue-5;
 $link-visited-color-light: $adw-purple-4;
-$headerbar-background-color-light: $adw-light-2;
+$headerbar-background-color-light: $adw-light-2; // Headerbar: off-white (same as new page bg)
 $headerbar-text-color-light: $text-color-light;
 $headerbar-border-color-light: $border-color-light;
-$window-background-color-light: $adw-light-1;
-$button-background-color-light: $adw-light-2;
+$window-background-color-light: $adw-light-2; // Window background: off-white
+$button-background-color-light: $adw-light-1; // Buttons: white
 $button-text-color-light: $text-color-light;
 $button-border-color-light: $border-color-light; // Standard button border
 $button-hover-background-color-light: $adw-light-3;
@@ -114,10 +114,10 @@ $headerbar-background-color-dark: #303030; // Headerbar in dark
 $headerbar-text-color-dark: $text-color-dark;
 $headerbar-border-color-dark: $border-color-dark;
 $window-background-color-dark: $background-color-dark;
-$button-background-color-dark: $adw-dark-2; // Button bg in dark: #383838 or $adw-dark-2
+$button-background-color-dark: $adw-dark-3; // Button bg in dark: $adw-dark-3 (#3d3846)
 $button-text-color-dark: $text-color-dark;
 $button-border-color-dark: $border-color-dark; // Standard button border in dark
-$button-hover-background-color-dark: $adw-dark-1;
+$button-hover-background-color-dark: $adw-dark-1; // Hover can be a bit lighter
 $button-hover-border-color-dark: color.adjust($border-color-dark, $lightness: 10%);
 $button-hover-text-color-dark: $text-color-dark;
 $button-active-background-color-dark: color.adjust($adw-dark-1, $lightness: 5%);
@@ -283,6 +283,10 @@ $accent-color-definitions-map: (
   --list-row-hover-bg-color: #{rgba($adw-dark-5, 0.04)}; // Hover for rows
   --list-row-active-bg-color: #{rgba($adw-dark-5, 0.08)}; // Active for rows
   --list-separator-color: #{rgba($adw-dark-5, 0.1)}; // For light theme
+
+  // Default padding for rows using the row-base mixin
+  --row-padding-vertical-default: var(--spacing-s);   // 9px
+  --row-padding-horizontal-default: var(--spacing-m); // 12px
 
   --document-font-family: 'AdwaitaSansWeb', 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --monospace-font-family: 'AdwaitaMonoWeb', 'Monaco', 'Menlo', 'Courier New', monospace;
