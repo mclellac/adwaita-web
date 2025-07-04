@@ -110,8 +110,8 @@ def create_app(config_name=None):
         if not isinstance(value, str): value = str(value)
         return Markup(value.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r').replace('/', '\\/'))
 
-    @app.template_filter('markdown_to_html') # Simpler name for template
-    def markdown_filter(text):
+    @app.template_filter('markdown') # Changed decorator to register as 'markdown'
+    def actual_markdown_filter(text): # Function name can be anything
         return markdown_to_html_and_sanitize_util(text)
 
     # Context processors
