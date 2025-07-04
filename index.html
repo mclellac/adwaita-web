@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="adwaita-web/css/adwaita-skin.css">
     <style>
         body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; font-family: var(--document-font-family); color: var(--text-color); background-color: var(--window-bg-color); }
-        .adw-header-bar { /* Basic header bar structure */
+        .adw-header-bar
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -25,7 +25,7 @@
             justify-content: center;
             text-align: center;
         }
-         .adw-header-bar__title { /* from _headerbar.scss */
+         .adw-header-bar__title
             font-size: var(--headerbar-title-font-size, var(--font-size-large));
             font-weight: var(--headerbar-title-font-weight, $font-weight-bold);
             color: var(--headerbar-title-color, var(--text-color));
@@ -189,7 +189,7 @@
         <section class="widget-showcase">
             <h2 class="adw-label title-2">Controls (Static HTML)</h2>
             <div class="adw-box adw-box-vertical adw-box-spacing-m">
-                <div class="adw-row"> {/* Assuming adw-row is a styled div */}
+                <div class="adw-row"> 
                     <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" checked> <span class="adw-label">Enable Feature</span></label>
                     <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" disabled> <span class="adw-label">Disabled Checkbox</span></label>
                     <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch"> <span class="adw-label visually-hidden">Switch 1</span></label>
@@ -202,7 +202,7 @@
                     <label class="adw-radio-wrapper"><input type="radio" name="my-radio-group" class="adw-radio" value="gamma" disabled> <span class="adw-label">Gamma</span></label>
                 </div>
                 <div class="adw-row" style="align-items: center;">
-                    <span class="adw-label">Spin Button:</span> {# Changed label to span as it's not for an input directly here #}
+                    <span class="adw-label">Spin Button:</span> 
                     <div class="adw-spin-button" id="spin-btn-1-wrapper">
                         <input type="number" id="spin-btn-1-input" class="adw-entry adw-spin-button-entry" value="5" min="0" max="10" step="1">
                         <div class="adw-spin-button-buttons">
@@ -292,14 +292,14 @@
                     <input type="text" class="adw-entry" id="username-entry" placeholder="Enter your username">
                 </div>
                 <div class="adw-expander-row">
-                    <div class="adw-action-row"> {/* Expander uses an action row for its header */}
+                    <div class="adw-action-row"> 
                         <div class="adw-action-row__text">
                             <div class="adw-action-row__title">Expandable Section</div>
                             <div class="adw-action-row__subtitle">Click to see more</div>
                         </div>
                          <span class="adw-expander-row__chevron"><!-- Chevron via CSS --></span>
                     </div>
-                    <div class="adw-expander-row__content" style="display:none;"> {/* Content hidden by default */}
+                    <div class="adw-expander-row__content" style="display:none;"> 
                         <p class="adw-label body" style="padding: var(--spacing-m);">Content for the first expander.</p>
                         <div class="adw-action-row"><div class="adw-action-row__title">Nested Item</div></div>
                     </div>
@@ -313,7 +313,7 @@
             <div class="adw-box adw-box-spacing-s">
                 <button class="adw-button">Show Alert Dialog (No Action)</button>
             </div>
-            <div class="adw-dialog" role="alertdialog" style="display: block; position:relative; margin-top: var(--spacing-m); max-width: 400px;"> {/* Inline for demo */}
+            <div class="adw-dialog" role="alertdialog" style="display: block; position:relative; margin-top: var(--spacing-m); max-width: 400px;"> 
                 <header class="adw-header-bar">
                     <h2 class="adw-header-bar__title">Confirm Action</h2>
                 </header>
@@ -342,9 +342,9 @@
 
             <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Status Page</h3>
             <div class="adw-status-page">
-                <span class="adw-icon icon-status-emblem-ok-symbolic adw-status-page-icon" style="font-size: 4.5rem;"></span> {# Ensured adw-status-page-icon class #}
-                <h4 class="adw-label title-1 adw-status-page-title">All Done!</h4> {# Ensured adw-status-page-title class #}
-                <p class="adw-label body adw-status-page-description">You have completed all tasks.</p> {# Ensured adw-status-page-description class #}
+                <span class="adw-icon icon-status-emblem-ok-symbolic adw-status-page-icon" style="font-size: 4.5rem;"></span> 
+                <h4 class="adw-label title-1 adw-status-page-title">All Done!</h4> 
+                <p class="adw-label body adw-status-page-description">You have completed all tasks.</p> 
                 <div class="adw-status-page-actions">
                     <button class="adw-button suggested-action">Example Action</button>
                 </div>
@@ -395,7 +395,7 @@
                     <h4 class="adw-label title-4">Small View (0px+)</h4>
                     <p class="adw-label body">This is shown when the BreakpointBin is narrow.</p>
                 </div>
-                {# Other views would be hidden by CSS/JS in a real BreakpointBin #}
+                
             </div>
              <details>
                 <summary>Show Layout Examples (Static HTML)</summary>
@@ -408,8 +408,8 @@
         </section>
 
 
-        <div style="height: 200px;"></div> {/* Extra space at bottom */}
+        <div style="height: 200px;"></div> 
     </div>
-    {/* Toast overlay removed as it's JS driven */}
+    
 </body>
 </html>
