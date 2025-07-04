@@ -7,7 +7,8 @@ import argparse
 import getpass  # For hidden password input
 
 # Import create_app and necessary models/db instance
-from app import create_app, db, User # Post model not used in this script currently
+from app_demo import create_app, db # Post model not used in this script currently
+from app_demo.models import User
 
 def create_initial_user(flask_app):
     """

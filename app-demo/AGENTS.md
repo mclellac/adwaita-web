@@ -12,7 +12,7 @@ If you encounter an `OperationalError` from `psycopg2` with a message like `FATA
 
 **Required Environment Variables:**
 
-To ensure a successful database connection, you **must** set the following environment variables in your shell session *before* running `python app-demo/setup_db.py` or `python app-demo/app.py`:
+To ensure a successful database connection, you **must** set the following environment variables in your shell session *before* running `python app-demo/setup_db.py` or running the application (e.g., with `flask run`):
 
 1.  **`POSTGRES_USER`**: The username for your PostgreSQL database.
     *   Defaults to `postgres` in the application if not set.
@@ -37,6 +37,27 @@ Alternatively, you can provide the full database connection URI via the `DATABAS
 
 *   Format: `postgresql://username:password@host:port/database`
 *   Example: `export DATABASE_URL="postgresql://myuser:mypassword123@localhost:5432/mydemoapp_db"`
+
+**Running the Application (Post-Refactor):**
+
+After the refactor to use an application factory (`create_app` in `app-demo/__init__.py`), the application is run using the `flask` command-line interface. Ensure you are in the `app-demo` directory.
+
+1.  Set `FLASK_APP`:
+    ```bash
+    export FLASK_APP=app_demo
+    ```
+    (The `app_demo` here refers to the directory `app-demo/` which is treated as a package, and `flask` will look for `create_app` or `make_app` within its `__init__.py`).
+
+2.  Set `FLASK_ENV` (optional, recommended for development):
+    ```bash
+    export FLASK_ENV=development
+    ```
+    This enables debug mode and auto-reloading.
+
+3.  Run the application:
+    ```bash
+    flask run
+    ```
 
 **Why the "Ident authentication failed" error happens:**
 

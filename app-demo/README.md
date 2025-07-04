@@ -10,11 +10,12 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
 
 ## Setup and Running
 
-1.  **Navigate to the `app-demo` directory:**
+1.  **Navigate to the `app-demo` directory (if not already there):**
+    If your current directory is the root of the repository, change to the `app-demo` directory:
     ```bash
     cd app-demo
     ```
-    (Or ensure you are in this directory if you've just cloned the repository and `app-demo` is the root).
+    All subsequent commands assume you are in the `app-demo` directory.
 
 2.  **Create a virtual environment (recommended):**
     ```bash
@@ -60,7 +61,7 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
         If you wish to use peer authentication (common for local Unix socket connections where the database user matches the system user):
         1.  Set `POSTGRES_PASSWORD` to an empty string: `export POSTGRES_PASSWORD=""`
         2.  Set `POSTGRES_HOST` to the directory containing the PostgreSQL Unix domain socket. Common locations include `/var/run/postgresql` or `/tmp`. (e.g., `export POSTGRES_HOST="/var/run/postgresql"`)
-        3.  **Crucially, the script (`setup_db.py` or `app.py`) must be run by a system user whose username exactly matches the `POSTGRES_USER` configured in the database** (e.g., if `POSTGRES_USER` is `myuser`, you must run the Python script as the `myuser` system user).
+        3.  **Crucially, the script (`setup_db.py` or when running the app) must be run by a system user whose username exactly matches the `POSTGRES_USER` configured in the database** (e.g., if `POSTGRES_USER` is `myuser`, you must run the Python script as the `myuser` system user).
         Peer authentication is generally more complex to set up correctly for web applications and is less common than password authentication when connecting from an application.
 
     *   **Creating a PostgreSQL User and Database (if they don't exist):**
@@ -87,7 +88,7 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
         If you are using the default application user `postgres` and have set its password to `postgres`, you might not need to create a new user, but ensure the `postgres` user has a password set in the database.
 
     *   **Initialize Database and Create Admin User**:
-        After configuring your environment variables and ensuring the database and user exist, run the setup script from within the `app-demo` directory:
+        After configuring your environment variables and ensuring the database and user exist, run the setup script (ensure you are in the `app-demo` directory):
         ```bash
         python setup_db.py
         ```
@@ -96,12 +97,24 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
         *   Guide you through creating an initial admin user for the application.
 
 5.  **Run the Flask development server:**
-    Once the database is set up, you can run the application:
-    ```bash
-    python app.py
-    ```
+    Once the database is set up, you can run the application using the Flask CLI.
+    Ensure you are in the `app-demo` directory.
 
-6.  Open your web browser and go to `http://127.0.0.1:5000/` to see the application.
+    Set the `FLASK_APP` environment variable to point to the application factory:
+    ```bash
+    export FLASK_APP=app_demo
+    ```
+    For development mode (enables debugger and automatic reloading), also set `FLASK_ENV`:
+    ```bash
+    export FLASK_ENV=development
+    ```
+    Then, run the development server:
+    ```bash
+    flask run
+    ```
+    The `app_demo` in `FLASK_APP=app_demo` refers to the `app-demo` directory (which is a Python package containing `__init__.py` where `create_app()` is defined).
+
+6.  Open your web browser and go to `http://127.0.0.1:5000/` (or the address shown in the `flask run` output) to see the application.
 
 ## Key Features
 
@@ -117,11 +130,15 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
 
 ## Project Structure
 
-*   `app.py`: Main Flask application file, contains routes and logic.
-*   `setup_db.py`: Script for initial database setup (table creation, initial user).
+*   `__init__.py`: (Inside `app-demo/`) Main application package initializer. Contains the Flask `create_app` factory function and initializes extensions.
+*   `config.py`: Contains application configuration classes (e.g., for development, production).
+*   `models.py`: Defines SQLAlchemy database models.
+*   `forms.py`: Defines WTForms classes for handling web forms.
+*   `routes/`: Directory containing Blueprints for different parts of the application (e.g., auth, posts).
+*   `setup_db.py`: Script for initial database setup (table creation, initial admin user).
 *   `requirements.txt`: Python dependencies.
-*   `static/`: Contains static assets.
+*   `static/`: Contains static assets (CSS, JavaScript, images).
 *   `templates/`: Contains HTML templates for the application.
-*   `tests/`: Contains unit and integration tests.
+*   `utils.py`: Utility functions for the application.
 
 ```
