@@ -23,7 +23,7 @@
             <div class="blog-post-card__excerpt styled-text-content">
                 {# Rendered HTML excerpt, truncated by CSS if too long, or use a JS solution for smarter HTML truncation #}
                 {# For now, rendering a portion of Markdown. This should be improved for proper HTML excerpt. #}
-                {{ (post.content | truncate(600) | markdown_to_html ) if post.content else '' }}
+                {{ (post.content | truncate(600) | markdown ) if post.content else '' }}
             </div>
             {% endif %}
             <footer class="blog-post-card__footer">
