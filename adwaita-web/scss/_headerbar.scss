@@ -89,19 +89,29 @@
 
   // Ensure links and adw-buttons within the headerbar inherit the correct color
   // and have appropriate default styling if not overridden by button's own classes.
-  a,
-  adw-button,
-  .adw-button {
-    // For adw-button, the component's own styling will apply.
-    // However, for <a> tags or elements that *become* buttons,
-    // ensuring they inherit the foreground color is important.
+
+  // General links and default buttons in headerbar
+  a:not(.adw-button), // For plain <a> tags that aren't styled as buttons
+  .adw-button:not(.suggested-action):not(.destructive-action) { // For adw-buttons that are not special types
     color: var(--headerbar-fg-color);
     text-decoration: none;
 
-    &:hover {
-      // Define a hover state, perhaps a slight change in brightness or background
-      // Depending on how adw-button handles hover, this might need adjustment
-      color: var(--headerbar-fg-color);
+    &.adw-button { // If it's an .adw-button caught by this rule, make it look flat
+        background-color: transparent;
+        border-color: transparent;
+        box-shadow: none;
+        &:hover {
+            background-color: var(--button-flat-hover-bg-color);
+            // color: var(--headerbar-fg-color); // Text color should remain --headerbar-fg-color on hover for these flat buttons
+        }
+        &:active, &.active { // &.active is for toggle buttons, not general active state from click
+            background-color: var(--button-flat-active-bg-color);
+            // color: var(--headerbar-fg-color);
+        }
+    }
+     &:hover:not(.adw-button) { // For plain <a> tags hover (that are not .adw-button)
+        // color: var(--headerbar-fg-color); // Or a slightly different hover if desired
+        // text-decoration: underline; // Optional for plain links
     }
   }
 }

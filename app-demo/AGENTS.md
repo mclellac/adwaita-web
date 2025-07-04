@@ -77,6 +77,20 @@ The `app-demo` application sources its primary CSS (`adwaita-skin.css`) and Java
 
 Refer to the root `AGENTS.md` and `adwaita-web/AGENTS.md` for more details on asset management and the role of `adwaita-web/scss/_app-demo-specific.scss` for styles unique to this application's layout.
 
-## Adwaita Color Compliance
+## Adwaita Styling and Color Compliance
 
-Please ensure that all UI elements strictly use Adwaita named colors as specified in the [official Adwaita documentation](https://gnome.pages.gitlab.gnome.org/libadwaita/doc/1.5/named-colors.html). Do not use hardcoded hex values or other color names unless they are directly derived from or map to these Adwaita named colors. This applies to SCSS files, HTML templates, and any JavaScript that might manipulate styles.
+**1. Use Adwaita Named Colors and CSS Variables:**
+Please ensure that all UI elements strictly use Adwaita named colors (defined as SASS variables in `adwaita-web/scss/_variables.scss` like `$adw-blue-3`) or, preferably, the Adwaita CSS custom properties (e.g., `var(--accent-bg-color)`, `var(--window-bg-color)`). Do not use hardcoded hex values or other color names unless they are directly derived from or map to these Adwaita named colors/variables. This applies to SCSS files, HTML templates, and any JavaScript that might manipulate styles. For official Adwaita color palette reference, see the [GNOME HIG](https://developer.gnome.org/hig/reference/palette.html) (though our variable names might differ slightly, the principle is to use the defined set).
+
+**2. Critical Styling Guideline: Do Not Override Core Widget Aesthetics:**
+To maintain UI consistency and adherence to Adwaita principles, **do not** use custom SCSS in `_app-demo-specific.scss` to override the fundamental visual appearance of standard Adwaita widgets when such appearance is governed by Adwaita's own CSS variables and component styles. This includes, but is not limited to:
+    *   Background colors of elements like `.adw-card`, `.adw-list-box`, `.adw-action-row`. These should use variables like `var(--card-bg-color)`, `var(--view-bg-color)`, `var(--list-row-bg-color)`.
+    *   Text colors of standard buttons (e.g., `.adw-button.suggested-action` text should come from `var(--accent-fg-color)`).
+    *   Default border colors or shadows of widgets.
+
+Always rely on the core Adwaita CSS variables and the cascade for such properties. Custom SCSS in `_app-demo-specific.scss` should be reserved for:
+    *   Layout adjustments specific to `app-demo`'s structure.
+    *   Styling entirely new components not provided by Adwaita.
+    *   Minor thematic alterations that *complement* Adwaita, not fight its base design (e.g., a specific border on a custom element, not changing all card backgrounds).
+
+Overriding core widget aesthetics leads to inconsistencies, breaks theme adaptability (light/dark/HC), and defeats the purpose of using a consistent design system like Adwaita. If a widget's default Adwaita style seems incorrect, the issue might be in the core Adwaita SCSS for that widget or its variables, which should be investigated there rather than patching with app-specific overrides.
