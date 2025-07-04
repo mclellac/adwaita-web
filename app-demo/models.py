@@ -19,7 +19,7 @@ class User(UserMixin, db.Model):
     # New fields for enhanced profile
     address = db.Column(db.String(255), nullable=True)
     phone_number = db.Column(db.String(50), nullable=True)
-    age = db.Column(db.Integer, nullable=True)
+    birthdate = db.Column(db.Date, nullable=True)  # Replaced age with birthdate
     # profile_info (Text type) is already suitable for an extensive bio
 
     is_profile_public = db.Column(db.Boolean, default=True, nullable=False)

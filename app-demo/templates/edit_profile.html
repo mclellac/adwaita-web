@@ -84,13 +84,14 @@
                 <input type="tel" id="{{ form.phone_number.id or 'phone_number_input' }}" name="{{ form.phone_number.name }}" value="{{ form.phone_number.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Your phone number">
             </div>
 
-            {# Age Entry Row (using type="number") #}
-            <div class="adw-entry-row {{ 'has-error' if form.age.errors else '' }}">
+            {# Birthdate Entry Row (using type="date") #}
+            <div class="adw-entry-row {{ 'has-error' if form.birthdate.errors else '' }}">
                 <div class="adw-entry-row-text-content">
-                    <label for="{{ form.age.id or 'age_input' }}" class="adw-entry-row-title">{{ form.age.label.text }}</label>
-                    {% if form.age.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.age.errors|join(' ') }}</span>{% endif %}
+                    <label for="{{ form.birthdate.id or 'birthdate_input' }}" class="adw-entry-row-title">{{ form.birthdate.label.text }}</label>
+                    {% if form.birthdate.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.birthdate.errors|join(' ') }}</span>{% endif %}
                 </div>
-                <input type="number" id="{{ form.age.id or 'age_input' }}" name="{{ form.age.name }}" value="{{ form.age.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Your age" min="0" max="150">
+                {# Render DateField. WTForms DateField renders as <input type="date"> by default #}
+                {{ form.birthdate(class="adw-entry adw-entry-row-entry", placeholder="YYYY-MM-DD") }}
             </div>
 
             {# is_profile_public Switch Row #}
