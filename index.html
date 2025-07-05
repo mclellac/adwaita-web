@@ -562,7 +562,33 @@
                         </div>
                     </div>
                 </div>
-                <div>
+                <!-- This is the end of the "Rows & ListBoxes" component-grid -->
+            </div>
+        </section>
+
+        <!-- Navigation & View Containers (Conceptual Structures) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Navigation & View Containers (Conceptual Structures)</h2>
+            <p class="adw-label body">These are complex containers, often requiring JavaScript for full functionality. Static representations are shown.</p>
+            <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column for these complex items -->
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">Navigation View</h3>
+                    <div class="adw-navigation-view" style="height: 250px; border: 1px solid var(--border-color); display: flex; flex-direction: column;">
+                        <div class="adw-header-bar">
+                            <div class="adw-header-bar__start">
+                                <button class="adw-button icon-only flat"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
+                            </div>
+                            <div class="adw-header-bar__center">
+                                <h1 class="adw-header-bar__title">Page Title</h1>
+                            </div>
+                        </div>
+                        <div style="padding: var(--spacing-m); flex-grow: 1; background-color: var(--view-bg-color);">
+                            <p class="adw-label body">Content of the current page in Navigation View.</p>
+                            <button class="adw-button">Push to next page (conceptual)</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-bottom: var(--spacing-xl);">
                     <h3 class="adw-label title-3">Flap</h3>
                     <div class="adw-flap" style="height: 200px; border: 1px solid var(--border-color); display: flex; position: relative; overflow: hidden;">
                         <div class="adw-flap__flap-area" style="width: 150px; background-color: var(--sidebar-bg-color); padding: var(--spacing-m); position: absolute; height: 100%; left: 0; transform: translateX(0%); transition: transform 0.2s ease-out;">
@@ -609,7 +635,7 @@
                     </div>
                      <small class="adw-label caption">Conceptual: Overlay sidebar shown. Interactive hide/show needs JS.</small>
                 </div>
-                <div>
+                <div> <!-- BreakpointBin is the last item in this new section's grid -->
                     <h3 class="adw-label title-3">Breakpoint Bin</h3>
                     <div class="adw-breakpoint-bin" style="border: 1px solid var(--border-color); padding: var(--spacing-m); min-height: 100px;">
                         <div data-name="child1" data-condition="0" style="background-color: var(--accent-blue-bg); color: white; padding: var(--spacing-s);">
@@ -621,7 +647,6 @@
                     </div>
                     <small class="adw-label caption">Conceptual: Shows different children based on width. Resize to see (needs JS).</small>
                 </div>
-                <!-- Last item in this grid, no extra margin-bottom needed beyond what .component-grid > div provides if it were multi-column -->
             </div>
         </section>
 
@@ -969,7 +994,7 @@
                             <h2 class="adw-header-bar__title">About My Application</h2>
                         </header>
                         <div class="adw-dialog__content adw-about-dialog__content" style="text-align: center;">
-                            <img src="adwaita-web/data/icons/apps/accessories-character-map-symbolic.svg" alt="App Logo" style="width: 64px; height: 64px; margin-bottom: var(--spacing-m); border-radius: var(--border-radius-medium); background-color: var(--shade-color); padding: var(--spacing-xs);"/>
+                            <span class="adw-icon icon-categories-applications-utilities-symbolic" style="width: 64px; height: 64px; font-size: 64px; margin-bottom: var(--spacing-m); border-radius: var(--border-radius-medium); background-color: var(--shade-color); padding: var(--spacing-xs); color: var(--accent-bg-color);"></span>
                             <h3 class="adw-label title-2" style="margin-bottom: var(--spacing-xxs);">My Application</h3>
                             <p class="adw-label body-small" style="margin-bottom: var(--spacing-s);">Version 1.0.0</p>
                             <p class="adw-label body">An amazing app that does wonderful things.</p>
