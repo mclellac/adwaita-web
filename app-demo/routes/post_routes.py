@@ -19,9 +19,9 @@ def view_post(post_id):
             user_desc = current_user.username if current_user.is_authenticated else 'Anonymous'
             current_app.logger.warning(f"User {user_desc} attempted to view unpublished post ID: {post_id}. Denying access.")
             abort(404)
-        current_app.logger.debug(f"Author {current_user.username} viewing their own unpublished post '{post.title}'.")
+        current_app.logger.debug(f"Author {current_user.username} viewing their own unpublished post ID: {post.id}.")
     else:
-        current_app.logger.debug(f"Viewing published post '{post.title}' (ID: {post_id}).")
+        current_app.logger.debug(f"Viewing published post ID: {post_id}.")
 
     form = CommentForm(request.form)
     delete_comment_form = DeleteCommentForm() # For each comment, if needed in template loop
@@ -116,13 +116,12 @@ def create_post():
     current_app.logger.debug(f"Accessing /create post, Method: {request.method}, User: {current_user.username}")
     form = PostForm(request.form)
     if form.validate_on_submit():
-        title = form.title.data
         content = form.content.data # Raw Markdown
         is_published_intent = bool(request.form.get('publish')) # Check if 'publish' button was clicked
 
-        current_app.logger.info(f"User {current_user.username} creating post titled '{title}'. Intent: {'Publish' if is_published_intent else 'Save Draft'}.")
+        current_app.logger.info(f"User {current_user.username} creating post. Intent: {'Publish' if is_published_intent else 'Save Draft'}.")
         try:
-            new_post = Post(title=title, content=content, user_id=current_user.id, is_published=is_published_intent)
+            new_post = Post(content=content, user_id=current_user.id, is_published=is_published_intent)
             if is_published_intent:
                 new_post.published_at = datetime.now(timezone.utc)
 
@@ -142,7 +141,7 @@ def create_post():
                 current_app.logger.info(f"Activity 'created_post' logged for user {current_user.username}, post ID pending assignment (will be {new_post.id}).")
 
             db.session.commit()
-            current_app.logger.info(f"Post '{new_post.title}' (ID: {new_post.id}, Published: {new_post.is_published}) created by {current_user.username}.")
+            current_app.logger.info(f"Post ID: {new_post.id} (Published: {new_post.is_published}) created by {current_user.username}.")
             if new_post.is_published and 'activity' in locals(): # Check if activity was created
                  current_app.logger.info(f"Activity 'created_post' (ID: {activity.id}) confirmed for user {current_user.username}, post ID {new_post.id}.")
 
@@ -151,7 +150,7 @@ def create_post():
             return redirect(url_for('post.view_post', post_id=new_post.id))
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error creating post '{title}' by {current_user.username}: {e}", exc_info=True)
+            current_app.logger.error(f"Error creating post by {current_user.username}: {e}", exc_info=True)
             flash(f'Error creating post: {str(e)}', 'danger')
     elif request.method == 'POST':
         current_app.logger.warning(f"Create post form validation failed. Errors: {form.errors}")
@@ -172,8 +171,8 @@ def edit_post(post_id):
     delete_form = DeletePostForm(prefix=f"del-eff-post-{post.id}-") # For delete button on edit page
 
     if form.validate_on_submit():
-        current_app.logger.info(f"User {current_user.username} updating post '{post.title}' (ID: {post_id}).")
-        post.title = form.title.data
+        current_app.logger.info(f"User {current_user.username} updating post ID: {post_id}.")
+        # post.title = form.title.data # Title removed
         post.content = form.content.data # Raw Markdown
         is_published_intent = bool(request.form.get('publish'))
 
@@ -187,7 +186,7 @@ def edit_post(post_id):
         try:
             db.session.add(post) # Add to session before commit
             db.session.commit()
-            current_app.logger.info(f"Post ID {post.id} ('{post.title}', Pub: {post.is_published}) updated by {current_user.username}.")
+            current_app.logger.info(f"Post ID {post.id} (Published: {post.is_published}) updated by {current_user.username}.")
             flash_msg = 'Post updated and published successfully!' if post.is_published else 'Post updated and saved as draft!'
             flash(flash_msg, 'success')
             return redirect(url_for('post.view_post', post_id=post.id))
@@ -230,7 +229,7 @@ def delete_post(post_id): # Renamed from delete_post_route
 
         db.session.delete(post)
         db.session.commit()
-        current_app.logger.info(f"Post ID: {post_id} ('{post.title}') successfully deleted by {current_user.username}.")
+        current_app.logger.info(f"Post ID: {post_id} successfully deleted by {current_user.username}.")
         flash('Post deleted successfully!', 'success')
     except Exception as e:
         db.session.rollback()

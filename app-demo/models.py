@@ -13,7 +13,6 @@ class User(UserMixin, db.Model):
     profile_info = db.Column(db.Text, nullable=True)
     profile_photo_url = db.Column(db.String(512), nullable=True)
     full_name = db.Column(db.String(120), nullable=True)
-    location = db.Column(db.String(100), nullable=True)
     website_url = db.Column(db.String(200), nullable=True)
 
     # New fields for enhanced profile
@@ -163,7 +162,6 @@ class Category(db.Model):
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(120), nullable=False)
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(

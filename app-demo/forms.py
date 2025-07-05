@@ -46,7 +46,6 @@ def get_category_pk(obj):
     return None
 
 class PostForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired(), Length(min=1, max=120)])
     content = TextAreaField('Content (Markdown)', validators=[DataRequired()]) # Updated label
     categories = QuerySelectMultipleField(
         'Categories',
@@ -71,7 +70,6 @@ class ProfileEditForm(FlaskForm):
         validators=[Optional(), Length(max=5000)]
     )
     profile_photo = FileField('Profile Photo (Max 2MB)', validators=[Optional()])
-    location = StringField('Location', validators=[Optional(), Length(max=100)])
     website_url = StringField('Website URL', validators=[Optional(), Length(max=200)])
 
     # New fields for enhanced profile
