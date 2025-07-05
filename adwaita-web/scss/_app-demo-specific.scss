@@ -466,8 +466,38 @@ $app-sidebar-breakpoint: 768px;
 }
 
 .comments-list.adw-list-box.flat {
-    .comment-card { border-bottom: none; }
-    background-color: transparent; border: none; box-shadow: none;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+
+    .comment-card { // This is the adw-card for a top-level comment + its replies
+        border-bottom: none; // No bottom border if it's part of a list-box look
+        // padding: var(--spacing-s); // Reduced padding for the main card to make replies feel less cramped
+
+        .comment-item { // Container for a single comment's content (parent or reply)
+            // No specific style needed here unless overriding something from .comment-card's direct children
+        }
+
+        .comment-top-level-item {
+            // Styles specific to the direct content of the top-level comment, if any.
+            // For example, if it needs different padding than replies.
+            padding-bottom: var(--spacing-s); // Space before replies start
+        }
+
+        .comment-reply-item {
+            // .is_reply=true adds inline: margin-left: 30px; margin-top: var(--spacing-s); padding-top: var(--spacing-s); border-top: 1px dashed var(--divider-color);
+            // We can refine this or add more specific styles here.
+            // Example: ensure avatar and text align well with the new border.
+            .comment-header {
+                // Adjust if needed due to the border-top
+            }
+        }
+
+        .comment-replies-container {
+            // Container for all replies to a specific comment.
+            // No specific styles needed if replies handle their own top margin/border.
+        }
+    }
 }
 
 // Gallery Specific Styles (from profile.html)
