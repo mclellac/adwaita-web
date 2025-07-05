@@ -16,6 +16,21 @@
             {{ form.hidden_tag() }} {# CSRF token #}
 
             <div class="adw-list-box" role="group" aria-labelledby="register-group-title">
+                {# Full Name (Display Name) Field #}
+                <div class="adw-entry-row {{ 'has-error' if form.full_name.errors else '' }}">
+                    <label for="{{ form.full_name.id or 'full_name_input' }}" class="adw-entry-row-title">{{ form.full_name.label.text }}</label>
+                    <input type="text"
+                           name="{{ form.full_name.name }}"
+                           id="{{ form.full_name.id or 'full_name_input' }}"
+                           class="adw-entry adw-entry-row-entry"
+                           required
+                           placeholder="Your preferred display name"
+                           value="{{ form.full_name.data or '' }}">
+                    {% if form.full_name.errors %}
+                        <span class="adw-label caption error-text adw-entry-row-subtitle">{{ form.full_name.errors|join(' ') }}</span>
+                    {% endif %}
+                </div>
+
                 {# Email (Username) Field #}
                 <div class="adw-entry-row {{ 'has-error' if form.email.errors else '' }}">
                     <label for="{{ form.email.id or 'email_input' }}" class="adw-entry-row-title">{{ form.email.label.text }}</label>
