@@ -12,13 +12,15 @@
   transform: scale(0.95) translateY(-10px); // Initial state for animation
   transform-origin: top center; // Default origin, JS might adjust based on arrow
   visibility: hidden;
-  transition: opacity 0.1s ease-out, transform 0.1s ease-out, visibility 0s linear 0.1s;
+  transition: opacity var(--animation-duration-short) var(--animation-ease-out-cubic),
+              transform var(--animation-duration-short) var(--animation-ease-out-cubic),
+              visibility 0s linear var(--animation-duration-short);
 
   &.open {
     opacity: 1;
     transform: scale(1) translateY(0);
     visibility: visible;
-    transition-delay: 0s;
+    transition-delay: 0s; // Ensure visibility transition applies immediately on open
   }
 }
 

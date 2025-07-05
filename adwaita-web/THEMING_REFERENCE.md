@@ -134,7 +134,23 @@ Used for sidebars in `AdwNavigationSplitView`, `AdwOverlaySplitView`.
     *   Light: `rgb(0 0 6 / 7%)`
     *   Dark: `rgb(0 0 6 / 25%)`
 
-*(Secondary sidebar variables like `--secondary-sidebar-bg-color` also exist with similar light/dark pairings).*
+### Secondary Sidebar Colors
+Used for middle panes in triple-pane layouts.
+*   `--secondary-sidebar-bg-color`:
+    *   Light: `#f3f3f5`
+    *   Dark: `#28282c`
+*   `--secondary-sidebar-fg-color`: (Usually same as `--window-fg-color`)
+    *   Light: `rgb(0 0 6 / 80%)`
+    *   Dark: `#ffffff`
+*   `--secondary-sidebar-backdrop-color`: Background when window is unfocused.
+    *   Light: `#f6f6fa`
+    *   Dark: `#252529`
+*   `--secondary-sidebar-border-color`: Border separating secondary sidebar.
+    *   Light: `rgb(0 0 6 / 7%)`
+    *   Dark: `rgb(0 0 6 / 36%)`
+*   `--secondary-sidebar-shade-color`: Scroll undershoots and transitions.
+    *   Light: `rgb(0 0 6 / 7%)`
+    *   Dark: `rgb(0 0 6 / 25%)`
 
 ### Card Colors
 Used for `.card` styled elements and `.boxed-list` list boxes.
@@ -194,6 +210,35 @@ Used for `.card` styled elements and `.boxed-list` list boxes.
 *   `--progress-bar-fill-color`: Fill color of progress bar. (Defaults to `--accent-bg-color`)
 *   `--spinner-color`: Color of the active part of a spinner. (Defaults to `--accent-color`)
 *   `--spinner-track-color`: Color of the inactive part of a spinner. (Defaults to `--shade-color`)
+*   `--expander-content-bg-color`: Background for the content area of an `AdwExpanderRow`. (Defaults to `var(--view-bg-color)`)
+*   `--pill-button-border-radius`: Border radius for pill-shaped buttons/groups (e.g., `100px`).
+
+### Row & List Styling Variables
+These are primarily used by the `row-base` mixin and row components like `AdwActionRow`.
+*   `--primary-fg-color`: Default primary text color for row content (defaults to `var(--window-fg-color)`).
+*   `--secondary-fg-color`: Color for secondary text (subtitles, dimmed icons) in rows (derived from `var(--window-fg-color-rgb)` and `var(--dim-opacity)`).
+*   `--icon-opacity`: Default opacity for less prominent icons like chevrons (e.g., `0.7`).
+*   `--row-padding-vertical-default`: Default vertical padding for rows (e.g., `10px`).
+*   `--row-padding-horizontal-default`: Default horizontal padding for rows (e.g., `var(--spacing-m)`).
+*   `--row-min-height`: Default minimum height for rows (e.g., `48px`).
+*   `--row-bg-color`: Default background color for rows (often `transparent`).
+*   `--row-fg-color`: Default foreground color for rows (defaults to `var(--primary-fg-color)`).
+*   `--row-border-radius`: Default border radius for interactive elements within rows (defaults to `var(--border-radius-small)`).
+*   `--list-row-selected-bg-color`: Background for selected rows (defaults to `var(--accent-bg-color)`).
+*   `--list-row-selected-fg-color`: Foreground for selected rows (defaults to `var(--accent-fg-color)`).
+*   `--list-row-hover-bg-color`: Background for hovered rows.
+*   `--list-row-active-bg-color`: Background for activated/pressed rows.
+*   `--list-separator-color`: Color for separators between rows in a default listbox.
+
+### Toast Variables
+*   `--toast-bg-color`: Background color for toasts (e.g., a dark neutral color like `var(--dark-3)`).
+*   `--toast-fg-color`: Foreground (text) color for toasts (e.g., a light color like `var(--light-1)`).
+*   `--toast-secondary-fg-color`: Color for secondary elements in toasts (e.g., `rgba(var(--light-1), 0.7)`).
+*   `--toast-accent-color`: Accent color used for actions within toasts (defaults to `var(--accent-color)`).
+*   `--toast-box-shadow`: Box shadow for toasts (defaults to `var(--popover-box-shadow-dark)`).
+*   `--toast-max-width`: Maximum width of toasts (e.g., `400px`).
+*   `--toast-min-height`: Minimum height of toasts (e.g., `36px`).
+*   `--toast-border-radius`: Border radius for toasts (defaults to `var(--border-radius-large)`).
 
 ## Fonts
 *   `--document-font-family`: Default sans-serif font stack.
@@ -213,12 +258,24 @@ These are used internally and can be leveraged for custom styling.
 *   `--disabled-opacity`: Opacity for disabled elements.
     *   Default: `0.5`
 *   `--border-color`: Dynamically calculated border color: `color-mix(in srgb, currentColor var(--border-opacity), transparent)`.
-*   `--window-radius`: Default radius for windows and dialogs (e.g., `12px`).
+*   `--window-radius`: Default radius for windows and dialogs (e.g., `15px`).
 *   `--border-radius-default`, `--border-radius-small`, `--border-radius-medium`, `--border-radius-large`: Standard border radii.
 *   `--border-width`: Default border width (e.g., `1px`).
 *   `--focus-ring-width`: Width of focus rings (e.g., `2px`).
 *   `--focus-ring-color`: Color of focus rings (defaults to `var(--accent-color)`).
+*   `--focus-outline-offset`: Default offset for focus rings on rows (e.g., `-2px`).
 *   Spacing variables: `--spacing-xxs` (3px) to `--spacing-xxl` (36px).
+*   Icon sizes: `--icon-size-base` (16px), `--icon-size-large` (20px), `--icon-size-small` (14px).
+
+## Animation Variables
+*   `--animation-duration-shortest`: e.g., `100ms`
+*   `--animation-duration-short`: e.g., `150ms`
+*   `--animation-duration-medium`: e.g., `250ms`
+*   `--animation-duration-long`: e.g., `400ms`
+*   `--animation-ease-out-cubic`: `cubic-bezier(0.215, 0.610, 0.355, 1.000)`
+*   `--animation-ease-in-out-cubic`: `cubic-bezier(0.645, 0.045, 0.355, 1.000)`
+*   `--animation-ease-in-cubic`: `cubic-bezier(0.550, 0.055, 0.675, 0.190)`
+*   `--animation-ease-out-sine`: `cubic-bezier(0.390, 0.575, 0.565, 1.000)`
 
 ## GNOME Color Palette
 The full GNOME color palette (e.g., `--blue-1` to `--blue-5`, `--green-1` to `--green-5`, etc.) is also available as CSS custom properties for direct use. Refer to `scss/_variables.scss` or Libadwaita documentation for the full list.

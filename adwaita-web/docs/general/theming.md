@@ -58,7 +58,7 @@ The theme system relies heavily on CSS custom properties. Some key variables inc
 *   `--destructive-bg-color`, `--destructive-fg-color`, `--destructive-color`
 *   `--success-bg-color`, `--warning-bg-color`, `--error-bg-color` (and their `fg`/`color` counterparts)
 
-For a comprehensive list, please refer to the [Theming Reference](./THEMING_REFERENCE.md) document. These variables are defined with default light theme values in `:root` and overridden within `.theme-dark` context in `scss/_variables.scss`.
+For a comprehensive list, please refer to the [Theming Reference](../../THEMING_REFERENCE.md) document. These variables are defined with default light theme values in `:root` and overridden within `.theme-dark` context in `scss/_variables.scss`.
 
 ## Accent Colors
 

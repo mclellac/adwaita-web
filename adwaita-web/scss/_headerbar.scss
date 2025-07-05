@@ -75,7 +75,7 @@
 
   .adw-header-bar-title {
     font-size: var(--font-size-base); // Titles in headerbars are often base size but bold
-    font-weight: variables.$font-weight-bold;
+    font-weight: var(--font-weight-bold);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

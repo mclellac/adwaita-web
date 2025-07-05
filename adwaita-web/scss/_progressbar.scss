@@ -17,7 +17,7 @@
   }
 
   &[disabled] {
-    opacity: var(--opacity-disabled, 0.5);
+    opacity: var(--disabled-opacity);
     cursor: not-allowed;
     // Colors should remain to indicate progress, opacity handles the disabled look
   }
@@ -38,6 +38,14 @@
         background-color: var(--accent-bg-color);
         border-radius: 3px;
         animation: adw-progress-indeterminate 1.5s infinite ease-in-out;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      &:before {
+        animation: none;
+        // Static representation for reduced motion: e.g. full bar or specific portion
+        left: 0;
+        width: 100%; // Or a fixed small portion like 30% without movement
+      }
     }
   }
 }

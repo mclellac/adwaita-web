@@ -1,0 +1,104 @@
+// SCSS for AdwBottomSheet (Pure CSS Adwaita Skin Version)
+// AdwBottomSheet is a container that slides up from the bottom.
+// Introduced in Libadwaita 1.6.alpha
+@use 'variables';
+@use 'mixins';
+
+.adw-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-index-dialog); // Similar z-index to dialogs, might need its own if they can overlap
+
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh; // Don't cover the entire screen, leave some space at the top
+
+  background-color: var(--dialog-bg-color); // Bottom sheets often use dialog background
+  color: var(--dialog-fg-color);
+  border-top-left-radius: var(--window-radius); // Rounded top corners, use large window radius
+  border-top-right-radius: var(--window-radius);
+  box-shadow: var(--dialog-box-shadow); // Similar shadow to dialogs
+
+  // Animation: Slide up from bottom
+  // Initial state: hidden below screen
+  transform: translateY(100%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform var(--animation-duration-medium) var(--animation-ease-out-cubic),
+              opacity var(--animation-duration-medium) var(--animation-ease-out-cubic),
+              visibility 0s linear var(--animation-duration-medium);
+  will-change: transform, opacity;
+
+  &.open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  // Optional Drag Handle area
+  .adw-bottom-sheet-drag-handle-area {
+    padding: var(--spacing-s) 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    // border-bottom: 1px solid var(--border-color); // Optional separator
+  }
+
+  .adw-bottom-sheet-drag-handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--border-color); // Use border color for the handle, which is fg with opacity
+    // In dark theme, this might need to be lighter.
+    // Consider a specific --drag-handle-color variable.
+    .theme-dark & {
+        background-color: rgba(var(--window-fg-color-rgb), 0.3); // Lighter on dark bg
+    }
+  }
+
+  // Header area (if the bottom sheet has a header bar)
+  .adw-bottom-sheet-header {
+    flex-shrink: 0;
+    // AdwHeaderBar styles would apply if an .adw-header-bar is placed here.
+    // Ensure it doesn't have bottom border or its top corners are not rounded if sheet already is.
+    .adw-header-bar {
+      border-top-left-radius: 0; // Override if sheet itself provides the radius
+      border-top-right-radius: 0;
+      border-bottom-width: var(--border-width); // Headerbar should have its bottom border
+      border-bottom-color: var(--headerbar-shade-color);
+    }
+  }
+
+  // Main content area of the bottom sheet
+  .adw-bottom-sheet-content {
+    flex-grow: 1;
+    overflow-y: auto; // Content should be scrollable
+    padding: var(--spacing-m); // Default padding for content area
+    // If content is a listbox, it might not need this padding.
+  }
+}
+
+// Backdrop for the bottom sheet (similar to dialog backdrop)
+.adw-bottom-sheet-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--dialog-backdrop-color);
+  z-index: calc(var(--z-index-dialog) - 1); // Just below the bottom sheet
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--animation-duration-medium) var(--animation-ease-out-cubic),
+              visibility 0s linear var(--animation-duration-medium);
+
+  &.open {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+}

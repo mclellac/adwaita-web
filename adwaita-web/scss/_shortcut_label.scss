@@ -8,20 +8,18 @@
 .adw-shortcut-label {
   display: inline-block;
   padding: var(--spacing-xxs) var(--spacing-xs);
-  font-family: var(--document-font-family); // Or a specific UI font if different
+  font-family: var(--monospace-font-family); // Use monospace for keycap feel
   font-size: var(--font-size-small); // Usually smaller text
   line-height: 1.2;
   color: var(--window-fg-color); // Standard text color
-  background-color: var(--view-bg-color); // Subtle background
+  background-color: color-mix(in srgb, var(--window-fg-color) 5%, var(--view-bg-color)); // Slightly offset background
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--border-radius-small);
   white-space: nowrap;
+  box-shadow: inset 0 -1px 0 rgba(var(--window-fg-color-rgb), 0.1); // Subtle keypress effect
 
   // Libadwaita often uses specific styling for keycaps, e.g. with subtle gradients or borders.
   // This is a simplified version.
-  // Example of a slightly more "keycap" like appearance:
-  // background-color: color.scale(var(--view-bg-color), $lightness: -5%);
-  // box-shadow: inset 0 -1px 0 color.scale(var(--view-bg-color), $lightness: -15%);
 
   // If there are separators for multiple keys like "Ctrl+S"
   // This would depend on the HTML structure generated for the shortcut label.

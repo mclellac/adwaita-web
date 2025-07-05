@@ -1,6 +1,7 @@
 // scss/_tabs.scss
 @use 'variables';
 @use 'mixins';
+@use 'button'; // For @extend .adw-button
 @use 'sass:color';
 
 // --- AdwTabButton ---
@@ -32,7 +33,7 @@
   &.active {
     background-color: var(--view-bg-color); // Active tab matches content area (view) background
     color: var(--accent-color);             // Active tab text uses accent color
-    font-weight: variables.$font-weight-bold;
+    font-weight: var(--font-weight-bold);
     opacity: 1.0;
     // Border to make it look like it's part of the content pane
     border-color: var(--headerbar-border-color); // Uses headerbar's border color for sides and top

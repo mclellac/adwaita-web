@@ -45,14 +45,10 @@
     padding: var(--spacing-m) var(--spacing-l) var(--spacing-m) var(--spacing-xl); // Top, Right, Bottom, Left
     background-color: var(--expander-content-bg-color, var(--window-bg-color)); // Define --expander-content-bg-color or use a fallback
 
-    // Separator for the content area.
-    // Usually, there's a top border (or the header's bottom border acts as one).
-    // And a bottom border if it's not the very last thing in a list.
-    border-top: var(--border-width) solid var(--borders-color);
-    // The original had border-bottom, which is also fine.
-    // If rows inside content-area have their own separators, this might not be needed.
-    // Let's keep a bottom border for now, assuming it's a general container.
-    border-bottom: var(--border-width) solid var(--borders-color);
+    // The header (ActionRow) typically provides the top separator with its bottom border.
+    // Content area itself usually doesn't have additional borders unless it's forming a new visual group.
+    // border-top: var(--border-width) solid var(--border-color); // Removed
+    // border-bottom: var(--border-width) solid var(--border-color); // Removed
 
     display: none; // Hidden by default
 
@@ -146,7 +142,7 @@
         // Let's use more standard content padding, similar to JS version
         padding: var(--spacing-m) var(--spacing-l) var(--spacing-m) var(--spacing-xl);
         white-space: pre-wrap; // For preserving formatting in bio (app-demo specific need)
-        border-top: 1px solid var(--divider-color, var(--borders-color));
+        border-top: 1px solid var(--border-color); // Use the standard border color variable
         // margin-top: -1px; // Collapses border with summary when open - this might not be needed if summary has no bottom border
         background-color: var(--expander-content-bg-color, var(--window-bg-color));
 

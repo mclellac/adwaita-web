@@ -53,7 +53,7 @@
 .caption {
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-normal);
-  line-height: variables.$line-height-base; // SASS var $line-height-base from _variables.scss
+  line-height: var(--line-height-base);
   color: var(--window-fg-color);
   opacity: var(--dim-opacity);
 }

@@ -2,6 +2,7 @@
 
 @use 'variables';
 @use 'mixins'; // For focus-ring if needed, though direct box-shadow is used here
+@use 'card'; // For @extend .adw-card
 @use 'sass:color';
 
 .adw-list-box {
@@ -220,6 +221,55 @@
   }
 }
 
+// Navigation Sidebar Style
+// Used for lists that act as navigation sidebars.
+.adw-list-box.navigation-sidebar {
+  background-color: var(--sidebar-bg-color);
+  color: var(--sidebar-fg-color);
+  border: none; // Sidebars typically don't have their own border here; GtkScrolledWindow might.
+  border-radius: 0; // Usually part of a larger sidebar structure, no independent radius.
+  box-shadow: none;
+
+  > .adw-row {
+    background-color: transparent; // Rows are transparent over sidebar-bg
+    color: var(--sidebar-fg-color);
+    border-radius: var(--border-radius-small); // Rows in sidebar can have a small radius for selection
+    padding: var(--spacing-s) var(--spacing-m); // Potentially slightly different padding for sidebar rows
+
+    &:not(:last-child) {
+      border-bottom: none; // No separators between rows in a typical sidebar list
+    }
+    &:first-child, &:last-child {
+      border-radius: var(--border-radius-small); // Consistent radius for all rows
+    }
+
+    &:hover:not(.activated):not(.selected):not(:disabled) {
+      background-color: rgba(var(--sidebar-fg-color-rgb, 255,255,255), 0.06); // Subtle hover on sidebar-bg
+    }
+    // For sidebar, selected items often take accent color directly for background
+    // and have more prominent styling.
+    &.activated,
+    &.selected {
+      background-color: var(--accent-bg-color);
+      color: var(--accent-fg-color);
+      .title, .subtitle, .adw-icon, .icon, svg, > * {
+        color: var(--accent-fg-color);
+      }
+      .subtitle {
+        opacity: 0.7; // Subtitles on selected sidebar items are often slightly less prominent
+      }
+    }
+
+    // Focus ring for sidebar rows
+    &.interactive:focus-visible,
+    &.activatable:focus-visible {
+      outline: var(--focus-ring-width) solid var(--focus-ring-color);
+      outline-offset: calc(var(--focus-ring-width) * -1);
+    }
+  }
+}
+
+
 // Header for a list box (if used)
 .adw-list-box-header {
   padding: var(--spacing-s) var(--spacing-m);
@@ -230,6 +280,6 @@
   > h1, > h2, > h3, > h4, > h5, > h6 { // Standard Libadwaita practice for list headers
     margin: 0;
     font-size: var(--font-size-large); // Example size for list headers
-    font-weight: variables.$font-weight-bold;
+    font-weight: var(--font-weight-bold);
   }
 }
