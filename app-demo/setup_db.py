@@ -26,6 +26,7 @@ app_module = importlib.import_module("app-demo")
 create_app = app_module.create_app
 db = app_module.db
 User = app_module.models.User
+SiteSetting = app_module.models.SiteSetting # Import SiteSetting
 
 
 def create_initial_user(flask_app):
@@ -124,6 +125,15 @@ def create_initial_user(flask_app):
         )
         new_user.set_password(password)
         db.session.add(new_user)
+
+        # Set default site settings on initial user creation if non-interactive
+        if not is_interactive:
+            print(f"DEBUG: Setting initial site settings for non-interactive setup.")
+            SiteSetting.set('site_title', 'Adwaita Social Demo', 'string')
+            SiteSetting.set('posts_per_page', 10, 'int')
+            SiteSetting.set('allow_registrations', True, 'bool')
+            print(f"DEBUG: allow_registrations set to True.")
+
         db.session.commit()
         print(f"User '{username}' created successfully and set as admin, approved, and active.")
 
