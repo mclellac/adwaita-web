@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, jsonify, session
 from flask_login import current_user, login_required
+from flask_wtf.csrf import generate_csrf # Import generate_csrf
 from datetime import datetime, timezone
 from sqlalchemy import or_ # For search query
 
@@ -119,50 +120,37 @@ def contact_page():
     current_app.logger.debug("Displaying Contact page.")
     return render_template('contact.html')
 
-@general_bp.route('/feed')
+@general_bp.route('/feed') # This is the "Home" page for logged-in users
 @login_required
-def activity_feed():
-    current_app.logger.info(f"Accessing activity feed for user {current_user.username}.")
+def activity_feed(): # Rename to home_feed or similar if preferred, but endpoint name stays for now
+    current_app.logger.info(f"Accessing main feed (posts) for user {current_user.username}.")
     page = request.args.get('page', 1, type=int)
-    per_page = current_app.config.get('ACTIVITIES_PER_PAGE', 20) # New config for activities per page
+    per_page = current_app.config.get('POSTS_PER_PAGE', 10) # Use POSTS_PER_PAGE
 
-    # Get users the current user is following
-    followed_users_list = current_user.followed.all() # .all() executes the query
+    posts_list, pagination = [], None
 
-    activities_list, pagination = [], None
+    # For the main feed, show posts from users the current user is following, plus their own posts.
+    # Alternatively, show all public posts if that's the desired global feed behavior.
+    # For now, let's implement a feed of all public posts, similar to the anonymous index.
+    # A more advanced feed would involve `followed_users_posts`.
 
-    # Combine IDs of followed users and the current user for the feed
-    user_ids_for_feed = [user.id for user in followed_users_list]
-    if current_user.id not in user_ids_for_feed: # Add current user if not already in list (e.g. from self-follow if that was possible)
-        user_ids_for_feed.append(current_user.id)
+    try:
+        # Fetch all published posts, newest first.
+        posts_query = Post.query.filter(Post.is_published == True)\
+                                .order_by(Post.published_at.desc(), Post.created_at.desc())
 
-    # The followed_users_count is for the message "You are following X users", so it should not include self.
-    followed_users_count = len(followed_users_list)
+        pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
+        posts_list = pagination.items
+        current_app.logger.debug(f"Found {len(posts_list)} posts for main feed page {page}. Total: {pagination.total}")
+    except Exception as e:
+        current_app.logger.error(f"Error fetching posts for main feed for user {current_user.username}: {e}", exc_info=True)
+        flash("Error loading the feed. Please try again later.", "danger")
+        # posts_list and pagination will remain empty or None
 
-
-    if not user_ids_for_feed:
-        # This case should ideally not be hit if current_user.id is always added,
-        # unless current_user somehow has no ID (which shouldn't happen for a logged-in user).
-        current_app.logger.debug(f"User {current_user.username} has an empty list of user IDs for feed (this is unexpected).")
-        # Render with empty activities_list
-    else:
-        current_app.logger.debug(f"User {current_user.username} feed will include activities from user IDs: {user_ids_for_feed}.")
-        try:
-            from ..models import Activity # Local import
-            # Query activities from the combined list of users (followed + self)
-            activity_query = Activity.query.filter(
-                Activity.user_id.in_(user_ids_for_feed)
-            ).order_by(Activity.timestamp.desc())
-
-            pagination = activity_query.paginate(page=page, per_page=per_page, error_out=False)
-            activities_list = pagination.items
-            current_app.logger.debug(f"Found {len(activities_list)} activities for feed page {page} for user {current_user.username}. Total: {pagination.total}")
-        except Exception as e:
-            current_app.logger.error(f"Error fetching activities for feed for user {current_user.username}: {e}", exc_info=True)
-            flash("Error loading your activity feed. Please try again later.", "danger")
-            # activities_list and pagination will remain empty or None
-
-    return render_template('feed.html', activities_list=activities_list, pagination=pagination, followed_users_count=followed_users_count)
+    # The template 'feed.html' will need to be adjusted to render posts instead of activities.
+    # Or, we can point to 'index.html' if it's suitable for rendering a list of posts with pagination.
+    # Let's assume 'feed.html' will be adapted.
+    return render_template('feed.html', posts=posts_list, pagination=pagination, current_user=current_user, csrf_token=generate_csrf())
 
 
 # The '/users/find' route is now removed as search is unified.

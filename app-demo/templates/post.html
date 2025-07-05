@@ -218,7 +218,7 @@
     </section>
     {% else %}
     <div class="login-prompt-comment">
-        <p class="adw-label body"><a href="{{ url_for('login', next=request.url) }}" class="adw-link">Login</a> to leave a comment.</p>
+        <p class="adw-label body"><a href="{{ url_for('auth.login', next=request.url) }}" class="adw-link">Login</a> to leave a comment.</p>
     </div>
     {% endif %}
 
@@ -280,7 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (firstFocusable) firstFocusable.focus();
         });
     }
-    if (cancelBtn && deleteDialogEl) {
+    // Corrected conditional: uses cancelPostDeleteBtn and deletePostDialogEl
+    if (cancelPostDeleteBtn && deletePostDialogEl) {
         cancelPostDeleteBtn.addEventListener('click', () => deletePostDialogEl.setAttribute('hidden', 'true'));
     }
     if (deletePostDialogEl) { // ESC key for post delete dialog
