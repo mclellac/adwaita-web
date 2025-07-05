@@ -655,3 +655,21 @@ $app-sidebar-breakpoint: 768px;
   // margin-left: auto; // Push to the right if not already by flex behavior of action row
   // font-size: 0.8em; // Make it smaller if default is too large for sidebar
 }
+
+// Tag Pills (for post.html, search_results.html, etc.)
+.tag-pill.adw-button.flat.compact {
+  border-radius: 999px; // Makes it a pill
+  // .compact already reduces padding, flat removes background.
+  // Ensure text color is distinct, flat buttons can sometimes blend.
+  color: var(--accent-fg-color); // Use accent color for text for visibility
+  border: 1px solid var(--accent-bg-color); // Add a border with accent color
+
+  &:hover, &:focus {
+    color: var(--accent-fg-color); // Keep text color on hover
+    background-color: rgba(var(--accent-color-rgb), 0.1); // Slight accent background on hover
+    border-color: var(--accent-bg-color); // Keep border color
+  }
+
+  // Ensure it doesn't inherit unwanted styles from generic .adw-button if they conflict
+  text-decoration: none; // Links shouldn't be underlined if they are buttons
+}
