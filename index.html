@@ -6,14 +6,23 @@
     <title>Adwaita Skin - CSS Demo</title>
     <link rel="stylesheet" href="adwaita-web/css/adwaita-skin.css">
     <style>
-        body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; font-family: var(--document-font-family); color: var(--text-color); background-color: var(--window-bg-color); }
-        .adw-header-bar
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: var(--document-font-family);
+            color: var(--text-color);
+            background-color: var(--window-bg-color);
+        }
+        .adw-header-bar { /* Basic headerbar styling, assuming it's not fully self-styled by _headerbar.scss alone */
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: var(--spacing-s) var(--spacing-m); /* Adapting from adw-header-bar styles */
+            padding: var(--spacing-s) var(--spacing-m);
             background-color: var(--headerbar-bg-color);
             border-bottom: 1px solid var(--headerbar-border-color);
+            box-shadow: var(--headerbar-box-shadow, none); /* In case headerbar gets its own shadow variable */
         }
         .adw-header-bar__start, .adw-header-bar__center, .adw-header-bar__end {
             display: flex;
@@ -25,38 +34,99 @@
             justify-content: center;
             text-align: center;
         }
-         .adw-header-bar__title
-            font-size: var(--headerbar-title-font-size, var(--font-size-large));
-            font-weight: var(--headerbar-title-font-weight, $font-weight-bold);
-            color: var(--headerbar-title-color, var(--text-color));
-            margin: 0; /* Reset default heading margin */
-        }
-        .adw-header-bar__subtitle {
-            font-size: var(--headerbar-subtitle-font-size, var(--font-size-small));
-            font-weight: var(--headerbar-subtitle-font-weight, $font-weight-normal);
-            color: var(--headerbar-subtitle-color, var(--text-color-secondary));
+         .adw-header-bar__title {
+            font-size: var(--title-1-font-size); /* Match Adwaita's default headerbar title size */
+            font-weight: var(--font-weight-bold);
+            color: var(--headerbar-fg-color);
             margin: 0;
         }
+        .adw-header-bar__subtitle {
+            font-size: var(--font-size-small);
+            font-weight: var(--font-weight-normal);
+            color: var(--secondary-fg-color); /* Use secondary for subtitles */
+            margin: 0;
+            margin-top: var(--spacing-xxs);
+        }
 
-        .main-content-area { padding: var(--spacing-l); overflow-y: auto; flex-grow: 1; }
-        .widget-showcase { margin-bottom: var(--spacing-l); }
-        .widget-showcase > .adw-label.title-1 { margin-bottom: var(--spacing-m); } /* Assuming title-level translates to classes */
-        .button-group .adw-button { margin-right: var(--spacing-s); margin-bottom: var(--spacing-s); }
-
-        /* Basic icon placeholder styling */
+        .main-content-area {
+            padding: var(--spacing-l);
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .widget-showcase {
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-m);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-large);
+            background-color: var(--view-bg-color); /* Give showcases a slight view background */
+        }
+        .widget-showcase > .adw-label.title-1,
+        .widget-showcase > h2.adw-label.title-2 {
+            margin-top: 0;
+            margin-bottom: var(--spacing-m);
+        }
+        .button-group .adw-button,
+        .control-group > * {
+            margin-right: var(--spacing-s);
+            margin-bottom: var(--spacing-s);
+        }
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--spacing-m);
+            margin-bottom: var(--spacing-s);
+        }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-m);
+        }
+        .component-grid > div {
+            padding: var(--spacing-s);
+            border: 1px dashed var(--border-color);
+            border-radius: var(--border-radius-medium);
+        }
+        /* Ensure details/summary also pick up Adwaita styles if not default */
+        details { margin-top: var(--spacing-s); }
+        summary {
+            cursor: pointer;
+            font-weight: var(--font-weight-bold);
+            padding: var(--spacing-xs);
+            border-radius: var(--border-radius-small);
+        }
+        summary:hover { background-color: var(--button-flat-hover-bg-color); }
+        pre {
+            background-color: var(--shade-color);
+            padding: var(--spacing-s);
+            border-radius: var(--border-radius-small);
+            overflow-x: auto;
+            font-family: var(--monospace-font-family);
+            font-size: var(--font-size-small);
+        }
+        /* Icon placeholder styling (ensure it's robust) */
         .adw-icon {
-            display: inline-block;
-            width: 16px; /* Default icon size, adjust as needed */
-            height: 16px;
-            background-color: currentColor; /* Simple placeholder */
+            display: inline-flex; /* Changed to inline-flex for better alignment */
+            align-items: center;
+            justify-content: center;
+            width: var(--icon-size-base, 16px);
+            height: var(--icon-size-base, 16px);
+            background-color: currentColor;
             -webkit-mask-size: contain;
             mask-size: contain;
             -webkit-mask-repeat: no-repeat;
             mask-repeat: no-repeat;
             -webkit-mask-position: center;
             mask-position: center;
+            vertical-align: middle; /* Helps with text alignment */
         }
-        /* Example for a specific icon if using mask-image and individual SVGs are not directly in CSS */
+        .adw-icon.size-small { width: var(--icon-size-small, 14px); height: var(--icon-size-small, 14px); }
+        .adw-icon.size-large { width: var(--icon-size-large, 20px); height: var(--icon-size-large, 20px); }
+        .adw-icon.size-xlarge { width: 24px; height: 24px; } /* Example custom size */
+        .adw-icon.size-xxlarge { width: 32px; height: 32px; } /* Example custom size */
+
+        /* Load all icons used in this demo */
+        /* (List of all .icon-*-symbolic classes from previous index.html, plus new ones if needed) */
         .icon-actions-go-previous-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/go-previous-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/go-previous-symbolic.svg"); }
         .icon-actions-open-menu-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/open-menu-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/open-menu-symbolic.svg"); }
         .icon-actions-document-new-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-new-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-new-symbolic.svg"); }
@@ -85,331 +155,744 @@
         .icon-categories-applications-graphics-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-graphics-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-graphics-symbolic.svg");}
         .icon-categories-applications-multimedia-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-multimedia-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-multimedia-symbolic.svg");}
         .icon-categories-applications-utilities-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-utilities-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-utilities-symbolic.svg");}
+        .icon-actions-send-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/send-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/send-symbolic.svg");}
+        .icon-actions-bookmark-new-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/bookmark-new-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/bookmark-new-symbolic.svg");}
+        .icon-actions-system-search-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/system-search-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/system-search-symbolic.svg");}
+        .icon-actions-view-refresh-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/view-refresh-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/view-refresh-symbolic.svg");}
+        .icon-places-user-home-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/places/user-home-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/places/user-home-symbolic.svg");}
+        .icon-status-weather-clear-night-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/weather-clear-night-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/weather-clear-night-symbolic.svg");}
+        .icon-status-avatar-default-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/avatar-default-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/avatar-default-symbolic.svg");}
+        .icon-ui-view-more-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/ui/view-more-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/ui/view-more-symbolic.svg");}
 
+        /* Helper for static popover */
+        .static-popover-container {
+            position: relative;
+            display: inline-block; /* Or block, depending on context */
+            margin: var(--spacing-xl);
+        }
     </style>
 </head>
 <body>
     <header class="adw-header-bar" id="main-header-bar">
         <div class="adw-header-bar__start">
-            <button class="adw-button icon-only flat" id="header-back-button" aria-label="Back"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
+            <button class="adw-button icon-only flat" id="header-back-button" aria-label="Back" title="Go Previous (dummy)"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
         </div>
         <div class="adw-header-bar__center">
             <div>
-                <h1 class="adw-header-bar__title">Adwaita Widgets</h1>
-                <div class="adw-header-bar__subtitle">CSS Demo</div>
+                <h1 class="adw-header-bar__title">Adwaita Web UI Showcase</h1>
+                <div class="adw-header-bar__subtitle">Comprehensive Component Demo</div>
             </div>
         </div>
         <div class="adw-header-bar__end">
             <button class="adw-button flat" id="theme-toggle-button">Toggle Theme</button>
-            <button class="adw-button icon-only flat" id="header-menu-button" aria-label="Menu"><span class="adw-icon icon-actions-open-menu-symbolic"></span></button>
+            <button class="adw-button icon-only flat" id="header-menu-button" aria-label="Menu" title="Open Menu (dummy)"><span class="adw-icon icon-actions-open-menu-symbolic"></span></button>
         </div>
     </header>
 
     <div class="main-content-area">
-        <div class="adw-label title-1">Adwaita Skin CSS Showcase</div>
-        <p class="adw-label body" style="margin-bottom: var(--spacing-l);">
-            This page demonstrates various HTML elements styled with Adwaita Skin CSS.
-            Interactivity requiring JavaScript from Adwaita Web has been removed or simplified.
+        <div class="adw-label title-1" style="text-align: center; margin-bottom: var(--spacing-xl);">Adwaita Web Component Showcase</div>
+        <p class="adw-label body" style="text-align: center; max-width: 60ch; margin: 0 auto var(--spacing-xl);">
+            This page demonstrates various HTML elements styled with Adwaita Web CSS.
+            Most components are static representations. Use the "Toggle Theme" button in the header to switch between light and dark modes.
         </p>
 
-        <!-- Accent Color Picker (Static Display) -->
+        <!-- Theme Controls (Static) -->
         <section class="widget-showcase">
-            <h2 class="adw-label title-2">Theme Controls (Static)</h2>
-            <div class="adw-box adw-box-spacing-s" id="accent-color-picker-box" style="align-items: center; margin-bottom: var(--spacing-m); flex-wrap: wrap;">
+            <h2 class="adw-label title-2">Theme Controls</h2>
+            <div class="control-group">
                 <span class="adw-label">Accent Color (Examples):</span>
-                <button class="adw-button" data-accent-color-id="default">Default</button>
-                <button class="adw-button" data-accent-color-id="blue">Blue</button>
-                <button class="adw-button" data-accent-color-id="green">Green</button>
-                <button class="adw-button" data-accent-color-id="yellow">Yellow</button>
-                <button class="adw-button" data-accent-color-id="orange">Orange</button>
-                <button class="adw-button" data-accent-color-id="red">Red</button>
-                <button class="adw-button" data-accent-color-id="purple">Purple</button>
+                <button class="adw-button" onclick="setAccent('default')">Default</button>
+                <button class="adw-button" onclick="setAccent('blue')">Blue</button>
+                <button class="adw-button" onclick="setAccent('green')">Green</button>
+                <button class="adw-button" onclick="setAccent('yellow')">Yellow</button>
+                <button class="adw-button" onclick="setAccent('orange')">Orange</button>
+                <button class="adw-button" onclick="setAccent('red')">Red</button>
+                <button class="adw-button" onclick="setAccent('purple')">Purple</button>
+                 <button class="adw-button" onclick="setAccent('pink')">Pink</button>
+                <button class="adw-button" onclick="setAccent('slate')">Slate</button>
+                <button class="adw-button" onclick="setAccent('teal')">Teal</button>
             </div>
-             <details>
-                <summary>Show Accent Picker Code (Static HTML)</summary>
-                <pre><code>&lt;div class="adw-box adw-box-spacing-s"&gt;
-    &lt;span class="adw-label"&gt;Accent Color (Examples):&lt;/span&gt;
-    &lt;button class="adw-button"&gt;Default&lt;/button&gt;
-    &lt;!-- ... more buttons ... --&gt;
-&lt;/div&gt;</code></pre>
-            </details>
         </section>
 
-        <!-- Buttons Section -->
+        <!-- Labels & Text -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Labels & Text Styles</h2>
+            <p><span class="adw-label title-1">Title 1 Label</span></p>
+            <p><span class="adw-label title-2">Title 2 Label</span></p>
+            <p><span class="adw-label title-3">Title 3 Label</span></p>
+            <p><span class="adw-label title-4">Title 4 Label</span> (if defined, otherwise regular)</p>
+            <p><span class="adw-label body">Standard body label. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span></p>
+            <p><span class="adw-label body-large">Large body label (if defined).</span> Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <p><span class="adw-label dim-label">Dim label (if utility class exists or applied by context).</span> Ut enim ad minim veniam.</p>
+            <p><a href="#" class="adw-label link">Link Label (if specific class exists)</a> or just <a href="#">a standard link</a>.</p>
+            <p><label class="adw-label selectable">Selectable text label (if class exists)</label></p>
+            <p class="adw-label">Shortcut: <span class="adw-shortcut-label">Ctrl+S</span></p>
+        </section>
+
+        <!-- Buttons -->
         <section class="widget-showcase">
             <h2 class="adw-label title-2">Buttons</h2>
-            <div class="button-group">
-                <button class="adw-button" id="btn-click-me">Click Me!</button>
-                <button class="adw-button suggested-action" id="btn-suggested">Suggested</button>
-                <button class="adw-button destructive-action" id="btn-destructive">Destructive</button>
-                <button class="adw-button flat" id="btn-flat">Flat</button>
-                <button class="adw-button" id="btn-disabled" disabled>Disabled</button>
+            <h3 class="adw-label title-3">Standard Buttons</h3>
+            <div class="control-group">
+                <button class="adw-button">Regular</button>
+                <button class="adw-button suggested-action">Suggested</button>
+                <button class="adw-button destructive-action">Destructive</button>
+                <button class="adw-button" disabled>Disabled</button>
             </div>
-            <div class="button-group" style="margin-top: var(--spacing-s);">
-                <button class="adw-button" id="btn-icon-text"><span class="adw-icon icon-actions-document-save-symbolic"></span>Save</button>
-                <button class="adw-button suggested-action" id="btn-icon-text-suggested"><span class="adw-icon icon-actions-document-open-symbolic"></span>Open</button>
-                <button class="adw-button destructive-action" id="btn-icon-text-destructive"><span class="adw-icon icon-actions-edit-delete-symbolic"></span>Delete</button>
-                <button class="adw-button flat" id="btn-icon-text-flat"><span class="adw-icon icon-actions-document-new-symbolic"></span>New</button>
-                <button class="adw-button" disabled id="btn-icon-text-disabled"><span class="adw-icon icon-actions-document-print-symbolic"></span>Print (Disabled)</button>
+            <h3 class="adw-label title-3">Flat Buttons</h3>
+            <div class="control-group">
+                <button class="adw-button flat">Flat Regular</button>
+                <button class="adw-button flat suggested-action">Flat Suggested</button>
+                <button class="adw-button flat destructive-action">Flat Destructive</button>
+                <button class="adw-button flat" disabled>Flat Disabled</button>
             </div>
-            <div class="button-group" style="margin-top: var(--spacing-s);">
-                <button class="adw-button circular" aria-label="Take Photo" id="btn-circular"><span class="adw-icon icon-devices-camera-photo-symbolic"></span></button>
-                <button class="adw-button circular suggested-action" aria-label="Start Call" id="btn-circular-suggested"><span class="adw-icon icon-actions-call-start-symbolic"></span></button>
-                <button class="adw-button circular destructive-action" aria-label="End Call" id="btn-circular-destructive"><span class="adw-icon icon-actions-call-stop-symbolic"></span></button>
-                <button class="adw-button circular flat" aria-label="More Info" id="btn-circular-flat"><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
-                <button class="adw-button circular" disabled aria-label="Exit (Disabled)" id="btn-circular-disabled"><span class="adw-icon icon-actions-application-exit-symbolic"></span></button>
+            <h3 class="adw-label title-3">Icon Buttons</h3>
+            <div class="control-group">
+                <button class="adw-button"><span class="adw-icon icon-actions-document-save-symbolic"></span> Save</button>
+                <button class="adw-button suggested-action"><span class="adw-icon icon-actions-document-open-symbolic"></span> Open</button>
+                <button class="adw-button icon-only" aria-label="New"><span class="adw-icon icon-actions-document-new-symbolic"></span></button>
+                <button class="adw-button icon-only flat" aria-label="Print"><span class="adw-icon icon-actions-document-print-symbolic"></span></button>
+                <button class="adw-button icon-only" aria-label="Delete" disabled><span class="adw-icon icon-actions-edit-delete-symbolic"></span></button>
             </div>
-             <details>
-                <summary>Show Button Examples</summary>
-                <pre><code>&lt;button class="adw-button"&gt;Click Me!&lt;/button&gt;
-&lt;button class="adw-button suggested-action"&gt;Suggested&lt;/button&gt;
-&lt;button class="adw-button"&gt;&lt;span class="adw-icon icon-actions-document-save-symbolic"&gt;&lt;/span&gt;Save&lt;/button&gt;
-&lt;button class="adw-button circular" aria-label="Take Photo"&gt;&lt;span class="adw-icon icon-devices-camera-photo-symbolic"&gt;&lt;/span&gt;&lt;/button&gt;</code></pre>
-            </details>
+            <h3 class="adw-label title-3">Circular Buttons</h3>
+            <div class="control-group">
+                <button class="adw-button circular" aria-label="Photo"><span class="adw-icon icon-devices-camera-photo-symbolic"></span></button>
+                <button class="adw-button circular suggested-action" aria-label="Call"><span class="adw-icon icon-actions-call-start-symbolic"></span></button>
+                <button class="adw-button circular destructive-action" aria-label="Stop"><span class="adw-icon icon-actions-call-stop-symbolic"></span></button>
+                <button class="adw-button circular flat" aria-label="More"><span class="adw-icon icon-ui-view-more-symbolic"></span></button>
+                <button class="adw-button circular" disabled aria-label="Exit"><span class="adw-icon icon-actions-application-exit-symbolic"></span></button>
+            </div>
+             <h3 class="adw-label title-3">Pill Buttons (often for Toggles)</h3>
+            <div class="control-group">
+                <button class="adw-button pill">Pill Button 1</button>
+                <button class="adw-button pill active">Pill Active</button>
+                 <button class="adw-button pill" disabled>Pill Disabled</button>
+            </div>
         </section>
 
-        <!-- Icons Section -->
+        <!-- Entries & Inputs -->
         <section class="widget-showcase">
-            <h2 class="adw-label title-2">Icons (Placeholder Styling)</h2>
-            <div class="adw-box adw-box-spacing-m" style="align-items: center; font-size: 24px;">
-                <span class="adw-icon icon-actions-document-new-symbolic" aria-label="New Document"></span>
-                <span class="adw-icon icon-actions-document-save-symbolic" style="color: var(--accent-color);"></span>
-                <span class="adw-icon icon-status-dialog-error-symbolic" style="color: var(--error-color); font-size: 32px;"></span>
-                <span class="adw-icon icon-ui-pan-up-symbolic"></span>
-                <span class="adw-icon icon-devices-camera-photo-symbolic"></span>
+            <h2 class="adw-label title-2">Entries & Inputs</h2>
+            <div class="component-grid">
+                <div>
+                    <label for="entry-default" class="adw-label">Default Entry:</label>
+                    <input type="text" class="adw-entry" id="entry-default" placeholder="Enter text...">
+                </div>
+                <div>
+                    <label for="entry-disabled" class="adw-label">Disabled Entry:</label>
+                    <input type="text" class="adw-entry" id="entry-disabled" placeholder="Disabled" disabled>
+                </div>
+                <div>
+                    <label for="entry-readonly" class="adw-label">Readonly Entry:</label>
+                    <input type="text" class="adw-entry" id="entry-readonly" value="Readonly text" readonly>
+                </div>
+                <div>
+                    <label for="entry-error" class="adw-label">Error State (if styled):</label>
+                    <input type="text" class="adw-entry error" id="entry-error" value="Invalid input">
+                </div>
+                <div>
+                    <label for="entry-icon-before" class="adw-label">With Icon (conceptual):</label>
+                    <div style="position: relative;"> <!-- Example wrapper for icon positioning -->
+                        <span class="adw-icon icon-actions-system-search-symbolic" style="position:absolute; left: 8px; top: 50%; transform: translateY(-50%); opacity: 0.5;"></span>
+                        <input type="text" class="adw-entry" id="entry-icon-before" placeholder="Search..." style="padding-left: 30px;">
+                    </div>
+                </div>
+                 <div>
+                    <label for="entry-password" class="adw-label">Password Entry:</label>
+                    <input type="password" class="adw-entry" id="entry-password" value="password">
+                </div>
             </div>
-             <details>
-                <summary>Show Icon Examples</summary>
-                <pre><code>&lt;span class="adw-icon icon-actions-document-new-symbolic"&gt;&lt;/span&gt;
-&lt;span class="adw-icon icon-status-dialog-error-symbolic" style="color: var(--error-color);"&gt;&lt;/span&gt;</code></pre>
-            </details>
         </section>
 
-        <!-- Controls Section (Static HTML representations) -->
+        <!-- Controls: Checkbox, Radio, Switch, SpinButton, SplitButton, ToggleGroup -->
         <section class="widget-showcase">
-            <h2 class="adw-label title-2">Controls (Static HTML)</h2>
-            <div class="adw-box adw-box-vertical adw-box-spacing-m">
-                <div class="adw-row"> 
-                    <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" checked> <span class="adw-label">Enable Feature</span></label>
-                    <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" disabled> <span class="adw-label">Disabled Checkbox</span></label>
-                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch"> <span class="adw-label visually-hidden">Switch 1</span></label>
-                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch" checked disabled> <span class="adw-label visually-hidden">Switch 2</span></label>
+            <h2 class="adw-label title-2">Controls</h2>
+            <div class="component-grid">
+                <div>
+                    <h3 class="adw-label title-3">Checkboxes</h3>
+                    <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox"> Option 1</label><br>
+                    <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" checked> Option 2 (Checked)</label><br>
+                    <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" disabled> Option 3 (Disabled)</label><br>
+                    <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" checked disabled> Option 4 (Checked, Disabled)</label>
                 </div>
-                <div class="adw-row">
-                    <span class="adw-label">Radio Group:</span>
-                    <label class="adw-radio-wrapper"><input type="radio" name="my-radio-group" class="adw-radio" value="alpha" checked> <span class="adw-label">Alpha</span></label>
-                    <label class="adw-radio-wrapper"><input type="radio" name="my-radio-group" class="adw-radio" value="beta"> <span class="adw-label">Beta</span></label>
-                    <label class="adw-radio-wrapper"><input type="radio" name="my-radio-group" class="adw-radio" value="gamma" disabled> <span class="adw-label">Gamma</span></label>
+                <div>
+                    <h3 class="adw-label title-3">Radio Buttons</h3>
+                    <label class="adw-radio-wrapper"><input type="radio" name="radio-group1" class="adw-radio" checked> Choice A</label><br>
+                    <label class="adw-radio-wrapper"><input type="radio" name="radio-group1" class="adw-radio"> Choice B</label><br>
+                    <label class="adw-radio-wrapper"><input type="radio" name="radio-group1" class="adw-radio" disabled> Choice C (Disabled)</label>
                 </div>
-                <div class="adw-row" style="align-items: center;">
-                    <span class="adw-label">Spin Button:</span> 
-                    <div class="adw-spin-button" id="spin-btn-1-wrapper">
-                        <input type="number" id="spin-btn-1-input" class="adw-entry adw-spin-button-entry" value="5" min="0" max="10" step="1">
+                <div>
+                    <h3 class="adw-label title-3">Switches</h3>
+                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch"> Setting X <span class="adw-label visually-hidden">Toggle Setting X</span></label><br>
+                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch" checked> Setting Y (On) <span class="adw-label visually-hidden">Toggle Setting Y</span></label><br>
+                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch" disabled> Setting Z (Disabled) <span class="adw-label visually-hidden">Toggle Setting Z</span></label><br>
+                     <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch" checked disabled> Setting W (On, Disabled) <span class="adw-label visually-hidden">Toggle Setting W</span></label>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Spin Button</h3>
+                    <div class="adw-spin-button">
+                        <input type="number" class="adw-entry adw-spin-button-entry" value="5" min="0" max="10">
                         <div class="adw-spin-button-buttons">
-                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-up" aria-label="Increase value"><span class="adw-icon icon-ui-pan-up-symbolic"></span></button>
-                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-down" aria-label="Decrease value"><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-up" aria-label="Increase"><span class="adw-icon icon-ui-pan-up-symbolic"></span></button>
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-down" aria-label="Decrease"><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
                         </div>
                     </div>
-                    <span class="adw-label" style="margin-left: var(--spacing-m);">Disabled Spin:</span>
-                    <div class="adw-spin-button disabled" id="spin-btn-2-wrapper">
-                        <input type="number" id="spin-btn-2-input" class="adw-entry adw-spin-button-entry" value="3" disabled>
-                        <div class="adw-spin-button-buttons">
-                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-up" aria-label="Increase value" disabled><span class="adw-icon icon-ui-pan-up-symbolic"></span></button>
-                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-down" aria-label="Decrease value" disabled><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
+                    <h3 class="adw-label title-3" style="margin-top:var(--spacing-s);">Disabled Spin Button</h3>
+                    <div class="adw-spin-button disabled">
+                        <input type="number" class="adw-entry adw-spin-button-entry" value="3" disabled>
+                         <div class="adw-spin-button-buttons">
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-up" aria-label="Increase" disabled><span class="adw-icon icon-ui-pan-up-symbolic"></span></button>
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-down" aria-label="Decrease" disabled><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
                         </div>
                     </div>
                 </div>
-                <div class="adw-row" style="align-items: center;">
-                    <span class="adw-label">Split Button:</span>
-                    <div class="adw-split-button" id="split-btn-1-wrapper">
+                <div>
+                    <h3 class="adw-label title-3">Split Button</h3>
+                    <div class="adw-split-button">
                         <button class="adw-split-button-action">Main Action</button>
-                        <button class="adw-split-button-dropdown" aria-label="More options"><span class="adw-icon icon-pan-down-symbolic"></span></button>
+                        <button class="adw-split-button-dropdown" aria-label="More options"><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
                     </div>
-                    <div class="adw-split-button suggested-action" id="split-btn-2-wrapper" style="margin-left: var(--spacing-s);">
-                        <button class="adw-split-button-action"><span class="adw-icon icon-actions-document-save-symbolic"></span> Save</button>
-                        <button class="adw-split-button-dropdown" aria-label="More options"><span class="adw-icon icon-pan-down-symbolic"></span></button>
+                    <h3 class="adw-label title-3" style="margin-top:var(--spacing-s);">Suggested Split Button</h3>
+                    <div class="adw-split-button suggested-action">
+                        <button class="adw-split-button-action"><span class="adw-icon icon-actions-document-save-symbolic"></span> Save All</button>
+                        <button class="adw-split-button-dropdown" aria-label="More save options"><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
                     </div>
-                    <div class="adw-split-button disabled" id="split-btn-3-wrapper" style="margin-left: var(--spacing-s);">
-                        <button class="adw-split-button-action">Disabled</button>
-                        <button class="adw-split-button-dropdown" aria-label="More options"><span class="adw-icon icon-pan-down-symbolic"></span></button>
+                     <h3 class="adw-label title-3" style="margin-top:var(--spacing-s);">Disabled Split Button</h3>
+                    <div class="adw-split-button disabled">
+                        <button class="adw-split-button-action">Disabled Action</button>
+                        <button class="adw-split-button-dropdown" aria-label="More options" disabled><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
                     </div>
                 </div>
-                 <div class="adw-row" style="align-items: center;">
-                    <span class="adw-label">Toggle Buttons:</span>
-                    <button class="adw-button" id="toggle-btn-1">Toggle Me</button>
-                    <button class="adw-button active" id="toggle-btn-2" aria-label="Play"><span class="adw-icon icon-actions-media-playback-start-symbolic"></span></button>
-                    <button class="adw-button" disabled>Disabled</button>
-                </div>
-                <div class="adw-row" style="align-items:center;">
-                    <span class="adw-label">Toggle Group (Linked):</span>
-                    <div class="adw-toggle-group linked" id="toggle-group-1">
-                        <button class="adw-button">Option 1</button>
-                        <button class="adw-button active">Option 2</button>
-                        <button class="adw-button">Option 3</button>
+                <div>
+                    <h3 class="adw-label title-3">Toggle Buttons (Standalone)</h3>
+                    <button class="adw-button toggle">Toggle Me</button> <!-- Add .toggle class if needed, or rely on JS to add .active -->
+                    <button class="adw-button active" aria-pressed="true">Pressed Toggle</button>
+                    <button class="adw-button" disabled>Disabled Toggle</button>
+
+                    <h3 class="adw-label title-3" style="margin-top:var(--spacing-s);">Toggle Group (Linked)</h3>
+                    <div class="adw-toggle-group linked">
+                        <button class="adw-button active" aria-pressed="true">Left</button>
+                        <button class="adw-button">Center</button>
+                        <button class="adw-button">Right</button>
+                    </div>
+                     <h3 class="adw-label title-3" style="margin-top:var(--spacing-s);">Toggle Group (Not Linked)</h3>
+                    <div class="adw-toggle-group">
+                        <button class="adw-button active pill" aria-pressed="true"><span class="adw-icon icon-actions-edit-select-all-symbolic"></span></button>
+                        <button class="adw-button pill"><span class="adw-icon icon-emoji-face-smile-symbolic"></span></button>
+                        <button class="adw-button pill"><span class="adw-icon icon-emoji-face-plain-symbolic"></span></button>
                     </div>
                 </div>
             </div>
-             <details>
-                <summary>Show Controls Examples (Static HTML)</summary>
-                <pre><code>&lt;label class="adw-checkbox-wrapper"&gt;&lt;input type="checkbox" class="adw-checkbox" checked&gt; Enable&lt;/label&gt;
-&lt;label class="adw-switch-wrapper"&gt;&lt;input type="checkbox" class="adw-switch"&gt;&lt;/label&gt;
-&lt;div class="adw-spin-button"&gt;&lt;button&gt;-&lt;/button&gt;&lt;input type="number" class="adw-entry" value="5"&gt;&lt;button&gt;+&lt;/button&gt;&lt;/div&gt;</code></pre>
-            </details>
         </section>
 
-        <!-- Links Section -->
+        <!-- Rows & ListBoxes -->
         <section class="widget-showcase">
-            <h2 class="adw-label title-2">Links</h2>
-            <div class="adw-box adw-box-vertical adw-box-spacing-s">
-                <p class="adw-label body">Standard HTML links should inherit Adwaita styling:</p>
-                <a href="#">This is a standard link</a>
-                <p class="adw-label body" style="margin-top: var(--spacing-s);">A link within a sentence <a href="#">like this</a> should also be styled.</p>
-                <p class="adw-label body" style="margin-top: var(--spacing-s);">Disabled link (via pointer-events and style):</p>
-                <a href="#" style="pointer-events: none; color: var(--disabled-fg-color); text-decoration: none; cursor: default;">This is a disabled link</a>
-            </div>
-        </section>
-
-        <!-- Rows Section -->
-        <section class="widget-showcase">
-            <h2 class="adw-label title-2">Rows</h2>
-            <div class="adw-list-box">
-                <div class="adw-action-row activatable">
-                    <div class="adw-action-row__text">
-                        <div class="adw-action-row__title">Simple Action Row</div>
-                        <div class="adw-action-row__subtitle">With a subtitle</div>
-                    </div>
-                </div>
-                <div class="adw-action-row activatable">
-                    <span class="adw-icon icon-apps-help-contents-symbolic adw-action-row__icon"></span>
-                    <div class="adw-action-row__text">
-                        <div class="adw-action-row__title">Action Row with Icon</div>
-                        <div class="adw-action-row__subtitle">And chevron</div>
-                    </div>
-                    <span class="adw-action-row__chevron"><!-- Chevron via CSS --></span>
-                </div>
-                <div class="adw-entry-row">
-                    <label class="adw-entry-row__title" for="username-entry">Username</label>
-                    <input type="text" class="adw-entry" id="username-entry" placeholder="Enter your username">
-                </div>
-                <div class="adw-expander-row">
-                    <div class="adw-action-row"> 
-                        <div class="adw-action-row__text">
-                            <div class="adw-action-row__title">Expandable Section</div>
-                            <div class="adw-action-row__subtitle">Click to see more</div>
+            <h2 class="adw-label title-2">Rows & ListBoxes</h2>
+            <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column for listbox clarity -->
+                <div>
+                    <h3 class="adw-label title-3">Default ListBox</h3>
+                    <div class="adw-list-box">
+                        <div class="adw-list-box-header"><h4 class="adw-label title-4">Section Header</h4></div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-prefix"><span class="adw-icon icon-places-user-home-symbolic"></span></div>
+                            <div class="adw-action-row-content">
+                                <div class="adw-action-row-title">General Settings</div>
+                                <div class="adw-action-row-subtitle">Language, Time, Users</div>
+                            </div>
+                            <div class="adw-action-row-suffix"><span class="adw-icon icon-actions-go-next-symbolic"></span></div>
                         </div>
-                         <span class="adw-expander-row__chevron"><!-- Chevron via CSS --></span>
+                        <div class="adw-entry-row">
+                            <label class="adw-entry-row-title" for="lb-entry1">Username:</label>
+                            <input type="text" class="adw-entry" id="lb-entry1" placeholder="Enter username">
+                        </div>
+                        <div class="adw-switch-row activatable">
+                             <div class="adw-action-row-content">
+                                <div class="adw-action-row-title">Enable Feature X</div>
+                                <div class="adw-action-row-subtitle">This will turn on X</div>
+                            </div>
+                            <label class="adw-switch-wrapper adw-action-row-suffix"><input type="checkbox" class="adw-switch" checked> <span class="adw-label visually-hidden">Toggle Feature X</span></label>
+                        </div>
+                        <div class="adw-combo-row">
+                            <label class="adw-combo-row-title" for="lb-combo1">Paper Size:</label>
+                            <select class="adw-entry" id="lb-combo1"> <!-- Reuse .adw-entry for select styling if appropriate -->
+                                <option>A4</option>
+                                <option>Letter</option>
+                                <option>Legal</option>
+                            </select>
+                        </div>
+                         <div class="adw-expander-row">
+                            <div class="adw-action-row activatable">
+                                <div class="adw-action-row-content">
+                                    <div class="adw-action-row-title">Advanced Options</div>
+                                </div>
+                                <span class="adw-expander-row-chevron adw-icon icon-ui-pan-down-symbolic"></span>
+                            </div>
+                            <div class="adw-expander-row-content" style="padding: var(--spacing-m);"> <!-- Hidden by default via CSS -->
+                                <p class="adw-label body">Here are some advanced settings...</p>
+                                <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox"> Enable super mode</label>
+                            </div>
+                        </div>
+                        <div class="adw-action-row destructive-action activatable">
+                            <div class="adw-action-row-content">
+                                <div class="adw-action-row-title">Reset All Settings</div>
+                            </div>
+                        </div>
+                         <div class="adw-action-row property">
+                            <div class="adw-action-row-content">
+                                <div class="adw-action-row-title">Version</div>
+                                <div class="adw-action-row-subtitle">1.2.3</div>
+                            </div>
+                        </div>
+                        <div class="adw-action-row monospace property">
+                            <div class="adw-action-row-content">
+                                <div class="adw-action-row-title">Build ID</div>
+                                <div class="adw-action-row-subtitle">a1b2c3d4e5f6</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="adw-expander-row__content" style="display:none;"> 
-                        <p class="adw-label body" style="padding: var(--spacing-m);">Content for the first expander.</p>
-                        <div class="adw-action-row"><div class="adw-action-row__title">Nested Item</div></div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Boxed ListBox</h3>
+                    <div class="adw-list-box boxed-list">
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">First Item</div>
+                        </div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">Second Item</div>
+                            <div class="adw-action-row-subtitle">With a subtitle</div>
+                        </div>
+                        <div class="adw-action-row activatable selected">
+                            <div class="adw-action-row-title">Third Item (Selected)</div>
+                        </div>
+                    </div>
+                </div>
+                 <div>
+                    <h3 class="adw-label title-3">Boxed ListBox (Separate)</h3>
+                    <div class="adw-list-box boxed-list-separate">
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">Card Row 1</div>
+                        </div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">Card Row 2</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Flat ListBox</h3>
+                    <div class="adw-list-box flat" style="background-color: var(--shade-color); padding: var(--spacing-xs);"> <!-- Added bg for visibility -->
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">Item A</div>
+                        </div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">Item B</div>
+                        </div>
+                    </div>
+                </div>
+                 <div>
+                    <h3 class="adw-label title-3">Navigation Sidebar ListBox</h3>
+                    <div class="adw-list-box navigation-sidebar" style="max-width: 250px;">
+                        <div class="adw-action-row activatable selected">
+                             <div class="adw-action-row-prefix"><span class="adw-icon icon-categories-applications-graphics-symbolic"></span></div>
+                            <div class="adw-action-row-title">Graphics Apps</div>
+                        </div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-prefix"><span class="adw-icon icon-categories-applications-multimedia-symbolic"></span></div>
+                            <div class="adw-action-row-title">Multimedia</div>
+                        </div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-prefix"><span class="adw-icon icon-categories-applications-utilities-symbolic"></span></div>
+                            <div class="adw-action-row-title">Utilities</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Dialogs (Static Structure, No JS interaction) -->
+        <!-- Cards -->
         <section class="widget-showcase">
-            <h2 class="adw-label title-2">Dialogs (Static Structure)</h2>
-            <div class="adw-box adw-box-spacing-s">
-                <button class="adw-button">Show Alert Dialog (No Action)</button>
-            </div>
-            <div class="adw-dialog" role="alertdialog" style="display: block; position:relative; margin-top: var(--spacing-m); max-width: 400px;"> 
-                <header class="adw-header-bar">
-                    <h2 class="adw-header-bar__title">Confirm Action</h2>
-                </header>
-                <div class="adw-dialog__content">
-                    <p class="adw-label body">Are you sure you want to proceed with this action?</p>
+            <h2 class="adw-label title-2">Cards</h2>
+            <div class="component-grid">
+                <div class="adw-card">
+                    <h3 class="adw-label title-3" style="margin-top:0;">Standard Card</h3>
+                    <p class="adw-label body">This is a standard card. It contains some text content and demonstrates the default card padding and shadow.</p>
+                    <div class="adw-button-row" style="justify-content: flex-end; margin-top: var(--spacing-m);">
+                        <button class="adw-button flat">Action</button>
+                    </div>
                 </div>
-                <footer class="adw-dialog__actions">
-                    <button class="adw-button">Cancel</button>
-                    <button class="adw-button destructive-action">Confirm</button>
-                </footer>
+                <div class="adw-card activatable">
+                    <h3 class="adw-label title-3" style="margin-top:0;">Activatable Card</h3>
+                    <p class="adw-label body">This card has hover and active states. Click me!</p>
+                </div>
+                <button class="adw-button card">
+                    <!-- Content for button styled as card -->
+                    <h3 class="adw-label title-3" style="margin-top:0;">Button as Card</h3>
+                    <p class="adw-label body">This is a button that looks like a card. It's fully clickable.</p>
+                </button>
             </div>
         </section>
 
-        <!-- Other Misc Components -->
+        <!-- Popovers & Dialogs (Static) -->
         <section class="widget-showcase">
-            <h2 class="adw-label title-2">Miscellaneous</h2>
-            <h3 class="adw-label title-3">Progress Bar</h3>
-            <div class="adw-progress-bar" style="margin-bottom: var(--spacing-s);"><div style="width: 60%;"></div></div>
-            <div class="adw-progress-bar indeterminate"><div class="adw-progress-bar__pulse"></div></div>
+            <h2 class="adw-label title-2">Popovers & Dialogs (Static Representations)</h2>
+            <div class="component-grid">
+                <div class="static-popover-container">
+                    <button class="adw-button" aria-haspopup="true" aria-expanded="true">Menu (Popover Below)</button>
+                    <div class="adw-popover" role="menu" style="position: absolute; top: 100%; left: 0; z-index: var(--z-index-popover); margin-top: var(--spacing-xs); width: 200px;">
+                        <div class="adw-list-box flat"> <!-- Popovers often use flat listboxes -->
+                            <div class="adw-action-row activatable" role="menuitem">
+                                <div class="adw-action-row-title">New File</div>
+                                <div class="adw-action-row-suffix"><span class="adw-shortcut-label">Ctrl+N</span></div>
+                            </div>
+                            <div class="adw-action-row activatable" role="menuitem">
+                                <div class="adw-action-row-title">Open...</div>
+                            </div>
+                            <hr style="margin: var(--spacing-xs) 0; border-color: var(--border-color);">
+                            <div class="adw-action-row destructive-action activatable" role="menuitem">
+                                <div class="adw-action-row-title">Quit</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Spinner</h3>
-            <div class="adw-spinner active"></div>
-
-            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Avatar</h3>
-            <div class="adw-avatar size-48"><span class="adw-avatar-text">AW</span></div>
-
-            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Status Page</h3>
-            <div class="adw-status-page">
-                <span class="adw-icon icon-status-emblem-ok-symbolic adw-status-page-icon" style="font-size: 4.5rem;"></span> 
-                <h4 class="adw-label title-1 adw-status-page-title">All Done!</h4> 
-                <p class="adw-label body adw-status-page-description">You have completed all tasks.</p> 
-                <div class="adw-status-page-actions">
-                    <button class="adw-button suggested-action">Example Action</button>
+                <div class="adw-dialog" role="alertdialog" style="position:relative; display:block; max-width: 350px;">
+                    <header class="adw-header-bar">
+                        <h2 class="adw-header-bar__title">Sample Dialog</h2>
+                    </header>
+                    <div class="adw-dialog__content">
+                        <p class="adw-label body">This is the content area of the dialog. It can contain any information or controls needed.</p>
+                        <input type="text" class="adw-entry" placeholder="Example field" style="margin-top: var(--spacing-s); width: 100%;">
+                    </div>
+                    <footer class="adw-dialog__actions">
+                        <button class="adw-button">Cancel</button>
+                        <button class="adw-button suggested-action">OK</button>
+                    </footer>
                 </div>
             </div>
         </section>
-        <!-- Layout Components -->
+
+        <!-- Indicators & Progress -->
         <section class="widget-showcase">
-            <h2 class="adw-label title-2">Layouts (Static Structures)</h2>
-            <h3 class="adw-label title-3">Box (Horizontal)</h3>
-            <div class="adw-box adw-box-spacing-m" style="padding:var(--spacing-s); border:1px dashed var(--border-color);">
-                <button class="adw-button">Box Child 1</button>
-                <span class="adw-label">Box Child 2</span>
-                <input type="text" class="adw-entry" placeholder="Box Child 3">
-            </div>
-
-            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Clamp</h3>
-            <div class="adw-clamp" style="padding:var(--spacing-s); border:1px dashed var(--border-color); max-width: 40ch;">
-                <p class="adw-label body">This text is clamped to a maximum width of 40 characters. It will not grow wider than that, ensuring readability even if the parent container is very wide.</p>
-            </div>
-
-            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Flap (Static Structure)</h3>
-            <button class="adw-button" id="toggle-main-flap-static">Toggle Flap (No Action)</button>
-            <div class="adw-flap" id="main-flap-example-static" style="border: 1px solid var(--border-color); margin-top: var(--spacing-s); min-height: 150px; display: flex;">
-                <div class="adw-flap__flap-content adw-box vertical" style="padding: var(--spacing-m); background: var(--sidebar-bg-color); min-width:200px; border-right: 1px solid var(--border-color);">
-                    <h3 class="adw-label title-3">Flap Content</h3>
-                    <div class="adw-action-row"><span class="adw-action-row__title">Settings</span></div>
+            <h2 class="adw-label title-2">Indicators & Progress</h2>
+            <div class="component-grid">
+                <div>
+                    <h3 class="adw-label title-3">Progress Bar</h3>
+                    <div class="adw-progress-bar" style="margin-bottom: var(--spacing-s);"><div style="width: 60%;"></div></div>
+                    <div class="adw-progress-bar indeterminate"><div class="adw-progress-bar__pulse"></div></div>
                 </div>
-                <div class="adw-flap__main-content adw-box vertical" style="padding: var(--spacing-m); flex-grow: 1;">
-                    <h3 class="adw-label title-3">Main Content (Flap Demo)</h3>
+                <div>
+                    <h3 class="adw-label title-3">Spinner</h3>
+                    <div class="control-group">
+                        <div class="adw-spinner active size-small"></div>
+                        <div class="adw-spinner active"></div>
+                        <div class="adw-spinner active size-large"></div>
+                        <div class="adw-spinner active size-xlarge"></div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Carousel Indicators (Static)</h3>
+                    <div class="adw-carousel-indicators">
+                        <button class="adw-carousel-indicator active" aria-label="Go to slide 1"></button>
+                        <button class="adw-carousel-indicator" aria-label="Go to slide 2"></button>
+                        <button class="adw-carousel-indicator" aria-label="Go to slide 3"></button>
+                    </div>
                 </div>
             </div>
-
-            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">WrapBox</h3>
-            <div class="adw-wrap-box spacing-s align-center" style="padding:var(--spacing-s); border:1px dashed var(--border-color); min-height: 100px;">
-                <button class="adw-button">Button 1</button>
-                <button class="adw-button suggested-action">Button 2 (Suggested)</button>
-                <button class="adw-button destructive-action">Button 3 (Destructive)</button>
-                <span class="adw-label">Label 4</span>
-                <input type="text" class="adw-entry" placeholder="Entry 5">
-                <button class="adw-button">Button 6</button>
-                <button class="adw-button">Button 7</button>
-            </div>
-
-            <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">BreakpointBin (Static Structure)</h3>
-            <p class="adw-label body" style="margin-bottom: var(--spacing-xs);">Shows different children based on width (CSS would handle this if possible, or JS). Below is a static representation of one state.</p>
-            <div class="adw-breakpoint-bin" style="padding:var(--spacing-s); border:1px dashed var(--border-color); min-height: 100px;">
-                <div class="adw-box adw-box-vertical" data-name="small" style="background-color: var(--theme-color-red-2); padding: var(--spacing-m);">
-                    <h4 class="adw-label title-4">Small View (0px+)</h4>
-                    <p class="adw-label body">This is shown when the BreakpointBin is narrow.</p>
-                </div>
-                
-            </div>
-             <details>
-                <summary>Show Layout Examples (Static HTML)</summary>
-                <pre><code>&lt;div class="adw-box adw-box-spacing-m"&gt;...&lt;/div&gt;
-&lt;div class="adw-clamp" style="max-width: 40ch;"&gt;...&lt;/div&gt;
-&lt;div class="adw-flap"&gt;...&lt;/div&gt;
-&lt;div class="adw-wrap-box spacing-s align-center"&gt;...&lt;/div&gt;
-&lt;div class="adw-breakpoint-bin"&gt;...&lt;/div&gt;</code></pre>
-            </details>
         </section>
 
+        <!-- Avatars -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Avatars</h2>
+            <div class="control-group">
+                <div class="adw-avatar size-24"><span class="adw-avatar-text">JD</span></div>
+                <div class="adw-avatar size-32"><span class="adw-icon icon-status-avatar-default-symbolic"></span></div>
+                <div class="adw-avatar size-48"><span class="adw-avatar-text">AW</span></div>
+                <div class="adw-avatar size-64" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22 viewBox=%220 0 64 64%22><circle cx=%2232%22 cy=%2232%22 r=%2228%22 fill=%22%2399c1f1%22/></svg>');"></div>
+                <div class="adw-avatar size-large"> <!-- Uses default size-large from avatar.scss -->
+                    <span class="adw-avatar-text">LG</span>
+                </div>
+            </div>
+        </section>
 
-        <div style="height: 200px;"></div> 
+        <!-- Banners & Toasts (Static) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Banners & Toasts (Static Representations)</h2>
+             <div class="component-grid">
+                <div>
+                    <h3 class="adw-label title-3">Banner</h3>
+                    <div class="adw-banner" role="status">
+                        <div class="adw-banner__content">
+                            <span class="adw-icon icon-status-dialog-information-symbolic"></span>
+                            <p class="adw-label body">This is an informational banner message.</p>
+                        </div>
+                        <div class="adw-banner__actions">
+                            <button class="adw-button flat">Dismiss</button>
+                        </div>
+                    </div>
+                    <div class="adw-banner warning" role="alert" style="margin-top: var(--spacing-s);">
+                         <div class="adw-banner__content">
+                            <span class="adw-icon icon-status-dialog-warning-symbolic"></span>
+                            <p class="adw-label body">This is a warning banner message.</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Toast</h3>
+                    <div class="adw-toast" role="status" style="position:relative; margin-top: var(--spacing-s);">
+                        <div class="adw-toast__content">
+                            <p class="adw-toast__title">File Saved</p>
+                            <p class="adw-toast__subtitle">Your document was successfully saved.</p>
+                        </div>
+                        <button class="adw-button flat circular adw-toast__dismiss" aria-label="Dismiss"><span class="adw-icon icon-actions-edit-delete-symbolic"></span></button>
+                    </div>
+                     <div class="adw-toast" role="status" style="position:relative; margin-top: var(--spacing-s);">
+                        <div class="adw-toast__content">
+                            <p class="adw-toast__title">Action Required</p>
+                        </div>
+                        <button class="adw-button flat adw-toast__action">Undo</button>
+                    </div>
+                </div>
+             </div>
+             <p class="adw-label body" style="margin-top: var(--spacing-m);">Note: Toast Overlay is a container and not shown visually here.</p>
+        </section>
+
+        <!-- ViewSwitchers & Tabs (Static) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">ViewSwitchers & Tabs (Static Representations)</h2>
+            <div class="component-grid">
+                <div>
+                    <h3 class="adw-label title-3">Inline View Switcher</h3>
+                    <div class="adw-inline-view-switcher">
+                        <button class="adw-button active" aria-pressed="true">View 1</button>
+                        <button class="adw-button">View 2</button>
+                        <button class="adw-button" disabled>View 3</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Tabs</h3>
+                    <div class="adw-tab-bar">
+                        <button class="adw-tab active" aria-pressed="true">
+                            <span class="adw-tab__label">Details</span>
+                        </button>
+                        <button class="adw-tab">
+                            <span class="adw-tab__label">Activity</span>
+                             <span class="adw-tab__indicator"></span> <!-- For "needs attention" -->
+                        </button>
+                        <button class="adw-tab" disabled>
+                            <span class="adw-tab__label">Settings</span>
+                        </button>
+                    </div>
+                    <div class="adw-tab-view" style="border: 1px solid var(--border-color); padding: var(--spacing-m); margin-top: calc(-1 * var(--border-width)); min-height: 50px;">
+                        <p class="adw-label body">Content for active tab (Details).</p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">ViewSwitcher (Conceptual)</h3>
+                    <div class="adw-view-switcher"> <!-- May need specific sub-elements like adw-view-switcher-bar -->
+                        <div class="adw-header-bar"> <!-- Example: A header bar acts as a view switcher bar -->
+                             <div class="adw-header-bar__start">
+                                <button class="adw-button icon-only flat active" aria-label="Home"><span class="adw-icon icon-places-user-home-symbolic"></span></button>
+                            </div>
+                            <div class="adw-header-bar__center adw-view-switcher-title">
+                                <h1 class="adw-header-bar__title">Home View</h1>
+                            </div>
+                             <div class="adw-header-bar__end">
+                                <button class="adw-button icon-only flat" aria-label="Search"><span class="adw-icon icon-actions-system-search-symbolic"></span></button>
+                            </div>
+                        </div>
+                        <div style="padding: var(--spacing-m); border: 1px solid var(--border-color); min-height: 50px;">View Content Area</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Layouts -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Layout Containers</h2>
+            <div class="component-grid">
+                <div>
+                    <h3 class="adw-label title-3">Box (Horizontal)</h3>
+                    <div class="adw-box horizontal spacing-m" style="border:1px dashed var(--border-color); padding: var(--spacing-s);">
+                        <button class="adw-button">Child 1</button>
+                        <span class="adw-label">Child 2</span>
+                        <input type="text" class="adw-entry" placeholder="Child 3" style="flex-grow:1;">
+                    </div>
+                    <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Box (Vertical)</h3>
+                    <div class="adw-box vertical spacing-s" style="border:1px dashed var(--border-color); padding: var(--spacing-s);">
+                        <button class="adw-button">Child A</button>
+                        <span class="adw-label">Child B</span>
+                        <input type="text" class="adw-entry" placeholder="Child C">
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Button Row</h3>
+                    <div class="adw-button-row" style="border:1px dashed var(--border-color); padding: var(--spacing-s);">
+                        <button class="adw-button">Cancel</button>
+                        <div style="flex-grow:1;"></div> <!-- Spacer -->
+                        <button class="adw-button suggested-action">Apply</button>
+                    </div>
+                     <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Button Row (Centered)</h3>
+                     <div class="adw-button-row centered" style="border:1px dashed var(--border-color); padding: var(--spacing-s);">
+                        <button class="adw-button">Action 1</button>
+                        <button class="adw-button">Action 2</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Clamp</h3>
+                    <div class="adw-clamp" style="border:1px dashed var(--border-color); padding: var(--spacing-s); max-width: 30ch;">
+                        <p class="adw-label body">This text is clamped. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">WrapBox</h3>
+                    <div class="adw-wrap-box spacing-m align-center" style="border:1px dashed var(--border-color); padding: var(--spacing-s); min-height: 80px;">
+                        <button class="adw-button">Item 1</button>
+                        <span class="adw-label">A Longer Item 2</span>
+                        <input type="text" class="adw-entry" placeholder="Item 3" style="width: 100px;">
+                        <button class="adw-button suggested-action">Item 4</button>
+                        <span class="adw-label">Item 5</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preferences Framework (Static) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Preferences Framework (Static Structure)</h2>
+            <div class="adw-preferences-view">
+                <div class="adw-preferences-page">
+                    <h3 class="adw-label title-3">Display Settings</h3>
+                    <div class="adw-preferences-group">
+                        <div class="adw-preferences-group__title">Appearance</div>
+                        <div class="adw-list-box flat"> <!-- Preferences often use flat listboxes within groups -->
+                            <div class="adw-action-row activatable">
+                                <div class="adw-action-row-content">
+                                    <div class="adw-action-row-title">Theme</div>
+                                    <div class="adw-action-row-subtitle">System Default</div>
+                                </div>
+                                <div class="adw-action-row-suffix"><span class="adw-icon icon-actions-go-next-symbolic"></span></div>
+                            </div>
+                            <div class="adw-switch-row activatable">
+                                <div class="adw-action-row-content">
+                                    <div class="adw-action-row-title">Automatic Dark Mode</div>
+                                </div>
+                                <label class="adw-switch-wrapper adw-action-row-suffix"><input type="checkbox" class="adw-switch"> <span class="adw-label visually-hidden">Toggle Automatic Dark Mode</span></label>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="adw-preferences-group">
+                        <div class="adw-preferences-group__title">Notifications</div>
+                         <div class="adw-list-box flat">
+                            <div class="adw-combo-row">
+                                <label class="adw-combo-row-title" for="pref-combo1">Sound Output:</label>
+                                <select class="adw-entry" id="pref-combo1">
+                                    <option>Built-in Audio</option>
+                                    <option>Headphones</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Other Major Components (Static) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Other Major Components (Static Structures)</h2>
+            <div class="component-grid">
+                <div>
+                    <h3 class="adw-label title-3">Status Page</h3>
+                    <div class="adw-status-page">
+                        <span class="adw-icon icon-status-weather-clear-night-symbolic adw-status-page-icon" style="font-size: 4rem;"></span>
+                        <h4 class="adw-label title-1 adw-status-page-title">Good Evening</h4>
+                        <p class="adw-label body adw-status-page-description">The stars are bright tonight.</p>
+                        <div class="adw-status-page-actions">
+                            <button class="adw-button">Make a Wish</button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Bottom Sheet (Conceptual)</h3>
+                    <div class="adw-bottom-sheet" style="position:relative; min-height: 150px; overflow:hidden; background: var(--view-bg-color);">
+                        <div class="adw-bottom-sheet-content" style="padding:var(--spacing-m); text-align:center;">
+                            <p class="adw-label body">This is where bottom sheet content would go.</p>
+                            <button class="adw-button suggested-action">Confirm Action</button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Toolbar View (Conceptual)</h3>
+                    <div class="adw-toolbar-view" style="border: 1px solid var(--border-color); min-height: 200px; display:flex; flex-direction: column;">
+                        <div class="adw-header-bar"> <!-- Top Bar -->
+                            <div class="adw-header-bar__start"><button class="adw-button icon-only flat"><span class="adw-icon icon-actions-view-refresh-symbolic"></span></button></div>
+                            <div class="adw-header-bar__center"><h2 class="adw-header-bar__title">Toolbar View</h2></div>
+                            <div class="adw-header-bar__end"><button class="adw-button icon-only flat"><span class="adw-icon icon-actions-bookmark-new-symbolic"></span></button></div>
+                        </div>
+                        <div style="flex-grow:1; padding: var(--spacing-m); background: var(--view-bg-color);">Main Content Area</div>
+                        <div class="adw-header-bar"> <!-- Bottom Bar -->
+                             <div class="adw-header-bar__start"><button class="adw-button flat">Filter</button></div>
+                             <div class="adw-header-bar__end"><button class="adw-button suggested-action">Add New</button></div>
+                        </div>
+                    </div>
+                </div>
+                 <div>
+                    <h3 class="adw-label title-3">Window (Conceptual - Body styling)</h3>
+                    <div class="adw-window" style="padding: var(--spacing-m); border: 1px solid var(--border-color); background-color: var(--window-bg-color); min-height: 100px;">
+                        <p class="adw-label body">This div uses <code>.adw-window</code> class. Body element is also styled as a window.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div style="height: 200px;"></div> <!-- Spacer at the bottom -->
     </div>
     
+    <script>
+        // Theme Toggle
+        const themeToggleButton = document.getElementById('theme-toggle-button');
+        if (themeToggleButton) {
+            themeToggleButton.addEventListener('click', () => {
+                document.documentElement.classList.toggle('theme-dark');
+            });
+        }
+
+        // Accent Color Switcher
+        const ACCENT_CLASSES = ['accent-blue', 'accent-green', 'accent-yellow', 'accent-orange', 'accent-red', 'accent-purple', 'accent-pink', 'accent-slate', 'accent-teal'];
+        function setAccent(accentName) {
+            document.documentElement.classList.remove(...ACCENT_CLASSES);
+            if (accentName !== 'default') {
+                document.documentElement.classList.add(`accent-${accentName}`);
+            }
+        }
+
+        // Basic Expander Row Toggle (Example - not full Adwaita behavior)
+        document.querySelectorAll('.adw-expander-row .adw-action-row').forEach(header => {
+            header.addEventListener('click', () => {
+                const expanderRow = header.closest('.adw-expander-row');
+                if (expanderRow) {
+                    const content = expanderRow.querySelector('.adw-expander-row-content');
+                    const chevron = header.querySelector('.adw-expander-row-chevron');
+                    if (content) {
+                        const isExpanded = content.style.display !== 'none';
+                        content.style.display = isExpanded ? 'none' : 'block'; // Or use CSS classes
+                        expanderRow.classList.toggle('expanded', !isExpanded);
+                        if(chevron) {
+                            chevron.classList.toggle('icon-ui-pan-down-symbolic', isExpanded);
+                            chevron.classList.toggle('icon-ui-pan-up-symbolic', !isExpanded);
+                        }
+                    }
+                }
+            });
+        });
+         // Initialize expander chevrons correctly
+        document.querySelectorAll('.adw-expander-row').forEach(expanderRow => {
+            const content = expanderRow.querySelector('.adw-expander-row-content');
+            const chevron = expanderRow.querySelector('.adw-expander-row .adw-expander-row-chevron');
+            if (content && chevron) {
+                 const isExpanded = content.style.display !== 'none' || expanderRow.classList.contains('expanded');
+                 chevron.classList.toggle('icon-ui-pan-down-symbolic', !isExpanded);
+                 chevron.classList.toggle('icon-ui-pan-up-symbolic', isExpanded);
+            }
+        });
+    </script>
 </body>
 </html>
