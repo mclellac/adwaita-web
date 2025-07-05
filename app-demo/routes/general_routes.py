@@ -61,30 +61,53 @@ def settings_page():
 def search_results():
     current_app.logger.debug(f"Accessing search page, Method: {request.method}")
     query_param = request.args.get('q', '').strip()
-    page = request.args.get('page', 1, type=int)
-    per_page = current_app.config.get('POSTS_PER_PAGE', 10)
-    current_app.logger.info(f"Search performed with query: '{query_param}', page: {page}.")
+    page = request.args.get('page', 1, type=int) # Common page number for both result types for simplicity
+    posts_per_page = current_app.config.get('POSTS_PER_PAGE', 10)
+    users_per_page = current_app.config.get('USERS_PER_PAGE', 10) # Can be different
+    current_app.logger.info(f"Unified search performed with query: '{query_param}', page: {page}.")
 
-    posts, pagination = [], None
+    posts_results, posts_pagination = [], None
+    users_results, users_pagination = [], None
+
     if query_param:
         search_term = f"%{query_param}%"
         try:
+            # Post search
             posts_query = Post.query.filter(
-                Post.is_published==True, # Ensure only published posts are searchable by public
-                Post.content.ilike(search_term) # Search only in content now
+                Post.is_published==True,
+                Post.content.ilike(search_term)
             ).order_by(Post.published_at.desc(), Post.created_at.desc())
+            posts_pagination = posts_query.paginate(page=page, per_page=posts_per_page, error_out=False)
+            posts_results = posts_pagination.items
+            current_app.logger.debug(f"Search for '{query_param}' found {len(posts_results)} posts on page {page}. Total: {posts_pagination.total}")
 
-            pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
-            posts = pagination.items
-            current_app.logger.debug(f"Search for '{query_param}' found {len(posts)} posts on page {page}. Total: {pagination.total}")
+            # User search (excluding current user if logged in)
+            user_query_base = User.query.filter(
+                or_(
+                    User.username.ilike(search_term),
+                    User.full_name.ilike(search_term)
+                )
+            )
+            if current_user.is_authenticated:
+                user_query_base = user_query_base.filter(User.id != current_user.id)
+
+            user_query = user_query_base.order_by(User.username.asc())
+            users_pagination = user_query.paginate(page=page, per_page=users_per_page, error_out=False)
+            users_results = users_pagination.items
+            current_app.logger.debug(f"Search for '{query_param}' found {len(users_results)} users on page {page}. Total: {users_pagination.total}")
+
         except Exception as e:
-            current_app.logger.error(f"Error during search for query '{query_param}': {e}", exc_info=True)
+            current_app.logger.error(f"Error during unified search for query '{query_param}': {e}", exc_info=True)
             flash("Error performing search. Please try again.", "danger")
     else:
         current_app.logger.debug("Search query was empty.")
-        # flash("Please enter a search term.", "info") # Optional: only show if user tried to submit empty
 
-    return render_template('search_results.html', query=query_param, posts=posts, pagination=pagination)
+    return render_template('search_results.html',
+                           query=query_param,
+                           posts=posts_results,
+                           posts_pagination=posts_pagination,
+                           users=users_results,
+                           users_pagination=users_pagination)
 
 @general_bp.route('/about')
 def about_page():
@@ -142,43 +165,7 @@ def activity_feed():
     return render_template('feed.html', activities_list=activities_list, pagination=pagination, followed_users_count=followed_users_count)
 
 
-@general_bp.route('/users/find', methods=['GET'])
-@login_required # Recommended to require login for user searching
-def find_users():
-    query_param = request.args.get('q', '').strip()
-    page = request.args.get('page', 1, type=int)
-    # Using a different per_page for user lists, e.g., 15 or 20, can be configured
-    per_page = current_app.config.get('USERS_PER_PAGE', 15)
-
-    users_list, pagination = [], None
-
-    if query_param:
-        search_term = f"%{query_param}%"
-        current_app.logger.info(f"User {current_user.username} searching for users with query: '{query_param}', page: {page}.")
-        try:
-            # Search in username and full_name, case-insensitive
-            # Exclude the current user from search results
-            user_query = User.query.filter(
-                User.id != current_user.id, # Don't show self in results
-                or_(
-                    User.username.ilike(search_term),
-                    User.full_name.ilike(search_term)
-                )
-            ).order_by(User.username.asc())
-
-            pagination = user_query.paginate(page=page, per_page=per_page, error_out=False)
-            users_list = pagination.items
-            current_app.logger.debug(f"User search for '{query_param}' found {len(users_list)} users on page {page}. Total: {pagination.total}")
-        except Exception as e:
-            current_app.logger.error(f"Error during user search for query '{query_param}': {e}", exc_info=True)
-            flash("Error performing user search. Please try again.", "danger")
-    else:
-        current_app.logger.debug(f"User search page accessed without a query by {current_user.username}.")
-        # Optionally, could display some default list here, or just the search bar.
-        # For now, it will just show the search bar and an empty list if no query.
-
-    return render_template('user_search_results.html', query=query_param, users_list=users_list, pagination=pagination)
-
+# The '/users/find' route is now removed as search is unified.
 
 # API routes for theme/accent settings
 @general_bp.route('/api/settings/theme', methods=['POST'])
