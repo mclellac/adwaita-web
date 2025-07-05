@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adwaita Skin - CSS Demo</title>
-    <link rel="stylesheet" href="adwaita-web/css/adwaita-skin.css">
+    <link rel="stylesheet" href="build/css/adwaita-skin.css"> <!-- Changed to load CSS from build directory -->
     <style>
         body {
             margin: 0;
@@ -132,42 +132,42 @@
 
         /* Load all icons used in this demo */
         /* (List of all .icon-*-symbolic classes from previous index.html, plus new ones if needed) */
-        .icon-actions-go-previous-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/go-previous-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/go-previous-symbolic.svg"); }
-        .icon-actions-open-menu-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/open-menu-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/open-menu-symbolic.svg"); }
-        .icon-actions-document-new-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-new-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-new-symbolic.svg"); }
-        .icon-actions-document-save-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-save-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-save-symbolic.svg"); }
-        .icon-actions-document-open-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-open-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-open-symbolic.svg"); }
-        .icon-actions-edit-delete-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/edit-delete-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/edit-delete-symbolic.svg"); }
-        .icon-actions-document-print-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/document-print-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/document-print-symbolic.svg"); }
-        .icon-devices-camera-photo-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/devices/camera-photo-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/devices/camera-photo-symbolic.svg"); }
-        .icon-actions-call-start-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/call-start-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/call-start-symbolic.svg"); }
-        .icon-actions-call-stop-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/call-stop-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/call-stop-symbolic.svg"); }
-        .icon-ui-pan-down-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-down-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-down-symbolic.svg"); }
-        .icon-actions-application-exit-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/application-exit-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/application-exit-symbolic.svg"); }
-        .icon-status-dialog-error-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-error-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-error-symbolic.svg"); }
-        .icon-ui-pan-up-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-up-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/ui/pan-up-symbolic.svg"); }
-        .icon-actions-media-playback-start-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/media-playback-start-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/media-playback-start-symbolic.svg"); }
-        .icon-apps-help-contents-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/apps/help-contents-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/apps/help-contents-symbolic.svg");}
-        .icon-status-emblem-ok-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/emblem-ok-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/emblem-ok-symbolic.svg");}
-        .icon-actions-go-next-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/go-next-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/go-next-symbolic.svg");}
-        .icon-status-dialog-information-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-information-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-information-symbolic.svg");}
-        .icon-status-dialog-warning-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-warning-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/dialog-warning-symbolic.svg");}
-        .icon-actions-go-up-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/go-up-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/go-up-symbolic.svg");}
-        .icon-actions-go-down-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/go-down-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/go-down-symbolic.svg");}
-        .icon-emoji-face-smile-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/emoji/face-smile-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/emoji/face-smile-symbolic.svg");}
-        .icon-actions-edit-select-all-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/edit-select-all-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/edit-select-all-symbolic.svg");}
-        .icon-emoji-face-plain-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/emoji/face-plain-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/emoji/face-plain-symbolic.svg");}
-        .icon-categories-applications-graphics-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-graphics-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-graphics-symbolic.svg");}
-        .icon-categories-applications-multimedia-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-multimedia-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-multimedia-symbolic.svg");}
-        .icon-categories-applications-utilities-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-utilities-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/categories/applications-utilities-symbolic.svg");}
-        .icon-actions-send-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/send-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/send-symbolic.svg");}
-        .icon-actions-bookmark-new-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/bookmark-new-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/bookmark-new-symbolic.svg");}
-        .icon-actions-system-search-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/system-search-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/system-search-symbolic.svg");}
-        .icon-actions-view-refresh-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/actions/view-refresh-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/actions/view-refresh-symbolic.svg");}
-        .icon-places-user-home-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/places/user-home-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/places/user-home-symbolic.svg");}
-        .icon-status-weather-clear-night-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/weather-clear-night-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/weather-clear-night-symbolic.svg");}
-        .icon-status-avatar-default-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/status/avatar-default-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/status/avatar-default-symbolic.svg");}
-        .icon-ui-view-more-symbolic { -webkit-mask-image: url("adwaita-web/data/icons/symbolic/ui/view-more-symbolic.svg"); mask-image: url("adwaita-web/data/icons/symbolic/ui/view-more-symbolic.svg");}
+        .icon-actions-go-previous-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/go-previous-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/go-previous-symbolic.svg"); }
+        .icon-actions-open-menu-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/open-menu-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/open-menu-symbolic.svg"); }
+        .icon-actions-document-new-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/document-new-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/document-new-symbolic.svg"); }
+        .icon-actions-document-save-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/document-save-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/document-save-symbolic.svg"); }
+        .icon-actions-document-open-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/document-open-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/document-open-symbolic.svg"); }
+        .icon-actions-edit-delete-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/edit-delete-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/edit-delete-symbolic.svg"); }
+        .icon-actions-document-print-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/document-print-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/document-print-symbolic.svg"); }
+        .icon-devices-camera-photo-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/devices/camera-photo-symbolic.svg"); mask-image: url("build/data/icons/symbolic/devices/camera-photo-symbolic.svg"); }
+        .icon-actions-call-start-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/call-start-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/call-start-symbolic.svg"); }
+        .icon-actions-call-stop-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/call-stop-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/call-stop-symbolic.svg"); }
+        .icon-ui-pan-down-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/ui/pan-down-symbolic.svg"); mask-image: url("build/data/icons/symbolic/ui/pan-down-symbolic.svg"); }
+        .icon-actions-application-exit-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/application-exit-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/application-exit-symbolic.svg"); }
+        .icon-status-dialog-error-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/status/dialog-error-symbolic.svg"); mask-image: url("build/data/icons/symbolic/status/dialog-error-symbolic.svg"); }
+        .icon-ui-pan-up-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/ui/pan-up-symbolic.svg"); mask-image: url("build/data/icons/symbolic/ui/pan-up-symbolic.svg"); }
+        .icon-actions-media-playback-start-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/media-playback-start-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/media-playback-start-symbolic.svg"); }
+        .icon-apps-help-contents-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/apps/help-contents-symbolic.svg"); mask-image: url("build/data/icons/symbolic/apps/help-contents-symbolic.svg");}
+        .icon-status-emblem-ok-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/status/emblem-ok-symbolic.svg"); mask-image: url("build/data/icons/symbolic/status/emblem-ok-symbolic.svg");}
+        .icon-actions-go-next-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/go-next-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/go-next-symbolic.svg");}
+        .icon-status-dialog-information-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/status/dialog-information-symbolic.svg"); mask-image: url("build/data/icons/symbolic/status/dialog-information-symbolic.svg");}
+        .icon-status-dialog-warning-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/status/dialog-warning-symbolic.svg"); mask-image: url("build/data/icons/symbolic/status/dialog-warning-symbolic.svg");}
+        .icon-actions-go-up-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/go-up-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/go-up-symbolic.svg");}
+        .icon-actions-go-down-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/go-down-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/go-down-symbolic.svg");}
+        .icon-emoji-face-smile-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/emoji/face-smile-symbolic.svg"); mask-image: url("build/data/icons/symbolic/emoji/face-smile-symbolic.svg");}
+        .icon-actions-edit-select-all-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/edit-select-all-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/edit-select-all-symbolic.svg");}
+        .icon-emoji-face-plain-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/emoji/face-plain-symbolic.svg"); mask-image: url("build/data/icons/symbolic/emoji/face-plain-symbolic.svg");}
+        .icon-categories-applications-graphics-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/categories/applications-graphics-symbolic.svg"); mask-image: url("build/data/icons/symbolic/categories/applications-graphics-symbolic.svg");}
+        .icon-categories-applications-multimedia-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/categories/applications-multimedia-symbolic.svg"); mask-image: url("build/data/icons/symbolic/categories/applications-multimedia-symbolic.svg");}
+        .icon-categories-applications-utilities-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/categories/applications-utilities-symbolic.svg"); mask-image: url("build/data/icons/symbolic/categories/applications-utilities-symbolic.svg");}
+        .icon-actions-send-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/send-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/send-symbolic.svg");}
+        .icon-actions-bookmark-new-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/bookmark-new-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/bookmark-new-symbolic.svg");}
+        .icon-actions-system-search-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/system-search-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/system-search-symbolic.svg");}
+        .icon-actions-view-refresh-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/actions/view-refresh-symbolic.svg"); mask-image: url("build/data/icons/symbolic/actions/view-refresh-symbolic.svg");}
+        .icon-places-user-home-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/places/user-home-symbolic.svg"); mask-image: url("build/data/icons/symbolic/places/user-home-symbolic.svg");}
+        .icon-status-weather-clear-night-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/status/weather-clear-night-symbolic.svg"); mask-image: url("build/data/icons/symbolic/status/weather-clear-night-symbolic.svg");}
+        .icon-status-avatar-default-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/status/avatar-default-symbolic.svg"); mask-image: url("build/data/icons/symbolic/status/avatar-default-symbolic.svg");}
+        .icon-ui-view-more-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/ui/view-more-symbolic.svg"); mask-image: url("build/data/icons/symbolic/ui/view-more-symbolic.svg");}
 
         /* Helper for static popover */
         .static-popover-container {
