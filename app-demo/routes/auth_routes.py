@@ -86,7 +86,7 @@ def login():
                 login_user(user)
                 current_app.logger.info(f"User '{user.username}' (ID: {user.id}) logged in successfully.")
                 current_app.logger.debug(f"Session after login for user '{user.username}': {dict(session)}")
-            flash('Logged in successfully.', 'success')
+            flash('Logged in successfully.', 'toast_success') # Changed to toast_success
             next_page = request.args.get('next')
             # More robust security check for next_page
             if next_page:
@@ -133,7 +133,7 @@ def logout():
 
     current_app.logger.info(f"User '{username_before_logout}' (ID: {user_id_before_logout}) logged out successfully.")
     current_app.logger.debug(f"Session after logout: {dict(session)}")
-    flash('Logged out successfully.', 'success')
+    flash('Logged out successfully.', 'toast_success') # Changed to toast_success
     return redirect(url_for('general.index'))
 
 

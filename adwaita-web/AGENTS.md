@@ -73,3 +73,9 @@ Dark mode is typically handled by adding a class (e.g., `theme-dark`) to a high-
 *   **Linting:** Implement SCSS linting to maintain code quality.
 
 By following these guidelines, `adwaita-skin` can be maintained as a robust and easy-to-use pure CSS library for Adwaita styling.
+
+## User Notifications (Banners, Toasts)
+
+*   **Dismiss Mechanisms:** All transient user notifications, such as banners (`.adw-banner`) and toasts (`.adw-toast`), that are implemented or styled by this library (or its associated JavaScript helpers like `banner.js`, `toast.js`) **must** include a clearly visible and user-operable mechanism for dismissal (e.g., a close button with an 'X' icon).
+*   **Functionality:** This dismiss mechanism must be fully functional, allowing the user to remove the notification from view.
+*   **Accessibility:** Ensure these dismiss controls are accessible (e.g., proper ARIA attributes, keyboard focusable).
