@@ -34,14 +34,14 @@
                     <div class="adw-action-row-title">General</div>
                     <div class="adw-action-row-subtitle">Language, Date & Time, Users</div>
                 </div>
-                <div class="adw-action-row-suffix"><span class="adw-icon go-next-symbolic"></span></div>
+                <div class="adw-action-row-suffix"><span class="adw-icon adw-action-row-chevron"></span></div>
             </div>
             <div class="adw-action-row activatable">
                 <div class="adw-action-row-content">
                     <div class="adw-action-row-title">Appearance</div>
                     <div class="adw-action-row-subtitle">Background, Style</div>
                 </div>
-                <div class="adw-action-row-suffix"><span class="adw-icon go-next-symbolic"></span></div>
+                <div class="adw-action-row-suffix"><span class="adw-icon adw-action-row-chevron"></span></div>
             </div>
             <div class="adw-action-row">
                 <div class="adw-action-row-content">
@@ -84,7 +84,7 @@
                 background-color: currentColor; /* Simple way to make them visible */
             }
             .preferences-system-symbolic { mask-image: url(../data/icons/symbolic/preferences-system-symbolic.svg); }
-            .go-next-symbolic { mask-image: url(../data/icons/symbolic/go-next-symbolic.svg); }
+            /* .go-next-symbolic rule is removed as it's now part of .adw-action-row-chevron in main SCSS */
             .help-about-symbolic { mask-image: url(../data/icons/symbolic/help-about-symbolic.svg); }
         `;
         document.head.appendChild(styleSheet);

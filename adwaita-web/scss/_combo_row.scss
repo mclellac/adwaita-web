@@ -79,11 +79,28 @@
         // If it's just a chevron, it could be similar to adw-action-row__chevron
         flex-shrink: 0;
         margin-left: var(--spacing-s);
-        // Example: using a simple chevron character, can be replaced with SVG icon
-        &::after {
-            content: '▼'; // Simple dropdown indicator
-            font-size: var(--font-size-small);
-            color: var(--icon-color);
+        // Replace text chevron with SVG icon
+        // Assuming the button itself will be the icon, or it contains an .adw-icon span
+        // Let's make the button itself the icon container for simplicity here.
+        // If an <span class="adw-icon"> is preferred inside, adjust selector to &__button .adw-icon
+        display: inline-flex; // To contain the icon properly
+        align-items: center;
+        justify-content: center;
+        width: var(--icon-size-small, 14px); // Size of the icon
+        height: var(--icon-size-small, 14px);
+        background-color: currentColor; // Colors the icon via mask
+        -webkit-mask-image: url('../data/icons/symbolic/pan-down-symbolic.svg');
+        mask-image: url('../data/icons/symbolic/pan-down-symbolic.svg');
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        color: var(--icon-color); // Set the color for currentColor to pick up
+
+        &::after { // Remove the text chevron
+            content: none;
         }
     }
 

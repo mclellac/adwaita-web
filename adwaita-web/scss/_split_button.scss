@@ -57,9 +57,20 @@
     border: none;
 
     .adw-icon {
-      width: calc(var(--icon-size-base) * 0.75);
-      height: calc(var(--icon-size-base) * 0.75);
-      fill: currentColor;
+      // width: calc(var(--icon-size-base) * 0.75); // Adjusted to standard small icon size
+      // height: calc(var(--icon-size-base) * 0.75);
+      width: var(--icon-size-small, 14px);
+      height: var(--icon-size-small, 14px);
+      // fill: currentColor; // Not needed for mask-image, use background-color
+      background-color: currentColor;
+      -webkit-mask-image: url('../data/icons/symbolic/pan-down-symbolic.svg');
+      mask-image: url('../data/icons/symbolic/pan-down-symbolic.svg');
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+      -webkit-mask-size: contain;
+      mask-size: contain;
     }
 
     &:hover {

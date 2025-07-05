@@ -69,11 +69,37 @@
       align-items: center;
       justify-content: center;
       color: var(--button-fg-color); // Ensure button text/icon color
+      // The .adw-icon class is a good target if an actual <i> or <span> element is used for the icon.
+      // If not, we might need pseudo-elements on the button itself.
+      // Assuming an element with .adw-icon will be used, or this style can be applied to button itself.
+      // For now, let's assume .adw-icon is the target within the button.
+      // If buttons are empty and rely on pseudo-elements, this needs to change.
+      // The HTML structure would be <button class="adw-spin-button-control adw-button adw-spin-button-up"><span class="adw-icon"></span></button>
+      // If the button itself is the icon carrier (no inner span):
+      // Then these mask properties should be directly on .adw-spin-button-control.adw-button
+      // Let's style .adw-icon for now as it's explicitly mentioned.
 
-      .adw-icon {
-        width: var(--icon-size-base); // Use variable for icon size
-        height: var(--icon-size-base);
-        margin: 0; // Reset icon margin
+      .adw-icon { // This will be the container for the mask
+        width: var(--icon-size-small, 14px);  // Spin button icons are typically small
+        height: var(--icon-size-small, 14px);
+        margin: 0;
+        background-color: currentColor; // This will color the icon mask.
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+      }
+
+      &.adw-spin-button-up .adw-icon {
+        -webkit-mask-image: url('../data/icons/symbolic/pan-up-symbolic.svg');
+        mask-image: url('../data/icons/symbolic/pan-up-symbolic.svg');
+      }
+
+      &.adw-spin-button-down .adw-icon {
+        -webkit-mask-image: url('../data/icons/symbolic/pan-down-symbolic.svg');
+        mask-image: url('../data/icons/symbolic/pan-down-symbolic.svg');
       }
 
       &:hover:not(:disabled) {
