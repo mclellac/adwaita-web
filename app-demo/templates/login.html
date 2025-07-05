@@ -52,16 +52,14 @@
       </div>
 
       <div class="adw-box horizontal justify-end" style="margin-top: var(--spacing-m);">
-        <button type="submit" class="adw-button suggested-action {{ 'full-width-button' if not form.registration_url else '' }}">{{ form.submit.label.text }}</button>
+        <button type="submit" class="adw-button suggested-action {{ 'full-width-button' if not site_settings.get('allow_registrations') else '' }}">{{ form.submit.label.text }}</button>
       </div>
-      {# TODO: Add link for registration if available from form object, e.g. form.registration_url #}
-      {# Example:
-      {% if form.registration_url %}
+
+      {% if site_settings.get('allow_registrations', False) %} {# Default to False if setting not present #}
       <div class="adw-box horizontal justify-center" style="margin-top: var(--spacing-m);">
-          <a href="{{ form.registration_url }}" class="adw-link">Don't have an account? Sign up</a>
+          <a href="{{ url_for('auth.register') }}" class="adw-link">Don't have an account? Sign up</a>
       </div>
       {% endif %}
-      #}
     </form>
 </div>
 {% endblock %}
