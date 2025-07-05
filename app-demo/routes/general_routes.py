@@ -150,7 +150,8 @@ def activity_feed(): # Rename to home_feed or similar if preferred, but endpoint
     # The template 'feed.html' will need to be adjusted to render posts instead of activities.
     # Or, we can point to 'index.html' if it's suitable for rendering a list of posts with pagination.
     # Let's assume 'feed.html' will be adapted.
-    return render_template('feed.html', posts=posts_list, pagination=pagination, current_user=current_user, csrf_token=generate_csrf())
+    # csrf_token() is globally available in templates if CSRFProtect is setup, no need to pass it explicitly as a string.
+    return render_template('feed.html', posts=posts_list, pagination=pagination, current_user=current_user)
 
 
 # The '/users/find' route is now removed as search is unified.
