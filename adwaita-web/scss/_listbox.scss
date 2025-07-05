@@ -18,6 +18,10 @@
   // Default listbox might have a subtle border or rely on context (e.g. inside a card or scrolled window)
   // For now, let's assume a subtle border similar to other views.
   border: var(--border-width) solid var(--border-color);
+  // Add the new subtle box shadow for default list boxes
+  &:not(.boxed-list):not(.flat) {
+    box-shadow: var(--subtle-box-shadow);
+  }
 
 
   // DEPRECATED: .content class was an old alias for .boxed-list.

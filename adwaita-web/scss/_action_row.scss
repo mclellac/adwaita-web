@@ -19,6 +19,10 @@
                                          // If used standalone on a card, card provides bg.
                                          // If within a listbox on a card, listbox provides bg.
   gap: var(--spacing-m); // Use gap for spacing prefix, content, and suffix
+  // Apply subtle shadow to action rows.
+  // If inside a listbox with its own shadow, this might be visually merged or overridden.
+  // This is primarily for standalone action rows or those in flat listboxes.
+  box-shadow: var(--subtle-box-shadow);
 
   &.has-subtitle {
     // Adjust padding for rows with subtitles to achieve ~70px height

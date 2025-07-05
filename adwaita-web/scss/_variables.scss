@@ -290,6 +290,11 @@ $accent-definitions: (
   --popover-box-shadow-dark: 0 2px 8px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25); // Darker shadow for dark theme
   --popover-box-shadow: var(--popover-box-shadow-light);
 
+  // General purpose subtle shadow for elements like default list-boxes or action rows
+  --subtle-box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.03);
+  // Stronger shadow for cards, as per user request
+  --stronger-card-box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 2px 5px rgba(0,0,0,0.06);
+
 
   --border-radius-small: 4px;
   --border-radius-medium: 6px;
@@ -470,6 +475,10 @@ $accent-definitions: (
     // --border-opacity for dark theme might need adjustment if it's different in libadwaita's high contrast dark.
     // For now, using the same --border-color definition which relies on currentColor.
     --popover-box-shadow: var(--popover-box-shadow-dark);
+
+    // Overrides for new shadows in dark theme
+    --subtle-box-shadow: 0 1px 2px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.1);
+    --stronger-card-box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 3px 7px rgba(0,0,0,0.12);
 
     // Input States for Dark Theme
     --input-readonly-bg-color: #{$input-readonly-bg-color-dark};
