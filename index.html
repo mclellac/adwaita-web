@@ -327,7 +327,8 @@
                     <label class="adw-radio-wrapper"><input type="radio" name="radio-group1" class="adw-radio" disabled> Choice C (Disabled)</label>
                 </div>
                 <div style="margin-bottom: var(--spacing-l);"> <!-- Added specific margin for better separation -->
-                    <h3 class="adw-label title-3">Switches</h3>
+                    <h3 class="adw-label title-3">Switches (Toggle Switches)</h3>
+                    <p class="adw-label body-small" style="margin-top: calc(var(--spacing-m) * -1); margin-bottom: var(--spacing-s);">Standalone toggle switches.</p>
                     <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch"> Setting X <span class="adw-label visually-hidden">Toggle Setting X</span></label><br>
                     <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch" checked> Setting Y (On) <span class="adw-label visually-hidden">Toggle Setting Y</span></label><br>
                     <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch" disabled> Setting Z (Disabled) <span class="adw-label visually-hidden">Toggle Setting Z</span></label><br>
@@ -410,6 +411,7 @@
                             <label class="adw-entry-row-title" for="lb-entry1">Username:</label>
                             <input type="text" class="adw-entry" id="lb-entry1" placeholder="Enter username">
                         </div>
+                        <!-- AdwSwitchRow Example -->
                         <div class="adw-switch-row activatable">
                              <div class="adw-action-row-content">
                                 <div class="adw-action-row-title">Enable Feature X</div>
@@ -543,7 +545,7 @@
                     </div>
                     <small class="adw-label caption">Conceptual: Flap shown. Interactive hide/show needs JS.</small>
                 </div>
-                <div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
                     <h3 class="adw-label title-3">Navigation Split View</h3>
                     <div class="adw-navigation-split-view" style="height: 250px; border: 1px solid var(--border-color); display: flex;">
                         <div class="adw-navigation-split-view__sidebar" style="width: 180px; background-color: var(--sidebar-bg-color); padding: var(--spacing-m); border-right: 1px solid var(--border-color);">
@@ -560,7 +562,7 @@
                     </div>
                     <small class="adw-label caption">Conceptual: Sidebar docked. Responsive collapse/overlay needs JS.</small>
                 </div>
-                <div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
                     <h3 class="adw-label title-3">Overlay Split View</h3>
                     <div class="adw-overlay-split-view" style="height: 250px; border: 1px solid var(--border-color); position: relative; overflow: hidden;">
                         <div class="adw-overlay-split-view__content" style="background-color: var(--view-bg-color); padding: var(--spacing-m); height: 100%;">
@@ -588,6 +590,7 @@
                     </div>
                     <small class="adw-label caption">Conceptual: Shows different children based on width. Resize to see (needs JS).</small>
                 </div>
+                <!-- Last item in this grid, no extra margin-bottom needed beyond what .component-grid > div provides if it were multi-column -->
             </div>
         </section>
 
@@ -807,8 +810,8 @@
         <section class="widget-showcase">
             <h2 class="adw-label title-2">Navigation & View Containers (Conceptual Structures)</h2>
             <p class="adw-label body">These are complex containers, often requiring JavaScript for full functionality. Static representations are shown.</p>
-            <div class="component-grid">
-                <div>
+            <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column for these complex items -->
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
                     <h3 class="adw-label title-3">Navigation View</h3>
                     <div class="adw-navigation-view" style="height: 250px; border: 1px solid var(--border-color); display: flex; flex-direction: column;">
                         <div class="adw-header-bar">
@@ -831,41 +834,41 @@
         <!-- Layouts -->
         <section class="widget-showcase">
             <h2 class="adw-label title-2">Layout Containers</h2>
-            <div class="component-grid">
-                <div>
+            <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column for these layout examples -->
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
                     <h3 class="adw-label title-3">Box (Horizontal)</h3>
-                    <div class="adw-box horizontal spacing-m" style="border:1px dashed var(--border-color); padding: var(--spacing-s);">
+                    <div class="adw-box horizontal spacing-m" style="padding: var(--spacing-s); background-color: var(--shade-color); border-radius: var(--border-radius-medium);">
                         <button class="adw-button">Child 1</button>
                         <span class="adw-label">Child 2</span>
                         <input type="text" class="adw-entry" placeholder="Child 3" style="flex-grow:1;">
                     </div>
                     <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Box (Vertical)</h3>
-                    <div class="adw-box vertical spacing-s" style="border:1px dashed var(--border-color); padding: var(--spacing-s);">
+                    <div class="adw-box vertical spacing-s" style="padding: var(--spacing-s); background-color: var(--shade-color); border-radius: var(--border-radius-medium);">
                         <button class="adw-button">Child A</button>
                         <span class="adw-label">Child B</span>
                         <input type="text" class="adw-entry" placeholder="Child C">
                     </div>
                 </div>
-                <div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
                     <h3 class="adw-label title-3">Button Row</h3>
-                    <div class="adw-button-row" style="border:1px dashed var(--border-color); padding: var(--spacing-s);">
+                    <div class="adw-button-row" style="padding: var(--spacing-s); background-color: var(--shade-color); border-radius: var(--border-radius-medium);">
                         <button class="adw-button">Cancel</button>
                         <div style="flex-grow:1;"></div> <!-- Spacer -->
                         <button class="adw-button suggested-action">Apply</button>
                     </div>
                      <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Button Row (Centered)</h3>
-                     <div class="adw-button-row centered" style="border:1px dashed var(--border-color); padding: var(--spacing-s);">
+                     <div class="adw-button-row centered" style="padding: var(--spacing-s); background-color: var(--shade-color); border-radius: var(--border-radius-medium);">
                         <button class="adw-button">Action 1</button>
                         <button class="adw-button">Action 2</button>
                     </div>
                 </div>
-                <div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
                     <h3 class="adw-label title-3">Clamp</h3>
-                    <div class="adw-clamp" style="border:1px dashed var(--border-color); padding: var(--spacing-s); max-width: 30ch;">
-                        <p class="adw-label body">This text is clamped. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    <div class="adw-clamp" style="padding: var(--spacing-s); max-width: 40ch; background-color: var(--shade-color); border-radius: var(--border-radius-medium);">
+                        <p class="adw-label body">This text is clamped. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Try making it longer to see the clamping effect.</p>
                     </div>
                 </div>
-                <div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
                     <h3 class="adw-label title-3">Bin</h3>
                     <div class="adw-bin" style="background-color: var(--shade-color); padding: var(--spacing-m); border-radius: var(--border-radius-medium);">
                         <button class="adw-button suggested-action">Single Child in a Bin</button>
@@ -927,8 +930,8 @@
         <!-- Specialized Dialogs (Static Representations) -->
         <section class="widget-showcase">
             <h2 class="adw-label title-2">Specialized Dialogs (Static Representations)</h2>
-            <div class="component-grid">
-                <div>
+            <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column -->
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
                     <h3 class="adw-label title-3">About Dialog</h3>
                     <div class="adw-dialog adw-about-dialog" role="dialog" style="position:relative; display:block; max-width: 400px;">
                         <header class="adw-header-bar">
@@ -948,7 +951,7 @@
                         </footer>
                     </div>
                 </div>
-                <div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
                     <h3 class="adw-label title-3">Preferences Dialog</h3>
                     <div class="adw-dialog adw-preferences-dialog" role="dialog" style="position:relative; display:block; max-width: 550px;">
                         <header class="adw-header-bar">
@@ -981,6 +984,20 @@
                             </div>
                         </div>
                         <!-- No standard footer for PreferencesDialog, actions are in HeaderBar -->
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Alert Dialog</h3>
+                    <div class="adw-dialog adw-alert-dialog" role="alertdialog" style="position:relative; display:block; max-width: 380px;">
+                        <div class="adw-dialog__content adw-alert-dialog__content" style="padding-top: var(--spacing-xl); text-align: center;">
+                            <h4 class="adw-alert-dialog__heading" style="font-size: var(--title-2-font-size); margin-bottom: var(--spacing-xs);">Action Required</h4>
+                            <p class="adw-alert-dialog__body" style="margin-bottom: var(--spacing-l);">This is an important message that requires your attention. Please choose an option below.</p>
+                        </div>
+                        <footer class="adw-dialog__actions adw-alert-dialog__actions" style="padding-top: 0;">
+                            <button class="adw-button">Cancel</button>
+                            <button class="adw-button destructive-action">Delete</button>
+                            <button class="adw-button suggested-action">Confirm</button>
+                        </footer>
                     </div>
                 </div>
             </div>
