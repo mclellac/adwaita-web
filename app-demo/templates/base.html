@@ -100,7 +100,7 @@
                     {% endif %}
                 </span>
             </a>
-            <div class="sidebar-profile-name adw-label title-3">{{ current_user.full_name or current_user.username }}</div>
+            <div class="sidebar-profile-name adw-label title-3">{{ current_user.full_name }}</div> {# Prefer full_name directly #}
         </div>
         {% endif %}
         <nav class="adw-list-box flat sidebar-nav" aria-label="Main Navigation">

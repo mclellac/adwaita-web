@@ -36,6 +36,7 @@ def register():
         try:
             new_user = User(
                 username=form.email.data,
+                full_name=form.full_name.data, # Added full_name
                 is_approved=False,
                 is_active=False,
                 is_admin=False # Explicitly false for new registrations

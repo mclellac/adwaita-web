@@ -95,7 +95,7 @@ def create_app(config_name=None):
             return None
 
     # Template filters
-    from .utils import markdown_to_html_and_sanitize_util # Renamed to avoid conflict
+    from .utils import markdown_to_html_and_sanitize_util, linkify_mentions as linkify_mentions_util # Renamed to avoid conflict
 
     @app.template_filter('urlencode')
     def urlencode_filter(s):
@@ -110,9 +110,16 @@ def create_app(config_name=None):
         if not isinstance(value, str): value = str(value)
         return Markup(value.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r').replace('/', '\\/'))
 
+    @app.template_filter('linkify_mentions')
+    def actual_linkify_mentions_filter(text):
+        # This filter should be applied BEFORE markdown
+        return linkify_mentions_util(text)
+
     @app.template_filter('markdown') # Changed decorator to register as 'markdown'
     def actual_markdown_filter(text): # Function name can be anything
-        return markdown_to_html_and_sanitize_util(text)
+        # Apply linkify_mentions before markdown processing
+        text_with_mention_links = linkify_mentions_util(text)
+        return markdown_to_html_and_sanitize_util(text_with_mention_links)
 
     # Context processors
     @app.context_processor

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
-{% block page_title %}Post by {{ post.author.username }}{% endblock %}
+{% block page_title %}Post by {{ post.author.full_name or post.author.username }}{% endblock %} {# Keep username as fallback if full_name somehow missing for old data #}
 
-{% block header_title %}Post by {{ post.author.username }}{% endblock %}
+{% block header_title %}Post by {{ post.author.full_name or post.author.username }}{% endblock %}
 
 {% block content %}
 <div class="post-view"> {# Removed adw-clamp content-clamp as base.html provides clamp #}
@@ -11,7 +11,7 @@
             {# Title h1 removed #}
             <div class="post-meta-detail">
                 <p class="adw-label body">
-                    By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
+                    By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>
                     {%- if post.published_at -%}
                         on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
                     {%- else -%} {# Should not happen for new posts, fallback for old data or if published_at was somehow not set #}
@@ -77,11 +77,11 @@
 
         {% if post.author %}
         <section class="author-bio-section adw-card">
-            <h3 class="adw-title-3">About {{ post.author.full_name or post.author.username }}</h3>
+            <h3 class="adw-title-3">About {{ post.author.full_name }}</h3>
             <div class="adw-box adw-box-spacing-m author-bio-content">
                 <span class="adw-avatar size-large">
                      {% set author_avatar = url_for('static', filename=post.author.profile_photo_url) if post.author.profile_photo_url else url_for('static', filename='img/default_avatar.png') %}
-                     <img src="{{ author_avatar }}" alt="{{ post.author.username }} avatar" class="adw-avatar__image">
+                     <img src="{{ author_avatar }}" alt="{{ post.author.full_name }} avatar" class="adw-avatar__image">
                 </span>
                 <div class="author-bio-text-content">
                     {% if post.author.profile_info %}
@@ -91,7 +91,7 @@
                     {% else %}
                     <p class="adw-label body author-bio-text-placeholder">This author has not provided a bio yet.</p>
                     {% endif %}
-                    <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-button flat view-profile-button">View Profile of {{ post.author.username }}</a>
+                    <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-button flat view-profile-button">View Profile of {{ post.author.full_name }}</a>
                 </div>
             </div>
         </section>
@@ -128,18 +128,18 @@
         <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
             <span class="adw-avatar size-medium">
                {% set comment_avatar = url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else default_avatar_url %}
-               <img src="{{ comment_avatar }}" alt="{{ comment.author.username }} avatar" class="adw-avatar__image">
+               <img src="{{ comment_avatar }}" alt="{{ comment.author.full_name }} avatar" class="adw-avatar__image">
             </span>
             <div class="comment-author-meta">
-                 <a href="{{ url_for('profile.view_profile', username=comment.author.username) }}" class="adw-link comment-author-link-strong">{{ comment.author.username }}</a>
+                 <a href="{{ url_for('profile.view_profile', username=comment.author.username) }}" class="adw-link comment-author-link-strong">{{ comment.author.full_name }}</a>
                 <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></small>
             </div>
         </header>
-        <p class="comment-text styled-text-content">{{ comment.text }}</p> {# Assuming comment.text is plain text for now, or apply markdown filter if comments can be markdown #}
+        <div class="comment-text styled-text-content">{{ comment.text | markdown }}</div> {# Apply markdown (which now includes linkify_mentions) #}
 
         <div class="comment-actions"> {# Removed adw-box, adw-box-spacing-xs, and inline style #}
             {% if current_user.is_authenticated %}
-            <button class="adw-button flat compact reply-button" data-comment-id="{{ comment.id }}" data-comment-author="{{ comment.author.username }}">Reply</button>
+            <button class="adw-button flat compact reply-button" data-comment-id="{{ comment.id }}" data-comment-author="{{ comment.author.full_name | e }}">Reply</button>
             {% endif %}
             {# Flag Button #}
             {% if current_user.is_authenticated and comment.author != current_user %}
@@ -223,7 +223,7 @@
             {% for related_post in related_posts %}
             <a href="{{ url_for('post.view_post', post_id=related_post.id) }}" class="adw-action-row activatable">
                 <div class="adw-action-row-content">
-                    <span class="adw-action-row-title">Post by {{ related_post.author.username }}</span>
+                    <span class="adw-action-row-title">Post by {{ related_post.author.full_name or related_post.author.username }}</span>
                     {% if related_post.content %}
                     <span class="adw-action-row-subtitle">{{ related_post.content | striptags | truncate(80) }}</span>
                     {% endif %}

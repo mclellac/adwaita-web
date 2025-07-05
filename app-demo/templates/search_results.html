@@ -35,9 +35,9 @@
                         <div class="adw-action-row-prefix">
                             <span class="adw-avatar size-m">
                                 {% if user_result.profile_photo_url %}
-                                <img src="{{ url_for('static', filename=user_result.profile_photo_url) }}" alt="{{ user_result.username }} avatar">
+                                <img src="{{ url_for('static', filename=user_result.profile_photo_url) }}" alt="{{ user_result.full_name or user_result.username }} avatar">
                                 {% else %}
-                                <img src="{{ default_avatar_url }}" alt="{{ user_result.username }} default avatar">
+                                <img src="{{ default_avatar_url }}" alt="{{ user_result.full_name or user_result.username }} default avatar">
                                 {% endif %}
                             </span>
                         </div>
@@ -97,7 +97,7 @@
                     <article class="adw-card blog-post-item-card">
                         <header class="blog-post-card__header">
                             <div class="blog-post-card__meta adw-label caption">
-                                By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
+                                By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>
                                 on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else 'Unknown date' }}</time>
                             </div>
                         </header>

@@ -23,6 +23,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 class RegistrationForm(FlaskForm):
+    full_name = StringField('Display Name', validators=[DataRequired(), Length(min=1, max=120)])
     email = StringField('Email (Username)', validators=[DataRequired(), Length(min=6, max=120), Email(message="Please enter a valid email address.")])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=8, message="Password must be at least 8 characters long.")])
     confirm_password = PasswordField(
@@ -75,7 +76,7 @@ class PostForm(FlaskForm):
     submit = SubmitField('Post') # Single submit button
 
 class ProfileEditForm(FlaskForm):
-    full_name = StringField('Display Name', validators=[Optional(), Length(max=120)])
+    full_name = StringField('Display Name', validators=[DataRequired(), Length(min=1, max=120)]) # Changed to DataRequired
     profile_info = TextAreaField(
         'Bio (supports some HTML)', # Label from app.py
         validators=[Optional(), Length(max=5000)]
