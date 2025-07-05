@@ -36,7 +36,7 @@
   // If it's an icon button (close), it's also flat.
   .adw-button {
     // Make buttons flat and adapt to banner's coloring
-    @extend .adw-button, .flat; // Inherit flat style
+    @extend .adw-button, .flat !optional; // Inherit flat style
     background-color: transparent; // Ensure fully transparent over banner bg
     color: inherit; // Inherit banner's text color
     border-color: transparent;

@@ -24,7 +24,7 @@
   .adw-status-page-title {
     // Uses .title-2 utility class sizing by default in Libadwaita if it's GtkLabel
     // font-size: var(--title-2-font-size); // Defined in _utility_classes.scss
-    @extend .title-2; // Use the utility class for font size and weight
+    @extend .title-2 !optional; // Use the utility class for font size and weight
     color: var(--window-fg-color);
     margin-top: 0;
     margin-bottom: var(--spacing-s);
@@ -58,7 +58,7 @@
     }
     .adw-status-page-title {
       // font-size: var(--title-3-font-size); // Smaller title
-      @extend .title-3;
+      @extend .title-3 !optional;
       margin-bottom: var(--spacing-xs);
     }
     .adw-status-page-description {
