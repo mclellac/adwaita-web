@@ -104,7 +104,6 @@ def edit_profile():
             strip=True
         )
         current_user.full_name = form.full_name.data
-        current_user.location = form.location.data
         current_user.website_url = form.website_url.data
         current_user.is_profile_public = form.is_profile_public.data
         current_user.street_address = form.street_address.data
