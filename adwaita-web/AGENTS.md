@@ -16,13 +16,12 @@ This document provides instructions and guidelines for AI agents (like Jules) wo
 1.  **Pure CSS:** All styling must be achievable with CSS only. Do not introduce JavaScript for styling purposes. Interactivity that requires JavaScript should be handled by the consuming application, not this library.
 2.  **HTML Structure Agnostic (Flexible):** Styles should be applicable to common HTML structures (e.g., standard `<button>`, `<input>`, `<div>` with classes). Avoid overly specific selectors that demand a rigid HTML structure unless absolutely necessary for the component's design.
 3.  **Class-Based Styling:** Styling is primarily applied via CSS classes (e.g., `.adw-button`, `.adw-entry`, `.adw-list-box`).
-4.  **CSS Custom Properties:** Leverage CSS custom properties (variables) extensively for theming (colors, spacing, fonts, etc.) to allow easy customization and dark mode support.
-    *   Global variables should be defined in `scss/_variables.scss` and on the `:root` or `body` element.
-    *   Component-specific variables can also be defined if they don't fit the global scope.
+4.  **CSS Custom Properties & Libadwaita Alignment:** Leverage CSS custom properties (variables) extensively for theming. Strive to align variable names and theming concepts (light/dark themes, accent colors, semantic colors like error/warning/success, UI area colors like headerbar/sidebar/card) with those found in the native Libadwaita GTK library. This ensures consistency and makes it easier for developers familiar with Libadwaita.
+    *   Global variables are defined in `scss/_variables.scss` on the `:root` element and overridden by `.theme-dark` and accent classes (e.g., `.accent-green`).
 5.  **SCSS Usage:** The library is written in SCSS (`.scss` files) and compiled into a single CSS file (`css/adwaita-skin.css`).
     *   Modular SCSS: Styles are organized into partials (e.g., `_button.scss`, `_entry.scss`) and imported into `adwaita-skin.scss`.
     *   SASS features like variables (`$sass-variable`), mixins (`@mixin`), and nesting should be used for maintainability. However, the output must be pure CSS.
-6.  **No Web Components:** Unlike `adwaita-web`, this library does *not* use custom elements or shadow DOM. All styles are global.
+6.  **No Web Components:** This library does *not* use custom elements or shadow DOM. All styles are global.
 7.  **Accessibility (A11y):** Ensure that styles support accessibility best practices. For example, provide clear focus indicators (`:focus-visible`), sufficient color contrast, and respect `prefers-reduced-motion` where applicable.
 
 ## Development Workflow

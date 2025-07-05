@@ -1,0 +1,50 @@
+// SCSS for Adwaita Wrap Layout related styles
+// AdwWrapLayout is a layout manager, AdwWrapBox is a widget.
+// These are primarily for .wrap style class on GtkBox or similar containers.
+// Libadwaita 1.7 introduced AdwWrapBox and AdwWrapLayout.
+@use 'variables';
+@use 'mixins';
+
+// If a generic .adw-wrap-layout or .adw-wrap-box class is needed for containers
+// that should behave like AdwWrapBox.
+.adw-wrap-box {
+  display: flex;
+  flex-wrap: wrap; // Core feature
+  gap: var(--spacing-m); // Default gap between items
+
+  // AdwWrapLayout supports policies like 'start', 'end', 'center', 'space-around', etc.
+  // These would typically be controlled by align-items and justify-content on the flex container.
+  // Example utility classes for these policies:
+  &.justify-start { justify-content: flex-start; }
+  &.justify-end { justify-content: flex-end; }
+  &.justify-center { justify-content: center; }
+  &.justify-space-between { justify-content: space-between; }
+  &.justify-space-around { justify-content: space-around; }
+  &.justify-space-evenly { justify-content: space-evenly; }
+
+  &.align-start { align-items: flex-start; }
+  &.align-end { align-items: flex-end; }
+  &.align-center { align-items: center; }
+  &.align-baseline { align-items: baseline; }
+  &.align-stretch { align-items: stretch; }
+
+  // Specific pack direction (row/column) is usually part of flex-direction,
+  // but AdwWrapLayout has explicit pack directions.
+  // Default is horizontal wrapping.
+  // &.pack-direction-column { flex-direction: column; flex-wrap: wrap; /* Needs height */ }
+
+  // Line alignment (align-content for multi-line flex)
+  &.line-align-start { align-content: flex-start; }
+  &.line-align-end { align-content: flex-end; }
+  &.line-align-center { align-content: center; }
+  &.line-align-space-between { align-content: space-between; }
+  &.line-align-space-around { align-content: space-around; }
+  &.line-align-stretch { align-content: stretch; }
+}
+
+// Note: AdwWrapLayout itself is a GtkLayoutManager.
+// The styles above are for a container that *uses* a wrap layout concept.
+// Actual AdwWrapBox widget styling might involve more if it has its own specific visual properties
+// beyond standard flex wrapping. For now, this provides basic flex-wrap utilities.
+// The existing _wrap_box.scss should be reviewed for AdwWrapBox widget specifics.
+// This file (_wrap_layout.scss) could be merged into _wrap_box.scss or kept for general wrap utilities.

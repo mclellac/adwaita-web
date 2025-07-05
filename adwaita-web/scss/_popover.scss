@@ -1,110 +1,143 @@
+// scss/_popover.scss
 @use 'variables';
+@use 'mixins'; // For z-index
 
-// Styles for the <adw-popover> host element.
-// The host element itself is positioned fixed by the JS.
-// Its shadow DOM contains .adw-popover-surface and .adw-popover-arrow.
-:host(adw-popover) {
-  // display: none; // Controlled by JS by setting display: block/none on host
-  // position: fixed; // Set by JS
-  z-index: var(--z-index-popover, 1200); // Default from variables
-  // opacity and transform for animations are handled by the .adw-popover-surface
+// Main popover container/widget.
+// This element would be positioned by JS.
+// It should have an .open class for visibility and animations.
+.adw-popover {
+  position: fixed; // Typically fixed, JS handles top/left
+  z-index: var(--z-index-popover);
+  opacity: 0;
+  transform: scale(0.95) translateY(-10px); // Initial state for animation
+  transform-origin: top center; // Default origin, JS might adjust based on arrow
+  visibility: hidden;
+  transition: opacity 0.1s ease-out, transform 0.1s ease-out, visibility 0s linear 0.1s;
+
+  &.open {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    visibility: visible;
+    transition-delay: 0s;
+  }
 }
 
 .adw-popover-surface {
-  background-color: var(--popover-bg-color, var(--window-bg-color));
-  border-radius: var(--popover-border-radius, var(--border-radius-default));
-  box-shadow: var(--popover-box-shadow, 0 3px 6px rgba(0, 0, 0, 0.16));
-  padding: var(--popover-padding, var(--spacing-m)); // Consistent padding for popovers
-  position: relative; // For arrow positioning if arrow is inside surface
+  background-color: var(--popover-bg-color);
+  color: var(--window-fg-color); // Popovers usually contain interactive content, use window_fg
+  border-radius: var(--border-radius-large); // Libadwaita popovers often use larger radius (12px)
+  box-shadow: var(--popover-box-shadow);
+  // Default padding for popover content if not a menu. Menus handle their own.
+  padding: var(--spacing-m);
+  position: relative; // For arrow positioning if arrow is part of the surface div
 
-  // Transition for open/close (applied when host's display changes)
-  // Consider if animations are needed on the surface itself or the host
-  opacity: 1; // Start fully visible once display:block is set
-  transform: scale(1);
-  // Example transition if host is toggled:
-  // transition: opacity 0.1s ease-out, transform 0.1s ease-out;
-  // :host(:not([open])) .adw-popover-surface {
-  //   opacity: 0;
-  //   transform: scale(0.95);
-  // }
-}
+  // For popovers that function as menus (contain a listbox)
+  &.menu {
+    padding: var(--spacing-xs) 0; // Menus have tighter vertical padding, no horizontal on surface
+    .adw-list-box {
+      background-color: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0; // ListBox itself has no padding here, rows do
 
-.adw-popover-arrow {
-  position: absolute; // Positioned relative to the :host(adw-popover) element
-  width: var(--arrow-size, 12px);
-  height: var(--arrow-size, 12px);
-  background-color: var(--popover-bg-color, var(--window-bg-color)); // Same as popover surface
-  transform-origin: center center;
-  // The actual border is created by rotating a square and hiding parts,
-  // or using clip-path. For simplicity, we use a single background color.
-  // Box shadow can make it look more integrated if desired.
-  // box-shadow: var(--popover-box-shadow); // Optional: if arrow should also cast shadow
+      .adw-row { // General row styling within a menu popover
+        padding: var(--spacing-s) var(--spacing-m);
+        border-radius: var(--border-radius-small);
+        background-color: transparent; // Rows are transparent initially
+        color: var(--window-fg-color); // Ensure text color is standard
 
-  // Common setup for all arrow directions
-  &::before { // This pseudo-element creates the visible triangle
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-color: inherit; // Inherits from .adw-popover-arrow
-    transform: rotate(45deg);
-    // If borders are desired on the arrow (more complex):
-    // border: 1px solid var(--popover-border-color, var(--borders-color));
-  }
+        &:hover:not(.disabled):not([disabled]) {
+          background-color: var(--list-row-hover-bg-color); // Subtle hover
+        }
 
-  &.arrow-up { // Popover is below target, arrow points up
-    // top, left set by JS
-    // transform: translateY(calc(-100% + var(--arrow-offset, 6px))); // Position arrow tip at edge
-    // clip-path: polygon(50% 0%, 0% 100%, 100% 100%); // Triangle pointing up
-    &::before {
-      // If using borders, only top and left/right would be visible depending on rotation
-      // For simple triangle, rotation handles it.
+        // Selected or focused items in a menu list
+        &.selected, // From GtkListBox selection
+        &:focus-visible, // For keyboard navigation
+        &.active-item { // Custom class if needed for "active" but not GtkSelected
+          background-color: var(--accent-bg-color);
+          color: var(--accent-fg-color);
+          // Ensure icons and all text elements within also get the accent foreground color
+          .adw-icon, svg, .title, .subtitle, span { // Target common elements
+            color: var(--accent-fg-color) !important; // Use important if specificity is an issue
+            fill: var(--accent-fg-color) !important;
+          }
+        }
+         &:focus-visible {
+           outline: none; // Custom styling for focus, no default outline
+         }
+      }
     }
   }
-  &.arrow-down { // Popover is above target, arrow points down
-    // top, left set by JS
-    // transform: translateY(calc(0% - var(--arrow-offset, 6px)));
-    // clip-path: polygon(0% 0%, 100% 0%, 50% 100%); // Triangle pointing down
-     &::before {
-        // box-shadow: 0 1px 1px 0 rgba(0,0,0,0.1); // Shadow for down arrow
-     }
-  }
-  &.arrow-left { // Popover is to the right of target, arrow points left
-    // top, left set by JS
-    // transform: translateX(calc(-100% + var(--arrow-offset, 6px)));
-    // clip-path: polygon(0% 50%, 100% 0%, 100% 100%); // Triangle pointing left
-  }
-  &.arrow-right { // Popover is to the left of target, arrow points right
-    // top, left set by JS
-    // transform: translateX(calc(0% - var(--arrow-offset, 6px)));
-    // clip-path: polygon(0% 0%, 100% 50%, 0% 100%); // Triangle pointing right
-  }
 }
 
-// Ensure proper padding for common Adwaita elements if used directly in popover
-// For example, list boxes in popovers (menus) are often borderless and have specific row styling.
-.adw-popover-surface {
-  .adw-list-box {
-    // Common style for list boxes inside popovers (e.g., menus)
-    background-color: transparent; // Inherit popover background
-    border: none;
-    box-shadow: none;
-    padding: var(--spacing-xs) 0; // Typical menu padding
+// Popover Arrow
+// Positioned absolutely by JS relative to the .adw-popover container.
+.adw-popover-arrow {
+  position: absolute;
+  width: 16px;  // Standard arrow size in Libadwaita (can be adjusted)
+  height: 8px; // Half of width for a typical isosceles triangle base
+  overflow: hidden; // Used to clip the square into a triangle
 
-    .adw-row, adw-action-row, adw-entry-row { // Target both WC and class-based rows
-      // Menu item like padding
-      padding: var(--spacing-s) var(--spacing-m);
-      border-radius: var(--border-radius-small); // Rounded corners for menu items
-      &:hover {
-        background-color: var(--list-row-hover-bg-color);
-      }
-      &.active, &:focus, &:focus-within { // More visible active/focus state
-        background-color: var(--accent-bg-color);
-        color: var(--accent-fg-color);
-        .adw-label, .adw-action-row__title, .adw-action-row__subtitle { // Ensure text color changes
-            color: var(--accent-fg-color);
-        }
-      }
+  &::before { // The rotated square that forms the triangle
+    content: '';
+    position: absolute;
+    width: 12px; // Size of the square to be rotated
+    height: 12px;
+    background-color: var(--popover-bg-color);
+    // Apply the same shadow as the popover surface for consistency, but might need adjustments
+    // box-shadow: var(--popover-box-shadow); // This can be tricky to get right for an arrow
+    // A simpler border or slight inner shadow might be better:
+    border: var(--border-width) solid var(--popover-shade-color); // Use popover-shade for arrow border
+    transform-origin: center center;
+    transform: rotate(45deg);
+  }
+
+  // Arrow pointing upwards (popover is below the target)
+  &.arrow-up {
+    // JS sets top/left. This aligns the tip.
+    // Example: top: -8px (height of arrow);
+    &::before {
+      bottom: -7px; // Position square so its top point (after rotation) forms the arrow tip
+      left: 2px;    // Center the 12x12 square in the 16px width
+      border-top-color: transparent;
+      border-left-color: transparent;
+    }
+  }
+
+  // Arrow pointing downwards (popover is above the target)
+  &.arrow-down {
+    // Example: bottom: -8px;
+     &::before {
+      top: -7px;
+      left: 2px;
+      border-bottom-color: transparent;
+      border-right-color: transparent;
+    }
+  }
+
+  // Arrow pointing left (popover is to the right of the target)
+  &.arrow-left {
+    width: 8px; // Base of triangle is now vertical
+    height: 16px;
+    // Example: left: -8px;
+    &::before {
+      top: 2px; // Center
+      right: -7px; // Position for left pointing
+      border-top-color: transparent;
+      border-bottom-color: transparent;
+    }
+  }
+
+  // Arrow pointing right (popover is to the left of the target)
+  &.arrow-right {
+     width: 8px;
+     height: 16px;
+    // Example: right: -8px;
+    &::before {
+      top: 2px;
+      left: -7px; // Position for right pointing
+      border-left-color: transparent;
+      border-right-color: transparent;
     }
   }
 }

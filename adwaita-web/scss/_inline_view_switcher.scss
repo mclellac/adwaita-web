@@ -1,0 +1,20 @@
+// SCSS for Adwaita Inline View Switcher
+// Based on Libadwaita 1.7 AdwInlineViewSwitcher
+// This widget uses a toggle group.
+@use 'variables';
+@use 'mixins';
+@use 'toggle_group'; // It's essentially a styled toggle group
+
+.adw-inline-view-switcher {
+  // It behaves much like an .adw-toggle-group.
+  // It can also have .flat or .round styles from AdwToggleGroup.
+  // display: inline-flex; // from .adw-toggle-group
+
+  // Specific styling for AdwInlineViewSwitcher if it differs from a standard AdwToggleGroup
+  // For example, it might enforce a specific button style or padding.
+  // Libadwaita documentation: "A view switcher that uses a toggle group."
+  // So, it likely inherits most styling from .adw-toggle-group and its variants.
+
+  // Ensure its buttons (likely .adw-button or .adw-toggle)
+  // use the standard --active-toggle-bg-color when active.
+}

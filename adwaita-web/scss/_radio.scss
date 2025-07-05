@@ -1,29 +1,29 @@
 // scss/_radio.scss
 @use 'variables';
+@use 'mixins';
 
 .adw-radio {
   display: inline-flex;
   align-items: center;
   cursor: pointer;
   user-select: none;
-  gap: var(--spacing-s); // Use gap for spacing
+  gap: var(--spacing-s);
+  color: var(--window-fg-color); // Label color
 
   input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
+    @include mixins.visually-hidden;
 
     &:checked + .adw-radio-indicator {
-      border-color: var(--accent-color); // Use standalone accent for border
+      border-color: var(--accent-color); // Checked border uses standalone accent color
 
-      &:before { // Inner dot
+      &::before { // Inner dot
         content: "";
         display: block;
-        width: 8px;
-        height: 8px;
+        // Size relative to indicator, e.g. indicator_size / 2 - border_width
+        width: calc(18px / 2 - 2px); // Example: 18px indicator, 2px border -> 7px dot. Libadwaita is 8px dot for 18px/2px border.
+        height: calc(18px / 2 - 2px);
         border-radius: 50%;
-        background-color: var(--accent-color); // Dot color also standalone accent
+        background-color: var(--accent-color); // Dot color is also standalone accent
         position: absolute;
         top: 50%;
         left: 50%;
@@ -31,60 +31,62 @@
       }
     }
 
-    &:disabled + .adw-radio-indicator { // Disabled and Unchecked
-      background-color: var(--entry-disabled-bg-color);
-      border-color: var(--entry-disabled-border-color);
-      opacity: 1;
-      cursor: not-allowed;
-
-      &:before { // No inner dot
-        background-color: transparent;
-      }
-    }
-
-    &:disabled:checked + .adw-radio-indicator { // Disabled and Checked
-        border-color: var(--accent-color); // Still show accent border
-        opacity: var(--opacity-disabled); // But muted
-        &:before { // Inner dot
-            background-color: var(--accent-color); // Still show accent dot
-            // Opacity on parent mutes this too
-        }
-    }
-
     &:focus-visible + .adw-radio-indicator {
-      outline: 2px solid var(--accent-color); // Focus uses standalone accent color
+      outline: var(--focus-ring-width) solid var(--accent-color);
       outline-offset: 2px;
+    }
+
+    &:disabled {
+      & + .adw-radio-indicator {
+        cursor: not-allowed;
+      }
+      &:focus-visible + .adw-radio-indicator {
+        outline: none;
+      }
     }
   }
 
   .adw-radio-indicator {
     width: 18px;
     height: 18px;
-    border-width: 2px; // Adwaita radio often has a 2px border
+    border-width: 2px; // Libadwaita radio buttons have a 2px border
     border-style: solid;
-    border-color: var(--entry-border-color); // Use entry border color for consistency (or a specific radio border)
-    border-radius: 50%;
-    background-color: var(--view-bg-color);
+    border-color: var(--border-color); // Default border color
+    border-radius: 50%; // Always round
+    background-color: var(--view-bg-color); // Or transparent if on complex bg
     position: relative;
     transition: background-color 0.1s ease-out, border-color 0.1s ease-out;
     flex-shrink: 0;
+    display: inline-block;
   }
 
   .adw-radio-label {
-    color: var(--view-fg-color);
-    line-height: 1.2;
+    line-height: 1.3;
+    // Color inherited
   }
 
-  // If the whole radio component is marked disabled
-  &[disabled] {
+  &.disabled, &[disabled] {
+    cursor: not-allowed;
+    opacity: var(--disabled-opacity);
+
     .adw-radio-label {
-      color: var(--disabled-fg-color);
       cursor: not-allowed;
     }
     .adw-radio-indicator {
       cursor: not-allowed;
     }
   }
-}
 
-// Dark theme specific overrides are handled by variables.
+  // Selection Mode Style
+  &.selection-mode {
+    .adw-radio-indicator {
+      width: 22px; // Larger
+      height: 22px;
+
+      &::before { // Inner dot for larger indicator
+         width: calc(22px / 2 - 2px); // Scale dot accordingly, e.g. 9px
+         height: calc(22px / 2 - 2px);
+      }
+    }
+  }
+}

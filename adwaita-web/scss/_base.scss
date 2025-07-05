@@ -24,10 +24,10 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: var(--heading-font-family); // Use CSS var for heading font family
-    font-weight: variables.$heading-font-weight;       // Use SASS var for heading font-weight
-    color: var(--heading-color);
-    line-height: variables.$heading-line-height;       // Use SASS var for heading line-height
+    font-family: var(--document-font-family); // Headings use document font family
+    font-weight: variables.$font-weight-bold; // Standard bold for headings
+    color: var(--window-fg-color); // Headings use standard window foreground color
+    line-height: 1.3; // A common tighter line-height for headings
     margin-top: var(--spacing-m);
     margin-bottom: var(--spacing-s);
 }

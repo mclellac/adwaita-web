@@ -1,204 +1,118 @@
 // Styles for Adwaita Entries (Input Fields) (Adwaita Skin Version)
-// Adapted from adwaita-web/scss/_entry.scss
 @use "sass:color";
-@use 'variables'; // Defines CSS vars like --input-bg-color, --borders-color, --accent-color, etc. (Reverted for debugging)
-@use 'mixins';    // May contain reusable mixins (Reverted for debugging)
-
-// Define default values for local entry variables, these can be overridden by specific contexts (like entry-row)
-// by setting these variables on the .adw-entry element itself or a parent.
-:root {
-  --entry-padding-vertical-default: var(--spacing-s);      // 9px
-  --entry-padding-horizontal-default: var(--spacing-m);    // 12px (Increased for better horizontal spacing)
-  --entry-border-width-default: var(--border-width);
-  --entry-border-color-default: var(--input-border-color, var(--borders-color)); // Use specific input border or general
-  --entry-background-color-default: var(--input-bg-color, var(--view-bg-color)); // Adwaita entries often use view_bg_color
-  --entry-inset-shadow-light-default: inset 0 1px 1px rgba(0,0,0,0.06); // Softer inset for light
-  --entry-inset-shadow-dark-default: inset 0 1px 1px rgba(0,0,0,0.2);  // Slightly stronger for dark
-
-  --entry-focus-border-color-default: var(--input-focus-border-color, var(--accent-color));
-  --entry-focus-ring-shadow-default: 0 0 0 var(--focus-ring-width) var(--input-focus-border-color, var(--accent-color)); // Use focus-ring-width
-
-  --entry-disabled-bg-color-default: var(--input-disabled-bg-color, rgba(0,0,0,0.04));
-  --entry-disabled-border-color-default: var(--input-disabled-border-color, rgba(0,0,0,0.08));
-
-  // Specific for dark theme if needed, or rely on base variable changes
-  &.theme-dark {
-    --entry-inset-shadow-light-default: var(--entry-inset-shadow-dark-default); // In dark, "light" shadow means the dark theme's shadow
-  }
-}
-
+@use 'variables';
+@use 'mixins';
 
 .adw-entry {
-  // Use local variables that default to the :root defined ones, allowing overrides
-  --_entry-padding-vertical: var(--entry-padding-vertical, var(--entry-padding-vertical-default));
-  --_entry-padding-horizontal: var(--entry-padding-horizontal, var(--entry-padding-horizontal-default));
-  --_entry-border-width: var(--entry-border-width, var(--entry-border-width-default));
-  --_entry-border-color: var(--entry-border-color, var(--entry-border-color-default));
-  --_entry-background-color: var(--entry-background-color, var(--entry-background-color-default));
-  --_entry-inset-shadow: var(--entry-inset-shadow, var(--entry-inset-shadow-light-default)); // Default to light, overridden by .theme-dark context below
-  --_entry-focus-border-color: var(--entry-focus-border-color, var(--entry-focus-border-color-default));
-  --_entry-focus-ring-shadow: var(--entry-focus-ring-shadow, var(--entry-focus-ring-shadow-default));
-  --_entry-disabled-bg-color: var(--entry-disabled-bg-color, var(--entry-disabled-bg-color-default));
-  --_entry-disabled-border-color: var(--entry-disabled-border-color, var(--entry-disabled-border-color-default));
-
-
-  display: inline-block; // Or block if it should take full width by default
-  width: auto; // Default, can be overridden by parent or utility classes
-  // Ensure padding is applied directly and not easily overridden for the base component
-  padding-top: var(--_entry-padding-vertical) !important;
-  padding-bottom: var(--_entry-padding-vertical) !important;
-  padding-left: var(--_entry-padding-horizontal) !important;
-  padding-right: var(--_entry-padding-horizontal) !important;
-  border-width: var(--_entry-border-width);
+  display: inline-block;
+  width: auto;
+  padding: var(--spacing-s) var(--spacing-m);
+  border-width: var(--border-width);
   border-style: solid;
-  border-color: var(--_entry-border-color);
-  border-radius: var(--input-border-radius, var(--border-radius-default)); // Use input-specific or general default
-  background-color: var(--_entry-background-color);
-  color: var(--input-fg-color, var(--text-color)); // Use input-specific or general text color
+  border-color: var(--border-color); // Use the global --border-color
+  border-radius: var(--border-radius-default);
+  background-color: var(--view-bg-color); // Entries typically use view background
+  color: var(--window-fg-color); // Text color
   font-family: var(--document-font-family);
   font-size: var(--font-size-base);
-  line-height: variables.$line-height-base; // SASS var for line-height is fine
-  box-shadow: var(--_entry-inset-shadow);
+  line-height: variables.$line-height-base;
+  // Libadwaita entries have a subtle inset shadow.
+  // This is an approximation, actual values might differ slightly based on theme.
+  box-shadow: inset 0 1px 1px var(--shade-color); // Use --shade-color for a themeable inset
   transition: border-color 0.1s ease-out, box-shadow 0.1s ease-out, background-color 0.1s ease-out;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  .theme-dark & { // If .adw-entry is inside a .theme-dark container
-    --_entry-inset-shadow: var(--entry-inset-shadow, var(--entry-inset-shadow-dark-default));
-  }
-
   &::placeholder {
-    color: var(--input-placeholder-color, var(--text-color));
-    opacity: 0.5; // Adwaita placeholders are less prominent
+    color: currentColor; // Placeholder color is based on current text color
+    opacity: 0.5;       // Made less prominent by opacity
   }
 
   &:hover:not(:disabled):not(.disabled):not([readonly]) {
-    border-color: var(--input-hover-border-color, var(--_entry-border-color)); // Use specific or current
-    background-color: var(--input-hover-bg-color, var(--_entry-background-color));
+    // Libadwaita entry hover doesn't usually change border or background much,
+    // focus is the main indicator. We can add a very subtle effect if desired.
+    // border-color: color.mix(var(--window-fg-color), var(--border-color), 80%); // Slightly darker border
   }
 
   &:focus,
   &:focus-visible {
     outline: none;
-    border-color: var(--_entry-focus-border-color);
-    box-shadow: var(--_entry-inset-shadow), var(--_entry-focus-ring-shadow); // Combine inset shadow with outer focus ring
-    background-color: var(--input-focus-bg-color, var(--_entry-background-color)); // Allow override for focus bg
+    border-color: var(--accent-color); // Focus border uses accent color
+    // Combine inset shadow with outer focus ring
+    box-shadow: inset 0 1px 1px var(--shade-color), 0 0 0 var(--focus-ring-width) var(--accent-color);
   }
 
   &.disabled,
   &[disabled] {
     cursor: not-allowed;
-    background-color: var(--_entry-disabled-bg-color) !important; // Important to override defaults
-    border-color: var(--_entry-disabled-border-color) !important;
-    color: var(--input-disabled-fg-color, var(--disabled-fg-color)) !important;
-    opacity: var(--opacity-disabled); // Use global disabled opacity
-    box-shadow: none !important;
+    background-color: var(--view-bg-color); // Background might not change much
+    color: var(--window-fg-color);          // Text color is the same
+    opacity: var(--disabled-opacity);       // But opacity makes it appear disabled
+    box-shadow: inset 0 1px 1px var(--shade-color); // Keep inset shadow, opacity will affect it
     pointer-events: none;
 
     &::placeholder {
-      color: var(--input-disabled-fg-color, var(--disabled-fg-color)); // Match disabled text color
-      opacity: var(--opacity-disabled); // Ensure placeholder also reflects disabled state opacity
+      opacity: calc(0.5 * var(--disabled-opacity)); // Adjust placeholder opacity too
     }
   }
 
-  &.readonly,
   &[readonly] {
-    background-color: var(--input-readonly-bg-color, var(--_entry-background-color));
-    border-color: var(--input-readonly-border-color, var(--_entry-border-color));
-    color: var(--input-readonly-fg-color, var(--text-color-secondary));
+    background-color: var(--input-readonly-bg-color);
     cursor: default;
-    box-shadow: var(--_entry-inset-shadow); // Keep inset shadow for readonly
-
-    &:hover {
-      border-color: var(--input-readonly-border-color, var(--_entry-border-color)); // No hover change for border
-    }
-    &:focus,
-    &:focus-visible {
-      border-color: var(--input-readonly-border-color, var(--_entry-border-color)); // No focus border change
-      box-shadow: var(--_entry-inset-shadow); // Keep only inset shadow, no focus ring
+    // No border change on hover/focus for readonly
+    &:hover, &:focus, &:focus-visible {
+      border-color: var(--border-color); // Keep original border color
+      box-shadow: inset 0 1px 1px var(--shade-color); // Keep original inset shadow
     }
   }
 
-  // Variant for entries used within rows (e.g., AdwEntryRow / .adw-entry-row)
-  // This class should be added to the <input class="adw-entry row-input">
-  &.row-input {
-    // This variant is for use within AdwEntryRow, where the row itself provides horizontal padding.
-    // Text will align with other row content. Cursor will be at the start of this input's own border.
-    --_entry-border-width: 0 0 1px 0; // Only bottom border
-    --_entry-border-color: var(--input-border-color, var(--borders-color)); // Use standard border color for the line
-    border-radius: 0; // No border radius for a clean line
-    background-color: transparent; // Transparent background
-    box-shadow: none; // Remove inset shadow
-    padding-left: 0 !important;  // Explicitly no horizontal padding for the input itself
-    padding-right: 0 !important; // Vertical padding is inherited (var(--_entry-padding-vertical))
-    // Vertical padding might need adjustment to align text in row, use current --_entry-padding-vertical
-
-    &:focus,
-    &:focus-visible {
-      --_entry-border-color: var(--_entry-focus-border-color); // Accent color for focus
-      border-width: 0 0 2px 0; // Thicker bottom border on focus for rows (GTK style)
-      box-shadow: none; // No outer focus ring for row-input, just the accent border
-    }
-
-    &.disabled,
-    &[disabled] {
-      border-color: transparent !important; // No border for disabled row inputs
-      background-color: transparent !important;
-    }
-  }
-
-  // Error and Success states
+  // Validation States
   &.error {
-    border-color: var(--destructive-color) !important; // Use important if very specific overrides are needed
-    // color: var(--destructive-color); // Optional: change text color too
-
-    &:focus,
-    &:focus-visible {
-      border-color: var(--destructive-color) !important;
-      box-shadow: var(--_entry-inset-shadow), 0 0 0 var(--focus-ring-width) #{rgba(variables.$sass-accent-red-light-bg, 0.5)}; // Destructive focus ring
-      .theme-dark & {
-        box-shadow: var(--_entry-inset-shadow), 0 0 0 var(--focus-ring-width) #{rgba(variables.$sass-accent-red-dark-bg, 0.6)};
-      }
+    border-color: var(--error-color) !important; // Use important to override default
+    &:focus, &:focus-visible {
+      border-color: var(--error-color) !important;
+      box-shadow: inset 0 1px 1px var(--shade-color), 0 0 0 var(--focus-ring-width) var(--error-color);
     }
   }
-
+  &.warning {
+    border-color: var(--warning-color) !important;
+    &:focus, &:focus-visible {
+      border-color: var(--warning-color) !important;
+      box-shadow: inset 0 1px 1px var(--shade-color), 0 0 0 var(--focus-ring-width) var(--warning-color);
+    }
+  }
   &.success {
     border-color: var(--success-color) !important;
-    &:focus,
-    &:focus-visible {
+    &:focus, &:focus-visible {
       border-color: var(--success-color) !important;
-      box-shadow: var(--_entry-inset-shadow), 0 0 0 var(--focus-ring-width) #{rgba(variables.$sass-accent-green-light-bg, 0.5)}; // Success focus ring
-      .theme-dark & {
-        box-shadow: var(--_entry-inset-shadow), 0 0 0 var(--focus-ring-width) #{rgba(variables.$sass-accent-green-dark-bg, 0.6)};
-      }
+      box-shadow: inset 0 1px 1px var(--shade-color), 0 0 0 var(--focus-ring-width) var(--success-color);
     }
   }
 }
 
 // Styles for <textarea> elements that should look like Adwaita entries
-// Apply class .adw-textarea
 .adw-textarea {
-  @extend .adw-entry; // Inherit all styles from .adw-entry
-
-  resize: vertical; // Allow vertical resize by default
-  min-height: calc(var(--font-size-base) * #{variables.$line-height-base} * 3 + (var(--_entry-padding-vertical) * 2) + (var(--_entry-border-width) * 2)); // Approx 3 lines of text
+  @extend .adw-entry;
+  resize: vertical;
+  min-height: calc(var(--font-size-base) * #{variables.$line-height-base} * 3 + (var(--spacing-s) * 2) + (var(--border-width) * 2)); // Approx 3 lines
 }
 
 
-// Wrapper for entries with icons (if not handled by AdwEntryRow structure)
+// Wrapper for entries with icons (e.g., search icon, clear icon)
+// This structure is a common way to handle icons inside input fields.
 .adw-entry-wrapper {
   display: inline-flex;
   align-items: center;
-  position: relative; // For positioning icons absolutely within the wrapper
+  position: relative;
 
-  // The .adw-entry element when inside a wrapper
   > .adw-entry {
-    // Adjust padding if icons are present
+    // Adjust padding if icons are present. Icons are typically 16px.
+    // Padding needs to accommodate icon width + some spacing.
     &.with-icon-start {
-      padding-left: calc(var(--_entry-padding-horizontal) + #{variables.$icon-size-base} + var(--spacing-xs));
+      padding-left: calc(var(--spacing-m) + var(--icon-size-base) + var(--spacing-xs));
     }
     &.with-icon-end {
-      padding-right: calc(var(--_entry-padding-horizontal) + #{variables.$icon-size-base} + var(--spacing-xs));
+      padding-right: calc(var(--spacing-m) + var(--icon-size-base) + var(--spacing-xs));
     }
   }
 
@@ -206,33 +120,34 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--input-placeholder-color); // Icon color often matches placeholder
+    color: var(--window-fg-color); // Icon color matches text
+    opacity: 0.5; // Icons are often dimmed like placeholders
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: variables.$icon-size-base;
-    height: variables.$icon-size-base;
-    pointer-events: none; // By default, icons are not interactive
+    width: var(--icon-size-base);
+    height: var(--icon-size-base);
+    pointer-events: none; // Default: icons are not interactive
 
-    svg { // If using SVGs directly for icons
+    svg {
       width: 100%;
       height: 100%;
       fill: currentColor;
     }
 
     &.start {
-      left: var(--_entry-padding-horizontal);
+      left: var(--spacing-m);
     }
     &.end {
-      right: var(--_entry-padding-horizontal);
+      right: var(--spacing-m);
     }
 
-    &.interactive { // If the icon itself is clickable (e.g., clear button)
+    &.interactive { // For clickable icons like a clear button
       pointer-events: auto;
       cursor: pointer;
-      color: var(--text-color-secondary);
+      opacity: 0.7; // Slightly more prominent if interactive
       &:hover {
-        color: var(--text-color);
+        opacity: 1.0; // Full opacity on hover
       }
     }
   }
@@ -240,20 +155,22 @@
 
 // Remove spinner from number inputs for WebKit/Blink (Chrome, Edge, Safari)
 input[type="number"].adw-entry {
-  -webkit-appearance: textfield; /* Safari and Chrome */
-  -moz-appearance: textfield; /* Firefox */
+  -webkit-appearance: textfield;
+  -moz-appearance: textfield;
   appearance: textfield;
-}
-input[type="number"].adw-entry::-webkit-inner-spin-button,
-input[type="number"].adw-entry::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
 
 // Remove clear button from search inputs for WebKit/Blink
-input[type="search"].adw-entry::-webkit-search-decoration,
-input[type="search"].adw-entry::-webkit-search-cancel-button,
-input[type="search"].adw-entry::-webkit-search-results-button,
-input[type="search"].adw-entry::-webkit-search-results-decoration {
-  display: none;
+input[type="search"].adw-entry {
+  &::-webkit-search-decoration,
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-results-button,
+  &::-webkit-search-results-decoration {
+    display: none;
+  }
 }

@@ -2,58 +2,54 @@
 @use 'variables';
 @use 'mixins';
 
-// Preferences Page: Overall container for a page within a preferences window/view
+// AdwPreferencesPage: Overall container for a page within a preferences window/view
 .adw-preferences-page {
-  padding: var(--spacing-l) var(--spacing-xl); // Generous padding for a page
-  // background-color: var(--window-bg-color); // Usually inherits from parent view/window
+  padding: var(--spacing-l) var(--spacing-xl);
+  color: var(--window-fg-color); // Ensure text color is set for the page
 
-  // Header for the preferences page (if any)
-  .adw-preferences-page__header {
+  .adw-preferences-page__header { // Optional header within a page
     margin-bottom: var(--spacing-xl);
-    // border-bottom: 1px solid var(--border-color); // Optional separator
+    // border-bottom: var(--border-width) solid var(--border-color);
     // padding-bottom: var(--spacing-l);
   }
 
   .adw-preferences-page__title {
-    font-size: var(--font-size-h1); // Large title for the page
-    font-weight: var(--heading-font-weight);
-    color: var(--heading-color);
-    margin: 0; // Reset default heading margin
-    // text-align: center; // Optional: if titles should be centered
+    // Use .title-1 or .title-2 utility class for styling
+    // Example: <h1 class="adw-preferences-page__title title-1">Page Title</h1>
+    // Or apply directly:
+    @extend .title-1; // Using .title-1 for main page titles
+    color: var(--window-fg-color); // Ensure it uses window foreground
+    margin-top: 0;
+    margin-bottom: var(--spacing-xl); // Space after page title before first group
   }
 }
 
-// Preferences Group: A titled section within a preferences page
+// AdwPreferencesGroup: A titled section within a preferences page
 .adw-preferences-group {
-  margin-bottom: var(--spacing-xl); // Space between groups
+  margin-bottom: var(--spacing-xl);
 
   .adw-preferences-group__title-container {
-    padding: var(--spacing-s) 0; // Ensure some vertical padding. Horizontal comes from page.
-    // If group titles are ever directly in a listbox, this might need horizontal padding too.
-    // For now, assuming it's on a page which has its own horizontal padding.
-    margin-bottom: var(--spacing-m);
-    // border-bottom: 1px solid var(--divider-color); // Optional separator for title
+    // This container might not be strictly necessary if page padding handles horizontal space.
+    // If title is directly before a listbox, listbox might have its own header area.
+    // For a standalone group title:
+    padding-top: var(--spacing-s);    // Some space above title
+    padding-bottom: var(--spacing-s); // Some space below title before list
+    margin-bottom: var(--spacing-xs); // Reduced margin if listbox below has its own top margin/padding
   }
 
   .adw-preferences-group__title {
-    font-size: var(--font-size-h3); // Smaller title for groups
-    font-weight: var(--heading-font-weight);
-    color: var(--heading-color);
-    margin: 0; // Reset default heading margin
-    // text-transform: uppercase; // Adwaita group titles are often uppercase and slightly lighter
-    // letter-spacing: 0.5px;
-    // opacity: 0.8;
+    // Libadwaita group titles are often like .title-4 or .heading, but sometimes smaller, all-caps, and dimmed.
+    // Let's use .heading as a base and customize.
+    @extend .heading; // Base font size, bold
+    color: var(--window-fg-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: var(--dim-opacity); // Dimmed title
+    font-size: var(--font-size-small); // Smaller than default .heading
+    margin: 0;
   }
 
-  // Content within a group is often an .adw-list-box or directly .adw-action-row, .adw-entry-row etc.
-  // If groups have a card-like appearance:
-  // background-color: var(--card-bg-color);
-  // border: 1px solid var(--card-border-color);
-  // border-radius: var(--card-border-radius);
-  // padding: var(--spacing-m); // If card-like, content might be padded this way instead of list-box
+  // The content of an AdwPreferencesGroup is typically an AdwListBox with the .boxed-list style class.
+  // Styling for that is in _listbox.scss.
+  // The group itself doesn't usually have a card background; the listbox inside does.
 }
-
-// Dark theme adjustments are handled by CSS variables in _variables.scss
-// No specific dark theme overrides needed here if variables are correctly themed.
-// .theme-dark .adw-preferences-page { ... }
-// .theme-dark .adw-preferences-group { ... }

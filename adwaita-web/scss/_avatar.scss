@@ -1,58 +1,60 @@
+// scss/_avatar.scss
 @use "variables";
+@use "sass:math";
 
 :root {
-  --avatar-bg-color: var(--shade-color);
-  --avatar-text-color: var(--view-fg-color);
+  // Default fallback colors for avatar if not specified by other means
+  // Libadwaita often uses a subtle gray or a color derived from text if no image/custom color.
+  --avatar-bg-color: var(--shade-color); // A generic shade color
+  --avatar-text-color: var(--window-fg-color); // Contrasting text color
 }
 
 .adw-avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  overflow: hidden;
-  background-color: var(--avatar-bg-color);
-  color: var(--avatar-text-color);
-  font-weight: bold;
-  vertical-align: middle;
+  border-radius: 50%; // Avatars are always round
+  overflow: hidden;   // Clip image/text to the round shape
+  background-color: var(--avatar-bg-color); // Use the CSS variable
+  color: var(--avatar-text-color);         // Use the CSS variable for text (initials)
+  font-weight: variables.$font-weight-bold; // Initials are usually bold
+  vertical-align: middle; // Align well with adjacent text
   user-select: none;
-  box-sizing: border-box;
+  box-sizing: border-box; // Consistent sizing behavior
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    display: block;
+    object-fit: cover; // Ensure image covers the avatar area nicely
+    display: block;    // Remove extra space below image
   }
 
   .adw-avatar-text {
-    color: var(--avatar-text-color);
+    color: inherit; // Inherit text color from .adw-avatar
     text-align: center;
-    line-height: 1;
-    // Font size will be set dynamically by JavaScript based on avatar size
+    line-height: 1; // Keep initials vertically centered
+    // Font size is often ~40-50% of the avatar's height.
+    // This will be set by size-specific classes or inline styles.
   }
 }
 
-// Optional: Predefined size classes (JS primarily controls size via style attribute)
-// These can be useful if you want to use avatars purely from HTML/CSS sometimes.
-// The font-size here is a rough guide; JS will calculate it more precisely.
-.adw-avatar.size-tiny { // Example: 16px
-  width: 16px;
-  height: 16px;
-}
-.adw-avatar.size-small { // Example: 24px
-  width: 24px;
-  height: 24px;
-}
-.adw-avatar.size-medium { // Example: 48px
-  width: 48px;
-  height: 48px;
-}
-.adw-avatar.size-large { // Example: 72px
-  width: 72px;
-  height: 72px;
-}
-.adw-avatar.size-huge { // Example: 96px
-  width: 96px;
-  height: 96px;
+// Predefined size classes. JS might also set width/height via style attribute.
+// Font size for initials is approximated here.
+$_avatar_sizes: (
+  tiny: 16px,
+  small: 24px,
+  medium: 48px,
+  large: 72px,
+  huge: 96px
+);
+
+@each $name, $size in $_avatar_sizes {
+  .adw-avatar.size-#{$name} {
+    width: $size;
+    height: $size;
+    // Approximate font size for initials (e.g., 40% of height for 1-2 letters)
+    // Using a slightly smaller factor for smaller avatars.
+    $font-size-factor: if($size < 32px, 0.5, 0.4);
+    font-size: calc(#{$size} * #{$font-size-factor});
+  }
 }
