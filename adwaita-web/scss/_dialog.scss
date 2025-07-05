@@ -39,7 +39,35 @@
       font-weight: var(--font-weight-bold);
       color: inherit; // Inherits --dialog-fg-color
     }
-    // Close button would be an .adw-button.circular.flat
+
+    // Styling for a dedicated close button in the header
+    .adw-dialog-close-button.adw-button {
+      // Assuming .adw-button provides base button styling (padding, border, etc.)
+      // And .circular, .flat modify it. We primarily need to set the icon here.
+      // If the button is purely iconic, it might need width/height settings too.
+      // Let's assume it's a circular flat button, so padding might create the size.
+      // The icon itself:
+      .adw-icon { // If an <span class="adw-icon"> is used inside the button
+        background-color: currentColor;
+        -webkit-mask-image: url('../data/icons/symbolic/window-close-symbolic.svg');
+        mask-image: url('../data/icons/symbolic/window-close-symbolic.svg');
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        width: var(--icon-size-base); // Standard icon size
+        height: var(--icon-size-base);
+        display: inline-block; // Ensure it takes space
+      }
+      // If the button *is* the icon (no inner .adw-icon span):
+      // background-color: currentColor;
+      // -webkit-mask-image: url('../data/icons/symbolic/window-close-symbolic.svg');
+      // mask-image: url('../data/icons/symbolic/window-close-symbolic.svg');
+      // width: var(--icon-size-base); height: var(--icon-size-base); etc.
+      // For now, sticking to .adw-icon child pattern.
+    }
   }
 
   // Dialog Content Area

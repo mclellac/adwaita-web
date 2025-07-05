@@ -85,6 +85,18 @@
     // Specific for chevron, e.g. opacity
     .adw-action-row-chevron.adw-icon {
       opacity: var(--icon-opacity); // Uses variable defined in _variables.scss
+      -webkit-mask-image: url('../data/icons/symbolic/go-next-symbolic.svg');
+      mask-image: url('../data/icons/symbolic/go-next-symbolic.svg');
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      background-color: currentColor;
+      // Ensure width/height are set if not already by .adw-icon generic rule
+      width: var(--icon-size-small, 14px); // Or specific size for chevrons
+      height: var(--icon-size-small, 14px);
     }
   }
 

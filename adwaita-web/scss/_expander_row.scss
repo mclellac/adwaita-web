@@ -21,10 +21,21 @@
       transition: transform var(--animation-duration-short) var(--animation-ease-out-sine);
       transform: rotate(-90deg); // Point right for LTR when collapsed (assuming pan-down icon)
       opacity: var(--icon-opacity, 0.7); // Use a variable for icon opacity
-      font-size: 0.8em; // Consistent with existing style, can be adjusted
-      // Ensure it's vertically centered if AdwActionRow suffix area doesn't guarantee it.
+      // font-size: 0.8em; // Remove font-size if using direct width/height for SVG mask
       display: flex;
       align-items: center;
+      justify-content: center; // Center the mask content
+      width: var(--icon-size-small, 14px); // Standard icon size, adjust if needed for chevrons
+      height: var(--icon-size-small, 14px);
+      background-color: currentColor; // To color the mask
+      -webkit-mask-image: url('../data/icons/symbolic/pan-down-symbolic.svg');
+      mask-image: url('../data/icons/symbolic/pan-down-symbolic.svg');
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+      -webkit-mask-size: contain; // Or 100% 100%
+      mask-size: contain;
     }
 
     // When the header (and thus the row) is expanded
