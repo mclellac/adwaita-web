@@ -221,8 +221,23 @@ if __name__ == "__main__":
         print("DEBUG: db.create_all() returned.")
     print("DEBUG: Exited app_context for db.create_all()")
 
+    # Initialize default site settings if they don't exist
+    with app.app_context():
+        print("DEBUG: Checking/Initializing default site settings...")
+        if SiteSetting.query.filter_by(key='allow_registrations').first() is None:
+            SiteSetting.set('allow_registrations', True, 'bool')
+            print("DEBUG: Default 'allow_registrations' set to True as it was missing.")
+        if SiteSetting.query.filter_by(key='site_title').first() is None:
+            SiteSetting.set('site_title', 'Adwaita Social Demo', 'string')
+        if SiteSetting.query.filter_by(key='posts_per_page').first() is None:
+            SiteSetting.set('posts_per_page', 10, 'int')
+        # Ensure commit if SiteSetting.set doesn't commit itself (original did, current one in models.py does)
+        # db.session.commit() # Not needed if SiteSetting.set commits
+
     if not args.skipuser:
         print("DEBUG: --skipuser is false. Calling create_initial_user()")
+        # The create_initial_user function might also set allow_registrations True
+        # for non-interactive, which is fine (idempotent or last-write wins).
         create_initial_user(app) # This function handles its own app context and gets args from app.config
         print("DEBUG: create_initial_user() returned")
     else:
