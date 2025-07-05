@@ -76,7 +76,7 @@ window.Adw = window.Adw || {};
         closeButton.setAttribute('aria-label', 'Close notification');
 
         const icon = document.createElement('span');
-        icon.classList.add('adw-icon', 'icon-actions-close-symbolic');
+        icon.classList.add('adw-icon', 'icon-window-close-symbolic'); // Corrected class
         // icon.innerHTML = '&times;'; // Fallback if icon class not present or SVG not used
         closeButton.appendChild(icon);
 
