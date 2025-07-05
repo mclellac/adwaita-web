@@ -82,8 +82,43 @@
         {% else %}
             <a href="{{ url_for('auth.login') }}" class="adw-button">Login</a>
         {% endif %}
+
+        {# Main App Menu Button - Placed at the very end of header actions #}
+        <div class="main-app-menu-container" style="position: relative;">
+            <button id="main-app-menu-button" class="adw-button circular flat" aria-label="Main menu" aria-haspopup="true" aria-expanded="false">
+                <span class="adw-icon icon-view-more-symbolic"></span>
+            </button>
+            <div class="adw-popover menu-popover" id="main-app-popover" role="menu" hidden>
+                <div class="adw-list-box flat popover-list-box">
+                    <button class="adw-action-row activatable" id="about-dialog-trigger" role="menuitem">
+                        <span class="adw-action-row-title">About</span>
+                    </button>
+                    {# Add other menu items here if needed in the future #}
+                </div>
+            </div>
+        </div>
     </div>
 </header>
+
+{# Adwaita About Dialog HTML Structure #}
+<div class="adw-dialog adw-about-dialog" id="app-about-dialog" role="dialog" aria-labelledby="about-dialog-title" aria-modal="true" hidden>
+    <header class="adw-header-bar adw-dialog__header">
+        <h2 class="adw-header-bar__title" id="about-dialog-title">About {{ site_settings.get('site_title', 'Adwaita Social Demo') }}</h2>
+        <button id="close-about-dialog-btn" class="adw-button circular flat adw-dialog-close-button" aria-label="Close dialog">
+            <span class="adw-icon icon-window-close-symbolic"></span>
+        </button>
+    </header>
+    <div class="adw-dialog__content">
+        {# Basic content for an AboutDialog #}
+        <p class="adw-label application-name">{{ site_settings.get('site_title', 'Adwaita Social Demo') }}</p>
+        <p class="adw-label version">Version 1.0.0 (Demo)</p>
+        <p class="adw-label copyright">© {{ current_year }} Your Name/Organization</p>
+        <p class="adw-label comments">This is a demonstration application using the Adwaita-Web UI library.</p>
+        {# <a href="YOUR_WEBSITE_URL_HERE" class="adw-link website-link" target="_blank" rel="noopener noreferrer">Visit Website</a> #}
+    </div>
+    {# AboutDialogs typically don't have a separate action footer unless for credits button etc. #}
+</div>
+
 
 <div class="app-body-container"> {# NEW: Main container for sidebar + content #}
     <aside class="app-sidebar" id="app-sidebar"> {# Added id for ARIA #}
@@ -152,19 +187,7 @@
             {% endif %}
             {% endblock sidebar_nav %}
         </nav>
-
-        {# Secondary navigation for About, Contact, etc. #}
-        <div class="sidebar-section-header adw-label caption" style="padding: var(--spacing-s) var(--spacing-m); margin-top: var(--spacing-xs); text-transform: uppercase; font-weight: bold;">More</div>
-        <nav class="adw-list-box flat sidebar-nav" aria-label="Secondary Navigation">
-            <a href="{{ url_for('general.about_page') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.about_page' }}">
-                <span class="adw-action-row-icon icon-actions-help-about-symbolic"></span>
-                <span class="adw-action-row-title">About</span>
-            </a>
-            <a href="{{ url_for('general.contact_page') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.contact_page' }}">
-                <span class="adw-action-row-icon icon-content-mail-symbolic"></span>
-                <span class="adw-action-row-title">Contact</span>
-            </a>
-        </nav>
+        {# "More" section with About/Contact removed from sidebar #}
     </aside>
 
     <div class="app-content-area"> {# NEW: Wrapper for main content + its own potential footer #}
@@ -198,9 +221,7 @@
                         {% endif %}
                         <div class="{{ banner_class }} visible" role="alert" style="position: relative; top: auto; left: auto; right: auto; transform: none; opacity: 1; margin-top: var(--spacing-s);">
                             <span class="adw-banner-title">{{ message }}</span>
-                            <button class="adw-button circular flat adw-banner-dismiss-button" aria-label="Close notification">
-                                <span class="adw-icon icon-window-close-symbolic"></span> {# Corrected icon class #}
-                            </button>
+                            <button class="adw-button flat adw-banner-dismiss-button">Dismiss</button>
                         </div>
                     {% endif %}
                 {% endfor %}
@@ -231,6 +252,70 @@
     <script src="{{ url_for('static', filename='js/app-layout.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/banner.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/toast.js') }}" defer></script> {# Ensure toast.js is loaded #}
+    <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
+        document.addEventListener('DOMContentLoaded', () => {
+            // Main App Menu Popover
+            const menuButton = document.getElementById('main-app-menu-button');
+            const menuPopover = document.getElementById('main-app-popover');
+            if (menuButton && menuPopover) {
+                menuButton.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent click from immediately closing via document listener
+                    const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+                    if (isExpanded) {
+                        menuPopover.setAttribute('hidden', '');
+                        menuButton.setAttribute('aria-expanded', 'false');
+                    } else {
+                        menuPopover.removeAttribute('hidden');
+                        menuButton.setAttribute('aria-expanded', 'true');
+                        // Optional: focus first item in popover
+                        const firstFocusable = menuPopover.querySelector('[role="menuitem"]');
+                        if (firstFocusable) firstFocusable.focus();
+                    }
+                });
+                // Close popover if clicking outside
+                document.addEventListener('click', (event) => {
+                    if (!menuPopover.hidden && !menuButton.contains(event.target) && !menuPopover.contains(event.target)) {
+                        menuPopover.setAttribute('hidden', '');
+                        menuButton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                // Close popover on ESC key
+                menuPopover.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') {
+                        menuPopover.setAttribute('hidden', '');
+                        menuButton.setAttribute('aria-expanded', 'false');
+                        menuButton.focus();
+                    }
+                });
+            }
+
+            // About Dialog
+            const aboutDialog = document.getElementById('app-about-dialog');
+            const openAboutDialogBtn = document.getElementById('about-dialog-trigger');
+            const closeAboutDialogBtn = document.getElementById('close-about-dialog-btn');
+
+            if (aboutDialog && openAboutDialogBtn && closeAboutDialogBtn) {
+                openAboutDialogBtn.addEventListener('click', () => {
+                    aboutDialog.removeAttribute('hidden');
+                    // Close popover if open
+                    if(menuPopover && !menuPopover.hidden) {
+                        menuPopover.setAttribute('hidden', '');
+                        menuButton.setAttribute('aria-expanded', 'false');
+                    }
+                    const firstFocusable = aboutDialog.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                    if (firstFocusable) firstFocusable.focus();
+                });
+                closeAboutDialogBtn.addEventListener('click', () => {
+                    aboutDialog.setAttribute('hidden', 'true');
+                });
+                aboutDialog.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') {
+                        aboutDialog.setAttribute('hidden', 'true');
+                    }
+                });
+            }
+        });
+    </script>
     {% endblock %}
 
     <div id="adw-toast-overlay" class="adw-toast-overlay">

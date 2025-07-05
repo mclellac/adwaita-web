@@ -1,117 +1,78 @@
 {% extends "base.html" %}
 
-{% block title %}My Feed{% endblock %}
+{% block title %}Home Feed{% endblock %}
 
-{% block header_title %}Activity Feed{% endblock %}
+{% block header_title %}Home{% endblock %}
 
 {% block content %}
 <div class="adw-clamp adw-clamp-xl">
-    {# Import the macro for like buttons, as it's used for 'created_post' activity type #}
     {% from "_macros.html" import like_button_and_count %}
 
-    {% if activities_list and activities_list|length > 0 %}
-        <div class="feed-activities-container adw-list-box"> {# Using adw-list-box for simpler activity items, can be changed #}
-            {% for activity in activities_list %}
-                {% if activity.type == 'created_post' and activity.target_post %}
-                    {# Render 'created_post' as a full post card. is_published check removed as posts are now always published. #}
-                    <article class="adw-card blog-post-item-card feed-activity-item">
-                        <header class="blog-post-card__header">
-                            <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
-                                <a href="{{ url_for('profile.view_profile', username=activity.actor.username) }}" class="adw-link">
-                                    <span class="adw-avatar size-m">
-                                        {% if activity.actor.profile_photo_url %}
-                                        <img src="{{ url_for('static', filename=activity.actor.profile_photo_url) }}" alt="{{ activity.actor.username }} avatar">
-                                        {% else %}
-                                        <img src="{{ default_avatar_url }}" alt="{{ activity.actor.username }} default avatar">
-                                        {% endif %}
-                                    </span>
-                                </a>
-                                <div class="adw-box adw-box-vertical">
-                                    <a href="{{ url_for('profile.view_profile', username=activity.actor.username) }}" class="adw-link">
-                                        <strong class="adw-label body-1">{{ activity.actor.full_name or activity.actor.username }}</strong>
-                                    </a>
-                                     <span class="adw-label caption">@{{ activity.actor.username }}</span>
-                                     <span class="adw-label caption feed-activity-timestamp"><time datetime="{{ activity.timestamp.isoformat() }}">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time></span>
-                                </div>
-                            </div>
-                            {# Post title h2 removed #}
-                             {# Meta for publish date of post, not activity timestamp here, is part of the post card content #}
-                            <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
-                                {% if activity.target_post.published_at %}
-                                    Published: <time datetime="{{ activity.target_post.published_at.isoformat() }}">{{ activity.target_post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                                {% else %}
-                                    Created: <time datetime="{{ activity.target_post.created_at.isoformat() }}">{{ activity.target_post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                                {% endif %}
-                            </div>
-                        </header>
-                        <div class="adw-card__content styled-text-content">
-                            {{ activity.target_post.content | truncate(300, True, '...') | markdown }}
-                        </div>
-                        <footer class="blog-post-card__footer">
-                             <div class="blog-post-card__terms">
-                                {% if activity.target_post.categories %}
-                                    {# Categories display #}
-                                {% endif %}
-                                {% if activity.target_post.tags %}
-                                    {# Tags display #}
-                                {% endif %}
-                            </div>
-                            <a href="{{ url_for('post.view_post', post_id=activity.target_post.id) }}" class="adw-button flat read-more-link">
-                                View Post & Comments <span class="adw-icon icon-actions-go-next-symbolic"></span>
+    {% if posts and posts|length > 0 %}
+        <div class="blog-posts-container" style="margin-top: var(--spacing-l);"> {# Using grid like index.html #}
+            {% for post_item in posts %}
+                <article class="adw-card blog-post-item-card">
+                    <header class="blog-post-card__header">
+                        <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
+                            <a href="{{ url_for('profile.view_profile', username=post_item.author.username) }}" class="adw-link">
+                                <span class="adw-avatar size-m">
+                                    {% if post_item.author.profile_photo_url %}
+                                    <img src="{{ url_for('static', filename=post_item.author.profile_photo_url) }}" alt="{{ post_item.author.username }} avatar">
+                                    {% else %}
+                                    <img src="{{ default_avatar_url }}" alt="{{ post_item.author.username }} default avatar">
+                                    {% endif %}
+                                </span>
                             </a>
-                        </footer>
-                        <div class="adw-card__actions card-secondary-actions">
-                            {{ like_button_and_count(activity.target_post, current_user, csrf_token()) }}
+                            <div class="adw-box adw-box-vertical">
+                                <a href="{{ url_for('profile.view_profile', username=post_item.author.username) }}" class="adw-link">
+                                    <strong class="adw-label body-1">{{ post_item.author.full_name or post_item.author.username }}</strong>
+                                </a>
+                                 <span class="adw-label caption">@{{ post_item.author.username }}</span>
+                            </div>
                         </div>
-                    </article>
-                {% elif activity.type == 'started_following' and activity.actor and activity.target_user %}
-                    <div class="adw-action-row feed-activity-item feed-activity-follow">
-                        <div class="adw-action-row-start-content">
-                            <span class="adw-icon icon-status-user-available-symbolic feed-activity-icon"></span>
+                        <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
+                            {% if post_item.published_at %}
+                                Published: <time datetime="{{ post_item.published_at.isoformat() }}">{{ post_item.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                            {% else %}
+                                Created: <time datetime="{{ post_item.created_at.isoformat() }}">{{ post_item.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                            {% endif %}
                         </div>
-                        <div class="adw-action-row-text-content">
-                            <span class="adw-action-row-title">
-                                <a href="{{ url_for('profile.view_profile', username=activity.actor.username) }}" class="adw-link">{{ activity.actor.full_name or activity.actor.username }}</a>
-                                started following
-                                <a href="{{ url_for('profile.view_profile', username=activity.target_user.username) }}" class="adw-link">{{ activity.target_user.full_name or activity.target_user.username }}</a>.
-                            </span>
-                            <span class="adw-action-row-subtitle feed-activity-timestamp"><time datetime="{{ activity.timestamp.isoformat() }}">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time></span>
-                        </div>
+                    </header>
+                    <div class="adw-card__content styled-text-content">
+                        {{ post_item.content | truncate(300, True, '...') | markdown }}
                     </div>
-                {% elif activity.type == 'liked_post' and activity.actor and activity.target_post %}
-                     <div class="adw-action-row feed-activity-item feed-activity-like">
-                        <div class="adw-action-row-start-content">
-                            <span class="adw-icon icon-actions-star-symbolic feed-activity-icon"></span>
+                    <footer class="blog-post-card__footer">
+                         <div class="blog-post-card__terms">
+                            {% if post_item.categories %}
+                            <div class="meta-section">
+                                <strong class="adw-label caption meta-label-strong">Categories:</strong>
+                                {% for category in post_item.categories %}
+                                    <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact tag-pill">{{ category.name }}</a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if post_item.tags %}
+                            <div class="meta-section">
+                                <strong class="adw-label caption meta-label-strong">Tags:</strong>
+                                {% for tag in post_item.tags %}
+                                    <a href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact tag-pill">{{ tag.name }}</a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                         </div>
-                        <div class="adw-action-row-text-content">
-                            <span class="adw-action-row-title">
-                                <a href="{{ url_for('profile.view_profile', username=activity.actor.username) }}" class="adw-link">{{ activity.actor.full_name or activity.actor.username }}</a>
-                                liked a <a href="{{ url_for('post.view_post', post_id=activity.target_post.id) }}" class="adw-link">post by {{ activity.target_post.author.full_name or activity.target_post.author.username }}</a>.
-                            </span>
-                             <span class="adw-action-row-subtitle feed-activity-timestamp"><time datetime="{{ activity.timestamp.isoformat() }}">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time></span>
-                        </div>
+                        <a href="{{ url_for('post.view_post', post_id=post_item.id) }}" class="adw-button flat read-more-link">
+                            View Post & Comments <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                        </a>
+                    </footer>
+                    <div class="adw-card__actions card-secondary-actions">
+                        {{ like_button_and_count(post_item, current_user, csrf_token) }} {# Use csrf_token from context #}
                     </div>
-                {% elif activity.type == 'commented_on_post' and activity.actor and activity.target_post %}
-                    <div class="adw-action-row feed-activity-item feed-activity-comment">
-                        <div class="adw-action-row-start-content">
-                             <span class="adw-icon icon-content-message-symbolic feed-activity-icon"></span>
-                        </div>
-                        <div class="adw-action-row-text-content">
-                            <span class="adw-action-row-title">
-                                <a href="{{ url_for('profile.view_profile', username=activity.actor.username) }}" class="adw-link">{{ activity.actor.full_name or activity.actor.username }}</a>
-                                commented on a <a href="{{ url_for('post.view_post', post_id=activity.target_post.id, _anchor='comment-' ~ activity.target_comment_id if activity.target_comment_id else 'post-comments-area') }}" class="adw-link">post by {{ activity.target_post.author.full_name or activity.target_post.author.username }}</a>.
-                            </span>
-                            {# Optionally, show comment snippet here if available on activity model or fetched #}
-                            <span class="adw-action-row-subtitle feed-activity-timestamp"><time datetime="{{ activity.timestamp.isoformat() }}">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time></span>
-                        </div>
-                    </div>
-                {% endif %}
+                </article>
             {% endfor %}
         </div>
 
-        {# Pagination Controls - Check if pagination object is for activities now #}
         {% if pagination and pagination.pages > 1 %}
-        <div class="adw-box adw-box-horizontal justify-center profile-pagination-box"> {# Re-use class for styling if applicable #}
+        <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
             <div class="adw-toggle-group">
                 {% if pagination.has_prev %}
                     <a href="{{ url_for('general.activity_feed', page=pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
@@ -131,7 +92,6 @@
                             <a href="{{ url_for('general.activity_feed', page=page_num) }}" class="adw-button">{{ page_num }}</a>
                         {% endif %}
                     {% elif loop.index != 1 and loop.index != pagination.pages + pagination.iter_pages()|length %}
-                        {# Placeholder for ellipsis if pages are skipped #}
                         <button class="adw-button flat" disabled>…</button>
                     {% endif %}
                 {% endfor %}
@@ -149,22 +109,12 @@
         </div>
         {% endif %}
 
-    {% elif followed_users_count == 0 %}
-        <div class="adw-status-page">
-            <span class="adw-icon icon-status-user-available-symbolic adw-status-page-icon app-status-page-icon"></span>
-            <h3 class="adw-status-page-title">Your Feed is Empty</h3>
-            <p class="adw-status-page-description">You are not following anyone yet.</p>
-            <p class="adw-status-page-description">Find people to follow to see their posts here.</p>
-            {# Optional: Add a button to explore users or go to a search page #}
-            <a href="{{ url_for('general.index') }}" class="adw-button suggested-action" style="margin-top: var(--spacing-m);">Explore Posts</a>
-        </div>
     {% else %}
         <div class="adw-status-page">
             <span class="adw-icon icon-content-document-multiple-symbolic adw-status-page-icon app-status-page-icon"></span>
-            <h3 class="adw-status-page-title">No Posts in Your Feed Yet</h3>
-            <p class="adw-status-page-description">The users you follow haven't posted anything yet, or there are no new posts.</p>
-            <p class="adw-status-page-description">Check back later or find more people to follow!</p>
-            <a href="{{ url_for('general.index') }}" class="adw-button" style="margin-top: var(--spacing-m);">Explore More Posts</a>
+            <h3 class="adw-status-page-title">No Posts Yet</h3>
+            <p class="adw-status-page-description">There are no posts to display. Why not create one?</p>
+            <a href="{{ url_for('post.create_post') }}" class="adw-button suggested-action" style="margin-top: var(--spacing-m);">Create Post</a>
         </div>
     {% endif %}
 </div>
