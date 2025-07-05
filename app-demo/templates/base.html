@@ -144,16 +144,20 @@
                 </a>
             {% endif %}
             {% endif %}
-                {# Separator or Group for About/Contact if desired, or just continue list #}
-                <a href="{{ url_for('general.about_page') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.about_page' }}">
-                    <span class="adw-action-row-icon icon-actions-help-about-symbolic"></span>
-                    <span class="adw-action-row-title">About</span>
-                </a>
-                <a href="{{ url_for('general.contact_page') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.contact_page' }}">
-                    <span class="adw-action-row-icon icon-content-mail-symbolic"></span>
-                    <span class="adw-action-row-title">Contact</span>
-                </a>
             {% endblock sidebar_nav %}
+        </nav>
+
+        {# Secondary navigation for About, Contact, etc. #}
+        <div class="sidebar-section-header adw-label caption" style="padding: var(--spacing-s) var(--spacing-m); margin-top: var(--spacing-xs); text-transform: uppercase; font-weight: bold;">More</div>
+        <nav class="adw-list-box flat sidebar-nav" aria-label="Secondary Navigation">
+            <a href="{{ url_for('general.about_page') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.about_page' }}">
+                <span class="adw-action-row-icon icon-actions-help-about-symbolic"></span>
+                <span class="adw-action-row-title">About</span>
+            </a>
+            <a href="{{ url_for('general.contact_page') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.contact_page' }}">
+                <span class="adw-action-row-icon icon-content-mail-symbolic"></span>
+                <span class="adw-action-row-title">Contact</span>
+            </a>
         </nav>
     </aside>
 

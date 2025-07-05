@@ -221,7 +221,7 @@
                         {% for page_num in posts_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
                             {% if page_num %}
                                 {% if page_num == posts_pagination.page %}
-                                    <button class="adw-button suggested-action" disabled aria-current="page">{{ page_num }}</button>
+                                    <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
                                 {% else %}
                                     <a href="{{ url_for('profile.view_profile', username=user_profile.username, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
@@ -289,7 +289,7 @@
                         {% for page_num in comments_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
                             {% if page_num %}
                                 {% if page_num == comments_pagination.page %}
-                                    <button class="adw-button suggested-action" disabled aria-current="page">{{ page_num }}</button>
+                                    <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
                                 {% else %}
                                     <a href="{{ url_for('profile.view_profile', username=user_profile.username, comments_page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
@@ -339,14 +339,15 @@
                         </div>
                         {{ gallery_upload_form.photo(class="adw-entry adw-entry-row-entry") if gallery_upload_form }}
                     </div>
-                    <div class="adw-action-row">
-                        <div class="adw-action-row__text" style="width:100%;">
-                           <label for="{{ gallery_upload_form.caption.id if gallery_upload_form else 'gallery_caption_input' }}" class="adw-action-row__title">{{ gallery_upload_form.caption.label.text if gallery_upload_form else 'Caption' }}</label>
-                           {% if gallery_upload_form and gallery_upload_form.caption.errors %}<div class="error-text form-field-error adw-action-row__subtitle">{{ gallery_upload_form.caption.errors|join(' ') }}</div>{% endif %}
-                           {{ gallery_upload_form.caption(class="adw-textarea content-textarea gallery-caption-textarea", rows="2", placeholder="Optional caption...") if gallery_upload_form }}
-                        </div>
-                   </div>
-                   <div class="form-actions-end">
+                    {# Caption Textarea - Revised Structure #}
+                    <div class="form-field-container {{ 'has-error' if gallery_upload_form and gallery_upload_form.caption.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);">
+                        <label for="{{ gallery_upload_form.caption.id if gallery_upload_form else 'gallery_caption_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.caption.label.text if gallery_upload_form else 'Caption' }}</label>
+                        {% if gallery_upload_form and gallery_upload_form.caption.errors %}
+                            <p class="adw-label caption error-text" style="margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.caption.errors|join(' ') }}</p>
+                        {% endif %}
+                        {{ gallery_upload_form.caption(class="adw-entry", rows="2", placeholder="Optional caption...", style="width: 100%; min-height: 60px; box-sizing: border-box;") if gallery_upload_form }}
+                    </div>
+                   <div class="form-actions-end" style="padding: 0 var(--spacing-m) var(--spacing-m) var(--spacing-m);">
                        {{ gallery_upload_form.submit(class="adw-button suggested-action") if gallery_upload_form }}
                    </div>
                 </form>
