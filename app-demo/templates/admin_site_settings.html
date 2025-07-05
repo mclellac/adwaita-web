@@ -22,7 +22,7 @@
                 {# Site Title #}
                 <div class="adw-entry-row {{ 'has-error' if form.site_title.errors else '' }}">
                     <label for="{{ form.site_title.id or 'site_title_input' }}" class="adw-entry-row-title">{{ form.site_title.label.text }}</label>
-                    <input type="text" id="{{ form.site_title.id or 'site_title_input' }}" name="{{ form.site_title.name }}" value="{{ form.site_title.data or '' }}" class="adw-entry adw-entry-row-entry">
+                    <input type="text" id="{{ form.site_title.id or 'site_title_input' }}" name="{{ form.site_title.name }}" value="{{ form.site_title.data or '' }}" class="adw-entry adw-entry-row-entry" required>
                     {% if form.site_title.errors %}
                         <span class="adw-label caption error-text adw-entry-row-subtitle">{{ form.site_title.errors|join(' ') }}</span>
                     {% endif %}

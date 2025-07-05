@@ -31,7 +31,7 @@ def view_profile(username):
 
     if not user_profile.is_profile_public and user_profile != current_user:
         current_app.logger.warning(f"User {current_user.username} attempted to view private profile of {user_profile.username}.")
-        flash("This profile is private.", "warning")
+        flash("This profile is private.", "danger")
         abort(403)
 
     page = request.args.get('page', 1, type=int)
@@ -125,14 +125,14 @@ def edit_profile():
             file_size = file.content_length if hasattr(file, 'content_length') else request.content_length
             if file_size is None:
                  current_app.logger.warning(f"Could not determine file size for {current_user.username}.")
-                 flash("Could not determine file size. Please try again.", "warning")
+                 flash("Could not determine file size. Please try again.", "danger")
             elif file_size > current_app.config['MAX_PROFILE_PHOTO_SIZE_BYTES']:
                 current_app.logger.warning(f"Profile photo for {current_user.username} too large: {file_size} bytes.")
                 max_size_mb = current_app.config['MAX_PROFILE_PHOTO_SIZE_BYTES'] // 1024 // 1024
                 flash(f"Profile photo too large. Max size: {max_size_mb}MB.", 'danger')
             elif not allowed_file_util(file.filename):
                 current_app.logger.warning(f"Invalid file type for photo by {current_user.username}: {file.filename}")
-                flash(f"Invalid file type for photo. Allowed types are {', '.join(current_app.config['ALLOWED_EXTENSIONS'])}.", 'warning')
+                flash(f"Invalid file type for photo. Allowed types are {', '.join(current_app.config['ALLOWED_EXTENSIONS'])}.", 'danger')
             else:
                 try:
                     original_filename = secure_filename(file.filename)
@@ -184,8 +184,12 @@ def edit_profile():
             db.session.commit()
             flash_msg = 'Profile and photo updated successfully!' if photo_update_attempted and photo_saved_successfully else \
                         ('Profile information updated, but there was an issue with the photo upload.' if photo_update_attempted else 'Profile updated successfully!')
-            flash_cat = 'success' if not photo_update_attempted or photo_saved_successfully else 'warning'
-            flash(flash_msg, flash_cat)
+            original_flash_cat = 'success' if not photo_update_attempted or photo_saved_successfully else 'warning'
+
+            if original_flash_cat == 'success':
+                flash(flash_msg, 'toast_success')
+            else:
+                flash(flash_msg, original_flash_cat) # This will be 'warning'
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error saving profile to DB for {current_user.username}: {e}", exc_info=True)
@@ -232,13 +236,14 @@ def upload_gallery_photo():
                 new_photo = UserPhoto(user_id=current_user.id, image_filename=db_image_path, caption=caption)
                 db.session.add(new_photo)
                 db.session.commit()
-                flash('Photo uploaded to gallery successfully!', 'success')
+                flash('Photo uploaded to gallery successfully!', 'toast_success')
             else:
                 flash('Error saving photo: File could not be written to disk.', 'danger')
         except Exception as e:
             current_app.logger.error(f"Exception during gallery photo processing: {e}", exc_info=True)
             flash(f'Error processing gallery photo: {str(e)}', 'danger')
     else:
+        # flash_form_errors_util already uses 'danger'
         flash_form_errors_util(form)
     return redirect(url_for('profile.view_profile', username=current_user.username))
 
@@ -256,7 +261,7 @@ def delete_gallery_photo(photo_id):
             os.remove(image_full_path)
         db.session.delete(photo)
         db.session.commit()
-        flash('Photo deleted from gallery successfully.', 'success')
+        flash('Photo deleted from gallery successfully.', 'toast_success')
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error deleting gallery photo ID {photo_id}: {e}", exc_info=True)
@@ -269,7 +274,7 @@ def delete_gallery_photo(photo_id):
 def view_gallery(username):
     user_profile = User.query.filter_by(username=username).first_or_404()
     if not user_profile.is_profile_public and user_profile != current_user:
-        flash("This profile's gallery is private.", "warning")
+        flash("This profile's gallery is private.", "danger")
         abort(403)
     gallery_photos = user_profile.gallery_photos.order_by(UserPhoto.uploaded_at.desc()).all()
     return render_template('gallery_full.html', user_profile=user_profile, gallery_photos=gallery_photos)
@@ -293,7 +298,7 @@ def follow_user(username):
             activity = Activity(user_id=current_user.id, type='started_following', target_user_id=user_to_follow.id)
             db.session.add(activity)
             db.session.commit()
-            flash(f"You are now following {username}.", "success")
+            flash(f"You are now following {username}.", "toast_success")
         else:
             flash(f"Could not follow {username}. An unexpected error occurred or it was a self-follow.", "danger")
             db.session.rollback()
@@ -312,7 +317,7 @@ def unfollow_user(username):
     else:
         if current_user.unfollow(user_to_unfollow):
             db.session.commit()
-            flash(f"You have unfollowed {username}.", "success")
+            flash(f"You have unfollowed {username}.", "toast_success")
         else:
             flash(f"Could not unfollow {username}. An unexpected error occurred.", "danger")
             db.session.rollback()
@@ -324,7 +329,7 @@ def unfollow_user(username):
 def followers_list(username):
     user = User.query.filter_by(username=username).first_or_404()
     if not user.is_profile_public and user != current_user:
-        flash("This user's connections are private.", "warning")
+        flash("This user's connections are private.", "danger")
         return redirect(url_for('profile.view_profile', username=username))
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 15)
@@ -344,7 +349,7 @@ def followers_list(username):
 def following_list(username):
     user = User.query.filter_by(username=username).first_or_404()
     if not user.is_profile_public and user != current_user:
-        flash("This user's connections are private.", "warning")
+        flash("This user's connections are private.", "danger")
         return redirect(url_for('profile.view_profile', username=username))
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 15)
