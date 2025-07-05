@@ -63,8 +63,10 @@
     text-overflow: ellipsis;
   }
   .adw-tab-button-close { /* Assuming this class for close button */
-    @extend .adw-button, .flat; // Inherit button AND flat styles
-    padding: var(--spacing-xxs) !important;
+    // This should be an .adw-button in HTML, e.g., <button class="adw-button adw-tab-button-close">
+    // @extend .adw-button, .flat !optional; // Replaced with mixin for flat style
+    @include mixins.apply-flat-button-style;
+    padding: var(--spacing-xxs) !important; // Specific padding override
     margin-left: var(--spacing-xs);
     opacity: 0.7;
     &:hover { opacity: 1; }
@@ -93,9 +95,14 @@
     margin-left: var(--spacing-s);
     align-self: center; // Vertically center if bar is taller due to tab content
     // Make it a small, circular, flat icon button
-    @extend .adw-button, .flat;
-    @extend .adw-button, .circular;
-    padding: var(--spacing-xxs);
+    // @extend .adw-button, .flat !optional; // Already an .adw-button, apply mixin
+    // @extend .adw-button, .circular !optional; // Already an .adw-button, apply mixin
+    @include mixins.apply-flat-button-style;
+    @include mixins.apply-circular-button-style;
+    // padding: var(--spacing-xxs); // Mixins apply padding, this might override or be redundant. Let's test.
+                                     // apply-circular-button-style sets padding to var(--spacing-xs)
+                                     // If xxs is truly needed, override after include.
+    padding: var(--spacing-xxs); // Explicitly set desired padding after mixins
     .adw-icon svg, svg { width: 16px; height: 16px; }
   }
 

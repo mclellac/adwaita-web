@@ -22,7 +22,13 @@
   }
 
   .adw-status-page-title {
+<<<<<<< HEAD
     // Was: @extend .title-2;
+=======
+    // Uses .title-2 utility class sizing by default in Libadwaita if it's GtkLabel
+    // font-size: var(--title-2-font-size); // Defined in _utility_classes.scss
+    // @extend .title-2; // Use the utility class for font size and weight - Replaced with direct properties
+>>>>>>> main
     font-size: var(--title-2-font-size);
     font-weight: var(--heading-font-weight);
     line-height: 1.2;
@@ -58,7 +64,12 @@
       margin-bottom: var(--spacing-s);
     }
     .adw-status-page-title {
+<<<<<<< HEAD
       // Was: @extend .title-3;
+=======
+      // font-size: var(--title-3-font-size); // Smaller title
+      // @extend .title-3; // Replaced with direct properties
+>>>>>>> main
       font-size: var(--title-3-font-size);
       font-weight: var(--heading-font-weight);
       line-height: 1.3;

@@ -1,15 +1,25 @@
 // adwaita-web/scss/_card.scss
 @use 'variables';
-@use 'mixins';
+@use 'mixins'; // This is the one to keep
 @use 'sass:color';
+// Ensure mixins are available if apply-card-style is defined there.
+// However, if apply-card-style is specific to cards, it could also live in this file
+// and not be in _mixins.scss. For now, assuming it's in _mixins.scss as per plan.
+// @use 'mixins'; // This was the duplicate
 
 // General .card style class from Libadwaita
 // https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html#boxed-lists-cards
 .adw-card, .card { // Allow .card as an alias for consistency with Libadwaita docs
-  background-color: var(--card-bg-color);
-  color: var(--card-fg-color); // Text color for content within the card
-  border-radius: var(--border-radius-large); // Libadwaita cards use a larger radius
-  padding: var(--spacing-m); // Default padding, can be overridden by specific components
+  @include mixins.apply-card-style;
+
+  // Original properties that are now in the mixin:
+  // background-color: var(--card-bg-color);
+  // color: var(--card-fg-color); // Text color for content within the card
+  // border-radius: var(--border-radius-large); // Libadwaita cards use a larger radius
+  // padding: var(--spacing-m); // Default padding, can be overridden by specific components
+  // box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05);
+  // display: block; // Cards are usually block elements
+
 
   // Libadwaita cards typically have a subtle outer shadow and an inner "border" created by card-shade-color
   // The outer shadow is not explicitly defined as a variable in Libadwaita, but is part of the look.
