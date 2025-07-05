@@ -68,7 +68,7 @@ def search_results():
         try:
             posts_query = Post.query.filter(
                 Post.is_published==True, # Ensure only published posts are searchable by public
-                or_(Post.title.ilike(search_term), Post.content.ilike(search_term))
+                Post.content.ilike(search_term) # Search only in content now
             ).order_by(Post.published_at.desc(), Post.created_at.desc())
 
             pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)

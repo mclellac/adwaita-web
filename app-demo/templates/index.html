@@ -11,21 +11,21 @@
         {% for post in posts %}
         <article class="adw-card blog-post-item-card">
             <header class="blog-post-card__header">
-                <h2 class="adw-title-2 blog-post-card__title">
-                    <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-link">{{ post.title }}</a>
-                </h2>
+                {# Post title removed #}
                 <div class="blog-post-card__meta adw-label caption">
                     By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
-                    on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
+                    on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else 'Unknown date' }}</time> {# Show time as well #}
                 </div>
             </header>
-            {% if post.content %}
-            <div class="blog-post-card__excerpt styled-text-content">
-                {# Rendered HTML excerpt, truncated by CSS if too long, or use a JS solution for smarter HTML truncation #}
-                {# For now, rendering a portion of Markdown. This should be improved for proper HTML excerpt. #}
-                {{ (post.content | truncate(600) | markdown ) if post.content else '' }}
-            </div>
-            {% endif %}
+            <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-link post-content-link"> {# Make content clickable #}
+                {% if post.content %}
+                <div class="blog-post-card__excerpt styled-text-content">
+                    {# Rendered HTML excerpt, truncated by CSS if too long, or use a JS solution for smarter HTML truncation #}
+                    {# For now, rendering a portion of Markdown. This should be improved for proper HTML excerpt. #}
+                    {{ (post.content | truncate(600) | markdown ) if post.content else '' }}
+                </div>
+                {% endif %}
+            </a>
             <footer class="blog-post-card__footer">
                 <div class="blog-post-card__terms">
                     {% if post.categories %}

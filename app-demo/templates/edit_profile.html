@@ -47,16 +47,6 @@
                  </div>
             </div>
 
-
-            {# Location Entry Row #}
-            <div class="adw-entry-row {{ 'has-error' if form.location.errors else '' }}">
-                <div class="adw-entry-row-text-content">
-                    <label for="{{ form.location.id or 'location_input' }}" class="adw-entry-row-title">{{ form.location.label.text }}</label>
-                    {% if form.location.errors %}<span class="adw-entry-row-subtitle error-text">{{ form.location.errors|join(' ') }}</span>{% endif %}
-                </div>
-                <input type="text" id="{{ form.location.id or 'location_input' }}" name="{{ form.location.name }}" value="{{ form.location.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="e.g., City, Country">
-            </div>
-
             {# Website URL Entry Row #}
             <div class="adw-entry-row {{ 'has-error' if form.website_url.errors else '' }}">
                 <div class="adw-entry-row-text-content">

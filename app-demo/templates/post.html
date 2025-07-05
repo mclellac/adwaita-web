@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block page_title %}{{ post.title }}{% endblock %}
+{% block page_title %}Post by {{ post.author.username }}{% endblock %}
 
-{% block header_title %}{{ post.title }}{% endblock %}
+{% block header_title %}Post by {{ post.author.username }}{% endblock %}
 
 {% block content %}
 <div class="post-view"> {# Removed adw-clamp content-clamp as base.html provides clamp #}
     <article class="post-article adw-card blog-content-card"> {# Added adw-card and specific class #}
         <header class="post-header">
-            <h1 class="adw-title-1">{{ post.title }}{% if not post.is_published and current_user == post.author %} <span class="adw-label caption draft-indicator">(Draft)</span>{% endif %}</h1>
+            {# Title h1 removed #}
             <div class="post-meta-detail">
                 <p class="adw-label body">
                     By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>

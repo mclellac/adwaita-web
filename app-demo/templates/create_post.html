@@ -15,17 +15,6 @@
                 <h2 class="adw-title-2" id="post-details-title">Post Details</h2>
             </header>
 
-            {# Title Entry Row #}
-            <div class="adw-entry-row {{ 'has-error' if form.title.errors else '' }}">
-                <div class="adw-entry-row-text-content">
-                    <label for="{{ form.title.id or 'title_input' }}" class="adw-entry-row-title">{{ form.title.label.text }}</label>
-                    {% if form.title.errors %}
-                        <span class="adw-entry-row-subtitle error-text">{{ form.title.errors|join(' ') }}</span>
-                    {% endif %}
-                </div>
-                <input type="text" id="{{ form.title.id or 'title_input' }}" name="{{ form.title.name }}" value="{{ form.title.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Enter post title" {% if form.title.flags.required %}required{% endif %}>
-            </div>
-
             {# Content Textarea - Revised Structure #}
             <div class="form-field-container {{ 'has-error' if form.content.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);">
                 <label for="{{ form.content.id or 'content_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
