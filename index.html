@@ -329,10 +329,36 @@
                 <div style="margin-bottom: var(--spacing-l);"> <!-- Added specific margin for better separation -->
                     <h3 class="adw-label title-3">Switches (Toggle Switches)</h3>
                     <p class="adw-label body-small" style="margin-top: calc(var(--spacing-m) * -1); margin-bottom: var(--spacing-s);">Standalone toggle switches.</p>
-                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch"> Setting X <span class="adw-label visually-hidden">Toggle Setting X</span></label><br>
-                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch" checked> Setting Y (On) <span class="adw-label visually-hidden">Toggle Setting Y</span></label><br>
-                    <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch" disabled> Setting Z (Disabled) <span class="adw-label visually-hidden">Toggle Setting Z</span></label><br>
-                     <label class="adw-switch-wrapper"><input type="checkbox" class="adw-switch" checked disabled> Setting W (On, Disabled) <span class="adw-label visually-hidden">Toggle Setting W</span></label>
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing-s);">
+                        <label class="adw-switch-wrapper" for="switch_x_id">
+                            <span class="adw-switch">
+                                <input type="checkbox" id="switch_x_id">
+                                <span class="adw-switch-slider"></span>
+                            </span>
+                            <span style="margin-left: var(--spacing-s);">Setting X</span>
+                        </label>
+                        <label class="adw-switch-wrapper" for="switch_y_id">
+                            <span class="adw-switch">
+                                <input type="checkbox" id="switch_y_id" checked>
+                                <span class="adw-switch-slider"></span>
+                            </span>
+                            <span style="margin-left: var(--spacing-s);">Setting Y (On)</span>
+                        </label>
+                        <label class="adw-switch-wrapper" for="switch_z_id">
+                            <span class="adw-switch">
+                                <input type="checkbox" id="switch_z_id" disabled>
+                                <span class="adw-switch-slider"></span>
+                            </span>
+                            <span style="margin-left: var(--spacing-s);">Setting Z (Disabled)</span>
+                        </label>
+                        <label class="adw-switch-wrapper" for="switch_w_id">
+                            <span class="adw-switch">
+                                <input type="checkbox" id="switch_w_id" checked disabled>
+                                <span class="adw-switch-slider"></span>
+                            </span>
+                            <span style="margin-left: var(--spacing-s);">Setting W (On, Disabled)</span>
+                        </label>
+                    </div>
                 </div>
                 <div style="margin-bottom: var(--spacing-l);"> <!-- Added specific margin for better separation -->
                     <h3 class="adw-label title-3">Spin Button</h3>
@@ -413,11 +439,16 @@
                         </div>
                         <!-- AdwSwitchRow Example -->
                         <div class="adw-switch-row activatable">
-                             <div class="adw-action-row-content">
+                             <div class="adw-action-row-content" id="label_for_feature_x_switch">
                                 <div class="adw-action-row-title">Enable Feature X</div>
                                 <div class="adw-action-row-subtitle">This will turn on X</div>
                             </div>
-                            <label class="adw-switch-wrapper adw-action-row-suffix"><input type="checkbox" class="adw-switch" checked> <span class="adw-label visually-hidden">Toggle Feature X</span></label>
+                            <div class="adw-switch-wrapper adw-action-row-suffix"> <!-- Using div instead of label if main content is the label -->
+                                <span class="adw-switch">
+                                    <input type="checkbox" id="feature_x_switch" aria-labelledby="label_for_feature_x_switch" checked>
+                                    <span class="adw-switch-slider"></span>
+                                </span>
+                            </div>
                         </div>
                         <div class="adw-combo-row">
                             <label class="adw-combo-row-title" for="lb-combo1">Paper Size:</label>
