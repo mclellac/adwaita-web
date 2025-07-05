@@ -105,7 +105,7 @@ def view_post(post_id):
             if new_mentions_created_comment:
                 db.session.commit()
 
-            flash('Comment posted successfully!', 'success')
+            flash('Comment posted successfully!', 'toast_success')
             return redirect(url_for('post.view_post', post_id=post_id, _anchor=f"comment-{comment.id}"))
         except ValueError: # Specific to parent_id conversion
             current_app.logger.error(f"Invalid parent_id format '{form.parent_id.data}' for comment on post {post_id}.")
@@ -188,7 +188,7 @@ def create_post():
             if mentioned_users_in_post:
                 db.session.commit() # Commit any mention notifications
 
-            flash('Post created successfully!', 'success')
+            flash('Post created successfully!', 'toast_success')
             return redirect(url_for('post.view_post', post_id=new_post.id))
         except Exception as e:
             db.session.rollback()
@@ -265,7 +265,7 @@ def edit_post(post_id):
             if new_mentions_created:
                 db.session.commit()
 
-            flash('Post updated successfully!', 'success')
+            flash('Post updated successfully!', 'toast_success')
             return redirect(url_for('post.view_post', post_id=post.id))
         except Exception as e:
             db.session.rollback()
@@ -307,7 +307,7 @@ def delete_post(post_id): # Renamed from delete_post_route
         db.session.delete(post)
         db.session.commit()
         current_app.logger.info(f"Post ID: {post_id} successfully deleted by {current_user.username}.")
-        flash('Post deleted successfully!', 'success')
+        flash('Post deleted successfully!', 'toast_success')
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error deleting post ID {post_id}: {e}", exc_info=True)
@@ -338,7 +338,7 @@ def delete_comment(comment_id): # Renamed
             CommentFlag.query.filter_by(comment_id=comment.id).delete()
             db.session.delete(comment)
             db.session.commit()
-            flash('Comment deleted.', 'success')
+            flash('Comment deleted.', 'toast_success')
             current_app.logger.info(f"Comment ID: {comment_id} successfully deleted by {current_user.username}.")
         except Exception as e:
             db.session.rollback()
@@ -376,7 +376,7 @@ def flag_comment(comment_id): # Renamed
                 db.session.add(new_flag)
                 db.session.commit()
                 current_app.logger.info(f"Comment {comment_id} flagged by user {current_user.username}.")
-                flash('Comment flagged for review.', 'success')
+                flash('Comment flagged for review.', 'toast_success')
             except Exception as e:
                 db.session.rollback()
                 current_app.logger.error(f"Error flagging comment {comment_id}: {e}", exc_info=True)
@@ -460,7 +460,7 @@ def like_post_route(post_id):
             current_app.logger.info(f"Activity 'liked_post' logged for user {current_user.username} on post {post.id}.")
 
             db.session.commit()
-            flash('Post liked!', 'success')
+            flash('Post liked!', 'toast_success')
             current_app.logger.info(f"User {current_user.username} liked post {post_id}.")
         else:
             flash('Could not like post. An unexpected error occurred.', 'danger')
@@ -480,7 +480,7 @@ def unlike_post_route(post_id):
     else:
         if current_user.unlike_post(post):
             db.session.commit()
-            flash('Post unliked.', 'success')
+            flash('Post unliked.', 'toast_success')
             current_app.logger.info(f"User {current_user.username} unliked post {post_id}.")
         else:
             flash('Could not unlike post. An unexpected error occurred.', 'danger')

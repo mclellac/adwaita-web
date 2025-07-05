@@ -40,7 +40,7 @@ def flash_form_errors_util(form):
             label_text = field
             if hasattr(form, field) and hasattr(getattr(form, field), 'label') and hasattr(getattr(form, field).label, 'text'):
                 label_text = getattr(form, field).label.text
-            flash(f"Error in {label_text}: {error}", 'warning')
+            flash(f"Error in {label_text}: {error}", 'danger')
 
 
 def markdown_to_html_and_sanitize_util(text):

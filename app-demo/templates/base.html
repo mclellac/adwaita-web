@@ -173,19 +173,36 @@
             {% if messages %}
                 <div class="flash-messages-container" style="position: sticky; top: 0; z-index: 1050; padding: 0 var(--spacing-m) var(--spacing-s);">
                 {% for category, message in messages %}
-                    {% set banner_class = 'adw-banner' %}
-                    {% if category == 'error' %}
-                    {% set banner_class = banner_class ~ ' adw-banner-error' %}
-                    {% elif category == 'success' %}
-                    {% set banner_class = banner_class ~ ' adw-banner-success' %}
-                    {# Default 'info' or 'message' categories will use the base .adw-banner style #}
+                    {% if category == 'toast_success' %}
+                        <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
+                            document.addEventListener('DOMContentLoaded', function() {
+                                if (window.Adw && window.Adw.createToast) {
+                                    window.Adw.createToast("{{ message|escapejs }}");
+                                } else {
+                                    // Fallback if Adw.createToast is not available for some reason
+                                    console.warn("Adw.createToast not found, falling back for message: {{ message|escapejs }}");
+                                    // Optional: could add a simple alert or console log as fallback
+                                }
+                            });
+                        </script>
+                    {% else %}
+                        {% set banner_class = 'adw-banner' %}
+                        {% if category == 'danger' or category == 'error' %}
+                        {% set banner_class = banner_class ~ ' error' %} {# Use .error class for adw-banner styling #}
+                        {% elif category == 'success' %} {# For regular success banners not converted to toasts #}
+                        {% set banner_class = banner_class ~ ' success' %} {# Use .success class #}
+                        {% elif category == 'warning' %}
+                        {% set banner_class = banner_class ~ ' warning' %} {# Use .warning class #}
+                        {% elif category == 'info' %}
+                        {% set banner_class = banner_class ~ ' info' %} {# Use .info class or default Adwaita banner style #}
+                        {% endif %}
+                        <div class="{{ banner_class }} visible" role="alert" style="position: relative; top: auto; left: auto; right: auto; transform: none; opacity: 1; margin-top: var(--spacing-s);">
+                            <span class="adw-banner-title">{{ message }}</span>
+                            <button class="adw-button circular flat adw-banner-dismiss-button" aria-label="Close notification">
+                                <span class="adw-icon icon-actions-close-symbolic"></span>
+                            </button>
+                        </div>
                     {% endif %}
-                    <div class="{{ banner_class }} visible" role="alert" style="position: relative; top: auto; left: auto; right: auto; transform: none; opacity: 1; margin-top: var(--spacing-s);">
-                        <span class="adw-banner-title">{{ message }}</span>
-                        <button class="adw-button circular flat adw-banner-dismiss-button" aria-label="Close notification">
-                            <span class="adw-icon icon-actions-close-symbolic"></span>
-                        </button>
-                    </div>
                 {% endfor %}
                 </div>
             {% endif %}

@@ -30,7 +30,7 @@ def register():
         existing_user = User.query.filter_by(username=form.email.data).first()
         if existing_user:
             current_app.logger.warning(f"Registration attempt with existing email: '{form.email.data}'.")
-            flash('An account with this email address already exists. Please log in or use a different email.', 'warning')
+            flash('An account with this email address already exists. Please log in or use a different email.', 'danger')
             return render_template('register.html', form=form) # Show form again with error
 
         try:
@@ -78,10 +78,10 @@ def login():
         if user and user.check_password(form.password.data):
             if not user.is_active:
                 current_app.logger.warning(f"Login attempt by inactive user: '{user.username}'.")
-                flash('Your account is not active. Please contact an administrator.', 'warning')
+                flash('Your account is not active. Please contact an administrator.', 'danger')
             elif not user.is_approved:
                 current_app.logger.warning(f"Login attempt by unapproved user: '{user.username}'.")
-                flash('Your account is pending admin approval.', 'warning')
+                flash('Your account is pending admin approval.', 'danger')
             else:
                 login_user(user)
                 current_app.logger.info(f"User '{user.username}' (ID: {user.id}) logged in successfully.")
@@ -153,7 +153,7 @@ def change_password_page():
                 db.session.add(current_user) # Add to session before commit if changed
                 db.session.commit()
                 current_app.logger.info(f"Password changed for user {current_user.username}.")
-                flash('Your password has been updated successfully!', 'success')
+                flash('Your password has been updated successfully!', 'toast_success')
                 # Redirect to a general settings page or profile page
                 return redirect(url_for('general.settings_page'))
             except Exception as e:

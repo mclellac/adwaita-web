@@ -60,7 +60,7 @@ def resolve_flag(flag_id):
         db.session.add(flag)
         db.session.commit()
         current_app.logger.info(f"Admin {current_user.username} resolved flag ID {flag_id} for comment ID {flag.comment_id}.")
-        flash(f'Flag for comment "{flag.comment.text[:30]}..." resolved.', 'success')
+        flash(f'Flag for comment "{flag.comment.text[:30]}..." resolved.', 'toast_success')
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error resolving flag {flag_id} by admin {current_user.username}: {e}", exc_info=True)
@@ -93,7 +93,7 @@ def site_settings():
             # No need to commit SiteSetting.set here if it commits itself.
             # db.session.commit() # If SiteSetting.set doesn't commit. Original did.
 
-            flash('Site settings updated successfully!', 'success')
+            flash('Site settings updated successfully!', 'toast_success')
             current_app.logger.info(f"Site settings updated by admin {current_user.username}.")
             return redirect(url_for('admin.site_settings')) # Redirect to refresh page with new settings
         except Exception as e:
@@ -153,7 +153,7 @@ def approve_user(user_id):
         db.session.add(user_to_approve)
         db.session.commit()
         current_app.logger.info(f"Admin {current_user.username} approved user ID {user_id} ({user_to_approve.username}).")
-        flash(f'User {user_to_approve.username} has been approved and activated.', 'success')
+        flash(f'User {user_to_approve.username} has been approved and activated.', 'toast_success')
         # TODO: Consider sending a notification email to the user.
     except Exception as e:
         db.session.rollback()
@@ -186,7 +186,7 @@ def reject_user(user_id):
         db.session.delete(user_to_reject)
         db.session.commit()
         current_app.logger.info(f"Admin {current_user.username} rejected and deleted user ID {user_id} (Username: {username_rejected}).")
-        flash(f'User {username_rejected} has been rejected and deleted.', 'success')
+        flash(f'User {username_rejected} has been rejected and deleted.', 'toast_success')
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error rejecting user {user_id} by admin {current_user.username}: {e}", exc_info=True)
