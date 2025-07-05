@@ -40,13 +40,15 @@ def create_initial_user(flask_app):
     is_interactive = not (script_args and script_args.admin_user and script_args.admin_pass)
     username = ""
     password = ""
+    full_name_val = ""
     profile_info = None
 
     if not is_interactive:
         username = script_args.admin_user
         password = script_args.admin_pass
+        full_name_val = script_args.admin_fullname if script_args.admin_fullname else username # Default full_name to username
         profile_info = script_args.admin_bio
-        print(f"Non-interactive mode: Creating/updating admin user '{username}'.")
+        print(f"Non-interactive mode: Creating/updating admin user '{username}' with display name '{full_name_val}'.")
     else:
         default_username = "admin"
         try:
@@ -64,14 +66,19 @@ def create_initial_user(flask_app):
 
         if existing_user:
             print(f"User '{username}' already exists.")
-            if not is_interactive: # Non-interactive: always update password if provided
-                print(f"Updating password for user '{username}'.")
+            if not is_interactive: # Non-interactive: always update password and full_name if provided
+                print(f"Updating password and display name for user '{username}'.")
                 existing_user.set_password(password)
+                existing_user.full_name = full_name_val # Update full_name
                 if profile_info is not None: # Update bio if provided
                     existing_user.profile_info = profile_info
                 db.session.commit()
                 print(f"User '{username}' updated non-interactively.")
             else: # Interactive: ask to update
+                # For interactive mode, we assume full_name is handled by profile edit,
+                # but if user wants to update password, we could also ask for full_name if it's empty.
+                # For now, keeping interactive update focused on password as before.
+                # The main requirement is for *new* user creation.
                 try:
                     update_choice = input(
                         "Do you want to update the password for this user? (y/n): "
@@ -107,17 +114,24 @@ def create_initial_user(flask_app):
                 if password != password_confirm:
                     print("Passwords do not match. Aborting user creation.")
                     return
+
+                while not full_name_val:
+                    full_name_val = input(f"Enter Display Name for '{username}': ").strip()
+                    if not full_name_val:
+                        print("Display Name cannot be empty.")
+
                 profile_info_input = input(
                     f"Enter profile information for '{username}' (optional, press Enter to skip): "
                 )
                 profile_info = profile_info_input if profile_info_input else None
             except EOFError:
-                print("Cannot create user interactively without password. Please run interactively or use args.")
+                print("Cannot create user interactively without required inputs. Please run interactively or use args.")
                 return
 
         # For both interactive and non-interactive new user creation
         new_user = User(
             username=username,
+            full_name=full_name_val, # Use gathered full_name
             profile_info=profile_info,
             is_admin=True,  # Initial user is admin
             is_approved=True, # Admin user is auto-approved
@@ -185,6 +199,10 @@ if __name__ == "__main__":
     )
     parser.add_argument('--admin-user', help='Set initial admin username non-interactively.')
     parser.add_argument('--admin-pass', help='Set initial admin password non-interactively.')
+    # --admin-bio is less relevant now full_name is mandatory. Let's use admin-user for full_name if not specified.
+    # For more control, a dedicated --admin-fullname could be added.
+    # For now, will default full_name to admin_user for non-interactive.
+    parser.add_argument('--admin-fullname', help='Set initial admin display name (full_name) non-interactively (optional, defaults to admin-user).')
     parser.add_argument('--admin-bio', help='Set initial admin bio non-interactively (optional).')
 
     # --skiptables is implicitly handled: if --deletedb is not followed by explicit creation, tables remain deleted.

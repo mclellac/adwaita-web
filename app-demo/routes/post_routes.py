@@ -2,10 +2,10 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import current_user, login_required
 from datetime import datetime, timezone
 
-from ..models import Post, Category, Tag, Comment, CommentFlag
+from ..models import Post, Category, Tag, Comment, CommentFlag, Notification, Activity # Added Notification, Activity
 from ..forms import PostForm, CommentForm, DeleteCommentForm, DeletePostForm, FlagCommentForm
 from .. import db
-from ..utils import flash_form_errors_util, update_post_relations_util
+from ..utils import flash_form_errors_util, update_post_relations_util, extract_mentions # Added extract_mentions
 
 post_bp = Blueprint('post', __name__) # No url_prefix, template_folder defaults to app's
 
@@ -73,17 +73,47 @@ def view_post(post_id):
             current_app.logger.info(f"Activity 'commented_on_post' logged for user {current_user.username} on post {post.id}, comment ID pending (will be {comment.id}).")
 
             db.session.commit() # Commit comment, notification, and activity together
+
             current_app.logger.info(f"Comment (ID: {comment.id}) by {current_user.username} added to post {post_id}.")
             if 'activity' in locals(): # Check if activity was created
                  current_app.logger.info(f"Activity 'commented_on_post' (ID: {activity.id}) confirmed for user {current_user.username}, post ID {post.id}, comment ID {comment.id}.")
+
+            # Process mentions in the comment
+            mentioned_users_in_comment = extract_mentions(comment.text)
+            new_mentions_created_comment = False
+            for mentioned_user in mentioned_users_in_comment:
+                if mentioned_user.id != current_user.id: # Don't notify for self-mentions
+                    # Avoid duplicate notifications (simple check)
+                    existing_notif = Notification.query.filter_by(
+                        user_id=mentioned_user.id,
+                        actor_id=current_user.id,
+                        type='mention_in_comment', # New type
+                        related_comment_id=comment.id
+                    ).first()
+                    if not existing_notif:
+                        mention_notification = Notification(
+                            user_id=mentioned_user.id,
+                            actor_id=current_user.id,
+                            type='mention_in_comment',
+                            related_post_id=post.id, # Link to post as well for context
+                            related_comment_id=comment.id
+                        )
+                        db.session.add(mention_notification)
+                        new_mentions_created_comment = True
+                        current_app.logger.info(f"Mention notification created for user {mentioned_user.username} in comment {comment.id}")
+
+            if new_mentions_created_comment:
+                db.session.commit()
+
             flash('Comment posted successfully!', 'success')
             return redirect(url_for('post.view_post', post_id=post_id, _anchor=f"comment-{comment.id}"))
-        except ValueError:
+        except ValueError: # Specific to parent_id conversion
             current_app.logger.error(f"Invalid parent_id format '{form.parent_id.data}' for comment on post {post_id}.")
             flash('Error posting comment: Invalid parent comment ID.', 'danger')
+            # No rollback needed here as commit hasn't happened for this specific error
         except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f"Error saving comment for post {post_id}: {e}", exc_info=True)
+            db.session.rollback() # Rollback for other types of errors during comment/notification/activity creation
+            current_app.logger.error(f"Error saving comment for post {post_id} or processing mentions: {e}", exc_info=True)
             flash('Error posting comment. Please try again.', 'danger')
     elif request.method == 'POST': # Comment form validation failed
         current_app.logger.warning(f"Comment form validation failed for post {post_id}. Errors: {form.errors}")
@@ -137,16 +167,32 @@ def create_post():
             db.session.add(activity)
             current_app.logger.info(f"Activity 'created_post' logged for user {current_user.username}, post ID pending assignment (will be {new_post.id}).")
 
-            db.session.commit()
+            db.session.commit() # Commit post and activity first to get IDs
+
             current_app.logger.info(f"Post ID: {new_post.id} (Published: True) created by {current_user.username}.")
             if 'activity' in locals(): # Check if activity was created
                  current_app.logger.info(f"Activity 'created_post' (ID: {activity.id}) confirmed for user {current_user.username}, post ID {new_post.id}.")
+
+            # Process mentions after initial commit
+            mentioned_users_in_post = extract_mentions(new_post.content)
+            for mentioned_user in mentioned_users_in_post:
+                if mentioned_user.id != current_user.id: # Don't notify for self-mentions
+                    mention_notification = Notification(
+                        user_id=mentioned_user.id,
+                        actor_id=current_user.id,
+                        type='mention_in_post', # New type
+                        related_post_id=new_post.id
+                    )
+                    db.session.add(mention_notification)
+                    current_app.logger.info(f"Mention notification created for user {mentioned_user.username} in post {new_post.id}")
+            if mentioned_users_in_post:
+                db.session.commit() # Commit any mention notifications
 
             flash('Post created successfully!', 'success')
             return redirect(url_for('post.view_post', post_id=new_post.id))
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error creating post by {current_user.username}: {e}", exc_info=True)
+            current_app.logger.error(f"Error creating post by {current_user.username} or processing mentions: {e}", exc_info=True)
             flash(f'Error creating post: {str(e)}', 'danger')
     elif request.method == 'POST':
         current_app.logger.warning(f"Create post form validation failed. Errors: {form.errors}")
@@ -182,13 +228,48 @@ def edit_post(post_id):
         update_post_relations_util(post, form, db.session)
         try:
             db.session.add(post)
-            db.session.commit()
+            db.session.commit() # Commit post content changes first
+
             current_app.logger.info(f"Post ID {post.id} (Published: {post.is_published}) updated by {current_user.username}.")
+
+            # Process mentions for updated content
+            # Note: This doesn't remove notifications for users no longer mentioned.
+            # A more complex system would track existing mentions vs new ones.
+            # For now, it just adds new notifications.
+            mentioned_users_in_post = extract_mentions(post.content)
+            new_mentions_created = False
+            for mentioned_user in mentioned_users_in_post:
+                if mentioned_user.id != current_user.id: # Don't notify for self-mentions
+                    # Avoid duplicate notifications if a user is mentioned multiple times or was already notified for this post edit session
+                    # A more robust solution would check existing notifications of this type for this post by this actor.
+                    # Simplified: just create if they are mentioned in current content.
+                    existing_notif = Notification.query.filter_by(
+                        user_id=mentioned_user.id,
+                        actor_id=current_user.id,
+                        type='mention_in_post',
+                        related_post_id=post.id
+                    ).first() # This check is simplistic; doesn't account for multiple edits creating multiple notifs over time.
+                              # A real system might only notify once per post, or if a user is newly added.
+
+                    if not existing_notif: # Only create if no similar notification exists (simplistic check)
+                        mention_notification = Notification(
+                            user_id=mentioned_user.id,
+                            actor_id=current_user.id,
+                            type='mention_in_post',
+                            related_post_id=post.id
+                        )
+                        db.session.add(mention_notification)
+                        new_mentions_created = True
+                        current_app.logger.info(f"Mention notification created for user {mentioned_user.username} in updated post {post.id}")
+
+            if new_mentions_created:
+                db.session.commit()
+
             flash('Post updated successfully!', 'success')
             return redirect(url_for('post.view_post', post_id=post.id))
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error updating post {post.id}: {e}", exc_info=True)
+            current_app.logger.error(f"Error updating post {post.id} or processing mentions: {e}", exc_info=True)
             flash(f'Error updating post: {str(e)}', 'danger')
     elif request.method == 'POST':
         current_app.logger.warning(f"Edit post form validation failed for post {post_id}. Errors: {form.errors}")

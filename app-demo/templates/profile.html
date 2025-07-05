@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}Profile: {{ user_profile.username }}{% endblock %}
+{% block title %}Profile: {{ user_profile.full_name or user_profile.username }}{% endblock %}
 
-{% block header_title %}{{ user_profile.username }}'s Profile{% endblock %}
+{% block header_title %}{{ user_profile.full_name or user_profile.username }}'s Profile{% endblock %}
 
 {% block header_actions_start %}
     {% if current_user == user_profile %}
@@ -30,9 +30,9 @@
         <div class="adw-box adw-box-spacing-xl align-center"> {# Horizontal by default #}
             <div class="adw-avatar size-huge"> {# size-huge for 96px from _avatar.scss comments #}
                 {% if user_profile.profile_photo_url %}
-                <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ user_profile.username }} avatar">
+                <img src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ user_profile.full_name or user_profile.username }} avatar">
                 {% else %}
-                <img src="{{ default_avatar_url }}" alt="{{ user_profile.username }} default avatar">
+                <img src="{{ default_avatar_url }}" alt="{{ user_profile.full_name or user_profile.username }} default avatar">
                 {% endif %}
             </div>
             <div class="adw-box adw-box-vertical adw-box-spacing-xs">
@@ -54,7 +54,7 @@
         {# Profile Details Group #}
         <div class="adw-preferences-group" role="group" aria-labelledby="profile-details-title-{{user_profile.id}}">
              <div class="adw-preferences-group__title-container">
-                <h2 class="adw-preferences-group__title title-2" id="profile-details-title-{{user_profile.id}}">About {{user_profile.username}}</h2>
+                <h2 class="adw-preferences-group__title title-2" id="profile-details-title-{{user_profile.id}}">About {{user_profile.full_name or user_profile.username}}</h2>
             </div>
             <div class="adw-list-box">
                 {% if user_profile.profile_info %}
@@ -159,7 +159,7 @@
         {# User Posts Section #}
         <div class="adw-preferences-group" role="group" aria-labelledby="user-posts-title-{{user_profile.id}}">
             <div class="adw-preferences-group__title-container">
-                <h2 class="adw-preferences-group__title title-2" id="user-posts-title-{{user_profile.id}}">Posts by {{ user_profile.username }}</h2>
+                <h2 class="adw-preferences-group__title title-2" id="user-posts-title-{{user_profile.id}}">Posts by {{ user_profile.full_name or user_profile.username }}</h2>
             </div>
             {% if posts_pagination and posts_pagination.items %}
                 <div class="blog-posts-container"> {# Use new card container #}
@@ -232,7 +232,7 @@
                 <div class="adw-status-page">
                     <span class="adw-icon icon-content-document-new-symbolic adw-status-page-icon app-status-page-icon"></span>
                     <h3 class="adw-status-page-title">No Posts Yet</h3>
-                    <p class="adw-status-page-description">{{ user_profile.username }} has not made any posts.</p>
+                    <p class="adw-status-page-description">{{ user_profile.full_name or user_profile.username }} has not made any posts.</p>
                 </div>
             {% endif %}
         </div>
@@ -240,14 +240,14 @@
         {# User Comments Section #}
         <div class="adw-preferences-group" role="group" aria-labelledby="user-comments-title-{{user_profile.id}}">
             <div class="adw-preferences-group__title-container">
-                <h2 class="adw-preferences-group__title title-2" id="user-comments-title-{{user_profile.id}}">Comments by {{ user_profile.username }}</h2>
+                <h2 class="adw-preferences-group__title title-2" id="user-comments-title-{{user_profile.id}}">Comments by {{ user_profile.full_name or user_profile.username }}</h2>
             </div>
             {% if comments_pagination and comments_pagination.items %}
                 <div class="adw-list-box">
                     {% for comment in comments_pagination.items %}
                     <a href="{{ url_for('post.view_post', post_id=comment.post_id, _anchor='comment-' ~ comment.id) }}" class="adw-action-row activatable">
                         <div class="adw-action-row__text">
-                            <span class="adw-action-row__title">Comment on post by {{ comment.post.author.username }}</span>
+                            <span class="adw-action-row__title">Comment on post by {{ comment.post.author.full_name or comment.post.author.username }}</span>
                             <span class="adw-action-row__subtitle">"{{ comment.text | truncate(100, True) }}"</span>
                             <small class="adw-label caption">
                                 <time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
@@ -300,7 +300,7 @@
                 <div class="adw-status-page">
                     <span class="adw-icon icon-content-message-symbolic adw-status-page-icon app-status-page-icon"></span>
                     <h3 class="adw-status-page-title">No Comments Yet</h3>
-                    <p class="adw-status-page-description">{{ user_profile.username }} has not made any comments.</p>
+                    <p class="adw-status-page-description">{{ user_profile.full_name or user_profile.username }} has not made any comments.</p>
                 </div>
             {% endif %}
         </div>
@@ -347,7 +347,7 @@
                 <div class="profile-gallery-grid">
                     {% for photo in gallery_photos_preview %}
                     <div class="adw-card gallery-photo-card">
-                        <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo.image_filename) }}" alt="{{ photo.caption or 'Gallery image by ' ~ user_profile.username }}" class="gallery-photo-image">
+                        <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo.image_filename) }}" alt="{{ photo.caption or 'Gallery image by ' ~ (user_profile.full_name or user_profile.username) }}" class="gallery-photo-image">
                         {% if photo.caption %}
                         <div class="adw-card__content gallery-photo-caption">
                             <p class="adw-label body-2">{{ photo.caption }}</p>
@@ -377,7 +377,7 @@
                 <div class="adw-status-page">
                     <span class="adw-icon icon-media-image-symbolic adw-status-page-icon app-status-page-icon"></span>
                     <h3 class="adw-status-page-title">Empty Gallery</h3>
-                    <p class="adw-status-page-description">{{ user_profile.username }} has not uploaded any photos to their gallery yet.</p>
+                    <p class="adw-status-page-description">{{ user_profile.full_name or user_profile.username }} has not uploaded any photos to their gallery yet.</p>
                     {% if current_user != user_profile %}
                     <p class="adw-status-page-description">Check back later!</p>
                     {% endif %}

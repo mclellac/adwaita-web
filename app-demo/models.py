@@ -12,7 +12,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     profile_info = db.Column(db.Text, nullable=True)
     profile_photo_url = db.Column(db.String(512), nullable=True)
-    full_name = db.Column(db.String(120), nullable=True)
+    full_name = db.Column(db.String(120), nullable=False) # Changed to nullable=False
     website_url = db.Column(db.String(200), nullable=True)
 
     # New fields for enhanced profile

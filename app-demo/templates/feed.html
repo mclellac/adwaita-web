@@ -86,7 +86,7 @@
                         <div class="adw-action-row-text-content">
                             <span class="adw-action-row-title">
                                 <a href="{{ url_for('profile.view_profile', username=activity.actor.username) }}" class="adw-link">{{ activity.actor.full_name or activity.actor.username }}</a>
-                                liked a <a href="{{ url_for('post.view_post', post_id=activity.target_post.id) }}" class="adw-link">post by {{ activity.target_post.author.username }}</a>.
+                                liked a <a href="{{ url_for('post.view_post', post_id=activity.target_post.id) }}" class="adw-link">post by {{ activity.target_post.author.full_name or activity.target_post.author.username }}</a>.
                             </span>
                              <span class="adw-action-row-subtitle feed-activity-timestamp"><time datetime="{{ activity.timestamp.isoformat() }}">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time></span>
                         </div>
@@ -99,7 +99,7 @@
                         <div class="adw-action-row-text-content">
                             <span class="adw-action-row-title">
                                 <a href="{{ url_for('profile.view_profile', username=activity.actor.username) }}" class="adw-link">{{ activity.actor.full_name or activity.actor.username }}</a>
-                                commented on a <a href="{{ url_for('post.view_post', post_id=activity.target_post.id, _anchor='comment-' ~ activity.target_comment_id if activity.target_comment_id else 'post-comments-area') }}" class="adw-link">post by {{ activity.target_post.author.username }}</a>.
+                                commented on a <a href="{{ url_for('post.view_post', post_id=activity.target_post.id, _anchor='comment-' ~ activity.target_comment_id if activity.target_comment_id else 'post-comments-area') }}" class="adw-link">post by {{ activity.target_post.author.full_name or activity.target_post.author.username }}</a>.
                             </span>
                             {# Optionally, show comment snippet here if available on activity model or fetched #}
                             <span class="adw-action-row-subtitle feed-activity-timestamp"><time datetime="{{ activity.timestamp.isoformat() }}">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time></span>

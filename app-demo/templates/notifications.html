@@ -18,6 +18,8 @@
                         <span class="adw-icon icon-actions-star-symbolic notification-icon"></span>
                     {% elif notification.type == 'new_comment' %}
                         <span class="adw-icon icon-content-message-symbolic notification-icon"></span>
+                    {% elif notification.type == 'mention_in_post' or notification.type == 'mention_in_comment' %}
+                        <span class="adw-icon icon-content-mail-reply-sender-symbolic notification-icon"></span> {# Icon for mention #}
                     {% else %}
                         <span class="adw-icon icon-emotes-face-smile-symbolic notification-icon"></span> {# Generic #}
                     {% endif %}
@@ -27,10 +29,13 @@
                         {% if notification.type == 'new_follower' and notification.actor %}
                             <a href="{{ url_for('profile.view_profile', username=notification.actor.username) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> started following you.
                         {% elif notification.type == 'new_like' and notification.actor and notification.related_post %}
-                            <a href="{{ url_for('profile.view_profile', username=notification.actor.username) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> liked your post: <a href="{{ url_for('post.view_post', post_id=notification.related_post.id) }}" class="adw-link">{{ notification.related_post.title }}</a>.
+                            <a href="{{ url_for('profile.view_profile', username=notification.actor.username) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> liked your post: <a href="{{ url_for('post.view_post', post_id=notification.related_post.id) }}" class="adw-link">{{ notification.related_post.title | truncate(50) }}</a>.
                         {% elif notification.type == 'new_comment' and notification.actor and notification.related_post %}
-                            {# Assuming related_comment_id might be used later for direct link to comment #}
-                            <a href="{{ url_for('profile.view_profile', username=notification.actor.username) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> commented on your post: <a href="{{ url_for('post.view_post', post_id=notification.related_post.id, _anchor='comment-' ~ notification.related_comment_id if notification.related_comment_id else 'post-comments-area') }}" class="adw-link">{{ notification.related_post.title }}</a>.
+                            <a href="{{ url_for('profile.view_profile', username=notification.actor.username) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> commented on your post: <a href="{{ url_for('post.view_post', post_id=notification.related_post.id, _anchor='comment-' ~ notification.related_comment_id if notification.related_comment_id else 'post-comments-area') }}" class="adw-link">{{ notification.related_post.title | truncate(50) }}</a>.
+                        {% elif notification.type == 'mention_in_post' and notification.actor and notification.related_post %}
+                            <a href="{{ url_for('profile.view_profile', username=notification.actor.username) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> mentioned you in a post: <a href="{{ url_for('post.view_post', post_id=notification.related_post.id) }}" class="adw-link">{{ notification.related_post.title | truncate(50) }}</a>.
+                        {% elif notification.type == 'mention_in_comment' and notification.actor and notification.related_comment %}
+                            <a href="{{ url_for('profile.view_profile', username=notification.actor.username) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> mentioned you in a <a href="{{ url_for('post.view_post', post_id=notification.related_post.id, _anchor='comment-' ~ notification.related_comment_id if notification.related_comment_id else 'post-comments-area') }}" class="adw-link">comment</a> on post: {{ notification.related_post.title | truncate(50) }}.
                         {% else %}
                             {{ notification.type | replace('_', ' ') | title }} {# Generic display #}
                         {% endif %}
