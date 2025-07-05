@@ -12,13 +12,15 @@
             <div class="post-meta-detail">
                 <p class="adw-label body">
                     By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
-                    {% if post.is_published and post.published_at %}
+                    {% if not post.is_published and current_user == post.author %}
+                        (Draft created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>) <span class="adw-label caption draft-indicator">(Draft)</span>
+                    {% elif post.is_published and post.published_at %}
                         on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time> (Published)
                     {% else %}
-                         (Draft created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>)
+                         (Created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>)
                     {% endif %}
                 </p>
-                {% if post.updated_at and post.updated_at != post.created_at and (post.published_at is none or post.updated_at != post.published_at) %}
+                {% if post.updated_at and post.updated_at != post.created_at and (post.published_at is none or post.updated_at != post.published_at) and not (not post.is_published and current_user == post.author and post.updated_at == post.created_at) %}
                     <p class="adw-label caption last-updated">(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>)</p>
                 {% endif %}
             </div>
@@ -221,11 +223,11 @@
         <h2 id="related-posts-heading" class="adw-title-2">Related Posts</h2>
         <div class="adw-list-box">
             {% for related_post in related_posts %}
-            <a href="{{ url_for('view_post', post_id=related_post.id) }}" class="adw-action-row activatable">
+            <a href="{{ url_for('post.view_post', post_id=related_post.id) }}" class="adw-action-row activatable">
                 <div class="adw-action-row-content">
-                    <span class="adw-action-row-title">{{ related_post.title }}</span>
-                    {% if related_post.author %}
-                    <span class="adw-action-row-subtitle">By {{ related_post.author.username }}</span>
+                    <span class="adw-action-row-title">Post by {{ related_post.author.username }}</span>
+                    {% if related_post.content %}
+                    <span class="adw-action-row-subtitle">{{ related_post.content | striptags | truncate(80) }}</span>
                     {% endif %}
                 </div>
                 <span class="adw-action-row__chevron"></span>

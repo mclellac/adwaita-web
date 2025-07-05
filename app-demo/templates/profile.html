@@ -169,14 +169,10 @@
                             {# Post title removed, content will be linked in footer or by making card clickable if desired #}
                             <div class="blog-post-card__meta adw-label caption">
                                 {% if not post.is_published and current_user == post.author %}
-                                    <span class="adw-label caption">(Draft)</span> -
+                                    Draft - Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
                                 {% elif post.is_published and post.published_at %}
                                     Published: <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                                {% elif not post.is_published %}
-                                    Draft - Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                                {% elif not post.is_published %}
-                                    Draft - Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                                {% else %}
+                                {% else %} {# Fallback for created but not explicitly draft/published with date (should ideally be covered by above) #}
                                     Created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
                                 {% endif %}
                             </div>

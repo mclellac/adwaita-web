@@ -17,7 +17,7 @@
 
             {# Content Textarea - Revised Structure #}
             <div class="form-field-container {{ 'has-error' if form.content.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);">
-                <label for="{{ form.content.id or 'content_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
+                <label for="{{ form.content.id or 'content_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ form.content.label.text }} <span class="adw-label caption">(Supports Markdown)</span></label>
                 {% if form.content.errors %}
                     <p class="adw-label caption error-text" style="margin-bottom: var(--spacing-xs);">{{ form.content.errors|join(' ') }}</p>
                 {% endif %}

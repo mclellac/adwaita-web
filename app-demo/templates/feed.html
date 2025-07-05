@@ -34,13 +34,9 @@
                                      <span class="adw-label caption feed-activity-timestamp"><time datetime="{{ activity.timestamp.isoformat() }}">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time></span>
                                 </div>
                             </div>
-                            <h2 class="adw-title-2 blog-post-card__title">
-                                <a href="{{ url_for('post.view_post', post_id=activity.target_post.id) }}" class="adw-link">
-                                    {{ activity.target_post.title }}
-                                </a>
-                            </h2>
-                             {# Meta for publish date of post, not activity timestamp here #}
-                            <div class="blog-post-card__meta adw-label caption">
+                            {# Post title h2 removed #}
+                             {# Meta for publish date of post, not activity timestamp here, is part of the post card content #}
+                            <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
                                 {% if activity.target_post.published_at %}
                                     Published: <time datetime="{{ activity.target_post.published_at.isoformat() }}">{{ activity.target_post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
                                 {% else %}
@@ -90,8 +86,7 @@
                         <div class="adw-action-row-text-content">
                             <span class="adw-action-row-title">
                                 <a href="{{ url_for('profile.view_profile', username=activity.actor.username) }}" class="adw-link">{{ activity.actor.full_name or activity.actor.username }}</a>
-                                liked
-                                <a href="{{ url_for('post.view_post', post_id=activity.target_post.id) }}" class="adw-link">"{{ activity.target_post.title }}"</a>.
+                                liked a <a href="{{ url_for('post.view_post', post_id=activity.target_post.id) }}" class="adw-link">post by {{ activity.target_post.author.username }}</a>.
                             </span>
                              <span class="adw-action-row-subtitle feed-activity-timestamp"><time datetime="{{ activity.timestamp.isoformat() }}">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time></span>
                         </div>
@@ -104,8 +99,7 @@
                         <div class="adw-action-row-text-content">
                             <span class="adw-action-row-title">
                                 <a href="{{ url_for('profile.view_profile', username=activity.actor.username) }}" class="adw-link">{{ activity.actor.full_name or activity.actor.username }}</a>
-                                commented on
-                                <a href="{{ url_for('post.view_post', post_id=activity.target_post.id, _anchor='comment-' ~ activity.target_comment_id if activity.target_comment_id else 'post-comments-area') }}" class="adw-link">"{{ activity.target_post.title }}"</a>.
+                                commented on a <a href="{{ url_for('post.view_post', post_id=activity.target_post.id, _anchor='comment-' ~ activity.target_comment_id if activity.target_comment_id else 'post-comments-area') }}" class="adw-link">post by {{ activity.target_post.author.username }}</a>.
                             </span>
                             {# Optionally, show comment snippet here if available on activity model or fetched #}
                             <span class="adw-action-row-subtitle feed-activity-timestamp"><time datetime="{{ activity.timestamp.isoformat() }}">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time></span>
@@ -132,7 +126,7 @@
                 {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
                     {% if page_num %}
                         {% if page_num == pagination.page %}
-                            <button class="adw-button suggested-action" disabled aria-current="page">{{ page_num }}</button>
+                            <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
                         {% else %}
                             <a href="{{ url_for('general.activity_feed', page=page_num) }}" class="adw-button">{{ page_num }}</a>
                         {% endif %}
