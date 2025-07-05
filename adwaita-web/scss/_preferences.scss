@@ -17,7 +17,7 @@
     // Use .title-1 or .title-2 utility class for styling
     // Example: <h1 class="adw-preferences-page__title title-1">Page Title</h1>
     // Or apply directly:
-    @extend .title-1; // Using .title-1 for main page titles
+    @extend .title-1 !optional; // Using .title-1 for main page titles
     color: var(--window-fg-color); // Ensure it uses window foreground
     margin-top: 0;
     margin-bottom: var(--spacing-xl); // Space after page title before first group
@@ -40,7 +40,7 @@
   .adw-preferences-group__title {
     // Libadwaita group titles are often like .title-4 or .heading, but sometimes smaller, all-caps, and dimmed.
     // Let's use .heading as a base and customize.
-    @extend .heading; // Base font size, bold
+    @extend .heading !optional; // Base font size, bold
     color: var(--window-fg-color);
     text-transform: uppercase;
     letter-spacing: 0.5px;
