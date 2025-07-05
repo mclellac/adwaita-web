@@ -83,3 +83,43 @@
   clip: rect(1px, 1px, 1px, 1px);
   white-space: nowrap; // Prevent line breaks from affecting layout
 }
+
+// Mixin to apply the core visual characteristics of a flat button
+@mixin apply-flat-button-style {
+  background-color: transparent;
+  border-color: transparent;
+  // Note: text color should be contextual (e.g., inherit, or var(--accent-color) for suggested-action)
+  // Hover and active states for general flat buttons:
+  &:hover {
+    background-color: var(--button-flat-hover-bg-color);
+  }
+  &:active {
+    background-color: var(--button-flat-active-bg-color);
+  }
+}
+
+// Mixin to apply the core visual characteristics of a circular button
+@mixin apply-circular-button-style {
+  padding: var(--spacing-xs);
+  border-radius: 50%;
+  .adw-icon, .icon, svg { // Styles for an icon directly within the circular button
+    margin: 0; // Remove any default margins if the icon is the sole content
+    width: var(--icon-size-base);
+    height: var(--icon-size-base);
+  }
+  // If a larger icon is typical for circular buttons (like .image-button):
+  // &.image-button .adw-icon, &.image-button .icon, &.image-button svg {
+  //   width: var(--icon-size-large);
+  //   height: var(--icon-size-large);
+  // }
+}
+
+// Mixin to apply the core visual characteristics of an Adwaita card
+@mixin apply-card-style {
+  background-color: var(--card-bg-color);
+  color: var(--card-fg-color);
+  border-radius: var(--border-radius-large); // Libadwaita cards use a larger radius
+  padding: var(--spacing-m); // Default padding for a card
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05); // Default card shadow
+  display: block; // Cards are typically block elements
+}

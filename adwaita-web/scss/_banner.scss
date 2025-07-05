@@ -36,12 +36,16 @@
   // If it's an icon button (close), it's also flat.
   .adw-button {
     // Make buttons flat and adapt to banner's coloring
-    @extend .adw-button, .flat !optional; // Inherit flat style
-    background-color: transparent; // Ensure fully transparent over banner bg
-    color: inherit; // Inherit banner's text color
-    border-color: transparent;
-    padding: var(--spacing-xs) var(--spacing-s); // Slightly less padding for banner buttons
+    // @extend .adw-button, .flat !optional; // Replaced with mixin
+    @include mixins.apply-flat-button-style;       // This applies transparent bg/border and flat hover/active
+    // background-color: transparent; // Ensured by mixin
+    color: inherit; // Inherit banner's text color - IMPORTANT for banner context
+    // border-color: transparent; // Ensured by mixin
+    padding: var(--spacing-xs) var(--spacing-s); // Specific padding for banner buttons
 
+    // Override mixin hover/active if banner-specific behavior is needed,
+    // or ensure mixin variables like --button-flat-hover-bg-color are contextually defined.
+    // The mixin uses --button-flat-hover-bg-color. Banner buttons have specific hover:
     &:hover {
       // Hover on banner button: subtle background using banner's fg color at low alpha
       background-color: rgba(var(--_banner-current-fg-color-rgb, 255,255,255), 0.1);

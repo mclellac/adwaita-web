@@ -72,7 +72,8 @@
         // Buttons inside are styled as flat.
         > .adw-button,
         > .adw-toggle {
-            @extend .adw-button, .flat; // Inherit flat button appearance (transparent bg, no border)
+            // @extend .adw-button, .flat !optional; // Replaced with mixin
+            @include mixins.apply-flat-button-style; // Assumes base button styles are present or handled by the element itself
 
             &:not(:last-child) {
                 // Separator for flat linked buttons (subtle)
