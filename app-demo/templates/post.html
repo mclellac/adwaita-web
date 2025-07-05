@@ -12,15 +12,13 @@
             <div class="post-meta-detail">
                 <p class="adw-label body">
                     By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
-                    {% if not post.is_published and current_user == post.author %}
-                        (Draft created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>) <span class="adw-label caption draft-indicator">(Draft)</span>
-                    {% elif post.is_published and post.published_at %}
-                        on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time> (Published)
-                    {% else %}
-                         (Created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>)
-                    {% endif %}
+                    {%- if post.published_at -%}
+                        on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                    {%- else -%} {# Should not happen for new posts, fallback for old data or if published_at was somehow not set #}
+                        on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                    {%- endif -%}
                 </p>
-                {% if post.updated_at and post.updated_at != post.created_at and (post.published_at is none or post.updated_at != post.published_at) and not (not post.is_published and current_user == post.author and post.updated_at == post.created_at) %}
+                {% if post.updated_at and post.updated_at != (post.published_at or post.created_at) %}
                     <p class="adw-label caption last-updated">(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>)</p>
                 {% endif %}
             </div>

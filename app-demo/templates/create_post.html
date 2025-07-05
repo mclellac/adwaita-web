@@ -65,8 +65,7 @@
         </section>
 
         <div class="adw-box horizontal justify-end adw-box-spacing-s" style="margin-top: var(--spacing-l);" id="create-post-form-actions">
-            {{ form.save_draft(class="adw-button", id="save-draft-button") }}
-            {{ form.publish(class="adw-button suggested-action", id="publish-button") }}
+            {{ form.submit(class="adw-button suggested-action", id="submit-button") }} {# Changed to single submit button #}
             <adw-spinner size="small" active="false" style="margin-left: var(--spacing-xs);"></adw-spinner>
         </div>
     </form>
@@ -79,23 +78,17 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form.stacked-form');
-    const saveButton = document.getElementById('save-draft-button');
-    const publishButton = document.getElementById('publish-button');
+    const submitButton = document.getElementById('submit-button');
     const actionsContainer = document.getElementById('create-post-form-actions');
     let spinner;
     if (actionsContainer) {
         spinner = actionsContainer.querySelector('adw-spinner');
     }
 
-    if (form && spinner && (saveButton || publishButton)) {
+    if (form && spinner && submitButton) {
         form.addEventListener('submit', function() {
-            // Disable buttons
-            if (saveButton) {
-                saveButton.disabled = true;
-            }
-            if (publishButton) {
-                publishButton.disabled = true;
-            }
+            // Disable button
+            submitButton.disabled = true;
             // Show spinner
             if (spinner) {
                 spinner.setAttribute('active', 'true');

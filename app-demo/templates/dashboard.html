@@ -13,15 +13,15 @@
         {% for post in user_posts %}
         <div class="adw-action-row blog-post-dashboard-item">
             <div class="adw-action-row-content" style="display: flex; flex-direction: column; gap: var(--spacing-xxs);">
-                <h3 class="adw-action-row-title" style="font-size: var(--font-size-large);">{{ post.title }}</h3>
+                <h3 class="adw-action-row-title" style="font-size: var(--font-size-large);">
+                    <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-link">{{ post.content | striptags | truncate(80, True) }}</a>
+                </h3>
                 <div class="adw-action-row-subtitle">
-                    Status:
-                    {% if post.is_published %}
-                        <span style="color: var(--success-color);">Published</span>
-                        {% if post.published_at %} (on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d') }}</time>){% endif %}
-                    {% else %}
-                        <span style="color: var(--warning-fg-color);">Draft</span>
-                    {% endif %}
+                    {%- if post.published_at -%}
+                        Published: <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                    {%- else -%}
+                        Created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                    {%- endif -%}
                     <br>
                     Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
                 </div>
@@ -30,7 +30,7 @@
                 <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat">View</a>
                 <a href="{{ url_for('post.edit_post', post_id=post.id) }}" class="adw-button">Edit</a>
                 {% set delete_form = delete_forms[post.id] %}
-                <form method="POST" action="{{ url_for('post.delete_post', post_id=post.id) }}" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this post? \\n\\n\'{{ post.title|escapejs }}\'');">
+                <form method="POST" action="{{ url_for('post.delete_post', post_id=post.id) }}" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this post?');">
                     {{ delete_form.hidden_tag() }}
                     <button type="submit" class="adw-button destructive-action">Delete</button>
                 </form>

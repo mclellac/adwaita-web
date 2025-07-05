@@ -12,8 +12,8 @@
     {% if activities_list and activities_list|length > 0 %}
         <div class="feed-activities-container adw-list-box"> {# Using adw-list-box for simpler activity items, can be changed #}
             {% for activity in activities_list %}
-                {% if activity.type == 'created_post' and activity.target_post and activity.target_post.is_published %}
-                    {# Render 'created_post' as a full post card #}
+                {% if activity.type == 'created_post' and activity.target_post %}
+                    {# Render 'created_post' as a full post card. is_published check removed as posts are now always published. #}
                     <article class="adw-card blog-post-item-card feed-activity-item">
                         <header class="blog-post-card__header">
                             <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
