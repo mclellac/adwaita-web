@@ -11,6 +11,7 @@
 @use 'button';
 @use 'entry';
 @use 'headerbar';
+@use 'card'; // Ensure card is before listbox
 @use 'listbox';
 @use 'dialog';
 @use 'row_types';
@@ -46,7 +47,7 @@
 @use 'wrap_box'; // Added
 @use 'clamp';
 @use 'window';
-@use 'card'; // Added card
+// @use 'card'; // Removed duplicate, ensured it's loaded before listbox
 
 // App-demo specific styles
 @use 'app-demo-specific';
