@@ -1,27 +1,30 @@
 # Entry CSS Styling (Adwaita Skin)
 
-Entries are input fields that allow users to enter a single line of text. Adwaita Skin provides CSS classes to style standard HTML `<input>` elements (and potentially `<textarea>` for multi-line, though specific textarea styling might need verification) to look like Adwaita entries.
+Entries are input fields that allow users to enter a single line of text. Adwaita Skin provides CSS classes to style standard HTML `<input>` and `<textarea>` elements to look like Adwaita entries.
 
 ## HTML Structure and CSS Classes
 
-To style an HTML `<input>` element as an Adwaita entry, apply the base class `adw-entry`.
+To style an HTML `<input>` or `<textarea>` element as an Adwaita entry, apply the base class `adw-entry` or `adw-textarea` respectively.
 
 **Basic Text Entry:**
-
 ```html
 <input type="text" class="adw-entry" placeholder="Enter text here...">
 ```
 
-**Supported Input Types:**
+**Textarea Entry:**
+```html
+<textarea class="adw-textarea" placeholder="Enter multiple lines of text..."></textarea>
+```
 
-The `.adw-entry` class can be applied to various `<input>` types, and the browser's default appearance for that type will be styled:
+**Supported Input Types:**
+The `.adw-entry` class can be applied to various `<input>` types:
 *   `type="text"`
 *   `type="password"`
 *   `type="email"`
 *   `type="search"`
 *   `type="url"`
 *   `type="tel"`
-*   `type="number"` (Note: for more styled number input with steppers, see SpinButton styling if available)
+*   `type="number"`
 
 ```html
 <input type="password" class="adw-entry" placeholder="Password">
@@ -30,64 +33,66 @@ The `.adw-entry` class can be applied to various `<input>` types, and the browse
 
 ## Modifier Classes and States
 
-*   `.disabled` or `disabled` attribute: To make an entry appear and behave as disabled.
+*   **Disabled State:** Use the `disabled` attribute on the HTML element.
     ```html
     <input type="text" class="adw-entry" value="Cannot edit" disabled>
-    <input type="text" class="adw-entry disabled" value="CSS Disabled">
     ```
-    *Note: Using the `disabled` attribute on the `<input>` element is standard and preferred.*
+*   **Readonly State:** Use the `readonly` attribute.
+    ```html
+    <input type="text" class="adw-entry" value="Readonly information" readonly>
+    ```
+*   **Focus State:** Entries show a focus ring using the current accent color (`var(--accent-color)`).
+*   **Placeholder Text:** Styled according to Adwaita guidelines (dimmed text).
+*   **Validation States:** Apply these classes to the `.adw-entry` or `.adw-textarea` element to indicate validation status. The border and focus ring will change color.
+    *   `.error`: For invalid input.
+        ```html
+        <input type="email" class="adw-entry error" value="not-an-email" placeholder="Email">
+        ```
+    *   `.warning`: For potentially problematic input.
+        ```html
+        <input type="text" class="adw-entry warning" placeholder="Username is very short">
+        ```
+    *   `.success`: For valid input (less common, but available).
+        ```html
+        <input type="text" class="adw-entry success" placeholder="Username available">
+        ```
 
-*   Focus State: Entries will typically show a focus ring (often using the accent color) when they are focused by the user. This is handled by `:focus` or `:focus-visible` pseudo-classes in the CSS.
+## Entry with Icons
 
-*   Placeholder text is styled according to Adwaita guidelines.
+To add icons inside an entry (e.g., a search icon or a clear button), use the `.adw-entry-wrapper` container:
 
-## Examples
-
-**Simple Text Entry:**
 ```html
-<div>
-  <label for="username-entry">Username:</label>
-  <input type="text" id="username-entry" class="adw-entry" name="username" placeholder="e.g., jdoe">
+<div class="adw-entry-wrapper">
+  <span class="adw-entry-icon start">
+    <svg><!-- search icon --></svg>
+  </span>
+  <input type="search" class="adw-entry with-icon-start with-icon-end" placeholder="Search...">
+  <button class="adw-entry-icon end interactive" aria-label="Clear search">
+    <svg><!-- clear icon --></svg>
+  </button>
 </div>
 ```
-
-**Password Entry:**
-```html
-<div>
-  <label for="password-entry">Password:</label>
-  <input type="password" id="password-entry" class="adw-entry" name="password" placeholder="Enter your password">
-</div>
-```
-
-**Search Entry:**
-Some Adwaita themes might have specific styling for search entries (e.g., rounded corners, embedded search icon). Check `adwaita-web/examples/` or `scss/_entry.scss` if specific search variants are available via additional classes.
-```html
-<input type="search" class="adw-entry" placeholder="Search items...">
-```
+*   Add `.with-icon-start` or `.with-icon-end` to the `.adw-entry` to adjust its padding.
+*   Icons are placed in `<span>` or `<button>` elements with class `.adw-entry-icon` and either `.start` or `.end`.
+*   Add `.interactive` to icon containers if they should be clickable.
 
 ## Styling & Theming
 
 *   **SCSS Source:** `scss/_entry.scss`
-*   **CSS Variables:** Entry styles are influenced by general theme variables from `scss/_variables.scss` (e.g., for background color, text color, border color, focus outline color).
-    *   `--entry-bg-color` (or general `--view-bg-color`)
-    *   `--entry-fg-color` (or general `--view-fg-color`)
-    *   `--entry-border-color` (or general `--borders-color`)
-    *   `--entry-focus-border-color` (often related to `--accent-color`)
-    *   `--entry-placeholder-color`
+*   **CSS Variables:** Entry styles are primarily determined by global CSS custom properties:
+    *   **Background:** `var(--view-bg-color)`
+    *   **Text Color:** `var(--window-fg-color)`
+    *   **Border:** `var(--border-color)` for the default state.
+    *   **Focus:** Border and focus ring use `var(--accent-color)`.
+    *   **Validation States:** Borders and focus rings use `var(--error-color)`, `var(--warning-color)`, or `var(--success-color)`.
+    *   **Placeholder:** Uses `currentColor` with `opacity: 0.5`.
+    *   **Disabled State:** Uses `var(--disabled-opacity)`.
 
-Refer to `scss/_variables.scss` and `scss/_entry.scss` for a full list of CSS variables that can be used for customization.
+Refer to the [Theming Reference](../general/theming.md) and `scss/_variables.scss` for more details.
 
 ## Interactivity
 
-All entry-related logic (e.g., reading values, validation, handling `input` or `change` events) must be implemented with your own JavaScript. Adwaita Skin only provides the visual styling.
-
-```javascript
-// Example: Getting the value of an entry
-const usernameInput = document.getElementById('username-entry');
-usernameInput.addEventListener('input', function() {
-  console.log('Username changed to:', usernameInput.value);
-});
-```
+All entry-related logic (e.g., reading values, validation feedback, icon actions) must be implemented with your own JavaScript. Adwaita Skin only provides the visual styling.
 
 ---
 Next: [ListBox CSS Styling](./listbox.md)

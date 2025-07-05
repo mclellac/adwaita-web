@@ -1,66 +1,105 @@
 // scss/_toolbar_view.scss
 @use 'variables';
+@use 'sass:color';
 
 .adw-toolbar-view {
   display: flex;
   flex-direction: column;
-  height: 100%; // Typically, a toolbar view would fill its parent.
-  background-color: var(--window-bg-color); // Or view-bg-color depending on context
+  height: 100%;
+  background-color: var(--window-bg-color); // Usually window background, content area might be --view-bg-color
+  position: relative; // For undershoot pseudo-elements if not using box-shadows on content
 
   .adw-toolbar-view-top-bar,
   .adw-toolbar-view-bottom-bar {
-    flex-shrink: 0; // Prevent bars from shrinking
-    // background-color: var(--headerbar-bg-color); // Default bar background
-    // color: var(--headerbar-fg-color);
-    // border-bottom: 1px solid var(--headerbar-border-color); // For top bar
-    // border-top: 1px solid var(--headerbar-border-color); // For bottom bar
-    // padding: var(--spacing-xs) var(--spacing-m); // Default padding for bars
-    // transition for reveal/hide if using max-height or transform
-    // transition: max-height 0.2s ease-out, opacity 0.2s ease-out, visibility 0.2s;
-    // overflow: hidden; // Important for max-height transitions
+    flex-shrink: 0;
+    z-index: 1; // Ensure bars are above content for shadow effects
+    // Default bar style (flat, relies on headerbar inside for visuals)
+    background-color: var(--headerbar-bg-color); // Bars take headerbar bg
+    color: var(--headerbar-fg-color);
 
-    // &.revealed { // If using class-based transitions
-    //   max-height: 200px; // Example max height
-    //   opacity: 1;
-    //   visibility: visible;
-    // }
-    // &:not(.revealed) {
-    //    max-height: 0;
-    //    opacity: 0;
-    //    visibility: hidden;
-    //    padding-top: 0;
-    //    padding-bottom: 0;
-    //    border-width: 0;
-    // }
+    // If the bar itself is styled (not just the headerbar within it)
+    // These styles are based on AdwToolbarStyle from Libadwaita
+    &.flat {
+      // The headerbar inside should also be flat
+      box-shadow: none;
+      border-bottom-color: transparent; // For top bar
+      border-top-color: transparent;    // For bottom bar
+      .adw-header-bar { // Assuming headerbar is a direct child or styled this way
+        border-bottom-color: transparent;
+        box-shadow: none;
+      }
+    }
+
+    &.raised {
+      // Raised style gives a shadow to the bar itself
+      // This is a generic shadow, Libadwaita's might be more nuanced
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      // Ensure headerbar inside doesn't have conflicting bottom border if it's also default
+      .adw-header-bar {
+         border-bottom-color: transparent; // Shadow comes from the bar itself
+      }
+    }
+
+    &.raised-border {
+      // This style applies a distinct border to the bar
+      // border-color should be --headerbar-darker-shade-color
+    }
   }
 
-  // Assuming direct children of slot are the actual headerbar/actionbar components
-  .adw-toolbar-view-top-bar ::slotted(adw-header-bar),
-  .adw-toolbar-view-top-bar ::slotted(header) { // For native header
-    border-bottom: 1px solid var(--headerbar-border-color);
+  .adw-toolbar-view-top-bar {
+    // Default border from the AdwHeaderBar inside it is usually var(--headerbar-shade-color)
+    // If .raised-border is on this bar:
+    &.raised-border {
+      border-bottom: var(--border-width) solid var(--headerbar-darker-shade-color);
+      .adw-header-bar { border-bottom-color: transparent; } // Avoid double border
+    }
   }
-
-  .adw-toolbar-view-bottom-bar ::slotted(adw-header-bar), // Though less common for bottom
-  .adw-toolbar-view-bottom-bar ::slotted(footer), // For native footer or action bar
-  .adw-toolbar-view-bottom-bar ::slotted(.adw-action-bar) { // If an action-bar class is used
-     border-top: 1px solid var(--headerbar-border-color);
+  .adw-toolbar-view-bottom-bar {
+    // Default border from AdwHeaderBar inside (if used) would be its top border.
+    // If .raised-border is on this bar:
+    &.raised-border {
+      border-top: var(--border-width) solid var(--headerbar-darker-shade-color);
+       .adw-header-bar { border-top-color: transparent; }
+    }
   }
-
 
   .adw-toolbar-view-content {
     flex-grow: 1;
-    overflow-y: auto; // Main content is usually scrollable
-    padding: var(--spacing-xl); // Provide default padding for the main content area
+    overflow: auto; // Scrollable content area
+    // padding: var(--spacing-xl); // Content itself should manage its padding usually
+    background-color: var(--view-bg-color); // Content area often has view background
+
+    // Undershoot indicator styles
+    // These classes would be toggled by JS based on scroll position.
+    // Using pseudo-elements for a softer shadow that doesn't affect layout.
+    position: relative; // Needed for absolute positioning of pseudo-elements
+
+    &::before, &::after { // For top and bottom undershoots
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 6px; // Height of the shadow gradient
+      z-index: 0; // Below content but visible if content bg is transparent at edges
+      opacity: 0;
+      transition: opacity 0.15s ease-in-out;
+      pointer-events: none;
+    }
+
+    &::before { // Top undershoot
+      top: 0;
+      background: linear-gradient(to bottom, var(--shade-color), transparent);
+    }
+    &::after { // Bottom undershoot
+      bottom: 0;
+      background: linear-gradient(to top, var(--shade-color), transparent);
+    }
+
+    &.undershoot-top::before,
+    &.undershoot-bottom::after {
+      opacity: 0.5; // Make shadow visible
+    }
+    // Horizontal undershoots would need ::start and ::end pseudo elements or different logic
+    // For now, focusing on vertical, which is most common for ToolbarView.
   }
 }
-
-// Dark theme adjustments if needed, though variables should cover most.
-// .dark-theme .adw-toolbar-view,
-// body.dark-theme .adw-toolbar-view {
-//   .adw-toolbar-view-top-bar,
-//   .adw-toolbar-view-bottom-bar {
-//     background-color: var(--headerbar-bg-color);
-//     color: var(--headerbar-fg-color);
-//     border-color: var(--headerbar-border-color);
-//   }
-// }

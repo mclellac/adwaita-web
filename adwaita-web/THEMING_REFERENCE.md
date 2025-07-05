@@ -1,43 +1,224 @@
-# Adwaita Web Theming Reference
+# Adwaita Skin Theming Reference
 
-This document outlines the canonical color values used in Adwaita theming, which `adwaita-web` aims to replicate. These serve as a reference for development and contributions.
+This document outlines the CSS Custom Properties provided by Adwaita Skin for theming, aiming to align with Libadwaita 1.8.beta.
+All color definitions are managed in `scss/_variables.scss`.
 
-All color definitions are managed via SASS variables and CSS Custom Properties in `scss/_variables.scss`.
+## Themes
 
-## Light Theme
+Adwaita Skin supports a **light theme** (default) and a **dark theme**. The dark theme is activated by adding the class `theme-dark` to a root HTML element (e.g., `<html>` or `<body>`).
 
-Key principle: The overall window is a very light grey, with pure white elements (like cards, rows, buttons, inputs) on top of it. Sidebars are typically a shade between the window background and pure white.
+## Core UI Colors
 
-| Element Semantic Name     | Target Hex Value | Notes                                                        | Corresponding SCSS/CSS Variable (Primary)      |
-|---------------------------|------------------|--------------------------------------------------------------|------------------------------------------------|
-| Window Background         | `#fafafb`        | Main application background.                                 | `$adw-window-background-light`, `--window-bg-color` |
-| View Background           | `#fafafb`        | Background for larger content areas like listbox backdrops.    | `--view-bg-color` (derived from `$adwaita-window-background-light`) |
-| Widget Background         | `#ffffff`        | Buttons, Entries, List Rows (on views), Cards.               | `$adw-light-1`, `--button-bg-color`, `--input-bg-color`, `--list-row-bg-color`, `--card-bg-color` (often defaults to `--window-bg-color` but should be white for cards on `#fafafb` views) |
-| Headerbar Background      | `#fafafb`        | Usually matches window background.                           | `$headerbar-background-color-light` (derived from `$adw-window-background-light`) |
-| Sidebar Background        | `#f2f2f2`        | Slightly darker than window, lighter than some old Adwaita elements. | `$adw-sidebar-background-light`, `--sidebar-bg-color` |
-| Text (Primary)            | `rgba(0,0,0,0.8)`| Dark grey, not pure black.                                 | `$text-color-light`, `--text-color`             |
-| Text (Secondary)          | `rgba(0,0,0,0.55)`| Lighter grey for subtitles, less important text.             | `$text-color-secondary-light`, `--text-color-secondary` |
-| Borders/Dividers          | `rgba(0,0,0,0.15)` for general borders, `rgba(0,0,0,0.1)` for dividers | Subtle dark lines.                                           | `$border-color-light`, `$divider-color-light`, `--border-color`, `--divider-color` |
-| Accent Color (Default)    | `$adw-blue-3` (`#3584e4`) | Default accent for selections, focus rings.                | `--accent-bg-color` (bg), `--accent-color` (fg/border) |
-| Listbox/Popover Shadow    | complex          | Subtle, multi-layered shadow.                                | `--listbox-box-shadow` (see `_variables.scss`)   |
+These variables define the primary colors for different UI states and elements. They change between light and dark themes.
 
-_Note on Card Backgrounds_: While individual cards are `#ffffff`, if a view area itself is styled like a card (e.g. a preferences page), that view area would be `#fafafb`. The term "Card" here refers to distinct card elements placed *within* a view or window. The `adwaita-web` library's general `.adw-card` in `_box.scss` defaults its `--card-bg-color` to `var(--window-bg-color)`. For the app-demo, specific card components like `.blog-content-card` correctly use this when the window background is `#fafafb`. If a card is meant to be pure white, it should explicitly set its background to `$adwaita-light-1` or the equivalent CSS var. Currently, the app-demo cards will correctly pick up the intended pure white via `--list-row-bg-color` or by being on `--window-bg-color` if the view itself isn't distinct. This might need refinement if cards are placed directly on the main window background and are expected to be white. For now, the primary target is that elements *on* a view (like rows) or distinct interactive elements (buttons, inputs) are pure white.
+### Accent Colors
+Used for interactive elements, selections, and to highlight important actions. The default accent is **Blue**.
+To change the active accent color, apply a class like `.accent-green`, `.accent-red`, etc., to a root element.
 
-## Dark Theme
+*   `--accent-bg-color`: Background color for accented elements (e.g., suggested action buttons, selected list rows).
+    *   Default (Blue): `#3584e4` (Light & Dark)
+*   `--accent-fg-color`: Foreground color (text/icons) on top of `--accent-bg-color`.
+    *   Default (Blue): `#ffffff` (Light & Dark)
+*   `--accent-color`: Standalone accent color, typically for text or icons on a neutral background (e.g., flat suggested button text, focused entry border).
+    *   Default (Blue, Light Theme): `#0461be`
+    *   Default (Blue, Dark Theme): `#81d0ff`
 
-Key principle: Dark grey backgrounds with slightly lighter grey surfaces for interactive elements or content areas.
+**Available Accent Classes (apply to `html` or `body`):**
+`.accent-blue`, `.accent-teal`, `.accent-green`, `.accent-yellow`, `.accent-orange`, `.accent-red`, `.accent-pink`, `.accent-purple`, `.accent-slate`. Each class updates the three `--accent-*` variables above to their respective color values for the current theme (light/dark).
 
-| Element Semantic Name     | Target Hex Value | Notes                                                        | Corresponding SCSS/CSS Variable (Primary)      |
-|---------------------------|------------------|--------------------------------------------------------------|------------------------------------------------|
-| Window Background         | `#242424`        | Main application background.                                 | `$background-color-dark`, `--window-bg-color`    |
-| View Background           | `#303030`        | Background for larger content areas like listbox backdrops. Usually matches headerbar. | `--view-bg-color` (derived from `$headerbar-background-color-dark`) |
-| Widget Background         | `#3d3846`        | Buttons, Entries, List Rows (on views).                      | `$adw-dark-3`, `--button-bg-color`, `--input-bg-color`, `--list-row-bg-color` |
-| Headerbar Background      | `#303030`        |                                                              | `$headerbar-background-color-dark`             |
-| Sidebar Background        | `#303030`        | Usually matches headerbar or view background.                | `--sidebar-bg-color` (derived from `$headerbar-background-color-dark`) |
-| Text (Primary)            | `#eeeeec` or `rgba(255,255,255,0.87)` | Very light grey, not pure white for body text. Pure white for titles. | `$text-color-dark` (uses `$adw-light-1`), `--text-color` |
-| Text (Secondary)          | `rgba(255,255,255,0.7)` |                                                              | `$text-color-secondary-dark`, `--text-color-secondary` |
-| Borders/Dividers          | `rgba(255,255,255,0.15)` for general borders, `rgba(255,255,255,0.1)` for dividers | Subtle light lines.                                          | `$border-color-dark`, `$divider-color-dark`, `--border-color`, `--divider-color` |
-| Accent Color (Default)    | `$adw-blue-3` (`#3584e4`) for bg, `$adw-blue-2` (`#62a0ea`) for fg/border | Default accent for selections, focus rings.                | `--accent-bg-color` (bg), `--accent-color` (fg/border) |
-| Listbox/Popover Shadow    | complex          | Subtle, multi-layered shadow adapted for dark theme.         | `--listbox-box-shadow` (see `_variables.scss`)   |
+### Destructive Colors
+Used for actions that indicate a potentially dangerous operation (e.g., deleting).
 
-This document should be updated as more specific color decisions are made or if official Adwaita guidelines provide more explicit mappings for web usage.Tool output for `create_file_with_block`:
+*   `--destructive-bg-color`: Background for destructive action elements.
+    *   Light: `#e01b24`
+    *   Dark: `#c01c28`
+*   `--destructive-fg-color`: Foreground on destructive backgrounds.
+    *   Light & Dark: `#ffffff`
+*   `--destructive-color`: Standalone destructive color (text/icons on neutral background).
+    *   Light: `#c30000`
+    *   Dark: `#ff938c`
+
+### Success Colors
+Used to indicate a successful operation.
+
+*   `--success-bg-color`: Background for success elements.
+    *   Light: `#2ec27e`
+    *   Dark: `#26a269`
+*   `--success-fg-color`: Foreground on success backgrounds.
+    *   Light & Dark: `#ffffff`
+*   `--success-color`: Standalone success color.
+    *   Light: `#007c3d`
+    *   Dark: `#78e9ab`
+
+### Warning Colors
+Used to indicate a warning.
+
+*   `--warning-bg-color`: Background for warning elements.
+    *   Light: `#e5a50a`
+    *   Dark: `#cd9309`
+*   `--warning-fg-color`: Foreground on warning backgrounds.
+    *   Light & Dark: `rgb(0 0 0 / 80%)` (Dark text)
+*   `--warning-color`: Standalone warning color.
+    *   Light: `#905400`
+    *   Dark: `#ffc252`
+
+### Error Colors
+Used to indicate an error. Often similar to destructive colors.
+
+*   `--error-bg-color`: Background for error elements.
+    *   Light: `#e01b24`
+    *   Dark: `#c01c28`
+*   `--error-fg-color`: Foreground on error backgrounds.
+    *   Light & Dark: `#ffffff`
+*   `--error-color`: Standalone error color.
+    *   Light: `#c30000`
+    *   Dark: `#ff938c`
+
+## UI Surface Colors
+
+These variables define colors for various UI surfaces and regions.
+
+### Window Colors
+*   `--window-bg-color`: Main application window background.
+    *   Light: `#fafafb`
+    *   Dark: `#222226`
+*   `--window-fg-color`: Default foreground (text) color on window backgrounds.
+    *   Light: `rgb(0 0 6 / 80%)`
+    *   Dark: `#ffffff`
+
+### View Colors
+Used for main content areas within windows (e.g., text views, list box backgrounds if not carded).
+*   `--view-bg-color`:
+    *   Light: `#ffffff`
+    *   Dark: `#1d1d20`
+*   `--view-fg-color`: Default foreground on view backgrounds.
+    *   Light: `rgb(0 0 6 / 80%)`
+    *   Dark: `#ffffff`
+
+### Header Bar Colors
+Used for `AdwHeaderBar` and similar top/bottom bars in `AdwToolbarView`.
+*   `--headerbar-bg-color`:
+    *   Light: `#ffffff`
+    *   Dark: `#2e2e32`
+*   `--headerbar-fg-color`: Foreground (text/icons) on header bars.
+    *   Light: `rgb(0 0 6 / 80%)`
+    *   Dark: `#ffffff`
+*   `--headerbar-border-color`: Border color for elements within header bars (e.g., separators).
+    *   Light: `rgb(0 0 6 / 80%)`
+    *   Dark: `#ffffff`
+*   `--headerbar-backdrop-color`: Background when the window is unfocused.
+    *   Light: `#fafafb` (Same as `--window-bg-color`)
+    *   Dark: `#222226` (Same as `--window-bg-color`)
+*   `--headerbar-shade-color`: Subtle bottom border/shadow for header bars.
+    *   Light: `rgb(0 0 6 / 12%)`
+    *   Dark: `rgb(0 0 6 / 36%)`
+*   `--headerbar-darker-shade-color`: Darker border/shadow (e.g., for `ADW_TOOLBAR_RAISED_BORDER`).
+    *   Light: `rgb(0 0 6 / 12%)` (Note: Libadwaita seems to use same as normal shade for light)
+    *   Dark: `rgb(0 0 6 / 90%)`
+
+### Sidebar Colors
+Used for sidebars in `AdwNavigationSplitView`, `AdwOverlaySplitView`.
+*   `--sidebar-bg-color`:
+    *   Light: `#ebebed`
+    *   Dark: `#2e2e32`
+*   `--sidebar-fg-color`:
+    *   Light: `rgb(0 0 6 / 80%)`
+    *   Dark: `#ffffff`
+*   `--sidebar-backdrop-color`: Background when window is unfocused.
+    *   Light: `#f2f2f4`
+    *   Dark: `#28282c`
+*   `--sidebar-border-color`: Border separating sidebar from content.
+    *   Light: `rgb(0 0 6 / 7%)`
+    *   Dark: `rgb(0 0 6 / 36%)`
+*   `--sidebar-shade-color`: Scroll undershoots and transitions within sidebars.
+    *   Light: `rgb(0 0 6 / 7%)`
+    *   Dark: `rgb(0 0 6 / 25%)`
+
+*(Secondary sidebar variables like `--secondary-sidebar-bg-color` also exist with similar light/dark pairings).*
+
+### Card Colors
+Used for `.card` styled elements and `.boxed-list` list boxes.
+*   `--card-bg-color`:
+    *   Light: `#ffffff`
+    *   Dark: `rgb(255 255 255 / 8%)`
+*   `--card-fg-color`: Foreground (text) on cards.
+    *   Light: `rgb(0 0 6 / 80%)`
+    *   Dark: `#ffffff`
+*   `--card-shade-color`: Separators in boxed lists or inner border effect.
+    *   Light: `rgb(0 0 6 / 7%)`
+    *   Dark: `rgb(0 0 6 / 36%)`
+
+### Dialog Colors
+*   `--dialog-bg-color`:
+    *   Light: `#fafafb`
+    *   Dark: `#36363a`
+*   `--dialog-fg-color`:
+    *   Light: `rgb(0 0 6 / 80%)`
+    *   Dark: `#ffffff`
+*   `--dialog-backdrop-color`: Overlay color behind dialogs.
+    *   Default: `rgba(0,0,0,0.4)`
+*   `--dialog-box-shadow`: Shadow for dialogs.
+    *   Light: `0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)`
+    *   Dark: (Uses same definition, effect differs on dark backdrop)
+
+### Popover Colors
+*   `--popover-bg-color`:
+    *   Light: `#ffffff`
+    *   Dark: `#36363a`
+*   `--popover-fg-color`: (Usually same as `--window-fg-color`)
+    *   Light: `rgb(0 0 6 / 80%)`
+    *   Dark: `#ffffff`
+*   `--popover-shade-color`: Used for arrow border or undershoots within popovers.
+    *   Light: `rgb(0 0 6 / 7%)`
+    *   Dark: `rgb(0 0 6 / 25%)`
+*   `--popover-box-shadow`: Shadow for popovers.
+    *   Light: `0 2px 8px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)`
+    *   Dark: `0 2px 8px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25)`
+
+### Other UI Colors
+*   `--active-toggle-bg-color`: Background for active toggles in `AdwToggleGroup`.
+    *   Light: `#ffffff`
+    *   Dark: `rgb(255 255 255 / 20%)`
+*   `--active-toggle-fg-color`: Foreground for active toggles.
+    *   Light: `rgb(0 0 6 / 80%)`
+    *   Dark: `#ffffff`
+*   `--overview-bg-color`, `--overview-fg-color`: For `AdwTabOverview`.
+*   `--thumbnail-bg-color`, `--thumbnail-fg-color`: For tab thumbnails in `AdwTabOverview`.
+*   `--shade-color`: General subtle shade, e.g., for scroll undershoots.
+    *   Light: `rgb(0 0 6 / 7%)`
+    *   Dark: `rgb(0 0 6 / 25%)`
+*   `--scrollbar-outline-color`: For overlay scrollbars.
+    *   Light: `#ffffff`
+    *   Dark: `rgb(0 0 6 / 50%)`
+*   `--progress-bar-track-color`: Background of progress bar track. (Defaults to `--shade-color`)
+*   `--progress-bar-fill-color`: Fill color of progress bar. (Defaults to `--accent-bg-color`)
+*   `--spinner-color`: Color of the active part of a spinner. (Defaults to `--accent-color`)
+*   `--spinner-track-color`: Color of the inactive part of a spinner. (Defaults to `--shade-color`)
+
+## Fonts
+*   `--document-font-family`: Default sans-serif font stack.
+*   `--document-font-size`: Default base font size (e.g., `10pt`).
+*   `--monospace-font-family`: Default monospace font stack.
+*   `--monospace-font-size`: Default base font size for monospace.
+*   Typography scale variables used by utility classes like `.title-1`, etc.:
+    *   `--font-size-base`, `--font-size-small`, `--font-size-large`
+    *   `--title-1-font-size`, `--title-2-font-size`, `--title-3-font-size`, `--title-4-font-size`
+
+## Helper Variables
+These are used internally and can be leveraged for custom styling.
+*   `--border-opacity`: Opacity used with `currentColor` to derive `--border-color`.
+    *   Default: `0.15`
+*   `--dim-opacity`: Opacity for dimmed/secondary text or elements.
+    *   Default: `0.55`
+*   `--disabled-opacity`: Opacity for disabled elements.
+    *   Default: `0.5`
+*   `--border-color`: Dynamically calculated border color: `color-mix(in srgb, currentColor var(--border-opacity), transparent)`.
+*   `--window-radius`: Default radius for windows and dialogs (e.g., `12px`).
+*   `--border-radius-default`, `--border-radius-small`, `--border-radius-medium`, `--border-radius-large`: Standard border radii.
+*   `--border-width`: Default border width (e.g., `1px`).
+*   `--focus-ring-width`: Width of focus rings (e.g., `2px`).
+*   `--focus-ring-color`: Color of focus rings (defaults to `var(--accent-color)`).
+*   Spacing variables: `--spacing-xxs` (3px) to `--spacing-xxl` (36px).
+
+## GNOME Color Palette
+The full GNOME color palette (e.g., `--blue-1` to `--blue-5`, `--green-1` to `--green-5`, etc.) is also available as CSS custom properties for direct use. Refer to `scss/_variables.scss` or Libadwaita documentation for the full list.

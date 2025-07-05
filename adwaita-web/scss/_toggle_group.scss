@@ -1,177 +1,196 @@
 // SCSS for Adwaita Toggle Group (Pure CSS Adwaita Skin Version)
+// Based on Libadwaita 1.7 AdwToggleGroup
 @use 'variables';
 @use 'mixins';
-// Assumes _button.scss provides styles for .adw-button and .adw-button.active
 
 .adw-toggle-group {
     display: inline-flex;
-    border-radius: var(--button-border-radius); // Group rounding, especially for linked style
+    align-items: center; // Align items vertically
+    // Default appearance is like a set of individual buttons.
+    // If they are standard .adw-button, they will have their own borders.
+    // Gap between them if not linked:
+    gap: var(--spacing-xxs); // Small gap for unlinked toggles
 
-    // Default: individual buttons with their own styling, separated by a small gap
-    // This assumes .adw-button children will have their own borders/backgrounds.
-    // If buttons are flat by default, this might look like just spaced flat buttons.
-    gap: 1px; // Small gap to visually separate buttons if they have borders
+    // Child toggles (assuming .adw-button or a dedicated .adw-toggle class)
+    // The .active class on a child toggle uses specific active-toggle variables.
+    > .adw-button.active, // If using .adw-button as toggles
+    > .adw-toggle.active { // If using a dedicated .adw-toggle class
+        background-color: var(--active-toggle-bg-color);
+        color: var(--active-toggle-fg-color);
+        // Border might also change, or be removed if the background provides enough contrast
+        border-color: var(--active-toggle-bg-color); // Or a slightly darker shade of it
+        box-shadow: none; // Usually no extra shadow for active toggle button itself
+    }
 
-    // Linked style (Segmented button appearance)
+    // Linked style (like GtkBox with .linked style class)
+    // Libadwaita AdwToggleGroup does not use .linked itself, but its children can be .linked
+    // This style is for when the group ITSELF should look like one continuous element.
+    // This is more akin to the old Adwaita GtkButton .linked style.
     &.linked {
-        // For the "joined buttons" look, often the group itself has no border/bg,
-        // or it has one that contains the buttons.
-        // Assuming buttons inside are styled by .adw-button.
-        // The .adw-button.flat might be common here.
-        border: var(--button-border-width) solid var(--button-border-color);
-        // background-color: var(--button-bg-color); // Optional: if group needs a background
-        overflow: hidden; // Important for child border radius clipping if group has border/bg
+        gap: 0; // No gap for linked items
+        border: var(--border-width) solid var(--border-color);
+        border-radius: var(--border-radius-default);
+        overflow: hidden; // Clip children to the group's border-radius
 
-        .adw-button {
-            border-radius: 0; // No individual rounding
-            border-right-width: 0; // Remove right border for all but last
-            // Ensure buttons don't have their own left/right borders if group provides the outer one
-            border-left-width: 0;
-            margin-left: 0; // Remove any default margins
+        > .adw-button, // Target .adw-button or .adw-toggle if that's used
+        > .adw-toggle {
+            border-radius: 0;
+            border-width: 0; // Remove individual borders first
 
-            // If buttons are not flat, they need to "lose" their individual side borders
-            // to merge. If they are flat, this is less of an issue.
-            // The current .adw-button is not flat by default.
+            &:not(:last-child) {
+                border-right-width: var(--border-width);
+                border-right-style: solid;
+                border-right-color: var(--border-color);
+            }
 
             &:first-child {
-                border-top-left-radius: var(--button-border-radius);
-                border-bottom-left-radius: var(--button-border-radius);
-                border-left-width: var(--button-border-width); // First button gets its left border
+                border-top-left-radius: inherit; // Inherit from parent .linked
+                border-bottom-left-radius: inherit;
             }
-
             &:last-child {
-                border-top-right-radius: var(--button-border-radius);
-                border-bottom-right-radius: var(--button-border-radius);
-                border-right-width: var(--button-border-width); // Last button gets its right border
+                border-top-right-radius: inherit;
+                border-bottom-right-radius: inherit;
             }
 
-            // Ensure borders between buttons are consistent
-            &:not(:last-child) {
-              border-right: var(--button-border-width) solid var(--button-border-color);
+            // Active state within a linked group
+            &.active {
+                border-color: var(--active-toggle-bg-color); // Border matches bg
             }
-
-
-            &:focus, &.focus, &:focus-visible {
+             &:focus-visible {
                 position: relative; // Ensure focus ring is drawn correctly over adjacent buttons
                 z-index: 1;
-                 // Parent .adw-split-button handles main focus ring, remove from children if too noisy
-                outline: none;
-            }
-
-            // Active state for linked buttons (already handled by .adw-button.active)
-            &.active {
-                // border-color: var(--accent-bg-color); // Border matches accent bg if not flat
-                // If flat, the background will provide the visual.
-                // For non-flat active linked, it might need a stronger border or distinct look.
-                // z-index: 2; // Ensure active button is visually on top if borders overlap
+                // Focus ring handled by .adw-button's default focus
             }
         }
     }
 
-    // Flat style for the group itself (buttons inside might also be .flat)
+    // Flat style for the Toggle Group (AdwToggleGroup.flat)
+    // "makes the group look like a series of flat buttons"
     &.flat {
-        background-color: transparent;
-        border: none; // No border for the group itself
+        gap: 0; // No gap for flat group
+        // The group itself has no border or background.
+        // Buttons inside are styled as flat.
+        > .adw-button,
+        > .adw-toggle {
+            @extend .adw-button.flat; // Inherit flat button appearance (transparent bg, no border)
 
-        // If not linked, flat buttons are just spaced out
-        &:not(.linked) {
-            gap: var(--spacing-xs);
-            .adw-button {
-                // Standard .adw-button.flat styling applies
+            &:not(:last-child) {
+                // Separator for flat linked buttons (subtle)
+                border-right: var(--border-width) solid var(--border-color);
+            }
+
+            &.active {
+                // Active flat toggle still uses active-toggle colors
+                background-color: var(--active-toggle-bg-color);
+                color: var(--active-toggle-fg-color);
+                border-color: transparent; // No border for active flat toggle usually
             }
         }
-        // If .flat.linked, the .linked style needs to adapt:
+        // If .flat and .linked are combined, the above .flat > .adw-button rules for separators apply.
+        // The outer .linked border is removed by .flat.
         &.linked {
-            border: none; // No outer border for flat linked group
-            .adw-button {
-                border-color: transparent; // No borders for internal flat linked buttons
-                &:not(:last-child) {
-                     border-right: var(--button-border-width) solid var(--divider-color); // Subtle separator for flat linked
-                }
-                &:not(.active) {
-                    background-color: transparent; // Ensure non-active are fully transparent
-                }
-                // .active state is handled by .adw-button.active (gets a background)
-            }
+            border: none;
         }
     }
 
-    // Round style (pill shape for the group)
+    // Round style for the Toggle Group (AdwToggleGroup.round)
+    // "makes the group, as well as toggles inside it rounded"
     &.round {
-        border-radius: var(--pill-button-border-radius); // Fully rounded group
-        .adw-button {
-            border-radius: 0; // Individual buttons lose rounding if inside a pill group
-            &:first-child {
-                border-top-left-radius: var(--pill-button-border-radius);
-                border-bottom-left-radius: var(--pill-button-border-radius);
-            }
-            &:last-child {
-                border-top-right-radius: var(--pill-button-border-radius);
-                border-bottom-right-radius: var(--pill-button-border-radius);
+        border-radius: var(--pill-button-border-radius); // Makes the group pill-shaped if linked
+
+        &:not(.linked) { // If not linked, individual toggles become pills
+            gap: var(--spacing-xxs);
+            > .adw-button,
+            > .adw-toggle {
+                border-radius: var(--pill-button-border-radius);
             }
         }
-        // If flat and round, the active button might also get fully rounded
-        // This depends on how .adw-button.active and .adw-button.flat interact
-        // For a pill group, usually only the ends are rounded, active item is square within.
+
+        &.linked { // If linked and round, only ends of group are rounded
+             overflow: hidden; // Ensure children clip to pill shape
+            > .adw-button,
+            > .adw-toggle {
+                border-radius: 0; // Inner buttons are square
+                &:first-child {
+                    border-top-left-radius: var(--pill-button-border-radius);
+                    border-bottom-left-radius: var(--pill-button-border-radius);
+                }
+                &:last-child {
+                    border-top-right-radius: var(--pill-button-border-radius);
+                    border-bottom-right-radius: var(--pill-button-border-radius);
+                }
+            }
+        }
     }
 
     // Vertical orientation
     &.vertical {
         flex-direction: column;
-        border-radius: var(--button-border-radius); // Consistent radius for vertical group
+        gap: var(--spacing-xxs); // Default gap for vertical unlinked
 
         &.linked {
-            .adw-button {
-                border-right-width: var(--button-border-width); // All get right border
-                border-bottom-width: 0; // Remove bottom border for all but last
-                border-left-width: var(--button-border-width); // All get left border
-
-                &:first-child {
-                    border-top-left-radius: var(--button-border-radius);
-                    border-top-right-radius: var(--button-border-radius);
-                    border-bottom-left-radius: 0;
-                    border-bottom-right-radius: 0;
+            gap: 0;
+            border-radius: var(--border-radius-default);
+            > .adw-button,
+            > .adw-toggle {
+                border-radius: 0;
+                border-width: 0; // Remove individual borders
+                &:not(:last-child) {
+                    border-bottom-width: var(--border-width);
+                    border-bottom-style: solid;
+                    border-bottom-color: var(--border-color);
+                }
+                 &:first-child {
+                    border-top-left-radius: inherit;
+                    border-top-right-radius: inherit;
                 }
                 &:last-child {
-                    border-bottom-left-radius: var(--button-border-radius);
-                    border-bottom-right-radius: var(--button-border-radius);
-                    border-bottom-width: var(--button-border-width);
-                }
-                 &:not(:last-child) {
-                    border-bottom: var(--button-border-width) solid var(--button-border-color);
+                    border-bottom-left-radius: inherit;
+                    border-bottom-right-radius: inherit;
                 }
             }
         }
+
+        &.flat {
+            gap: 0;
+             > .adw-button,
+             > .adw-toggle {
+                &:not(:last-child) {
+                    border-right-width: 0; // No side borders
+                    border-bottom: var(--border-width) solid var(--border-color);
+                }
+             }
+        }
+
         &.round { // Vertical pill
              border-radius: var(--pill-button-border-radius);
-            .adw-button {
-                &:first-child {
-                    border-top-left-radius: var(--pill-button-border-radius);
-                    border-top-right-radius: var(--pill-button-border-radius);
-                    border-bottom-left-radius: 0;
-                    border-bottom-right-radius: 0;
-                }
-                &:last-child {
-                    border-bottom-left-radius: var(--pill-button-border-radius);
-                    border-bottom-right-radius: var(--pill-button-border-radius);
-                    border-top-left-radius: 0;
-                    border-top-right-radius: 0;
+            &:not(.linked) { // Individual vertical pills
+                > .adw-button, > .adw-toggle { border-radius: var(--pill-button-border-radius); }
+            }
+            &.linked { // Linked vertical pill
+                > .adw-button, > .adw-toggle {
+                    border-radius: 0;
+                    &:first-child {
+                        border-top-left-radius: var(--pill-button-border-radius);
+                        border-top-right-radius: var(--pill-button-border-radius);
+                    }
+                    &:last-child {
+                        border-bottom-left-radius: var(--pill-button-border-radius);
+                        border-bottom-right-radius: var(--pill-button-border-radius);
+                    }
                 }
             }
-        }
-        &.flat.linked .adw-button:not(:last-child) {
-            border-right: var(--button-border-width) solid transparent; // No side border for flat vertical
-            border-bottom: var(--button-border-width) solid var(--divider-color); // Subtle separator
         }
     }
 }
 
-// No specific .adw-toggle-button class needed if .adw-button and .adw-button.active suffice.
-// The .active class on .adw-button should provide the "pressed" state.
-// Example:
-// .adw-button.active {
-//   background-color: var(--accent-bg-color);
-//   color: var(--accent-fg-color);
-//   border-color: var(--accent-bg-color);
+// AdwToggle specific styles (if .adw-button is not sufficient)
+// For now, assume .adw-button with .active state is used for toggles.
+// .adw-toggle {
+//   @extend .adw-button; // Inherit base button styles
+//   &.active {
+//     background-color: var(--active-toggle-bg-color);
+//     color: var(--active-toggle-fg-color);
+//     border-color: var(--active-toggle-bg-color); // Or a slightly darker shade
+//   }
 // }
-// This is already in _button.scss

@@ -1,37 +1,36 @@
 // SCSS for Adwaita Split Button (Pure CSS Adwaita Skin Version)
 @use 'variables';
 @use 'mixins';
+@use 'sass:color';
 
 .adw-split-button {
-  display: inline-flex; // Behaves like a single button unit
-  align-items: stretch; // Make both parts equal height
-  border-radius: var(--button-border-radius, var(--border-radius-default));
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: var(--border-radius-default);
   font-size: var(--font-size-base);
-  vertical-align: middle; // Align with other inline-flex elements
+  vertical-align: middle;
 
-  // Default appearance (not suggested, not destructive)
+  // Default appearance
   background-color: var(--button-bg-color);
-  border: var(--button-border-width, 1px) solid var(--button-border-color);
+  border: var(--border-width) solid var(--button-border-color);
   color: var(--button-fg-color);
-  box-shadow: none; // Adwaita buttons typically don't have outer box-shadow unless focused
+  box-shadow: none;
 
-  &:focus-within { // When either part has focus, show focus on the whole button
-    // Use a standard focus outline mixin or variables
+  &:focus-within {
     outline: var(--focus-ring-width) solid var(--focus-ring-color);
-    outline-offset: 2px; // Standard offset
+    outline-offset: 2px;
   }
 
-  // Action part (main button)
   .adw-split-button-action {
-    padding: var(--button-padding-vertical) var(--button-padding-horizontal);
+    padding: var(--spacing-s) var(--spacing-m);
     cursor: pointer;
     text-align: center;
-    flex-grow: 1; // Action part takes available space
-    border-radius: var(--button-border-radius, var(--border-radius-default)) 0 0 var(--button-border-radius, var(--border-radius-default));
-    transition: background-color var(--animation-duration-short) var(--animation-ease);
-    color: inherit; // Inherit color from .adw-split-button
-    background-color: transparent; // Will be colored by parent .adw-split-button or its variants
-    border: none; // Border is on the parent .adw-split-button
+    flex-grow: 1;
+    border-radius: var(--border-radius-default) 0 0 var(--border-radius-default);
+    transition: background-color 0.1s ease-out;
+    color: inherit;
+    background-color: transparent;
+    border: none;
 
     &:hover {
       background-color: var(--button-hover-bg-color);
@@ -39,29 +38,28 @@
     &:active {
       background-color: var(--button-active-bg-color);
     }
-    &:focus, &:focus-visible { // Individual focus styles are removed as parent handles it
+    &:focus, &:focus-visible {
       outline: none;
     }
   }
 
-  // Dropdown part (arrow button)
   .adw-split-button-dropdown {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--button-padding-vertical) var(--spacing-xs); // Less horizontal padding for arrow
+    padding: var(--spacing-s) var(--spacing-xs);
     cursor: pointer;
-    border-left: var(--button-border-width, 1px) solid var(--button-border-color); // Separator line
-    border-radius: 0 var(--button-border-radius, var(--border-radius-default)) var(--button-border-radius, var(--border-radius-default)) 0;
-    transition: background-color var(--animation-duration-short) var(--animation-ease);
-    color: inherit; // Inherit color
+    border-left: var(--border-width) solid var(--button-border-color);
+    border-radius: 0 var(--border-radius-default) var(--border-radius-default) 0;
+    transition: background-color 0.1s ease-out;
+    color: inherit;
     background-color: transparent;
     border: none;
 
-    .adw-icon { // Assuming icon is passed as a child, e.g. <span class="adw-icon icon-pan-down-symbolic"></span>
-      width: variables.$icon-size-base * 0.75; // Smaller arrow icon
-      height: variables.$icon-size-base * 0.75;
-      // fill is currentColor by default for icons
+    .adw-icon {
+      width: calc(var(--icon-size-base) * 0.75);
+      height: calc(var(--icon-size-base) * 0.75);
+      fill: currentColor;
     }
 
     &:hover {
@@ -75,11 +73,10 @@
     }
   }
 
-  // Suggested action variant
   &.suggested-action {
     background-color: var(--accent-bg-color);
     color: var(--accent-fg-color);
-    border-color: transparent; // Suggested buttons often have no border or accent border
+    border-color: var(--accent-bg-color);
 
     .adw-split-button-action {
       &:hover {
@@ -90,7 +87,7 @@
       }
     }
     .adw-split-button-dropdown {
-      border-left-color: var(--accent-bg-active-color); // Or a slightly darker shade of accent-bg
+      border-left-color: #{rgba(variables.$accent-default-fg, 0.3)}; // Use SASS rgba for a subtle border with accent's FG
       &:hover {
         background-color: var(--accent-bg-hover-color);
       }
@@ -100,11 +97,10 @@
     }
   }
 
-  // Destructive action variant
   &.destructive-action {
     background-color: var(--destructive-bg-color);
     color: var(--destructive-fg-color);
-    border-color: transparent;
+    border-color: var(--destructive-bg-color);
 
     .adw-split-button-action {
       &:hover {
@@ -115,7 +111,7 @@
       }
     }
     .adw-split-button-dropdown {
-      border-left-color: var(--destructive-bg-active-color);
+      border-left-color: #{rgba(variables.$accent-default-fg, 0.3)}; // Use SASS rgba for a subtle border with destructive's FG
       &:hover {
         background-color: var(--destructive-bg-hover-color);
       }
@@ -125,46 +121,39 @@
     }
   }
 
-
-  // Disabled state
   &[disabled],
-  &.disabled { // If using a class for disabled
-    background-color: var(--button-disabled-bg-color);
-    color: var(--button-disabled-fg-color);
-    border-color: var(--button-disabled-border-color);
-    opacity: var(--opacity-disabled);
+  &.disabled {
+    background-color: var(--button-bg-color);
+    color: var(--button-fg-color);
+    border-color: var(--button-border-color);
+    opacity: var(--button-disabled-opacity);
     cursor: not-allowed;
-    pointer-events: all !important; // Ensure wrapper is not interactive
+    pointer-events: all !important;
 
     .adw-split-button-action,
     .adw-split-button-dropdown {
-      background-color: transparent !important; // Ensure parts don't show hover/active colors
+      background-color: transparent !important;
       color: inherit !important;
       cursor: not-allowed;
-      pointer-events: none; // Disable pointer events on children
+      pointer-events: none;
     }
     .adw-split-button-dropdown {
-         border-left-color: var(--button-disabled-border-color);
+         border-left-color: var(--button-border-color);
     }
 
-    // Handle disabled suggested/destructive variants
     &.suggested-action {
-        background-color: var(--accent-bg-color); // Keep base color but opacity handles visual disable
-        border-color: transparent;
+        background-color: var(--accent-bg-color);
+        border-color: var(--accent-bg-color);
          .adw-split-button-dropdown {
-            border-left-color: var(--accent-bg-active-color); // Or transparent
+            border-left-color: #{rgba(variables.$accent-default-fg, 0.3)};
         }
     }
     &.destructive-action {
         background-color: var(--destructive-bg-color);
-        border-color: transparent;
+        border-color: var(--destructive-bg-color);
         .adw-split-button-dropdown {
-            border-left-color: var(--destructive-bg-active-color); // Or transparent
+            border-left-color: #{rgba(variables.$accent-default-fg, 0.3)};
         }
     }
   }
 }
-
-// Dark theme adjustments are handled by CSS variables.
-// .theme-dark .adw-split-button { ... }
-// &.suggested-action, &.destructive-action will use themed variables.

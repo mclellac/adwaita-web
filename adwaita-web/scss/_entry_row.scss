@@ -2,134 +2,118 @@
 @use 'variables';
 @use 'mixins';
 
-// AdwEntryRow is an AdwPreferencesRow
-// It typically exists within an .adw-list-box, which provides padding and separators.
-// If used standalone, it might need its own padding/margins.
-
 .adw-entry-row {
-  // Inherits .adw-row styles (display: flex, align-items: center, min-height, padding etc.)
-  // from being slotted into AdwRow or if AdwEntryRow's own shadow DOM root has .adw-row.
-  // The JS for AdwEntryRow creates a div with .adw-row and .adw-entry-row
-  @include mixins.row-base; // Applies common row styles like min-height, padding
-  background-color: var(--list-row-bg-color); // Ensure entry rows use the standard row background
-  border-bottom: none; // Ensure no individual border, listbox handles separators if applicable.
-                       // row-base mixin might also handle this, but explicit is fine.
-  gap: var(--spacing-m); // Standard gap between elements in a row
-  padding-top: var(--spacing-s);    // Override default vertical padding from row-base (9px)
-  padding-bottom: var(--spacing-s); // Override default vertical padding from row-base (9px)
+  @include mixins.row-base; // Applies common row styles
+  gap: var(--spacing-m);
+  // Vertical padding is often smaller for rows with inputs to align text baselines
+  padding-top: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
 
-  // Container for title and optional subtitle (matches JS structure: .adw-entry-row-text-content)
   .adw-entry-row-text-content {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    // No flex-grow here, let the entry take up space.
-    // color is inherited from .adw-row
+    flex-shrink: 0; // Prevent title area from shrinking too much
+    // flex-grow: 0; // Title part usually doesn't grow
   }
 
-  // Title for the entry row (matches JS structure: .adw-entry-row-title)
   .adw-entry-row-title {
     font-size: var(--font-size-base);
-    font-weight: normal; // Standard weight for preference row titles
-    color: var(--view-fg-color); // Changed from secondary-fg-color to view-fg-color for better contrast
-    // Libadwaita uses placeholder color for EntryRow titles that are also placeholders for the input
-    // but here the title is distinct from the input's placeholder.
-    // If it should act as a placeholder when entry is empty, JS would hide it.
-    // For now, style as a standard row title.
+    font-weight: variables.$font-weight-normal;
+    color: var(--window-fg-color);
+    line-height: 1.3; // Adjusted for better baseline alignment with entry
   }
 
-  // Subtitle (matches JS structure: .adw-entry-row-subtitle)
   .adw-entry-row-subtitle {
     font-size: var(--font-size-small);
-    color: var(--secondary-fg-color); // Subtitles are typically also secondary
-    opacity: 0.7; // Standard Adwaita subtitle opacity
+    color: var(--window-fg-color);
+    opacity: var(--dim-opacity); // Use dim-opacity for subtitles
+    line-height: 1.3;
   }
 
-  // The adw-entry component itself, when used inside an adw-entry-row
-  // The JS directly appends an <adw-entry> element with class .adw-entry-row-entry
   .adw-entry-row-entry.adw-entry {
     flex-grow: 1;
-    // Adwaita EntryRows often have flat/borderless entries integrated into the row.
-    // The row itself provides the visual grouping.
-    // The AdwEntry component might have its own border/bg by default.
-    // We need to override them here for the integrated look.
-    --entry-background-color: transparent;
-    --entry-border-color: transparent;
-    --entry-border-width: 0;
-    --entry-box-shadow: none;
-    --entry-padding-vertical: var(--spacing-xs); // Adjust if needed for alignment
-    --entry-padding-horizontal: 0; // No extra horizontal padding inside the entry, row handles it
-    min-width: 100px; // Ensure it has some minimum width
+    background-color: transparent;
+    border: none; // No border by default
+    box-shadow: none; // No inset shadow by default
+    padding: var(--spacing-xxs) 0; // Minimal vertical padding, no horizontal
+    line-height: 1.3; // Match title/subtitle line-height
+    min-width: 100px;
+
+    // Underline for focus, common in Adwaita preferences
+    border-bottom: var(--border-width) solid var(--border-color); // Subtle underline by default
+    border-radius: 0; // Ensure no radius from base .adw-entry
 
     &:focus,
-    &.focus, // If AdwEntry component uses .focus class
-    &:focus-within { // If AdwEntry has internal input
-      // Standard Adwaita focus for entries in rows: accent colored bottom border
-      --entry-border-color: var(--accent-color); // This will be used by --_entry-focus-border-color in _entry.scss
-      --entry-border-width: 0 0 2px 0;           // Bottom border only for the main border (2px is standard for focus)
-      --entry-background-color: transparent;     // Keep transparent background on focus for integrated look
-      --entry-box-shadow: none; // Ensure no other shadows are present
-      --entry-focus-box-shadow-ring: none; // Explicitly disable the outer focus ring for integrated entries
+    &:focus-visible {
+      border-bottom-color: var(--accent-color);
+      border-bottom-width: 2px; // Thicker underline on focus
+      box-shadow: none; // No outer ring for embedded entries
     }
 
     &[disabled],
     &:disabled {
-      --entry-background-color: transparent;
-      // Opacity and text color for disabled state should be handled by the AdwEntry component itself
-      // or by the general .adw-entry-row[disabled] styles.
+      border-bottom-color: transparent; // No underline when disabled
+      // Opacity and text color handled by .adw-entry's disabled state
     }
   }
 
-  // When the row itself is disabled
+  // .property style class
+  // De-emphasizes title, emphasizes value (which might be the entry if not editable, or subtitle)
+  &.property {
+    .adw-entry-row-title {
+      font-size: var(--font-size-small);
+      opacity: var(--dim-opacity);
+    }
+    .adw-entry-row-subtitle, // If subtitle is used as value
+    .adw-entry-row-entry.adw-entry { // If entry is styled as value
+      font-weight: variables.$font-weight-bold; // Emphasize value
+      opacity: 1; // Ensure full opacity for value
+    }
+    // If the entry in a property row is meant to look like static text:
+    &.entry-as-value .adw-entry-row-entry.adw-entry {
+        border-bottom-color: transparent; // No underline
+        pointer-events: none; // Not interactive
+        cursor: default;
+        &:focus, &:focus-visible {
+            border-bottom-color: transparent;
+            box-shadow: none;
+        }
+    }
+  }
+
+  // .monospace style class
+  &.monospace {
+    // By default, applies to the entry part
+    .adw-entry-row-entry.adw-entry {
+      font-family: var(--monospace-font-family);
+    }
+    // If it's a property row, .monospace applies to the subtitle (value)
+    // This assumes the entry is hidden or styled as static text in property rows
+    // and the value is in the subtitle.
+    &.property .adw-entry-row-subtitle {
+      font-family: var(--monospace-font-family);
+    }
+    // If the entry itself is the value display in a property row:
+    &.property.entry-as-value .adw-entry-row-entry.adw-entry {
+        font-family: var(--monospace-font-family);
+    }
+  }
+
+
   &[disabled],
   &:disabled {
     .adw-entry-row-title,
     .adw-entry-row-subtitle {
-      opacity: var(--opacity-disabled);
-      color: var(--disabled-fg-color);
+      opacity: var(--disabled-opacity); // Global disabled opacity
+      // color will be handled by the .adw-entry's own disabled state if text color needs to change
     }
-    // The .adw-entry inside will also apply its disabled styles
-    // (e.g., text color, pointer-events)
-    .adw-entry-row-entry.adw-entry {
-        // Ensure disabled styles from AdwEntry are effective
-        // or override if necessary specifically for entry row context.
-    }
+    // .adw-entry-row-entry.adw-entry will handle its own disabled state
   }
 
-  // Support for prefix/suffix widgets (if AdwEntryRow JS adds slots/containers for them)
-  // Assuming they would be direct children of .adw-entry-row or handled by its internal structure
-  .adw-entry-row-prefix {
-    // styles for prefix container
-    display: flex;
-    align-items: center;
-  }
+  .adw-entry-row-prefix,
   .adw-entry-row-suffix {
-    // styles for suffix container (e.g., for an apply button)
     display: flex;
     align-items: center;
   }
 }
-
-// When an EntryRow is used within a ListBox, some styles are inherited or provided by the ListBox context
-.adw-list-box > .adw-entry-row {
-  // Padding and border-bottom are typically handled by `.adw-list-box > .adw-row` general rules.
-  // If AdwEntryRow's shadow DOM root has `.adw-row`, it gets these from `_row.scss` via `@include mixins.row-base;`
-  // If it's a direct child, these might need to be explicitly set or ensured.
-  // The current AdwEntryRow JS component creates its own .adw-row div in its shadow DOM,
-  // so it should get padding from the row-base mixin.
-}
-
-// Dark theme adjustments are mostly handled by CSS variables.
-// Specific overrides can be placed here if variables are not sufficient.
-// body.dark-theme .adw-entry-row {
-//   .adw-entry-row-title {
-//     color: var(--secondary-fg-color); // Ensure it uses theme-aware var
-//   }
-//   .adw-entry-row-entry.adw-entry {
-//     &:focus,
-//     &.focus,
-//     &:focus-within {
-//       --entry-background-color: var(--view-bg-color); // Ensure themed focus background
-//     }
-//   }
-// }

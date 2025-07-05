@@ -1,38 +1,78 @@
 // adwaita-web/scss/_card.scss
 @use 'variables';
 @use 'mixins';
+@use 'sass:color';
 
-.adw-card {
-  background-color: var(--card-background-color, var(--window-bg-color));
-  border-radius: var(--card-border-radius, var(--border-radius-large));
-  border: 1px solid var(--card-border-color, var(--borders-color)); // Using 'borders-color' from Adwaita variables
-  box-shadow: var(--card-box-shadow, var(--popover-box-shadow)); // Using popover-box-shadow as a sensible default
-  padding: var(--card-padding, var(--spacing-m));
-  display: flex; // Often cards are flex containers for their content
-  flex-direction: column; // Default to column layout
+// General .card style class from Libadwaita
+// https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html#boxed-lists-cards
+.adw-card, .card { // Allow .card as an alias for consistency with Libadwaita docs
+  background-color: var(--card-bg-color);
+  color: var(--card-fg-color); // Text color for content within the card
+  border-radius: var(--border-radius-large); // Libadwaita cards use a larger radius
+  padding: var(--spacing-m); // Default padding, can be overridden by specific components
 
-  // Suggested variables to be defined in _variables.scss (theme mixins):
-  // --card-background-color
-  // --card-border-radius
-  // --card-border-color
-  // --card-box-shadow
-  // --card-padding
-  // --card-hover-border-color (optional)
-  // --card-hover-box-shadow (optional)
+  // Libadwaita cards typically have a subtle outer shadow and an inner "border" created by card-shade-color
+  // The outer shadow is not explicitly defined as a variable in Libadwaita, but is part of the look.
+  // The --card-shade-color is used for internal separators in boxed lists or for an inner border effect.
+  // For a general card, we might apply a subtle shadow.
+  // Box shadow for cards: a subtle outer shadow.
+  // For the inner border effect common in boxed lists, that's usually applied to rows within.
+  // For a standalone card, it might just have the background and shadow.
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05);
 
-  &.flat {
-    border-color: transparent;
-    box-shadow: none;
+  // If a card is meant to look like a boxed list container, it might also have an effective "inner border"
+  // This could be approximated by an inset shadow using --card-shade-color or by styling child elements.
+  // For now, focusing on the standalone card appearance.
+
+  display: block; // Cards are usually block elements
+
+  &.activatable {
+    // From Libadwaita: "If a widget with the .card style class also has the .activatable style class,
+    // it will also have hover and active states similar to an activatable row inside a boxed list."
+    cursor: pointer;
+    transition: background-color 0.1s ease-out;
+
+    &:hover {
+      background-color: rgba(var(--card-fg-color-rgb), 0.05);
+    }
+    &:active {
+      background-color: rgba(var(--card-fg-color-rgb), 0.08);
+    }
+     &:focus, &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color), 0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05);
+    }
+  }
+}
+
+// `.adw-button.card` styling - when a button itself is styled as a card
+// Libadwaita: "If the .card style class is applied to a GtkButton, it will get these states automatically"
+.adw-button.card {
+  // Reset button's own padding, border, default background/color
+  padding: 0; // Card padding will apply
+  border: none;
+  background-color: var(--card-bg-color);
+  color: var(--card-fg-color);
+  border-radius: var(--border-radius-large);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05);
+  text-align: inherit; // Inherit text align from card content if any
+  display: block; // Make button behave like a block card
+
+  // Apply card's activatable hover/active states
+   &:hover {
+      background-color: rgba(var(--card-fg-color-rgb), 0.05);
+  }
+  &:active {
+      background-color: rgba(var(--card-fg-color-rgb), 0.08);
+  }
+  &:focus, &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color), 0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05);
   }
 
-  &.outlined {
-    // Keeps border, removes shadow if not desired with outline
-    box-shadow: none;
+  // Content inside the button should be padded by the card's padding.
+  // This assumes the button's direct children are the content.
+  > * {
+    padding: var(--spacing-m);
   }
-
-  // Optional: Hover effects for cards if desired as a base feature
-  // &.interactive:hover {
-  //   border-color: var(--card-hover-border-color, var(--accent-color));
-  //   box-shadow: var(--card-hover-box-shadow, 0 2px 4px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.07));
-  // }
 }

@@ -1,63 +1,65 @@
 // Styles for Adwaita Buttons (Adwaita Skin Version)
 
-@use "sass:color"; // For color.adjust if needed, though direct var() usage is preferred
-@use 'variables'; // Defines SASS color vars like $sass-accent-blue-light-color and CSS vars like --button-bg-color
-@use 'mixins'; // Reverted for debugging build hang
+@use "sass:color";
+@use 'variables';
+@use 'mixins';
 
+// Default Button Styling
+// Corresponds to a standard GtkButton
 .adw-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-s) var(--spacing-m); // Use CSS vars for spacing
+    padding: var(--spacing-s) var(--spacing-m);
     border-radius: var(--border-radius-default);
-    border: var(--border-width) solid var(--button-border-color);
-    background-color: var(--button-bg-color);
-    color: var(--button-fg-color);
+    border: var(--border-width) solid var(--border-color); // Default border color
+    background-color: var(--window-bg-color); // Libadwaita buttons are often on window or view bg
+    color: var(--window-fg-color);
     font-family: var(--document-font-family);
     font-size: var(--font-size-base);
-    font-weight: variables.$font-weight-bold; // SASS var for static value
-    line-height: variables.$line-height-base;   // SASS var for static value
+    font-weight: variables.$font-weight-bold;
+    line-height: variables.$line-height-base;
     text-align: center;
     text-decoration: none;
     white-space: nowrap;
     cursor: pointer;
-    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, color 0.15s ease-in-out;
     user-select: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 
+    // Standard button hover: slight darkening of background
     &:hover {
         background-color: var(--button-hover-bg-color);
-        border-color: var(--button-hover-border-color);
-        color: var(--button-hover-text-color);
     }
 
+    // Standard button active: slightly more pronounced darkening
     &:active {
         background-color: var(--button-active-bg-color);
-        border-color: var(--button-active-border-color);
     }
 
     &:focus, &:focus-visible {
         outline: none;
-        box-shadow: var(--focus-ring-width) solid var(--focus-ring-color); // Use CSS vars
+        box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
     }
 
     &.disabled, &[disabled] {
-        opacity: var(--opacity-disabled); // Use CSS var
+        color: var(--window-fg-color); // Disabled text color based on window fg
+        opacity: var(--disabled-opacity);
         cursor: not-allowed;
-        background-color: var(--button-disabled-bg-color) !important;
-        border-color: var(--button-disabled-border-color) !important;
-        color: var(--button-disabled-fg-color) !important;
+        // Background and border might not change, or become more desaturated.
+        // Libadwaita often just uses opacity.
         box-shadow: none !important;
         pointer-events: none;
     }
 
+    // Icon within a button
     .adw-icon, .icon, svg {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: variables.$icon-size-base; // SASS var
-        height: variables.$icon-size-base; // SASS var
+        width: var(--icon-size-base);
+        height: var(--icon-size-base);
         fill: currentColor;
 
         &:first-child:not(:last-child) {
@@ -68,154 +70,233 @@
         }
     }
 
+    // Suggested Action (.suggested-action)
+    // Uses accent colors.
     &.suggested-action {
-        background-color: var(--accent-bg-color); // Uses current accent
-        border-color: var(--accent-bg-color); // Or a slightly darker var if defined: var(--accent-bg-border-color, var(--accent-bg-color))
+        background-color: var(--accent-bg-color);
+        border-color: var(--accent-bg-color); // Border matches bg
         color: var(--accent-fg-color);
 
         &:hover {
             background-color: var(--accent-bg-hover-color);
-            border-color: var(--accent-bg-hover-color);
-            // color: var(--accent-fg-hover-color, var(--accent-fg-color));
+            border-color: var(--accent-bg-hover-color); // Keep border consistent with bg
         }
 
         &:active {
             background-color: var(--accent-bg-active-color);
-            border-color: var(--accent-bg-active-color);
+            border-color: var(--accent-bg-active-color); // Keep border consistent with bg
         }
     }
 
+    // Destructive Action (.destructive-action)
+    // Uses destructive colors.
     &.destructive-action {
         background-color: var(--destructive-bg-color);
-        // Use the specific --destructive-border-color if available, otherwise fallback to bg color
-        border-color: var(--destructive-border-color, var(--destructive-bg-color));
+        border-color: var(--destructive-bg-color); // Border matches bg
         color: var(--destructive-fg-color);
 
         &:hover {
             background-color: var(--destructive-bg-hover-color);
-            // Use the specific --destructive-border-color for hover if available, else hover-bg
-            border-color: var(--destructive-border-color, var(--destructive-bg-hover-color));
+            border-color: var(--destructive-bg-hover-color);
         }
 
         &:active {
             background-color: var(--destructive-bg-active-color);
-            // Use the specific --destructive-border-color for active if available, else active-bg
-            border-color: var(--destructive-border-color, var(--destructive-bg-active-color));
+            border-color: var(--destructive-bg-active-color);
         }
     }
 
+    // Flat Button (.flat)
+    // Looks like a label/icon until hovered.
     &.flat {
         background-color: transparent;
         border-color: transparent;
-        color: var(--text-color); // Use the default text color for flat buttons
+        color: var(--window-fg-color); // Default text color
 
         &:hover {
             background-color: var(--button-flat-hover-bg-color);
-            color: var(--text-color); // Or a specific hover text color if needed
         }
 
         &:active {
             background-color: var(--button-flat-active-bg-color);
         }
 
+        // Flat + Suggested Action
         &.suggested-action {
-            color: var(--accent-color); // Text color is the standalone accent color
+            color: var(--accent-color); // Standalone accent color for text
             background-color: transparent;
             border-color: transparent;
             &:hover {
-                color: var(--accent-color); // Or a hover variant if defined
-                background-color: var(--button-flat-hover-bg-color);
+                color: var(--accent-color); // Text color remains accent
+                // Background uses a mix of accent-color (text version) and window-bg, or a specific flat-accent-hover variable
+                background-color: rgba(var(--accent-color-rgb, 0,0,255), 0.1); // Fallback if accent-color-rgb not set
+            }
+             &:active {
+                background-color: rgba(var(--accent-color-rgb, 0,0,255), 0.15);
             }
         }
+
+        // Flat + Destructive Action
         &.destructive-action {
-            color: var(--destructive-color);
+                color: var(--destructive-color); // Standalone destructive color for text
             background-color: transparent;
             border-color: transparent;
             &:hover {
                 color: var(--destructive-color);
-                background-color: var(--button-flat-hover-bg-color);
+                    background-color: rgba(var(--destructive-color-rgb, 255,0,0), 0.1); // Fallback if destructive-color-rgb not set
+            }
+            &:active {
+                    background-color: rgba(var(--destructive-color-rgb, 255,0,0), 0.15);
             }
         }
     }
 
+    // Opaque Button (.opaque) - DEPRECATED by Libadwaita 1.6
+    // Advise: Use .suggested-action and override accent vars for custom colors.
+    // No specific styling here anymore, or add a deprecation comment.
+    &.opaque {
+        // DEPRECATED: Use .suggested-action and override --accent-*-color variables.
+    }
+
+
+    // Circular Button (.circular)
     &.circular {
-        padding: var(--circular-button-padding); // SASS var that points to CSS var
-        border-radius: variables.$circular-button-border-radius; // SASS var
-        width: var(--circular-button-size); // SASS var that points to CSS var
-        height: var(--circular-button-size);
-        min-width: var(--circular-button-size);
+        padding: var(--spacing-xs); // Consistent padding for circular
+        border-radius: 50%; // Fully round
+        // Width/height should be determined by content (icon size + padding)
+        // Or set explicitly if fixed size is needed.
+        // For fixed size based on icon:
+        // width: calc(#{variables.$icon-size-base} + (var(--spacing-xs) * 2) + (var(--border-width) * 2));
+        // height: calc(#{variables.$icon-size-base} + (var(--spacing-xs) * 2) + (var(--border-width) * 2));
+        // min-width: auto;
+
 
         .adw-icon, .icon, svg {
-            margin: 0;
-            width: variables.$icon-size-large; // SASS var
-            height: variables.$icon-size-large; // SASS var
+            margin: 0; // No extra margin for icon inside circular button
+            width: var(--icon-size-base);
+            height: var(--icon-size-base);
+        }
+         // Libadwaita .circular buttons with icons often use larger icons
+        &.image-button .adw-icon, &.image-button .icon, &.image-button svg { // Assuming .image-button or similar if icon is primary content
+             width: var(--icon-size-large); // Larger icon for circular icon buttons
+             height: var(--icon-size-large);
         }
     }
 
+    // Pill Button (.pill)
     &.pill {
-        border-radius: var(--pill-button-border-radius); // SASS var that points to CSS var
+        border-radius: 100px; // Large value for pill shape
     }
 
-    &.active { // Toggle active state
-        background-color: var(--button-active-toggle-bg-color);
-        border-color: var(--button-active-toggle-border-color);
-        color: var(--button-active-toggle-text-color);
+    // Active state for Toggle Buttons (if .adw-button is used for toggle)
+    // Libadwaita uses GtkToggleButton, which might have its own specific styling.
+    // This is a generic .active class for adw-button if it acts as a toggle.
+    &.active {
+        // Standard active toggle: often similar to a regular button's :active state, but persistent
+        background-color: var(--button-active-bg-color); // Use the pre-calculated active background
 
         &.suggested-action {
+             // Persistent suggested action state
             background-color: var(--accent-bg-active-color); // Use active accent bg
             border-color: var(--accent-bg-active-color);
             color: var(--accent-fg-color);
         }
         &.flat {
-            background-color: var(--button-flat-active-bg-color);
-            &.suggested-action { color: var(--accent-color); }
-            &.destructive-action { color: var(--destructive-color); }
+            background-color: var(--button-flat-active-bg-color); // Use pre-calculated flat active
+            &.suggested-action {
+                color: var(--accent-color);
+                background-color: rgba(var(--accent-color-rgb, 0,0,255), 0.15); // Use rgba for flat active suggested
+            }
+            &.destructive-action {
+                color: var(--destructive-color);
+                background-color: rgba(var(--destructive-color-rgb, 255,0,0), 0.15); // Use rgba for flat active destructive
+            }
         }
     }
 
+    // Raised button style (opposite of flat, useful in toolbars)
+    &.raised {
+        // This class ensures the button is not flat, even in contexts where it might default to flat (e.g. toolbars)
+        // Styles are essentially the default .adw-button styles.
+        // If inside a .toolbar context that makes buttons flat, this overrides it.
+        // Example:
+        // .toolbar .adw-button.raised {
+        //   background-color: var(--window-bg-color); // Or specific raised button bg
+        //   border: var(--border-width) solid var(--border-color);
+        // }
+    }
+
+    // OSD buttons (On-Screen Display)
+    &.osd {
+        background-color: rgba(0,0,0,0.7); // Example dark transparent background
+        color: var(--light-1); // White text
+        border-color: transparent; // Often borderless or subtle border
+
+        --accent-color: var(--light-1); // Make internal accents white for OSD context
+    --accent-bg-color: #{rgba(variables.$adw-light-1, 0.2)}; // Lighter, transparent accent bg
+        --accent-fg-color: var(--dark-5); // Dark text on light OSD accent
+
+        &:hover {
+            background-color: rgba(0,0,0,0.8);
+        }
+        &:active {
+            background-color: rgba(0,0,0,0.9);
+        }
+        &.suggested-action {
+             background-color: var(--accent-bg-color); // This is rgba(variables.$adw-light-1, 0.2)
+             color: var(--accent-fg-color); // This is var(--dark-5)
+             &:hover {
+                 background-color: rgba(variables.$adw-light-1, 0.3); // Slightly more opaque white
+             }
+             &:active {
+                 background-color: rgba(variables.$adw-light-1, 0.4);
+             }
+        }
+    }
+
+
+    // Icon-only utility (if not using .circular and want tight padding)
     &.icon-only {
-        padding: var(--circular-button-padding);
+        padding: var(--spacing-xs);
         .adw-icon, .icon, svg {
             margin: 0;
         }
     }
 }
 
+// Ensure <a> tags styled as buttons behave correctly
 a.adw-button {
     text-decoration: none;
 }
 
+// Ensure <input type="button"> styled as buttons behave correctly
 input[type="button"].adw-button,
 input[type="submit"].adw-button,
 input[type="reset"].adw-button {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    line-height: variables.$line-height-base; // SASS var
-    font-family: var(--document-font-family); // CSS var
+    line-height: variables.$line-height-base;
+    font-family: var(--document-font-family);
 }
 
-// Small button variant
+// Small button variant - Review against Libadwaita's approach to small buttons if any.
+// This is an adwaita-web specific addition for now.
 .adw-button.small {
-    padding: var(--button-padding-small-y, var(--spacing-xxs)) var(--button-padding-small-x, var(--spacing-xs));
-    font-size: var(--button-font-size-small, var(--font-size-caption));
-    line-height: var(--button-line-height-small, 1.2);
-    min-height: auto; // Allow button to shrink vertically
+    padding: var(--spacing-xxs) var(--spacing-xs);
+    font-size: var(--font-size-small); // Use the smaller base font size
+    // line-height might remain base or be slightly smaller
+    // min-height: auto; // Allow button to shrink vertically
 
-    .adw-icon {
-        // For small buttons, icon size might need to be adjusted relative to the button's font size
-        font-size: var(--button-icon-size-small, 1.2em); // Slightly larger than text for visibility, or 1em
+    .adw-icon, .icon, svg {
+        // Calculate smaller icon size based on --icon-size-base if possible, or set fixed small size
+        width: calc(var(--icon-size-base) * 0.8);
+        height: calc(var(--icon-size-base) * 0.8);
         &:first-child:not(:last-child) {
-             margin-right: var(--button-icon-spacing-small, var(--spacing-xxs));
+             margin-right: var(--spacing-xxs);
         }
         &:last-child:not(:first-child) {
-            margin-left: var(--button-icon-spacing-small, var(--spacing-xxs));
+            margin-left: var(--spacing-xxs);
         }
-    }
-
-    // If circular and small, padding might need to be even smaller or icon size adjusted
-    &.circular {
-        // padding: var(--button-padding-circular-small, var(--spacing-xxs)); // Example
-        // .adw-icon { font-size: var(--button-icon-size-circular-small, 1em); }
     }
 }

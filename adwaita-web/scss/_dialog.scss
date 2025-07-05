@@ -1,86 +1,109 @@
+// scss/_dialog.scss
 @use 'variables';
+@use 'mixins'; // For z-index variables if defined there
 
 .adw-dialog {
   background-color: var(--dialog-bg-color);
   color: var(--dialog-fg-color);
-  border-radius: var(--window-radius);
-  box-shadow: var(--dialog-box-shadow); // Use the new theme-aware variable
-  padding: var(--spacing-l);
-  width: 90%;
-  max-width: 550px;
-  position: fixed;
+  border-radius: var(--window-radius); // Dialogs are like small windows
+  box-shadow: var(--dialog-box-shadow); // Defined in _variables.scss
+  padding: 0; // Dialog manages its own internal padding via header/content/footer
+  width: 90%; // Responsive width
+  max-width: 550px; // Max width for larger screens
+  position: fixed; // For centering and overlay
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.95);
+  transform: translate(-50%, -50%) scale(0.95); // Initial state for animation
   z-index: var(--z-index-dialog);
   opacity: 0;
-  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+  visibility: hidden; // Start hidden
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out, visibility 0s linear 0.15s;
 
   &.open {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
+    visibility: visible;
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out, visibility 0s linear 0s;
   }
 
-  .adw-dialog-title {
-    font-size: var(--font-size-h3);
-    margin-bottom: var(--spacing-m);
-    font-weight: bold;
-    color: var(--dialog-fg-color); // Changed to dialog's fg color
-  }
-
-  .adw-dialog-content {
-    margin-bottom: var(--spacing-l);
-    line-height: 1.6; // Added for better readability of text content
-    padding: 0 var(--spacing-m); // Add horizontal padding to content area itself for safety
-    // Consider other typography improvements if needed globally
-  }
-
-  .adw-dialog-header { // New style
+  // Dialog Header (AdwAlertDialog uses this structure implicitly)
+  .adw-dialog-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; // Title left, close button right
     align-items: center;
-    padding: var(--spacing-s) var(--spacing-m);
-    border-bottom: 1px solid var(--border-color); // Similar to headerbar
-    margin: calc(var(--spacing-l) * -1); // Negative margin to counteract dialog's main padding for header
-    margin-bottom: var(--spacing-l); // Space below header
-    border-top-left-radius: var(--window-radius);
-    border-top-right-radius: var(--window-radius);
+    padding: var(--spacing-m); // Standard padding
+    border-bottom: var(--border-width) solid var(--border-color);
 
-    .adw-dialog-title { // Adjust if it's used within this header
-        margin-bottom: 0; // Remove margin if it's part of this flex layout
-        font-size: var(--font-size-h4); // Slightly smaller for dialog header
+    .adw-dialog-title {
+      font-size: var(--title-3-font-size); // Use typography utility class size
+      font-weight: variables.$font-weight-bold;
+      color: inherit; // Inherits --dialog-fg-color
     }
-    // .adw-dialog-close-button is handled by .adw-button.circular.flat
+    // Close button would be an .adw-button.circular.flat
   }
 
-  .adw-dialog-footer { // New style
+  // Dialog Content Area
+  .adw-dialog-content {
+    padding: var(--spacing-l); // Generous padding for content
+    line-height: 1.6;
+    color: inherit;
+
+    // For AdwAlertDialog, title might be here if no header is used
+    .adw-alert-dialog-heading { // Specific class for AlertDialog heading
+        font-size: var(--title-2-font-size);
+        font-weight: variables.$font-weight-bold;
+        margin-bottom: var(--spacing-xs);
+        text-align: center;
+    }
+    .adw-alert-dialog-body { // Specific class for AlertDialog body text
+        font-size: var(--font-size-base);
+        text-align: center;
+        opacity: var(--dim-opacity); // Body text is often dimmed
+        margin-bottom: var(--spacing-l);
+    }
+  }
+
+  // Dialog Footer / Actions Area
+  .adw-dialog-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-end; // Buttons typically to the right
     align-items: center;
-    padding: var(--spacing-s) var(--spacing-m);
-    border-top: 1px solid var(--border-color); // Similar to toolbar
-    margin: calc(var(--spacing-l) * -1); // Negative margin
-    margin-top: var(--spacing-l); // Space above footer
-    border-bottom-left-radius: var(--window-radius);
-    border-bottom-right-radius: var(--window-radius);
-    gap: var(--spacing-s);
+    padding: var(--spacing-m);
+    border-top: var(--border-width) solid var(--border-color);
+    gap: var(--spacing-s); // Gap between buttons
+
+    // AdwAlertDialog has a specific layout for responses (buttons)
+    // This is a general footer, AlertDialog might have more specific button styling/layout.
   }
 
-  // This was the old buttons container, will be superseded by adw-dialog-footer
-  // but keep for compatibility or if used directly.
+  // Old .adw-dialog-buttons, kept for compatibility, prefer .adw-dialog-footer
   .adw-dialog-buttons {
+    @extend .adw-dialog-footer; // Inherit footer styles
+  }
+
+
+  // AdwAlertDialog specific button layout (often centered or full-width if few)
+  // This would typically be inside .adw-dialog-content if no footer is explicitly used by AlertDialog structure
+  .adw-alert-dialog-responses {
     display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-m); // Increased gap for buttons
+    flex-direction: column; // Default for stacked buttons in simple alerts
+    gap: var(--spacing-s);
+    margin-top: var(--spacing-m);
 
     .adw-button {
-      margin-left: 0;
-      // Buttons in dialogs sometimes are less padded if space is tight
+      width: 100%; // Buttons often take full width in simple alerts
+    }
+
+    // For horizontal button layout in alerts (e.g. confirm/cancel)
+    &.horizontal {
+        flex-direction: row;
+        justify-content: flex-end; // Or center, depending on HIG
+         .adw-button {
+            width: auto; // Auto width for horizontal buttons
+         }
     }
   }
 }
-
-// Dark theme box-shadow override is no longer needed as --dialog-box-shadow handles it.
 
 .adw-dialog-backdrop {
   position: fixed;
@@ -88,12 +111,16 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: var(--dialog-backdrop-color); // Use new variable
+  background-color: var(--dialog-backdrop-color); // Defined in _variables.scss
   z-index: var(--z-index-dialog-backdrop);
   opacity: 0;
-  transition: opacity 0.15s ease-out;
+  visibility: hidden; // Start hidden
+  transition: opacity 0.15s ease-out, visibility 0s linear 0.15s;
 
   &.open {
-    opacity: 1;
+    opacity: 1; // Matches Libadwaita's default backdrop opacity (0.2 for dark, 0.4 for light)
+                // Our var(--dialog-backdrop-color) is rgba(0,0,0,0.4)
+    visibility: visible;
+    transition: opacity 0.15s ease-out, visibility 0s linear 0s;
   }
 }

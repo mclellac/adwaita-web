@@ -1,6 +1,6 @@
 // SCSS for Adwaita Status Page (Pure CSS Adwaita Skin Version)
-@use 'variables'; // For CSS variables like --spacing-xl, --text-color etc.
-@use 'mixins';    // For any relevant mixins
+@use 'variables';
+@use 'mixins';
 
 .adw-status-page {
   display: flex;
@@ -9,65 +9,65 @@
   justify-content: center;
   text-align: center;
   padding: var(--spacing-xxl) var(--spacing-xl);
-  height: 100%; // Take full height of its container if possible
+  height: 100%;
   box-sizing: border-box;
-  color: var(--text-color); // Use default text color from variables
-  background-color: var(--window-bg-color); // Or specific status page bg if different
+  color: var(--window-fg-color); // Use main foreground color
+  background-color: var(--window-bg-color); // Usually on window background
 
-  // Icon styling within the status page
-  .adw-status-page-icon.adw-icon { // Assuming .adw-icon is used for icons
-    font-size: 4.5rem; // Large icon size
+  .adw-status-page-icon.adw-icon {
+    font-size: 4.5rem; // Large icon
     margin-bottom: var(--spacing-l);
-    // opacity: 0.7; // Original had opacity, can be themed via a variable if needed
-    color: var(--text-color-secondary); // Often icons are subtly colored
+    color: var(--window-fg-color); // Icon uses foreground color
+    opacity: calc(var(--dim-opacity) * 0.8); // Dimmer than standard dimmed text
   }
 
-  // Title styling
   .adw-status-page-title {
-    // Can use .adw-label class with title-level modifiers or define explicitly
-    font-size: var(--font-size-h2); // Or a specific status page title size variable
-    font-weight: var(--heading-font-weight, 700);
-    margin-top: 0; // Reset default heading margin
-    margin-bottom: var(--spacing-s);
-    color: var(--heading-color); // Use heading color from variables
-  }
-
-  // Description styling
-  .adw-status-page-description {
-    font-size: var(--font-size-large);
-    color: var(--text-color); // Use text color
-    opacity: 0.7; // Standard Adwaita subtitle/description opacity
-    max-width: 450px; // Prevent description from becoming too wide
-    line-height: variables.$line-height-base * 1.1; // Slightly more line height for readability
+    // Uses .title-2 utility class sizing by default in Libadwaita if it's GtkLabel
+    // font-size: var(--title-2-font-size); // Defined in _utility_classes.scss
+    @extend .title-2; // Use the utility class for font size and weight
+    color: var(--window-fg-color);
     margin-top: 0;
-    margin-bottom: var(--spacing-xl); // Space before actions
+    margin-bottom: var(--spacing-s);
   }
 
-  // Container for action buttons
+  .adw-status-page-description {
+    font-size: var(--font-size-large); // Default description size
+    color: var(--window-fg-color);
+    opacity: var(--dim-opacity); // Dimmed description text
+    max-width: 450px;
+    line-height: variables.$line-height-base * 1.1;
+    margin-top: 0;
+    margin-bottom: var(--spacing-xl);
+  }
+
   .adw-status-page-actions {
     display: flex;
-    flex-direction: column; // Stack buttons vertically by default
-    align-items: center; // Center buttons if they don't take full width
-    gap: var(--spacing-s); // Gap between action buttons
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-s);
+  }
 
-    // If actions should be horizontal on wider screens, use a media query or make it default
-    // e.g., &.horizontal { flex-direction: row; }
-    // or based on available width. For now, defaulting to column.
+  // Compact style for StatusPage
+  // https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html#compact-status-page
+  &.compact {
+    padding: var(--spacing-l) var(--spacing-m); // Reduced padding
+
+    .adw-status-page-icon.adw-icon {
+      font-size: 3rem; // Smaller icon
+      margin-bottom: var(--spacing-s);
+    }
+    .adw-status-page-title {
+      // font-size: var(--title-3-font-size); // Smaller title
+      @extend .title-3;
+      margin-bottom: var(--spacing-xs);
+    }
+    .adw-status-page-description {
+      font-size: var(--font-size-base); // Smaller description
+      max-width: 300px; // More constrained width
+      margin-bottom: var(--spacing-m);
+    }
+    .adw-status-page-actions {
+      gap: var(--spacing-xs); // Tighter gap for actions
+    }
   }
 }
-
-// Dark theme adjustments are handled by CSS variables.
-// .theme-dark .adw-status-page {
-//   color: var(--text-color); // Will use dark theme's text color
-//   background-color: var(--window-bg-color); // Will use dark theme's window bg
-//
-//   .adw-status-page-icon.adw-icon {
-//     color: var(--text-color-secondary);
-//   }
-//   .adw-status-page-title {
-//     color: var(--heading-color);
-//   }
-//   .adw-status-page-description {
-//     color: var(--text-color);
-//   }
-// }

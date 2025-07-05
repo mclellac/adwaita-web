@@ -1,4 +1,6 @@
+// scss/_checkbox.scss
 @use 'variables';
+@use 'mixins';
 
 .adw-checkbox {
   display: inline-flex;
@@ -6,88 +8,96 @@
   cursor: pointer;
   user-select: none;
   gap: var(--spacing-s);
+  color: var(--window-fg-color); // Label color
 
   input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
+    @include mixins.visually-hidden; // Hide the actual input but keep it accessible
 
+    // Checked state
     &:checked + .adw-checkbox-indicator {
       background-color: var(--accent-bg-color);
-      border-color: var(--accent-bg-color); // Or var(--accent-color) if a slight border is desired over the bg
+      border-color: var(--accent-bg-color);
 
-      &:before { // Checkmark
+      &::before { // Checkmark
         content: "";
         display: block;
         width: 5px;
-        height: 9px;
+        height: 10px; // Slightly taller checkmark
         border-style: solid;
-        border-color: var(--accent-fg-color); // Color of the checkmark itself
+        border-color: var(--accent-fg-color);
         border-width: 0 2px 2px 0;
         position: absolute;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -60%) rotate(45deg); // Adjust to center checkmark better
+        transform: translate(-50%, -60%) rotate(45deg);
       }
     }
 
-    &:disabled + .adw-checkbox-indicator { // Disabled and Unchecked
-      background-color: var(--entry-disabled-bg-color); // Use consistent disabled bg
-      border-color: var(--entry-disabled-border-color);   // Use consistent disabled border
-      opacity: 1; // Explicit colors, no extra opacity needed on indicator itself
-      cursor: not-allowed;
-      &:before {
-        border-color: transparent; // No checkmark
-      }
-    }
-
-    &:disabled:checked + .adw-checkbox-indicator { // Disabled and Checked
-        background-color: var(--accent-bg-color); // Still show accent
-        border-color: var(--accent-bg-color);
-        opacity: var(--opacity-disabled); // But muted
-         &:before { // Checkmark
-            border-color: var(--accent-fg-color); // Still show checkmark fg color
-            // Opacity on parent mutes this too
-         }
-    }
-
+    // Focus state
     &:focus-visible + .adw-checkbox-indicator {
-      outline: 2px solid var(--accent-color); // Focus uses standalone accent color
+      outline: var(--focus-ring-width) solid var(--accent-color);
       outline-offset: 2px;
+    }
+
+    // Disabled state (applies to both checked and unchecked)
+    &:disabled {
+      // Parent .adw-checkbox[disabled] will handle opacity of label and indicator
+      & + .adw-checkbox-indicator { // Styles for indicator when input is disabled
+        // Colors might remain (e.g. accent if checked) but will be faded by parent's opacity
+        cursor: not-allowed;
+      }
+       // Ensure no focus ring on disabled items
+      &:focus-visible + .adw-checkbox-indicator {
+        outline: none;
+      }
     }
   }
 
   .adw-checkbox-indicator {
-    width: 18px; // Standard Adwaita size
+    width: 18px;
     height: 18px;
-    border-width: var(--border-width, 1px); // Adwaita checkboxes have 1px border usually
-    border-style: solid;
-    border-color: var(--entry-border-color); // Use entry border color for consistency
-    border-radius: var(--border-radius-medium); // 4px, more Adwaita-like
-    background-color: var(--view-bg-color);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-medium); // Default slightly rounded square
+    background-color: var(--view-bg-color); // Or transparent if on complex bg
     position: relative;
     transition: background-color 0.1s ease-out, border-color 0.1s ease-out;
     flex-shrink: 0;
+    display: inline-block; // Ensure it takes space
   }
 
   .adw-checkbox-label {
-    color: var(--view-fg-color);
-    line-height: 1.2;
+    line-height: 1.3; // Align with other text
+    // Color inherited from .adw-checkbox
   }
 
-  // If the whole checkbox component is marked disabled
-  &[disabled] {
+  // Disabled state for the whole component
+  &.disabled, &[disabled] { // Check for class or attribute
+    cursor: not-allowed;
+    opacity: var(--disabled-opacity);
+
     .adw-checkbox-label {
-      color: var(--disabled-fg-color);
       cursor: not-allowed;
     }
     .adw-checkbox-indicator {
       cursor: not-allowed;
     }
-    // The input:disabled styles above will handle the indicator appearance
+  }
+
+  // Selection Mode Style
+  // https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html#selection-mode-check-buttons
+  &.selection-mode {
+    .adw-checkbox-indicator {
+      width: 22px; // Larger
+      height: 22px;
+      border-radius: 50%; // Fully round
+
+      // Adjust checkmark for round indicator if needed
+      &::before { // Checkmark
+        width: 6px;
+        height: 12px;
+        // transform: translate(-50%, -60%) rotate(45deg); // May need slight repositioning
+      }
+    }
+    // Label style usually remains the same for selection-mode
   }
 }
-
-// Dark theme specific overrides are handled by variables like --entry-border-color,
-// --entry-disabled-bg-color, etc., so explicit .dark-theme block might not be needed here.

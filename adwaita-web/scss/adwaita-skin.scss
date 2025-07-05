@@ -5,6 +5,7 @@
 @use 'variables';
 @use 'mixins';
 @use 'base';
+@use 'utility_classes'; // Added new utility classes
 
 // Components (to be adapted for skin usage)
 @use 'button';
