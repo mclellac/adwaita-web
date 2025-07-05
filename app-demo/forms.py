@@ -10,7 +10,7 @@ from wtforms import (
     IntegerField
 )
 from wtforms.fields import DateField # Changed import for DateField
-from wtforms.validators import DataRequired, EqualTo, Length, Optional, NumberRange
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange # Added Email
 from wtforms.widgets import CheckboxInput, ListWidget # Ensure ListWidget is imported if used by QuerySelectMultipleField
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from .models import Category # Import Category from models.py
@@ -21,6 +21,18 @@ class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
+
+class RegistrationForm(FlaskForm):
+    email = StringField('Email (Username)', validators=[DataRequired(), Length(min=6, max=120), Email(message="Please enter a valid email address.")])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=8, message="Password must be at least 8 characters long.")])
+    confirm_password = PasswordField(
+        'Confirm Password',
+        validators=[
+            DataRequired(),
+            EqualTo('password', message='Passwords must match.')
+        ]
+    )
+    submit = SubmitField('Register')
 
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField('Current Password', validators=[DataRequired()])

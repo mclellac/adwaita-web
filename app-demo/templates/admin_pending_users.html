@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Pending User Approvals{% endblock %}
+
+{% block header_title %}Pending User Approvals{% endblock %}
+
+{% block content %}
+<div class="adw-preferences-page"> {# Using preferences-page for consistent admin styling #}
+    <header class="adw-preferences-page__header">
+        <h1 class="adw-preferences-page__title">Manage Pending User Registrations</h1>
+        <p class="adw-preferences-page__description">
+            Review and approve or reject new user registrations.
+        </p>
+    </header>
+
+    {% if pending_users %}
+    <section class="adw-preferences-group" aria-labelledby="pending-users-title">
+        <h2 class="adw-preferences-group__title" id="pending-users-title">Users Awaiting Approval</h2>
+        <div class="adw-list-box">
+            {% for user_account in pending_users %}
+            <div class="adw-action-row">
+                <div class="adw-action-row__text">
+                    <span class="adw-action-row__title">{{ user_account.username }}</span>
+                    {# Could add registration date here if available and desired #}
+                    {# <span class="adw-action-row__subtitle">Registered: {{ user_account.created_at|datetimeformat }}</span> #}
+                </div>
+                <div class="adw-action-row__actions adw-box horizontal spacing-s">
+                    {# Approve Form - Minimal form for CSRF #}
+                    <form method="POST" action="{{ url_for('admin.approve_user', user_id=user_account.id) }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="adw-button suggested-action">Approve</button>
+                    </form>
+                    {# Reject Form - Minimal form for CSRF #}
+                    <form method="POST" action="{{ url_for('admin.reject_user', user_id=user_account.id) }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="adw-button destructive-action">Reject</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% if user_pagination and (user_pagination.has_prev or user_pagination.has_next) %}
+    <nav aria-label="User pagination" class="pagination-nav adw-box horizontal justify-center" style="margin-top: var(--spacing-l);">
+        {% if user_pagination.has_prev %}
+            <a href="{{ url_for('admin.pending_users', page=user_pagination.prev_num) }}" class="adw-button">
+                <span class="adw-icon icon-actions-go-previous-symbolic"></span> Previous
+            </a>
+        {% endif %}
+        <span class="adw-label" style="margin: 0 var(--spacing-m);">Page {{ user_pagination.page }} of {{ user_pagination.pages }}.</span>
+        {% if user_pagination.has_next %}
+            <a href="{{ url_for('admin.pending_users', page=user_pagination.next_num) }}" class="adw-button">
+                Next <span class="adw-icon icon-actions-go-next-symbolic"></span>
+            </a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="adw-status-page">
+      <span class="adw-status-page__icon icon-status-info-symbolic"></span>
+      <h2 class="adw-status-page__title">No Pending Approvals</h2>
+      <p class="adw-status-page__description">There are currently no users awaiting approval.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
