@@ -11,10 +11,13 @@ general_bp = Blueprint('general', __name__) # template_folder defaults to app's
 
 @general_bp.route('/')
 def index():
-    current_app.logger.info(f"Accessing index page {request.path}")
+    current_app.logger.info(f"Accessing index page / {request.path}")
     if current_user.is_authenticated:
-        current_app.logger.info(f"User {current_user.username}: theme='{current_user.theme}', accent_color='{current_user.accent_color}' before rendering index.")
+        current_app.logger.info(f"User {current_user.username} is authenticated, redirecting to activity feed.")
+        return redirect(url_for('general.activity_feed'))
 
+    # For anonymous users, show the public posts page
+    current_app.logger.info(f"Anonymous user accessing index page, showing public posts.")
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 10)
     current_app.logger.debug(f"Fetching published posts for index page {page}, {per_page} posts per page.")
@@ -104,24 +107,28 @@ def activity_feed():
     followed_users_list = current_user.followed.all() # .all() executes the query
 
     activities_list, pagination = [], None
+
+    # Combine IDs of followed users and the current user for the feed
+    user_ids_for_feed = [user.id for user in followed_users_list]
+    if current_user.id not in user_ids_for_feed: # Add current user if not already in list (e.g. from self-follow if that was possible)
+        user_ids_for_feed.append(current_user.id)
+
+    # The followed_users_count is for the message "You are following X users", so it should not include self.
     followed_users_count = len(followed_users_list)
 
-    if not followed_users_list:
-        current_app.logger.debug(f"User {current_user.username} is not following anyone. Feed will be based on their own activities if desired, or empty.")
-        # Optionally, show user's own activities if they follow no one, or just show empty.
-        # For now, let's make it empty if not following anyone, for a cleaner "followed feed".
-        # To include own activities:
-        # activity_query = Activity.query.filter_by(user_id=current_user.id)...
-        pass # Will render with empty activities_list
-    else:
-        followed_user_ids = [user.id for user in followed_users_list]
-        current_app.logger.debug(f"User {current_user.username} is following users with IDs: {followed_user_ids}.")
 
+    if not user_ids_for_feed:
+        # This case should ideally not be hit if current_user.id is always added,
+        # unless current_user somehow has no ID (which shouldn't happen for a logged-in user).
+        current_app.logger.debug(f"User {current_user.username} has an empty list of user IDs for feed (this is unexpected).")
+        # Render with empty activities_list
+    else:
+        current_app.logger.debug(f"User {current_user.username} feed will include activities from user IDs: {user_ids_for_feed}.")
         try:
             from ..models import Activity # Local import
-            # Query activities from followed users, ordered by timestamp
+            # Query activities from the combined list of users (followed + self)
             activity_query = Activity.query.filter(
-                Activity.user_id.in_(followed_user_ids)
+                Activity.user_id.in_(user_ids_for_feed)
             ).order_by(Activity.timestamp.desc())
 
             pagination = activity_query.paginate(page=page, per_page=per_page, error_out=False)

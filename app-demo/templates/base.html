@@ -105,15 +105,19 @@
         {% endif %}
         <nav class="adw-list-box flat sidebar-nav" aria-label="Main Navigation">
             {% block sidebar_nav %}
-                <a href="{{ url_for('general.index') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.index' }}">
-                    <span class="adw-action-row-icon icon-actions-go-home-symbolic"></span>
-                    <span class="adw-action-row-title">Home</span>
-                </a>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('general.activity_feed') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.activity_feed' or request.endpoint == 'general.index' }}">
+                        <span class="adw-action-row-icon icon-actions-go-home-symbolic"></span>
+                        <span class="adw-action-row-title">Home</span> {# "Home" now points to feed for logged-in users #}
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('general.index') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.index' }}">
+                        <span class="adw-action-row-icon icon-actions-go-home-symbolic"></span>
+                        <span class="adw-action-row-title">Home</span>
+                    </a>
+                {% endif %}
             {% if current_user.is_authenticated %}
-                <a href="{{ url_for('general.activity_feed') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.activity_feed' }}">
-                    <span class="adw-action-row-icon icon-content-view-grid-symbolic"></span>
-                    <span class="adw-action-row-title">Feed</span>
-                </a>
+                {# The "Feed" link is removed as "Home" now serves this purpose for logged-in users #}
                 <a href="{{ url_for('general.find_users') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.find_users' }}">
                     <span class="adw-action-row-icon icon-actions-system-search-symbolic"></span>
                     <span class="adw-action-row-title">Find Users</span>
