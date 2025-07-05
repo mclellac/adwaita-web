@@ -83,9 +83,10 @@ A declarative way to create Adwaita banners.
 
 *   `button-clicked`: Fired when the action button (if present) is clicked.
     `event.detail` might contain the banner instance.
-*   `dismissed`: (Potentially) Fired if the banner has a built-in dismiss
-    mechanism (e.g., a close button, not standard in Libadwaita banners but
-    common in web implementations).
+*   `dismissed`: Fired if the banner is dismissed via its built-in dismiss mechanism.
+    Applications using `banner.js` should provide a dismiss button (e.g., a text button "Dismiss")
+    with the class `.adw-banner-dismiss-button` or `.adw-banner-dismiss`. `banner.js`
+    will automatically handle its functionality.
 
 **Slots:**
 *   If the `title` attribute is not used, the default slot can be used for the

@@ -76,6 +76,8 @@ By following these guidelines, `adwaita-skin` can be maintained as a robust and 
 
 ## User Notifications (Banners, Toasts)
 
-*   **Dismiss Mechanisms:** All transient user notifications, such as banners (`.adw-banner`) and toasts (`.adw-toast`), that are implemented or styled by this library (or its associated JavaScript helpers like `banner.js`, `toast.js`) **must** include a clearly visible and user-operable mechanism for dismissal (e.g., a close button with an 'X' icon).
-*   **Functionality:** This dismiss mechanism must be fully functional, allowing the user to remove the notification from view.
+*   **Dismiss Mechanisms:** All transient user notifications implemented or styled by this library (or its associated JavaScript helpers like `banner.js`, `toast.js`) **must** include a clearly visible and user-operable mechanism for dismissal.
+    *   **Banners (`.adw-banner`):** Should include a text button (e.g., labeled "Dismiss") for dismissal. The `banner.js` helper script looks for a button with class `.adw-banner-dismiss-button` or `.adw-banner-dismiss` within the banner element.
+    *   **Toasts (`.adw-toast`):** Should include a circular icon button with an 'X' icon (e.g., using `icon-window-close-symbolic`) for dismissal. The `toast.js` helper script automatically adds such a button.
+*   **Functionality:** These dismiss mechanisms must be fully functional, allowing the user to remove the notification from view.
 *   **Accessibility:** Ensure these dismiss controls are accessible (e.g., proper ARIA attributes, keyboard focusable).
