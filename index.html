@@ -562,7 +562,33 @@
                         </div>
                     </div>
                 </div>
-                <div>
+                <!-- This is the end of the "Rows & ListBoxes" component-grid -->
+            </div>
+        </section>
+
+        <!-- Navigation & View Containers (Conceptual Structures) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Navigation & View Containers (Conceptual Structures)</h2>
+            <p class="adw-label body">These are complex containers, often requiring JavaScript for full functionality. Static representations are shown.</p>
+            <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column for these complex items -->
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">Navigation View</h3>
+                    <div class="adw-navigation-view" style="height: 250px; border: 1px solid var(--border-color); display: flex; flex-direction: column;">
+                        <div class="adw-header-bar">
+                            <div class="adw-header-bar__start">
+                                <button class="adw-button icon-only flat"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
+                            </div>
+                            <div class="adw-header-bar__center">
+                                <h1 class="adw-header-bar__title">Page Title</h1>
+                            </div>
+                        </div>
+                        <div style="padding: var(--spacing-m); flex-grow: 1; background-color: var(--view-bg-color);">
+                            <p class="adw-label body">Content of the current page in Navigation View.</p>
+                            <button class="adw-button">Push to next page (conceptual)</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-bottom: var(--spacing-xl);">
                     <h3 class="adw-label title-3">Flap</h3>
                     <div class="adw-flap" style="height: 200px; border: 1px solid var(--border-color); display: flex; position: relative; overflow: hidden;">
                         <div class="adw-flap__flap-area" style="width: 150px; background-color: var(--sidebar-bg-color); padding: var(--spacing-m); position: absolute; height: 100%; left: 0; transform: translateX(0%); transition: transform 0.2s ease-out;">
@@ -609,7 +635,7 @@
                     </div>
                      <small class="adw-label caption">Conceptual: Overlay sidebar shown. Interactive hide/show needs JS.</small>
                 </div>
-                <div>
+                <div> <!-- BreakpointBin is the last item in this new section's grid -->
                     <h3 class="adw-label title-3">Breakpoint Bin</h3>
                     <div class="adw-breakpoint-bin" style="border: 1px solid var(--border-color); padding: var(--spacing-m); min-height: 100px;">
                         <div data-name="child1" data-condition="0" style="background-color: var(--accent-blue-bg); color: white; padding: var(--spacing-s);">
@@ -621,7 +647,6 @@
                     </div>
                     <small class="adw-label caption">Conceptual: Shows different children based on width. Resize to see (needs JS).</small>
                 </div>
-                <!-- Last item in this grid, no extra margin-bottom needed beyond what .component-grid > div provides if it were multi-column -->
             </div>
         </section>
 
@@ -668,8 +693,8 @@
             <h2 class="adw-label title-2">Popovers & Dialogs (Static Representations)</h2>
             <div class="component-grid">
                 <div class="static-popover-container">
-                    <button class="adw-button" aria-haspopup="true" aria-expanded="true">Menu (Popover Below)</button>
-                    <div class="adw-popover" role="menu" style="position: absolute; top: 100%; left: 0; z-index: var(--z-index-popover); margin-top: var(--spacing-xs); width: 200px;">
+                    <button class="adw-button" id="popoverDemoBtn" aria-haspopup="true" aria-expanded="false">Menu (Popover Below)</button>
+                    <div class="adw-popover" id="popoverDemo" role="menu" style="position: absolute; top: 100%; left: 0; z-index: var(--z-index-popover); margin-top: var(--spacing-xs); width: 200px; display: none;">
                         <div class="adw-list-box flat"> <!-- Popovers often use flat listboxes -->
                             <div class="adw-action-row activatable" role="menuitem">
                                 <div class="adw-action-row-title">New File</div>
@@ -685,19 +710,23 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="adw-dialog" role="alertdialog" style="position:relative; display:block; max-width: 350px;">
-                    <header class="adw-header-bar">
-                        <h2 class="adw-header-bar__title">Sample Dialog</h2>
-                    </header>
-                    <div class="adw-dialog__content">
-                        <p class="adw-label body">This is the content area of the dialog. It can contain any information or controls needed.</p>
-                        <input type="text" class="adw-entry" placeholder="Example field" style="margin-top: var(--spacing-s); width: 100%;">
+                <div> <!-- Wrapper for button and dialog -->
+                    <button class="adw-button" id="openSampleDialogBtn">Open Sample Dialog</button>
+                    <div class="adw-dialog-backdrop" id="sampleDialogBackdrop" style="display: none;"></div>
+                    <div class="adw-dialog" id="sampleDialog" role="dialog" style="position:fixed; display:none; max-width: 350px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050;">
+                        <header class="adw-header-bar">
+                            <h2 class="adw-header-bar__title">Sample Dialog</h2>
+                            <button class="adw-button icon-only flat" aria-label="Close" onclick="closeDialog('sampleDialog')"><span class="adw-icon icon-window-close-symbolic"></span></button>
+                        </header>
+                        <div class="adw-dialog__content">
+                            <p class="adw-label body">This is the content area of the dialog. It can contain any information or controls needed.</p>
+                            <input type="text" class="adw-entry" placeholder="Example field" style="margin-top: var(--spacing-s); width: 100%;">
+                        </div>
+                        <footer class="adw-dialog__actions">
+                            <button class="adw-button" onclick="closeDialog('sampleDialog')">Cancel</button>
+                            <button class="adw-button suggested-action" onclick="closeDialog('sampleDialog')">OK</button>
+                        </footer>
                     </div>
-                    <footer class="adw-dialog__actions">
-                        <button class="adw-button">Cancel</button>
-                        <button class="adw-button suggested-action">OK</button>
-                    </footer>
                 </div>
             </div>
         </section>
@@ -784,7 +813,9 @@
                     </div>
                 </div>
              </div>
-             <p class="adw-label body" style="margin-top: var(--spacing-m);">Note: Toast Overlay is a container and not shown visually here.</p>
+             <p class="adw-label body" style="margin-top: var(--spacing-m);">Note: Toast Overlay is a container and not shown visually here.
+                <button class="adw-button" id="showToastBtn" style="margin-left: var(--spacing-m);">Show Demo Toast</button>
+             </p>
         </section>
 
         <!-- ViewSwitchers & Tabs (Static) -->
@@ -801,20 +832,32 @@
                 </div>
                 <div>
                     <h3 class="adw-label title-3">Tabs</h3>
-                    <div class="adw-tab-bar">
-                        <button class="adw-tab active" aria-pressed="true">
-                            <span class="adw-tab__label">Details</span>
-                        </button>
-                        <button class="adw-tab">
-                            <span class="adw-tab__label">Activity</span>
-                             <span class="adw-tab__indicator"></span> <!-- For "needs attention" -->
-                        </button>
-                        <button class="adw-tab" disabled>
-                            <span class="adw-tab__label">Settings</span>
-                        </button>
-                    </div>
-                    <div class="adw-tab-view" style="border: 1px solid var(--border-color); padding: var(--spacing-m); margin-top: calc(-1 * var(--border-width)); min-height: 50px;">
-                        <p class="adw-label body">Content for active tab (Details).</p>
+                    <div class="adw-tab-view">
+                        <div class="adw-tab-bar" id="demo-tab-bar">
+                            <button class="adw-tab-button active" aria-pressed="true" data-tab-target="tab-details-content">
+                                <span class="adw-tab-button-label">Details</span>
+                            </button>
+                            <button class="adw-tab-button" data-tab-target="tab-activity-content">
+                                <span class="adw-tab-button-label">Activity</span>
+                                <!-- <span class="adw-tab__indicator"></span> For "needs attention" - styling not in SCSS for adw-tab-button -->
+                            </button>
+                            <button class="adw-tab-button" data-tab-target="tab-settings-content" disabled>
+                                <span class="adw-tab-button-label">Settings</span>
+                            </button>
+                        </div>
+                        <div class="adw-tab-view-pages-container" id="demo-tab-pages" style="border: 1px solid var(--border-color); border-top: none; padding: var(--spacing-m); min-height: 100px; position: relative;">
+                            <div class="adw-tab-page active-page" id="tab-details-content">
+                                <p class="adw-label body">Content for active tab (Details).</p>
+                                <p class="adw-label body-small">This is the first tab's content area.</p>
+                            </div>
+                            <div class="adw-tab-page" id="tab-activity-content" style="display: none;">
+                                <p class="adw-label body">Content for Activity tab.</p>
+                                <p class="adw-label body-small">This tab shows recent activity.</p>
+                            </div>
+                            <div class="adw-tab-page" id="tab-settings-content" style="display: none;">
+                                <p class="adw-label body">Content for Settings tab (this tab button is disabled).</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -964,27 +1007,32 @@
             <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column -->
                 <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
                     <h3 class="adw-label title-3">About Dialog</h3>
-                    <div class="adw-dialog adw-about-dialog" role="dialog" style="position:relative; display:block; max-width: 400px;">
+                    <button class="adw-button" id="openAboutDialogBtn">Open About Dialog</button>
+                    <div class="adw-dialog-backdrop" id="aboutDialogBackdrop" style="display: none;"></div>
+                    <div class="adw-dialog adw-about-dialog" id="aboutDialog" role="dialog" style="position:fixed; display:none; max-width: 400px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050;">
                         <header class="adw-header-bar">
                             <h2 class="adw-header-bar__title">About My Application</h2>
+                            <button class="adw-button icon-only flat" aria-label="Close" onclick="closeDialogById('aboutDialog')"><span class="adw-icon icon-window-close-symbolic"></span></button>
                         </header>
                         <div class="adw-dialog__content adw-about-dialog__content" style="text-align: center;">
-                            <img src="adwaita-web/data/icons/apps/accessories-character-map-symbolic.svg" alt="App Logo" style="width: 64px; height: 64px; margin-bottom: var(--spacing-m); border-radius: var(--border-radius-medium); background-color: var(--shade-color); padding: var(--spacing-xs);"/>
+                            <span class="adw-icon icon-categories-applications-utilities-symbolic" style="width: 64px; height: 64px; font-size: 64px; margin-bottom: var(--spacing-m); border-radius: var(--border-radius-medium); background-color: var(--shade-color); padding: var(--spacing-xs); color: var(--accent-bg-color);"></span>
                             <h3 class="adw-label title-2" style="margin-bottom: var(--spacing-xxs);">My Application</h3>
                             <p class="adw-label body-small" style="margin-bottom: var(--spacing-s);">Version 1.0.0</p>
                             <p class="adw-label body">An amazing app that does wonderful things.</p>
                             <p class="adw-label body-small" style="margin-top: var(--spacing-m);">© 2023 Developer Name</p>
                         </div>
                         <footer class="adw-dialog__actions">
-                            <button class="adw-button">Credits</button>
+                            <button class="adw-button" onclick="closeDialogById('aboutDialog')">Credits</button> <!-- Made it a close button for demo -->
                             <div style="flex-grow: 1;"></div>
-                            <button class="adw-button suggested-action">Close</button>
+                            <button class="adw-button suggested-action" onclick="closeDialogById('aboutDialog')">Close</button>
                         </footer>
                     </div>
                 </div>
                 <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
                     <h3 class="adw-label title-3">Preferences Dialog</h3>
-                    <div class="adw-dialog adw-preferences-dialog" role="dialog" style="position:relative; display:block; max-width: 550px;">
+                    <button class="adw-button" id="openPrefsDialogBtn">Open Preferences Dialog</button>
+                    <div class="adw-dialog-backdrop" id="prefsDialogBackdrop" style="display: none;"></div>
+                    <div class="adw-dialog adw-preferences-dialog" id="prefsDialog" role="dialog" style="position:fixed; display:none; max-width: 550px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050;">
                         <header class="adw-header-bar">
                             <div class="adw-header-bar__start">
                                 <!-- This would be part of an adw-view-switcher or similar -->
@@ -994,7 +1042,7 @@
                                 </div>
                             </div>
                             <div class="adw-header-bar__end">
-                                <button class="adw-button icon-only flat" aria-label="Close"><span class="adw-icon icon-window-close-symbolic"></span></button>
+                                <button class="adw-button icon-only flat" aria-label="Close" onclick="closeDialogById('prefsDialog')"><span class="adw-icon icon-window-close-symbolic"></span></button>
                             </div>
                         </header>
                         <div class="adw-dialog__content adw-preferences-dialog__content" style="min-height: 200px;">
@@ -1017,17 +1065,20 @@
                         <!-- No standard footer for PreferencesDialog, actions are in HeaderBar -->
                     </div>
                 </div>
-                <div>
+                <div> <!-- Wrapper for button and dialog -->
                     <h3 class="adw-label title-3">Alert Dialog</h3>
-                    <div class="adw-dialog adw-alert-dialog" role="alertdialog" style="position:relative; display:block; max-width: 380px;">
+                    <button class="adw-button" id="openAlertDialogBtn">Open Alert Dialog</button>
+                    <div class="adw-dialog-backdrop" id="alertDialogBackdrop" style="display: none;"></div>
+                    <div class="adw-dialog adw-alert-dialog" id="alertDialog" role="alertdialog" style="position:fixed; display:none; max-width: 380px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050;">
+                        <!-- Alert dialogs often don't have a traditional header bar with a title, the heading is in the content -->
                         <div class="adw-dialog__content adw-alert-dialog__content" style="padding-top: var(--spacing-xl); text-align: center;">
                             <h4 class="adw-alert-dialog__heading" style="font-size: var(--title-2-font-size); margin-bottom: var(--spacing-xs);">Action Required</h4>
                             <p class="adw-alert-dialog__body" style="margin-bottom: var(--spacing-l);">This is an important message that requires your attention. Please choose an option below.</p>
                         </div>
                         <footer class="adw-dialog__actions adw-alert-dialog__actions" style="padding-top: 0;">
-                            <button class="adw-button">Cancel</button>
-                            <button class="adw-button destructive-action">Delete</button>
-                            <button class="adw-button suggested-action">Confirm</button>
+                            <button class="adw-button" onclick="closeDialogById('alertDialog')">Cancel</button>
+                            <button class="adw-button destructive-action" onclick="closeDialogById('alertDialog')">Delete</button>
+                            <button class="adw-button suggested-action" onclick="closeDialogById('alertDialog')">Confirm</button>
                         </footer>
                     </div>
                 </div>
@@ -1051,7 +1102,8 @@
                 </div>
                 <div>
                     <h3 class="adw-label title-3">Bottom Sheet (Conceptual)</h3>
-                    <div class="adw-bottom-sheet" style="position:relative; min-height: 150px; overflow:hidden; background: var(--view-bg-color);">
+                    <div class="adw-bottom-sheet" style="position:relative; min-height: 150px; overflow:hidden; background: var(--dialog-bg-color); border-top-left-radius: var(--window-radius); border-top-right-radius: var(--window-radius); box-shadow: var(--dialog-box-shadow); max-width: 400px; margin-left: auto; margin-right: auto;">
+                        <div class="adw-bottom-sheet-drag-handle-area" style="padding:var(--spacing-s); display:flex; justify-content:center;"><div style="width:36px; height:4px; border-radius:2px; background-color: var(--border-color);"></div></div>
                         <div class="adw-bottom-sheet-content" style="padding:var(--spacing-m); text-align:center;">
                             <p class="adw-label body">This is where bottom sheet content would go.</p>
                             <button class="adw-button suggested-action">Confirm Action</button>
@@ -1094,6 +1146,39 @@
             });
         }
 
+        // Tab View Demo
+        const demoTabBar = document.getElementById('demo-tab-bar');
+        const demoTabPagesContainer = document.getElementById('demo-tab-pages');
+
+        if (demoTabBar && demoTabPagesContainer) {
+            const tabButtons = demoTabBar.querySelectorAll('.adw-tab-button:not([disabled])');
+            const tabPages = demoTabPagesContainer.querySelectorAll('.adw-tab-page');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Deactivate all buttons and pages
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-pressed', 'false');
+                    });
+                    tabPages.forEach(page => {
+                        page.classList.remove('active-page');
+                        page.style.display = 'none';
+                    });
+
+                    // Activate clicked button and corresponding page
+                    button.classList.add('active');
+                    button.setAttribute('aria-pressed', 'true');
+                    const targetPageId = button.dataset.tabTarget;
+                    const targetPage = document.getElementById(targetPageId);
+                    if (targetPage) {
+                        targetPage.classList.add('active-page');
+                        targetPage.style.display = 'block';
+                    }
+                });
+            });
+        }
+
         // Accent Color Switcher
         const ACCENT_CLASSES = ['accent-blue', 'accent-green', 'accent-yellow', 'accent-orange', 'accent-red', 'accent-purple', 'accent-pink', 'accent-slate', 'accent-teal'];
         function setAccent(accentName) {
@@ -1132,6 +1217,192 @@
                  chevron.classList.toggle('icon-ui-pan-up-symbolic', isExpanded);
             }
         });
+
+        // Dialog handling
+        let currentlyOpenDialogId = null;
+
+        function openDialogById(dialogId) {
+            const dialog = document.getElementById(dialogId);
+            const backdrop = document.getElementById(dialogId + 'Backdrop');
+            if (dialog) {
+                if(currentlyOpenDialogId) { // Close any already open dialog
+                    closeDialogById(currentlyOpenDialogId);
+                }
+                dialog.style.display = 'block'; // Or manage with classes
+                if (backdrop) backdrop.style.display = 'block';
+                currentlyOpenDialogId = dialogId;
+                dialog.focus(); // For accessibility, focus the dialog
+            }
+        }
+
+        function closeDialogById(dialogId) {
+            const dialog = document.getElementById(dialogId);
+            const backdrop = document.getElementById(dialogId + 'Backdrop');
+            if (dialog) {
+                dialog.style.display = 'none'; // Or manage with classes
+                if (backdrop) backdrop.style.display = 'none';
+                if(currentlyOpenDialogId === dialogId) {
+                    currentlyOpenDialogId = null;
+                }
+            }
+        }
+        // Close dialog on Escape key
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && currentlyOpenDialogId) {
+                closeDialogById(currentlyOpenDialogId);
+            }
+        });
+
+        // Sample Dialog
+        const openSampleDialogBtn = document.getElementById('openSampleDialogBtn');
+        if (openSampleDialogBtn) {
+            openSampleDialogBtn.addEventListener('click', () => openDialogById('sampleDialog'));
+        }
+        // The close buttons for sampleDialog now have inline onclick="closeDialogById('sampleDialog')"
+
+        // About Dialog
+        const openAboutDialogBtn = document.getElementById('openAboutDialogBtn');
+        if (openAboutDialogBtn) {
+            openAboutDialogBtn.addEventListener('click', () => openDialogById('aboutDialog'));
+        }
+        // Close buttons for aboutDialog have inline onclick="closeDialogById('aboutDialog')"
+
+        // Preferences Dialog
+        const openPrefsDialogBtn = document.getElementById('openPrefsDialogBtn');
+        if (openPrefsDialogBtn) {
+            openPrefsDialogBtn.addEventListener('click', () => openDialogById('prefsDialog'));
+        }
+        // Close button for prefsDialog has inline onclick
+
+        // Alert Dialog
+        const openAlertDialogBtn = document.getElementById('openAlertDialogBtn');
+        if (openAlertDialogBtn) {
+            openAlertDialogBtn.addEventListener('click', () => openDialogById('alertDialog'));
+        }
+        // Close buttons for alertDialog have inline onclick
+
+
+        // Popover Demo
+        const popoverDemoBtn = document.getElementById('popoverDemoBtn');
+        const popoverDemo = document.getElementById('popoverDemo');
+        let isPopoverDemoOpen = false;
+
+        if (popoverDemoBtn && popoverDemo) {
+            popoverDemoBtn.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent click from immediately closing popover via document listener
+                isPopoverDemoOpen = !isPopoverDemoOpen;
+                popoverDemo.style.display = isPopoverDemoOpen ? 'block' : 'none';
+                popoverDemoBtn.setAttribute('aria-expanded', isPopoverDemoOpen.toString());
+            });
+
+            // Click outside to close
+            document.addEventListener('click', (event) => {
+                if (isPopoverDemoOpen && !popoverDemo.contains(event.target) && event.target !== popoverDemoBtn) {
+                    isPopoverDemoOpen = false;
+                    popoverDemo.style.display = 'none';
+                    popoverDemoBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+             // Close popover on Escape key
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && isPopoverDemoOpen) {
+                    isPopoverDemoOpen = false;
+                    popoverDemo.style.display = 'none';
+                    popoverDemoBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
+
+        // Function to make closeDialogById globally accessible for inline onclick attributes
+        window.closeDialog = closeDialogById;
+
+        // Toast Demo
+        function ensureToastOverlay() {
+            let overlay = document.getElementById('adw-toast-overlay-main');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'adw-toast-overlay-main';
+                overlay.className = 'adw-toast-overlay'; // This class should provide fixed positioning
+                document.body.appendChild(overlay);
+            }
+            return overlay;
+        }
+
+        function showDemoToast(title, subtitle, actionText, actionCallback) {
+            const overlay = ensureToastOverlay();
+
+            const toast = document.createElement('div');
+            toast.className = 'adw-toast';
+
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'adw-toast__content'; // As per SCSS structure
+
+            const titleEl = document.createElement('p');
+            titleEl.className = 'adw-toast__title';
+            titleEl.textContent = title;
+            contentWrapper.appendChild(titleEl);
+
+            if (subtitle) {
+                const subtitleEl = document.createElement('p');
+                subtitleEl.className = 'adw-toast__subtitle';
+                subtitleEl.textContent = subtitle;
+                contentWrapper.appendChild(subtitleEl);
+            }
+            toast.appendChild(contentWrapper);
+
+            if (actionText) {
+                const actionBtn = document.createElement('button');
+                actionBtn.className = 'adw-button flat adw-toast__action';
+                actionBtn.textContent = actionText;
+                if (actionCallback) {
+                    actionBtn.addEventListener('click', () => {
+                        actionCallback();
+                        // Optionally close toast on action
+                        toast.classList.add('hiding');
+                        setTimeout(() => toast.remove(), 150); // Match animation-duration-shortest
+                    });
+                }
+                toast.appendChild(actionBtn);
+            } else { // Add a dismiss button if no action
+                const dismissBtn = document.createElement('button');
+                dismissBtn.className = 'adw-button flat circular adw-toast__dismiss';
+                dismissBtn.setAttribute('aria-label', 'Dismiss');
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'adw-icon icon-actions-edit-delete-symbolic'; // Using a common icon
+                dismissBtn.appendChild(iconSpan);
+                dismissBtn.addEventListener('click', () => {
+                    toast.classList.add('hiding');
+                    setTimeout(() => toast.remove(), 150);
+                });
+                toast.appendChild(dismissBtn);
+            }
+
+            overlay.appendChild(toast);
+
+            // Animation: make visible, then hide and remove
+            requestAnimationFrame(() => { // Ensure element is in DOM for transition
+                 setTimeout(() => toast.classList.add('visible'), 10); // Small delay for transition to trigger
+            });
+
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => {
+                    toast.remove();
+                }, 150); // Corresponds to --animation-duration-shortest
+            }, 3000); // Auto-dismiss after 3 seconds
+        }
+
+        const showToastBtn = document.getElementById('showToastBtn');
+        if (showToastBtn) {
+            showToastBtn.addEventListener('click', () => {
+                showDemoToast("File Saved", "Your document 'report.docx' was successfully saved.", "Undo", () => {
+                    console.log("Undo action clicked!");
+                    showDemoToast("Previous action undone.", null, null, null);
+                });
+            });
+        }
+
     </script>
 </body>
 </html>
