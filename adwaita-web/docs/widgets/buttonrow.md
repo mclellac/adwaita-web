@@ -1,108 +1,57 @@
 # ButtonRow
 
-An AdwButtonRow is a specialized `AdwRow` designed to hold one or more buttons, typically for form actions (like "Cancel", "Apply") or a small set of related actions. It provides specific styling to manage the layout of these buttons within a row context.
+The `.adw-button-row` class styles a list row to look and behave like a button. This is often used in preferences or lists where an entire row should be an activatable target with button-like feedback. It's based on Libadwaita's `AdwButtonRow`.
 
-## JavaScript Factory: `Adw.createButtonRow()`
+## Basic Usage
 
-Creates an Adwaita-styled row for holding buttons.
-
-**Signature:**
-
-```javascript
-Adw.createButtonRow(options = {}) -> HTMLDivElement
-```
-
-**Parameters:**
-
-*   `options` (Object, optional): Configuration options:
-    *   `buttons` (Array<HTMLElement | Object>, optional): An array of button elements (e.g., created with `Adw.createButton()`) or button option objects (which will be used to create buttons internally).
-    *   `centered` (Boolean, optional): If `true`, centers the buttons within the row. If `false` (default), buttons are typically aligned to the end (right).
-
-**Returns:**
-
-*   `(HTMLDivElement)`: The created `<div>` element representing the button row.
-
-**Example:**
+Apply the `.adw-button-row` class to a `<div>` or other suitable block element, typically within an `.adw-list-box`.
 
 ```html
-<div id="js-buttonrow-listbox" style="max-width: 450px;">
-  <!-- AdwListBox might wrap this, or it could be standalone in a form -->
+<div class="adw-list-box boxed-list">
+  <div class="adw-button-row">
+    <span class="adw-button-row-icon">
+      <!-- Optional: place an .adw-icon or svg here -->
+    </span>
+    <span class="adw-button-row-title">Clickable Row Action</span>
+  </div>
+  <div class="adw-button-row suggested-action">
+    <span class="adw-button-row-title">Suggested Action Row</span>
+  </div>
+  <div class="adw-button-row destructive-action">
+    <span class="adw-button-row-title">Destructive Action Row</span>
+  </div>
+  <div class="adw-button-row" disabled>
+    <span class="adw-button-row-title">Disabled Button Row</span>
+  </div>
 </div>
-<script>
-  const container = document.getElementById('js-buttonrow-listbox');
-
-  // ButtonRow with end-aligned buttons (default)
-  const formActionsRow = Adw.createButtonRow({
-    buttons: [
-      Adw.createButton("Cancel", { onClick: () => Adw.createToast("Cancel clicked") }),
-      Adw.createButton("Apply", { onClick: () => Adw.createToast("Apply clicked") }),
-      Adw.createButton("Save", { suggested: true, onClick: () => Adw.createToast("Save clicked") })
-    ]
-  });
-  container.appendChild(formActionsRow);
-
-  container.appendChild(document.createElement('hr')); // separator
-
-  // ButtonRow with centered buttons
-  const centeredActionsRow = Adw.createButtonRow({
-    buttons: [
-      { label: "Option 1", onClick: () => Adw.createToast("Option 1") }, // Pass options object
-      { label: "Option 2", flat: true, onClick: () => Adw.createToast("Option 2") }
-    ],
-    centered: true
-  });
-  container.appendChild(centeredActionsRow);
-</script>
 ```
 
-## Web Component: `<adw-button-row>`
+## Appearance and Behavior
 
-A declarative way to define Adwaita button rows.
+-   **Base Styling:** Inherits general row structure (e.g., from `row-base` mixin) and button visual styles (e.g., from `.adw-button`).
+-   **Layout:** Uses flexbox to align content. Text is typically left-aligned.
+-   **Padding:** Uses row padding variables, which are generally less than standalone button padding.
+-   **Borders:** Designed to integrate into list contexts. It typically has no visible border itself; separators are handled by the parent `.adw-list-box` (especially with `.boxed-list` style).
+-   **States:** Supports `:hover`, `:active`, and `:focus-visible` states, visually similar to an `.adw-button`.
+-   **Variants:** Can be combined with `.suggested-action` or `.destructive-action` classes to adopt those button styles.
+-   **Disabled:** Can be disabled using the `disabled` attribute or `.disabled` class.
 
-**HTML Tag:** `<adw-button-row>`
+## HTML Structure
 
-**Attributes:**
+A common structure includes:
+-   An optional icon area (e.g., `<span class="adw-button-row-icon">...</span>`).
+-   A title (e.g., `<span class="adw-button-row-title">...</span>`).
 
-*   `centered` (Boolean, optional): If present, centers the buttons within the row. Otherwise, buttons are typically end-aligned.
+## CSS Variables Used
 
-**Slots:**
+Inherits variables from both row styling and button styling:
+-   `--row-padding-vertical-default`, `--row-padding-horizontal-default`
+-   `--button-bg-color`, `--button-fg-color`, `--button-hover-bg-color`, `--button-active-bg-color`
+-   `--accent-bg-color`, `--accent-fg-color` (for suggested/active states)
+-   `--destructive-bg-color`, `--destructive-fg-color`
+-   `--focus-ring-color`, `--focus-ring-width`
+-   `--disabled-opacity`
 
-*   Default slot: Place `adw-button` elements or standard `<button>` elements here.
+## Interactivity
 
-**Example:**
-
-```html
-<div style="max-width: 500px; display: flex; flex-direction: column; gap: 10px;">
-
-  <adw-list-box>
-    <adw-entry-row title="Name"></adw-entry-row>
-    <!-- Default: end-aligned buttons -->
-    <adw-button-row>
-      <adw-button id="br-cancel">Cancel</adw-button>
-      <adw-button id="br-save" suggested>Save Changes</adw-button>
-    </adw-button-row>
-  </adw-list-box>
-
-
-  <adw-button-row centered style="border-top: 1px solid var(--borders-color); padding-top: var(--spacing-s);">
-    <adw-button flat>Previous</adw-button>
-    <adw-button flat>Next Page</adw-button>
-  </adw-button-row>
-
-</div>
-
-<script>
-  document.getElementById('br-save').addEventListener('click', () => Adw.createToast("Save from WC ButtonRow"));
-</script>
-```
-
-## Styling
-
-*   Primary SCSS: `scss/_button_row.scss` (and inherits from `_listbox.scss` / `_row_types.scss`, uses `_button.scss`).
-*   The layout uses flexbox to arrange the buttons within a container.
-*   `justify-content: flex-end` is common for default alignment, and `justify-content: center` for the `centered` variant.
-*   Spacing between buttons is managed by the flex container's `gap` property or margins on the buttons.
-*   The row itself usually has padding appropriate for its context (e.g., within a listbox or dialog footer).
-
----
-Next: [TabView (and its sub-components TabBar, TabButton, TabPage)](./tabview.md)
+Click handling and actions must be implemented with JavaScript. Adwaita Skin only provides the styling.

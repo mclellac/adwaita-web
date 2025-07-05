@@ -1,0 +1,84 @@
+// SCSS for AdwButtonRow (Pure CSS Adwaita Skin Version)
+// AdwButtonRow is a GtkListBoxRow that looks like a button.
+// Introduced in Libadwaita 1.6.alpha
+@use 'variables';
+@use 'mixins';
+@use 'button'; // To extend .adw-button styles
+
+.adw-button-row {
+  // Inherit base row structure and padding behavior from row-base
+  @include mixins.row-base;
+  // Apply button-like visual styling
+  @extend .adw-button; // This applies border, default background, text color, focus, etc.
+
+  // Override/Adjust some row-base or button styles specific to ButtonRow context:
+  display: flex; // row-base already does this
+  align-items: center; // row-base already does this
+  width: 100%; // ButtonRows typically span the full width of a listbox
+  text-align: left; // Text in ButtonRow is usually left-aligned, not centered like a standalone button
+  justify-content: flex-start; // Align content to the start
+
+  // Padding from .adw-button might be too much for a row context.
+  // row-base provides --row-padding-vertical/horizontal.
+  // Let's use row padding, which is usually less than button padding.
+  padding: var(--row-padding-vertical, var(--row-padding-vertical-default)) var(--row-padding-horizontal, var(--row-padding-horizontal-default));
+
+  // Ensure the border from .adw-button is handled correctly within a list context.
+  // Typically, a ButtonRow won't have its own border if it's inside a listbox
+  // that manages separators or if it's in a .boxed-list.
+  // The .adw-button default has a border. We might need to make it transparent here
+  // and rely on listbox separators.
+  border-color: transparent; // Default to no visible border for the row itself
+  box-shadow: none; // Remove default button box-shadow if any
+
+  // If the listbox handles separators, this ensures ButtonRow doesn't add its own.
+  .adw-list-box > & { // If direct child of a listbox
+    // The row-base mixin's last-child border removal should handle this.
+    // If listbox uses .boxed-list style, its own separator logic applies.
+  }
+  // For .boxed-list context, the listbox itself adds separators.
+  .adw-list-box.boxed-list > & {
+     border-color: transparent !important; // Ensure no button border interferes with card separators
+  }
+
+
+  // Content alignment: icon, title, subtitle (if any)
+  // Assuming a similar structure to AdwActionRow for content if complex.
+  // For a simple ButtonRow, it might just be text or an icon + text.
+  .adw-button-row-icon {
+    // Styles for an icon if present (e.g., margin-right)
+    margin-right: var(--spacing-s);
+    display: inline-flex;
+    align-items: center;
+    color: inherit; // Inherit color from the button row state
+    .adw-icon, svg {
+        width: var(--icon-size-base);
+        height: var(--icon-size-base);
+        fill: currentColor;
+    }
+  }
+
+  .adw-button-row-title {
+    flex-grow: 1; // Title takes available space
+    color: inherit; // Inherit from button row state
+  }
+
+  // States: hover, active, disabled
+  // These are mostly handled by @extend .adw-button
+  // However, background for hover/active might need to use list-row variables
+  // if the button row is meant to look more like a row than a standalone button.
+  // For now, assume it behaves like a button.
+
+  &.suggested-action {
+    // Styles from .adw-button.suggested-action are extended.
+  }
+  &.destructive-action {
+    // Styles from .adw-button.destructive-action are extended.
+  }
+
+  &[disabled] {
+    // Styles from .adw-button[disabled] are extended.
+    // Ensure text color is also appropriately dimmed if not handled by .adw-button's opacity.
+    // color: var(--disabled-fg-color); // This is often just opacity on the whole element
+  }
+}

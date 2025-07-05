@@ -1,143 +1,95 @@
 # ToggleGroup
 
-An AdwToggleGroup manages a collection of `AdwToggleButton` elements, ensuring that only one button within the group can be active at a time (similar to a radio button group). It can also style the buttons as a single, visually linked unit.
+The `.adw-toggle-group` class styles a container and its button children to function as an Adwaita Toggle Group. This is typically used for a set of exclusive toggles, often presented as segmented buttons. It's based on Libadwaita's `AdwToggleGroup`.
 
-## JavaScript Factory: `Adw.createAdwToggleGroup()`
+## Basic Usage
 
-Creates an Adwaita-styled toggle group.
-
-**Signature:**
-
-```javascript
-Adw.createAdwToggleGroup(options = {}) -> HTMLDivElement (with methods)
-```
-
-**Parameters:**
-
-*   `options` (Object, optional): Configuration options:
-    *   `buttons` (Array<Object | HTMLElement>, optional): An array of
-        `AdwToggleButton` option objects (passed to `Adw.createAdwToggleButton`)
-        or pre-created `AdwToggleButton` elements. Each button should have a
-        unique `value`.
-    *   `linked` (Boolean, optional): If `true`, styles the buttons as a single
-        linked group (e.g., like segments of a segmented button). Defaults to
-        `false`.
-    *   `activeValue` (String, optional): The `value` of the button to be initially
-        active.
-    *   `onActiveChanged` (Function, optional): Callback when the active button
-        changes. Receives the `value` of the newly active button (or `null` if
-        none become active, though typically one is always active in a group).
-
-**Returns:**
-
-*   `(HTMLDivElement)`: The `<div>` container for the toggle group. It's augmented with methods:
-    *   `getValue() -> String | null`: Returns the value of the currently active button.
-    *   `setValue(valueToActivate: String)`: Sets the active button by its value.
-
-**Example:**
+Apply the `.adw-toggle-group` class to a container element (e.g., a `<div>`). Inside this container, place button elements (e.g., `<button class="adw-button">`). The button corresponding to the active/pressed state should have the `.active` class or the `aria-pressed="true"` attribute.
 
 ```html
-<div id="js-togglegroup-container" style="padding: 10px;"></div>
-<script>
-  const container = document.getElementById('js-togglegroup-container');
-
-  // Standard ToggleGroup
-  const alignmentGroup = Adw.createAdwToggleGroup({
-    buttons: [
-      { label: "Left", value: "left" /*, icon: "format-justify-left-symbolic" */ },
-      { label: "Center", value: "center", active: true },
-      { label: "Right", value: "right" }
-    ],
-    onActiveChanged: (value) => {
-      Adw.createToast(`Alignment changed to: ${value}`);
-      document.body.style.textAlign = value; // Demo effect
-    }
-  });
-  container.appendChild(Adw.createLabel("Text Alignment:"));
-  container.appendChild(alignmentGroup);
-
-  container.appendChild(document.createElement('br'));
-
-  // Linked ToggleGroup
-  const viewModeGroup = Adw.createAdwToggleGroup({
-    buttons: [
-      { label: "List", value: "list-view" },
-      { label: "Grid", value: "grid-view" }
-    ],
-    linked: true,
-    activeValue: "grid-view",
-    onActiveChanged: (value) => Adw.createToast(`View mode: ${value}`)
-  });
-  container.appendChild(Adw.createLabel("View Mode:"));
-  container.appendChild(viewModeGroup);
-
-  // Programmatically change active value
-  setTimeout(() => {
-    // viewModeGroup.setValue("list-view");
-  }, 3000);
-</script>
-```
-
-## Web Component: `<adw-toggle-group>`
-
-A declarative way to define Adwaita toggle groups.
-
-**HTML Tag:** `<adw-toggle-group>`
-
-**Attributes:**
-
-*   `linked` (Boolean, optional): If present, styles buttons as a linked group.
-*   `active-value` (String, optional): The `value` of the initially active child `<adw-toggle-button>`.
-
-**Slots:**
-
-*   Default slot: Place `<adw-toggle-button>` elements here. Each button should have a unique `value` attribute.
-
-**Properties:**
-
-*   `value` (String): Gets or sets the value of the active button in the group.
-
-**Events:**
-
-*   `active-changed`: Fired when the active button changes. `event.detail` contains `{ value: String | null }`.
-
-**Example:**
-
-```html
-<div style="padding: 10px;">
-  <p>Editor Mode:</p>
-  <adw-toggle-group active-value="visual" id="editor-mode-group">
-    <adw-toggle-button label="Visual" value="visual"></adw-toggle-button>
-    <adw-toggle-button label="Code" value="code"></adw-toggle-button>
-    <adw-toggle-button label="Preview" value="preview" disabled></adw-toggle-button>
-  </adw-toggle-group>
-
-  <p style="margin-top: 1em;">File Type (Linked):</p>
-  <adw-toggle-group linked id="file-type-group">
-    <adw-toggle-button value="doc">Document</adw-toggle-button>
-    <adw-toggle-button value="sheet" active>Spreadsheet</adw-toggle-button>
-    <adw-toggle-button value="slide">Presentation</adw-toggle-button>
-  </adw-toggle-group>
+<div class="adw-toggle-group">
+  <button class="adw-button active" aria-pressed="true">Option 1</button>
+  <button class="adw-button" aria-pressed="false">Option 2</button>
+  <button class="adw-button" aria-pressed="false">Option 3</button>
 </div>
-
-<script>
-  const editorModeGroup = document.getElementById('editor-mode-group');
-  editorModeGroup.addEventListener('active-changed', (event) => {
-    Adw.createToast(`Editor mode set to: ${event.detail.value}`);
-  });
-
-  const fileTypeGroup = document.getElementById('file-type-group');
-  // Programmatically change active button in the linked group
-  // setTimeout(() => { fileTypeGroup.value = "doc"; }, 2500);
-</script>
 ```
 
-## Styling
+## Appearance and Variants
 
-*   Primary SCSS: `scss/_toggle_group.scss` (and uses `_toggle_button.scss`, `_button.scss`).
-*   When `linked`, child buttons have their borders adjusted to appear connected (e.g., shared borders, rounded corners only on the ends of the group).
-*   The group itself is a flex container.
-*   Spacing between non-linked buttons is managed by their margins or `gap` on the group.
+By default, an `.adw-toggle-group` may appear as a set of closely spaced individual buttons. The `.linked` class is commonly used to make them visually connected.
 
----
-Next: [NavigationSplitView](./navigationsplitview.md)
+### Linked Style (Default Adwaita Appearance)
+
+Add the `.linked` class to the `.adw-toggle-group` container to make the buttons appear as a single, segmented control. This is the most common appearance for toggle groups in Adwaita.
+
+```html
+<div class="adw-toggle-group linked">
+  <button class="adw-button active">Left</button>
+  <button class="adw-button">Center</button>
+  <button class="adw-button">Right</button>
+</div>
+```
+-   The group has an outer border.
+-   Buttons inside have no individual borders except for separators between them.
+-   The first and last buttons have rounded corners matching the group.
+
+### Active State
+
+The button with the `.active` class (or `aria-pressed="true"`) is styled using:
+-   `--active-toggle-bg-color`
+-   `--active-toggle-fg-color`
+-   Font weight may be bolder (e.g., `var(--font-weight-bold)`).
+
+### Flat Style
+
+Add the `.flat` class for a borderless appearance, where buttons are flat and typically separated by subtle lines.
+
+```html
+<div class="adw-toggle-group linked flat">
+  <button class="adw-button active">Day</button>
+  <button class="adw-button">Week</button>
+  <button class="adw-button">Month</button>
+</div>
+```
+
+### Round Style
+
+Add the `.round` class. If also `.linked`, the entire group becomes pill-shaped. If not `.linked`, individual buttons become pill-shaped.
+
+```html
+<div class="adwaita-web/scss/.adw-toggle-group linked round">
+  <button class="adw-button active">View A</button>
+  <button class="adw-button">View B</button>
+</div>
+```
+
+### Vertical Orientation
+
+Add the `.vertical` class to arrange the buttons vertically. This can be combined with `.linked`, `.flat`, and `.round`.
+
+```html
+<div class="adw-toggle-group linked vertical">
+  <button class="adw-button active">Top</button>
+  <button class="adw-button">Middle</button>
+  <button class="adw-button">Bottom</button>
+</div>
+```
+
+## Interactivity
+
+As Adwaita Skin is a pure CSS library, the logic for managing the toggle state (which button is active) must be implemented with your own JavaScript. This typically involves:
+- Listening for click events on the buttons.
+- Updating the `.active` class (and/or `aria-pressed` attribute) on the clicked button and removing it from others in the group.
+
+## CSS Variables Used
+
+-   `--button-border-color`, `--border-color`
+-   `--border-radius-default`, `--border-radius-small`
+-   `--spacing-xxs`, `--spacing-xs`, `--spacing-s`
+-   `--button-bg-color`, `--button-fg-color`
+-   `--button-flat-hover-bg-color`
+-   `--active-toggle-bg-color`, `--active-toggle-fg-color`
+-   `--font-weight-bold` (for active button)
+-   `--disabled-opacity`
+-   `--pill-button-border-radius` (for `.round` variant)
+-   `--accent-bg-color`, `--accent-fg-color` (Note: Default active toggles use `--active-toggle-*` vars, but if `.suggested-action` were applied to a toggle, it would use accent.)

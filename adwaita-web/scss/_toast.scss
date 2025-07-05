@@ -5,11 +5,11 @@
 .adw-toast {
   // Base style for a toast notification.
   // Toasts are displayed by an AdwToastOverlay. Positioning is handled by the overlay.
-  background-color: var(--toast-bg-color); // Use variable from _variables.scss
-  color: var(--toast-fg-color);       // Use variable from _variables.scss
+  background-color: var(--toast-bg-color);
+  color: var(--toast-fg-color);
   padding: var(--spacing-s) var(--spacing-m);
-  border-radius: var(--border-radius-large); // Use general large border radius
-  box-shadow: var(--toast-box-shadow); // Use variable from _variables.scss (popover shadow is a good fit)
+  border-radius: var(--toast-border-radius);
+  box-shadow: var(--toast-box-shadow);
 
   display: flex;
   align-items: center;
@@ -17,12 +17,12 @@
   gap: var(--spacing-s);
   width: max-content; // Shrink to content size, up to max-width
   max-width: var(--toast-max-width, 400px);
-  min-height: var(--toast-min-height, 36px); // Ensure a minimum touch target / visual size
+  min-height: var(--toast-min-height);
   // Default state for animation by overlay:
   opacity: 0;
   transform: translateY(100%) scale(0.9); // Start off-screen (bottom) and slightly scaled down
-  transition: opacity var(--animation-duration-fast) var(--animation-ease-out-cubic),
-              transform var(--animation-duration-fast) var(--animation-ease-out-cubic);
+  transition: opacity var(--animation-duration-short) var(--animation-ease-out-cubic),
+              transform var(--animation-duration-short) var(--animation-ease-out-cubic);
   will-change: transform, opacity;
 
   // State when visible (class added by AdwToastOverlay)
@@ -36,8 +36,8 @@
     opacity: 0;
     transform: translateY(100%) scale(0.9); // Animate downwards (same direction as appear) and fade
     // Transition duration for hiding can be slightly different if needed
-    transition-duration: var(--animation-duration-xfast); // Use a shorter duration for hiding
-    transition-timing-function: var(--animation-ease-in); // Ease-in for hiding (standard keyword)
+    transition-duration: var(--animation-duration-shortest); // Use a shorter duration for hiding
+    transition-timing-function: var(--animation-ease-in-cubic); // Ease-in for hiding
   }
 
   .adw-toast-content-wrapper {
@@ -70,11 +70,9 @@
     // AdwButton styles (flat, suggested, etc.) will apply.
     // Ensure good contrast on dark toast background.
     &.flat {
-      // Assuming accent-color is chosen to be visible on dark backgrounds.
-      // If a specific lighter variant of accent is needed for toasts, define --toast-accent-fg-color
-      color: var(--accent-color);
+      color: var(--toast-accent-color); // Use toast specific accent if defined, else fallback to accent-color
       &:hover {
-        background-color: rgba(255,255,255,0.1); // Standard flat button hover on dark
+        background-color: rgba(var(--toast-fg-color-rgb, 255,255,255), 0.1); // Standard flat button hover on dark
       }
     }
   }
@@ -83,39 +81,26 @@
   .adw-toast-close-button.adw-button {
     flex-shrink: 0;
     margin-left: var(--spacing-s);
-    color: var(--secondary-text-color); // Use general secondary text color for dark bg
+    color: var(--toast-secondary-fg-color);
 
     // Target the icon container (span.icon or adw-icon)
     .adw-icon, .icon {
         display: inline-flex; // Ensure proper alignment and sizing
         align-items: center;
         justify-content: center;
-        // Use a specific size for the icon container, matching typical Adwaita small icon buttons
-        width: var(--icon-size-small, 16px); // e.g., 16px
-        height: var(--icon-size-small, 16px);
+        width: var(--icon-size-small);
+        height: var(--icon-size-small);
     }
 
     // Target the SVG element itself within the icon container
     .adw-icon svg, .icon svg {
         width: 100%; // Fill the container
         height: 100%; // Fill the container
-        // fill: currentColor; // Already set in SVG string, but good to ensure
     }
 
     &:hover {
-        color: var(--toast-foreground-color, rgba(255,255,255,1));
-        background-color: rgba(255,255,255,0.1);
+        color: var(--toast-fg-color);
+        background-color: rgba(var(--toast-fg-color-rgb, 255,255,255), 0.1);
     }
   }
 }
-
-// Variables for _variables.scss:
-// --toast-background-color: hsl(0, 0%, 18%); // A dark, neutral color
-// --toast-foreground-color: hsl(0, 0%, 95%); // A light text color
-// --toast-secondary-fg-color: hsla(0, 0%, 95%, 0.7);
-// --toast-accent-fg-color: var(--accent-color); // Or a lighter variant for dark bg
-// --toast-border-radius: var(--border-radius-large);
-// --toast-max-width: 400px;
-// --toast-min-height: 36px;
-// --animation-ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-// --animation-duration-xs: 150ms;

@@ -36,7 +36,7 @@
     // Disabled state - ON
     &:disabled:checked + .adw-switch-slider {
       background-color: var(--accent-bg-color);
-      opacity: var(--opacity-disabled); // Apply opacity to the whole slider for disabled "on" state
+      opacity: var(--disabled-opacity); // Apply opacity to the whole slider for disabled "on" state
       cursor: not-allowed;
 
        &:before {

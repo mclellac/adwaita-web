@@ -48,8 +48,8 @@
       // Standard focus: outline. row-base or listbox context might provide this.
       // If not, enable it here:
       outline: 2px solid var(--accent-color);
-      outline-offset: var(--focus-outline-offset, -2px);
-      border-radius: var(--row-border-radius, var(--border-radius-small));
+      outline-offset: var(--focus-outline-offset); // Use the defined variable
+      border-radius: var(--row-border-radius); // Use the defined variable
     }
   }
 

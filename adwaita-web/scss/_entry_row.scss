@@ -19,7 +19,7 @@
 
   .adw-entry-row-title {
     font-size: var(--font-size-base);
-    font-weight: variables.$font-weight-normal;
+    font-weight: var(--font-weight-normal);
     color: var(--window-fg-color);
     line-height: 1.3; // Adjusted for better baseline alignment with entry
   }
@@ -67,7 +67,7 @@
     }
     .adw-entry-row-subtitle, // If subtitle is used as value
     .adw-entry-row-entry.adw-entry { // If entry is styled as value
-      font-weight: variables.$font-weight-bold; // Emphasize value
+      font-weight: var(--font-weight-bold); // Emphasize value
       opacity: 1; // Ensure full opacity for value
     }
     // If the entry in a property row is meant to look like static text:

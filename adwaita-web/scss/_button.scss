@@ -17,7 +17,7 @@
     color: var(--window-fg-color);
     font-family: var(--document-font-family);
     font-size: var(--font-size-base);
-    font-weight: variables.$font-weight-bold;
+    font-weight: var(--font-weight-bold);
     line-height: variables.$line-height-base;
     text-align: center;
     text-decoration: none;
@@ -103,6 +103,11 @@
         &:active {
             background-color: var(--destructive-bg-active-color);
             border-color: var(--destructive-bg-active-color);
+        }
+
+        &:focus, &:focus-visible {
+            // Libadwaita 1.6.alpha: "Use red focus rings for destructive buttons"
+            box-shadow: 0 0 0 var(--focus-ring-width) var(--destructive-color);
         }
     }
 

@@ -17,7 +17,7 @@
   overflow: hidden;   // Clip image/text to the round shape
   background-color: var(--avatar-bg-color); // Use the CSS variable
   color: var(--avatar-text-color);         // Use the CSS variable for text (initials)
-  font-weight: variables.$font-weight-bold; // Initials are usually bold
+  font-weight: var(--font-weight-bold); // Initials are usually bold
   vertical-align: middle; // Align well with adjacent text
   user-select: none;
   box-sizing: border-box; // Consistent sizing behavior

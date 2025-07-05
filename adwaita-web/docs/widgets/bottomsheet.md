@@ -1,118 +1,78 @@
 # BottomSheet
 
-An AdwBottomSheet is a widget that slides up from the bottom of the screen, typically used to display contextual actions or more detailed information related to the current view. It can contain arbitrary content and often includes a bottom bar that might be visible when the sheet is closed.
+The `.adw-bottom-sheet` class styles a container to appear as a bottom sheet, a panel that slides up from the bottom of the screen. This component is based on Libadwaita's `AdwBottomSheet`.
 
-## Web Component: `<adw-bottom-sheet>`
+A backdrop element, styled with `.adw-bottom-sheet-backdrop`, is often used in conjunction with the bottom sheet.
 
-A declarative way to define an Adwaita BottomSheet.
+## Basic Usage
 
-**HTML Tag:** `<adw-bottom-sheet>`
-
-**Attributes:**
-
-*   `open` (Boolean attribute): Controls whether the sheet is visible (open) or hidden (closed). Add the attribute to open, remove to close.
-*   `modal` (Boolean attribute, default: `true`): If present (or not set to `"false"`), the bottom sheet will be modal, typically showing a backdrop that blocks interaction with underlying content. Set `modal="false"` for a non-modal sheet.
-*   `show-drag-handle` (Boolean attribute, default: `true`): If present (or not set to `"false"`), a drag handle is shown at the top of the sheet. Set `show-drag-handle="false"` to hide it.
-*   `reveal-bottom-bar` (Boolean attribute, default: `true`): If present (or not set to `"false"`), the content slotted into `bottom-bar` is visible when the sheet is closed. Set `reveal-bottom-bar="false"` to hide the bottom bar always, or when the sheet is closed.
-*   `can-open` (Boolean attribute, default: `true`): If set to `"false"`, user interactions (like clicking bottom bar or drag handle, or swiping - if implemented) cannot open the sheet. Programmatic opening via `open` attribute/property still works.
-*   `can-close` (Boolean attribute, default: `true`): If set to `"false"`, user interactions (like backdrop click, Escape key, drag handle click, or swiping - if implemented) cannot close the sheet. Programmatic closing works.
-*   `full-width` (Boolean attribute, default: `true`): If present (or not set to `"false"`), the sheet and bottom bar take the full width of their container. If `full-width="false"`, they take a portion of the width and can be aligned using the `align` attribute.
-*   `align` (String, default: `fill` or `center`): If `full-width` is `false`, this attribute controls horizontal alignment. Possible values: `"start"`, `"center"`, `"end"`. (`fill` might imply full width within its constraints).
-
-**Slots:**
-
-*   Default slot: The main content of the screen/area that the bottom sheet overlays.
-*   `sheet` (Named slot): Content to be displayed inside the sheet when it's open.
-*   `bottom-bar` (Named slot): Content for the bottom bar, visible when the sheet is closed and `reveal-bottom-bar` is true.
-
-**Events:**
-
-*   `open`: Fired when the bottom sheet transitions to the open state.
-*   `close`: Fired when the bottom sheet transitions to the closed state.
-*   `close-attempt`: Fired if a user interaction tries to close the sheet but `can-close` is `false`.
-
-**Methods (via JavaScript):**
-
-*   `open()`: Programmatically opens the sheet by setting the `open` property to `true`.
-*   `close()`: Programmatically closes the sheet by setting the `open` property to `false`.
-
-**Properties (via JavaScript):**
-*   `open` (Boolean): Gets or sets the open state.
-*   `modal` (Boolean): Gets or sets the modal state.
-*   `showDragHandle` (Boolean): Gets or sets the visibility of the drag handle.
-*   `revealBottomBar` (Boolean): Gets or sets the visibility of the bottom bar when sheet is closed.
-*   `canOpen` (Boolean): Gets or sets whether user interaction can open the sheet.
-*   `canClose` (Boolean): Gets or sets whether user interaction can close the sheet.
-*   `fullWidth` (Boolean): Gets or sets whether the sheet is full width.
-*   `align` (String): Gets or sets the alignment when not full width.
-
-
-**Example:**
+The HTML structure typically involves a main container for the sheet and an optional backdrop. JavaScript is required to toggle the `.open` class for animations and visibility.
 
 ```html
-<adw-button id="open-bs-btn">Show BottomSheet</adw-button>
+<!-- Backdrop for the bottom sheet -->
+<div class="adw-bottom-sheet-backdrop" id="myBottomSheetBackdrop"></div>
 
-<adw-bottom-sheet id="my-bottom-sheet">
-  <!-- This is the main page content over which the sheet appears -->
-  <p>This is the main content of the page.</p>
-  <p>More content here to demonstrate the sheet overlaying it.</p>
-
-  <div slot="bottom-bar" style="display: flex; justify-content: space-around; align-items: center; padding: var(--spacing-xs);">
-    <span>Now Playing: Song Title</span>
-    <adw-button icon-name="media-playback-start-symbolic" circular flat title="Play"></adw-button>
+<!-- Bottom Sheet -->
+<div class="adw-bottom-sheet" id="myBottomSheet">
+  <div class="adw-bottom-sheet-drag-handle-area">
+    <div class="adw-bottom-sheet-drag-handle"></div>
   </div>
-
-  <div slot="sheet" style="padding: var(--spacing-m);">
-    <h4>Sheet Title</h4>
+  <div class="adw-bottom-sheet-header">
+    <!-- Optional: AdwHeaderBar or custom header content -->
+    <div class="adw-header-bar">
+      <span class="adw-header-bar-title">Sheet Title</span>
+    </div>
+  </div>
+  <div class="adw-bottom-sheet-content">
     <p>This is the content of the bottom sheet.</p>
-    <adw-list-box>
-      <adw-action-row title="Action 1"></adw-action-row>
-      <adw-action-row title="Action 2"></adw-action-row>
-    </adw-list-box>
-    <adw-button id="close-bs-btn" style="margin-top: var(--spacing-m);">Close Sheet</adw-button>
+    <p>It can be scrollable if the content exceeds the available height.</p>
+    <!-- Add more content here -->
   </div>
-</adw-bottom-sheet>
+</div>
 
 <script>
-  const bottomSheet = document.getElementById('my-bottom-sheet');
-  const openBtn = document.getElementById('open-bs-btn');
-  const closeBtn = document.getElementById('close-bs-btn'); // Assuming this button is inside the sheet slot
-
-  if (openBtn) openBtn.addEventListener('click', () => bottomSheet.open = true);
-  if (closeBtn) closeBtn.addEventListener('click', () => bottomSheet.open = false);
-
-  bottomSheet.addEventListener('open', () => console.log('BottomSheet opened'));
-  bottomSheet.addEventListener('close', () => console.log('BottomSheet closed'));
+  // Example JS to toggle the bottom sheet (you'll need more robust logic)
+  const sheet = document.getElementById('myBottomSheet');
+  const backdrop = document.getElementById('myBottomSheetBackdrop');
+  // Add event listener to a button or trigger:
+  // myTriggerButton.addEventListener('click', () => {
+  //   sheet.classList.toggle('open');
+  //   backdrop.classList.toggle('open');
+  // });
+  // backdrop.addEventListener('click', () => { // Close on backdrop click
+  //   sheet.classList.remove('open');
+  //   backdrop.classList.remove('open');
+  // });
 </script>
 ```
 
-## JavaScript Factory: `createAdwBottomSheet()`
+## Appearance
 
-Creates an `<adw-bottom-sheet>` Web Component instance.
+-   **Positioning:** Fixed to the bottom of the viewport.
+-   **Background & Color:** Uses `--dialog-bg-color` and `--dialog-fg-color` by default, similar to dialogs.
+-   **Shape:** Top corners are rounded using `var(--window-radius)`.
+-   **Shadow:** Uses `var(--dialog-box-shadow)`.
+-   **Animation:** Slides up from the bottom and fades in when the `.open` class is applied. Slides down and fades out when `.open` is removed.
+-   **Max Height:** Limited to `90vh` to prevent covering the entire screen.
 
-**Signature:**
-```javascript
-createAdwBottomSheet(options = {}) -> AdwBottomSheetElement // AdwBottomSheetElement is the class for <adw-bottom-sheet>
-```
+## Structure
 
-**Parameters:**
-*   `options` (Object, optional): Configuration options, mapped to attributes of `<adw-bottom-sheet>`:
-    *   `open`, `modal`, `showDragHandle`, `revealBottomBar`, `canOpen`, `canClose`, `fullWidth` (Booleans): Sets corresponding attributes. For boolean attributes, `true` means presence of attribute, `false` means absence (or `attr="false"` if explicit false is different from absence for the component). Factory typically sets attribute if option is true, or `attr="false"` if option is explicitly false and that's distinct.
-    *   `align` (String): Sets the `align` attribute.
-    *   `content` (Node): Node for the default slot (main page content).
-    *   `sheetContent` (Node): Node for the `sheet` slot.
-    *   `bottomBarContent` (Node): Node for the `bottom-bar` slot.
-    *   `onOpen`, `onClose`, `onCloseAttempt` (Functions): Event listeners for corresponding events.
+-   **`.adw-bottom-sheet`**: The main container.
+    -   **`.adw-bottom-sheet-drag-handle-area`** (Optional): Contains the `.adw-bottom-sheet-drag-handle` for a visual cue.
+    -   **`.adw-bottom-sheet-header`** (Optional): Can contain an `.adw-header-bar` or other header content.
+    -   **`.adw-bottom-sheet-content`**: The main scrollable content area.
+-   **`.adw-bottom-sheet-backdrop`**: A separate element for the overlay behind the sheet.
 
-**Returns:**
-*   `(AdwBottomSheetElement)`: The created `<adw-bottom-sheet>` instance.
+## CSS Variables Used
 
-## Styling
+-   `--dialog-bg-color`, `--dialog-fg-color`
+-   `--window-radius`
+-   `--dialog-box-shadow`
+-   `--border-color` (for drag handle)
+-   `--z-index-dialog` (or a dedicated bottom sheet z-index)
+-   Animation variables (e.g., `--animation-duration-medium`, `--animation-ease-out-cubic`)
 
-*   Primary SCSS: `scss/_bottom_sheet.scss`
-*   Uses CSS variables for theming (background, shadows, border-radius, etc.).
-*   The sheet animates from the bottom of the screen.
-*   A backdrop is shown if `modal` is true and the sheet is open.
-*   The drag handle is a small visual indicator at the top of the sheet.
----
-Next: Documentation for other components like `Icon`, `WindowTitle`, etc.
+## Interactivity
+
+All interactivity (showing, hiding, handling drag gestures if desired) must be implemented with JavaScript. Adwaita Skin provides the styling for the open and closed states.
+The `.open` class on both the sheet and backdrop elements controls their visibility and triggers animations.

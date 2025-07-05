@@ -1,14 +1,5 @@
 @use 'variables';
 
-// Default spinner color, can be overridden by context (e.g., on dark backgrounds)
-// Using accent-color as it's often indicative of an active/interactive state.
-// For spinners on non-interactive waiting screens, --window-fg-color might also be an option.
-// Ensure this variable choice provides good contrast.
-:root {
-  --spinner-color: var(--accent-color);
-  --spinner-track-color: var(--shade-color); // Or a lighter/more transparent version of accent-color
-}
-
 .adw-spinner {
   display: inline-block;
   width: 24px;

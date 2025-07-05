@@ -2,6 +2,7 @@
 // AdwBanner is an inline notification bar.
 @use 'variables';
 @use 'mixins';
+@use 'button'; // For @extend .adw-button
 @use 'sass:color';
 
 .adw-banner {
@@ -22,7 +23,7 @@
   .adw-banner-title {
     flex-grow: 1;
     font-size: var(--font-size-base);
-    font-weight: variables.$font-weight-normal; // Libadwaita banner titles are normal weight
+    font-weight: var(--font-weight-normal); // Libadwaita banner titles are normal weight
     text-align: left; // Usually left-aligned
     min-width: 0;
     white-space: nowrap;

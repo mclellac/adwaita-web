@@ -97,7 +97,7 @@
     // Round style for the Toggle Group (AdwToggleGroup.round)
     // "makes the group, as well as toggles inside it rounded"
     &.round {
-        border-radius: var(--pill-button-border-radius); // Makes the group pill-shaped if linked
+        border-radius: var(--pill-button-border-radius);
 
         &:not(.linked) { // If not linked, individual toggles become pills
             gap: var(--spacing-xxs);
@@ -194,4 +194,10 @@
 //     color: var(--active-toggle-fg-color);
 //     border-color: var(--active-toggle-bg-color); // Or a slightly darker shade
 //   }
+// }
+//
+// // AdwInlineViewSwitcher often uses an AdwToggleGroup.
+// // If .adw-inline-view-switcher is just an alias for .adw-toggle-group styling:
+// .adw-inline-view-switcher {
+//   @extend .adw-toggle-group;
 // }

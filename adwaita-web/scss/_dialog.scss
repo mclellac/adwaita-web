@@ -36,7 +36,7 @@
 
     .adw-dialog-title {
       font-size: var(--title-3-font-size); // Use typography utility class size
-      font-weight: variables.$font-weight-bold;
+      font-weight: var(--font-weight-bold);
       color: inherit; // Inherits --dialog-fg-color
     }
     // Close button would be an .adw-button.circular.flat
@@ -51,7 +51,7 @@
     // For AdwAlertDialog, title might be here if no header is used
     .adw-alert-dialog-heading { // Specific class for AlertDialog heading
         font-size: var(--title-2-font-size);
-        font-weight: variables.$font-weight-bold;
+        font-weight: var(--font-weight-bold);
         margin-bottom: var(--spacing-xs);
         text-align: center;
     }

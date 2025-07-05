@@ -38,7 +38,7 @@
     color: var(--window-fg-color);
     opacity: var(--dim-opacity); // Dimmed description text
     max-width: 450px;
-    line-height: variables.$line-height-base * 1.1;
+    line-height: calc(var(--line-height-base) * 1.1);
     margin-top: 0;
     margin-bottom: var(--spacing-xl);
   }

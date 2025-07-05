@@ -26,7 +26,7 @@
   .adw-action-row__title { // Or .adw-switch-row__title
     font-size: var(--font-size-base);
     font-weight: normal;
-    color: var(--text-color);
+    color: var(--primary-fg-color);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -35,8 +35,8 @@
   // Subtitle for the switch row
   .adw-action-row__subtitle { // Or .adw-switch-row__subtitle
     font-size: var(--font-size-small);
-    color: var(--text-color-secondary);
-    opacity: 0.7;
+    color: var(--secondary-fg-color);
+    // opacity: 0.7; // --secondary-fg-color already includes opacity via --dim-opacity
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -55,8 +55,8 @@
   &.disabled { // If a class is used
     .adw-action-row__title,
     .adw-action-row__subtitle {
-      color: var(--disabled-fg-color);
-      opacity: var(--opacity-disabled);
+      // color: var(--disabled-fg-color); // Color is usually not changed, only opacity for text
+      opacity: var(--disabled-opacity);
     }
     // The .adw-switch input inside .adw-switch-row__switch should handle its own disabled styling.
   }
