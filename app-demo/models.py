@@ -32,6 +32,8 @@ class User(UserMixin, db.Model):
     theme = db.Column(db.String(80), nullable=True, default='system')
     accent_color = db.Column(db.String(80), nullable=True, default='default')
     is_admin = db.Column(db.Boolean, default=False, nullable=False) # Admin flag
+    is_approved = db.Column(db.Boolean, default=False, nullable=False)
+    is_active = db.Column(db.Boolean, default=False, nullable=False)
     posts = db.relationship(
         'Post', backref='author', lazy=True, order_by=lambda: desc(Post.created_at) # Use lambda for Post ref
     )

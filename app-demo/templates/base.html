@@ -143,6 +143,11 @@
                     <span class="adw-action-row-icon icon-actions-document-properties-symbolic"></span>
                     <span class="adw-action-row-title">Site Settings</span>
                 </a>
+                <a href="{{ url_for('admin.pending_users') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'admin.pending_users' }}">
+                    <span class="adw-action-row-icon icon-community-users-symbolic"></span> {# Or similar relevant icon #}
+                    <span class="adw-action-row-title">Pending Users</span>
+                    {# Optionally, add a badge for count of pending users if available in context #}
+                </a>
             {% endif %}
             {% endif %}
             {% endblock sidebar_nav %}

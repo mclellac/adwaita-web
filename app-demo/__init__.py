@@ -172,16 +172,16 @@ def create_app(config_name=None):
         db.session.rollback() # Rollback in case of DB error leading to 500
         return render_template('500.html'), 500
 
-    with app.app_context():
-        app.logger.info("Application context pushed for initial db.create_all().")
-        try:
-            app.logger.info("Attempting to ensure database tables are created (db.create_all())...")
-            db.create_all()
-            app.logger.info("db.create_all() completed. Tables should exist if they didn't.")
-        except Exception as e: # Catch broad exception, could be OperationalError if DB not ready
-            app.logger.error(f"Error during initial db.create_all(): {e}", exc_info=True)
-            # Depending on the app's needs, this might be a fatal error or something to warn about.
-            # For now, just log it. The app might still run if tables exist or are not immediately needed.
+    # Removed redundant db.create_all() from app initialization.
+    # Database schema should be managed by setup_db.py or migrations.
+    # with app.app_context():
+    #     app.logger.info("Application context pushed for initial db.create_all().")
+    #     try:
+    #         app.logger.info("Attempting to ensure database tables are created (db.create_all())...")
+    #         db.create_all()
+    #         app.logger.info("db.create_all() completed. Tables should exist if they didn't.")
+    #     except Exception as e: # Catch broad exception, could be OperationalError if DB not ready
+    #         app.logger.error(f"Error during initial db.create_all(): {e}", exc_info=True)
 
     app.logger.info("Flask application instance created and configured.")
     return app

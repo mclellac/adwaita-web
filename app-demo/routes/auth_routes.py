@@ -2,12 +2,64 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_user, logout_user, current_user, login_required
 from datetime import datetime, timezone # For logging if restored
 
-from ..models import User
-from ..forms import LoginForm, ChangePasswordForm
+from ..models import User, SiteSetting
+from ..forms import LoginForm, RegistrationForm, ChangePasswordForm
 from .. import db # db instance from app-demo/__init__.py
 from ..utils import flash_form_errors_util
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    current_app.logger.debug(f"Accessing /auth/register, Method: {request.method}, IP: {request.remote_addr}")
+    if current_user.is_authenticated:
+        current_app.logger.debug(f"User {current_user.username} already authenticated, redirecting to general.index.")
+        return redirect(url_for('general.index'))
+
+    if not SiteSetting.get('allow_registrations', False):
+        current_app.logger.info("Registration attempt while registrations are disabled.")
+        flash('User registration is currently disabled.', 'info')
+        return redirect(url_for('auth.login'))
+
+    form = RegistrationForm(request.form)
+    if request.method == 'POST':
+        current_app.logger.debug(f"Registration form submitted. Email: '{form.email.data}'")
+
+    if form.validate_on_submit():
+        existing_user = User.query.filter_by(username=form.email.data).first()
+        if existing_user:
+            current_app.logger.warning(f"Registration attempt with existing email: '{form.email.data}'.")
+            flash('An account with this email address already exists. Please log in or use a different email.', 'warning')
+            return render_template('register.html', form=form) # Show form again with error
+
+        try:
+            new_user = User(
+                username=form.email.data,
+                is_approved=False,
+                is_active=False,
+                is_admin=False # Explicitly false for new registrations
+            )
+            new_user.set_password(form.password.data)
+            db.session.add(new_user)
+            db.session.commit()
+            current_app.logger.info(f"New user '{new_user.username}' (ID: {new_user.id}) registered successfully. Pending approval.")
+            flash('Registration successful! Your account is pending admin approval.', 'success')
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error during new user registration for email '{form.email.data}': {e}", exc_info=True)
+            flash('An unexpected error occurred during registration. Please try again later.', 'danger')
+            # It's important to render the template again here, not redirect,
+            # so the user doesn't lose their input if it was a transient error.
+            return render_template('register.html', form=form)
+
+    elif request.method == 'POST': # Catches validation failures on POST
+        current_app.logger.warning(f"Registration form validation failed for email: '{form.email.data}'. Errors: {form.errors}")
+        flash_form_errors_util(form)
+
+    current_app.logger.debug(f"Rendering register template for {request.path}")
+    return render_template('register.html', form=form)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -23,9 +75,16 @@ def login():
     if form.validate_on_submit(): # validate_on_submit checks method and validates
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data):
-            login_user(user)
-            current_app.logger.info(f"User '{user.username}' (ID: {user.id}) logged in successfully.")
-            current_app.logger.debug(f"Session after login for user '{user.username}': {dict(session)}")
+            if not user.is_active:
+                current_app.logger.warning(f"Login attempt by inactive user: '{user.username}'.")
+                flash('Your account is not active. Please contact an administrator.', 'warning')
+            elif not user.is_approved:
+                current_app.logger.warning(f"Login attempt by unapproved user: '{user.username}'.")
+                flash('Your account is pending admin approval.', 'warning')
+            else:
+                login_user(user)
+                current_app.logger.info(f"User '{user.username}' (ID: {user.id}) logged in successfully.")
+                current_app.logger.debug(f"Session after login for user '{user.username}': {dict(session)}")
             flash('Logged in successfully.', 'success')
             next_page = request.args.get('next')
             # More robust security check for next_page
