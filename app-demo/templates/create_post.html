@@ -17,20 +17,20 @@
 
             {# Title Entry Row #}
             <div class="adw-entry-row {{ 'has-error' if form.title.errors else '' }}">
-                <label for="{{ form.title.id or 'title_input' }}" class="adw-entry-row-title">{{ form.title.label.text }}</label>
+                <div class="adw-entry-row-text-content">
+                    <label for="{{ form.title.id or 'title_input' }}" class="adw-entry-row-title">{{ form.title.label.text }}</label>
+                    {% if form.title.errors %}
+                        <span class="adw-entry-row-subtitle error-text">{{ form.title.errors|join(' ') }}</span>
+                    {% endif %}
+                </div>
                 <input type="text" id="{{ form.title.id or 'title_input' }}" name="{{ form.title.name }}" value="{{ form.title.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Enter post title" {% if form.title.flags.required %}required{% endif %}>
             </div>
-            {% if form.title.errors %}
-            <div class="adw-row form-field-error" style="padding-left: var(--spacing-m); padding-right: var(--spacing-m);">
-                <span class="adw-label caption error-text">{{ form.title.errors|join(' ') }}</span>
-            </div>
-            {% endif %}
 
-            {# Content Textarea #}
-            <div class="adw-action-row column-layout {{ 'has-error' if form.content.errors else '' }}" style="padding-bottom: var(--spacing-m);">
-                <label for="{{ form.content.id or 'content_input' }}" class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
+            {# Content Textarea - Revised Structure #}
+            <div class="form-field-container {{ 'has-error' if form.content.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);">
+                <label for="{{ form.content.id or 'content_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
                 {% if form.content.errors %}
-                    <span class="adw-action-row-subtitle error-text" style="margin-bottom: var(--spacing-xs);">{{ form.content.errors|join(' ') }}</span>
+                    <p class="adw-label caption error-text" style="margin-bottom: var(--spacing-xs);">{{ form.content.errors|join(' ') }}</p>
                 {% endif %}
                 <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-entry" rows="10" placeholder="Enter your post content here..." style="width: 100%; min-height: 150px; box-sizing: border-box;">{{ form.content.data or '' }}</textarea>
             </div>
@@ -42,16 +42,15 @@
             </header>
             <div class="{{ 'has-error' if form.categories.errors else '' }}">
                 {% for subfield in form.categories %}
-                <div class="adw-action-row adw-checkbox-row">
-                     <div class="adw-action-row__text checkbox-label-container"> {# Match edit_post.html structure #}
-                        {{ subfield(class="adw-checkbox") }}
-                        {{ subfield.label(class="adw-label category-checkbox-label") }}
-                    </div>
+                <div class="adw-checkbox-row">
+                    {{ subfield(class="adw-checkbox", id=subfield.id or subfield.name) }}
+                    {{ subfield.label(class="adw-label", for=subfield.id or subfield.name) }}
                 </div>
                 {% endfor %}
             </div>
             {% if form.categories.errors %}
-            <div class="adw-action-row error-row form-field-error"> {# Use action-row for error display consistency #}
+            {# Displaying general errors for checkbox group. Individual item errors are harder here. #}
+            <div class="adw-row form-field-error" style="padding-left: var(--spacing-m); padding-right: var(--spacing-m);">
                 <span class="adw-label caption error-text">{{ form.categories.errors|join('; ') }}</span>
             </div>
             {% endif %}
@@ -76,9 +75,10 @@
             {% endif %}
         </section>
 
-        <div class="form-actions-container form-actions-end">
-            {{ form.save_draft(class="adw-button") }}
-            {{ form.publish(class="adw-button suggested-action") }}
+        <div class="adw-box horizontal justify-end adw-box-spacing-s" style="margin-top: var(--spacing-l);" id="create-post-form-actions">
+            {{ form.save_draft(class="adw-button", id="save-draft-button") }}
+            {{ form.publish(class="adw-button suggested-action", id="publish-button") }}
+            <adw-spinner size="small" active="false" style="margin-left: var(--spacing-xs);"></adw-spinner>
         </div>
     </form>
   </div>
@@ -87,5 +87,32 @@
 
 {% block scripts %}
 {{ super() }}
-{# JavaScript for expander row (if any) would go here or in a global JS file. For now, content is always visible. #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form.stacked-form');
+    const saveButton = document.getElementById('save-draft-button');
+    const publishButton = document.getElementById('publish-button');
+    const actionsContainer = document.getElementById('create-post-form-actions');
+    let spinner;
+    if (actionsContainer) {
+        spinner = actionsContainer.querySelector('adw-spinner');
+    }
+
+    if (form && spinner && (saveButton || publishButton)) {
+        form.addEventListener('submit', function() {
+            // Disable buttons
+            if (saveButton) {
+                saveButton.disabled = true;
+            }
+            if (publishButton) {
+                publishButton.disabled = true;
+            }
+            // Show spinner
+            if (spinner) {
+                spinner.setAttribute('active', 'true');
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

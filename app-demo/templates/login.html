@@ -51,10 +51,17 @@
         {% endif %}
       </div>
 
-      {# It's common for main form actions to be in a container for consistent spacing #}
-      <div class="form-actions-container form-actions-end">
-        <button type="submit" class="adw-button suggested-action full-width-button">{{ form.submit.label.text }}</button>
+      <div class="adw-box horizontal justify-end" style="margin-top: var(--spacing-m);">
+        <button type="submit" class="adw-button suggested-action {{ 'full-width-button' if not form.registration_url else '' }}">{{ form.submit.label.text }}</button>
       </div>
+      {# TODO: Add link for registration if available from form object, e.g. form.registration_url #}
+      {# Example:
+      {% if form.registration_url %}
+      <div class="adw-box horizontal justify-center" style="margin-top: var(--spacing-m);">
+          <a href="{{ form.registration_url }}" class="adw-link">Don't have an account? Sign up</a>
+      </div>
+      {% endif %}
+      #}
     </form>
 </div>
 {% endblock %}

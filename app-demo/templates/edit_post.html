@@ -26,11 +26,11 @@
                 <input type="text" id="{{ form.title.id or 'title_input' }}" name="{{ form.title.name }}" value="{{ form.title.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Enter post title" {% if form.title.flags.required %}required{% endif %}>
             </div>
 
-            {# Content Textarea #}
-            <div class="adw-action-row column-layout {{ 'has-error' if form.content.errors else '' }}" style="padding-bottom: var(--spacing-m);">
-                <label for="{{ form.content.id or 'content_input' }}" class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
+            {# Content Textarea - Revised Structure #}
+            <div class="form-field-container {{ 'has-error' if form.content.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);">
+                <label for="{{ form.content.id or 'content_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ form.content.label.text }}</label>
                 {% if form.content.errors %}
-                    <span class="adw-action-row-subtitle error-text" style="margin-bottom: var(--spacing-xs);">{{ form.content.errors|join(' ') }}</span>
+                    <p class="adw-label caption error-text" style="margin-bottom: var(--spacing-xs);">{{ form.content.errors|join(' ') }}</p>
                 {% endif %}
                 <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-entry" rows="15" placeholder="Enter your post content here..." style="width: 100%; min-height: 200px; box-sizing: border-box;">{{ form.content.data or '' }}</textarea>
             </div>
@@ -42,16 +42,15 @@
             </header>
             <div class="{{ 'has-error' if form.categories.errors else '' }}">
                 {% for subfield in form.categories %}
-                <div class="adw-action-row adw-checkbox-row">
-                     <div class="adw-action-row__text checkbox-label-container">
-                        {{ subfield(class="adw-checkbox") }}
-                        {{ subfield.label(class="adw-label category-checkbox-label") }}
-                    </div>
+                <div class="adw-checkbox-row">
+                    {{ subfield(class="adw-checkbox", id=subfield.id or subfield.name) }}
+                    {{ subfield.label(class="adw-label", for=subfield.id or subfield.name) }}
                 </div>
                 {% endfor %}
             </div>
             {% if form.categories.errors %}
-            <div class="adw-action-row error-row form-field-error" style="padding-left: var(--spacing-m); padding-right: var(--spacing-m);">
+            {# Displaying general errors for checkbox group. Individual item errors are harder here. #}
+            <div class="adw-row form-field-error" style="padding-left: var(--spacing-m); padding-right: var(--spacing-m);">
                 <span class="adw-label caption error-text">{{ form.categories.errors|join('; ') }}</span>
             </div>
             {% endif %}
@@ -74,16 +73,17 @@
             </div>
         </section>
 
-        <div class="form-actions-container form-actions-space-between" style="margin-top: var(--spacing-l);">
-            <div class="actions-start">
-                <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat">Cancel</a>
+        <div class="adw-box horizontal justify-between" style="margin-top: var(--spacing-l);" id="edit-post-form-actions">
+            <div class="adw-box horizontal adw-box-spacing-s"> {# Group for left buttons #}
+                <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat" id="cancel-edit-button">Cancel</a>
                 {% if delete_form %}
                 <button type="button" id="open-edit-delete-post-dialog-btn" class="adw-button destructive-action">Delete Post</button>
                 {% endif %}
             </div>
-            <div class="actions-end">
-                {{ form.save_draft(class="adw-button") }}
-                {{ form.publish(class="adw-button suggested-action") }}
+            <div class="adw-box horizontal adw-box-spacing-s align-center"> {# Group for right buttons, added align-center for spinner #}
+                {{ form.save_draft(class="adw-button", id="save-draft-button") }}
+                {{ form.publish(class="adw-button suggested-action", id="publish-button") }}
+                <adw-spinner size="small" active="false" style="margin-left: var(--spacing-xs);"></adw-spinner>
             </div>
         </div>
     </form>
@@ -103,8 +103,8 @@
             <p class="adw-label body">Are you sure you want to permanently delete this post titled "<strong>{{ post.title|escape }}</strong>"? This action cannot be undone.</p>
         </div>
         <div class="adw-dialog-footer">
-            <button id="cancel-edit-delete-post-btn" class="adw-button flat">Cancel</button>
-            <button id="confirm-edit-delete-post-btn" class="adw-button destructive-action">Delete</button>
+            <button id="cancel-dialog-delete-post-btn" class="adw-button flat">Cancel</button>
+            <button id="confirm-dialog-delete-post-btn" class="adw-button destructive-action">Delete</button>
         </div>
     </div>
     {% endif %}
@@ -113,14 +113,13 @@
 
 {% block scripts %}
 {{ super() }}
-{# JavaScript for dialogs. Assuming app-layout.js or a new components.js will handle dialog logic. #}
-{# For now, the basic JS to open/close this specific dialog if not handled globally: #}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Dialog logic
     const openDialogBtn = document.getElementById('open-edit-delete-post-dialog-btn');
     const dialog = document.getElementById('edit-delete-post-confirm-dialog');
-    const cancelBtn = document.getElementById('cancel-edit-delete-post-btn');
-    const confirmBtn = document.getElementById('confirm-edit-delete-post-btn');
+    const cancelDialogBtn = document.getElementById('cancel-dialog-delete-post-btn');
+    const confirmDialogBtn = document.getElementById('confirm-dialog-delete-post-btn');
     const deleteForm = document.getElementById('delete-post-form-{{ post.id }}');
     const closeDialogBtn = dialog ? dialog.querySelector('.adw-dialog-close-button') : null;
 
@@ -143,22 +142,53 @@ document.addEventListener('DOMContentLoaded', function() {
     if (openDialogBtn && dialog) {
         openDialogBtn.addEventListener('click', () => showDialog(dialog));
     }
-    if (cancelBtn && dialog) {
-        cancelBtn.addEventListener('click', () => hideDialog(dialog));
+    if (cancelDialogBtn && dialog) {
+        cancelDialogBtn.addEventListener('click', () => hideDialog(dialog));
     }
     if (closeDialogBtn && dialog) {
         closeDialogBtn.addEventListener('click', () => hideDialog(dialog));
     }
-    if (confirmBtn && deleteForm && dialog) {
-        confirmBtn.addEventListener('click', () => {
+    if (confirmDialogBtn && deleteForm && dialog) {
+        confirmDialogBtn.addEventListener('click', () => {
+            // Optionally show spinner on dialog confirm button too
+            confirmDialogBtn.disabled = true;
+            // Could add a spinner inside the dialog button if desired
             deleteForm.submit();
-            hideDialog(dialog);
+            // No need to hide dialog, page will reload or navigate
         });
     }
     if (dialog) {
         dialog.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 hideDialog(dialog);
+            }
+        });
+    }
+
+    // Form submission spinner logic
+    const form = document.querySelector('form.stacked-form[method="POST"]'); // More specific form selector
+    const saveButton = document.getElementById('save-draft-button');
+    const publishButton = document.getElementById('publish-button');
+    const cancelEditButton = document.getElementById('cancel-edit-button');
+    // const deletePostButton = openDialogBtn; // Already defined above
+
+    const actionsContainer = document.getElementById('edit-post-form-actions');
+    let spinner;
+    if (actionsContainer) {
+        spinner = actionsContainer.querySelector('adw-spinner');
+    }
+
+    if (form && spinner) {
+        form.addEventListener('submit', function(event) {
+            // Check which button triggered the submit if possible, or disable all
+            // For simplicity, disable all main action buttons on any submit from this form
+            if (saveButton) saveButton.disabled = true;
+            if (publishButton) publishButton.disabled = true;
+            if (cancelEditButton) cancelEditButton.style.pointerEvents = 'none'; // Disable link
+            if (openDialogBtn) openDialogBtn.disabled = true; // Disable delete button too
+
+            if (spinner) {
+                spinner.setAttribute('active', 'true');
             }
         });
     }
