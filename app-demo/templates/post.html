@@ -123,8 +123,12 @@
 
     <hr class="section-divider">
 
-    {% macro render_comment_thread(comment, post, delete_comment_form, current_user, form, loop_depth=0) %}
-    <article class="adw-card comment-card" id="comment-{{ comment.id }}" style="margin-left: {{ loop_depth * 30 }}px;">
+    {# Macro to render a single comment and its replies recursively #}
+    {% macro render_comment_with_replies(comment, post, delete_comment_form, current_user, form, is_reply=false) %}
+    <div class="comment-item {% if is_reply %}comment-reply-item{% else %}comment-top-level-item{% endif %}"
+         id="comment-{{ comment.id }}"
+         {% if is_reply %}style="margin-left: 30px; margin-top: var(--spacing-s); padding-top: var(--spacing-s); border-top: 1px dashed var(--divider-color);"{% endif %}>
+
         <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
             <span class="adw-avatar size-medium">
                {% set comment_avatar = url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else default_avatar_url %}
@@ -135,51 +139,52 @@
                 <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></small>
             </div>
         </header>
-        <div class="comment-text styled-text-content">{{ comment.text | markdown }}</div> {# Apply markdown (which now includes linkify_mentions) #}
+        <div class="comment-text styled-text-content">{{ comment.text | markdown }}</div>
 
-        <div class="comment-actions"> {# Removed adw-box, adw-box-spacing-xs, and inline style #}
+        <div class="comment-actions">
             {% if current_user.is_authenticated %}
             <button class="adw-button flat compact reply-button" data-comment-id="{{ comment.id }}" data-comment-author="{{ comment.author.full_name | e }}">Reply</button>
             {% endif %}
-            {# Flag Button #}
             {% if current_user.is_authenticated and comment.author != current_user %}
                 {% if comment.is_flagged_active %}
                     <button class="adw-button flat compact" disabled title="This comment has been flagged">Flagged</button>
                 {% else %}
                     <form method="POST" action="{{ url_for('post.flag_comment', comment_id=comment.id) }}" style="display: inline;">
-                        {{ form.hidden_tag() }} {# Use the main comment form's CSRF for simplicity, or pass a dedicated FlagCommentForm #}
+                        {{ form.hidden_tag() }}
                         <button type="submit" class="adw-button flat compact" title="Flag this comment for review">Flag</button>
                     </form>
                 {% endif %}
             {% endif %}
-            {# Delete Button #}
             {% if current_user.is_authenticated and (comment.author == current_user or post.author == current_user or current_user.is_admin) %}
             <form method="POST" action="{{ url_for('post.delete_comment', comment_id=comment.id) }}" onsubmit="return confirm('Are you sure you want to delete this comment?');" style="display: inline;">
-                {{ delete_comment_form.hidden_tag() }} {# Use the passed form #}
+                {{ delete_comment_form.hidden_tag() }}
                 <button type="submit" class="adw-button destructive-action compact">Delete</button>
             </form>
             {% endif %}
         </div>
         <div class="reply-form-container" id="reply-form-for-{{ comment.id }}" style="display: none; margin-top: var(--spacing-s);">
-            {# Reply form will be injected here by JS or this is a template for it #}
+            {# Reply form will be injected here by JS #}
         </div>
 
-        {% if comment.replies %}
-            <div class="comment-replies" style="margin-top: var(--spacing-s);">
-                {% for reply in comment.replies %}
-                    {{ render_comment_thread(reply, post, delete_form, current_user, form, loop_depth + 1) }}
+        {# Recursively render replies within this comment's div #}
+        {% if comment.replies.count() > 0 %}
+            <div class="comment-replies-container" style="margin-top: var(--spacing-s);">
+                {% for reply_comment in comment.replies %}
+                    {{ render_comment_with_replies(reply_comment, post, delete_comment_form, current_user, form, is_reply=true) }}
                 {% endfor %}
             </div>
         {% endif %}
-    </article>
+    </div>
     {% endmacro %}
 
     <section class="comments-section" aria-labelledby="comments-heading">
-        <h2 id="comments-heading" class="adw-title-2">Comments ({{ post.comments.count() }})</h2> {# Use post.comments.count() for top-level #}
+        <h2 id="comments-heading" class="adw-title-2">Comments ({{ post.comments.count() }})</h2>
         {% if post.comments.first() %}
-            <div class="adw-list-box comments-list flat"> {# Made list-box flat as cards provide bg/border #}
+            <div class="adw-list-box comments-list flat">
                 {% for comment in post.comments %} {# Iterates over top-level comments #}
-                    {{ render_comment_thread(comment, post, delete_comment_form, current_user, form) }}
+                    <article class="adw-card comment-card" id="comment-card-for-{{ comment.id }}"> {# Each top-level comment is a card #}
+                        {{ render_comment_with_replies(comment, post, delete_comment_form, current_user, form, is_reply=false) }}
+                    </article>
                 {% endfor %}
             </div>
         {% else %}
