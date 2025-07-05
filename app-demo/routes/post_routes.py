@@ -117,36 +117,32 @@ def create_post():
     form = PostForm(request.form)
     if form.validate_on_submit():
         content = form.content.data # Raw Markdown
-        is_published_intent = bool(request.form.get('publish')) # Check if 'publish' button was clicked
-
-        current_app.logger.info(f"User {current_user.username} creating post. Intent: {'Publish' if is_published_intent else 'Save Draft'}.")
+        current_app.logger.info(f"User {current_user.username} creating post.")
         try:
-            new_post = Post(content=content, user_id=current_user.id, is_published=is_published_intent)
-            if is_published_intent:
-                new_post.published_at = datetime.now(timezone.utc)
+            # Posts are now immediately published by default
+            new_post = Post(content=content, user_id=current_user.id,
+                            is_published=True, published_at=datetime.now(timezone.utc))
 
             db.session.add(new_post)
-            # Update relations before commit, especially if new tags need to be created and flushed for ID
+            # Update relations before commit
             update_post_relations_util(new_post, form, db.session)
 
-            # Create Activity entry for new post, if it's being published
-            if new_post.is_published:
-                from ..models import Activity # Local import
-                activity = Activity(
-                    user_id=current_user.id,
-                    type='created_post',
-                    target_post_id=new_post.id # Will be populated after flush/commit
-                )
-                db.session.add(activity)
-                current_app.logger.info(f"Activity 'created_post' logged for user {current_user.username}, post ID pending assignment (will be {new_post.id}).")
+            # Create Activity entry for new post
+            from ..models import Activity # Local import
+            activity = Activity(
+                user_id=current_user.id,
+                type='created_post',
+                target_post_id=new_post.id # Will be populated after flush/commit
+            )
+            db.session.add(activity)
+            current_app.logger.info(f"Activity 'created_post' logged for user {current_user.username}, post ID pending assignment (will be {new_post.id}).")
 
             db.session.commit()
-            current_app.logger.info(f"Post ID: {new_post.id} (Published: {new_post.is_published}) created by {current_user.username}.")
-            if new_post.is_published and 'activity' in locals(): # Check if activity was created
+            current_app.logger.info(f"Post ID: {new_post.id} (Published: True) created by {current_user.username}.")
+            if 'activity' in locals(): # Check if activity was created
                  current_app.logger.info(f"Activity 'created_post' (ID: {activity.id}) confirmed for user {current_user.username}, post ID {new_post.id}.")
 
-            flash_msg = 'Post published successfully!' if new_post.is_published else 'Post saved as draft successfully!'
-            flash(flash_msg, 'success')
+            flash('Post created successfully!', 'success')
             return redirect(url_for('post.view_post', post_id=new_post.id))
         except Exception as e:
             db.session.rollback()
@@ -167,28 +163,28 @@ def edit_post(post_id):
         current_app.logger.warning(f"User {current_user.username} not authorized to edit post {post_id}.")
         abort(403)
 
+    # Ensure post is treated as published; editing does not change published status
+    if not post.is_published:
+        # This case should ideally not be reachable if drafts are removed.
+        # If it is, it's an inconsistency. For now, log and proceed.
+        current_app.logger.warning(f"Editing post {post.id} which is marked as not published. This is unexpected.")
+
     form = PostForm(request.form, obj=post)
-    delete_form = DeletePostForm(prefix=f"del-eff-post-{post.id}-") # For delete button on edit page
+    form.submit.label.text = "Update Post" # Change button label for edit context
+
+    delete_form = DeletePostForm(prefix=f"del-eff-post-{post.id}-")
 
     if form.validate_on_submit():
         current_app.logger.info(f"User {current_user.username} updating post ID: {post_id}.")
-        # post.title = form.title.data # Title removed
         post.content = form.content.data # Raw Markdown
-        is_published_intent = bool(request.form.get('publish'))
-
-        post.is_published = is_published_intent
-        if is_published_intent and not post.published_at: # If publishing now and wasn't before
-            post.published_at = datetime.now(timezone.utc)
-        elif not is_published_intent: # If saving as draft
-            post.published_at = None
+        # is_published and published_at are not changed during an edit
 
         update_post_relations_util(post, form, db.session)
         try:
-            db.session.add(post) # Add to session before commit
+            db.session.add(post)
             db.session.commit()
             current_app.logger.info(f"Post ID {post.id} (Published: {post.is_published}) updated by {current_user.username}.")
-            flash_msg = 'Post updated and published successfully!' if post.is_published else 'Post updated and saved as draft!'
-            flash(flash_msg, 'success')
+            flash('Post updated successfully!', 'success')
             return redirect(url_for('post.view_post', post_id=post.id))
         except Exception as e:
             db.session.rollback()
@@ -198,7 +194,7 @@ def edit_post(post_id):
         current_app.logger.warning(f"Edit post form validation failed for post {post_id}. Errors: {form.errors}")
         flash_form_errors_util(form)
 
-    if request.method == 'GET': # Populate tags string on GET
+    if request.method == 'GET':
         if not form.tags_string.data and post.tags:
             form.tags_string.data = ', '.join([tag.name for tag in post.tags])
             current_app.logger.debug(f"Populated tags_string for GET: '{form.tags_string.data}'")

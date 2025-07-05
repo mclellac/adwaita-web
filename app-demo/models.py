@@ -185,8 +185,10 @@ class Post(db.Model):
         lazy='subquery',
         backref=db.backref('posts', lazy=True)
     )
-    is_published = db.Column(db.Boolean, nullable=False, default=True)
-    published_at = db.Column(db.DateTime, nullable=True)
+    # is_published defaults to True, implying posts are published on creation.
+    # The route logic will handle setting published_at.
+    is_published = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())
+    published_at = db.Column(db.DateTime, nullable=True) # Set at time of creation by route logic
     # Relationship for top-level comments moved to be defined here
     comments = db.relationship(
         'Comment',

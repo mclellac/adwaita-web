@@ -70,8 +70,7 @@
                 {% endif %}
             </div>
             <div class="adw-box horizontal adw-box-spacing-s align-center"> {# Group for right buttons, added align-center for spinner #}
-                {{ form.save_draft(class="adw-button", id="save-draft-button") }}
-                {{ form.publish(class="adw-button suggested-action", id="publish-button") }}
+                {{ form.submit(class="adw-button suggested-action", id="submit-button", value="Update Post") }} {# Changed to single submit button, label "Update Post" #}
                 <adw-spinner size="small" active="false" style="margin-left: var(--spacing-xs);"></adw-spinner>
             </div>
         </div>
@@ -156,10 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Form submission spinner logic
     const form = document.querySelector('form.stacked-form[method="POST"]'); // More specific form selector
-    const saveButton = document.getElementById('save-draft-button');
-    const publishButton = document.getElementById('publish-button');
+    const submitButton = document.getElementById('submit-button');
     const cancelEditButton = document.getElementById('cancel-edit-button');
-    // const deletePostButton = openDialogBtn; // Already defined above
+    // const deletePostButton = openDialogBtn; // Already defined and handled by dialog logic or page navigation
 
     const actionsContainer = document.getElementById('edit-post-form-actions');
     let spinner;
@@ -167,14 +165,12 @@ document.addEventListener('DOMContentLoaded', function() {
         spinner = actionsContainer.querySelector('adw-spinner');
     }
 
-    if (form && spinner) {
+    if (form && spinner && submitButton) { // Ensure submitButton exists
         form.addEventListener('submit', function(event) {
-            // Check which button triggered the submit if possible, or disable all
-            // For simplicity, disable all main action buttons on any submit from this form
-            if (saveButton) saveButton.disabled = true;
-            if (publishButton) publishButton.disabled = true;
-            if (cancelEditButton) cancelEditButton.style.pointerEvents = 'none'; // Disable link
-            if (openDialogBtn) openDialogBtn.disabled = true; // Disable delete button too
+            // Disable all action buttons on form submission
+            submitButton.disabled = true;
+            if (cancelEditButton) cancelEditButton.style.pointerEvents = 'none'; // Disable link behavior
+            if (openDialogBtn) openDialogBtn.disabled = true;
 
             if (spinner) {
                 spinner.setAttribute('active', 'true');

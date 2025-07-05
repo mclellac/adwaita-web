@@ -60,8 +60,7 @@ class PostForm(FlaskForm):
         'Tags (comma-separated)',
         validators=[Optional(), Length(max=250)]
     )
-    save_draft = SubmitField('Save Draft')
-    publish = SubmitField('Publish')
+    submit = SubmitField('Post') # Single submit button
 
 class ProfileEditForm(FlaskForm):
     full_name = StringField('Display Name', validators=[Optional(), Length(max=120)])
