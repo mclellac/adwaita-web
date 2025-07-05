@@ -223,6 +223,13 @@ $accent-definitions: (
   --title-2-font-size: #{math.round($font-size-base-val * 1.5)};   // approx 15pt
   --title-1-font-size: #{math.round($font-size-base-val * 1.8)};   // approx 18pt
 
+  // Variables for h1-h6 tags, mapping to title sizes for consistency
+  --h1-font-size: var(--title-1-font-size);
+  --h2-font-size: var(--title-2-font-size);
+  --h3-font-size: var(--title-3-font-size);
+  --h4-font-size: var(--title-4-font-size);
+  // h5 and h6 are mapped to --font-size-large and --font-size-base in _base.scss respectively
+
   // ProgressBar specific
   --progress-bar-track-color: var(--shade-color); // Default track to general shade color
   --progress-bar-fill-color: var(--accent-bg-color); // Fill uses accent
