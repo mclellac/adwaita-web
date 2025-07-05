@@ -69,13 +69,34 @@ PostgreSQL uses a file named `pg_hba.conf` to control client authentication.
 
 ## Static Assets (CSS, JS)
 
-The `app-demo` application sources its primary CSS (`adwaita-skin.css`) and JavaScript (e.g., `app-layout.js`) from the `adwaita-web` library. These assets are:
+The `app-demo` application sources its primary CSS (`adwaita-skin.css`) and core JavaScript components from the `adwaita-web` library. These assets are:
 1.  Developed and stored within the `adwaita-web/scss/` and `adwaita-web/js/` directories, respectively.
 2.  Compiled and/or copied into `app-demo/static/` by the `../build-adwaita-web.sh` script.
+
+Key JavaScript files from `adwaita-web/js/` used by `app-demo` include:
+*   `app-layout.js`: For managing the responsive sidebar and overall page layout.
+*   `banner.js`: For handling dismissible banner notifications.
+*   `toast.js`: For managing toast notifications.
+
+These are typically included in `app-demo/templates/base.html`.
 
 **Do not directly place or modify source SCSS or JavaScript files in `app-demo/static/css/` or `app-demo/static/js/`.** Such changes will be ignored by `.gitignore` or overwritten by the build process. All styling and JavaScript development should occur within the `adwaita-web` directory.
 
 Refer to the root `AGENTS.md` and `adwaita-web/AGENTS.md` for more details on asset management and the role of `adwaita-web/scss/_app-demo-specific.scss` for styles unique to this application's layout.
+
+## Navigation and Core UI
+
+*   **Main Navigation:** The primary navigation is located in the collapsible sidebar (`app-sidebar` in `base.html`).
+*   **Header Bar Menu:** A main application menu is available in the header bar (typically triggered by a "view-more" icon). This menu provides access to application-level actions like the "About" dialog.
+*   **"About" Dialog:** Information about the application is presented in an Adwaita-styled dialog, triggered from the header bar menu. The `general.about_page` route and `about.html` template are no longer used for a separate page.
+*   **"Contact" Page:** The "Contact" page has been removed from the primary navigation.
+*   **Home Page / Feed:** For logged-in users, the "Home" link in the sidebar (endpoint `general.activity_feed`) directs to a page displaying a chronological feed of all published posts. For anonymous users, the main index page (`/`) shows public posts.
+
+## User Notifications and Confirmations
+
+*   **Toasts:** Used for brief success messages (e.g., after creating a post). Implemented via `adwaita-web/js/toast.js` and triggered by flashing messages with the `toast_success` category. Toasts include an 'x' icon for dismissal.
+*   **Banners:** Used for more prominent information or errors. Implemented via `adwaita-web/js/banner.js` and triggered by flashed messages with categories like `danger`, `warning`, `info`. Banners include a "Dismiss" text button.
+*   **Confirmation Dialogs:** Actions requiring user confirmation (e.g., deleting posts or comments) now use Adwaita-styled dialogs implemented directly in the relevant templates (e.g., `post.html`). These replace native browser `confirm()` dialogs and are managed by inline JavaScript within the templates.
 
 ## Adwaita Styling and Color Compliance
 
