@@ -217,7 +217,7 @@ class Comment(db.Model):
         'Comment',
         backref=db.backref('parent', remote_side=[id]),
         lazy='dynamic',
-        order_by=created_at.asc()
+        order_by=lambda: desc(Comment.created_at) # Sort replies newest first
     )
     # is_flagged_active property will be defined after CommentFlag model
 

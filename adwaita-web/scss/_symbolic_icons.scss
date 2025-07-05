@@ -2999,6 +2999,19 @@ $icon-base-path: '../data/icons/symbolic/';
   mask-image: url($icon-base-path + 'object-select-symbolic.svg');
 }
 
+// Specific for Like/Liked actions
+.icon-actions-star-symbolic { // Should be an empty star for "Like" action
+  @extend %symbolic-icon-base;
+  -webkit-mask-image: url($icon-base-path + 'non-starred-symbolic.svg');
+  mask-image: url($icon-base-path + 'non-starred-symbolic.svg');
+}
+
+.icon-actions-starred-symbolic { // Should be a filled star for "Liked" state
+  @extend %symbolic-icon-base;
+  -webkit-mask-image: url($icon-base-path + 'starred-symbolic.svg');
+  mask-image: url($icon-base-path + 'starred-symbolic.svg');
+}
+
 .icon-open-menu-symbolic {
   @extend %symbolic-icon-base;
   -webkit-mask-image: url($icon-base-path + 'open-menu-symbolic.svg');
