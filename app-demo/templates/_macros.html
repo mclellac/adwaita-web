@@ -4,8 +4,8 @@
         {% if current_user.has_liked_post(post) %}
             <form action="{{ url_for('post.unlike_post_route', post_id=post.id) }}" method="POST" style="display: inline;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <button type="submit" class="adw-button small flat destructive-action" aria-label="Unlike post">
-                    <span class="adw-icon icon-actions-object-select-symbolic"></span>
+                <button type="submit" class="adw-button small flat" aria-label="Unlike post"> {# Keep it neutral #}
+                    <span class="adw-icon icon-actions-starred-symbolic"></span>
                 </button>
             </form>
         {% else %}

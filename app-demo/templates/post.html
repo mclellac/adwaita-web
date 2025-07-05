@@ -53,14 +53,14 @@
                     {% if current_user.has_liked_post(post) %}
                         <form action="{{ url_for('post.unlike_post_route', post_id=post.id) }}" method="POST" style="display: inline;">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="adw-button flat destructive-action" aria-label="Unlike post"> {# Destructive for unlike, or just plain #}
-                                <span class="adw-icon icon-actions-object-select-symbolic"></span> Liked
+                            <button type="submit" class="adw-button flat" aria-label="Unlike post"> {# Keep it neutral, not destructive for "unlike" #}
+                                <span class="adw-icon icon-actions-starred-symbolic"></span> Liked
                             </button>
                         </form>
                     {% else %}
                         <form action="{{ url_for('post.like_post_route', post_id=post.id) }}" method="POST" style="display: inline;">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="adw-button flat suggested-action" aria-label="Like post"> {# Suggested for like #}
+                            <button type="submit" class="adw-button flat suggested-action" aria-label="Like post">
                                 <span class="adw-icon icon-actions-star-symbolic"></span> Like
                             </button>
                         </form>
