@@ -264,69 +264,18 @@
 </div>
 
 <script>
+// Threaded comments reply script & post/comment dialog logic is now primarily handled by app-layout.js
+// Any page-specific variations or initializations needed beyond global handlers can go here.
+// For post.html, the dialogs (delete post, delete comment) are expected to be handled by app-layout.js.
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Post Deletion Dialog
-    const deletePostDialogEl = document.getElementById('delete-confirm-dialog'); // This is now <adw-dialog>
-    const openPostDeleteDialogBtn = document.getElementById('open-delete-dialog-btn');
-    const cancelPostDeleteBtn = document.getElementById('cancel-delete-btn');
+    // Specific logic for comment deletion dialog on this page, if different from global app-layout.js
+    // This example assumes app-layout.js handles the #delete-comment-confirm-dialog
+    // and its trigger buttons (.comment-delete-button) correctly.
+    // If post.html's comment deletion needs unique handling not covered by app-layout's generic setup, add here.
+    // For now, we assume app-layout.js covers it.
 
-    if (openPostDeleteDialogBtn && deletePostDialogEl) {
-        openPostDeleteDialogBtn.addEventListener('click', (event) => {
-            event.preventDefault();
-            if (typeof deletePostDialogEl.open === 'function') {
-                deletePostDialogEl.open();
-            } else { // Fallback if WC not registered/working
-                deletePostDialogEl.removeAttribute('hidden');
-            }
-            // Focusing logic might need to be inside the component's open method
-        });
-    }
-    if (cancelPostDeleteBtn && deletePostDialogEl) {
-        cancelPostDeleteBtn.addEventListener('click', () => {
-            if (typeof deletePostDialogEl.close === 'function') {
-                deletePostDialogEl.close();
-            } else { // Fallback
-                deletePostDialogEl.setAttribute('hidden', 'true');
-            }
-        });
-    }
-    // ESC key handling is now ideally inside the AdwDialogElement component
-
-    // Comment Deletion Dialog
-    const deleteCommentDialogEl = document.getElementById('delete-comment-confirm-dialog'); // This is now <adw-dialog>
-    const cancelCommentDeleteBtn = document.getElementById('cancel-comment-delete-btn');
-    const confirmDeleteCommentFormActual = document.getElementById('confirm-delete-comment-form-actual');
-
-    document.querySelectorAll('.comment-delete-button').forEach(button => {
-        button.addEventListener('click', (event) => {
-            event.preventDefault();
-            const formId = button.dataset.formId;
-            const originalForm = document.getElementById(formId);
-            if (originalForm && confirmDeleteCommentFormActual && deleteCommentDialogEl) {
-                confirmDeleteCommentFormActual.action = originalForm.action;
-                if (typeof deleteCommentDialogEl.open === 'function') {
-                    deleteCommentDialogEl.open();
-                } else { // Fallback
-                    deleteCommentDialogEl.removeAttribute('hidden');
-                }
-            }
-        });
-    });
-
-    if (cancelCommentDeleteBtn && deleteCommentDialogEl) {
-        cancelCommentDeleteBtn.addEventListener('click', () => {
-            if (typeof deleteCommentDialogEl.close === 'function') {
-                deleteCommentDialogEl.close();
-            } else { // Fallback
-                deleteCommentDialogEl.setAttribute('hidden', 'true');
-            }
-        });
-    }
-    // ESC key handling is now ideally inside the AdwDialogElement component
-});
-
-// Threaded comments reply script
-document.addEventListener('DOMContentLoaded', () => {
+    // Threaded comments reply script
     const mainCommentForm = document.getElementById('main-comment-form');
     if (!mainCommentForm) return; // If no comment form, do nothing
 

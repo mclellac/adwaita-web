@@ -251,19 +251,3 @@ Adw.Dialog.factory = (options = {}) => {
 };
 // For convenience, matching docs
 window.createAdwDialog = Adw.Dialog.factory;
-I've created the file `adwaita-web/js/components/dialog.js` and implemented a basic `AdwDialogElement` web component.
-
-Key features of this initial implementation:
-*   It's registered as `<adw-dialog>`.
-*   It uses Light DOM for easier styling with the global `adwaita-skin.css`. The host element itself gets the `adw-dialog` class.
-*   It manages a shared backdrop element (`AdwDialogElement._backdropElement`) for all dialog instances.
-*   Implements `open()` and `close()` methods, which toggle an `open` attribute and manage visibility with basic opacity/scale transitions.
-*   Handles `title` attribute to update a title element within a standard header structure (created if not present).
-*   Supports `close-on-backdrop-click` attribute and ESC key for closing.
-*   Provides a basic `Adw.Dialog.factory` (aliased to `createAdwDialog`) for imperative creation, though it's simplified and assumes the global CSS will style slotted content correctly.
-
-**Next Steps within this plan item:**
-1.  Create a main `adwaita-web/js/components.js` file that imports and ensures `dialog.js` (and potentially other future components) is executed.
-2.  Ensure this main `components.js` (or `dialog.js` directly if preferred for now) is loaded in `app-demo/templates/base.html`.
-
-Let's create `adwaita-web/js/components.js` to load `dialog.js`.
