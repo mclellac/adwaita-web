@@ -153,7 +153,7 @@
                     <button class="adw-button flat compact" disabled title="This comment has been flagged">Flagged</button>
                 {% else %}
                     <form method="POST" action="{{ url_for('post.flag_comment', comment_id=comment.id) }}" style="display: inline;">
-                        {{ form.hidden_tag() }}
+                        {{ flag_comment_form.hidden_tag() }} {# Use the correct form instance #}
                         <button type="submit" class="adw-button flat compact" title="Flag this comment for review">Flag</button>
                     </form>
                 {% endif %}
