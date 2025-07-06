@@ -1,158 +1,163 @@
 // adwaita-web/js/components/aboutdialog.js
+console.log('AdwAboutDialogElement: script loading.');
 
 if (!window.Adw) {
     window.Adw = {};
+    console.log('AdwAboutDialogElement: Adw global namespace created.');
 }
-
-// Use the same shared backdrop logic as AdwDialogElement for consistency
-// This assumes AdwDialogElement's static _backdropElement is accessible or re-implemented here.
-// For simplicity, let's make it self-contained for now, but sharing would be better.
 
 class AdwAboutDialogElement extends HTMLElement {
     constructor() {
         super();
+        console.log(`AdwAboutDialogElement: constructor called for ID: ${this.id || 'N/A'}`);
         this._boundOnKeydown = this._onKeydown.bind(this);
-        this._boundCloseButtonClick = this.close.bind(this); // For close button in header
+        this._boundCloseButtonClick = this.close.bind(this);
 
-        // This component will also use Light DOM for easier styling with adwaita-skin.css
-        this.classList.add('adw-dialog', 'adw-about-dialog'); // Host is the dialog
+        this.classList.add('adw-dialog', 'adw-about-dialog');
         this.setAttribute('role', 'dialog');
         this.setAttribute('aria-modal', 'true');
+        this._initialized = false; // Ensure render happens on first connect
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} basic setup complete.`);
     }
 
     static get observedAttributes() {
+        console.log('AdwAboutDialogElement: observedAttributes getter called.');
         return ['open', 'app-name', 'version', 'copyright', 'logo', 'comments', 'website', 'website-label', 'license-type'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} attributeChangedCallback - Name: ${name}, Old: ${oldValue}, New: ${newValue}`);
         if (name === 'open') {
             if (this.hasAttribute('open')) {
+                console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} 'open' attribute added, calling _doOpen.`);
                 this._doOpen();
             } else {
+                console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} 'open' attribute removed, calling _doClose.`);
                 this._doClose();
             }
         } else {
-            // For other attributes, re-render if the component is already connected
-            if (this.isConnected) {
+            if (this.isConnected && this._initialized) { // Only re-render if connected and initialized
+                console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} attribute ${name} changed, calling _render.`);
                 this._render();
             }
         }
     }
 
     connectedCallback() {
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} connectedCallback. Initialized: ${this._initialized}`);
         if (!this._initialized) {
+            console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} first connection, calling _render.`);
             this._render();
             this._initialized = true;
         }
-        // Default to hidden if not explicitly open
         if (!this.hasAttribute('open')) {
+            console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} initially not open, setting hidden attribute and display:none.`);
             this.setAttribute('hidden', '');
             this.style.display = 'none';
         } else {
-            this._doOpen(); // Ensure it's properly opened if 'open' is set on connect
+            console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} connected with 'open' attribute, ensuring _doOpen.`);
+            // If already open, ensure visibility and transitions are correctly applied
+            this._doOpen();
+        }
+    }
+
+    disconnectedCallback() {
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} disconnectedCallback.`);
+        // Clean up global event listeners if removed from DOM while open
+        document.removeEventListener('keydown', this._boundOnKeydown);
+        // Note: backdrop cleanup might need care if shared across dialog types
+        if (AdwAboutDialogElement._backdropElement && AdwAboutDialogElement._backdropElement.style.display !== 'none') {
+            // If this was the only dialog, hide backdrop. Complex if shared with AdwDialog.
         }
     }
 
     _render() {
-        // Clear existing content before re-rendering
-        this.innerHTML = '';
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} _render called.`);
+        this.innerHTML = ''; // Clear existing content
 
         const appName = this.getAttribute('app-name') || 'Application';
+        // ... (rest of the attribute fetching remains the same)
         const version = this.getAttribute('version');
         const copyright = this.getAttribute('copyright');
         const logoSrc = this.getAttribute('logo');
         const commentsText = this.getAttribute('comments');
         const websiteUrl = this.getAttribute('website');
         const websiteLabel = this.getAttribute('website-label') || websiteUrl;
-        // LicenseType, developers, etc., can be added similarly
 
-        // Header
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} rendering with appName: ${appName}`);
+
         const header = document.createElement('header');
         header.classList.add('adw-header-bar', 'adw-dialog__header');
-
         const titleEl = document.createElement('h2');
         titleEl.classList.add('adw-header-bar__title');
         titleEl.id = 'about-dialog-title-' + (this.id || Math.random().toString(36).substring(2,7));
         titleEl.textContent = `About ${appName}`;
         this.setAttribute('aria-labelledby', titleEl.id);
         header.appendChild(titleEl);
-
         const closeButton = document.createElement('button');
         closeButton.classList.add('adw-button', 'circular', 'flat', 'adw-dialog-close-button');
         closeButton.setAttribute('aria-label', 'Close dialog');
         const closeIcon = document.createElement('span');
-        closeIcon.classList.add('adw-icon', 'icon-window-close-symbolic');
+        closeIcon.classList.add('adw-icon', 'icon-window-close-symbolic'); // Ensure this class provides the icon
         closeButton.appendChild(closeIcon);
         closeButton.addEventListener('click', this._boundCloseButtonClick);
         header.appendChild(closeButton);
         this.appendChild(header);
 
-        // Content Area
         const contentArea = document.createElement('div');
-        contentArea.classList.add('adw-dialog__content'); // Standard dialog content class
-
-        // AboutDialog specific layout within contentArea
+        contentArea.classList.add('adw-dialog__content');
+        // ... (rest of contentArea population is the same as original)
         if (logoSrc) {
             const logoImg = document.createElement('img');
-            logoImg.src = logoSrc;
-            logoImg.alt = `${appName} Logo`;
-            logoImg.classList.add('adw-about-dialog-logo');
+            logoImg.src = logoSrc; logoImg.alt = `${appName} Logo`; logoImg.classList.add('adw-about-dialog-logo');
             contentArea.appendChild(logoImg);
         }
-
         const appNameEl = document.createElement('p');
-        appNameEl.classList.add('adw-label', 'application-name', 'title-1'); // title-1 for prominence
-        appNameEl.textContent = appName;
+        appNameEl.classList.add('adw-label', 'application-name', 'title-1'); appNameEl.textContent = appName;
         contentArea.appendChild(appNameEl);
-
         if (version) {
             const versionEl = document.createElement('p');
-            versionEl.classList.add('adw-label', 'version', 'body-2');
-            versionEl.textContent = `Version ${version}`;
+            versionEl.classList.add('adw-label', 'version', 'body-2'); versionEl.textContent = `Version ${version}`;
             contentArea.appendChild(versionEl);
         }
-
         if (commentsText) {
             const commentsEl = document.createElement('p');
-            commentsEl.classList.add('adw-label', 'comments');
-            commentsEl.textContent = commentsText;
+            commentsEl.classList.add('adw-label', 'comments'); commentsEl.textContent = commentsText;
             contentArea.appendChild(commentsEl);
         }
-
         if (websiteUrl) {
             const websiteLink = document.createElement('a');
-            websiteLink.href = websiteUrl;
-            websiteLink.textContent = websiteLabel || websiteUrl;
-            websiteLink.classList.add('adw-link');
-            websiteLink.target = '_blank';
-            websiteLink.rel = 'noopener noreferrer';
-            const websiteP = document.createElement('p');
-            websiteP.appendChild(websiteLink);
+            websiteLink.href = websiteUrl; websiteLink.textContent = websiteLabel || websiteUrl;
+            websiteLink.classList.add('adw-link'); websiteLink.target = '_blank'; websiteLink.rel = 'noopener noreferrer';
+            const websiteP = document.createElement('p'); websiteP.appendChild(websiteLink);
             contentArea.appendChild(websiteP);
         }
-
         if (copyright) {
             const copyrightEl = document.createElement('p');
-            copyrightEl.classList.add('adw-label', 'copyright', 'caption');
-            copyrightEl.textContent = copyright;
+            copyrightEl.classList.add('adw-label', 'copyright', 'caption'); copyrightEl.textContent = copyright;
             contentArea.appendChild(copyrightEl);
         }
-
-        // TODO: Add sections for developers, license, etc. as per full AdwAboutDialog spec
-        // This might involve more complex slotted content or attributes.
-
         this.appendChild(contentArea);
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} _render completed.`);
     }
 
-    _createBackdrop() { // Simplified backdrop creation, could share with AdwDialogElement
-        if (!AdwAboutDialogElement._backdropElement) {
+    _createBackdrop() {
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} _createBackdrop called.`);
+        // For now, assume AdwDialogElement's static backdrop logic is primary if available.
+        // This component might need its own static _backdropElement if fully independent.
+        // Let's use AdwDialogElement's static one if it exists for better sharing.
+        const GenericDialog = customElements.get('adw-dialog');
+        if (GenericDialog && GenericDialog._backdropElement) {
+            console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} using existing shared backdrop from AdwDialogElement.`);
+             AdwAboutDialogElement._backdropElement = GenericDialog._backdropElement; // Link to it
+        } else if (!AdwAboutDialogElement._backdropElement) {
+            console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} creating its own backdrop element.`);
             AdwAboutDialogElement._backdropElement = document.createElement('div');
-            AdwAboutDialogElement._backdropElement.classList.add('adw-dialog-backdrop'); // Global class
+            AdwAboutDialogElement._backdropElement.classList.add('adw-dialog-backdrop');
             Object.assign(AdwAboutDialogElement._backdropElement.style, {
-                display: 'none', position: 'fixed', top: '0', left: '0',
-                width: '100%', height: '100%',
+                display: 'none', position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
                 backgroundColor: 'var(--dialog-backdrop-color, rgba(0,0,0,0.4))',
-                zIndex: 'calc(var(--z-index-dialog, 1050) - 1)',
+                zIndex: 'calc(var(--z-index-dialog, 1050) - 1)', // Ensure z-index is less than dialog
                 opacity: '0',
                 transition: 'opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease)'
             });
@@ -162,69 +167,94 @@ class AdwAboutDialogElement extends HTMLElement {
     }
 
     _onKeydown(event) {
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} _onKeydown, key: ${event.key}`);
         if (event.key === 'Escape') {
             this.close();
         }
     }
 
     _doOpen() {
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} _doOpen executing.`);
+        if (!this._initialized) this._render(); // Ensure rendered if opened programmatically before connect
+
         this.removeAttribute('hidden');
-        this.style.display = 'flex';
+        this.style.display = 'flex'; // Should be handled by CSS for :host([open])
+        this.style.opacity = '0'; // Start transparent for transition
+        this.style.transform = 'scale(0.95)'; // Start small for transition
 
         const backdrop = this._createBackdrop();
         backdrop.style.display = 'block';
-        // Force reflow before starting animation
-        void backdrop.offsetWidth;
-        void this.offsetWidth;
 
-        backdrop.style.opacity = '1';
-        this.style.opacity = '1';
-        this.style.transform = 'scale(1)';
+        requestAnimationFrame(() => {
+            console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} RAF for open transition.`);
+            backdrop.style.opacity = '1';
+            this.style.opacity = '1';
+            this.style.transform = 'scale(1)';
+        });
 
-        // No backdrop click to close for AboutDialog by default, per GNOME HIG
         document.addEventListener('keydown', this._boundOnKeydown);
 
-        const firstFocusable = this.querySelector('.adw-dialog-close-button, button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        const firstFocusable = this.querySelector('.adw-dialog-close-button');
         if (firstFocusable) {
+            console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} focusing close button.`);
             firstFocusable.focus();
+        } else {
+            this.setAttribute('tabindex', '-1'); this.focus(); // Fallback to dialog itself
+             console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} no close button found to focus, focusing dialog.`);
         }
-        this.dispatchEvent(new CustomEvent('open'));
+        this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }));
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} 'open' event dispatched.`);
     }
 
     _doClose() {
-        if (AdwAboutDialogElement._backdropElement) {
-            AdwAboutDialogElement._backdropElement.style.opacity = '0';
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} _doClose executing.`);
+        const backdrop = AdwAboutDialogElement._backdropElement; // Use the static ref
+        if (backdrop) {
+            backdrop.style.opacity = '0';
         }
         this.style.opacity = '0';
         this.style.transform = 'scale(0.95)';
 
         setTimeout(() => {
+            console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} timeout for close, setting display:none and hidden attribute.`);
             this.setAttribute('hidden', '');
             this.style.display = 'none';
-            if (AdwAboutDialogElement._backdropElement) {
-                AdwAboutDialogElement._backdropElement.style.display = 'none';
+            if (backdrop) {
+                 // Check if other dialogs (adw-dialog or adw-about-dialog) are open
+                const anyOtherAdwDialogOpen = document.querySelector('adw-dialog[open]:not([hidden]), adw-about-dialog[open]:not([hidden])');
+                if (!anyOtherAdwDialogOpen) { // If this was the last one
+                    console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} No other dialogs open, hiding backdrop.`);
+                    backdrop.style.display = 'none';
+                } else {
+                    console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} Other dialogs may be open, not hiding backdrop globally here.`);
+                }
             }
-        }, 150); // Match animation duration
+        }, 150);
 
         document.removeEventListener('keydown', this._boundOnKeydown);
-        this.dispatchEvent(new CustomEvent('close'));
+        this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} 'close' event dispatched.`);
     }
 
     open() {
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} open() method called. Setting 'open' attribute.`);
         this.setAttribute('open', '');
     }
 
     close() {
+        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} close() method called. Removing 'open' attribute.`);
         this.removeAttribute('open');
     }
 }
-AdwAboutDialogElement._backdropElement = null; // Shared backdrop instance
+AdwAboutDialogElement._backdropElement = null;
 
 customElements.define('adw-about-dialog', AdwAboutDialogElement);
 
 Adw.AboutDialog = Adw.AboutDialog || {};
 Adw.AboutDialog.factory = (options = {}) => {
+    console.log('Adw.AboutDialog.factory called with options:', options);
     const dialog = document.createElement('adw-about-dialog');
+    // ... (attribute setting remains the same)
     if (options.appName) dialog.setAttribute('app-name', options.appName);
     if (options.version) dialog.setAttribute('version', options.version);
     if (options.copyright) dialog.setAttribute('copyright', options.copyright);
@@ -233,11 +263,11 @@ Adw.AboutDialog.factory = (options = {}) => {
     if (options.website) dialog.setAttribute('website', options.website);
     if (options.websiteLabel) dialog.setAttribute('website-label', options.websiteLabel);
     if (options.licenseType) dialog.setAttribute('license-type', options.licenseType);
-    // Note: Does not handle complex slotted content like developers list from JS factory yet.
 
     if (typeof options.onClose === 'function') {
         dialog.addEventListener('close', options.onClose);
     }
+    console.log('Adw.AboutDialog.factory: created dialog instance:', dialog);
     return dialog;
 };
 window.createAdwAboutDialog = Adw.AboutDialog.factory;

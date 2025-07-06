@@ -247,63 +247,82 @@
     <script type="module" src="{{ url_for('static', filename='js/components.js') }}" defer></script> {# Load Web Components #}
     <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('base.html script: DOMContentLoaded');
+
             // Main App Menu Popover
             const menuButton = document.getElementById('main-app-menu-button');
             const menuPopover = document.getElementById('main-app-popover');
+            console.log('base.html script: menuButton:', menuButton, 'menuPopover:', menuPopover);
+
             if (menuButton && menuPopover) {
                 menuButton.addEventListener('click', (event) => {
-                    event.stopPropagation(); // Prevent click from immediately closing via document listener
+                    event.stopPropagation();
                     const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+                    console.log('base.html script: menuButton clicked. Was expanded:', isExpanded);
                     if (isExpanded) {
                         menuPopover.setAttribute('hidden', '');
                         menuButton.setAttribute('aria-expanded', 'false');
+                        console.log('base.html script: Popover hidden.');
                     } else {
                         menuPopover.removeAttribute('hidden');
                         menuButton.setAttribute('aria-expanded', 'true');
-                        // Optional: focus first item in popover
+                        console.log('base.html script: Popover shown.');
                         const firstFocusable = menuPopover.querySelector('[role="menuitem"]');
-                        if (firstFocusable) firstFocusable.focus();
+                        if (firstFocusable) {
+                            console.log('base.html script: Focusing first item in popover:', firstFocusable);
+                            firstFocusable.focus();
+                        }
                     }
                 });
-                // Close popover if clicking outside
                 document.addEventListener('click', (event) => {
-                    if (!menuPopover.hidden && !menuButton.contains(event.target) && !menuPopover.contains(event.target)) {
+                    if (menuPopover && !menuPopover.hidden && menuButton && !menuButton.contains(event.target) && !menuPopover.contains(event.target)) {
+                        console.log('base.html script: Click outside popover. Closing.');
                         menuPopover.setAttribute('hidden', '');
                         menuButton.setAttribute('aria-expanded', 'false');
                     }
                 });
-                // Close popover on ESC key
                 menuPopover.addEventListener('keydown', (event) => {
                     if (event.key === 'Escape') {
+                        console.log('base.html script: Escape key in popover. Closing.');
                         menuPopover.setAttribute('hidden', '');
-                        menuButton.setAttribute('aria-expanded', 'false');
-                        menuButton.focus();
+                        if (menuButton) {
+                           menuButton.setAttribute('aria-expanded', 'false');
+                           menuButton.focus();
+                        }
                     }
                 });
             }
 
             // About Dialog
-            const appAboutDialogEl = document.getElementById('app-about-dialog'); // This is now <adw-about-dialog>
+            const appAboutDialogEl = document.getElementById('app-about-dialog');
             const openAboutDialogBtn = document.getElementById('about-dialog-trigger');
-            // The close button is now part of the AdwAboutDialogElement's internal structure,
-            // and ESC key handling is also ideally within the component.
+            console.log('base.html script: appAboutDialogEl:', appAboutDialogEl, 'openAboutDialogBtn:', openAboutDialogBtn);
 
-            if (appAboutDialogEl && openAboutDialogBtn) {
-                openAboutDialogBtn.addEventListener('click', () => {
-                    if (typeof appAboutDialogEl.open === 'function') {
-                        appAboutDialogEl.open();
-                    } else { // Fallback
-                        appAboutDialogEl.removeAttribute('hidden');
-                    }
-                    // Close popover if open
-                    if(menuPopover && !menuPopover.hidden) {
-                        menuPopover.setAttribute('hidden', '');
-                        if(menuButton) menuButton.setAttribute('aria-expanded', 'false');
-                    }
+            // Ensure adw-about-dialog is defined before attaching listeners that call its methods
+            if (openAboutDialogBtn && appAboutDialogEl) {
+                customElements.whenDefined('adw-about-dialog').then(() => {
+                    console.log('base.html script: adw-about-dialog is defined. Attaching click listener to about-dialog-trigger.');
+                    openAboutDialogBtn.addEventListener('click', () => {
+                        console.log('base.html script: about-dialog-trigger clicked.');
+                        if (typeof appAboutDialogEl.open === 'function') {
+                            console.log('base.html script: Calling appAboutDialogEl.open() for:', appAboutDialogEl.id);
+                            appAboutDialogEl.open();
+                        } else {
+                            console.warn('base.html script: appAboutDialogEl.open() is not a function. Fallback: removing hidden attr for:', appAboutDialogEl.id);
+                            appAboutDialogEl.removeAttribute('hidden'); // Fallback
+                        }
+                        // Close main menu popover if open
+                        if(menuPopover && !menuPopover.hidden && menuButton) {
+                            console.log('base.html script: Closing main menu popover after opening About dialog.');
+                            menuPopover.setAttribute('hidden', '');
+                            menuButton.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                }).catch(error => {
+                     console.error("base.html script: Failed to initialize About Dialog trigger; adw-about-dialog definition not found.", error);
                 });
-                // Note: The AdwAboutDialogElement should handle its own close button clicks and ESC key.
-                // If a manual close button outside the component was needed, its listener would be:
-                // closeAboutDialogBtn.addEventListener('click', () => appAboutDialogEl.close());
+            } else {
+                 console.warn("base.html script: About dialog trigger or dialog element not found. openAboutDialogBtn:", openAboutDialogBtn, "appAboutDialogEl:", appAboutDialogEl);
             }
         });
     </script>
