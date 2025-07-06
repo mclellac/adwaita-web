@@ -92,21 +92,17 @@
   }
 
   // Dialog Footer / Actions Area
-  .adw-dialog-footer {
+  // This style applies to .adw-dialog-footer, .adw-dialog-buttons (legacy),
+  // and .adw-dialog__actions-buttons-container (used by JS factory and recommended for slotted buttons)
+  .adw-dialog-footer,
+  .adw-dialog-buttons,
+  .adw-dialog__actions-buttons-container { // Added .adw-dialog__actions-buttons-container
     display: flex;
     justify-content: flex-end; // Buttons typically to the right
     align-items: center;
     padding: var(--spacing-m);
     border-top: var(--border-width) solid var(--border-color);
     gap: var(--spacing-s); // Gap between buttons
-
-    // AdwAlertDialog has a specific layout for responses (buttons)
-    // This is a general footer, AlertDialog might have more specific button styling/layout.
-  }
-
-  // Old .adw-dialog-buttons, kept for compatibility, prefer .adw-dialog-footer
-  .adw-dialog-buttons {
-    @extend .adw-dialog-footer; // Inherit footer styles
   }
 
 
@@ -130,6 +126,65 @@
             width: auto; // Auto width for horizontal buttons
          }
     }
+  }
+
+  // --- AdwAboutDialog Specific Styles ---
+  &.adw-about-dialog {
+    .adw-dialog__content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center; // Center text for most elements within
+      padding-top: var(--spacing-xl); // More top padding for About dialog content
+      padding-bottom: var(--spacing-xl); // More bottom padding
+    }
+
+    .adw-about-dialog-logo {
+      width: 64px; // Standard Adwaita About Dialog logo size
+      height: 64px;
+      margin-bottom: var(--spacing-l);
+      border-radius: var(--border-radius-small); // Slight rounding if the logo isn't circular
+    }
+
+    .application-name { // This already has .adw-label and .title-1
+      // .title-1 provides font size and weight. We might want specific margin.
+      margin-bottom: var(--spacing-xxs); // Very small margin below app name
+      color: var(--window-fg-color); // Ensure it uses the main text color
+    }
+
+    .version { // This already has .adw-label and .body-2
+      // .body-2 provides font size. Adwaita often uses slightly dimmed for version.
+      opacity: var(--dim-opacity);
+      margin-top: 0;
+      margin-bottom: var(--spacing-m);
+    }
+
+    .comments { // This already has .adw-label
+      font-size: var(--font-size-base); // Ensure base font size
+      margin-top: 0;
+      margin-bottom: var(--spacing-l);
+      max-width: 90%; // Prevent comments from being too wide
+    }
+
+    // Container for the website link
+    p:has(> .adw-link) { // Target the <p> tag containing the website link
+      margin-top: 0;
+      margin-bottom: var(--spacing-l);
+      .adw-link {
+        font-size: var(--font-size-base);
+      }
+    }
+
+
+    .copyright { // This already has .adw-label and .caption
+      // .caption provides font size and often dimmed color.
+      margin-top: var(--spacing-l); // Space above copyright
+      margin-bottom: 0; // No margin below the last element
+      opacity: var(--dim-opacity);
+    }
+
+    // No explicit footer/buttons for AboutDialog by default, content flows to bottom.
+    // If a footer were added, it would use .adw-dialog-footer styles.
   }
 }
 
