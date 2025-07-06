@@ -19,52 +19,31 @@ class AdwDialogElement extends HTMLElement {
     // For now, let's assume global CSS handles .adw-dialog, .adw-dialog-backdrop etc.
     // For web components, it's better to adopt external stylesheets or define self-contained styles.
     // This is a simplified approach for now.
-    // Using an array of strings joined by newlines for extreme robustness.
-    const cssLines = [
-      ':host {',
-      '  display: none; /* Hidden by default */',
-      '  position: fixed;',
-      '  top: 0;',
-      '  left: 0;',
-      '  width: 100%;',
-      '  height: 100%;',
-      '  z-index: var(--z-index-dialog, 1050);',
-      '  align-items: center;',
-      '  justify-content: center;',
-      '}',
-      ':host([open]) {',
-      '  display: flex;',
-      '}',
-      '.adw-dialog-backdrop {',
-      '  position: fixed;',
-      '  top: 0;',
-      '  left: 0;',
-      '  width: 100%;',
-      '  height: 100%;',
-      '  background-color: var(--dialog-backdrop-color, rgba(0,0,0,0.4));',
-      '  opacity: 0;',
-      '  transition: opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease);',
-      '}',
-      ':host([open]) .adw-dialog-backdrop {',
-      '  opacity: 1;',
-      '}',
-      '.adw-dialog-container {',
-      '  position: relative;',
-      '  z-index: 1;',
-      '  opacity: 0;',
-      '  transform: scale(0.95);',
-      '  transition: opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease),',
-      '              transform var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease);',
-      '}',
-      ':host([open]) .adw-dialog-container {',
-      '  opacity: 1;',
-      '  transform: scale(1);',
-      '}'
-    ];
-    style.textContent = cssLines.join('\\n');
+    // Populating style tag content line by line to avoid any JS string literal issues.
+    style.appendChild(document.createTextNode(':host {'));
+    style.appendChild(document.createTextNode('  display: none; /* Hidden by default */'));
+    style.appendChild(document.createTextNode('  position: fixed;'));
+    style.appendChild(document.createTextNode('  top: 0; left: 0; width: 100%; height: 100%;'));
+    style.appendChild(document.createTextNode('  z-index: var(--z-index-dialog, 1050);'));
+    style.appendChild(document.createTextNode('  align-items: center; justify-content: center;'));
+    style.appendChild(document.createTextNode('}'));
+    style.appendChild(document.createTextNode(':host([open]) { display: flex; }'));
+    style.appendChild(document.createTextNode('.adw-dialog-backdrop {'));
+    style.appendChild(document.createTextNode('  position: fixed; top: 0; left: 0; width: 100%; height: 100%;'));
+    style.appendChild(document.createTextNode('  background-color: var(--dialog-backdrop-color, rgba(0,0,0,0.4));'));
+    style.appendChild(document.createTextNode('  opacity: 0;'));
+    style.appendChild(document.createTextNode('  transition: opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease);'));
+    style.appendChild(document.createTextNode('}'));
+    style.appendChild(document.createTextNode(':host([open]) .adw-dialog-backdrop { opacity: 1; }'));
+    style.appendChild(document.createTextNode('.adw-dialog-container {'));
+    style.appendChild(document.createTextNode('  position: relative; z-index: 1; opacity: 0; transform: scale(0.95);'));
+    style.appendChild(document.createTextNode('  transition: opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease), transform var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease);'));
+    style.appendChild(document.createTextNode('}'));
+    style.appendChild(document.createTextNode(':host([open]) .adw-dialog-container { opacity: 1; transform: scale(1); }'));
+
     // Shadow DOM approach is complex for modals due to stacking and global styles.
     // Reverting to Light DOM for dialog component for easier styling with global CSS.
-    // this.shadowRoot.appendChild(style);
+    // this.shadowRoot.appendChild(style); // Style would go into shadowRoot if used
     // this._backdrop = document.createElement('div');
     // this._backdrop.classList.add('adw-dialog-backdrop');
     // this.shadowRoot.appendChild(this._backdrop);
