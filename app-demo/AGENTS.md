@@ -96,7 +96,7 @@ Refer to the root `AGENTS.md` and `adwaita-web/AGENTS.md` for more details on as
 
 *   **Toasts:** Used for brief success messages (e.g., after creating a post). Implemented via `adwaita-web/js/toast.js` and triggered by flashing messages with the `toast_success` category. Toasts include an 'x' icon for dismissal.
 *   **Banners:** Used for more prominent information or errors. Implemented via `adwaita-web/js/banner.js` and triggered by flashed messages with categories like `danger`, `warning`, `info`. Banners include a "Dismiss" text button.
-*   **Confirmation Dialogs:** Actions requiring user confirmation (e.g., deleting posts or comments) now use Adwaita-styled dialogs implemented directly in the relevant templates (e.g., `post.html`). These replace native browser `confirm()` dialogs and are managed by inline JavaScript within the templates.
+*   **Confirmation Dialogs:** Actions requiring user confirmation (e.g., deleting posts or comments) now use Adwaita-styled dialogs (`<adw-dialog>` custom elements) declared directly in the relevant templates (e.g., `post.html`). These replace native browser `confirm()` dialogs. Their activation and interaction logic (opening, closing, handling cancel/confirm button clicks that lead to form submissions) is primarily managed by global JavaScript in `adwaita-web/js/app-layout.js`.
 
 ## Adwaita Styling and Color Compliance
 

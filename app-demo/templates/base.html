@@ -7,49 +7,49 @@
     <title>{% block page_title %}{% endblock %}{% if self.page_title() %} - {% endif %}{{ site_settings.get('site_title', 'Adwaita Social Demo') }}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-skin.css') }}">
+    <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
+      (function() {
+        const theme = {{ (current_user.theme if current_user and current_user.is_authenticated and current_user.theme else "system")|tojson|safe }};
+        const accent = {{ (current_user.accent_color if current_user and current_user.is_authenticated and current_user.accent_color else "default")|tojson|safe }};
+
+        let effectiveTheme = theme;
+        if (theme === 'system') {
+          effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        if (effectiveTheme === 'dark') {
+          document.documentElement.classList.add('theme-dark');
+          document.documentElement.classList.remove('theme-light');
+        } else {
+          document.documentElement.classList.add('theme-light');
+          document.documentElement.classList.remove('theme-dark');
+        }
+
+        // For accent colors, Adwaita CSS typically handles this via body classes like accent-blue, accent-green etc.
+        // The following is a conceptual way to apply it if the CSS is structured for it.
+        // Ensure your adwaita-skin.css has rules for .accent-blue, .accent-red etc. on body or html.
+        const validAccents = ['default', 'blue', 'green', 'yellow', 'orange', 'red', 'purple', 'pink']; // Updated list
+        let accentClassFound = false;
+        document.documentElement.classList.forEach(cls => {
+          if (cls.startsWith('accent-')) {
+            if (cls === `accent-${accent}`) {
+              accentClassFound = true; // Current accent is already set
+            } else {
+              document.documentElement.classList.remove(cls); // Remove other accent classes
+            }
+          }
+        });
+
+        if (accent !== 'default' && validAccents.includes(accent) && !accentClassFound) {
+          document.documentElement.classList.add(`accent-${accent}`);
+        } else if (accent === 'default') {
+          // All non-default accent classes should have been removed by the loop above.
+          // The base :root styles (which default to blue) will apply.
+        }
+      })();
+    </script>
 </head>
 <body>
-  <script>
-    (function() {
-      const theme = {{ (current_user.theme if current_user and current_user.is_authenticated and current_user.theme else "system")|tojson|safe }};
-      const accent = {{ (current_user.accent_color if current_user and current_user.is_authenticated and current_user.accent_color else "default")|tojson|safe }};
-
-      let effectiveTheme = theme;
-      if (theme === 'system') {
-        effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-
-      if (effectiveTheme === 'dark') {
-        document.documentElement.classList.add('theme-dark');
-        document.documentElement.classList.remove('theme-light');
-      } else {
-        document.documentElement.classList.add('theme-light');
-        document.documentElement.classList.remove('theme-dark');
-      }
-
-      // For accent colors, Adwaita CSS typically handles this via body classes like accent-blue, accent-green etc.
-      // The following is a conceptual way to apply it if the CSS is structured for it.
-      // Ensure your adwaita-skin.css has rules for .accent-blue, .accent-red etc. on body or html.
-      const validAccents = ['default', 'blue', 'green', 'yellow', 'orange', 'red', 'purple', 'pink']; // Updated list
-      let accentClassFound = false;
-      document.documentElement.classList.forEach(cls => {
-        if (cls.startsWith('accent-')) {
-          if (cls === `accent-${accent}`) {
-            accentClassFound = true; // Current accent is already set
-          } else {
-            document.documentElement.classList.remove(cls); // Remove other accent classes
-          }
-        }
-      });
-
-      if (accent !== 'default' && validAccents.includes(accent) && !accentClassFound) {
-        document.documentElement.classList.add(`accent-${accent}`);
-      } else if (accent === 'default') {
-        // All non-default accent classes should have been removed by the loop above.
-        // The base :root styles (which default to blue) will apply.
-      }
-    })();
-  </script>
 
 <header class="adw-header-bar">
     <div class="adw-header-bar__start">
@@ -241,36 +241,29 @@
 
     {% block scripts %}
     {# Theme and accent handling script is above, this is for other scripts #}
+    <script type="module" src="{{ url_for('static', filename='js/components.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app-layout.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/banner.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/toast.js') }}" defer></script>
-    {# <script type="module" src="{{ url_for('static', filename='js/components.js') }}" defer></script> <!-- TEMPORARILY COMMENTED OUT FOR FLASHING DIAGNOSIS --> #}
     <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('base.html script: DOMContentLoaded');
-
-            /*
-            // --- Temporarily Commented Out for Flashing Diagnosis ---
             // Main App Menu Popover
             const menuButton = document.getElementById('main-app-menu-button');
             const menuPopover = document.getElementById('main-app-popover');
-            console.log('base.html script: menuButton:', menuButton, 'menuPopover:', menuPopover);
 
             if (menuButton && menuPopover) {
                 menuButton.addEventListener('click', (event) => {
                     event.stopPropagation();
                     const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
-                    console.log('base.html script: menuButton clicked. Was expanded:', isExpanded);
                     if (isExpanded) {
                         menuPopover.setAttribute('hidden', '');
                         menuButton.setAttribute('aria-expanded', 'false');
-                        console.log('base.html script: Popover hidden.');
                     } else {
-                        // Temporarily simplified for diagnosing flashing issue
-                        menuPopover.removeAttribute('hidden'); // Make it available for CSS
-                        menuPopover.classList.add('open');    // Let CSS handle visibility and animation
+                        menuPopover.removeAttribute('hidden');
+                        // CSS should handle visibility of popover via :not([hidden]) or a class toggled by JS if animations are complex.
+                        // For simplicity, direct attribute toggling is used. Add .open class if SCSS relies on it for animation.
+                        menuPopover.classList.add('open'); // Assuming SCSS uses .open for visibility/animation
                         menuButton.setAttribute('aria-expanded', 'true');
-                        console.log('base.html script: Popover shown (simple toggle for diagnosis).');
                         const firstFocusable = menuPopover.querySelector('[role="menuitem"]');
                         if (firstFocusable) {
                             firstFocusable.focus();
@@ -279,16 +272,13 @@
                 });
                 document.addEventListener('click', (event) => {
                     if (menuPopover && menuPopover.classList.contains('open') && menuButton && !menuButton.contains(event.target) && !menuPopover.contains(event.target)) {
-                        console.log('base.html script: Click outside popover. Closing (simple toggle for diagnosis).');
                         menuPopover.classList.remove('open');
                         menuButton.setAttribute('aria-expanded', 'false');
-                        // Forcing hidden attribute after transition, CSS should handle actual visibility via .open
-                        setTimeout(() => { if(!menuPopover.classList.contains('open')) menuPopover.setAttribute('hidden', ''); }, 150);
+                        setTimeout(() => { if(!menuPopover.classList.contains('open')) menuPopover.setAttribute('hidden', ''); }, 150); // Match popover animation
                     }
                 });
                 menuPopover.addEventListener('keydown', (event) => {
                     if (event.key === 'Escape') {
-                        console.log('base.html script: Escape key in popover. Closing (simple toggle for diagnosis).');
                         menuPopover.classList.remove('open');
                         menuButton.setAttribute('aria-expanded', 'false');
                         if (menuButton) menuButton.focus();
@@ -296,39 +286,34 @@
                     }
                 });
             }
-            // --- End of Temporarily Commented Out Block ---
-            */
 
             // About Dialog
             const appAboutDialogEl = document.getElementById('app-about-dialog');
             const openAboutDialogBtn = document.getElementById('about-dialog-trigger');
-            console.log('base.html script: appAboutDialogEl:', appAboutDialogEl, 'openAboutDialogBtn:', openAboutDialogBtn);
 
-            // Ensure adw-about-dialog is defined before attaching listeners that call its methods
             if (openAboutDialogBtn && appAboutDialogEl) {
                 customElements.whenDefined('adw-about-dialog').then(() => {
-                    console.log('base.html script: adw-about-dialog is defined. Attaching click listener to about-dialog-trigger.');
                     openAboutDialogBtn.addEventListener('click', () => {
-                        console.log('base.html script: about-dialog-trigger clicked.');
                         if (typeof appAboutDialogEl.open === 'function') {
-                            console.log('base.html script: Calling appAboutDialogEl.open() for:', appAboutDialogEl.id);
                             appAboutDialogEl.open();
                         } else {
-                            console.warn('base.html script: appAboutDialogEl.open() is not a function. Fallback: removing hidden attr for:', appAboutDialogEl.id);
-                            appAboutDialogEl.removeAttribute('hidden'); // Fallback
+                            // Fallback if .open() method isn't available (e.g. element not fully upgraded)
+                            appAboutDialogEl.setAttribute('open', '');
+                            console.warn('appAboutDialogEl.open() is not a function. Used setAttribute as fallback.');
                         }
                         // Close main menu popover if open
-                        if(menuPopover && !menuPopover.hidden && menuButton) {
-                            console.log('base.html script: Closing main menu popover after opening About dialog.');
-                            menuPopover.setAttribute('hidden', '');
+                        if(menuPopover && menuPopover.classList.contains('open') && menuButton) {
+                            menuPopover.classList.remove('open');
                             menuButton.setAttribute('aria-expanded', 'false');
+                            setTimeout(() => { if(!menuPopover.classList.contains('open')) menuPopover.setAttribute('hidden', ''); }, 150);
                         }
                     });
                 }).catch(error => {
                      console.error("base.html script: Failed to initialize About Dialog trigger; adw-about-dialog definition not found.", error);
                 });
             } else {
-                 console.warn("base.html script: About dialog trigger or dialog element not found. openAboutDialogBtn:", openAboutDialogBtn, "appAboutDialogEl:", appAboutDialogEl);
+                 if (!openAboutDialogBtn) console.warn("base.html script: About dialog trigger button not found.");
+                 if (!appAboutDialogEl) console.warn("base.html script: About dialog element not found.");
             }
         });
     </script>

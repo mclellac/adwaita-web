@@ -13,13 +13,13 @@
                 <p class="adw-label body">
                     By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>
                     {%- if post.published_at -%}
-                        on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                        on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at | human_readable_date }}</time>
                     {%- else -%} {# Should not happen for new posts, fallback for old data or if published_at was somehow not set #}
-                        on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                        on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at | human_readable_date }}</time>
                     {%- endif -%}
                 </p>
                 {% if post.updated_at and post.updated_at != (post.published_at or post.created_at) %}
-                    <p class="adw-label caption last-updated">(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>)</p>
+                    <p class="adw-label caption last-updated">(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at | human_readable_date }}</time>)</p>
                 {% endif %}
             </div>
 
@@ -113,7 +113,7 @@
         <div slot="content" class="adw-dialog-content">
                 <p class="adw-label body">Are you sure you want to delete this post? This action cannot be undone.</p>
             </div>
-        <div slot="buttons" class="adw-dialog__actions-buttons-container">
+        <div slot="buttons" class="adw-dialog-footer">
                 <button id="cancel-delete-btn" class="adw-button flat">Cancel</button>
                 <form method="POST" action="{{ url_for('post.delete_post', post_id=post.id) }}" id="delete-post-form" class="delete-post-form-inline">
                     {{ delete_post_form.hidden_tag() }} {# Use form instance for CSRF #}
@@ -139,7 +139,7 @@
             </span>
             <div class="comment-author-meta">
                  <a href="{{ url_for('profile.view_profile', username=comment.author.username) }}" class="adw-link comment-author-link-strong">{{ comment.author.full_name }}</a>
-                <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time></small>
+                <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at | human_readable_date }}</time></small>
             </div>
         </header>
         <div class="comment-text styled-text-content">{{ comment.text | markdown }}</div>
@@ -253,7 +253,7 @@
         <div slot="content" class="adw-dialog-content">
             <p class="adw-label body">Are you sure you want to delete this comment? This action cannot be undone.</p>
         </div>
-        <div slot="buttons" class="adw-dialog__actions-buttons-container">
+        <div slot="buttons" class="adw-dialog-footer">
             <button id="cancel-comment-delete-btn" class="adw-button flat">Cancel</button>
             <form method="POST" action="" id="confirm-delete-comment-form-actual" style="display: inline;">
                  {{ delete_comment_form.hidden_tag() }}
