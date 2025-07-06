@@ -257,16 +257,18 @@
             if (menuButton && menuPopover) {
                 menuButton.addEventListener('click', (event) => {
                     event.stopPropagation();
-                    const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
-                    console.log('base.html script: menuButton clicked. Was expanded:', isExpanded);
-                    if (isExpanded) {
-                        menuPopover.setAttribute('hidden', '');
+                    const isOpen = menuPopover.classList.contains('open');
+                    console.log('base.html script: menuButton clicked. Was open:', isOpen);
+                    if (isOpen) {
+                        menuPopover.classList.remove('open');
+                        menuPopover.setAttribute('hidden', ''); // Set hidden after animation starts (CSS handles timing)
                         menuButton.setAttribute('aria-expanded', 'false');
-                        console.log('base.html script: Popover hidden.');
+                        console.log('base.html script: Popover closed via class.');
                     } else {
-                        menuPopover.removeAttribute('hidden');
+                        menuPopover.removeAttribute('hidden'); // Remove hidden first to allow CSS to take over
+                        menuPopover.classList.add('open');
                         menuButton.setAttribute('aria-expanded', 'true');
-                        console.log('base.html script: Popover shown.');
+                        console.log('base.html script: Popover opened via class.');
                         const firstFocusable = menuPopover.querySelector('[role="menuitem"]');
                         if (firstFocusable) {
                             console.log('base.html script: Focusing first item in popover:', firstFocusable);
@@ -275,8 +277,9 @@
                     }
                 });
                 document.addEventListener('click', (event) => {
-                    if (menuPopover && !menuPopover.hidden && menuButton && !menuButton.contains(event.target) && !menuPopover.contains(event.target)) {
+                    if (menuPopover && menuPopover.classList.contains('open') && menuButton && !menuButton.contains(event.target) && !menuPopover.contains(event.target)) {
                         console.log('base.html script: Click outside popover. Closing.');
+                        menuPopover.classList.remove('open');
                         menuPopover.setAttribute('hidden', '');
                         menuButton.setAttribute('aria-expanded', 'false');
                     }
@@ -284,6 +287,7 @@
                 menuPopover.addEventListener('keydown', (event) => {
                     if (event.key === 'Escape') {
                         console.log('base.html script: Escape key in popover. Closing.');
+                        menuPopover.classList.remove('open');
                         menuPopover.setAttribute('hidden', '');
                         if (menuButton) {
                            menuButton.setAttribute('aria-expanded', 'false');

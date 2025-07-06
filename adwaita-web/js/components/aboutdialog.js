@@ -178,19 +178,15 @@ class AdwAboutDialogElement extends HTMLElement {
         if (!this._initialized) this._render(); // Ensure rendered if opened programmatically before connect
 
         this.removeAttribute('hidden');
-        this.style.display = 'flex'; // Should be handled by CSS for :host([open])
-        this.style.opacity = '0'; // Start transparent for transition
-        this.style.transform = 'scale(0.95)'; // Start small for transition
+        this.classList.add('open'); // Add .open class for CSS transitions
+        this.style.display = ''; // Clear direct display style if any was set by hidden logic
 
         const backdrop = this._createBackdrop();
-        backdrop.style.display = 'block';
-
-        requestAnimationFrame(() => {
-            console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} RAF for open transition.`);
-            backdrop.style.opacity = '1';
-            this.style.opacity = '1';
-            this.style.transform = 'scale(1)';
-        });
+        if (backdrop) { // Backdrop might be null if AdwDialogElement's one isn't ready
+            backdrop.classList.add('open'); // Add .open class for CSS transitions
+            backdrop.style.display = ''; // Clear direct display style
+        }
+        // Style changes for opacity/transform are now handled by CSS via .open class
 
         document.addEventListener('keydown', this._boundOnKeydown);
 
@@ -208,28 +204,32 @@ class AdwAboutDialogElement extends HTMLElement {
 
     _doClose() {
         console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} _doClose executing.`);
-        const backdrop = AdwAboutDialogElement._backdropElement; // Use the static ref
+        this.classList.remove('open'); // Remove .open class for CSS transitions
+        const backdrop = AdwAboutDialogElement._backdropElement; // Use the static ref for this component
         if (backdrop) {
-            backdrop.style.opacity = '0';
+            backdrop.classList.remove('open'); // Remove .open class
         }
-        this.style.opacity = '0';
-        this.style.transform = 'scale(0.95)';
 
+        // CSS transitions will handle opacity, transform, and visibility.
+        // JS needs to set 'hidden' and 'display:none' after transition.
         setTimeout(() => {
-            console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} timeout for close, setting display:none and hidden attribute.`);
-            this.setAttribute('hidden', '');
-            this.style.display = 'none';
-            if (backdrop) {
-                 // Check if other dialogs (adw-dialog or adw-about-dialog) are open
-                const anyOtherAdwDialogOpen = document.querySelector('adw-dialog[open]:not([hidden]), adw-about-dialog[open]:not([hidden])');
-                if (!anyOtherAdwDialogOpen) { // If this was the last one
-                    console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} No other dialogs open, hiding backdrop.`);
-                    backdrop.style.display = 'none';
-                } else {
-                    console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} Other dialogs may be open, not hiding backdrop globally here.`);
+            console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} timeout for close, setting hidden attribute and display:none if needed.`);
+            if (!this.hasAttribute('open')) { // Ensure it's still meant to be closed
+                this.setAttribute('hidden', '');
+                this.style.display = 'none'; // Fallback
+
+                if (backdrop) {
+                    // Check if other dialogs (adw-dialog or adw-about-dialog) are .open
+                    const anyOtherDialogOpen = document.querySelector('adw-dialog.open, adw-about-dialog.open');
+                    if (!anyOtherDialogOpen) {
+                        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} No other dialogs .open, setting backdrop display:none.`);
+                        backdrop.style.display = 'none';
+                    } else {
+                        console.log(`AdwAboutDialogElement: ${this.id || 'N/A'} Other dialogs still .open, not changing backdrop display.`);
+                    }
                 }
             }
-        }, 150);
+        }, 150); // Match CSS transition duration
 
         document.removeEventListener('keydown', this._boundOnKeydown);
         this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
