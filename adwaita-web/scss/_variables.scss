@@ -395,6 +395,12 @@ $accent-definitions: (
   // Pill button radius (for toggle groups, etc.)
   --pill-button-border-radius: 100px;
 
+  // Icon URLs (as CSS Custom Properties)
+  // Base path for icons, relative to the final CSS file (app-demo/static/css/)
+  $_icon-base-path-for-vars: '../data/icons/symbolic/';
+  --icon-window-close-symbolic-url: url(#{$_icon-base-path-for-vars}window-close-symbolic.svg);
+  // Add other frequently used icon URLs here if components need them directly via CSS vars
+
 
   // --- Dark Theme Overrides ---
   &.theme-dark {

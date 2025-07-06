@@ -53,8 +53,10 @@
         vertical-align: middle;
       }
       .icon-window-close-symbolic {
-        -webkit-mask-image: url(/static/data/icons/symbolic/window-close-symbolic.svg);
-        mask-image: url(/static/data/icons/symbolic/window-close-symbolic.svg);
+        /* Rely on global CSS to define this or use a CSS custom property if path needs to be dynamic */
+        /* Forcing it here if component needs to be self-contained with its icon path */
+        -webkit-mask-image: var(--icon-window-close-symbolic-url);
+        mask-image: var(--icon-window-close-symbolic-url);
       }
 
       .adw-dialog__content {
