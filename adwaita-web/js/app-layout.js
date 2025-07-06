@@ -1,5 +1,9 @@
+let appLayoutDOMContentLoadedCount = 0;
+let appLayoutWhenDefinedResolvedCount = 0;
+
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('app-layout.js: DOMContentLoaded');
+    appLayoutDOMContentLoadedCount++;
+    console.log(`app-layout.js: DOMContentLoaded event #${appLayoutDOMContentLoadedCount}`);
 
     const sidebarToggle = document.querySelector('.app-sidebar-toggle');
     const sidebar = document.getElementById('app-sidebar');
@@ -57,7 +61,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     console.log('app-layout.js: Waiting for adw-dialog custom element to be defined...');
     customElements.whenDefined('adw-dialog').then(() => {
-        console.log('app-layout.js: adw-dialog is defined. Initializing dialog handlers.');
+        appLayoutWhenDefinedResolvedCount++;
+        console.log(`app-layout.js: adw-dialog is defined. Initializing dialog handlers (call #${appLayoutWhenDefinedResolvedCount}).`);
 
         // Post Deletion Dialog (from post.html)
         const deletePostDialogEl = document.getElementById('delete-confirm-dialog');
