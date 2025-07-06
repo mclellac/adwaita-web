@@ -131,3 +131,11 @@ def init_app(app):
     # if they are already handled in __init__.py.
     # This init_app is primarily for filters directly defined AND registered from utils.
     pass
+
+def flash_form_errors_util(form):
+    """Flashes all errors from a Flask-WTF form."""
+    from flask import flash # Local import to avoid issues if utils is imported before app context
+    for field, errors in form.errors.items():
+        for error in errors:
+            field_label = getattr(form, field).label.text if hasattr(getattr(form, field), 'label') else field
+            flash(f"Error in {field_label}: {error}", 'danger')
