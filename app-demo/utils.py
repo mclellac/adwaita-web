@@ -196,8 +196,8 @@ def update_post_relations_util(post, form_data, current_user_id, is_new_post=Fal
 
     # Categories
     post.categories.clear()
-    if form_data.get('categories'): # Assuming categories is a list of category IDs from the form
-        for cat_id in form_data.get('categories'):
+    if form_data.categories.data: # Access data using .data attribute
+        for cat_id in form_data.categories.data:
             category = db.session.get(Category, int(cat_id))
             if category:
                 post.categories.append(category)
@@ -205,8 +205,8 @@ def update_post_relations_util(post, form_data, current_user_id, is_new_post=Fal
     # Tags
     # Clear existing tags using the relationship. SQLAlchemy will handle the association table.
     post.tags.clear()
-    if form_data.get('tags_string'):
-        tag_names = [name.strip() for name in form_data.get('tags_string').split(',') if name.strip()]
+    if form_data.tags_string.data: # Access data using .data attribute
+        tag_names = [name.strip() for name in form_data.tags_string.data.split(',') if name.strip()]
         for tag_name in tag_names:
             tag_slug = generate_slug_util(tag_name)
             tag = Tag.query.filter_by(slug=tag_slug).first()
