@@ -2,7 +2,10 @@
 @use 'variables';
 @use 'mixins'; // For z-index variables if defined there
 
-.adw-dialog {
+// Style the custom element host directly. The AdwDialogElement constructor also adds the class "adw-dialog".
+adw-dialog.adw-dialog {
+  display: flex; // Managed by [open] attribute states below, but set a default
+  flex-direction: column;
   background-color: var(--dialog-bg-color);
   color: var(--dialog-fg-color);
   border-radius: var(--window-radius); // Dialogs are like small windows
@@ -13,21 +16,31 @@
   position: fixed; // For centering and overlay
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.95); // Initial state for animation
   z-index: var(--z-index-dialog);
-  opacity: 0;
-  visibility: hidden; // Start hidden
-  transition: opacity 0.15s ease-out, transform 0.15s ease-out, visibility 0s linear 0.15s;
 
-  &.open {
+  // Initial state (when not having 'open' attribute)
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -50%) scale(0.95);
+  // Apply transition for opacity and transform. Visibility and display changes are instant.
+  transition: opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease),
+              transform var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease);
+
+  &:not([open]) {
+    display: none !important; // Hidden by default if 'open' attribute is not present.
+                             // JS also manipulates style.display. This ensures CSS hiding.
+  }
+
+  &[open] {
+    display: flex !important; // Show when 'open' attribute is present.
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
     visibility: visible;
-    transition: opacity 0.15s ease-out, transform 0.15s ease-out, visibility 0s linear 0s;
+    transform: translate(-50%, -50%) scale(1);
   }
 
   // Dialog Header (AdwAlertDialog uses this structure implicitly)
-  .adw-dialog-header {
+  // These are children of the adw-dialog host.
+  > .adw-dialog-header { // Use > for direct children if structure is fixed
     display: flex;
     justify-content: space-between; // Title left, close button right
     align-items: center;

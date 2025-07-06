@@ -5,7 +5,6 @@
 {% block header_title %}Edit Post{% endblock %} {# Keep it concise, post title is in the form #}
 
 {% block content %}
-<div class="adw-clamp"> {# Use adw-clamp from base.html #}
     <h1 class="adw-title-1 form-page-header" style="text-align: center; margin-bottom: var(--spacing-l);">Edit Post: {{ post.title | truncate(50, True) }}</h1>
     <form method="POST" action="{{ url_for('post.edit_post', post_id=post.id) }}" novalidate class="stacked-form">
         {{ form.hidden_tag() }} {# CSRF token #}
@@ -84,14 +83,14 @@
         <div slot="content" class="adw-dialog-content">
             <p class="adw-label body">Are you sure you want to permanently delete this post titled "<strong>{{ post.title|escape }}</strong>"? This action cannot be undone.</p>
         </div>
-        <div slot="buttons" class="adw-dialog__actions-buttons-container">
+        <div slot="buttons" class="adw-dialog-footer">
             {# Button IDs used by app-layout.js #}
             <button id="cancel-edit-delete-post-btn" class="adw-button flat">Cancel</button>
             <button id="confirm-edit-delete-post-btn" class="adw-button destructive-action">Delete</button>
         </div>
     </adw-dialog>
     {% endif %}
-</div>
+{# Removed closing div for adw-clamp #}
 {% endblock %}
 
 {% block scripts %}

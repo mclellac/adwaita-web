@@ -94,7 +94,10 @@ def create_app(config_name=None):
             # app.logger.error(f"[LOAD_USER] Exception for ID {user_id_str}: {e}", exc_info=True)
             return None
 
-    # Template filters
+    # Template filters & other utils
+    from . import utils as app_utils # Import the utils module
+    app_utils.init_app(app) # Register filters defined in utils.py
+
     from .utils import markdown_to_html_and_sanitize_util, linkify_mentions as linkify_mentions_util # Renamed to avoid conflict
 
     @app.template_filter('urlencode')
