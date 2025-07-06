@@ -100,24 +100,16 @@
     </div>
 </header>
 
-{# Adwaita About Dialog HTML Structure #}
-<div class="adw-dialog adw-about-dialog" id="app-about-dialog" role="dialog" aria-labelledby="about-dialog-title" aria-modal="true" hidden>
-    <header class="adw-header-bar adw-dialog__header">
-        <h2 class="adw-header-bar__title" id="about-dialog-title">About {{ site_settings.get('site_title', 'Adwaita Social Demo') }}</h2>
-        <button id="close-about-dialog-btn" class="adw-button circular flat adw-dialog-close-button" aria-label="Close dialog">
-            <span class="adw-icon icon-window-close-symbolic"></span>
-        </button>
-    </header>
-    <div class="adw-dialog__content">
-        {# Basic content for an AboutDialog #}
-        <p class="adw-label application-name">{{ site_settings.get('site_title', 'Adwaita Social Demo') }}</p>
-        <p class="adw-label version">Version 1.0.0 (Demo)</p>
-        <p class="adw-label copyright">© {{ current_year }} Your Name/Organization</p>
-        <p class="adw-label comments">This is a demonstration application using the Adwaita-Web UI library.</p>
-        {# <a href="YOUR_WEBSITE_URL_HERE" class="adw-link website-link" target="_blank" rel="noopener noreferrer">Visit Website</a> #}
-    </div>
-    {# AboutDialogs typically don't have a separate action footer unless for credits button etc. #}
-</div>
+{# Adwaita About Dialog Web Component #}
+<adw-about-dialog id="app-about-dialog"
+    app-name="{{ site_settings.get('site_title', 'Adwaita Social Demo') }}"
+    version="1.0.0 (Demo)"
+    copyright="© {{ current_year }} Adwaita-Web Contributors"
+    comments="This is a demonstration application using the Adwaita-Web UI library."
+    logo="{{ url_for('static', filename='img/default_avatar.png') }}" {# Example logo #}
+    website="https://github.com/mclellac/adwaita-web">
+    {# Additional slots like license-text or developers could be added here if needed #}
+</adw-about-dialog>
 
 
 <div class="app-body-container"> {# NEW: Main container for sidebar + content #}
@@ -251,7 +243,8 @@
     {# Theme and accent handling script is above, this is for other scripts #}
     <script src="{{ url_for('static', filename='js/app-layout.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/banner.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/toast.js') }}" defer></script> {# Ensure toast.js is loaded #}
+    <script src="{{ url_for('static', filename='js/toast.js') }}" defer></script>
+    <script type="module" src="{{ url_for('static', filename='js/components.js') }}" defer></script> {# Load Web Components #}
     <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
         document.addEventListener('DOMContentLoaded', () => {
             // Main App Menu Popover
@@ -290,29 +283,27 @@
             }
 
             // About Dialog
-            const aboutDialog = document.getElementById('app-about-dialog');
+            const appAboutDialogEl = document.getElementById('app-about-dialog'); // This is now <adw-about-dialog>
             const openAboutDialogBtn = document.getElementById('about-dialog-trigger');
-            const closeAboutDialogBtn = document.getElementById('close-about-dialog-btn');
+            // The close button is now part of the AdwAboutDialogElement's internal structure,
+            // and ESC key handling is also ideally within the component.
 
-            if (aboutDialog && openAboutDialogBtn && closeAboutDialogBtn) {
+            if (appAboutDialogEl && openAboutDialogBtn) {
                 openAboutDialogBtn.addEventListener('click', () => {
-                    aboutDialog.removeAttribute('hidden');
+                    if (typeof appAboutDialogEl.open === 'function') {
+                        appAboutDialogEl.open();
+                    } else { // Fallback
+                        appAboutDialogEl.removeAttribute('hidden');
+                    }
                     // Close popover if open
                     if(menuPopover && !menuPopover.hidden) {
                         menuPopover.setAttribute('hidden', '');
-                        menuButton.setAttribute('aria-expanded', 'false');
-                    }
-                    const firstFocusable = aboutDialog.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-                    if (firstFocusable) firstFocusable.focus();
-                });
-                closeAboutDialogBtn.addEventListener('click', () => {
-                    aboutDialog.setAttribute('hidden', 'true');
-                });
-                aboutDialog.addEventListener('keydown', (event) => {
-                    if (event.key === 'Escape') {
-                        aboutDialog.setAttribute('hidden', 'true');
+                        if(menuButton) menuButton.setAttribute('aria-expanded', 'false');
                     }
                 });
+                // Note: The AdwAboutDialogElement should handle its own close button clicks and ESC key.
+                // If a manual close button outside the component was needed, its listener would be:
+                // closeAboutDialogBtn.addEventListener('click', () => appAboutDialogEl.close());
             }
         });
     </script>
