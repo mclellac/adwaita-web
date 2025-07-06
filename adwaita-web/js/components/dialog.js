@@ -19,57 +19,49 @@ class AdwDialogElement extends HTMLElement {
     // For now, let's assume global CSS handles .adw-dialog, .adw-dialog-backdrop etc.
     // For web components, it's better to adopt external stylesheets or define self-contained styles.
     // This is a simplified approach for now.
-    style.textContent = `
-      :host {
-        display: none; /* Hidden by default */
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: var(--z-index-dialog, 1050);
-        align-items: center;
-        justify-content: center;
-      }
-      :host([open]) {
-        display: flex;
-      }
-      .adw-dialog-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: var(--dialog-backdrop-color, rgba(0,0,0,0.4));
-        opacity: 0;
-        transition: opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease);
-      }
-      :host([open]) .adw-dialog-backdrop {
-        opacity: 1;
-      }
-      .adw-dialog-container {
-        /* Styles for .adw-dialog class from global CSS are expected here */
-        /* This container is what users see as the dialog box */
-        position: relative; /* For z-index stacking if needed within the host */
-        z-index: 1; /* Above backdrop within the host */
-        opacity: 0;
-        transform: scale(0.95);
-        transition: opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease),
-                    transform var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease);
-      }
-      :host([open]) .adw-dialog-container {
-        opacity: 1;
-        transform: scale(1);
-      }
-      /* Applying Adwaita styles directly inside shadow DOM can be tricky.
-         Ideally, adwaita-skin.css would define styles for adw-dialog and its parts,
-         and we would construct the light DOM to match, or adopt the stylesheet.
-         For simplicity here, we'll assume the global CSS applies if we build the
-         dialog structure in light DOM and don't use shadow DOM, OR
-         we must explicitly link/adopt the main adwaita-skin.css into the shadow DOM.
-         Let's switch to Light DOM for dialogs as they are modal and often need global CSS.
-      */
-    `;
+    // Using an array of strings joined by newlines for extreme robustness.
+    const cssLines = [
+      ':host {',
+      '  display: none; /* Hidden by default */',
+      '  position: fixed;',
+      '  top: 0;',
+      '  left: 0;',
+      '  width: 100%;',
+      '  height: 100%;',
+      '  z-index: var(--z-index-dialog, 1050);',
+      '  align-items: center;',
+      '  justify-content: center;',
+      '}',
+      ':host([open]) {',
+      '  display: flex;',
+      '}',
+      '.adw-dialog-backdrop {',
+      '  position: fixed;',
+      '  top: 0;',
+      '  left: 0;',
+      '  width: 100%;',
+      '  height: 100%;',
+      '  background-color: var(--dialog-backdrop-color, rgba(0,0,0,0.4));',
+      '  opacity: 0;',
+      '  transition: opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease);',
+      '}',
+      ':host([open]) .adw-dialog-backdrop {',
+      '  opacity: 1;',
+      '}',
+      '.adw-dialog-container {',
+      '  position: relative;',
+      '  z-index: 1;',
+      '  opacity: 0;',
+      '  transform: scale(0.95);',
+      '  transition: opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease),',
+      '              transform var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease);',
+      '}',
+      ':host([open]) .adw-dialog-container {',
+      '  opacity: 1;',
+      '  transform: scale(1);',
+      '}'
+    ];
+    style.textContent = cssLines.join('\\n');
     // Shadow DOM approach is complex for modals due to stacking and global styles.
     // Reverting to Light DOM for dialog component for easier styling with global CSS.
     // this.shadowRoot.appendChild(style);
