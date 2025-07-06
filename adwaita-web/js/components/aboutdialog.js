@@ -53,8 +53,8 @@
         vertical-align: middle;
       }
       .icon-window-close-symbolic {
-        -webkit-mask-image: url(../data/icons/symbolic/window-close-symbolic.svg);
-        mask-image: url(../data/icons/symbolic/window-close-symbolic.svg);
+        -webkit-mask-image: url(/static/data/icons/symbolic/window-close-symbolic.svg);
+        mask-image: url(/static/data/icons/symbolic/window-close-symbolic.svg);
       }
 
       .adw-dialog__content {
