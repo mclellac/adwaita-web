@@ -192,7 +192,7 @@ def update_post_relations_util(post, form_data, current_user_id, is_new_post=Fal
     """
     from flask import current_app
     from . import db # Assuming db is SQLAlchemy instance from __init__
-    from .models import Category, Tag, PostTag, PostCategory, User, Notification
+    from .models import Category, Tag, User, Notification # Removed PostTag, PostCategory
 
     # Categories
     post.categories.clear()
@@ -203,9 +203,8 @@ def update_post_relations_util(post, form_data, current_user_id, is_new_post=Fal
                 post.categories.append(category)
 
     # Tags
-    # Clear existing tags first by removing entries from the association table directly
-    # This is more robust than post.tags.clear() if cascading isn't perfectly set up
-    PostTag.query.filter_by(post_id=post.id).delete()
+    # Clear existing tags using the relationship. SQLAlchemy will handle the association table.
+    post.tags.clear()
     if form_data.get('tags_string'):
         tag_names = [name.strip() for name in form_data.get('tags_string').split(',') if name.strip()]
         for tag_name in tag_names:
