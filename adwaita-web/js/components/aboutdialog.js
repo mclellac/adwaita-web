@@ -35,6 +35,28 @@
         /* Example if more specific styling needed and global doesn't fully apply in shadow */
         /* padding: var(--spacing-xxs); */
       }
+
+      /* Ensure .adw-icon and specific icon classes apply within Shadow DOM */
+      .adw-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--icon-size-base, 16px);
+        height: var(--icon-size-base, 16px);
+        background-color: currentColor;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        vertical-align: middle;
+      }
+      .icon-window-close-symbolic {
+        -webkit-mask-image: url(../data/icons/symbolic/window-close-symbolic.svg);
+        mask-image: url(../data/icons/symbolic/window-close-symbolic.svg);
+      }
+
       .adw-dialog__content {
          padding: 0; /* Remove padding if content-wrapper handles it */
          line-height: 1.6;
