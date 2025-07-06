@@ -142,6 +142,21 @@ else
     echo "WARNING: JS components directory ${JS_COMPONENTS_SOURCE_DIR} not found."
 fi
 
+JS_UTILS_SOURCE_DIR="${JS_INPUT_DIR}/utils"
+JS_UTILS_DEST_DIR_BUILD="${BUILD_JS_DIR}/utils"
+JS_UTILS_DEST_DIR_APP_DEMO="${APP_DEMO_JS_DIR}/utils"
+if [ -d "${JS_UTILS_SOURCE_DIR}" ]; then
+    mkdir -p "${JS_UTILS_DEST_DIR_BUILD}"
+    cp -r "${JS_UTILS_SOURCE_DIR}/." "${JS_UTILS_DEST_DIR_BUILD}/"
+    echo "Copied JS utils from ${JS_UTILS_SOURCE_DIR} to ${JS_UTILS_DEST_DIR_BUILD}"
+
+    mkdir -p "${JS_UTILS_DEST_DIR_APP_DEMO}"
+    cp -r "${JS_UTILS_SOURCE_DIR}/." "${JS_UTILS_DEST_DIR_APP_DEMO}/"
+    echo "Copied JS utils from ${JS_UTILS_SOURCE_DIR} to ${JS_UTILS_DEST_DIR_APP_DEMO}"
+else
+    echo "WARNING: JS utils directory ${JS_UTILS_SOURCE_DIR} not found."
+fi
+
 # Copy data files (e.g., icons) to BUILD directory
 # This section remains as is, assuming data and fonts don't have the same issue.
 echo "--- Copying Data Files to ${BUILD_DATA_DIR} ---"
