@@ -208,10 +208,10 @@ def update_post_relations_util(post, form_data, current_user_id, is_new_post=Fal
     if form_data.tags_string.data: # Access data using .data attribute
         tag_names = [name.strip() for name in form_data.tags_string.data.split(',') if name.strip()]
         for tag_name in tag_names:
-            tag_slug = generate_slug_util(tag_name)
+            tag_slug = generate_slug_util(tag_name) # Slug is still generated for lookup
             tag = Tag.query.filter_by(slug=tag_slug).first()
             if not tag:
-                tag = Tag(name=tag_name, slug=tag_slug)
+                tag = Tag(name=tag_name) # Pass only name; slug is generated in Tag.__init__
                 db.session.add(tag)
                 # db.session.flush() # Flush to get tag.id if needed immediately, or commit later
             post.tags.append(tag) # Appending to association collection
