@@ -264,31 +264,33 @@
                         menuButton.setAttribute('aria-expanded', 'false');
                         console.log('base.html script: Popover hidden.');
                     } else {
-                        menuPopover.removeAttribute('hidden');
+                        // Temporarily simplified for diagnosing flashing issue
+                        menuPopover.removeAttribute('hidden'); // Make it available for CSS
+                        menuPopover.classList.add('open');    // Let CSS handle visibility and animation
                         menuButton.setAttribute('aria-expanded', 'true');
-                        console.log('base.html script: Popover shown.');
+                        console.log('base.html script: Popover shown (simple toggle for diagnosis).');
                         const firstFocusable = menuPopover.querySelector('[role="menuitem"]');
                         if (firstFocusable) {
-                            console.log('base.html script: Focusing first item in popover:', firstFocusable);
                             firstFocusable.focus();
                         }
                     }
                 });
                 document.addEventListener('click', (event) => {
-                    if (menuPopover && !menuPopover.hidden && menuButton && !menuButton.contains(event.target) && !menuPopover.contains(event.target)) {
-                        console.log('base.html script: Click outside popover. Closing.');
-                        menuPopover.setAttribute('hidden', '');
+                    if (menuPopover && menuPopover.classList.contains('open') && menuButton && !menuButton.contains(event.target) && !menuPopover.contains(event.target)) {
+                        console.log('base.html script: Click outside popover. Closing (simple toggle for diagnosis).');
+                        menuPopover.classList.remove('open');
                         menuButton.setAttribute('aria-expanded', 'false');
+                        // Forcing hidden attribute after transition, CSS should handle actual visibility via .open
+                        setTimeout(() => { if(!menuPopover.classList.contains('open')) menuPopover.setAttribute('hidden', ''); }, 150);
                     }
                 });
                 menuPopover.addEventListener('keydown', (event) => {
                     if (event.key === 'Escape') {
-                        console.log('base.html script: Escape key in popover. Closing.');
-                        menuPopover.setAttribute('hidden', '');
-                        if (menuButton) {
-                           menuButton.setAttribute('aria-expanded', 'false');
-                           menuButton.focus();
-                        }
+                        console.log('base.html script: Escape key in popover. Closing (simple toggle for diagnosis).');
+                        menuPopover.classList.remove('open');
+                        menuButton.setAttribute('aria-expanded', 'false');
+                        if (menuButton) menuButton.focus();
+                        setTimeout(() => { if(!menuPopover.classList.contains('open')) menuPopover.setAttribute('hidden', ''); }, 150);
                     }
                 });
             }
