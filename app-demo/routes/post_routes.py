@@ -23,11 +23,12 @@ def view_post(post_id):
     else:
         current_app.logger.debug(f"Viewing published post ID: {post_id}.")
 
-    form = CommentForm(request.form)
-    delete_comment_form = DeleteCommentForm() # For each comment, if needed in template loop
-    delete_post_form = DeletePostForm() # For the post itself
+    form = CommentForm(request.form) # This is for new comments
+    delete_comment_form = DeleteCommentForm() # For deleting comments
+    delete_post_form = DeletePostForm() # For deleting the post
+    flag_comment_form = FlagCommentForm() # For flagging comments
 
-    if request.method == 'POST' and form.validate_on_submit(): # Check for comment submission
+    if request.method == 'POST' and form.validate_on_submit(): # Check for new comment submission
         current_app.logger.debug(f"Comment form submitted for post {post_id}. Data: {request.form}")
         if not current_user.is_authenticated:
             current_app.logger.warning(f"Anonymous user tried to comment on post {post_id}.")
@@ -138,6 +139,7 @@ def view_post(post_id):
     return render_template('post.html', post=post, form=form, comments=comments,
                            delete_comment_form=delete_comment_form,
                            delete_post_form=delete_post_form,
+                           flag_comment_form=flag_comment_form, # Pass the flag_comment_form
                            related_posts=related_posts)
 
 @post_bp.route('/create', methods=['GET', 'POST'])
