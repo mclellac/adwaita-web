@@ -136,18 +136,22 @@
   // Targets .adw-dialog.adw-about-dialog
   &.adw-about-dialog {
     // Overall content wrapper for About Dialog (this is the .adw-dialog__content inside .adw-about-dialog)
-    .adw-about-dialog__content-wrapper {
+    // Note: .adw-dialog__content already provides base padding. We use a more specific wrapper if needed
+    // or override padding directly on .adw-dialog.adw-about-dialog .adw-dialog__content
+    .adw-dialog__content { // Override padding for about dialog's specific layout needs
+        padding: var(--spacing-xl); // Uniform, larger padding for About Dialog content area
+    }
+
+    .adw-about-dialog__content-wrapper { // The actual container for about dialog elements, created by JS
       display: flex;
       flex-direction: column;
-      align-items: center; // Center content like logo, app name, version
+      align-items: center;
       text-align: center;
-      gap: var(--spacing-m); // Default gap between sections
-      // Padding is on .adw-dialog-content, but we might want more specific for about
-      padding: var(--spacing-l) var(--spacing-xl) var(--spacing-xl) var(--spacing-xl); // Generous padding
+      gap: var(--spacing-m);
 
-      > section { // Direct children sections
-        width: 100%; // Sections take full width of content area
-        margin-bottom: var(--spacing-m); // Space between sections
+      > section {
+        width: 100%;
+        margin-bottom: var(--spacing-m);
         &:last-child {
           margin-bottom: 0;
         }
@@ -155,13 +159,13 @@
     }
 
     .adw-about-dialog__app-info {
-      margin-bottom: var(--spacing-l); // Larger margin after app info block
+      margin-bottom: var(--spacing-l);
     }
 
     .adw-about-dialog-logo {
       width: 64px;
       height: 64px;
-      margin-bottom: var(--spacing-m); // Space after logo
+      margin-bottom: var(--spacing-m);
       border-radius: var(--border-radius-medium);
       object-fit: cover;
     }
@@ -194,14 +198,11 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: var(--spacing-s);
-      margin-bottom: var(--spacing-l); // Space after links block
+      margin-top: var(--spacing-m); // Add margin-top to separate from comments
+      margin-bottom: var(--spacing-l);
 
       .adw-button.pill {
-        // Assuming .adw-button.pill is styled elsewhere (e.g. _button.scss)
-        // to have a pill shape (large border-radius)
-        // Example if not defined elsewhere:
-        // border-radius: var(--pill-button-border-radius, 100px);
-        // padding: var(--spacing-xs) var(--spacing-m);
+         // Assuming .adw-button.pill is styled in _button.scss
       }
     }
 
@@ -210,9 +211,9 @@
       font-weight: var(--font-weight-bold);
       margin-bottom: var(--spacing-s);
       text-align: left;
-      border-bottom: 1px solid var(--border-color); // Add a separator line
+      border-bottom: 1px solid var(--border-color);
       padding-bottom: var(--spacing-xs);
-      margin-top: var(--spacing-l); // Space before a new section title
+      margin-top: var(--spacing-l);
     }
 
     .adw-about-dialog__credits {
@@ -233,14 +234,14 @@
         li {
           font-size: var(--font-size-base);
           margin-bottom: var(--spacing-xxs);
-          color: var(--secondary-fg-color); // Dim credit names slightly
+          color: var(--secondary-fg-color);
         }
       }
     }
 
     .adw-about-dialog__translators {
       text-align: left;
-      .adw-about-dialog-credit-title { // Reuse credit title style
+      .adw-about-dialog-credit-title {
          font-size: var(--font-size-large);
          font-weight: var(--font-weight-bold);
          margin-bottom: var(--spacing-xs);
@@ -267,7 +268,7 @@
         border-radius: var(--border-radius-small);
         white-space: pre-wrap;
         overflow-x: auto;
-        max-height: 150px; // Shorter height for license text
+        max-height: 150px;
         border: 1px solid var(--border-color);
         color: var(--secondary-fg-color);
       }
@@ -296,7 +297,7 @@
       text-align: center;
     }
   }
-} // This closing brace is for .adw-dialog
+} // End of .adw-dialog
 
 .adw-dialog-backdrop {
   position: fixed;

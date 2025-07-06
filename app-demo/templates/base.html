@@ -11,8 +11,8 @@
 <body>
   <script>
     (function() {
-      const theme = "{% if current_user and current_user.is_authenticated and current_user.theme %}{{ current_user.theme }}{% else %}system{% endif %}"; // Default to system
-      const accent = "{% if current_user and current_user.is_authenticated and current_user.accent_color %}{{ current_user.accent_color }}{% else %}default{% endif %}";
+      const theme = {{ ({% if current_user and current_user.is_authenticated and current_user.theme %}"{{ current_user.theme }}"{% else %}"system"{% endif %})|tojson|safe }};
+      const accent = {{ ({% if current_user and current_user.is_authenticated and current_user.accent_color %}"{{ current_user.accent_color }}"{% else %}"default"{% endif %})|tojson|safe }};
 
       let effectiveTheme = theme;
       if (theme === 'system') {
@@ -264,53 +264,9 @@
                         menuButton.setAttribute('aria-expanded', 'false');
                         console.log('base.html script: Popover hidden.');
                     } else {
-                        // Position and show popover
-                        menuPopover.classList.remove('open'); // Ensure it's not open for remeasuring if needed
-                        menuPopover.style.visibility = 'hidden'; // Keep hidden for measurement
-                        menuPopover.removeAttribute('hidden'); // Make it part of layout for measurement
-
-                        const buttonRect = menuButton.getBoundingClientRect();
-                        const popoverRect = menuPopover.getBoundingClientRect(); // Get initial dimensions
-
-                        let top = buttonRect.bottom + 2; // Default below button, +2 for small gap
-                        let left = buttonRect.right - popoverRect.width; // Default align right edges
-
-                        // Adjust for right overflow
-                        if (buttonRect.right > window.innerWidth) { // If button itself is partly off-screen
-                            left = window.innerWidth - popoverRect.width - 5; // Position from viewport edge
-                        } else if (left + popoverRect.width > window.innerWidth - 5) { // 5px margin from edge
-                            left = window.innerWidth - popoverRect.width - 5;
-                        }
-
-                        // Adjust for left overflow
-                        if (left < 5) { // 5px margin from edge
-                            left = 5;
-                        }
-
-                        // Adjust for bottom overflow (flip to top)
-                        if (top + popoverRect.height > window.innerHeight - 5) { // 5px margin from bottom
-                            top = buttonRect.top - popoverRect.height - 2; // Position above button
-                            // If it also overflows top, it's a very constrained space.
-                            // A more complex solution would limit height and make it scrollable.
-                            // For now, just ensure it's not less than 0.
-                            if (top < 5) {
-                                top = 5;
-                                // Potentially set max-height and overflow-y: auto here if still too tall
-                                // menuPopover.style.maxHeight = (window.innerHeight - 10) + 'px';
-                                // menuPopover.style.overflowY = 'auto';
-                            }
-                        }
-
-                        menuPopover.style.top = `${top}px`;
-                        menuPopover.style.left = `${left}px`;
-                        menuPopover.style.right = 'auto'; // Ensure right is not conflicting
-                        menuPopover.style.bottom = 'auto'; // Ensure bottom is not conflicting
-
-                        menuPopover.style.visibility = ''; // Make visible again before adding .open for transition
-                        menuPopover.classList.add('open');
+                        menuPopover.removeAttribute('hidden');
                         menuButton.setAttribute('aria-expanded', 'true');
-                        console.log('base.html script: Popover shown and positioned.');
-
+                        console.log('base.html script: Popover shown.');
                         const firstFocusable = menuPopover.querySelector('[role="menuitem"]');
                         if (firstFocusable) {
                             console.log('base.html script: Focusing first item in popover:', firstFocusable);
@@ -319,22 +275,20 @@
                     }
                 });
                 document.addEventListener('click', (event) => {
-                    if (menuPopover && menuPopover.classList.contains('open') && menuButton && !menuButton.contains(event.target) && !menuPopover.contains(event.target)) {
+                    if (menuPopover && !menuPopover.hidden && menuButton && !menuButton.contains(event.target) && !menuPopover.contains(event.target)) {
                         console.log('base.html script: Click outside popover. Closing.');
-                        menuPopover.classList.remove('open');
+                        menuPopover.setAttribute('hidden', '');
                         menuButton.setAttribute('aria-expanded', 'false');
-                        // Add hidden after transition (CSS handles this with visibility)
-                        setTimeout(() => { if (!menuPopover.classList.contains('open')) menuPopover.setAttribute('hidden', ''); }, 150);
                     }
                 });
                 menuPopover.addEventListener('keydown', (event) => {
                     if (event.key === 'Escape') {
                         console.log('base.html script: Escape key in popover. Closing.');
-                        menuPopover.classList.remove('open');
-                        menuButton.setAttribute('aria-expanded', 'false');
-                        if (menuButton) menuButton.focus();
-                         setTimeout(() => { if (!menuPopover.classList.contains('open')) menuPopover.setAttribute('hidden', ''); }, 150);
-                    }
+                        menuPopover.setAttribute('hidden', '');
+                        if (menuButton) {
+                           menuButton.setAttribute('aria-expanded', 'false');
+                           menuButton.focus();
+                        }
                     }
                 });
             }
