@@ -22,13 +22,22 @@ def create_app(config_name=None):
 
     # Load configuration
     # Default to DevelopmentConfig if FLASK_ENV is not set or recognized
-    from .config import config_by_name, DevelopmentConfig, Config
+    from .config import config_by_name, DevelopmentConfig, ProductionConfig, Config # Import ProductionConfig
     if config_name:
         app_config = config_by_name.get(config_name, DevelopmentConfig)
     else:
         flask_env = os.getenv('FLASK_ENV', 'development')
         app_config = config_by_name.get(flask_env, DevelopmentConfig)
     app.config.from_object(app_config)
+
+    # Runtime check for insecure SECRET_KEY in production
+    if isinstance(app_config, ProductionConfig) and app.config.get('SECRET_KEY') == 'a_default_very_secret_key_for_development_only_CHANGE_ME':
+        # Ensure app.logger is available if this check is very early or app_config is basic object
+        # However, logger is configured a bit later. This check should be fine here.
+        app.logger.critical("SECURITY WARNING: Running in PRODUCTION mode with the DEFAULT INSECURE SECRET_KEY. "
+                            "This key MUST be changed via the FLASK_SECRET_KEY environment variable for security.")
+        # Depending on policy, you might raise an error here to halt startup:
+        # raise RuntimeError("Refusing to start in production with default secret key.")
 
     # Ensure instance folder exists for future use (e.g. SQLite DB, instance specific configs)
     try:

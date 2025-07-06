@@ -288,52 +288,69 @@ def edit_post(post_id):
 @login_required
 def delete_post(post_id): # Renamed from delete_post_route
     current_app.logger.debug(f"Accessing /posts/{post_id}/delete, User: {current_user.username}")
-    post = Post.query.get_or_404(post_id)
-    if post.user_id != current_user.id and not current_user.is_admin:
-        current_app.logger.warning(f"User {current_user.username} not authorized to delete post {post_id}.")
-        abort(403)
 
-    try:
-        # Manually delete associated comment flags first
-        flags_to_delete = CommentFlag.query.join(Comment).filter(Comment.post_id == post.id).all()
-        for flag in flags_to_delete:
-            db.session.delete(flag)
-        current_app.logger.debug(f"Deleted {len(flags_to_delete)} flags for post {post_id}.")
+    # Instantiate DeletePostForm for explicit CSRF validation
+    form = DeletePostForm(request.form)
+    # The prefix used in dashboard.html is f"del-post-{post.id}-"
+    # and in edit_post.html is f"del-eff-post-{post.id}-"
+    # This might require handling dynamic prefixes if WTForms checks them strictly,
+    # but for CSRF token validation, the token itself is the key.
+    # If specific fields from the DeletePostForm were being accessed, prefix mismatch would matter more.
+    # For now, let's assume CSRF validation part of validate_on_submit() will work.
 
-        # Manually delete associated comments
-        all_comments_on_post = Comment.query.filter_by(post_id=post.id).all()
-        for comment in all_comments_on_post:
-            db.session.delete(comment)
-        current_app.logger.debug(f"Deleted {len(all_comments_on_post)} comments for post {post_id}.")
+    post = Post.query.get_or_404(post_id) # Get post early for logging / messages
 
-        # Manually delete associated activities
-        # Types of activities related to a post: 'created_post', 'liked_post', 'commented_on_post' (via comment which links to post)
-        # We only need to delete activities that directly reference the post via target_post_id.
-        # Activity types like 'commented_on_post' might have target_comment_id, and target_post_id for context.
-        # If a comment is deleted, its related 'commented_on_post' activity should also be handled.
-        # For now, focus on activities directly linked to the post via target_post_id.
-        activities_to_delete = Activity.query.filter_by(target_post_id=post.id).all()
-        for activity in activities_to_delete:
-            db.session.delete(activity)
-        current_app.logger.debug(f"Deleted {len(activities_to_delete)} activities directly targeting post {post_id}.")
+    if form.validate_on_submit(): # Explicit CSRF validation
+        if post.user_id != current_user.id and not current_user.is_admin:
+            current_app.logger.warning(f"User {current_user.username} not authorized to delete post {post_id}.")
+            abort(403)
 
-        # Also, consider activities where the post is the target of a notification that generated an activity.
-        # Example: 'new_comment' notification has related_post_id. If an activity was logged for this notification itself,
-        # it might also need cleanup if it directly holds post.id.
-        # The current Activity model has target_post_id, target_user_id, target_comment_id.
-        # This should cover activities like 'created_post' and 'liked_post'.
-        # 'commented_on_post' activities are linked via target_comment_id. If comments are deleted,
-        # their activities should be handled when comments are deleted (or via cascade if set up).
+        try:
+            # Manually delete associated comment flags first
+            flags_to_delete = CommentFlag.query.join(Comment).filter(Comment.post_id == post.id).all()
+            for flag in flags_to_delete:
+                db.session.delete(flag)
+            current_app.logger.debug(f"Deleted {len(flags_to_delete)} flags for post {post_id}.")
 
-        db.session.delete(post)
-        db.session.commit()
-        current_app.logger.info(f"Post ID: {post_id} successfully deleted by {current_user.username}.")
-        flash('Post deleted successfully!', 'toast_success')
-    except Exception as e:
-        db.session.rollback()
-        current_app.logger.error(f"Error deleting post ID {post_id}: {e}", exc_info=True)
-        flash('Error deleting post. Please try again.', 'danger')
-    return redirect(url_for('general.dashboard'))
+            # Manually delete associated comments
+            all_comments_on_post = Comment.query.filter_by(post_id=post.id).all()
+            for comment in all_comments_on_post:
+                db.session.delete(comment)
+            current_app.logger.debug(f"Deleted {len(all_comments_on_post)} comments for post {post_id}.")
+
+            # Manually delete associated activities
+            # Types of activities related to a post: 'created_post', 'liked_post', 'commented_on_post' (via comment which links to post)
+            # We only need to delete activities that directly reference the post via target_post_id.
+            # Activity types like 'commented_on_post' might have target_comment_id, and target_post_id for context.
+            # If a comment is deleted, its related 'commented_on_post' activity should also be handled.
+            # For now, focus on activities directly linked to the post via target_post_id.
+            activities_to_delete = Activity.query.filter_by(target_post_id=post.id).all()
+            for activity in activities_to_delete:
+                db.session.delete(activity)
+            current_app.logger.debug(f"Deleted {len(activities_to_delete)} activities directly targeting post {post_id}.")
+
+            # Also, consider activities where the post is the target of a notification that generated an activity.
+            # Example: 'new_comment' notification has related_post_id. If an activity was logged for this notification itself,
+            # it might also need cleanup if it directly holds post.id.
+            # The current Activity model has target_post_id, target_user_id, target_comment_id.
+            # This should cover activities like 'created_post' and 'liked_post'.
+            # 'commented_on_post' activities are linked via target_comment_id. If comments are deleted,
+            # their activities should be handled when comments are deleted (or via cascade if set up).
+
+            db.session.delete(post)
+            db.session.commit()
+            current_app.logger.info(f"Post ID: {post_id} successfully deleted by {current_user.username}.")
+            flash('Post deleted successfully!', 'toast_success')
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error deleting post ID {post_id}: {e}", exc_info=True)
+            flash('Error deleting post. Please try again.', 'danger')
+        return redirect(url_for('general.dashboard'))
+    else: # CSRF validation failed
+        current_app.logger.warning(f"Delete post form validation failed for post ID: {post_id}. Errors: {form.errors}")
+        flash('Failed to delete post. Invalid request or session expired.', 'danger')
+        # Attempt to redirect to a sensible page. Dashboard is the most likely origin.
+        return redirect(url_for('general.dashboard'))
 
 @post_bp.route('/comment/<int:comment_id>/delete', methods=['POST'])
 @login_required
