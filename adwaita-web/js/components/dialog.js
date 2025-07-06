@@ -7,7 +7,7 @@ if (!window.Adw) {
 class AdwDialogElement extends HTMLElement {
   constructor() {
     super();
-    this._boundOnBackdropClick = this._onBackdropClick.bind(this);
+    // this._boundOnBackdropClick = this._onBackdropClick.bind(this); // Removed, DialogManager handles backdrop clicks
     this._boundOnKeydown = this._onKeydown.bind(this); // For Escape key
     this._boundHandleFocusTrap = this._handleFocusTrap.bind(this); // For focus trapping
     this.classList.add('adw-dialog'); // The host itself is the .adw-dialog
