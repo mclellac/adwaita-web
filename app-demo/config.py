@@ -8,6 +8,7 @@ class Config:
         'a_default_very_secret_key_for_development_only_CHANGE_ME'
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    WTF_CSRF_TIME_LIMIT = 14400 # 4 hours, for diagnosing "CSRF token invalid" errors
     UPLOAD_FOLDER = 'static/uploads/profile_pics' # Relative to app root (app-demo/).
                                                   # Will be made absolute in __init__.py to app-demo/static/uploads/profile_pics
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -59,9 +60,26 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     # Add any production specific settings, e.g.
-    # SECRET_KEY = os.environ.get('FLASK_SECRET_KEY') # Should be a strong random key
-    # if not SECRET_KEY or SECRET_KEY == 'a_default_very_secret_key_for_development_only_CHANGE_ME':
-    #     raise ValueError("No FLASK_SECRET_KEY set for production")
+    SECRET_KEY_FALLBACK_USED = False
+    if Config.SECRET_KEY == 'a_default_very_secret_key_for_development_only_CHANGE_ME':
+        # This check happens at class definition time.
+        # If FLASK_SECRET_KEY is set in the environment, Config.SECRET_KEY would be that value.
+        # So, if it's still the default, it means FLASK_SECRET_KEY was NOT set or was set to the default.
+        # We can't easily log here directly at class definition without a logger instance.
+        # A better place might be in create_app when ProductionConfig is chosen.
+        # For now, let's set a flag that create_app can check.
+        SECRET_KEY_FALLBACK_USED = True
+        # Or, simply override it if FLASK_SECRET_KEY is not set,
+        # but that might hide the issue if FLASK_SECRET_KEY itself is set to the default.
+        # The current Config.SECRET_KEY already reflects the env var or fallback.
+        # So the check `Config.SECRET_KEY == '...'` is correct.
+
+    # The following is more of a runtime check if we want to raise an error,
+    # but it should be done when the config is loaded by the app.
+    # if not os.environ.get('FLASK_SECRET_KEY') or os.environ.get('FLASK_SECRET_KEY') == 'a_default_very_secret_key_for_development_only_CHANGE_ME':
+    #     # This implies the environment variable itself is missing or insecure.
+    #     # Better to check app.config['SECRET_KEY'] after it's loaded.
+    #     pass # See __init__.py for a runtime check
 
 # Dictionary to access configs by name
 config_by_name = {
