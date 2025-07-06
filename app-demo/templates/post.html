@@ -110,10 +110,10 @@
              <h2 class="adw-header-bar__title">Confirm Deletion</h2>
             </header>
         #}
-        <div slot="content">
+        <div slot="content" class="adw-dialog-content">
                 <p class="adw-label body">Are you sure you want to delete this post? This action cannot be undone.</p>
             </div>
-        <div slot="buttons" class="adw-dialog__actions-buttons-container"> {# Added a wrapper for consistent styling if needed #}
+        <div slot="buttons" class="adw-dialog__actions-buttons-container">
                 <button id="cancel-delete-btn" class="adw-button flat">Cancel</button>
                 <form method="POST" action="{{ url_for('post.delete_post', post_id=post.id) }}" id="delete-post-form" class="delete-post-form-inline">
                     {{ delete_post_form.hidden_tag() }} {# Use form instance for CSRF #}
@@ -250,7 +250,7 @@
 
     {# Dialog for confirming comment deletion - now using <adw-dialog> #}
     <adw-dialog id="delete-comment-confirm-dialog" title="Confirm Comment Deletion">
-        <div slot="content">
+        <div slot="content" class="adw-dialog-content">
             <p class="adw-label body">Are you sure you want to delete this comment? This action cannot be undone.</p>
         </div>
         <div slot="buttons" class="adw-dialog__actions-buttons-container">
