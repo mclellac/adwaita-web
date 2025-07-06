@@ -353,8 +353,18 @@ def delete_comment(comment_id): # Renamed
             current_app.logger.warning(f"User {current_user.username} not authorized to delete comment {comment_id}.")
             abort(403)
         try:
-            # Manually delete flags associated with this comment first
-            CommentFlag.query.filter_by(comment_id=comment.id).delete()
+            # Manually delete flags associated with this comment
+            CommentFlag.query.filter_by(comment_id=comment.id).delete(synchronize_session=False)
+            current_app.logger.debug(f"Deleted flags for comment ID: {comment_id}.")
+
+            # Manually delete notifications associated with this comment
+            Notification.query.filter_by(related_comment_id=comment.id).delete(synchronize_session=False)
+            current_app.logger.debug(f"Deleted notifications for comment ID: {comment_id}.")
+
+            # Manually delete activities associated with this comment
+            Activity.query.filter_by(target_comment_id=comment.id).delete(synchronize_session=False)
+            current_app.logger.debug(f"Deleted activities for comment ID: {comment_id}.")
+
             db.session.delete(comment)
             db.session.commit()
             flash('Comment deleted.', 'toast_success')
