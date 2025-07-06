@@ -33,5 +33,10 @@ This repository contains two main projects:
     *   Styling compositions of `adwaita-web` widgets that are unique to `app-demo`.
     *   Minor, one-off presentational tweaks for `app-demo` that do not represent a change to the core widget's default behavior.
     *   It should **not** be used for globally overriding the base styles of core `adwaita-web` widgets.
+*   **CSS and JavaScript Interaction**:
+    *   Avoid direct manipulation of CSS styles (e.g., `element.style.property = 'value'`) from JavaScript for UI/UX, animations, or core styling.
+    *   All fundamental UI/UX appearances, animations, and styles should be defined in the Adwaita-Web UI SCSS files (`adwaita-web/scss/`).
+    *   JavaScript should primarily interact with styles by toggling classes, setting attributes (which CSS can select on), or using CSS Custom Properties.
+    *   For web components with Shadow DOM, if internal styles need access to asset paths (like icons), prefer using CSS Custom Properties defined in global SCSS to pass these paths rather than hardcoding them in JS or inline styles within the component.
 
 Please consult the respective `AGENTS.md` files in each subdirectory for more detailed, context-specific instructions.
