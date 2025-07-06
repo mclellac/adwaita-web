@@ -105,12 +105,20 @@ class AdwDialogElement extends HTMLElement {
 
   _updateTitle(newTitle) {
     console.log(`AdwDialogElement: ${this.id || 'N/A'} _updateTitle with: ${newTitle}`);
-    let titleEl = this.querySelector('.adw-dialog__header .adw-header-bar__title');
-    if (titleEl) {
-      titleEl.textContent = newTitle || '';
-      console.log(`AdwDialogElement: ${this.id || 'N/A'} title updated to: ${titleEl.textContent}`);
+    // Only try to update DOM if connected.
+    // The actual title value is stored by setAttribute, and connectedCallback will call _updateTitle again.
+    if (this.isConnected) {
+      let titleEl = this.querySelector('.adw-dialog__header .adw-header-bar__title');
+      if (titleEl) {
+        titleEl.textContent = newTitle || '';
+        console.log(`AdwDialogElement: ${this.id || 'N/A'} title updated to: ${titleEl.textContent}`);
+      } else {
+        // This warning can still occur if a user provides a custom header without .adw-header-bar__title,
+        // or if connectedCallback hasn't fully completed its setup of the default header yet (less likely).
+        console.log(`AdwDialogElement: ${this.id || 'N/A'} title element (.adw-dialog__header .adw-header-bar__title) not found during _updateTitle. If this is pre-connection or using a custom header, this might be expected. Title will be applied by connectedCallback if default header is used.`);
+      }
     } else {
-      console.warn(`AdwDialogElement: ${this.id || 'N/A'} title element not found in header.`);
+        console.log(`AdwDialogElement: ${this.id || 'N/A'} _updateTitle called but element not connected. Title attribute is set ('${newTitle}'). DOM update will be handled by connectedCallback.`);
     }
   }
 
