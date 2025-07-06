@@ -62,7 +62,10 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('app-layout.js: Waiting for adw-dialog custom element to be defined...');
     customElements.whenDefined('adw-dialog').then(() => {
         appLayoutWhenDefinedResolvedCount++;
-        console.log(`app-layout.js: adw-dialog is defined. Initializing dialog handlers (call #${appLayoutWhenDefinedResolvedCount}).`);
+        console.log(`app-layout.js: adw-dialog is defined. Call #${appLayoutWhenDefinedResolvedCount}. Dialog init TEMPORARILY COMMENTED OUT for diagnosing flashing.`);
+
+        /*
+        // --- Temporarily Commented Out for Flashing Diagnosis ---
 
         // Post Deletion Dialog (from post.html)
         const deletePostDialogEl = document.getElementById('delete-confirm-dialog');
@@ -148,8 +151,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         }
-        console.log('app-layout.js: All dialog handlers initialized.');
+        console.log('app-layout.js: All dialog handlers initialized (commented out section).');
+
+        // --- End of Temporarily Commented Out Block ---
+        */
+
     }).catch(error => {
-        console.error("app-layout.js: Failed to initialize dialogs; adw-dialog definition not found or other error.", error);
+        console.error("app-layout.js: Failed to initialize dialogs (potentially); adw-dialog definition not found or other error.", error);
     });
 });
