@@ -139,3 +139,111 @@ def flash_form_errors_util(form):
         for error in errors:
             field_label = getattr(form, field).label.text if hasattr(getattr(form, field), 'label') else field
             flash(f"Error in {field_label}: {error}", 'danger')
+
+# Configuration for HTML sanitization (e.g., for Bleach)
+# These are example lists; a real application would have more comprehensive ones.
+ALLOWED_TAGS_CONFIG = [
+    'p', 'br', 'strong', 'em', 'b', 'i', 'u', 's', 'strike', 'del',
+    'ul', 'ol', 'li',
+    'a', 'img',
+    'pre', 'code', 'blockquote',
+    'hr',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'table', 'thead', 'tbody', 'tr', 'th', 'td', 'caption',
+    'figure', 'figcaption',
+    'span', 'div', # Allow span and div for flexible styling if content is trusted or further filtered
+    # SVG tags might be needed if allowing SVG uploads and inline display
+]
+
+ALLOWED_ATTRIBUTES_CONFIG = {
+    '*': ['class', 'id', 'style'],  # Allow class, id, style on any allowed tag (style should be used with caution)
+    'a': ['href', 'title', 'target', 'rel'],
+    'img': ['src', 'alt', 'title', 'width', 'height'],
+    'table': ['summary'],
+    'td': ['colspan', 'rowspan', 'align', 'valign'],
+    'th': ['colspan', 'rowspan', 'align', 'valign', 'scope'],
+    # Add specific attributes for other tags as needed
+}
+
+def allowed_file_util(filename):
+    """Checks if the filename has an allowed extension."""
+    from flask import current_app
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
+
+def extract_mentions(text):
+    """
+    Extracts @username mentions from text.
+    Returns a list of unique usernames without the '@'.
+    """
+    if not text:
+        return []
+    # Regex to find @username patterns (alphanumeric and underscores)
+    mention_regex = r'@([a-zA-Z0-9_]+)'
+    mentions = re.findall(mention_regex, text)
+    return list(set(mentions)) # Return unique mentions
+
+def update_post_relations_util(post, form_data, current_user_id, is_new_post=False):
+    """
+    Updates post relationships like categories, tags, and mentions.
+    This is a placeholder and will need access to models and db.session.
+    It's better if this logic resides within the Post model or a service layer.
+    For now, providing a structure.
+    """
+    from flask import current_app
+    from . import db # Assuming db is SQLAlchemy instance from __init__
+    from .models import Category, Tag, PostTag, PostCategory, User, Notification
+
+    # Categories
+    post.categories.clear()
+    if form_data.get('categories'): # Assuming categories is a list of category IDs from the form
+        for cat_id in form_data.get('categories'):
+            category = db.session.get(Category, int(cat_id))
+            if category:
+                post.categories.append(category)
+
+    # Tags
+    # Clear existing tags first by removing entries from the association table directly
+    # This is more robust than post.tags.clear() if cascading isn't perfectly set up
+    PostTag.query.filter_by(post_id=post.id).delete()
+    if form_data.get('tags_string'):
+        tag_names = [name.strip() for name in form_data.get('tags_string').split(',') if name.strip()]
+        for tag_name in tag_names:
+            tag_slug = generate_slug_util(tag_name)
+            tag = Tag.query.filter_by(slug=tag_slug).first()
+            if not tag:
+                tag = Tag(name=tag_name, slug=tag_slug)
+                db.session.add(tag)
+                # db.session.flush() # Flush to get tag.id if needed immediately, or commit later
+            post.tags.append(tag) # Appending to association collection
+
+    # Mentions (simplified: assumes extract_mentions is already called and usernames are passed)
+    # This part is highly dependent on how mentions are handled (e.g., in form_data or extracted from content)
+    # Let's assume form_data might contain an explicit list of mentioned usernames,
+    # or we re-extract from post.content. For now, re-extracting from content.
+
+    mentioned_usernames = extract_mentions(post.content)
+    if mentioned_usernames:
+        for username in mentioned_usernames:
+            mentioned_user = User.query.filter_by(username=username).first()
+            if mentioned_user and mentioned_user.id != current_user_id:
+                # Check if a notification already exists for this post and user to avoid duplicates
+                existing_notification = Notification.query.filter_by(
+                    user_id=mentioned_user.id,
+                    related_post_id=post.id,
+                    type='mention_in_post' # Or a more general mention type
+                ).first()
+
+                if not existing_notification:
+                    notification = Notification(
+                        user_id=mentioned_user.id,
+                        actor_id=current_user_id,
+                        type='mention_in_post', # Be specific if possible
+                        related_post_id=post.id
+                        # related_comment_id could be added if mentions in comments are handled here too
+                    )
+                    db.session.add(notification)
+
+    # Note: db.session.commit() should be handled by the calling route function
+    # after all updates are done. This utility should not commit itself.
+    return post
