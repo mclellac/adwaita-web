@@ -11,7 +11,7 @@
             {# Title h1 removed #}
             <div class="post-meta-detail">
                 <p class="adw-label body">
-                    By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>
+                    By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>&nbsp;
                     {%- if post.published_at -%}
                         on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at | human_readable_date }}</time>
                     {%- else -%} {# Should not happen for new posts, fallback for old data or if published_at was somehow not set #}
