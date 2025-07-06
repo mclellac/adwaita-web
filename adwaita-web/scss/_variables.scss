@@ -396,9 +396,8 @@ $accent-definitions: (
   --pill-button-border-radius: 100px;
 
   // Icon URLs (as CSS Custom Properties)
-  // Base path for icons, relative to the final CSS file (app-demo/static/css/)
-  $_icon-base-path-for-vars: '../data/icons/symbolic/';
-  --icon-window-close-symbolic-url: url(#{$_icon-base-path-for-vars}window-close-symbolic.svg);
+  // Path must be root-relative for use in JS component Shadow DOM styles if var is passed through.
+  --icon-window-close-symbolic-url: url('/static/data/icons/symbolic/window-close-symbolic.svg');
   // Add other frequently used icon URLs here if components need them directly via CSS vars
 
 
