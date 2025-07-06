@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (backdrop && sidebar) {
         backdrop.addEventListener('click', function () {
             sidebar.classList.remove('sidebar-open');
-            // Ensure sidebarToggle is defined before using it
             if (sidebarToggle) {
                 sidebarToggle.setAttribute('aria-expanded', 'false');
             }
@@ -24,20 +23,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Optional: Close sidebar when a nav link is clicked (if sidebar contains direct links)
     if (sidebar) {
         const sidebarLinks = sidebar.querySelectorAll('.sidebar-nav a.adw-action-row');
         sidebarLinks.forEach(link => {
             link.addEventListener('click', function() {
-                // Only close if sidebar is in overlay mode (i.e., sidebar-open class would be present)
-                // And if the click is not on something that opens a submenu (not applicable here yet)
-                if (sidebar.classList.contains('sidebar-open')) { // Check if it's in overlay mode
-                   if (window.innerWidth < 768) { // Match the SCSS breakpoint (consider making this a JS var or data-attr)
+                if (sidebar.classList.contains('sidebar-open')) {
+                   if (window.innerWidth < 768) {
                         sidebar.classList.remove('sidebar-open');
-                        if (sidebarToggle) { // Ensure sidebarToggle is defined
+                        if (sidebarToggle) {
                             sidebarToggle.setAttribute('aria-expanded', 'false');
                         }
-                        if (backdrop) { // Ensure backdrop is defined
+                        if (backdrop) {
                             backdrop.classList.remove('active');
                         }
                    }
@@ -46,33 +42,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Active state for sidebar navigation links
     const currentPath = window.location.pathname;
     const sidebarNav = document.querySelector('.app-sidebar .sidebar-nav');
-
     if (sidebarNav) {
         const navLinks = sidebarNav.querySelectorAll('a.adw-action-row');
         let bestMatch = null;
         let longestMatchLength = 0;
 
         navLinks.forEach(link => {
-            link.classList.remove('active'); // Clear any existing active states
+            link.classList.remove('active');
             const linkPath = new URL(link.href).pathname;
-
-            // Exact match or if current path starts with link path (for parent section highlighting)
             if (currentPath === linkPath) {
-                // Exact match is highest priority
                 bestMatch = link;
-                longestMatchLength = linkPath.length + 1000; // Prioritize exact match heavily
-            } else if (currentPath.startsWith(linkPath) && linkPath !== '/') { // Avoid '/' matching everything
-                 // Check if this is a better parent match than previous
+                longestMatchLength = linkPath.length + 1000;
+            } else if (currentPath.startsWith(linkPath) && linkPath !== '/') {
                 if (linkPath.length > longestMatchLength) {
                     bestMatch = link;
                     longestMatchLength = linkPath.length;
                 }
             } else if (linkPath === '/' && currentPath.startsWith('/index')) {
-                // Special case: if link is '/' and current path is effectively home (e.g. /index or /index.html)
-                // This might need adjustment based on actual Flask routing for index
                 if (linkPath.length > longestMatchLength) {
                     bestMatch = link;
                     longestMatchLength = linkPath.length;
@@ -83,15 +71,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (bestMatch) {
             bestMatch.classList.add('active');
         } else {
-            // Fallback: if no other match, and there's a plain "/" link (Home), make it active if on homepage.
-            // This logic might be redundant if currentPath === '/' already handled it.
-            // Check specific case for index.html or default route.
-            // The Flask url_for('index') usually generates just '/', so currentPath === linkPath should handle it.
-            // If Flask index is e.g. /index.html, the startsWith logic might be more complex.
-            // For now, rely on exact match or startsWith for typical Flask routing.
-            // If on true root "/" and no other match, find the home link specifically.
             if (currentPath === '/') {
-                const homeLink = sidebarNav.querySelector('a[href="/"]'); // Assuming home link href is exactly "/"
+                const homeLink = sidebarNav.querySelector('a[href="/"]');
                 if (homeLink) {
                     homeLink.classList.add('active');
                 }
@@ -100,141 +81,102 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --- Dialog Handlers ---
+    // Ensure adw-dialog custom element is defined before interacting with dialogs
+    customElements.whenDefined('adw-dialog').then(() => {
+        // Post Deletion Dialog (from post.html)
+        const deletePostDialogEl = document.getElementById('delete-confirm-dialog');
+        const openDeletePostDialogBtn = document.getElementById('open-delete-dialog-btn');
+        // The cancel button inside this specific dialog is #cancel-delete-btn
+        // The confirm button is type="submit" in a form, so it's handled by form submission.
+        // We only need to handle opening and the explicit cancel button.
 
-    // Post Deletion Dialog (from post.html)
-    const deletePostDialogEl = document.getElementById('delete-confirm-dialog');
-    const openDeletePostDialogBtn = document.getElementById('open-delete-dialog-btn');
-    const cancelDeletePostBtn = deletePostDialogEl ? deletePostDialogEl.querySelector('#cancel-delete-btn') : null;
-    // Note: The confirm button is type="submit" within a form, so direct JS handling for submission isn't strictly needed here.
-    // Dialog opening/closing is the main concern.
-
-    if (openDeletePostDialogBtn && deletePostDialogEl) {
-        openDeletePostDialogBtn.addEventListener('click', (event) => {
-            event.preventDefault();
-            if (typeof deletePostDialogEl.open === 'function') {
-                deletePostDialogEl.open();
-            } else {
-                console.warn('deletePostDialogEl.open() is not a function. Ensure <adw-dialog> is correctly defined and registered.');
-            }
-        });
-    }
-
-    if (cancelDeletePostBtn && deletePostDialogEl) {
-        cancelDeletePostBtn.addEventListener('click', () => {
-            if (typeof deletePostDialogEl.close === 'function') {
-                deletePostDialogEl.close();
-            }
-        });
-    }
-    // If deletePostDialogEl itself is an <adw-dialog>, it should handle ESC key to close.
-
-    // Comment Deletion Dialogs (from post.html, using template)
-    const commentDeleteDialogTemplate = document.getElementById('delete-comment-dialog-template');
-    if (commentDeleteDialogTemplate) { // Check if template exists before adding listeners
-        document.querySelectorAll('.open-delete-comment-dialog-btn').forEach(button => {
-            button.addEventListener('click', function(event) {
+        if (openDeletePostDialogBtn && deletePostDialogEl) {
+            openDeletePostDialogBtn.addEventListener('click', (event) => {
                 event.preventDefault();
-                const commentId = this.dataset.commentId;
-                const formToSubmit = document.querySelector(`.delete-comment-form[data-comment-id="${commentId}"]`);
+                deletePostDialogEl.open();
+            });
+        }
+        // The 'cancel-delete-btn' is inside the <adw-dialog id="delete-confirm-dialog">
+        // Its click should make the dialog close itself if it's set up correctly.
+        // AdwDialogElement should handle its own internal cancel buttons if they are simple (e.g. close on click).
+        // Or, if the button has a specific ID and needs to be handled by this global script:
+        const cancelDeletePostBtn = deletePostDialogEl ? deletePostDialogEl.querySelector('#cancel-delete-btn') : null;
+        if (cancelDeletePostBtn && deletePostDialogEl) {
+            cancelDeletePostBtn.addEventListener('click', () => {
+                deletePostDialogEl.close();
+            });
+        }
 
-                if (!formToSubmit) {
-                    console.error('Could not find delete form for comment ID:', commentId);
-                    return;
-                }
 
-                const dialogClone = commentDeleteDialogTemplate.content.firstElementChild.cloneNode(true);
-                document.body.appendChild(dialogClone); // Append to body to ensure it's interactable and visible over everything
+        // Comment Deletion Dialog (from post.html, uses #delete-comment-confirm-dialog which is a single dialog instance)
+        // This dialog is re-used; its form action is updated dynamically.
+        const deleteCommentDialogEl = document.getElementById('delete-comment-confirm-dialog');
+        const confirmDeleteCommentFormActual = document.getElementById('confirm-delete-comment-form-actual'); // The form inside the dialog
 
-                const cancelBtnClone = dialogClone.querySelector('.dialog-cancel-btn');
-                const confirmBtnClone = dialogClone.querySelector('.dialog-confirm-delete-comment-btn');
+        if (deleteCommentDialogEl) { // Check if the main dialog exists
+            document.querySelectorAll('.comment-delete-button').forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const formId = this.dataset.formId; // e.g., delete-comment-form-{{comment.id}}
+                    const originalForm = document.getElementById(formId); // The small form next to each comment
 
-                if (cancelBtnClone) {
-                    cancelBtnClone.addEventListener('click', () => {
-                        if (typeof dialogClone.close === 'function') dialogClone.close();
-                        // dialogClone.remove(); // Handled by 'close' event listener on dialogClone
-                    });
-                }
-                if (confirmBtnClone) {
-                    confirmBtnClone.addEventListener('click', () => {
-                        formToSubmit.submit();
-                        if (typeof dialogClone.close === 'function') dialogClone.close();
-                        // dialogClone.remove(); // Handled by 'close' event listener on dialogClone
-                    });
-                }
-
-                // Ensure dialog is removed from DOM after it's closed (e.g., by ESC key or programmatically)
-                dialogClone.addEventListener('close', () => {
-                     if (dialogClone.parentElement) {
-                        dialogClone.remove();
+                    if (originalForm && confirmDeleteCommentFormActual) {
+                        // Set the action for the dialog's form from the per-comment hidden form
+                        confirmDeleteCommentFormActual.action = originalForm.action;
+                        deleteCommentDialogEl.open();
+                    } else {
+                        console.error('Could not find original form or dialog form for comment deletion.');
                     }
-                }, { once: true });
+                });
+            });
 
-                if (typeof dialogClone.open === 'function') {
-                    dialogClone.open();
+            const cancelBtnClone = deleteCommentDialogEl.querySelector('#cancel-comment-delete-btn'); // ID of cancel button in this dialog
+            if (cancelBtnClone) {
+                cancelBtnClone.addEventListener('click', () => {
+                    deleteCommentDialogEl.close();
+                });
+            }
+            // The confirm button is a submit button for 'confirm-delete-comment-form-actual'.
+            // No special JS needed for its click if it submits the form, dialog will close on navigation/page update.
+            // If we need to close it manually after AJAX submit, that would be added here.
+        }
+
+
+        // Post Deletion Dialog (from edit_post.html)
+        const editDeletePostDialogEl = document.getElementById('edit-delete-post-confirm-dialog');
+        const openEditDeletePostDialogBtn = document.getElementById('open-edit-delete-post-dialog-btn');
+        const cancelEditDeletePostBtn = editDeletePostDialogEl ? editDeletePostDialogEl.querySelector('#cancel-edit-delete-post-btn') : null;
+        const confirmEditDeletePostBtn = editDeletePostDialogEl ? editDeletePostDialogEl.querySelector('#confirm-edit-delete-post-btn') : null;
+
+        if (openEditDeletePostDialogBtn && editDeletePostDialogEl) {
+            openEditDeletePostDialogBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                editDeletePostDialogEl.open();
+            });
+        }
+
+        if (cancelEditDeletePostBtn && editDeletePostDialogEl) {
+            cancelEditDeletePostBtn.addEventListener('click', () => {
+                editDeletePostDialogEl.close();
+            });
+        }
+
+        if (confirmEditDeletePostBtn && editDeletePostDialogEl) {
+            confirmEditDeletePostBtn.addEventListener('click', () => {
+                // The form ID is 'delete-post-form-{{ post.id }}' but post.id is not known here.
+                // Assuming there's only one form matching 'form[id^="delete-post-form-"]' on edit_post.html page
+                const deleteForm = document.querySelector('form[id^="delete-post-form-"]');
+                if (deleteForm) {
+                    deleteForm.submit();
+                    // Dialog will close on page navigation or can be closed manually if submission is AJAX
+                    // editDeletePostDialogEl.close();
                 } else {
-                    console.warn('Cloned comment delete dialog .open() is not a function.');
-                    dialogClone.remove(); // Clean up if it can't be opened
+                    console.error('Could not find the delete form for edit_post.html dialog.');
+                    editDeletePostDialogEl.close(); // Close dialog if form not found to prevent being stuck
                 }
             });
-        });
-    }
-
-
-    // Post Deletion Dialog (from edit_post.html)
-    const editDeletePostDialogEl = document.getElementById('edit-delete-post-confirm-dialog');
-    const openEditDeletePostDialogBtn = document.getElementById('open-edit-delete-post-dialog-btn');
-    const cancelEditDeletePostBtn = editDeletePostDialogEl ? editDeletePostDialogEl.querySelector('#cancel-edit-delete-post-btn') : null;
-    const confirmEditDeletePostBtn = editDeletePostDialogEl ? editDeletePostDialogEl.querySelector('#confirm-edit-delete-post-btn') : null;
-    // The form ID is dynamic based on post.id, so we need to handle this carefully if we want to get it here.
-    // However, the form ID is `delete-post-form-{{ post.id }}`.
-    // This script is global, so it can't directly use Jinja.
-    // The logic below assumes the form is findable if the dialog is present.
-
-    if (openEditDeletePostDialogBtn && editDeletePostDialogEl) {
-        openEditDeletePostDialogBtn.addEventListener('click', (event) => {
-            event.preventDefault();
-            if (typeof editDeletePostDialogEl.open === 'function') {
-                editDeletePostDialogEl.open();
-            } else {
-                console.warn('editDeletePostDialogEl.open() is not a function.');
-            }
-        });
-    }
-
-    if (cancelEditDeletePostBtn && editDeletePostDialogEl) {
-        cancelEditDeletePostBtn.addEventListener('click', () => {
-            if (typeof editDeletePostDialogEl.close === 'function') {
-                editDeletePostDialogEl.close();
-            }
-        });
-    }
-
-    if (confirmEditDeletePostBtn && editDeletePostDialogEl) {
-        confirmEditDeletePostBtn.addEventListener('click', () => {
-            // Try to find the form associated with this dialog.
-            // This assumes the form is somewhat uniquely identifiable if multiple delete forms could exist on admin pages.
-            // For edit_post.html, there's only one such form.
-            // The form ID is 'delete-post-form-{{ post.id }}'. We need to extract post.id if possible or find a more robust way.
-            // A simple way for edit_post page: assume the first form with 'delete-post-form-' in its ID.
-            // This is brittle. A better way would be to add a data-form-id to the dialog trigger or dialog itself.
-            // For now, let's assume there's a unique enough form ID on the page or use a class.
-            // The form was: <form method="POST" action="..." id="delete-post-form-{{ post.id }}" style="display: none;">
-            // Let's assume the ID of the open button can give us a hint or the form is globally unique enough with a generic ID.
-            // Given the template structure, `delete-post-form-{{ post.id }}` is specific.
-            // We can find the post ID from the URL if necessary, or rely on a fixed part of the ID if only one such form is on the page.
-            // The trigger button is `open-edit-delete-post-dialog-btn`. The form is `delete-post-form-${postId}`.
-            // This is tricky without passing the post ID to the global JS.
-            // A quick fix for edit_post.html assuming only one such form:
-            const deleteForm = document.querySelector('form[id^="delete-post-form-"]');
-            if (deleteForm) {
-                deleteForm.submit();
-            } else {
-                console.error('Could not find the delete form for edit_post.html dialog.');
-            }
-            if (typeof editDeletePostDialogEl.close === 'function') {
-                editDeletePostDialogEl.close();
-            }
-        });
-    }
-    // editDeletePostDialogEl should also handle ESC to close.
+        }
+    }).catch(error => {
+        console.error("Failed to initialize dialogs; adw-dialog definition not found.", error);
+    });
 });

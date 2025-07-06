@@ -80,21 +80,16 @@
     <form method="POST" action="{{ url_for('post.delete_post', post_id=post.id) }}" id="delete-post-form-{{ post.id }}" class="delete-post-form-inline" style="display: none;">
         {{ delete_form.hidden_tag() }}
     </form>
-    <div class="adw-dialog" id="edit-delete-post-confirm-dialog" role="alertdialog" aria-labelledby="delete-dialog-title-{{post.id}}" aria-modal="true" hidden>
-        <div class="adw-dialog-header">
-            <h3 class="adw-dialog-title" id="delete-dialog-title-{{post.id}}">Confirm Deletion</h3>
-            <button class="adw-button circular flat adw-dialog-close-button" aria-label="Close dialog">
-                <span class="adw-icon icon-actions-close-symbolic"></span>
-            </button>
-        </div>
-        <div class="adw-dialog-content">
+    <adw-dialog id="edit-delete-post-confirm-dialog" title="Confirm Deletion">
+        <div slot="content">
             <p class="adw-label body">Are you sure you want to permanently delete this post titled "<strong>{{ post.title|escape }}</strong>"? This action cannot be undone.</p>
         </div>
-        <div class="adw-dialog-footer">
-            <button id="cancel-dialog-delete-post-btn" class="adw-button flat">Cancel</button>
-            <button id="confirm-dialog-delete-post-btn" class="adw-button destructive-action">Delete</button>
+        <div slot="buttons" class="adw-dialog__actions-buttons-container">
+            {# Button IDs used by app-layout.js #}
+            <button id="cancel-edit-delete-post-btn" class="adw-button flat">Cancel</button>
+            <button id="confirm-edit-delete-post-btn" class="adw-button destructive-action">Delete</button>
         </div>
-    </div>
+    </adw-dialog>
     {% endif %}
 </div>
 {% endblock %}
@@ -103,61 +98,11 @@
 {{ super() }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Dialog logic
-    const openDialogBtn = document.getElementById('open-edit-delete-post-dialog-btn');
-    const dialog = document.getElementById('edit-delete-post-confirm-dialog');
-    const cancelDialogBtn = document.getElementById('cancel-dialog-delete-post-btn');
-    const confirmDialogBtn = document.getElementById('confirm-dialog-delete-post-btn');
-    const deleteForm = document.getElementById('delete-post-form-{{ post.id }}');
-    const closeDialogBtn = dialog ? dialog.querySelector('.adw-dialog-close-button') : null;
-
-    function showDialog(d) {
-        if (d) {
-            d.removeAttribute('hidden');
-            const firstFocusable = d.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            if (firstFocusable) {
-                firstFocusable.focus();
-            }
-        }
-    }
-
-    function hideDialog(d) {
-        if (d) {
-            d.setAttribute('hidden', '');
-        }
-    }
-
-    if (openDialogBtn && dialog) {
-        openDialogBtn.addEventListener('click', () => showDialog(dialog));
-    }
-    if (cancelDialogBtn && dialog) {
-        cancelDialogBtn.addEventListener('click', () => hideDialog(dialog));
-    }
-    if (closeDialogBtn && dialog) {
-        closeDialogBtn.addEventListener('click', () => hideDialog(dialog));
-    }
-    if (confirmDialogBtn && deleteForm && dialog) {
-        confirmDialogBtn.addEventListener('click', () => {
-            // Optionally show spinner on dialog confirm button too
-            confirmDialogBtn.disabled = true;
-            // Could add a spinner inside the dialog button if desired
-            deleteForm.submit();
-            // No need to hide dialog, page will reload or navigate
-        });
-    }
-    if (dialog) {
-        dialog.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                hideDialog(dialog);
-            }
-        });
-    }
-
-    // Form submission spinner logic
-    const form = document.querySelector('form.stacked-form[method="POST"]'); // More specific form selector
+    // Form submission spinner logic for the main edit form
+    const form = document.querySelector('form.stacked-form[method="POST"]'); // More specific form selector for the main edit form
     const submitButton = document.getElementById('submit-button');
     const cancelEditButton = document.getElementById('cancel-edit-button');
-    // const deletePostButton = openDialogBtn; // Already defined and handled by dialog logic or page navigation
+    const openDialogBtn = document.getElementById('open-edit-delete-post-dialog-btn'); // Keep this for disabling logic
 
     const actionsContainer = document.getElementById('edit-post-form-actions');
     let spinner;
@@ -170,13 +115,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Disable all action buttons on form submission
             submitButton.disabled = true;
             if (cancelEditButton) cancelEditButton.style.pointerEvents = 'none'; // Disable link behavior
-            if (openDialogBtn) openDialogBtn.disabled = true;
+            if (openDialogBtn) openDialogBtn.disabled = true; // Disable delete button during main form submission
 
             if (spinner) {
                 spinner.setAttribute('active', 'true');
             }
         });
     }
+    // Dialog specific logic is now handled by app-layout.js
 });
 </script>
 {% endblock %}
