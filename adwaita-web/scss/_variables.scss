@@ -198,9 +198,9 @@ $accent-definitions: (
   --list-separator-color: #{rgba($adw-dark-5, 0.1)};
 
   // Fonts (Libadwaita names)
-  --document-font-family: 'AdwaitaSansWeb', 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --document-font-family: 'Adwaita Sans', 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --document-font-size: #{$font-size-base-val};
-  --monospace-font-family: 'AdwaitaMonoWeb', 'Monaco', 'Menlo', 'Courier New', monospace;
+  --monospace-font-family: 'Adwaita Mono', 'Monaco', 'Menlo', 'Courier New', monospace;
   --monospace-font-size: #{$font-size-base-val};
 
   // Helper Variables
