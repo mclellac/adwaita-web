@@ -81,7 +81,7 @@
         {{ delete_form.hidden_tag() }}
     </form>
     <adw-dialog id="edit-delete-post-confirm-dialog" title="Confirm Deletion">
-        <div slot="content" class="adw-dialog-content">
+        <div slot="content">
             <p class="adw-label body">Are you sure you want to permanently delete this post titled "<strong>{{ post.title|escape }}</strong>"? This action cannot be undone.</p>
         </div>
         <div slot="buttons" class="adw-dialog__actions-buttons-container">
