@@ -11,8 +11,8 @@
 <body>
   <script>
     (function() {
-      const theme = "{% if current_user and current_user.is_authenticated and current_user.theme %}{{ current_user.theme }}{% else %}system{% endif %}"; // Default to system
-      const accent = "{% if current_user and current_user.is_authenticated and current_user.accent_color %}{{ current_user.accent_color }}{% else %}default{% endif %}";
+      const theme = {{ ({% if current_user and current_user.is_authenticated and current_user.theme %}"{{ current_user.theme }}"{% else %}"system"{% endif %})|tojson|safe }};
+      const accent = {{ ({% if current_user and current_user.is_authenticated and current_user.accent_color %}"{{ current_user.accent_color }}"{% else %}"default"{% endif %})|tojson|safe }};
 
       let effectiveTheme = theme;
       if (theme === 'system') {
