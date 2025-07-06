@@ -92,17 +92,21 @@
   }
 
   // Dialog Footer / Actions Area
-  // This style applies to .adw-dialog-footer, .adw-dialog-buttons (legacy),
-  // and .adw-dialog__actions-buttons-container (used by JS factory and recommended for slotted buttons)
-  .adw-dialog-footer,
-  .adw-dialog-buttons,
-  .adw-dialog__actions-buttons-container { // Added .adw-dialog__actions-buttons-container
+  .adw-dialog-footer {
     display: flex;
     justify-content: flex-end; // Buttons typically to the right
     align-items: center;
     padding: var(--spacing-m);
     border-top: var(--border-width) solid var(--border-color);
     gap: var(--spacing-s); // Gap between buttons
+
+    // AdwAlertDialog has a specific layout for responses (buttons)
+    // This is a general footer, AlertDialog might have more specific button styling/layout.
+  }
+
+  // Old .adw-dialog-buttons, kept for compatibility, prefer .adw-dialog-footer
+  .adw-dialog-buttons {
+    @extend .adw-dialog-footer; // Inherit footer styles
   }
 
 
@@ -127,66 +131,172 @@
          }
     }
   }
-
+}
   // --- AdwAboutDialog Specific Styles ---
+  // Targets .adw-dialog.adw-about-dialog
   &.adw-about-dialog {
-    .adw-dialog__content {
+    // Overall content wrapper for About Dialog (this is the .adw-dialog__content inside .adw-about-dialog)
+    .adw-about-dialog__content-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center; // Center text for most elements within
-      padding-top: var(--spacing-xl); // More top padding for About dialog content
-      padding-bottom: var(--spacing-xl); // More bottom padding
+      align-items: center; // Center content like logo, app name, version
+      text-align: center;
+      gap: var(--spacing-m); // Default gap between sections
+      // Padding is on .adw-dialog-content, but we might want more specific for about
+      padding: var(--spacing-l) var(--spacing-xl) var(--spacing-xl) var(--spacing-xl); // Generous padding
+
+      > section { // Direct children sections
+        width: 100%; // Sections take full width of content area
+        margin-bottom: var(--spacing-m); // Space between sections
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    .adw-about-dialog__app-info {
+      margin-bottom: var(--spacing-l); // Larger margin after app info block
     }
 
     .adw-about-dialog-logo {
-      width: 64px; // Standard Adwaita About Dialog logo size
+      width: 64px;
       height: 64px;
-      margin-bottom: var(--spacing-l);
-      border-radius: var(--border-radius-small); // Slight rounding if the logo isn't circular
+      margin-bottom: var(--spacing-m); // Space after logo
+      border-radius: var(--border-radius-medium);
+      object-fit: cover;
     }
 
-    .application-name { // This already has .adw-label and .title-1
-      // .title-1 provides font size and weight. We might want specific margin.
-      margin-bottom: var(--spacing-xxs); // Very small margin below app name
-      color: var(--window-fg-color); // Ensure it uses the main text color
+    .adw-about-dialog-application-name {
+      font-size: var(--title-1-font-size);
+      font-weight: var(--font-weight-bold);
+      margin-bottom: var(--spacing-xxs);
+      color: var(--window-fg-color);
     }
 
-    .version { // This already has .adw-label and .body-2
-      // .body-2 provides font size. Adwaita often uses slightly dimmed for version.
-      opacity: var(--dim-opacity);
+    .adw-about-dialog-version {
+      font-size: var(--font-size-base);
+      color: var(--secondary-fg-color);
       margin-top: 0;
       margin-bottom: var(--spacing-m);
     }
 
-    .comments { // This already has .adw-label
-      font-size: var(--font-size-base); // Ensure base font size
+    .adw-about-dialog-comments {
+      font-size: var(--font-size-base);
       margin-top: 0;
-      margin-bottom: var(--spacing-l);
-      max-width: 90%; // Prevent comments from being too wide
+      margin-bottom: 0;
+      max-width: 100%;
+      line-height: var(--line-height-base);
+      white-space: pre-wrap;
     }
 
-    // Container for the website link
-    p:has(> .adw-link) { // Target the <p> tag containing the website link
-      margin-top: 0;
-      margin-bottom: var(--spacing-l);
-      .adw-link {
-        font-size: var(--font-size-base);
+    .adw-about-dialog__links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--spacing-s);
+      margin-bottom: var(--spacing-l); // Space after links block
+
+      .adw-button.pill {
+        // Assuming .adw-button.pill is styled elsewhere (e.g. _button.scss)
+        // to have a pill shape (large border-radius)
+        // Example if not defined elsewhere:
+        // border-radius: var(--pill-button-border-radius, 100px);
+        // padding: var(--spacing-xs) var(--spacing-m);
       }
     }
 
-
-    .copyright { // This already has .adw-label and .caption
-      // .caption provides font size and often dimmed color.
-      margin-top: var(--spacing-l); // Space above copyright
-      margin-bottom: 0; // No margin below the last element
-      opacity: var(--dim-opacity);
+    .adw-about-dialog-section-title {
+      font-size: var(--title-4-font-size);
+      font-weight: var(--font-weight-bold);
+      margin-bottom: var(--spacing-s);
+      text-align: left;
+      border-bottom: 1px solid var(--border-color); // Add a separator line
+      padding-bottom: var(--spacing-xs);
+      margin-top: var(--spacing-l); // Space before a new section title
     }
 
-    // No explicit footer/buttons for AboutDialog by default, content flows to bottom.
-    // If a footer were added, it would use .adw-dialog-footer styles.
+    .adw-about-dialog__credits {
+      text-align: left;
+      .adw-about-dialog-credit-group {
+        margin-bottom: var(--spacing-m);
+        &:last-child { margin-bottom: 0; }
+      }
+      .adw-about-dialog-credit-title {
+        font-size: var(--font-size-large);
+        font-weight: var(--font-weight-bold);
+        margin-bottom: var(--spacing-xs);
+      }
+      .adw-about-dialog-credit-list {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+        li {
+          font-size: var(--font-size-base);
+          margin-bottom: var(--spacing-xxs);
+          color: var(--secondary-fg-color); // Dim credit names slightly
+        }
+      }
+    }
+
+    .adw-about-dialog__translators {
+      text-align: left;
+      .adw-about-dialog-credit-title { // Reuse credit title style
+         font-size: var(--font-size-large);
+         font-weight: var(--font-weight-bold);
+         margin-bottom: var(--spacing-xs);
+      }
+      .adw-about-dialog-translator-text {
+         font-size: var(--font-size-base);
+         white-space: pre-wrap;
+         color: var(--secondary-fg-color);
+      }
+    }
+
+    .adw-about-dialog__license {
+      text-align: left;
+      .adw-about-dialog-license-type {
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-bold);
+        margin-bottom: var(--spacing-xs);
+      }
+      .adw-about-dialog-license-text {
+        font-family: var(--monospace-font-family);
+        font-size: var(--font-size-small);
+        padding: var(--spacing-s);
+        background-color: var(--shade-color);
+        border-radius: var(--border-radius-small);
+        white-space: pre-wrap;
+        overflow-x: auto;
+        max-height: 150px; // Shorter height for license text
+        border: 1px solid var(--border-color);
+        color: var(--secondary-fg-color);
+      }
+    }
+
+    .adw-about-dialog__release-notes,
+    .adw-about-dialog__system-information {
+        text-align: left;
+        .adw-about-dialog-prose {
+            font-size: var(--font-size-base);
+            white-space: pre-wrap;
+            background-color: var(--shade-color);
+            padding: var(--spacing-s);
+            border-radius: var(--border-radius-small);
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            color: var(--secondary-fg-color);
+        }
+    }
+
+    .adw-about-dialog-copyright {
+      font-size: var(--font-size-small);
+      color: var(--secondary-fg-color);
+      margin-top: var(--spacing-l);
+      text-align: center;
+    }
   }
-}
+} // This closing brace is for .adw-dialog
 
 .adw-dialog-backdrop {
   position: fixed;
