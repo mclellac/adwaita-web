@@ -14,7 +14,7 @@ class AdwDialogElement extends HTMLElement {
 
     this._focusableElements = [];
     this._previouslyFocusedElement = null;
-    // this._backdrop is managed by the static _backdropElement property.
+    // Backdrop is now managed by Adw.DialogManager
   }
 
   static get observedAttributes() {
@@ -80,11 +80,15 @@ class AdwDialogElement extends HTMLElement {
   }
 
   disconnectedCallback() {
-    // Clean up global event listeners if the dialog is removed from DOM while open
-    if (AdwDialogElement._backdropElement) {
-        AdwDialogElement._backdropElement.removeEventListener('click', this._boundOnBackdropClick);
+    document.removeEventListener('keydown', this._boundOnKeydown); // Escape key
+    this.removeEventListener('keydown', this._boundHandleFocusTrap); // Focus trap
+
+    // If dialog is open when disconnected, ensure it's unregistered from DialogManager
+    if (this.hasAttribute('open')) {
+        if (window.Adw && window.Adw.DialogManager) {
+            window.Adw.DialogManager.unregister(this);
+        }
     }
-    document.removeEventListener('keydown', this._boundOnKeydown);
   }
 
   _updateTitle(newTitle) {
@@ -96,28 +100,7 @@ class AdwDialogElement extends HTMLElement {
     }
   }
 
-  _createBackdrop() {
-    if (!AdwDialogElement._backdropElement) {
-        AdwDialogElement._backdropElement = document.createElement('div');
-        AdwDialogElement._backdropElement.classList.add('adw-dialog-backdrop');
-        Object.assign(AdwDialogElement._backdropElement.style, {
-            display: 'none',
-            position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
-            backgroundColor: 'var(--dialog-backdrop-color, rgba(0,0,0,0.4))',
-            zIndex: 'calc(var(--z-index-dialog, 1050) - 1)',
-            opacity: '0',
-            transition: 'opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease)'
-        });
-        document.body.appendChild(AdwDialogElement._backdropElement);
-    }
-    return AdwDialogElement._backdropElement;
-  }
-
-  _onBackdropClick(event) {
-    if (this.getAttribute('close-on-backdrop-click') !== 'false') {
-      this.close();
-    }
-  }
+  // _createBackdrop and _onBackdropClick are removed; DialogManager handles backdrop.
 
   _onKeydown(event) {
     if (event.key === 'Escape') {
@@ -127,22 +110,21 @@ class AdwDialogElement extends HTMLElement {
 
   _doOpen() {
     this.removeAttribute('hidden');
-    // this.style.display = 'flex'; // Let CSS handle this based on [open]
+    // CSS handles display via [open] attribute
 
-    const backdrop = this._createBackdrop();
-    backdrop.style.display = 'block'; // Show backdrop
+    this._previouslyFocusedElement = document.activeElement; // Store focus before DialogManager changes it.
+    if (window.Adw && window.Adw.DialogManager) {
+        window.Adw.DialogManager.register(this);
+    } else {
+        console.warn("AdwDialog: DialogManager not found. Backdrop and initial focus might not work.");
+        // Fallback: manually make it visible if no manager (though backdrop won't appear)
+        // this.style.display = 'flex'; // Or use a class
+    }
 
-    // Use requestAnimationFrame to ensure 'display: flex' is applied before backdrop animation starts
-    // and before focus is managed. The dialog's own opacity/transform animations are handled by CSS via [open].
-    requestAnimationFrame(() => {
-        backdrop.style.opacity = '1'; // Animate backdrop opacity via JS
-    });
-
-    backdrop.addEventListener('click', this._boundOnBackdropClick);
     document.addEventListener('keydown', this._boundOnKeydown); // For Escape key
 
-    // Focus management
-    this._previouslyFocusedElement = document.activeElement;
+    // Focus management (focus trap part) - DialogManager handles initial focus.
+    // This._previouslyFocusedElement is already set above.
     this._focusableElements = Array.from(
         this.querySelectorAll(
             'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -182,42 +164,25 @@ class AdwDialogElement extends HTMLElement {
   }
 
   _doClose() {
-    if (AdwDialogElement._backdropElement) {
-         AdwDialogElement._backdropElement.style.opacity = '0'; // Animate backdrop opacity via JS
+    if (window.Adw && window.Adw.DialogManager) {
+        window.Adw.DialogManager.unregister(this);
     }
-    // Dialog's own opacity/transform animations are handled by CSS via :not([open]) selector.
-    // The 'open' attribute is removed by close(), triggering CSS transitions.
-    // CSS :not([open]) will hide it and apply transitions.
+    // CSS :not([open]) handles opacity/transform transitions and display:none.
 
     this.removeEventListener('keydown', this._boundHandleFocusTrap); // Remove focus trap listener
 
-    // Use transitionend to set 'hidden' attribute after animation.
+    // Use transitionend to set 'hidden' attribute after animation for semantics.
     const onTransitionEnd = (event) => {
         if (event.target === this && event.propertyName === 'opacity' && !this.hasAttribute('open')) {
             this.setAttribute('hidden', '');
-            // this.style.display = 'none'; // Let CSS handle this
             this.removeEventListener('transitionend', onTransitionEnd);
-
-            if (AdwDialogElement._backdropElement) {
-                const anyOtherDialogOpen = document.querySelector('adw-dialog[open]');
-                if (!anyOtherDialogOpen) {
-                    AdwDialogElement._backdropElement.style.display = 'none'; // Hide backdrop if no other dialogs are open
-                }
-            }
+            // DialogManager handles backdrop visibility, no need to check here.
         }
     };
     this.addEventListener('transitionend', onTransitionEnd);
 
-    // Fallback in case transitionend doesn't fire (e.g., if transitions are disabled or element is removed)
-    // This is less critical if CSS handles display:none correctly based on :not([open])
-    // but can be a safeguard for the 'hidden' attribute.
-    // However, relying on transitionend is preferred. For now, let's remove the direct setTimeout for hidden.
-    // If issues arise, a targeted setTimeout might be needed as a fallback.
-
-    if (AdwDialogElement._backdropElement) {
-        AdwDialogElement._backdropElement.removeEventListener('click', this._boundOnBackdropClick);
-    }
     document.removeEventListener('keydown', this._boundOnKeydown); // For Escape Key
+
     // Restore focus to the element that had focus before the dialog opened
     if (this._previouslyFocusedElement && typeof this._previouslyFocusedElement.focus === 'function') {
         this._previouslyFocusedElement.focus();
@@ -240,7 +205,7 @@ class AdwDialogElement extends HTMLElement {
     this.setAttribute('title', value);
   }
 }
-AdwDialogElement._backdropElement = null; // Static property for shared backdrop
+// AdwDialogElement._backdropElement = null; // Removed, DialogManager handles backdrop
 
 // Define the custom element
 customElements.define('adw-dialog', AdwDialogElement);

@@ -1,6 +1,7 @@
 // adwaita-web/js/components.js
 // Main file to load and initialize all Adwaita-Web components.
 
+import '../js/utils/dialog-manager.js'; // Import DialogManager first
 import './components/dialog.js';
 import './components/aboutdialog.js';
 
