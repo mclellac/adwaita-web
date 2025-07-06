@@ -34,13 +34,13 @@
             <div class="adw-action-row-suffix adw-box adw-box-spacing-s">
                 {# Form to Resolve Flag #}
                 <form method="POST" action="{{ url_for('admin.resolve_flag', flag_id=flag.id) }}" style="display: inline;">
-                    {{ csrf_token() }} {# Re-add CSRF if needed globally, or use a dedicated form object #}
+                    {{ csrf_token() }} {# This form is simple and doesn't use a FlaskForm object from the route, so direct CSRF token is fine for now. #}
                     <button type="submit" class="adw-button">Mark as Resolved</button>
                 </form>
                 {# Form to Delete Comment directly from flags page #}
                 {# This uses the existing delete_comment route which now supports admin deletion #}
                 <form method="POST" action="{{ url_for('post.delete_comment', comment_id=flag.comment_id) }}" onsubmit="return confirm('Are you sure you want to PERMANENTLY DELETE this comment? This action cannot be undone.');" style="display: inline;">
-                     {{ csrf_token() }} {# Re-add CSRF if needed globally, or use a dedicated form object #}
+                     {{ flag.delete_comment_form.hidden_tag() }}
                     <button type="submit" class="adw-button destructive-action">Delete Comment</button>
                 </form>
             </div>

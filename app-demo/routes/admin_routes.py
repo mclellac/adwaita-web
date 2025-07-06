@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import functools # For wraps in admin_required decorator
 
 from ..models import User, CommentFlag, SiteSetting, Comment # Import Comment for flag context, User for moderation
-from ..forms import SiteSettingsForm # Delete forms are simple, can be inline or reused from post_forms
+from ..forms import SiteSettingsForm, DeleteCommentForm # Delete forms are simple, can be inline or reused from post_forms
 from .. import db
 from ..utils import flash_form_errors_util
 
@@ -31,10 +31,25 @@ def view_flags():
     flags_query = CommentFlag.query.filter_by(is_resolved=False)\
                                    .order_by(CommentFlag.created_at.desc())
     flag_pagination = flags_query.paginate(page=page, per_page=per_page, error_out=False)
-    active_flags = flag_pagination.items
+    active_flags_raw = flag_pagination.items
 
-    current_app.logger.info(f"Admin {current_user.username} viewing flagged comments page {page}. Found {len(active_flags)} active flags.")
-    return render_template('admin_flags.html', active_flags=active_flags, flag_pagination=flag_pagination)
+    active_flags_with_forms = []
+    for flag in active_flags_raw:
+        # Create a unique prefix for each form to ensure their fields are namespaced if ever needed,
+        # though for just CSRF in separate forms, it's less critical.
+        # Using comment_id as it's directly relevant to the action.
+        delete_form = DeleteCommentForm(prefix=f"del-comm-flag-{flag.comment_id}-")
+        # Attach the form to a new object or a dictionary, or directly to flag if mutable and safe.
+        # For simplicity, let's create a list of dicts or wrapper objects if needed.
+        # Here, we'll just pass a list of forms that corresponds to active_flags by index,
+        # or, more robustly, modify/wrap flag objects.
+        # Let's attach directly to the flag object for convenience in the template.
+        flag.delete_comment_form = delete_form
+        active_flags_with_forms.append(flag)
+
+
+    current_app.logger.info(f"Admin {current_user.username} viewing flagged comments page {page}. Found {len(active_flags_with_forms)} active flags.")
+    return render_template('admin_flags.html', active_flags=active_flags_with_forms, flag_pagination=flag_pagination)
 
 @admin_bp.route('/flag/<int:flag_id>/resolve', methods=['POST'])
 @admin_required
