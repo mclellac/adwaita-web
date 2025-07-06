@@ -244,7 +244,7 @@
     <script src="{{ url_for('static', filename='js/app-layout.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/banner.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/toast.js') }}" defer></script>
-    <script type="module" src="{{ url_for('static', filename='js/components.js') }}" defer></script> {# Load Web Components #}
+    {# <script type="module" src="{{ url_for('static', filename='js/components.js') }}" defer></script> <!-- TEMPORARILY COMMENTED OUT FOR FLASHING DIAGNOSIS --> #}
     <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
         document.addEventListener('DOMContentLoaded', () => {
             console.log('base.html script: DOMContentLoaded');
