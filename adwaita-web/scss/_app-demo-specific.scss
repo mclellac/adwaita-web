@@ -689,8 +689,9 @@ $app-sidebar-breakpoint: 768px;
 // Tag Pills (for post.html, search_results.html, etc.)
 .tag-pill.adw-button.flat.compact {
   border-radius: 999px; // Makes it a pill
-  color: var(--accent-fg-color); // Use accent color for text for visibility
-  border: 1px solid var(--accent-bg-color); // Add a border with accent color
+  background-color: rgba(var(--accent-color-rgb, 53,132,228), 0.1); // Default light accent background
+  color: var(--accent-color, #3584e4); // Use main accent color for text (usually darker, good on light bg)
+  border: 1px solid transparent; // Make border transparent by default, or use a very subtle one like rgba(var(--accent-color-rgb), 0.2)
 
   // Override compact padding to ensure text visibility
   padding: var(--spacing-xxs) var(--spacing-s); // 3px vertical, 9px horizontal
@@ -699,9 +700,9 @@ $app-sidebar-breakpoint: 768px;
   white-space: nowrap; // Prevent text wrapping that might make it look circular
 
   &:hover, &:focus {
-    color: var(--accent-fg-color); // Keep text color on hover
-    background-color: rgba(var(--accent-color-rgb), 0.1); // Slight accent background on hover
-    border-color: var(--accent-bg-color); // Keep border color
+    color: var(--accent-color, #3584e4); // Keep text color on hover
+    background-color: rgba(var(--accent-color-rgb, 53,132,228), 0.2); // Darker/more opaque accent background on hover
+    border-color: transparent; // Keep border transparent or rgba(var(--accent-color-rgb), 0.3)
   }
 
   // Ensure it doesn't inherit unwanted styles from generic .adw-button if they conflict
