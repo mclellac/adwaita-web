@@ -1,58 +1,10 @@
 # Switch
 
-An `AdwSwitch` is a toggle control that allows users to switch between two states, typically "on" and "off" or "active" and "inactive". Adwaita-Web provides `Adw.createSwitch()` and the `<adw-switch>` Web Component.
+An `AdwSwitch` is a toggle control that allows users to switch between two states, typically "on" and "off" or "active" and "inactive". Adwaita Web provides styling for switches via the `.adw-switch` CSS class and an `<adw-switch>` Web Component.
 
 This component is essential for `AdwSwitchRow`.
 
-## JavaScript Factory: `Adw.createSwitch()`
-
-Creates an Adwaita-styled switch.
-
-**Signature:**
-
-```javascript
-Adw.createSwitch(options = {}) -> HTMLButtonElement (or a custom element wrapper)
-```
-*(Typically, a switch is implemented as a custom element or a styled `button` with `role="switch"`)*
-
-**Parameters:**
-
-*   `options` (Object, optional): Configuration options:
-    *   `active` (Boolean, optional): The initial state of the switch. `true` for on/active, `false` for off/inactive. Defaults to `false`.
-    *   `disabled` (Boolean, optional): If `true`, the switch is non-interactive. Defaults to `false`.
-    *   `onChange` (Function, optional): A callback function executed when the switch's state changes. It receives the new `active` state (boolean) as an argument.
-    *   `id` (String, optional): A specific ID to set on the switch element.
-    *   `cssClass` (Array<String>, optional): Additional CSS classes to apply.
-
-**Returns:**
-
-*   `(HTMLElement)`: The created switch element (e.g., `<adw-switch>` or a styled `button`).
-
-**Example:**
-
-```html
-<div id="js-switch-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
-<script>
-  const container = document.getElementById('js-switch-container');
-
-  const simpleSwitch = Adw.createSwitch({
-    onChange: (isActive) => console.log("Switch 1 state:", isActive)
-  });
-  container.appendChild(simpleSwitch);
-
-  const activeSwitch = Adw.createSwitch({
-    active: true,
-    onChange: (isActive) => console.log("Switch 2 state:", isActive)
-  });
-  container.appendChild(activeSwitch);
-
-  const disabledSwitch = Adw.createSwitch({
-    active: true,
-    disabled: true
-  });
-  container.appendChild(disabledSwitch);
-</script>
-```
+*(Note: Previous versions of this documentation may have described a JavaScript factory like `Adw.createSwitch()`. As of the current review, this specific factory function was not found in the core `adwaita-web/js` source. Usage should primarily rely on the CSS classes with the specified HTML structure, or the `<adw-switch>` Web Component.)*
 
 ## Web Component: `<adw-switch>`
 

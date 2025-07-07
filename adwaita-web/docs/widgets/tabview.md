@@ -9,104 +9,11 @@ The TabView system provides a way to manage multiple pages of content, where eac
 *   **`AdwTabButton`**: An individual button in the `AdwTabBar`, representing a page.
 *   **`AdwTabPage`**: A container for the content of a single tab.
 
-## JavaScript Factories
-
-### `Adw.createTabButton(options = {}) -> HTMLDivElement`
-
-*   **`options`**:
-    *   `label` (String): Text for the tab.
-    *   `iconHTML` (String, optional): HTML for an icon. *Security: Ensure trusted HTML.*
-    *   `pageName` (String, required): Unique identifier for the page this tab controls.
-    *   `isActive` (Boolean, optional): Initial active state.
-    *   `isClosable` (Boolean, optional): If `true` (default), shows a close button.
-    *   `onSelect` (Function, optional): `onSelect(pageName)` callback.
-    *   `onClose` (Function, optional): `onClose(pageName)` callback for the close button.
-*   **Returns**: The tab button `<div>` element.
-
-### `Adw.createTabBar(options = {}) -> HTMLDivElement (with methods)`
-
-*   **`options`**:
-    *   `tabsData` (Array<Object>, optional): Initial tabs, each object matching `Adw.createTabButton` options.
-    *   `activeTabName` (String, optional): `pageName` of the initially active tab.
-    *   `onTabSelect` (Function, optional): `onTabSelect(pageName)` callback.
-    *   `onTabClose` (Function, optional): `onTabClose(pageName)` callback.
-    *   `showNewTabButton` (Boolean, optional): If `true`, shows a '+' button.
-    *   `onNewTabRequested` (Function, optional): Callback for the new tab button.
-*   **Returns**: The tab bar `<div>` element, augmented with methods:
-    *   `setActiveTab(pageName)`
-    *   `addTab(tabData, makeActive?)`
-    *   `removeTab(pageName)`
-
-### `Adw.createTabPage(options = {}) -> HTMLDivElement`
-
-*   **`options`**:
-    *   `content` (HTMLElement, required): The main content element for this tab page.
-    *   `pageName` (String, required): Unique identifier for this page.
-*   **Returns**: The tab page `<div>` container.
-
-### `Adw.createTabView(options = {}) -> HTMLDivElement (with methods)`
-
-*   **`options`**:
-    *   `pages` (Array<Object>, optional): Initial pages. Each object: `{ name: String, title: String, content: HTMLElement, isClosable?: boolean }`.
-    *   `activePageName` (String, optional): Initially active page name.
-    *   `showNewTabButton` (Boolean, optional): Passed to `AdwTabBar`.
-    *   `onNewTabRequested` (Function, optional): Passed to `AdwTabBar`. App should
-        call `adwTabView.addPage()`.
-    *   `onPageChanged` (Function, optional): `onPageChanged(pageName)` callback.
-    *   `onBeforePageClose` (Function, optional):
-        `onBeforePageClose(pageName) -> boolean`. Return `false` to prevent
-        closing.
-    *   `onPageClosed` (Function, optional): `onPageClosed(pageName)` callback.
-*   **Returns**: The main tab view `<div>`, augmented with methods:
-    *   `addPage(pageData, makeActive?)`
-    *   `removePage(pageName)`
-    *   `setActivePage(pageName)`
-    *   `getActivePageName() -> String | null`
-
-**JavaScript Example (Full TabView):**
-
-```html
-<div id="js-tabview-container" style="height: 300px; border: 1px solid var(--borders-color);"></div>
-<script>
-  const tabViewContainer = document.getElementById('js-tabview-container');
-  let pageCounter = 2;
-
-  const page1Content = Adw.createLabel("Content for Page 1");
-  const page2Content = Adw.createEntry({placeholder: "Input for Page 2"});
-  const initialPages = [
-    { name: "page1", title: "Page 1", content: page1Content, isClosable: true },
-    { name: "page2", title: "Page Two", content: page2Content, isClosable: true }
-  ];
-
-  const myTabView = Adw.createTabView({
-    pages: initialPages,
-    activePageName: "page1",
-    showNewTabButton: true,
-    onNewTabRequested: () => {
-      pageCounter++;
-      const newPageName = `page${pageCounter}`;
-      myTabView.addPage({
-        name: newPageName,
-        title: `Page ${pageCounter}`,
-        content: Adw.createLabel(`Content for new Page ${pageCounter}`),
-        isClosable: true
-      }, true); // Add and make active
-    },
-    onPageChanged: (pageName) => Adw.createToast(`Switched to ${pageName}`),
-    onBeforePageClose: (pageName) => {
-      if (pageName === "page1") {
-        // return confirm("Are you sure you want to close Page 1? It's important!");
-      }
-      return true; // Allow close
-    },
-    onPageClosed: (pageName) => Adw.createToast(`${pageName} was closed.`)
-  });
-
-  tabViewContainer.appendChild(myTabView);
-</script>
-```
+*(Note: Previous versions of this documentation may have described JavaScript factories like `Adw.createTabView()`, `Adw.createTabBar()`, etc. As of the current review, these specific factory functions were not found in the core `adwaita-web/js` source. Usage should primarily rely on the Web Components detailed below or by applying CSS classes to manually structured HTML.)*
 
 ## Web Components
+
+The TabView system is primarily implemented via a set of interconnected Web Components:
 
 ### `<adw-tab-button>`
 

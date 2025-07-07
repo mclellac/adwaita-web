@@ -2,69 +2,35 @@
 
 An ExpanderRow is a row that can be expanded or collapsed to reveal or hide additional content. It typically displays a title, an optional subtitle, and an expander icon (chevron).
 
-## JavaScript Factory: `Adw.createExpanderRow()`
+*(Note: Previous versions of this documentation may have described a JavaScript factory like `Adw.createExpanderRow()`. As of the current review, this specific factory function was not found in the core `adwaita-web/js` source. Usage should primarily rely on the CSS classes with manual HTML structure, or the `<adw-expander-row>` Web Component.)*
 
-Creates an Adwaita-styled expander row.
+## HTML Structure (for CSS Styling)
 
-**Signature:**
-
-```javascript
-Adw.createExpanderRow(options = {}) -> HTMLDivElement
-```
-
-**Parameters:**
-
-*   `options` (Object, optional): Configuration options:
-    *   `title` (String, required): The main title text of the row.
-    *   `subtitle` (String, optional): Additional descriptive text displayed below the title.
-    *   `content` (HTMLElement, optional): The HTML element to be revealed when the row is expanded. *Security: Ensure content is trusted/sanitized.*
-    *   `expanded` (Boolean, optional): If `true`, the row is initially expanded. Defaults to `false`.
-    *   `onToggled` (Function, optional): Callback function executed when the row's expanded state changes. Receives a boolean argument indicating the new `expanded` state.
-    *   `disabled` (Boolean, optional): If `true`, disables the row, preventing expansion/collapse.
-
-**Returns:**
-
-*   `(HTMLDivElement)`: The created `<div>` element representing the expander row. It will have methods like `setExpanded(boolean)` and `isExpanded()` if not part of the base HTMLElement prototype.
-
-**Example:**
-
+To create an expander row manually for CSS styling, you would use a structure like:
 ```html
-<div id="js-expanderrow-listbox" style="max-width: 450px;">
-  <!-- AdwListBox would typically wrap these -->
+<div class="adw-expander-row">
+  <div class="adw-action-row activatable"> <!-- This is the clickable header -->
+    <span class="adw-action-row-title">Expander Title</span>
+    <div style="flex-grow: 1;"></div> <!-- Spacer -->
+    <span class="adw-icon adw-expander-row-chevron"></span>
+  </div>
+  <div class="adw-expander-row-content">
+    <p>This is the content that expands.</p>
+  </div>
 </div>
-<script>
-  const container = document.getElementById('js-expanderrow-listbox');
+```
+JavaScript is required to toggle an `.expanded` class on `.adw-expander-row` or `.adw-expander-row-content` to control visibility and chevron rotation.
 
-  // Create content for the expander
-  const detailsContent = document.createElement('div');
-  // Indent content for visual hierarchy
-  detailsContent.style.padding = "var(--spacing-s) 0 0 var(--spacing-l)";
-  detailsContent.innerHTML = `
-    <p>This is the detailed content that was hidden.</p>
-    <adw-entry placeholder="Enter detail..."></adw-entry>
-  `;
-
-  const expanderRow = Adw.createExpanderRow({
-    title: "Advanced Settings",
-    subtitle: "Click to see more options",
-    content: detailsContent,
-    expanded: false,
-    onToggled: (isExpanded) => {
-      Adw.createToast(`Expander is now ${isExpanded ? 'open' : 'closed'}`);
-    }
-  });
-  container.appendChild(expanderRow);
-
-  // Initially expanded row
-  const initiallyExpandedContent = Adw.createLabel("This content is visible by default.");
-  initiallyExpandedContent.style.padding = "var(--spacing-s) 0 0 var(--spacing-l)";
-  const autoExpandedRow = Adw.createExpanderRow({
-    title: "Visible Details",
-    content: initiallyExpandedContent,
-    expanded: true
-  });
-  container.appendChild(autoExpandedRow);
-</script>
+Alternatively, for a CSS-only solution, use the `<details>` and `<summary>` elements:
+```html
+<details class="adw-css-expander-row">
+  <summary class="adw-action-row activatable">
+    <span class="adw-action-row-title">CSS Expander Title</span>
+  </summary>
+  <div class="adw-expander-row-content">
+    <p>This content is revealed by the CSS-only expander.</p>
+  </div>
+</details>
 ```
 
 ## Web Component: `<adw-expander-row>`

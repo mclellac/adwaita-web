@@ -1,70 +1,31 @@
 # HeaderBar
 
-A HeaderBar is a crucial component in Adwaita applications, typically appearing at the top of a window or view, containing a title and actions. Adwaita-Web provides `Adw.createHeaderBar()` and the `<adw-header-bar>` Web Component.
+A HeaderBar is a crucial component in Adwaita applications, typically appearing at the top of a window or view, containing a title and actions. Adwaita Web provides styling for header bars via the `.adw-header-bar` CSS class and an `<adw-header-bar>` Web Component.
 
-## JavaScript Factory: `Adw.createHeaderBar()`
+*(Note: Previous versions of this documentation may have described a JavaScript factory like `Adw.createHeaderBar()`. As of the current review, this specific factory function was not found in the core `adwaita-web/js` source. Usage should primarily rely on the CSS classes with manual HTML structure, or the `<adw-header-bar>` Web Component.)*
 
-Creates an Adwaita-styled header bar.
+## HTML Structure (for CSS Styling)
 
-**Signature:**
-
-```javascript
-Adw.createHeaderBar(options = {}) -> HTMLElement
-```
-
-**Parameters:**
-
-*   `options` (Object, optional): Configuration options:
-    *   `title` (String, optional): Main title text for the header bar.
-    *   `subtitle` (String, optional): Subtitle text, displayed below the main title.
-    *   `start` (Array<HTMLElement>, optional): An array of HTML elements (e.g., `Adw.createButton()`) to place at the start (left side) of the header bar.
-    *   `end` (Array<HTMLElement>, optional): An array of HTML elements to place at the end (right side) of the header bar.
-
-**Returns:**
-
-*   `(HTMLElement)`: The created `<header>` element representing the header bar. This element will have methods like `updateTitleSubtitle(title, subtitle)`, `setStartWidgets(widgetsArray)`, and `setEndWidgets(widgetsArray)` monkey-patched onto it if they don't exist, allowing dynamic updates.
-
-**Example:**
-
+To create a header bar manually using CSS classes, structure your HTML like this:
 ```html
-<div id="js-headerbar-container">
-  <!-- This container will house a full window structure usually -->
-</div>
-<script>
-  const container = document.getElementById('js-headerbar-container');
-
-  const backButton = Adw.createButton("", {
-    icon: '<svg viewBox="0 0 16 16"><path d="M12 8a.5.5Z"/></svg>', // Left arrow (shortened)
-    flat: true,
-    onClick: () => Adw.createToast("Back button clicked")
-  });
-
-  const menuButton = Adw.createButton("", {
-    icon: '<svg viewBox="0 0 16 16"><path d="M2.5 12a.5.5Z"/></svg>', // Menu icon (shortened)
-    flat: true,
-    onClick: () => Adw.createToast("Menu button clicked")
-  });
-
-  const myHeaderBar = Adw.createHeaderBar({
-    title: "My Application",
-    subtitle: "Current View",
-    start: [backButton],
-    end: [menuButton]
-  });
-  container.appendChild(myHeaderBar); // Typically, a header bar is part of an AdwWindow
-
-  // Example of updating title dynamically
-  setTimeout(() => {
-    if (myHeaderBar.updateTitleSubtitle) { // Check if method exists
-        myHeaderBar.updateTitleSubtitle("Updated Title", "New Subtitle");
-    } else { // Fallback for older versions or direct manipulation
-        const titleEl = myHeaderBar.querySelector('.adw-header-bar-title');
-        const subtitleEl = myHeaderBar.querySelector('.adw-header-bar-subtitle');
-        if (titleEl) titleEl.textContent = "Updated Title";
-        if (subtitleEl) subtitleEl.textContent = "New Subtitle";
-    }
-  }, 2000);
-</script>
+<header class="adw-header-bar">
+  <div class="adw-header-bar-start">
+    <!-- Start items, e.g., back button -->
+    <button class="adw-button circular flat" aria-label="Back">
+      <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+    </button>
+  </div>
+  <div class="adw-header-bar-center-box">
+    <h1 class="adw-header-bar-title">Page Title</h1>
+    <h2 class="adw-header-bar-subtitle">Optional Subtitle</h2>
+  </div>
+  <div class="adw-header-bar-end">
+    <!-- End items, e.g., action buttons -->
+    <button class="adw-button flat" aria-label="Menu">
+      <span class="adw-icon icon-actions-open-menu-symbolic"></span>
+    </button>
+  </div>
+</header>
 ```
 
 ## Web Component: `<adw-header-bar>`
