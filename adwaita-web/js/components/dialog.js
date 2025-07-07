@@ -55,7 +55,8 @@ class AdwDialogElement extends HTMLElement {
             closeButton.type = 'button'; // CRITICAL: Prevent form submission
             closeButton.classList.add('adw-button', 'circular', 'flat', 'adw-dialog-close-button');
             closeButton.setAttribute('aria-label', 'Close dialog');
-            closeButton.innerHTML = '<span class="adw-icon icon-actions-close-symbolic"></span>'; // Make sure this icon class exists
+            // Use a more standard Adwaita icon name for 'close window'
+            closeButton.innerHTML = '<span class="adw-icon icon-actions-window-close-symbolic"></span>';
             closeButton.addEventListener('click', () => this.close());
             header.appendChild(closeButton);
         }
