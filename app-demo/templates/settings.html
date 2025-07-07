@@ -69,6 +69,77 @@
         </div>
     </section>
 
+    {% if current_user.is_admin and site_settings_form %}
+    <section class="adw-preferences-group" aria-labelledby="site-settings-group-title">
+        <div class="adw-preferences-group__title-container">
+            <h2 class="adw-preferences-group__title" id="site-settings-group-title">Site Settings (Admin)</h2>
+            <p class="adw-preferences-group__description">
+                Configure global settings for the application. These settings affect all users.
+            </p>
+        </div>
+        {# The form submission will go to the admin.site_settings endpoint #}
+        <form method="POST" action="{{ url_for('admin.site_settings') }}" class="stacked-form" style="padding-top: var(--spacing-s);">
+            {{ site_settings_form.hidden_tag() }} {# CSRF token for this specific form #}
+
+            <div class="adw-list-box"> {# Wrap settings in a list-box for consistent styling #}
+                {# Site Title #}
+                <div class="adw-entry-row {{ 'has-error' if site_settings_form.site_title.errors else '' }}">
+                    <label for="{{ site_settings_form.site_title.id or 'site_title_input_admin' }}" class="adw-entry-row-title">{{ site_settings_form.site_title.label.text }}</label>
+                    <input type="text" id="{{ site_settings_form.site_title.id or 'site_title_input_admin' }}" name="{{ site_settings_form.site_title.name }}" value="{{ site_settings_form.site_title.data or '' }}" class="adw-entry adw-entry-row-entry" required>
+                    {% if site_settings_form.site_title.errors %}
+                        <span class="adw-label caption error-text adw-entry-row-subtitle">{{ site_settings_form.site_title.errors|join(' ') }}</span>
+                    {% endif %}
+                </div>
+
+                {# Posts Per Page - Using adw-spin-row component #}
+                {# Note: The adw-spin-row is a custom element, ensure its JS is loaded and it works. #}
+                {# For simplicity, if adw-spin-row is problematic, could revert to simple number input. #}
+                {# Assuming adw-spin-row correctly uses its name attribute for form submission. #}
+                <adw-spin-row title="{{ site_settings_form.posts_per_page.label.text }}"
+                              id="{{ site_settings_form.posts_per_page.id or 'posts_per_page_input_admin' }}"
+                              name="{{ site_settings_form.posts_per_page.name }}"
+                              value="{{ site_settings_form.posts_per_page.data or '10' }}"
+                              min="1"
+                              max="100"
+                              step="1"
+                              subtitle="Number of posts to display per page."
+                              class="{{ 'has-error' if site_settings_form.posts_per_page.errors else '' }}">
+                </adw-spin-row>
+                {% if site_settings_form.posts_per_page.errors %}
+                <div class="adw-row form-field-error" style="padding-left: var(--spacing-m);"> {# Simple error display for spin-row #}
+                    <span class="adw-label caption error-text">{{ site_settings_form.posts_per_page.errors|join(' ') }}</span>
+                </div>
+                {% endif %}
+
+                {# Allow New User Registrations #}
+                <div class="adw-switch-row {{ 'has-error' if site_settings_form.allow_registrations.errors else '' }}">
+                     <div class="adw-action-row__text">
+                        <label for="{{ site_settings_form.allow_registrations.id or 'allow_registrations_input_admin' }}" class="adw-action-row__title">{{ site_settings_form.allow_registrations.label.text }}</label>
+                        <span class="adw-action-row__subtitle">Enable or disable new user sign-ups.</span>
+                        {% if site_settings_form.allow_registrations.errors %}
+                            <span class="adw-label caption error-text">{{ site_settings_form.allow_registrations.errors|join(' ') }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="adw-switch-row__switch">
+                        <label class="adw-switch">
+                            <input type="checkbox"
+                                   name="{{ site_settings_form.allow_registrations.name }}"
+                                   id="{{ site_settings_form.allow_registrations.id or 'allow_registrations_input_admin' }}"
+                                   {% if site_settings_form.allow_registrations.data %}checked{% endif %}
+                                   >
+                            <span class="adw-switch-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div> {# End adw-list-box for Site Settings #}
+
+            <div class="adw-box horizontal justify-end form-actions-container" style="margin-top: var(--spacing-l); padding: var(--spacing-m); border-top: 1px solid var(--border-color); background-color: var(--list-row-bg-color);">
+                {{ site_settings_form.submit(class="adw-button suggested-action", value="Save Site Settings") }}
+            </div>
+        </form>
+    </section>
+    {% endif %}
+
 </div>
 {% endblock %}
 

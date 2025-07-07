@@ -4,8 +4,8 @@ from flask_wtf.csrf import generate_csrf # Import generate_csrf
 from datetime import datetime, timezone
 from sqlalchemy import or_ # For search query
 
-from ..models import Post, User # User for current_user context if needed, Post for queries
-from ..forms import DeletePostForm # For dashboard delete buttons
+from ..models import Post, User, SiteSetting # User for current_user context if needed, Post for queries, SiteSetting for admin
+from ..forms import DeletePostForm, SiteSettingsForm # For dashboard delete buttons, SiteSettingsForm for admin
 from .. import db
 
 general_bp = Blueprint('general', __name__) # template_folder defaults to app's
@@ -54,9 +54,21 @@ def dashboard():
 @login_required
 def settings_page():
     current_app.logger.debug(f"Displaying settings page for user {current_user.username}.")
-    # The actual change password form is handled by auth_bp.change_password_page
-    # This page could link to it or display other user settings.
-    return render_template('settings.html')
+    site_settings_form = None
+    if current_user.is_admin:
+        # Instantiate the form. Population for GET will happen here.
+        # The form submission will still go to admin.site_settings endpoint.
+        site_settings_form = SiteSettingsForm()
+        # Populate for GET request. If it's a POST request that failed validation on admin.site_settings
+        # and redirected here, the form object might already have data.
+        # However, admin.site_settings redirects to itself on successful POST or renders its own template on GET/failed POST.
+        # So, this route will always be a GET for the site_settings_form part.
+        site_settings_form.site_title.data = SiteSetting.get('site_title', current_app.config.get('SITE_TITLE', 'Adwaita Social Demo'))
+        site_settings_form.posts_per_page.data = str(SiteSetting.get('posts_per_page', current_app.config.get('POSTS_PER_PAGE', 10)))
+        site_settings_form.allow_registrations.data = SiteSetting.get('allow_registrations', False)
+        current_app.logger.debug(f"Admin user {current_user.username} viewing settings, site_settings_form populated for display.")
+
+    return render_template('settings.html', site_settings_form=site_settings_form)
 
 @general_bp.route('/search')
 def search_results():
