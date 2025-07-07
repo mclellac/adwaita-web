@@ -36,19 +36,7 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="adw-action-row column-layout">
                  <label for="gallery-comment-text" class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">Your Comment</label>
-                <markdown-toolbar for="gallery-comment-text" class="custom-toolbar">
-                    <md-bold>Bold</md-bold>
-                    <md-italic>Italic</md-italic>
-                    <md-strikethrough>Strike</md-strikethrough>
-                    <md-header>Heading</md-header>
-                    <md-quote>Quote</md-quote>
-                    <md-code>Code</md-code>
-                    <md-link>Link</md-link>
-                    <md-image>Image/GIF</md-image>
-                    <md-unordered-list>List</md-unordered-list>
-                    <md-ordered-list>Ordered List</md-ordered-list>
-                </markdown-toolbar>
-                <textarea id="gallery-comment-text" name="text" class="adw-entry" rows="4" placeholder="Write a comment..." required style="width: 100%; min-height: 100px; box-sizing: border-box; margin-top: var(--spacing-xs);"></textarea>
+                <textarea id="gallery-comment-text" name="text" class="adw-entry" rows="4" placeholder="Write a comment..." required style="width: 100%; min-height: 100px; box-sizing: border-box;"></textarea> {# Removed margin-top from Markdown toolbar #}
                 <div id="gallery-comment-error" class="error-text adw-label caption" style="display:none; margin-top: var(--spacing-xs);"></div>
             </div>
             <div class="form-actions-end" style="margin-top: var(--spacing-s);">
@@ -143,18 +131,6 @@
 
 {% block scripts %}
 {{ super() }}
-<script type="module" src="https://cdn.jsdelivr.net/npm/@github/markdown-toolbar-element@1.0.3/dist/index.umd.js" nonce="{{ csp_nonce() if csp_nonce else '' }}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.12/marked.min.js" nonce="{{ csp_nonce() if csp_nonce else '' }}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.6/purify.min.js" nonce="{{ csp_nonce() if csp_nonce else '' }}"></script>
-<style nonce="{{ csp_nonce() if csp_nonce else '' }}">
-  /* Styles specific to photo comments images, if different from global .styled-text-content img */
-  /* For now, the global one in base.html should cover it. This is a placeholder if needed. */
-  .photo-comments-area .styled-text-content img {
-      /* max-width: 100%; */ /* Already handled by global style */
-      /* height: auto; */ /* Already handled by global style */
-      /* border-radius: var(--border-radius-m); */ /* Already handled by global style */
-  }
-</style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // Full-size gallery photo dialog logic
@@ -192,9 +168,10 @@ document.addEventListener('DOMContentLoaded', function () {
         comments.forEach(comment => {
             const commentDiv = document.createElement('div');
             commentDiv.classList.add('adw-action-row');
-            // Sanitize and render markdown for comment text
-            const unsafeHtml = marked.parse(comment.text || ''); // Use marked.parse (or marked())
-            const safeHtml = DOMPurify.sanitize(unsafeHtml);
+            // Display plain text for comment text
+            const commentTextNode = document.createElement('div');
+            commentTextNode.classList.add('adw-action-row-subtitle'); // Keep styling consistent
+            commentTextNode.textContent = comment.text || ''; // Display plain text
 
             commentDiv.innerHTML = `
                 <span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">
@@ -202,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </span>
                 <span class="adw-action-row-text-content">
                     <a href="${comment.author.profile_url}" class="adw-link adw-action-row-title">${comment.author.full_name || comment.author.username}</a>
-                    <div class="adw-action-row-subtitle styled-text-content">${safeHtml}</div>
+                    ${commentTextNode.outerHTML} {# Inject the plain text node's HTML #}
                     <small class="adw-label caption">${formatCommentDate(comment.created_at)}</small>
                 </span>
             `;
@@ -223,6 +200,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const comments = await response.json();
+            // Assuming comments from API are plain text or server-rendered HTML if that's the new backend strategy
+            // If API still sends Markdown, and we need to display it as plain text, this is fine.
+            // If API sends pre-rendered HTML, and it's safe, this is also fine.
+            // The goal here is to remove client-side Marked and DOMPurify.
             displayGalleryComments(comments);
         } catch (error) {
             console.error('Error fetching gallery comments:', error);

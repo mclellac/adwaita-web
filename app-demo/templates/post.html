@@ -215,19 +215,7 @@
                     <span class="adw-action-row-subtitle error-text" style="margin-bottom: var(--spacing-xs);">{{form.text.errors|join(' ')}}</span>
                 {% endif %}
 
-                <markdown-toolbar for="{{ form.text.id or 'comment_text_input' }}" class="custom-toolbar">
-                    <md-bold>Bold</md-bold>
-                    <md-italic>Italic</md-italic>
-                    <md-strikethrough>Strike</md-strikethrough>
-                    <md-header>Heading</md-header>
-                    <md-quote>Quote</md-quote>
-                    <md-code>Code</md-code>
-                    <md-link>Link</md-link>
-                    <md-image>Image/GIF</md-image> {# Users will paste URL for image/GIF #}
-                    <md-unordered-list>List</md-unordered-list>
-                    <md-ordered-list>Ordered List</md-ordered-list>
-                </markdown-toolbar>
-                <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry" rows="6" style="width: 100%; min-height: 120px; box-sizing: border-box; margin-top: var(--spacing-xs);">{{ form.text.data or ''}}</textarea>
+                <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry" rows="6" style="width: 100%; min-height: 120px; box-sizing: border-box;">{{ form.text.data or ''}}</textarea> {# Removed margin-top from Markdown toolbar #}
             </div>
 
             <div class="form-actions-container form-actions-end comment-form-actions" style="margin-top: var(--spacing-m); padding: 0;"> {# Simplified padding as form has it now #}
@@ -587,5 +575,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 {% block scripts %}
 {{ super() }}
-<script type="module" src="https://cdn.jsdelivr.net/npm/@github/markdown-toolbar-element@1.0.3/dist/index.umd.js" nonce="{{ csp_nonce() if csp_nonce else '' }}"></script>
 {% endblock %}
