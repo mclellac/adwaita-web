@@ -384,7 +384,7 @@ $accent-definitions: (
   --toast-bg-color: #{$adw-dark-3};
   --toast-fg-color: #{$adw-light-1};
   $_toast_fg_color_sass: $adw-light-1;
-  --toast-fg-color-rgb: #{color.red($_toast_fg_color_sass)}, #{color.green($_toast_fg_color_sass)}, #{color.blue($_toast_fg_color_sass)};
+  --toast-fg-color-rgb: #{color.channel($_toast_fg_color_sass, "red")}, #{color.channel($_toast_fg_color_sass, "green")}, #{color.channel($_toast_fg_color_sass, "blue")};
   --toast-secondary-fg-color: #{rgba($adw-light-1, 0.7)};
   --toast-accent-color: var(--accent-color);
   --toast-box-shadow: var(--popover-box-shadow-dark);
