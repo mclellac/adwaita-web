@@ -48,6 +48,16 @@
         }
       })();
     </script>
+    <style nonce="{{ csp_nonce() if csp_nonce else '' }}">
+        /* General styling for images within rendered markdown content */
+        .styled-text-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--border-radius-m); /* Optional: consistent image corner rounding */
+            margin-top: var(--spacing-s);
+            margin-bottom: var(--spacing-s);
+        }
+    </style>
 </head>
 <body>
 
