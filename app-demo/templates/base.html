@@ -268,10 +268,53 @@
                         menuButton.setAttribute('aria-expanded', 'false');
                     } else {
                         menuPopover.removeAttribute('hidden');
-                        // CSS should handle visibility of popover via :not([hidden]) or a class toggled by JS if animations are complex.
-                        // For simplicity, direct attribute toggling is used. Add .open class if SCSS relies on it for animation.
-                        menuPopover.classList.add('open'); // Assuming SCSS uses .open for visibility/animation
+                        menuPopover.classList.add('open');
                         menuButton.setAttribute('aria-expanded', 'true');
+
+                        // Position the popover
+                        const buttonRect = menuButton.getBoundingClientRect();
+                        // Ensure popover is open and rendered to get accurate dimensions
+                        const popoverRect = menuPopover.getBoundingClientRect();
+
+                        let popTop = buttonRect.bottom + window.scrollY + 2; // Default below button
+                        let popLeft = buttonRect.right + window.scrollX - popoverRect.width; // Default: align right edges
+
+                        menuPopover.style.transformOrigin = 'top right'; // Default for right-aligned
+
+                        // Check if aligning right makes it go off-screen left
+                        if (popLeft < 0) {
+                            popLeft = buttonRect.left + window.scrollX; // Align left edges
+                            menuPopover.style.transformOrigin = 'top left';
+                        }
+
+                        // Check if it overflows right viewport edge (even after potential switch to left align)
+                        if (popLeft + popoverRect.width > window.innerWidth) {
+                            popLeft = window.innerWidth - popoverRect.width - 5; // 5px padding from edge
+                        }
+                         // Ensure it doesn't go off-screen left after all adjustments
+                        if (popLeft < 5) {
+                           popLeft = 5;
+                        }
+
+
+                        // Check if it overflows bottom viewport edge
+                        if (popTop + popoverRect.height > window.innerHeight) {
+                            popTop = buttonRect.top + window.scrollY - popoverRect.height - 2; // Place above button
+                            // Adjust transform origin if it flips above
+                            if (menuPopover.style.transformOrigin.includes('left')) {
+                                menuPopover.style.transformOrigin = 'bottom left';
+                            } else {
+                                menuPopover.style.transformOrigin = 'bottom right';
+                            }
+                        }
+                        // Ensure it doesn't go off-screen top
+                        if (popTop < 5) {
+                            popTop = 5; // 5px padding from edge
+                        }
+
+                        menuPopover.style.top = `${popTop}px`;
+                        menuPopover.style.left = `${popLeft}px`;
+
                         const firstFocusable = menuPopover.querySelector('[role="menuitem"]');
                         if (firstFocusable) {
                             firstFocusable.focus();
