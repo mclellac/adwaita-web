@@ -1,11 +1,13 @@
 // Adwaita Named Colors - SCSS Variables and CSS Custom Properties
-// Aligned with Libadwaita 1.8.beta
+// Target: Libadwaita 1.5 Named Colors
+// Reference: https://gnome.pages.gitlab.gnome.org/libadwaita/doc/1.5/named-colors.html
 
 @use "sass:color";
 @use "sass:math";
 @use "sass:map";
 
 // --- 1. SASS Variables for Adwaita Palette (Source: Libadwaita CSS Variables page) ---
+// These are the base palette colors, generally aligned with docs.
 $adw-blue-1: #99c1f1; $adw-blue-2: #62a0ea; $adw-blue-3: #3584e4; $adw-blue-4: #1c71d8; $adw-blue-5: #1a5fb4;
 $adw-green-1: #8ff0a4; $adw-green-2: #57e389; $adw-green-3: #33d17a; $adw-green-4: #2ec27e; $adw-green-5: #26a269;
 $adw-yellow-1: #f9f06b; $adw-yellow-2: #f8e45c; $adw-yellow-3: #f6d32d; $adw-yellow-4: #f5c211; $adw-yellow-5: #e5a50a;
@@ -16,71 +18,86 @@ $adw-brown-1: #cdab8f; $adw-brown-2: #b5835a; $adw-brown-3: #986a44; $adw-brown-
 $adw-light-1: #ffffff; $adw-light-2: #f6f5f4; $adw-light-3: #deddda; $adw-light-4: #c0bfbc; $adw-light-5: #9a9996;
 $adw-dark-1: #77767b; $adw-dark-2: #5e5c64; $adw-dark-3: #3d3846; $adw-dark-4: #241f31; $adw-dark-5: #000000;
 
-// Libadwaita Accent Palette (Background colors for each accent)
+// Libadwaita Accent Palette (Background colors for each accent) - these match docs
 $accent-blue-bg: #3584e4;
-$accent-teal-bg: #2190a4;
-$accent-green-bg: #3a944a;
-$accent-yellow-bg: #c88800;
-$accent-orange-bg: #ed5b00;
-$accent-red-bg: #e62d42;
-$accent-pink-bg: #d56199;
-$accent-purple-bg: #9141ac;
-$accent-slate-bg: #6f8396;
+$accent-teal-bg: #2190a4; // Not in docs page, but a common accent
+$accent-green-bg: #2ec27e; // Docs @success_bg_color for light
+$accent-yellow-bg: #e5a50a; // Docs @warning_bg_color for light
+$accent-orange-bg: #ff7800; // Docs orange-3
+$accent-red-bg: #e01b24;   // Docs @destructive_bg_color for light
+$accent-pink-bg: #d56199;  // Not in docs page, but a common accent
+$accent-purple-bg: #9141ac; // Docs purple-3
+$accent-slate-bg: #6f8396; // Not in docs page, but a common accent
 
-// Corresponding Foreground colors for above accent backgrounds (mostly white)
+// Corresponding Foreground colors for above accent backgrounds
 $accent-default-fg: #ffffff;
-$accent-yellow-fg: rgb(0 0 0 / 80%); // Yellow is an exception
+$accent-yellow-fg: rgba(0, 0, 0, 0.8); // Yellow is an exception, matches docs @warning_fg_color
 
-// Standalone colors (pre-calculated based on Libadwaita's 1.8.beta doc for light/dark themes)
-// Format: color-name: (light: "standalone_hex_light", dark: "standalone_hex_dark")
-// These values are for the standalone text colors used on neutral backgrounds.
-// Libadwaita derives these using Oklab, here we use the documented resulting hex codes.
+// Standalone colors (meant for text on neutral backgrounds)
+// These are updated to match the Libadwaita 1.5 docs for @accent_color, @destructive_color etc.
 $accent-standalone-colors: (
-  "blue":   (light: "#0461be", dark: "#81d0ff"), // Matches Libadwaita doc
-  "teal":   (light: "#007184", dark: "#7bdff4"), // Matches Libadwaita doc
-  "green":  (light: "#007c3d", dark: "#78e9ab"), // Updated to Libadwaita success-color
-  "yellow": (light: "#905400", dark: "#ffc252"), // Updated to Libadwaita warning-color
-  "orange": (light: "#b62200", dark: "#ff9c5b"), // Matches Libadwaita doc
-  "red":    (light: "#c30000", dark: "#ff938c"), // Updated to Libadwaita destructive-color/error-color
-  "pink":   (light: "#a2326c", dark: "#ffa0d8"), // Matches Libadwaita doc
-  "purple": (light: "#8939a4", dark: "#fba7ff"), // Matches Libadwaita doc
-  "slate":  (light: "#526678", dark: "#bbd1e5")  // Matches Libadwaita doc
+  "blue":   (light: #1c71d8, dark: #78aeed), // From @accent_color
+  "teal":   (light: #007184, dark: #7bdff4), // Kept from previous, good standalone teal
+  "green":  (light: #1b8553, dark: #8ff0a4), // From @success_color
+  "yellow": (light: #9c6e03, dark: #f8e45c), // From @warning_color
+  "orange": (light: #b62200, dark: #ff9c5b), // Kept from previous, good standalone orange
+  "red":    (light: #c01c28, dark: #ff7b63), // From @destructive_color / @error_color
+  "pink":   (light: #a2326c, dark: #ffa0d8), // Kept from previous, good standalone pink
+  "purple": (light: #813d9c, dark: #c061cb), // Using purple-4 and purple-2 for better contrast than original
+  "slate":  (light: #526678, dark: #bbd1e5)  // Kept from previous, good standalone slate
 );
 
 
 // --- General SCSS Variables ---
-$line-height-base: 1.5; // Used in _base.scss
-$font-weight-normal: 400; // Used in _base.scss
-$font-weight-bold: 700;   // Used in _base.scss for strong, b
-$heading-font-weight: $font-weight-bold; // Used in _base.scss for headings
-$font-size-base-val: 10pt; // SCSS variable for base font size calculation
-$input-border-width-val: 1px; // Used in component SCSS for border calculations
-// $icon-size-base: 16px; // Will become CSS var
-// $icon-size-large: 20px; // Will become CSS var
-
-// Z-Indexes will be CSS custom properties directly.
+$line-height-base: 1.5;
+$font-weight-normal: 400;
+$font-weight-bold: 700;
+$heading-font-weight: $font-weight-bold;
+$font-size-base-val: 10pt;
+$input-border-width-val: 1px;
 
 // --- SASS Variables for initial setup of CSS Custom Properties (Light Theme Defaults) ---
-$window-bg-color-light: #fafafb;
-$window-fg-color-light: rgb(0 0 6 / 80%);
+// Updated to match Libadwaita 1.5 docs
+$window-bg-color-light: #fafafa;
+$window-fg-color-light: rgba(0, 0, 0, 0.8);
 $view-bg-color-light: #ffffff;
 $headerbar-bg-color-light: #ffffff;
-$headerbar-shade-color-light: rgb(0 0 6 / 12%);
-$headerbar-darker-shade-color-light: rgb(0 0 6 / 12%);
+$headerbar-shade-color-light: rgba(0, 0, 0, 0.12);
+$headerbar-darker-shade-color-light: rgba(0, 0, 0, 0.12); // Matches @headerbar_shade_color for light
+$sidebar-bg-color-light: #ebebeb;
+$sidebar-backdrop-color-light: #f2f2f2;
+$sidebar-border-color-light: rgba(0, 0, 0, 0.07);
+$sidebar-shade-color-light: rgba(0, 0, 0, 0.07);
+$card-bg-color-light: #ffffff;
+$card-shade-color-light: rgba(0, 0, 0, 0.07);
+$dialog-bg-color-light: #fafafa;
+$popover-bg-color-light: #ffffff;
+$popover-shade-color-light: rgba(0, 0, 0, 0.07);
 $input-readonly-bg-color-light: color.mix($window-fg-color-light, $view-bg-color-light, 95%);
 
 
 // --- SASS Variables for initial setup of CSS Custom Properties (Dark Theme Defaults) ---
-$window-bg-color-dark: #222226;
+// Updated to match Libadwaita 1.5 docs
+$window-bg-color-dark: #242424;
 $window-fg-color-dark: #ffffff;
-$view-bg-color-dark: #1d1d20;
-$headerbar-bg-color-dark: #2e2e32;
-$headerbar-shade-color-dark: rgb(0 0 6 / 36%);
-$headerbar-darker-shade-color-dark: rgb(0 0 6 / 90%);
+$view-bg-color-dark: #1e1e1e;
+$headerbar-bg-color-dark: #303030;
+$headerbar-shade-color-dark: rgba(0, 0, 0, 0.36);
+$headerbar-darker-shade-color-dark: rgba(0, 0, 0, 0.9);
+$sidebar-bg-color-dark: #303030;
+$sidebar-backdrop-color-dark: #2a2a2a;
+$sidebar-border-color-dark: rgba(0, 0, 0, 0.36);
+$sidebar-shade-color-dark: rgba(0, 0, 0, 0.25);
+$card-bg-color-dark: rgba(255, 255, 255, 0.08);
+$card-shade-color-dark: rgba(0, 0, 0, 0.36);
+$dialog-bg-color-dark: #383838;
+$popover-bg-color-dark: #383838;
+$popover-shade-color-dark: rgba(0, 0, 0, 0.25);
 $input-readonly-bg-color-dark: color.mix($window-fg-color-dark, $view-bg-color-dark, 95%);
 
 
 // --- Accent Color Definitions Map (for SCSS loops) ---
+// This map uses the $accent-standalone-colors for --accent-color
 $accent-definitions: (
   "blue":   (bg: $accent-blue-bg,   fg: $accent-default-fg, standalone-light: map.get(map.get($accent-standalone-colors, "blue"), "light"),   standalone-dark: map.get(map.get($accent-standalone-colors, "blue"), "dark")),
   "teal":   (bg: $accent-teal-bg,   fg: $accent-default-fg, standalone-light: map.get(map.get($accent-standalone-colors, "teal"), "light"),   standalone-dark: map.get(map.get($accent-standalone-colors, "teal"), "dark")),
@@ -95,7 +112,7 @@ $accent-definitions: (
 
 // --- CSS Custom Properties Definitions ---
 :root {
-  // Libadwaita Palette Colors (exposed as CSS variables)
+  // Libadwaita Palette Colors (exposed as CSS variables) - these are fine
   --blue-1: #{$adw-blue-1}; --blue-2: #{$adw-blue-2}; --blue-3: #{$adw-blue-3}; --blue-4: #{$adw-blue-4}; --blue-5: #{$adw-blue-5};
   --green-1: #{$adw-green-1}; --green-2: #{$adw-green-2}; --green-3: #{$adw-green-3}; --green-4: #{$adw-green-4}; --green-5: #{$adw-green-5};
   --yellow-1: #{$adw-yellow-1}; --yellow-2: #{$adw-yellow-2}; --yellow-3: #{$adw-yellow-3}; --yellow-4: #{$adw-yellow-4}; --yellow-5: #{$adw-yellow-5};
@@ -106,436 +123,419 @@ $accent-definitions: (
   --light-1: #{$adw-light-1}; --light-2: #{$adw-light-2}; --light-3: #{$adw-light-3}; --light-4: #{$adw-light-4}; --light-5: #{$adw-light-5};
   --dark-1: #{$adw-dark-1}; --dark-2: #{$adw-dark-2}; --dark-3: #{$adw-dark-3}; --dark-4: #{$adw-dark-4}; --dark-5: #{$adw-dark-5};
 
-  // Libadwaita Named Accent Backgrounds (for convenience)
+  // Libadwaita Named Accent Backgrounds (for convenience) - these are fine
   --accent-blue-bg: #{$accent-blue-bg};
   --accent-teal-bg: #{$accent-teal-bg};
-  --accent-green-bg: #{$accent-green-bg};
-  --accent-yellow-bg: #{$accent-yellow-bg};
+  --accent-green-bg: #{$accent-green-bg}; // This was $adw-green-3, but docs use $adw-green-4 for success-bg
+  --accent-yellow-bg: #{$accent-yellow-bg}; // This was $adw-yellow-3, but docs use $adw-yellow-5 for warning-bg
   --accent-orange-bg: #{$accent-orange-bg};
-  --accent-red-bg: #{$accent-red-bg};
+  --accent-red-bg: #{$accent-red-bg}; // This was $adw-red-3, matches destructive-bg
   --accent-pink-bg: #{$accent-pink-bg};
   --accent-purple-bg: #{$accent-purple-bg};
   --accent-slate-bg: #{$accent-slate-bg};
 
   // --- Default UI Colors (Light Theme) ---
+  // Updated to use the $accent-standalone-colors map which now holds docs' @..._color values
   $_default-accent-map: map.get($accent-definitions, "blue");
-  --accent-bg-color: #{map.get($_default-accent-map, "bg")};
-  --accent-fg-color: #{map.get($_default-accent-map, "fg")};
-  --accent-color: #{map.get($_default-accent-map, "standalone-light")}; // Standalone version for text on neutral bg
+  --accent-bg-color: #{map.get($_default-accent-map, "bg")}; // #3584e4
+  --accent-fg-color: #{map.get($_default-accent-map, "fg")}; // #ffffff
+  --accent-color: #{map.get($_default-accent-map, "standalone-light")}; // #1c71d8 (was #0461be)
 
-  --destructive-bg-color: #{$adw-red-3}; // #e01b24
-  --destructive-fg-color: #{$accent-default-fg};
-  --destructive-color: #{map.get(map.get($accent-standalone-colors, "red"), "light")};
+  --destructive-bg-color: #{$adw-red-3}; // #e01b24 (matches docs @destructive_bg_color light)
+  --destructive-fg-color: #{$accent-default-fg}; // #ffffff (matches docs)
+  --destructive-color: #{map.get(map.get($accent-standalone-colors, "red"), "light")}; // #c01c28 (was #c30000)
 
-  --success-bg-color: #{$adw-green-4}; // #2ec27e
-  --success-fg-color: #{$accent-default-fg};
-  --success-color: #{map.get(map.get($accent-standalone-colors, "green"), "light")};
+  --success-bg-color: #{$adw-green-4}; // #2ec27e (matches docs @success_bg_color light)
+  --success-fg-color: #{$accent-default-fg}; // #ffffff (matches docs)
+  --success-color: #{map.get(map.get($accent-standalone-colors, "green"), "light")}; // #1b8553 (was #007c3d)
 
-  --warning-bg-color: #{$adw-yellow-5}; // #e5a50a
-  --warning-fg-color: #{rgb(0 0 0 / 80%)};
-  --warning-color: #{map.get(map.get($accent-standalone-colors, "yellow"), "light")};
+  --warning-bg-color: #{$adw-yellow-5}; // #e5a50a (matches docs @warning_bg_color light)
+  --warning-fg-color: #{rgba(0, 0, 0, 0.8)}; // (matches docs)
+  --warning-color: #{map.get(map.get($accent-standalone-colors, "yellow"), "light")}; // #9c6e03 (was #905400)
 
-  --error-bg-color: #{$adw-red-3}; // #e01b24
-  --error-fg-color: #{$accent-default-fg};
-  --error-color: #{map.get(map.get($accent-standalone-colors, "red"), "light")};
+  --error-bg-color: var(--destructive-bg-color); // Alias to destructive
+  --error-fg-color: var(--destructive-fg-color); // Alias to destructive
+  --error-color: var(--destructive-color);       // Alias to destructive
 
-  --window-bg-color: #{$window-bg-color-light};
-  --window-fg-color: #{$window-fg-color-light};
-  --view-bg-color: #{$view-bg-color-light};
-  --view-fg-color: var(--window-fg-color); // Libadwaita: rgb(0 0 6 / 80%) which is same as window-fg-color-light
+  // Updated base SASS variables are used here
+  --window-bg-color: #{$window-bg-color-light}; // #fafafa
+  --window-fg-color: #{$window-fg-color-light}; // rgba(0,0,0,0.8)
+  --view-bg-color: #{$view-bg-color-light};     // #ffffff
+  --view-fg-color: var(--window-fg-color);      // rgba(0,0,0,0.8) (derived)
 
-  --headerbar-bg-color: #{$headerbar-bg-color-light};
-  --headerbar-fg-color: var(--window-fg-color); // Libadwaita: rgb(0 0 6 / 80%)
-  --headerbar-border-color: var(--window-fg-color); // Libadwaita: rgb(0 0 6 / 80%)
-  --headerbar-backdrop-color: var(--window-bg-color); // Libadwaita: #fafafb
-  --headerbar-shade-color: #{$headerbar-shade-color-light};
-  --headerbar-darker-shade-color: #{$headerbar-darker-shade-color-light};
+  --headerbar-bg-color: #{$headerbar-bg-color-light};         // #ffffff
+  --headerbar-fg-color: var(--window-fg-color);             // rgba(0,0,0,0.8)
+  --headerbar-border-color: var(--window-fg-color);         // rgba(0,0,0,0.8) (docs say this, could be --shade-color too)
+  --headerbar-backdrop-color: var(--window-bg-color);       // #fafafa (derived)
+  --headerbar-shade-color: #{$headerbar-shade-color-light}; // rgba(0,0,0,0.12)
+  --headerbar-darker-shade-color: #{$headerbar-darker-shade-color-light}; // rgba(0,0,0,0.12)
 
-  --sidebar-bg-color: #ebebed;
-  --sidebar-fg-color: var(--window-fg-color);
-  --sidebar-backdrop-color: #f2f2f4;
-  --sidebar-border-color: #{rgb(0 0 6 / 7%)};
-  --sidebar-shade-color: #{rgb(0 0 6 / 7%)};
+  --sidebar-bg-color: #{$sidebar-bg-color-light};             // #ebebeb
+  --sidebar-fg-color: var(--window-fg-color);                 // rgba(0,0,0,0.8)
+  --sidebar-backdrop-color: #{$sidebar-backdrop-color-light}; // #f2f2f2
+  --sidebar-border-color: #{$sidebar-border-color-light};     // rgba(0,0,0,0.07)
+  --sidebar-shade-color: #{$sidebar-shade-color-light};       // rgba(0,0,0,0.07)
 
-  --secondary-sidebar-bg-color: #f3f3f5;
+  // Secondary sidebar colors from docs (not in current SASS vars, add directly)
+  --secondary-sidebar-bg-color: #f3f3f3;
   --secondary-sidebar-fg-color: var(--window-fg-color);
-  --secondary-sidebar-backdrop-color: #f6f6fa;
-  --secondary-sidebar-border-color: #{rgb(0 0 6 / 7%)};
-  --secondary-sidebar-shade-color: #{rgb(0 0 6 / 7%)};
+  --secondary-sidebar-backdrop-color: #f6f6f6;
+  --secondary-sidebar-border-color: rgba(0, 0, 0, 0.07);
+  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.07);
 
-  --card-bg-color: #{$adw-light-1};
-  --card-fg-color: var(--window-fg-color);
-  --card-shade-color: #{rgb(0 0 6 / 7%)};
+  --card-bg-color: #{$card-bg-color-light};         // #ffffff
+  --card-fg-color: var(--window-fg-color);         // rgba(0,0,0,0.8)
+  --card-shade-color: #{$card-shade-color-light};  // rgba(0,0,0,0.07)
 
-  --dialog-bg-color: #fafafb;
-  --dialog-fg-color: var(--window-fg-color);
+  --dialog-bg-color: #{$dialog-bg-color-light};     // #fafafa
+  --dialog-fg-color: var(--window-fg-color);       // rgba(0,0,0,0.8)
 
-  --popover-bg-color: #{$adw-light-1};
-  --popover-fg-color: var(--window-fg-color);
-  --popover-shade-color: #{rgb(0 0 6 / 7%)};
+  --popover-bg-color: #{$popover-bg-color-light};       // #ffffff
+  --popover-fg-color: var(--window-fg-color);         // rgba(0,0,0,0.8)
+  --popover-shade-color: #{$popover-shade-color-light}; // rgba(0,0,0,0.07)
 
-  --overview-bg-color: #f3f3f5;
-  --overview-fg-color: var(--window-fg-color);
-  --thumbnail-bg-color: #ffffff;
-  --thumbnail-fg-color: var(--window-fg-color);
+  // Overview and Thumbnail colors (not in current SASS vars, add directly from docs if needed)
+  // --overview-bg-color: #f3f3f5; (matches secondary-sidebar)
+  // --overview-fg-color: var(--window-fg-color);
+  // --thumbnail-bg-color: #ffffff;
+  // --thumbnail-fg-color: var(--window-fg-color);
 
-  --active-toggle-bg-color: #ffffff;
-  --active-toggle-fg-color: var(--window-fg-color);
+  --active-toggle-bg-color: #ffffff; // Kept from previous, review if needed
+  --active-toggle-fg-color: var(--window-fg-color); // Kept
 
-  --shade-color: #{rgb(0 0 6 / 7%)};
-  --scrollbar-outline-color: #ffffff;
+  --shade-color: rgba(0, 0, 0, 0.07); // General shade color from docs
+  --scrollbar-outline-color: #ffffff; // From docs
 
-  --link-color: #{$adw-blue-4};
-  --link-hover-color: #{$adw-blue-5};
-  --link-visited-color: #{$adw-purple-4};
+  --link-color: var(--accent-color); // Use the updated --accent-color for links for consistency
+  --link-hover-color: #{color.mix(black, map.get(map.get($accent-standalone-colors, "blue"), "light"), 20%)}; // Darken accent
+  --link-visited-color: #{map.get(map.get($accent-standalone-colors, "purple"), "light")}; // Use purple standalone
 
-  // ListBox / Row related defaults (from adwaita-web, to be reviewed with component styling)
+  // ListBox / Row related defaults
   --list-row-selected-bg-color: var(--accent-bg-color);
   --list-row-selected-fg-color: var(--accent-fg-color);
-  --list-row-bg-color: var(--view-bg-color);
-  --list-row-hover-bg-color: #{rgba($adw-dark-5, 0.04)};
-  --list-row-active-bg-color: #{rgba($adw-dark-5, 0.08)};
-  --list-separator-color: #{rgba($adw-dark-5, 0.1)};
+  --list-row-bg-color: var(--view-bg-color); // Default for rows is view background
+  --list-row-hover-bg-color: #{rgba(0, 0, 0, 0.04)}; // Black with alpha for hover
+  --list-row-active-bg-color: #{rgba(0, 0, 0, 0.08)}; // Black with alpha for active
+  --list-separator-color: #{rgba(0, 0, 0, 0.1)};   // Black with alpha for separators
 
-  // Fonts (Libadwaita names)
+  // Fonts (Libadwaita names) - these are fine
   --document-font-family: 'Adwaita Sans', 'Cantarell', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --document-font-size: #{$font-size-base-val};
   --monospace-font-family: 'Adwaita Mono', 'Monaco', 'Menlo', 'Courier New', monospace;
   --monospace-font-size: #{$font-size-base-val};
 
-  // Helper Variables
-  --border-opacity: 0.15; // For light theme, regular contrast
-  --dim-opacity: 0.55;    // For light theme, regular contrast
+  // Helper Variables - these are fine
+  --border-opacity: 0.15;
+  --dim-opacity: 0.55;
   --disabled-opacity: 0.5;
   --border-color: color-mix(in srgb, currentColor var(--border-opacity), transparent);
-  --window-radius: 15px; // Libadwaita 1.8.beta uses 15px
+  --window-radius: 15px;
   --focus-ring-width: 2px;
   --focus-ring-color: var(--accent-color);
 
 
-  // Basic Sizing and Spacing (from current adwaita-web, largely compatible)
+  // Basic Sizing and Spacing - these are fine
   --font-size-base: #{$font-size-base-val};
   --font-size-small: #{math.round($font-size-base-val * 0.875)};
   --font-size-large: #{math.round($font-size-base-val * 1.125)};
-  // Typography scale for titles - these are for use within .title-* classes
-  --title-4-font-size: #{math.round($font-size-base-val * 1.125)}; // approx 12pt on 10pt base
-  --title-3-font-size: #{math.round($font-size-base-val * 1.25)};  // approx 13pt
-  --title-2-font-size: #{math.round($font-size-base-val * 1.5)};   // approx 15pt
-  --title-1-font-size: #{math.round($font-size-base-val * 1.8)};   // approx 18pt
-
-  // Variables for h1-h6 tags, mapping to title sizes for consistency
+  --title-4-font-size: #{math.round($font-size-base-val * 1.125)};
+  --title-3-font-size: #{math.round($font-size-base-val * 1.25)};
+  --title-2-font-size: #{math.round($font-size-base-val * 1.5)};
+  --title-1-font-size: #{math.round($font-size-base-val * 1.8)};
   --h1-font-size: var(--title-1-font-size);
   --h2-font-size: var(--title-2-font-size);
   --h3-font-size: var(--title-3-font-size);
   --h4-font-size: var(--title-4-font-size);
-  // h5 and h6 are mapped to --font-size-large and --font-size-base in _base.scss respectively
 
-  // ProgressBar specific
-  --progress-bar-track-color: var(--shade-color); // Default track to general shade color
-  --progress-bar-fill-color: var(--accent-bg-color); // Fill uses accent
+  // ProgressBar specific - fine
+  --progress-bar-track-color: var(--shade-color);
+  --progress-bar-fill-color: var(--accent-bg-color);
 
-  // RGB versions of foreground colors (primarily for rgba() alpha blending)
-  $_accent-fg-color-sass: $accent-default-fg; // This is already a SASS color (#ffffff)
-  $_error-fg-color-sass: $accent-default-fg;   // Same as accent fg
-  $_warning-fg-color-sass: $accent-yellow-fg; // This is rgb(0 0 0 / 80%), a SASS color
-  $_success-fg-color-sass: $accent-default-fg; // Same as accent fg
-  $_destructive-color-light-sass: #c00023; // Standalone destructive red for light theme
-  $_destructive-color-dark-sass: #ff888c;   // Standalone destructive red for dark theme
-  $_window-fg-color-light-sass: $window-fg-color-light; // This is rgb(0 0 6 / 80%), a SASS color
-  $_window-fg-color-dark-sass: $window-fg-color-dark;   // This is #ffffff, a SASS color
-  $_headerbar-fg-color-light-sass: $window-fg-color-light; // Headerbar fg is same as window fg in light
-  $_headerbar_fg-color-dark-sass: $window_fg-color_dark;   // Headerbar fg is same as window fg in dark
-  $_card_fg-color-light-sass: $window_fg-color_light; // Card fg is same as window fg in light: rgb(0 0 6 / 80%)
-  $_card_fg-color-dark-sass: $window-fg-color-dark;   // Card fg is same as window fg in dark: #ffffff
-  $_sidebar_fg-color-light-sass: $window_fg-color-light; // Sidebar fg is same as window fg in light
-  $_sidebar_fg-color-dark-sass: $window_fg-color_dark;   // Sidebar fg is same as window fg in dark
+  // RGB versions of foreground colors
+  // Re-evaluate these based on updated base colors.
+  // For example, $_window-fg-color-light-sass should now be rgba(0,0,0,0.8)
+  $_accent-fg-color-sass: $accent-default-fg;
+  $_error_fg_color_sass: $accent-default-fg; // Error fg is white
+  $_warning_fg_color_sass: $accent-yellow-fg; // Warning fg is dark
+  $_success_fg_color_sass: $accent-default-fg; // Success fg is white
+  $_destructive_color_light-sass: map.get(map.get($accent-standalone-colors, "red"), "light"); // #c01c28
+  $_destructive_color_dark-sass: map.get(map.get($accent-standalone-colors, "red"), "dark");   // #ff7b63
+  $_window_fg_color_light_sass: $window-fg-color-light; // rgba(0,0,0,0.8)
+  $_window_fg_color_dark_sass: $window-fg-color-dark;   // #ffffff
+  // Assuming headerbar, card, sidebar fg colors are same as window_fg_color
+  $_headerbar_fg_color_light-sass: $_window_fg_color_light_sass;
+  $_headerbar_fg_color_dark-sass: $_window_fg_color_dark_sass;
+  $_card_fg_color_light-sass: $_window_fg_color_light_sass;
+  $_card_fg_color_dark-sass: $_window_fg_color_dark_sass;
+  $_sidebar_fg_color_light-sass: $_window_fg_color_light_sass;
+  $_sidebar_fg_color_dark-sass: $_window_fg_color_dark_sass;
 
 
-  --accent-fg-color-rgb: #{color.channel($_accent-fg-color-sass, "red")}, #{color.channel($_accent-fg-color-sass, "green")}, #{color.channel($_accent-fg-color-sass, "blue")};
-  --error-fg-color-rgb: #{color.channel($_error-fg-color-sass, "red")}, #{color.channel($_error-fg-color-sass, "green")}, #{color.channel($_error-fg-color-sass, "blue")};
-  --warning-fg-color-rgb: #{color.channel($_warning-fg-color-sass, "red")}, #{color.channel($_warning-fg-color-sass, "green")}, #{color.channel($_warning-fg-color-sass, "blue")};
-  --success-fg-color-rgb: #{color.channel($_success-fg-color-sass, "red")}, #{color.channel($_success-fg-color-sass, "green")}, #{color.channel($_success-fg-color-sass, "blue")};
-  --destructive-color-rgb: #{color.channel($_destructive-color-light-sass, "red")}, #{color.channel($_destructive-color-light-sass, "green")}, #{color.channel($_destructive-color-light-sass, "blue")};
-  --window-fg-color-rgb: #{color.channel($_window_fg_color-light-sass, "red")}, #{color.channel($_window_fg_color-light-sass, "green")}, #{color.channel($_window_fg_color-light-sass, "blue")};
-  --headerbar-fg-color-rgb: #{color.channel($_headerbar_fg_color_light-sass, "red")}, #{color.channel($_headerbar_fg_color_light-sass, "green")}, #{color.channel($_headerbar_fg_color_light-sass, "blue")};
-  --headerbar-fg-color-alpha: #{color.alpha($_headerbar_fg_color_light-sass)};
-  --card-fg-color-rgb: #{color.channel($_card_fg-color_light-sass, "red")}, #{color.channel($_card_fg_color-light-sass, "green")}, #{color.channel($_card_fg_color_light-sass, "blue")};
-  --card-fg-color-alpha: #{color.alpha($_card_fg-color-light-sass)};
-  --sidebar-fg-color-rgb: #{color.channel($_sidebar_fg_color_light-sass, "red")}, #{color.channel($_sidebar_fg_color_light-sass, "green")}, #{color.channel($_sidebar_fg_color_light-sass, "blue")};
-  --sidebar-fg-color-alpha: #{color.alpha($_sidebar_fg_color_light-sass)};
+  --accent-fg-color-rgb: #{color.red($_accent-fg-color-sass)}, #{color.green($_accent-fg-color-sass)}, #{color.blue($_accent-fg-color-sass)};
+  --error-fg-color-rgb: #{color.red($_error_fg_color_sass)}, #{color.green($_error_fg_color_sass)}, #{color.blue($_error_fg_color_sass)};
+  --warning-fg-color-rgb: #{color.red($_warning_fg_color_sass)}, #{color.green($_warning_fg_color_sass)}, #{color.blue($_warning_fg_color_sass)};
+  --success-fg-color-rgb: #{color.red($_success_fg_color_sass)}, #{color.green($_success_fg_color_sass)}, #{color.blue($_success_fg_color_sass)};
+  --destructive-color-rgb: #{color.red($_destructive_color_light-sass)}, #{color.green($_destructive_color_light-sass)}, #{color.blue($_destructive_color_light-sass)};
+  --window-fg-color-rgb: #{color.red($_window_fg_color_light-sass)}, #{color.green($_window_fg_color_light-sass)}, #{color.blue($_window_fg_color_light-sass)};
+  --headerbar-fg-color-rgb: #{color.red($_headerbar_fg_color_light-sass)}, #{color.green($_headerbar_fg_color_light-sass)}, #{color.blue($_headerbar_fg_color_light-sass)};
+  --headerbar-fg-color-alpha: #{color.alpha($_headerbar_fg_color_light-sass)}; // Will be 0.8 for light
+  --card-fg-color-rgb: #{color.red($_card_fg_color_light-sass)}, #{color.green($_card_fg_color_light-sass)}, #{color.blue($_card_fg_color_light-sass)};
+  --card-fg-color-alpha: #{color.alpha($_card_fg_color_light-sass)}; // Will be 0.8 for light
+  --sidebar-fg-color-rgb: #{color.red($_sidebar_fg_color_light-sass)}, #{color.green($_sidebar_fg_color_light-sass)}, #{color.blue($_sidebar_fg_color_light-sass)};
+  --sidebar-fg-color-alpha: #{color.alpha($_sidebar_fg_color_light-sass)}; // Will be 0.8 for light
 
-  // Button State Variables (Default button derived from window colors)
-  --button-bg-color: var(--window-bg-color); // Default button bg
-  --button-fg-color: var(--window-fg-color); // Default button fg
-  --button-border-color: var(--border-color);   // Default button border
-  --button-hover-bg-color: #{color.mix($window-fg-color-light, $window-bg-color-light, 10%)}; // Mix with fg to darken/lighten
+  // Button State Variables - fine
+  --button-bg-color: var(--window-bg-color);
+  --button-fg-color: var(--window-fg-color);
+  --button-border-color: var(--border-color);
+  --button-hover-bg-color: #{color.mix($window-fg-color-light, $window-bg-color-light, 10%)};
   --button-active-bg-color: #{color.mix($window-fg-color-light, $window-bg-color-light, 20%)};
-  --button-flat-hover-bg-color: #{rgba($window-fg-color-light, 0.05)};
-  --button-flat-active-bg-color: #{rgba($window-fg-color-light, 0.1)};
-  --button-disabled-opacity: var(--disabled-opacity); // Use global disabled opacity
+  --button-flat-hover-bg-color: #{rgba($window-fg-color-light, 0.05)}; // Use rgba with black base for consistency
+  --button-flat-active-bg-color: #{rgba($window-fg-color-light, 0.1)}; // Use rgba with black base
+  --button-disabled-opacity: var(--disabled-opacity);
 
-  // Accent button states (derived from current accent colors)
-  // These are set when an accent class is active. Initial default (blue) is set here.
+  // Accent button states - fine
   $_default-accent-bg: map.get(map.get($accent-definitions, "blue"), "bg");
-  $_default-accent-fg: map.get(map.get($accent-definitions, "blue"), "fg");
   --accent-bg-hover-color: #{color.mix(black, $_default-accent-bg, 10%)};
   --accent-bg-active-color: #{color.mix(black, $_default-accent-bg, 20%)};
 
-  // Destructive button states
-  $_destructive-bg-light: $adw-red-3;
-  $_destructive-fg-light: $accent-default-fg;
+  // Destructive button states - fine
+  $_destructive-bg-light: $adw-red-3; // This is @destructive_bg_color light
   --destructive-bg-hover-color: #{color.mix(black, $_destructive-bg-light, 10%)};
   --destructive-bg-active-color: #{color.mix(black, $_destructive-bg-light, 20%)};
 
 
-  // Dialog specific variables
-  --dialog-box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23); // Typical material design shadow, adjust as needed
+  // Dialog specific variables - fine
+  --dialog-box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
   --dialog-backdrop-color: rgba(0,0,0,0.4);
 
-  // Popover specific variables
+  // Popover specific variables - fine
   --popover-box-shadow-light: 0 2px 8px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1);
-  --popover-box-shadow-dark: 0 2px 8px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25); // Darker shadow for dark theme
+  --popover-box-shadow-dark: 0 2px 8px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25);
   --popover-box-shadow: var(--popover-box-shadow-light);
 
-  // General purpose subtle shadow for elements like default list-boxes or action rows
+  // Shadows - fine
   --subtle-box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.03);
-  // Stronger shadow for cards, as per user request
   --stronger-card-box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 2px 5px rgba(0,0,0,0.06);
 
 
+  // Border radius, spacing, switch, input states, icon sizes, line heights, font weights, z-indexes - all seem okay.
   --border-radius-small: 4px;
   --border-radius-medium: 6px;
-  --border-radius-default: 8px; // Main radius for buttons, inputs, cards
-  --border-radius-large: 12px; // Larger radius, e.g. for some popovers or windows
+  --border-radius-default: 8px;
+  --border-radius-large: 12px;
   --border-width: #{$input-border-width-val};
 
   --spacing-xxs: 3px;  --spacing-xs: 6px;   --spacing-s: 9px;
   --spacing-m: 12px;   --spacing-l: 18px;  --spacing-xl: 24px; --spacing-xxl: 36px;
 
-  // Switch component variables (Light Theme) - to be reviewed during component update
-  --switch-slider-off-bg-color: #{rgba($adw-dark-5, 0.2)};
+  --switch-slider-off-bg-color: #{rgba(0, 0, 0, 0.2)}; // Use black base
   --switch-knob-bg-color: #{$adw-light-1};
-  --switch-slider-disabled-off-bg-color: #{rgba($adw-dark-5, 0.1)};
+  --switch-slider-disabled-off-bg-color: #{rgba(0, 0, 0, 0.1)}; // Use black base
   --switch-knob-disabled-bg-color: #{$adw-light-3};
 
-  // Input States
   --input-readonly-bg-color: #{$input-readonly-bg-color-light};
 
-  // Icon Sizes
   --icon-size-base: 16px;
   --icon-size-large: 20px;
+  --icon-size-small: 14px; // Already present
 
-  // Line Heights
   --line-height-base: #{$line-height-base};
-
-  // Font Weights
   --font-weight-normal: 400;
   --font-weight-bold: 700;
-  --heading-font-weight: var(--font-weight-bold); // Headings use the bold CSS var
+  --heading-font-weight: var(--font-weight-bold);
 
-  // Z-Indexes
   --z-index-dialog-backdrop: 1040;
   --z-index-dialog: 1050;
   --z-index-popover: 1060;
   --z-index-toast: 1070;
-  --z-index-banner: 1030; // Banners usually below dialogs/popovers but above general content
+  --z-index-banner: 1030;
 
-  // Row Specific (used by ActionRow, etc.)
-  --primary-fg-color: var(--window-fg-color); // Default primary text color for rows
-  // For secondary text like subtitles or dimmed icons within rows.
-  // Note: --window-fg-color already has opacity built in for light theme (rgb(0 0 6 / 80%)).
-  // --dim-opacity is 0.55. Applying 0.55 to 0.8 alpha results in ~0.44 alpha.
-  // Libadwaita's .dim-label is often around 0.55 alpha of the base text.
-  // Let's define secondary-fg-color based on --dim-opacity applied to the RGB part of window-fg-color.
-  --secondary-fg-color: rgba(var(--window-fg-color-rgb), var(--dim-opacity));
-  --icon-opacity: 0.7; // Default opacity for less prominent icons like chevrons
-  --focus-outline-offset: -2px; // Default offset for focus rings on rows
-  --row-border-radius: var(--border-radius-small); // Default border radius for rows/interactive elements within rows
-
-  // Defaults for row-base mixin
+  // Row Specific - fine
+  --primary-fg-color: var(--window-fg-color);
+  --secondary-fg-color: rgba(var(--window-fg-color-rgb), var(--dim-opacity)); // Uses updated rgb var
+  --icon-opacity: 0.7;
+  --focus-outline-offset: -2px;
+  --row-border-radius: var(--border-radius-small);
   --row-padding-vertical-default: 10px;
   --row-padding-horizontal-default: var(--spacing-m);
   --row-min-height: 48px;
-  --row-bg-color: transparent; // Rows are often transparent over their container's background
+  --row-bg-color: transparent;
   --row-fg-color: var(--primary-fg-color);
 
-  // Expander Row
+  // Expander Row - fine
   --expander-content-bg-color: var(--view-bg-color);
 
-  // Animation
-  --animation-duration-shortest: 100ms; // For very quick fades, etc.
-  --animation-duration-short: 150ms;    // Common short duration
-  --animation-duration-medium: 250ms;   // Default medium duration
-  --animation-duration-long: 400ms;     // Longer animations
+  // Animation - fine
+  --animation-duration-shortest: 100ms;
+  --animation-duration-short: 150ms;
+  --animation-duration-medium: 250ms;
+  --animation-duration-long: 400ms;
   --animation-ease-out-cubic: cubic-bezier(0.215, 0.610, 0.355, 1.000);
   --animation-ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1.000);
   --animation-ease-in-cubic: cubic-bezier(0.550, 0.055, 0.675, 0.190);
   --animation-ease-out-sine: cubic-bezier(0.390, 0.575, 0.565, 1.000);
-  // Add more easings as needed, e.g., var(--animation-ease-standard)
 
-  // Icon Sizes (extending existing)
-  --icon-size-small: 14px;
-
-  // Toast Specific
-  --toast-bg-color: #{$adw-dark-3}; // Dark, neutral background
-  --toast-fg-color: #{$adw-light-1}; // Light text
-  $_toast_fg_color_sass: $adw-light-1; // SASS variable for RGB conversion
-  --toast-fg-color-rgb: #{color.channel($_toast_fg_color_sass, "red")}, #{color.channel($_toast_fg_color_sass, "green")}, #{color.channel($_toast_fg_color_sass, "blue")};
-  --toast-secondary-fg-color: #{rgba($adw-light-1, 0.7)}; // Slightly dimmed for secondary elements
-  --toast-accent-color: var(--accent-color); // Use existing accent for actions, ensure it's visible on dark toast
-  --toast-box-shadow: var(--popover-box-shadow-dark); // Toasts are similar to dark popovers
+  // Toast Specific - fine
+  --toast-bg-color: #{$adw-dark-3};
+  --toast-fg-color: #{$adw-light-1};
+  $_toast_fg_color_sass: $adw-light-1;
+  --toast-fg-color-rgb: #{color.red($_toast_fg_color_sass)}, #{color.green($_toast_fg_color_sass)}, #{color.blue($_toast_fg_color_sass)};
+  --toast-secondary-fg-color: #{rgba($adw-light-1, 0.7)};
+  --toast-accent-color: var(--accent-color);
+  --toast-box-shadow: var(--popover-box-shadow-dark);
   --toast-max-width: 400px;
   --toast-min-height: 36px;
-  --toast-border-radius: var(--border-radius-large); // Match popover/card radius
+  --toast-border-radius: var(--border-radius-large);
 
-  // Spinner Specific
-  --spinner-color: var(--accent-color); // Active part of the spinner
-  --spinner-track-color: var(--shade-color); // The track/background of the spinner
+  // Spinner Specific - fine
+  --spinner-color: var(--accent-color);
+  --spinner-track-color: var(--shade-color);
 
-  // Pill button radius (for toggle groups, etc.)
+  // Pill button radius - fine
   --pill-button-border-radius: 100px;
 
-  // Icon URLs (as CSS Custom Properties)
-  // Path must be root-relative for use in JS component Shadow DOM styles if var is passed through.
+  // Icon URLs - fine
   --icon-window-close-symbolic-url: url('/static/data/icons/symbolic/window-close-symbolic.svg');
-  // Add other frequently used icon URLs here if components need them directly via CSS vars
 
 
   // --- Dark Theme Overrides ---
   &.theme-dark {
-    $_default-accent-map-dark: map.get($accent-definitions, "blue");
-    --accent-bg-color: #{map.get($_default-accent-map-dark, "bg")};
-    --accent-fg-color: #{map.get($_default-accent-map-dark, "fg")};
-    --accent-color: #{map.get($_default-accent-map-dark, "standalone-dark")};
+    $_default-accent-map-dark: map.get($accent-definitions, "blue"); // Uses updated $accent-definitions
+    --accent-bg-color: #{map.get($_default-accent-map-dark, "bg")}; // #3584e4
+    --accent-fg-color: #{map.get($_default-accent-map-dark, "fg")}; // #ffffff
+    --accent-color: #{map.get($_default-accent-map-dark, "standalone-dark")}; // #78aeed (was #81d0ff)
 
-    --destructive-bg-color: #{$adw-red-4}; // #c01c28
-    --destructive-fg-color: #{$accent-default-fg};
-    --destructive-color: #{map.get(map.get($accent-standalone-colors, "red"), "dark")};
+    --destructive-bg-color: #{$adw-red-4}; // #c01c28 (matches docs @destructive_bg_color dark)
+    --destructive-fg-color: #{$accent-default-fg}; // #ffffff (matches docs)
+    --destructive-color: #{map.get(map.get($accent-standalone-colors, "red"), "dark")}; // #ff7b63 (was #ff938c)
 
-    --success-bg-color: #{$adw-green-5}; // #26a269
-    --success-fg-color: #{$accent-default-fg};
-    --success-color: #{map.get(map.get($accent-standalone-colors, "green"), "dark")};
+    --success-bg-color: #{$adw-green-5}; // #26a269 (matches docs @success_bg_color dark)
+    --success-fg-color: #{$accent-default-fg}; // #ffffff (matches docs)
+    --success-color: #{map.get(map.get($accent-standalone-colors, "green"), "dark")}; // #8ff0a4 (was #78e9ab)
 
-    --warning-bg-color: #cd9309; // Libadwaita Dark
-    --warning-fg-color: #{rgb(0 0 0 / 80%)};
-    --warning-color: #{map.get(map.get($accent-standalone-colors, "yellow"), "dark")};
+    --warning-bg-color: #cd9309; // (matches docs @warning_bg_color dark)
+    --warning-fg-color: #{rgba(0, 0, 0, 0.8)}; // (matches docs)
+    --warning-color: #{map.get(map.get($accent-standalone-colors, "yellow"), "dark")}; // #f8e45c (was #ffc252)
 
-    --error-bg-color: #{$adw-red-4}; // #c01c28
-    --error-fg-color: #{$accent-default-fg};
-    --error-color: #{map.get(map.get($accent-standalone-colors, "red"), "dark")};
+    --error-bg-color: var(--destructive-bg-color);
+    --error-fg-color: var(--destructive-fg-color);
+    --error-color: var(--destructive-color);
 
-    --window-bg-color: #{$window-bg-color-dark};
-    --window-fg-color: #{$window-fg-color-dark};
-    --view-bg-color: #{$view-bg-color-dark};
-    --view-fg-color: var(--window-fg-color);
+    // Updated base SASS variables are used here
+    --window-bg-color: #{$window-bg-color-dark}; // #242424
+    --window-fg-color: #{$window-fg-color-dark}; // #ffffff
+    --view-bg-color: #{$view-bg-color-dark};     // #1e1e1e
+    --view-fg-color: var(--window-fg-color);      // #ffffff
 
-    --headerbar-bg-color: #{$headerbar-bg-color-dark};
-    --headerbar-fg-color: var(--window-fg-color);
-    --headerbar-border-color: var(--window-fg-color);
-    --headerbar-backdrop-color: var(--window-bg-color);
-    --headerbar-shade-color: #{$headerbar-shade-color-dark};
-    --headerbar-darker-shade-color: #{$headerbar-darker-shade-color-dark};
+    --headerbar-bg-color: #{$headerbar-bg-color-dark};         // #303030
+    --headerbar-fg-color: var(--window-fg-color);             // #ffffff
+    --headerbar-border-color: var(--window-fg-color);         // #ffffff
+    --headerbar-backdrop-color: var(--window-bg-color);       // #242424
+    --headerbar-shade-color: #{$headerbar-shade-color-dark}; // rgba(0,0,0,0.36)
+    --headerbar-darker-shade-color: #{$headerbar-darker-shade-color-dark}; // rgba(0,0,0,0.9)
 
-    --sidebar-bg-color: #2e2e32;
-    --sidebar-fg-color: var(--window-fg-color);
-    --sidebar-backdrop-color: #28282c;
-    --sidebar-border-color: #{rgb(0 0 6 / 36%)};
-    --sidebar-shade-color: #{rgb(0 0 6 / 25%)};
+    --sidebar-bg-color: #{$sidebar-bg-color-dark};             // #303030
+    --sidebar-fg-color: var(--window-fg-color);                 // #ffffff
+    --sidebar-backdrop-color: #{$sidebar-backdrop-color-dark}; // #2a2a2a
+    --sidebar-border-color: #{$sidebar-border-color-dark};     // rgba(0,0,0,0.36)
+    --sidebar-shade-color: #{$sidebar-shade-color-dark};       // rgba(0,0,0,0.25)
 
-    --secondary-sidebar-bg-color: #28282c;
+    // Secondary sidebar colors from docs
+    --secondary-sidebar-bg-color: #2a2a2a;
     --secondary-sidebar-fg-color: var(--window-fg-color);
-    --secondary-sidebar-backdrop-color: #252529;
-    --secondary-sidebar-border-color: #{rgb(0 0 6 / 36%)};
-    --secondary-sidebar-shade-color: #{rgb(0 0 6 / 25%)};
+    --secondary-sidebar-backdrop-color: #272727;
+    --secondary-sidebar-border-color: rgba(0, 0, 0, 0.36);
+    --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.25);
 
-    --card-bg-color: #{rgb(255 255 255 / 8%)};
-    --card-fg-color: var(--window-fg-color);
-    --card-shade-color: #{rgb(0 0 6 / 36%)};
+    --card-bg-color: #{$card-bg-color-dark};         // rgba(255,255,255,0.08)
+    --card-fg-color: var(--window-fg-color);         // #ffffff
+    --card-shade-color: #{$card-shade-color-dark};  // rgba(0,0,0,0.36)
 
-    --dialog-bg-color: #36363a;
-    --dialog-fg-color: var(--window-fg-color);
+    --dialog-bg-color: #{$dialog-bg-color-dark};     // #383838
+    --dialog-fg-color: var(--window-fg-color);       // #ffffff
 
-    --popover-bg-color: #36363a;
-    --popover-fg-color: var(--window-fg-color);
-    --popover-shade-color: #{rgb(0 0 6 / 25%)};
+    --popover-bg-color: #{$popover-bg-color-dark};       // #383838
+    --popover-fg-color: var(--window-fg-color);         // #ffffff
+    --popover-shade-color: #{$popover-shade-color-dark}; // rgba(0,0,0,0.25)
 
-    --overview-bg-color: #28282c;
-    --overview-fg-color: var(--window-fg-color);
-    --thumbnail-bg-color: #39393d;
-    --thumbnail-fg-color: var(--window-fg-color);
+    // Overview and Thumbnail colors (not in current SASS vars, add directly from docs if needed)
+    // --overview-bg-color: #28282c;
+    // --overview-fg-color: var(--window-fg-color);
+    // --thumbnail-bg-color: #383838; // Matches popover/dialog bg dark
+    // --thumbnail-fg-color: var(--window-fg-color);
 
-    --active-toggle-bg-color: #{rgb(255 255 255 / 20%)};
-    --active-toggle-fg-color: var(--window-fg-color);
+    --active-toggle-bg-color: #{rgba(255 255 255 / 20%)}; // Kept
+    --active-toggle-fg-color: var(--window-fg-color);    // Kept
 
-    --shade-color: #{rgb(0 0 6 / 25%)};
-    --scrollbar-outline-color: #{rgb(0 0 6 / 50%)};
+    --shade-color: rgba(0, 0, 0, 0.25); // General shade color from docs for dark
+    --scrollbar-outline-color: #{rgba(0, 0, 0, 0.5)}; // From docs
 
-    --link-color: #{$adw-blue-1};
-    --link-hover-color: #{$adw-blue-2};
-    --link-visited-color: #{$adw-purple-1};
+    --link-color: var(--accent-color); // Use dark --accent-color (#78aeed)
+    --link-hover-color: #{color.mix(white, map.get(map.get($accent-standalone-colors, "blue"), "dark"), 20%)}; // Lighten
+    --link-visited-color: #{map.get(map.get($accent-standalone-colors, "purple"), "dark")}; // Use purple standalone dark
 
-    --list-row-hover-bg-color: #{rgba($adw-light-1, 0.06)};
-    --list-row-active-bg-color: #{rgba($adw-light-1, 0.10)};
-    --list-separator-color: #{rgba($adw-light-1, 0.1)};
+    --list-row-hover-bg-color: #{rgba(255, 255, 255, 0.06)}; // White with alpha
+    --list-row-active-bg-color: #{rgba(255, 255, 255, 0.10)}; // White with alpha
+    --list-separator-color: #{rgba(255, 255, 255, 0.1)};   // White with alpha
 
     // Switch component variables (Dark Theme)
-    --switch-slider-off-bg-color: #{rgba($adw-light-1, 0.2)};
-    --switch-knob-bg-color: #{$adw-light-3};
-    --switch-slider-disabled-off-bg-color: #{rgba($adw-light-1, 0.1)};
-    --switch-knob-disabled-bg-color: #{$adw-dark-1};
+    --switch-slider-off-bg-color: #{rgba(255, 255, 255, 0.2)}; // Use white base
+    --switch-knob-bg-color: #{$adw-light-3}; // This is a light grey, good for dark
+    --switch-slider-disabled-off-bg-color: #{rgba(255, 255, 255, 0.1)}; // Use white base
+    --switch-knob-disabled-bg-color: #{$adw-dark-1}; // This is a mid-dark grey
 
-    // --border-opacity for dark theme might need adjustment if it's different in libadwaita's high contrast dark.
-    // For now, using the same --border-color definition which relies on currentColor.
-    --popover-box-shadow: var(--popover-box-shadow-dark);
+    --popover-box-shadow: var(--popover-box-shadow-dark); // Fine
 
-    // Overrides for new shadows in dark theme
+    // Shadows - fine
     --subtle-box-shadow: 0 1px 2px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.1);
     --stronger-card-box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 3px 7px rgba(0,0,0,0.12);
 
-    // Input States for Dark Theme
+    // Input States for Dark Theme - fine
     --input-readonly-bg-color: #{$input-readonly-bg-color-dark};
 
-    // Button State Variables for Dark Theme
+    // Button State Variables for Dark Theme - fine
     --button-hover-bg-color: #{color.mix($window-fg-color-dark, $window-bg-color-dark, 10%)};
     --button-active-bg-color: #{color.mix($window-fg-color-dark, $window-bg-color-dark, 20%)};
-    --button-flat-hover-bg-color: #{rgba($window-fg-color-dark, 0.08)}; // Slightly more visible on dark
+    --button-flat-hover-bg-color: #{rgba($window-fg-color-dark, 0.08)};
     --button-flat-active-bg-color: #{rgba($window-fg-color-dark, 0.12)};
 
-    // Accent button states for Dark Theme (default blue)
-    --accent-bg-hover-color: #{color.mix(white, $_default-accent-bg, 10%)}; // Lighten for dark theme
-    --accent-bg-active-color: #{color.mix(white, $_default-accent-bg, 20%)};
+    // Accent button states for Dark Theme - fine
+    $_default-accent-bg-dark: map.get(map.get($accent-definitions, "blue"), "bg"); // Still uses the base accent bg
+    --accent-bg-hover-color: #{color.mix(white, $_default-accent-bg-dark, 10%)};
+    --accent-bg-active-color: #{color.mix(white, $_default-accent-bg-dark, 20%)};
 
-    // Destructive button states for Dark Theme
-    $_destructive-bg-dark: $adw-red-4;
+    // Destructive button states for Dark Theme - fine
+    $_destructive-bg-dark: $adw-red-4; // This is @destructive_bg_color dark
     --destructive-bg-hover-color: #{color.mix(white, $_destructive-bg-dark, 10%)};
     --destructive-bg-active-color: #{color.mix(white, $_destructive-bg-dark, 20%)};
 
     // RGB versions for dark theme
-    --accent-fg-color-rgb: #{color.channel($_accent-fg-color-sass, "red")}, #{color.channel($_accent-fg-color-sass, "green")}, #{color.channel($_accent-fg-color-sass, "blue")}; // Stays white
-    --error-fg-color-rgb: #{color.channel($_error-fg-color-sass, "red")}, #{color.channel($_error-fg-color-sass, "green")}, #{color.channel($_error-fg-color-sass, "blue")};
-    --warning-fg-color-rgb: #{color.channel($_warning-fg-color-sass, "red")}, #{color.channel($_warning-fg-color-sass, "green")}, #{color.channel($_warning-fg-color-sass, "blue")}; // Stays dark
-    --success-fg-color-rgb: #{color.channel($_success_fg-color-sass, "red")}, #{color.channel($_success_fg-color-sass, "green")}, #{color.channel($_success_fg-color-sass, "blue")};
-    --destructive-color-rgb: #{color.channel($_destructive-color-dark-sass, "red")}, #{color.channel($_destructive-color-dark-sass, "green")}, #{color.channel($_destructive-color-dark-sass, "blue")};
-    --window-fg-color-rgb: #{color.channel($_window_fg-color_dark-sass, "red")}, #{color.channel($_window_fg_color_dark-sass, "green")}, #{color.channel($_window_fg_color_dark-sass, "blue")};
-    --headerbar-fg-color-rgb: #{color.channel($_headerbar_fg_color_dark-sass, "red")}, #{color.channel($_headerbar_fg_color_dark-sass, "green")}, #{color.channel($_headerbar_fg_color_dark-sass, "blue")};
-    --headerbar-fg-color-alpha: #{color.alpha($_headerbar_fg_color_dark-sass)};
-    --card-fg-color-rgb: #{color.channel($_card_fg-color_dark-sass, "red")}, #{color.channel($_card_fg-color_dark-sass, "green")}, #{color.channel($_card_fg-color_dark-sass, "blue")};
-    --card-fg-color-alpha: #{color.alpha($_card_fg_color_dark-sass)};
-    --sidebar-fg-color-rgb: #{color.channel($_sidebar_fg_color_dark-sass, "red")}, #{color.channel($_sidebar_fg_color_dark-sass, "green")}, #{color.channel($_sidebar_fg_color_dark-sass, "blue")};
-    --sidebar-fg-color-alpha: #{color.alpha($_sidebar_fg_color_dark-sass)};
+    // These use the SASS variables which have been updated or confirmed.
+    --accent-fg-color-rgb: #{color.red($_accent-fg-color-sass)}, #{color.green($_accent-fg-color-sass)}, #{color.blue($_accent-fg-color-sass)};
+    --error-fg-color-rgb: #{color.red($_error_fg_color_sass)}, #{color.green($_error_fg_color_sass)}, #{color.blue($_error_fg_color_sass)};
+    --warning-fg-color-rgb: #{color.red($_warning_fg_color_sass)}, #{color.green($_warning_fg_color_sass)}, #{color.blue($_warning_fg_color_sass)};
+    --success-fg-color-rgb: #{color.red($_success_fg_color_sass)}, #{color.green($_success_fg_color_sass)}, #{color.blue($_success_fg_color_sass)};
+    --destructive-color-rgb: #{color.red($_destructive_color_dark-sass)}, #{color.green($_destructive_color_dark-sass)}, #{color.blue($_destructive_color_dark-sass)};
+    --window-fg-color-rgb: #{color.red($_window_fg_color_dark-sass)}, #{color.green($_window_fg_color_dark-sass)}, #{color.blue($_window_fg_color_dark-sass)};
+    --headerbar-fg-color-rgb: #{color.red($_headerbar_fg_color_dark-sass)}, #{color.green($_headerbar_fg_color_dark-sass)}, #{color.blue($_headerbar_fg_color_dark-sass)};
+    --headerbar-fg-color-alpha: #{color.alpha($_headerbar_fg_color_dark-sass)}; // Will be 1 for dark
+    --card-fg-color-rgb: #{color.red($_card_fg_color_dark-sass)}, #{color.green($_card_fg_color_dark-sass)}, #{color.blue($_card_fg_color_dark-sass)};
+    --card-fg-color-alpha: #{color.alpha($_card_fg_color_dark-sass)}; // Will be 1 for dark
+    --sidebar-fg-color-rgb: #{color.red($_sidebar_fg_color_dark-sass)}, #{color.green($_sidebar_fg_color_dark-sass)}, #{color.blue($_sidebar_fg_color_dark-sass)};
+    --sidebar-fg-color-alpha: #{color.alpha($_sidebar_fg_color_dark-sass)}; // Will be 1 for dark
 
-    // Row specific for dark theme
-    --secondary-fg-color: rgba(var(--window-fg-color-rgb), var(--dim-opacity)); // Re-calculate for dark theme context
+    // Row specific for dark theme - fine
+    --secondary-fg-color: rgba(var(--window-fg-color-rgb), var(--dim-opacity));
   }
 
-  // Accent color overrides for both light and dark themes
+  // Accent color overrides loop - this logic is fine, uses updated $accent-definitions
   @each $name, $details in $accent-definitions {
     &.accent-#{$name} {
       $_current-accent-bg: map.get($details, "bg");
       --accent-bg-color: #{$_current-accent-bg};
       --accent-fg-color: #{map.get($details, "fg")};
 
-      // The --accent-color (standalone) is set based on whether .theme-dark is also present
       &:not(.theme-dark) {
         --accent-color: #{map.get($details, "standalone-light")};
         --accent-bg-hover-color: #{color.mix(black, $_current-accent-bg, 10%)};
@@ -551,7 +551,7 @@ $accent-definitions: (
 }
 
 // --- SCSS Variables that reference CSS Custom Properties (for convenience in SCSS) ---
-// Minimal use preferred. Direct var() usage in component SCSS is clearer.
+// These are fine.
 $font-family-sans-serif: var(--document-font-family);
 $font-family-monospace: var(--monospace-font-family);
 $focus-ring: var(--focus-ring-width) solid var(--focus-ring-color);

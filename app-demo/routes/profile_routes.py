@@ -6,10 +6,10 @@ from PIL import Image
 from werkzeug.utils import secure_filename
 from flask_wtf.file import FileAllowed
 import bleach
-from datetime import datetime # Moved import back to top
+from datetime import datetime
 
-from ..models import User, Post, Comment, UserPhoto
-from ..forms import ProfileEditForm, GalleryPhotoUploadForm
+from ..models import User, Post, Comment, UserPhoto, SiteSetting # Added SiteSetting
+from ..forms import ProfileEditForm, GalleryPhotoUploadForm, SiteSettingsForm # Added SiteSettingsForm
 from .. import db
 from ..utils import allowed_file_util, flash_form_errors_util, ALLOWED_TAGS_CONFIG, ALLOWED_ATTRIBUTES_CONFIG
 
