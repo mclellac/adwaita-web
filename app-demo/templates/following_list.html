@@ -11,7 +11,7 @@
             {% for listed_user in users_list %}
             <div class="adw-action-row user-list-item-row">
                 <div class="adw-action-row-start-content">
-                    <a href="{{ url_for('profile.view_profile', username=listed_user.username) }}">
+                    <a href="{{ url_for('profile.view_profile', user_id=listed_user.id) }}">
                         <span class="adw-avatar size-m">
                             {% if listed_user.profile_photo_url %}
                             <img src="{{ url_for('static', filename=listed_user.profile_photo_url) }}" alt="{{ listed_user.full_name or listed_user.username }} avatar">
@@ -22,11 +22,11 @@
                     </a>
                 </div>
                 <div class="adw-action-row-text-content">
-                     <a href="{{ url_for('profile.view_profile', username=listed_user.username) }}" class="adw-link">
-                        <span class="adw-action-row-title">{{ listed_user.full_name or listed_user.username }}</span>
+                     <a href="{{ url_for('profile.view_profile', user_id=listed_user.id) }}" class="adw-link">
+                        <span class="adw-action-row-title">{{ listed_user.full_name }}</span>
                     </a>
                     {% if listed_user.full_name %}
-                    <span class="adw-action-row-subtitle">@{{ listed_user.username }}</span>
+                    <span class="adw-action-row-subtitle">@{{ listed_user.full_name }}</span>
                     {% endif %}
                 </div>
                 <div class="adw-action-row-end-content">
@@ -55,7 +55,7 @@
         <div class="adw-box adw-box-horizontal justify-center list-pagination-box">
             <div class="adw-toggle-group">
                 {% if pagination.has_prev %}
-                    <a href="{{ url_for('profile.following_list', username=user_profile.username, page=pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
+                    <a href="{{ url_for('profile.following_list', user_id=user_profile.id, page=pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
                         <span class="adw-icon icon-actions-go-previous-symbolic"></span>
                     </a>
                 {% else %}
@@ -69,7 +69,7 @@
                         {% if page_num == pagination.page %}
                             <button class="adw-button suggested-action" disabled aria-current="page">{{ page_num }}</button>
                         {% else %}
-                            <a href="{{ url_for('profile.following_list', username=user_profile.username, page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                            <a href="{{ url_for('profile.following_list', user_id=user_profile.id, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                         {% endif %}
                     {% elif loop.index != 1 and loop.index != pagination.pages + pagination.iter_pages()|length %}
                         <button class="adw-button flat" disabled>…</button>
@@ -77,7 +77,7 @@
                 {% endfor %}
 
                 {% if pagination.has_next %}
-                     <a href="{{ url_for('profile.following_list', username=user_profile.username, page=pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
+                     <a href="{{ url_for('profile.following_list', user_id=user_profile.id, page=pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
                         <span class="adw-icon icon-actions-go-next-symbolic"></span>
                     </a>
                 {% else %}

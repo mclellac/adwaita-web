@@ -708,3 +708,23 @@ $app-sidebar-breakpoint: 768px;
   // Ensure it doesn't inherit unwanted styles from generic .adw-button if they conflict
   text-decoration: none; // Links shouldn't be underlined if they are buttons
 }
+
+// Notification dot styles (in _app-demo-specific.scss)
+.notification-icon-button {
+  position: relative;
+
+  .notification-dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: var(--font-size-caption);
+    line-height: 1;
+    padding: 2px 4px;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

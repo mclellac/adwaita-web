@@ -11,7 +11,7 @@
             {# Title h1 removed #}
             <div class="post-meta-detail">
                 <p class="adw-label body">
-                    By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>&nbsp;
+                    By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-link">{{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>&nbsp;
                     {%- if post.published_at -%}
                         on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at | human_readable_date }}</time>
                     {%- else -%} {# Should not happen for new posts, fallback for old data or if published_at was somehow not set #}
@@ -94,7 +94,7 @@
                     {% else %}
                     <p class="adw-label body author-bio-text-placeholder">This author has not provided a bio yet.</p>
                     {% endif %}
-                    <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-button flat view-profile-button">View Profile of {{ post.author.full_name }}</a>
+                    <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-button flat view-profile-button">View Profile of {{ post.author.full_name }}</a>
                 </div>
             </div>
         </section>
@@ -141,7 +141,7 @@
                <img src="{{ comment_avatar }}" alt="{{ comment.author.full_name }} avatar" class="adw-avatar__image">
             </span>
             <div class="comment-author-meta">
-                 <a href="{{ url_for('profile.view_profile', username=comment.author.username) }}" class="adw-link comment-author-link-strong">{{ comment.author.full_name }}</a>
+                 <a href="{{ url_for('profile.view_profile', user_id=comment.author.id) }}" class="adw-link comment-author-link-strong">{{ comment.author.full_name }}</a>
                 <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at | human_readable_date }}</time></small>
             </div>
         </header>
@@ -346,6 +346,229 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const setupMentionAutocomplete = (textareaElement, parentForm) => {
+        let mentionQuery = '';
+        let isMentioning = false;
+        let suggestionsBox = null;
+        let suggestionRequestTimeout = null;
+
+        const createSuggestionsBox = () => {
+            if (suggestionsBox) suggestionsBox.remove();
+            suggestionsBox = document.createElement('div');
+            suggestionsBox.className = 'adw-popover menu-popover mention-suggestions-popover'; // Re-use popover styling
+            suggestionsBox.style.position = 'absolute';
+            suggestionsBox.style.zIndex = '1000';
+            // suggestionsBox.style.border = '1px solid #ccc';
+            // suggestionsBox.style.background = 'var(--secondary-bg-color)'; // Use Adwaita variable
+            // suggestionsBox.style.maxHeight = '150px';
+            // suggestionsBox.style.overflowY = 'auto';
+            // suggestionsBox.style.minWidth = textareaElement.offsetWidth + 'px';
+            textareaElement.parentNode.insertBefore(suggestionsBox, textareaElement.nextSibling);
+
+            // Position relative to textarea
+            const rect = textareaElement.getBoundingClientRect();
+            const parentRect = textareaElement.offsetParent ? textareaElement.offsetParent.getBoundingClientRect() : { top: 0, left: 0 };
+
+            suggestionsBox.style.top = (rect.bottom - parentRect.top + window.scrollY) + 'px';
+            suggestionsBox.style.left = (rect.left - parentRect.left + window.scrollX) + 'px';
+            suggestionsBox.style.minWidth = rect.width + 'px';
+
+            return suggestionsBox;
+        };
+
+        const fetchSuggestions = async (query) => {
+            if (!query) {
+                if (suggestionsBox) suggestionsBox.style.display = 'none';
+                return;
+            }
+            try {
+                const response = await fetch(`/user/mention_suggestions?q=${encodeURIComponent(query)}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const users = await response.json();
+                displaySuggestions(users);
+            } catch (error) {
+                console.error('Error fetching mention suggestions:', error);
+                if (suggestionsBox) suggestionsBox.style.display = 'none';
+            }
+        };
+
+        const displaySuggestions = (users) => {
+            if (!suggestionsBox) suggestionsBox = createSuggestionsBox();
+            suggestionsBox.innerHTML = ''; // Clear previous suggestions
+
+            if (users.length === 0) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            const listBox = document.createElement('div');
+            listBox.className = 'adw-list-box flat popover-list-box'; // Use Adwaita list box styling
+
+            users.forEach(user => {
+                const userRow = document.createElement('button'); // Use button for focus and click
+                userRow.className = 'adw-action-row activatable'; // Adwaita action row
+                userRow.type = 'button'; // Important for forms
+                userRow.style.textAlign = 'left'; // Ensure text aligns left
+
+                const avatarSpan = document.createElement('span');
+                avatarSpan.className = 'adw-avatar size-s'; // Small avatar
+                avatarSpan.style.marginRight = 'var(--spacing-s)';
+                const avatarImg = document.createElement('img');
+                avatarImg.src = user.profile_photo_url ? '{{ url_for("static", filename="") }}' + user.profile_photo_url : '{{ default_avatar_url }}';
+                avatarImg.alt = user.full_name + ' avatar';
+                avatarSpan.appendChild(avatarImg);
+
+                const textContentDiv = document.createElement('div');
+                textContentDiv.className = 'adw-action-row-text-content';
+
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'adw-action-row-title';
+                titleSpan.textContent = user.full_name;
+
+                textContentDiv.appendChild(titleSpan);
+
+                userRow.appendChild(avatarSpan);
+                userRow.appendChild(textContentDiv);
+
+                userRow.addEventListener('click', () => {
+                    const currentText = textareaElement.value;
+                    const atIndex = currentText.lastIndexOf('@', textareaElement.selectionStart -1);
+                    if (atIndex !== -1) {
+                        const textBefore = currentText.substring(0, atIndex);
+                        const textAfter = currentText.substring(textareaElement.selectionStart);
+                        // Replace spaces in full_name with something or handle differently if spaces not allowed in mentions
+                        textareaElement.value = textBefore + `@${user.full_name} ` + textAfter;
+                        isMentioning = false;
+                        mentionQuery = '';
+                        suggestionsBox.style.display = 'none';
+                        textareaElement.focus();
+                        // Move cursor after the inserted mention
+                        const newCursorPos = (textBefore + `@${user.full_name} `).length;
+                        textareaElement.setSelectionRange(newCursorPos, newCursorPos);
+                    }
+                });
+                listBox.appendChild(userRow);
+            });
+            suggestionsBox.appendChild(listBox);
+            suggestionsBox.style.display = 'block';
+        };
+
+        textareaElement.addEventListener('input', (e) => {
+            const cursorPos = textareaElement.selectionStart;
+            const textBeforeCursor = textareaElement.value.substring(0, cursorPos);
+            const atMatch = textBeforeCursor.match(/@(\w*)$/);
+
+            if (atMatch) {
+                isMentioning = true;
+                mentionQuery = atMatch[1];
+                if (!suggestionsBox || suggestionsBox.style.display === 'none') {
+                    createSuggestionsBox(); // Create/re-create if hidden
+                }
+
+                clearTimeout(suggestionRequestTimeout);
+                suggestionRequestTimeout = setTimeout(() => {
+                    fetchSuggestions(mentionQuery);
+                }, 300); // Debounce API calls
+
+            } else {
+                isMentioning = false;
+                mentionQuery = '';
+                if (suggestionsBox) {
+                    suggestionsBox.style.display = 'none';
+                }
+            }
+        });
+
+        textareaElement.addEventListener('keydown', (e) => {
+            if (isMentioning && suggestionsBox && suggestionsBox.style.display === 'block') {
+                const suggestions = suggestionsBox.querySelectorAll('.adw-action-row');
+                if (suggestions.length > 0) {
+                    let currentIndex = Array.from(suggestions).findIndex(s => s === document.activeElement);
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        currentIndex = (currentIndex + 1) % suggestions.length;
+                        suggestions[currentIndex].focus();
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        currentIndex = (currentIndex - 1 + suggestions.length) % suggestions.length;
+                        suggestions[currentIndex].focus();
+                    } else if (e.key === 'Enter' && currentIndex !== -1) {
+                        e.preventDefault();
+                        suggestions[currentIndex].click();
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        suggestionsBox.style.display = 'none';
+                        isMentioning = false;
+                    }
+                }
+            }
+        });
+
+        // Hide suggestions if textarea loses focus, unless focus moves to a suggestion
+        textareaElement.addEventListener('blur', () => {
+            // Delay hiding to allow click on suggestion
+            setTimeout(() => {
+                if (suggestionsBox && !suggestionsBox.contains(document.activeElement)) {
+                    suggestionsBox.style.display = 'none';
+                }
+            }, 100);
+        });
+
+    };
+
+    // Setup for the main comment form
+    const mainCommentTextArea = document.getElementById('{{ form.text.id or "comment_text_input" }}');
+    const mainCommentFormElement = document.getElementById('main-comment-form');
+    if (mainCommentTextArea && mainCommentFormElement) {
+        setupMentionAutocomplete(mainCommentTextArea, mainCommentFormElement);
+    }
+
+    // Setup for reply forms (dynamically added or existing ones if any)
+    // This part needs to be robust if reply forms are added/removed.
+    // For now, let's assume they might exist on load or are added in a way that this can be re-triggered.
+    // A MutationObserver on the comments section could make this more dynamic.
+    document.querySelectorAll('.reply-form-container textarea').forEach(replyTextarea => {
+        const replyForm = replyTextarea.closest('form'); // Assuming textarea is inside a form
+        if(replyForm){
+            setupMentionAutocomplete(replyTextarea, replyForm);
+        }
+    });
+
+    // Re-initialize for reply form when it's moved
+    const originalSetupReplyForm = (commentId) => {
+        const replyFormContainer = document.getElementById(`reply-form-for-${commentId}`);
+        if (replyFormContainer) {
+            const replyTextarea = replyFormContainer.querySelector('textarea[name="text"]');
+            const replyForm = replyTextarea ? replyTextarea.closest('form') : null;
+            if (replyTextarea && replyForm && !replyTextarea.dataset.mentionInitialized) { // Avoid re-initializing
+                setupMentionAutocomplete(replyTextarea, replyForm);
+                replyTextarea.dataset.mentionInitialized = 'true';
+            }
+        }
+    };
+
+    document.querySelectorAll('.reply-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const commentId = button.dataset.commentId;
+            // When the main form is moved to a reply section, its textarea ID remains the same.
+            // The setupMentionAutocomplete is already called for the main form's textarea.
+            // We need to ensure the suggestionsBox is repositioned if the form moves.
+            // The current createSuggestionsBox() is called on input, which recalculates position.
+            // However, we might need to ensure the old suggestionsBox instance is removed or correctly handled.
+            // The simplest for now: the main form's JS will continue to work.
+            // If reply forms were separate elements, we'd call originalSetupReplyForm(commentId) here.
+            // Since we move the *same* form, its event listeners persist.
+            // The key is that createSuggestionsBox() is called on next @ input.
+        });
+    });
+
 });
 </script>
 {% endblock %}
