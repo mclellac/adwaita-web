@@ -39,24 +39,30 @@ adw-about-dialog {
 
 // Specific styles for the generic <adw-dialog> (Light DOM content)
 adw-dialog {
-  > .adw-dialog-header {
+  // Styles for the new .adw-dialog__header (which is now a div)
+  > .adw-dialog__header {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; // Title on left, close button on right
     align-items: center;
-    padding: var(--spacing-m);
-    // border-bottom: 1px solid var(--border-color); // Removed to avoid line under title
+    padding: var(--spacing-m); // Standard padding
+    border-bottom: 1px solid var(--border-color); // Separator line
 
-    .adw-header-bar__title {
-      font-size: var(--title-3-font-size);
+    .adw-dialog__title { // Styling for the new H2 title class
+      font-size: var(--title-3-font-size, 1.25em); // Use Adwaita title size or fallback
       font-weight: var(--font-weight-bold);
+      margin: 0; // Remove default H2 margin
+      flex-grow: 1; // Allow title to take available space
     }
-    // Styling for the close button in generic dialog header (if needed beyond .adw-button classes)
-    .adw-dialog-close-button.adw-button .adw-icon {
-        // Basic icon mask if not provided by global .adw-icon or button styles
-        // background-color: currentColor;
-        // -webkit-mask-image: url('../data/icons/symbolic/window-close-symbolic.svg');
-        // mask-image: url('../data/icons/symbolic/window-close-symbolic.svg');
-        // width: var(--icon-size-base); height: var(--icon-size-base);
+
+    .adw-dialog-close-button {
+      // Basic styling for the close button itself if needed beyond .adw-button
+      // For example, ensure it's not too large or small.
+      // Adwaita 'circular' and 'flat' styles should handle most of it.
+      // Ensure the icon inside is visible.
+      .adw-icon {
+        // Icon color should be inherited or set by button styles.
+        // Size is usually 16px for symbolic icons.
+      }
     }
   }
 

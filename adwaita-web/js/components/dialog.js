@@ -35,37 +35,35 @@ class AdwDialogElement extends HTMLElement {
 
   connectedCallback() {
     // Ensure basic header structure if not already present declaratively
-    if (!this.querySelector('.adw-dialog__header')) {
-        const header = document.createElement('header');
-        header.classList.add('adw-header-bar', 'adw-dialog__header');
+    // The new structure will not use adw-header-bar for a simpler look.
+    if (!this.querySelector('.adw-dialog__header')) { // Keep .adw-dialog__header as a general container name for styling
+        const headerContainer = document.createElement('div'); // Use a div instead of header to avoid adw-header-bar implications
+        headerContainer.classList.add('adw-dialog__header'); // This class will be styled in SCSS
 
         const titleEl = document.createElement('h2');
-        titleEl.classList.add('adw-header-bar__title');
+        titleEl.classList.add('adw-dialog__title'); // New class for specific title styling if needed
         // Ensure titleEl has an ID for aria-labelledby
         titleEl.id = `dialog-title-${this.id || Math.random().toString(36).substring(2, 9)}`;
         this.setAttribute('aria-labelledby', titleEl.id);
 
-        header.appendChild(titleEl);
+        headerContainer.appendChild(titleEl);
 
         // Check for a close button, add if not present by default
-        // Adwaita dialogs typically have a close button in the header.
-        // Users can override this by providing their own header slot.
-        if (!header.querySelector('.adw-dialog-close-button')) {
+        if (!headerContainer.querySelector('.adw-dialog-close-button')) {
             const closeButton = document.createElement('button');
             closeButton.type = 'button'; // CRITICAL: Prevent form submission
             closeButton.classList.add('adw-button', 'circular', 'flat', 'adw-dialog-close-button');
             closeButton.setAttribute('aria-label', 'Close dialog');
-            // Use a more standard Adwaita icon name for 'close window'
             closeButton.innerHTML = '<span class="adw-icon icon-actions-window-close-symbolic"></span>';
             closeButton.addEventListener('click', () => this.close());
-            header.appendChild(closeButton);
+            headerContainer.appendChild(closeButton);
         }
 
-        this.prepend(header);
+        this.prepend(headerContainer);
     }
 
     if (this.title) {
-        this._updateTitle(this.title);
+        this._updateTitle(this.title); // This will target .adw-dialog__title or similar
     }
 
     // Ensure initial state is hidden if not 'open'
@@ -94,7 +92,8 @@ class AdwDialogElement extends HTMLElement {
 
   _updateTitle(newTitle) {
     if (this.isConnected) {
-      let titleEl = this.querySelector('.adw-dialog__header .adw-header-bar__title');
+      // Adjusted selector to match the new title element's class
+      let titleEl = this.querySelector('.adw-dialog__header .adw-dialog__title');
       if (titleEl) {
         titleEl.textContent = newTitle || '';
       }
