@@ -2,66 +2,70 @@
 
 An `AdwBanner` is a prominent message area typically displayed at the top of a
 view or window, used for important announcements or status messages that require
-user attention but are not necessarily modal. Adwaita-Web provides
-`Adw.createBanner()` and the `<adw-banner>` Web Component.
+user attention but are not necessarily modal.
 
-## JavaScript Factory: `Adw.createBanner()`
+Adwaita Web provides styling for banners via the `.adw-banner` CSS class and helper JavaScript functions in `adwaita-web/js/banner.js` to initialize their interactivity (e.g., dismissal). There isn't a direct JavaScript factory like `Adw.createBanner()` for programmatic creation; banners are typically defined in HTML.
 
-Creates an Adwaita-styled banner element.
+## HTML Structure
 
-**Signature:**
-
-```javascript
-Adw.createBanner(title, options = {}) -> HTMLElement
-```
-
-**Parameters:**
-
-*   `title` (String): The main text to display in the banner. HTML can be used if
-    `useMarkup` is true.
-*   `options` (Object, optional): Configuration options:
-    *   `useMarkup` (Boolean, optional): If `true`, the `title` string is treated
-        as HTML. Defaults to `false`. **Use with caution and ensure any HTML is
-        sanitized if from user input.**
-    *   `buttonLabel` (String, optional): If provided, a button with this label is
-        added to the banner.
-    *   `onButtonClicked` (Function, optional): A callback function executed when
-        the button is clicked. The banner instance is passed as an argument.
-    *   `type` (String, optional): Sets the visual style of the banner. Common types
-        could be `'info'`, `'warning'`, `'error'`, `'success'`. This usually
-        applies a corresponding CSS class (e.g., `adw-banner-warning`). Defaults
-        to a neutral/info style.
-    *   `id` (String, optional): A specific ID to set on the banner element.
-
-**Returns:**
-
-*   `(HTMLElement)`: The created banner element (typically a `div` with class `adw-banner`).
-
-**Example:**
+To create a banner, you would typically use the following HTML structure:
 
 ```html
-<div id="banner-container"></div>
-<script>
-  const container = document.getElementById('banner-container');
+<div class="adw-banner [type-class]" role="status">
+  <div class="adw-banner__content">
+    <span class="adw-icon [icon-class]"></span> <!-- Optional icon -->
+    <p class="adw-label body">Your banner message here.</p>
+  </div>
+  <div class="adw-banner__actions">
+    <!-- Optional action button -->
+    <button class="adw-button flat">Action</button>
+    <!-- Dismiss button (functionality initialized by banner.js) -->
+    <button class="adw-button flat adw-banner-dismiss-button">Dismiss</button>
+  </div>
+</div>
+```
+*   Apply `.adw-banner` to the main container.
+*   Optional type classes: `.info`, `.warning`, `.error`, `.success` (these might need to be defined in `_banner.scss` or use existing status color variables). The `index.html` showcase uses `.warning` as an example.
+*   `.adw-banner__content`: Wraps the icon and message.
+*   `.adw-banner__actions`: Wraps action and dismiss buttons.
+*   A dismiss button should have class `.adw-banner-dismiss-button` or `.adw-banner-dismiss` for `banner.js` to make it functional.
 
-  const infoBanner = Adw.createBanner("This is an informational banner.");
-  container.appendChild(infoBanner);
+## JavaScript Initialization (`banner.js`)
 
-  const actionBanner = Adw.createBanner("Your session will expire soon.", {
-    buttonLabel: "Renew Session",
-    type: "warning",
-    onButtonClicked: (banner) => {
-      console.log("Renew Session clicked!");
-      banner.remove(); // Example: dismiss banner on action
-    }
-  });
-  container.appendChild(actionBanner);
-</script>
+The `adwaita-web/js/banner.js` script provides:
+*   `Adw.initBanners()`: Call this function (it's also called automatically on DOMContentLoaded) to find all `.adw-banner` elements and attach click listeners to their dismiss buttons.
+*   `Adw.dismissBanner(bannerElement)`: A function to programmatically dismiss a banner.
+
+**Example (HTML and JS Interaction):**
+
+```html
+<div id="banner-container">
+  <div class="adw-banner warning" role="alert">
+    <div class="adw-banner__content">
+      <span class="adw-icon icon-status-dialog-warning-symbolic"></span>
+      <p class="adw-label body">This is a warning banner that can be dismissed.</p>
+    </div>
+    <div class="adw-banner__actions">
+      <button class="adw-button flat adw-banner-dismiss-button">Dismiss</button>
+    </div>
+  </div>
+</div>
+
+<script src="path/to/adwaita-web/js/banner.js"></script>
+<!-- Adw.initBanners() is called automatically by banner.js -->
 ```
 
-## Web Component: `<adw-banner>`
+## Web Component: `<adw-banner>` (If Available)
 
-A declarative way to create Adwaita banners.
+(This section describes a hypothetical Web Component. If `adwaita-web/js/banner.js` or another file defines an `<adw-banner>` custom element, its specific API would be documented here. Based on current findings, `banner.js` focuses on initializing HTML-defined banners.)
+
+If a Web Component `adw-banner` exists, it would likely encapsulate the HTML structure and dismissal logic. Example hypothetical usage:
+```html
+<!-- Hypothetical <adw-banner> Web Component -->
+<adw-banner title="Welcome to Adwaita-Web!" type="info" closable button-label="Learn More"></adw-banner>
+```
+*Check the `adwaita-web/js/` directory for a definition of `<adw-banner>` if you intend to use it as a Web Component.*
+For now, primary usage is via HTML structure and `banner.js` initialization.
 
 **HTML Tag:** `<adw-banner>`
 

@@ -2,80 +2,31 @@
 
 An ActionRow is a specialized type of `AdwRow` designed for presenting an action or navigation item, often with a title, subtitle, and an optional icon or chevron. It's commonly used within an `AdwListBox`.
 
-## JavaScript Factory: `Adw.createActionRow()`
+*(Note: Previous versions of this documentation may have described a JavaScript factory like `Adw.createActionRow()`. As of the current review, this specific factory function was not found in the core `adwaita-web/js` source. Usage should primarily rely on the CSS classes with manual HTML structure, or the `<adw-action-row>` Web Component if available.)*
 
-Creates an Adwaita-styled action row.
+## HTML Structure (for CSS Styling)
 
-**Signature:**
-
-```javascript
-Adw.createActionRow(options = {}) -> HTMLDivElement
-```
-
-**Parameters:**
-
-*   `options` (Object, optional): Configuration options:
-    *   `title` (String, required): The main title text of the row.
-    *   `subtitle` (String, optional): Additional descriptive text displayed
-        below the title.
-    *   `iconHTML` (String, optional): HTML string for an SVG icon or an icon font
-        class to be displayed at the start of the row. *Security: Ensure
-        trusted/sanitized HTML if user-supplied.*
-    *   `onClick` (Function, optional): Callback function executed when the row is
-        clicked. Makes the row interactive.
-    *   `showChevron` (Boolean, optional): If `true`, displays a chevron (navigation
-        arrow) at the end of the row, indicating it leads to another view.
-        Defaults to `false` but might be implied if `onClick` is present and
-        it's a navigation action.
-    *   `suffix` (HTMLElement, optional): An element to place at the end of the row,
-        before any chevron (e.g., a switch, a small button, a spinner).
-    *   `disabled` (Boolean, optional): If `true`, disables the row, making it
-        non-interactive and visually muted.
-
-**Returns:**
-
-*   `(HTMLDivElement)`: The created `<div>` element representing the action row.
-
-**Example:**
+To create an action row manually, you would typically use a `div` with the class `.adw-action-row` and structure its content using helper classes:
 
 ```html
-<div id="js-actionrow-listbox" style="max-width: 400px;">
-  <!-- AdwListBox would typically wrap these -->
+<div class="adw-action-row activatable">
+  <div class="adw-action-row-prefix">
+    <span class="adw-icon icon-settings-symbolic"></span> <!-- Example -->
+  </div>
+  <div class="adw-action-row-content">
+    <span class="adw-action-row-title">Settings</span>
+    <span class="adw-action-row-subtitle">Configure application preferences</span>
+  </div>
+  <div class="adw-action-row-suffix">
+    <span class="adw-icon adw-action-row-chevron"></span> <!-- Navigational chevron -->
+  </div>
 </div>
-<script>
-  const container = document.getElementById('js-actionrow-listbox');
-
-  // ActionRow for navigation
-  const networkRow = Adw.createActionRow({
-    title: "Network",
-    subtitle: "Wi-Fi, Ethernet, VPN",
-    // Example icon (details omitted for brevity)
-    iconHTML: '<svg viewBox="0 0 16 16"><path d="M8 0C3.582Z"/></svg>',
-    showChevron: true,
-    onClick: () => Adw.createToast("Navigate to Network Settings")
-  });
-  container.appendChild(networkRow);
-
-  // ActionRow with a suffix (e.g., a spinner)
-  const updateSpinner = Adw.createSpinner({ active: true, size: 'small' }); // Assuming AdwSpinner exists
-  const updatesRow = Adw.createActionRow({
-    title: "Software Updates",
-    subtitle: "Checking for updates...",
-    suffix: updateSpinner,
-    onClick: () => Adw.createToast("Checking for updates action...")
-  });
-  container.appendChild(updatesRow);
-
-  // Disabled ActionRow
-  const disabledRow = Adw.createActionRow({
-    title: "Advanced Settings",
-    subtitle: "Requires admin privileges",
-    disabled: true,
-    showChevron: true
-  });
-  container.appendChild(disabledRow);
-</script>
 ```
+*   Add `.activatable` if the row should have hover/active states and be clickable.
+*   `.adw-action-row-prefix`: For icons or widgets at the start.
+*   `.adw-action-row-content`: Wraps title and subtitle.
+*   `.adw-action-row-title`, `.adw-action-row-subtitle`: For text content.
+*   `.adw-action-row-suffix`: For icons (like chevrons) or widgets (like switches, spinners) at the end.
 
 ## Web Component: `<adw-action-row>`
 

@@ -2,71 +2,30 @@
 
 Avatars are used to display a user's profile picture or a placeholder with initials. Adwaita-Web provides `Adw.createAvatar()` for JavaScript creation and the `<adw-avatar>` Web Component.
 
-## JavaScript Factory: `Adw.createAvatar()`
+Avatars are used to display a user's profile picture or a placeholder with initials. Adwaita Web provides styling for avatars via the `.adw-avatar` CSS class and an `<adw-avatar>` Web Component.
 
-Creates an Adwaita-styled avatar.
+*(Note: Previous versions of this documentation may have described a JavaScript factory like `Adw.createAvatar()`. As of the current review, this specific factory function was not found in the core `adwaita-web/js` source. Usage should primarily rely on the CSS classes with manual HTML structure, or the `<adw-avatar>` Web Component.)*
 
-**Signature:**
+## HTML Structure (for CSS Styling)
 
-```javascript
-Adw.createAvatar(options = {}) -> HTMLDivElement
-```
-
-**Parameters:**
-
-*   `options` (Object, optional): Configuration options:
-    *   `size` (Number, optional): The size (width and height) of the avatar in pixels. Defaults to `48`.
-    *   `imageSrc` (String, optional): URL of the image to display. If not provided or if the image fails to load, text initials will be shown.
-    *   `text` (String, optional): Text to display as initials if no image is provided or loads. Typically 1 to 3 characters. If not provided, a generic icon might be shown (styling dependent).
-    *   `alt` (String, optional): Alternative text for the image, for accessibility. Defaults to "Avatar".
-    *   `backgroundColor` (String, optional): Custom background color for the avatar (e.g., if `imageSrc` is not set or fails).
-    *   `textColor` (String, optional): Custom text color for the initials.
-
-**Returns:**
-
-*   `(HTMLDivElement)`: The created avatar `<div>` element.
-
-**Example:**
+To create an avatar manually, you would use a `div` with the class `.adw-avatar` and potentially other size or content-specific classes or inline styles.
 
 ```html
-<div id="js-avatar-container" style="display: flex; align-items: center; gap: 10px;"></div>
-<script>
-  const container = document.getElementById('js-avatar-container');
+<!-- Avatar with image -->
+<div class="adw-avatar" style="width: 64px; height: 64px; background-image: url('path/to/image.png');"></div>
 
-  // Avatar with image
-  const avatarWithImage = Adw.createAvatar({
-    size: 64,
-    imageSrc: "app-demo/static/img/default_avatar.png", // Replace with a valid image path
-    alt: "User Avatar"
-  });
-  container.appendChild(avatarWithImage);
+<!-- Avatar with text initials -->
+<div class="adw-avatar" style="width: 48px; height: 48px; background-color: var(--accent-bg-color);">
+  <span class="adw-avatar-text" style="color: var(--accent-fg-color); font-size: 18px;">JD</span>
+</div>
 
-  // Avatar with text initials
-  const avatarWithText = Adw.createAvatar({
-    size: 48,
-    text: "JD", // John Doe
-    backgroundColor: "var(--accent-bg-color)", // Use theme accent
-    textColor: "var(--accent-fg-color)"
-  });
-  container.appendChild(avatarWithText);
-
-  // Smaller avatar with text
-  const smallAvatar = Adw.createAvatar({
-    size: 32,
-    text: "A"
-  });
-  container.appendChild(smallAvatar);
-
-  // Avatar that will show fallback (if image path is wrong)
-  const fallbackAvatar = Adw.createAvatar({
-    size: 48,
-    imageSrc: "path/to/nonexistent-image.png",
-    text: "??",
-    alt: "Fallback Avatar"
-  });
-  container.appendChild(fallbackAvatar);
-</script>
+<!-- Avatar with an icon (ensure icon is styled and sized appropriately) -->
+<div class="adw-avatar size-32"> <!-- .size-32 is an example utility or direct style -->
+  <span class="adw-icon icon-status-avatar-default-symbolic"></span>
+</div>
 ```
+*   The `adw-avatar-text` class can be used for text initials, which then needs to be sized and centered.
+*   Specific sizes (like `.size-24`, `.size-32`, etc.) are defined in `_avatar.scss` or can be set with inline styles.
 
 ## Web Component: `<adw-avatar>`
 
