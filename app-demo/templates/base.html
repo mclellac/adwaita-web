@@ -167,10 +167,7 @@
                     <span class="adw-action-row-icon icon-status-flag-symbolic"></span>
                     <span class="adw-action-row-title">Review Flags</span>
                 </a>
-                <a href="{{ url_for('admin.site_settings') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'admin.site_settings' }}">
-                    <span class="adw-action-row-icon icon-actions-document-properties-symbolic"></span>
-                    <span class="adw-action-row-title">Site Settings</span>
-                </a>
+                {# Site Settings link removed as it's now part of the main Settings page for admins #}
                 <a href="{{ url_for('admin.pending_users') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'admin.pending_users' }}">
                     <span class="adw-action-row-icon icon-community-users-symbolic"></span> {# Or similar relevant icon #}
                     <span class="adw-action-row-title">Pending Users</span>
