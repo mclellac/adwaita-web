@@ -36,7 +36,19 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="adw-action-row column-layout">
                  <label for="gallery-comment-text" class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">Your Comment</label>
-                <textarea id="gallery-comment-text" name="text" class="adw-entry" rows="2" placeholder="Write a comment..." required style="width: 100%; min-height: 60px; box-sizing: border-box;"></textarea>
+                <markdown-toolbar for="gallery-comment-text" class="custom-toolbar">
+                    <md-bold>Bold</md-bold>
+                    <md-italic>Italic</md-italic>
+                    <md-strikethrough>Strike</md-strikethrough>
+                    <md-header>Heading</md-header>
+                    <md-quote>Quote</md-quote>
+                    <md-code>Code</md-code>
+                    <md-link>Link</md-link>
+                    <md-image>Image/GIF</md-image>
+                    <md-unordered-list>List</md-unordered-list>
+                    <md-ordered-list>Ordered List</md-ordered-list>
+                </markdown-toolbar>
+                <textarea id="gallery-comment-text" name="text" class="adw-entry" rows="4" placeholder="Write a comment..." required style="width: 100%; min-height: 100px; box-sizing: border-box; margin-top: var(--spacing-xs);"></textarea>
                 <div id="gallery-comment-error" class="error-text adw-label caption" style="display:none; margin-top: var(--spacing-xs);"></div>
             </div>
             <div class="form-actions-end" style="margin-top: var(--spacing-s);">
@@ -131,9 +143,21 @@
 
 {% block scripts %}
 {{ super() }}
+<script type="module" src="https://cdn.jsdelivr.net/npm/@github/markdown-toolbar-element@1.0.3/dist/index.umd.js" nonce="{{ csp_nonce() if csp_nonce else '' }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.12/marked.min.js" nonce="{{ csp_nonce() if csp_nonce else '' }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.6/purify.min.js" nonce="{{ csp_nonce() if csp_nonce else '' }}"></script>
+<style nonce="{{ csp_nonce() if csp_nonce else '' }}">
+  /* Styles specific to photo comments images, if different from global .styled-text-content img */
+  /* For now, the global one in base.html should cover it. This is a placeholder if needed. */
+  .photo-comments-area .styled-text-content img {
+      /* max-width: 100%; */ /* Already handled by global style */
+      /* height: auto; */ /* Already handled by global style */
+      /* border-radius: var(--border-radius-m); */ /* Already handled by global style */
+  }
+</style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Full-size gallery photo dialog logic - Copied and adapted from profile.html
+    // Full-size gallery photo dialog logic
     const galleryPhotoDialog = document.getElementById('gallery-photo-dialog');
     const fullGalleryPhotoImg = document.getElementById('full-gallery-photo-img');
     const fullGalleryPhotoCaption = document.getElementById('full-gallery-photo-caption');
@@ -168,13 +192,17 @@ document.addEventListener('DOMContentLoaded', function () {
         comments.forEach(comment => {
             const commentDiv = document.createElement('div');
             commentDiv.classList.add('adw-action-row');
+            // Sanitize and render markdown for comment text
+            const unsafeHtml = marked.parse(comment.text || ''); // Use marked.parse (or marked())
+            const safeHtml = DOMPurify.sanitize(unsafeHtml);
+
             commentDiv.innerHTML = `
                 <span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">
                     <img src="${comment.author.profile_photo_url}" alt="${comment.author.full_name || comment.author.username} avatar">
                 </span>
                 <span class="adw-action-row-text-content">
                     <a href="${comment.author.profile_url}" class="adw-link adw-action-row-title">${comment.author.full_name || comment.author.username}</a>
-                    <span class="adw-action-row-subtitle">${comment.text}</span>
+                    <div class="adw-action-row-subtitle styled-text-content">${safeHtml}</div>
                     <small class="adw-label caption">${formatCommentDate(comment.created_at)}</small>
                 </span>
             `;
