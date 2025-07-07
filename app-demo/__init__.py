@@ -174,6 +174,9 @@ def create_app(config_name=None):
     from .routes.photo_routes import photo_bp
     app.register_blueprint(photo_bp) # prefix is /photo from blueprint definition
 
+    from .routes.user_routes import user_bp
+    app.register_blueprint(user_bp) # prefix is /user from blueprint definition
+
     # Error handlers
     @app.errorhandler(403)
     def forbidden_page(error):

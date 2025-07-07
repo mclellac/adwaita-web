@@ -36,7 +36,7 @@ def get_photo_comments(photo_id):
                 'username': comment.author.username,
                 'full_name': comment.author.full_name or comment.author.username,
                 'profile_photo_url': get_avatar_url(comment.author),
-                'profile_url': url_for('profile.view_profile', username=comment.author.username, _external=False)
+                'profile_url': url_for('profile.view_profile', user_id=comment.author.id, _external=False)
             }
         })
     return jsonify(comments_data)
@@ -73,7 +73,7 @@ def post_photo_comment(photo_id):
                 'username': current_user.username,
                 'full_name': current_user.full_name or current_user.username,
                 'profile_photo_url': get_avatar_url(current_user),
-                'profile_url': url_for('profile.view_profile', username=current_user.username, _external=False)
+                'profile_url': url_for('profile.view_profile', user_id=current_user.id, _external=False)
             }
         }), 201
     else:

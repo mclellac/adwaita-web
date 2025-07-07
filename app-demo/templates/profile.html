@@ -9,12 +9,12 @@
         <a href="{{ url_for('profile.edit_profile') }}" class="adw-button suggested-action">Edit Profile</a>
     {% elif current_user.is_authenticated %} {# Only show follow/unfollow if logged in and not viewing own profile #}
         {% if current_user.is_following(user_profile) %}
-            <form action="{{ url_for('profile.unfollow_user', username=user_profile.username) }}" method="POST" style="display: inline;">
+            <form action="{{ url_for('profile.unfollow_user', user_id=user_profile.id) }}" method="POST" style="display: inline;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="adw-button">Unfollow</button>
             </form>
         {% else %}
-            <form action="{{ url_for('profile.follow_user', username=user_profile.username) }}" method="POST" style="display: inline;">
+            <form action="{{ url_for('profile.follow_user', user_id=user_profile.id) }}" method="POST" style="display: inline;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="adw-button suggested-action">Follow</button>
             </form>
@@ -81,15 +81,15 @@
                 {% endif %}
             </div>
             <div class="adw-box adw-box-vertical adw-box-spacing-xs">
-                <h1 class="adw-label title-1">{{ user_profile.full_name or user_profile.username }}</h1>
+                <h1 class="adw-label title-1">{{ user_profile.full_name }}</h1>
                 {% if user_profile.full_name %}
-                <div><span class="adw-label adw-caption">@{{ user_profile.username }}</span></div>
+                <div><span class="adw-label adw-caption">@{{ user_profile.full_name }}</span></div>
                 {% endif %}
                 <div class="adw-box adw-box-horizontal adw-box-spacing-s profile-follow-stats">
-                    <a href="{{ url_for('profile.followers_list', username=user_profile.username) }}" class="adw-link">
+                    <a href="{{ url_for('profile.followers_list', user_id=user_profile.id) }}" class="adw-link">
                         <span class="adw-label body-2"><strong>{{ user_profile.followers.count() }}</strong> Followers</span>
                     </a>
-                    <a href="{{ url_for('profile.following_list', username=user_profile.username) }}" class="adw-link">
+                    <a href="{{ url_for('profile.following_list', user_id=user_profile.id) }}" class="adw-link">
                         <span class="adw-label body-2"><strong>{{ user_profile.followed.count() }}</strong> Following</span>
                     </a>
                 </div>
@@ -240,7 +240,7 @@
                 <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
                     <div class="adw-toggle-group">
                         {% if posts_pagination.has_prev %}
-                            <a href="{{ url_for('profile.view_profile', username=user_profile.username, page=posts_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
+                            <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=posts_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
                                 <span class="adw-icon icon-actions-go-previous-symbolic"></span>
                             </a>
                         {% else %}
@@ -254,7 +254,7 @@
                                 {% if page_num == posts_pagination.page %}
                                     <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
                                 {% else %}
-                                    <a href="{{ url_for('profile.view_profile', username=user_profile.username, page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                                    <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
                             {% elif loop.index != 1 and loop.index != posts_pagination.pages + posts_pagination.iter_pages()|length %}
                                 <button class="adw-button flat" disabled>…</button>
@@ -262,7 +262,7 @@
                         {% endfor %}
 
                         {% if posts_pagination.has_next %}
-                             <a href="{{ url_for('profile.view_profile', username=user_profile.username, page=posts_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
+                             <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=posts_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
                                 <span class="adw-icon icon-actions-go-next-symbolic"></span>
                             </a>
                         {% else %}
@@ -308,7 +308,7 @@
                 <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
                     <div class="adw-toggle-group">
                         {% if comments_pagination.has_prev %}
-                            <a href="{{ url_for('profile.view_profile', username=user_profile.username, comments_page=comments_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous comments page">
+                            <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=comments_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous comments page">
                                 <span class="adw-icon icon-actions-go-previous-symbolic"></span>
                             </a>
                         {% else %}
@@ -322,7 +322,7 @@
                                 {% if page_num == comments_pagination.page %}
                                     <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
                                 {% else %}
-                                    <a href="{{ url_for('profile.view_profile', username=user_profile.username, comments_page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                                    <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
                             {% elif loop.index != 1 and loop.index != comments_pagination.pages + comments_pagination.iter_pages()|length %}
                                 <button class="adw-button flat" disabled>…</button>
@@ -330,7 +330,7 @@
                         {% endfor %}
 
                         {% if comments_pagination.has_next %}
-                             <a href="{{ url_for('profile.view_profile', username=user_profile.username, comments_page=comments_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next comments page">
+                             <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=comments_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next comments page">
                                 <span class="adw-icon icon-actions-go-next-symbolic"></span>
                             </a>
                         {% else %}
@@ -420,7 +420,7 @@
                 </div>
                 {% if total_gallery_photos > 0 %} {# Show view all button if there's at least one photo #}
                 <div class="adw-box justify-center" style="margin-top: var(--spacing-m);">
-                    <a href="{{ url_for('profile.view_gallery', username=user_profile.username) }}" class="adw-button">
+                    <a href="{{ url_for('profile.view_gallery', user_id=user_profile.id) }}" class="adw-button">
                         View All Photos ({{ total_gallery_photos }}) <span class="adw-icon icon-actions-go-next-symbolic"></span>
                     </a>
                 </div>
