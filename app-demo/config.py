@@ -18,6 +18,7 @@ class Config:
     MAX_GALLERY_PHOTO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # Max overall request size 10MB (increased for gallery)
     POSTS_PER_PAGE = 10 # Default, can be overridden by SiteSetting
+    GALLERY_PHOTOS_PER_PAGE = int(os.environ.get('GALLERY_PHOTOS_PER_PAGE', 12)) # Added for gallery pagination
     ACTIVITIES_PER_PAGE = 20 # For the new activity feed
     ALLOWED_THEMES = {'light', 'dark', 'system'}
 

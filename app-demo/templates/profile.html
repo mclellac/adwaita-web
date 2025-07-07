@@ -365,21 +365,21 @@
                     {{ gallery_upload_form.hidden_tag() if gallery_upload_form else '' }} {# CSRF token #}
                     <div class="adw-entry-row {{ 'has-error' if gallery_upload_form and gallery_upload_form.photo.errors else '' }}">
                         <div class="adw-entry-row-text-content">
-                            <label for="{{ gallery_upload_form.photo.id if gallery_upload_form else 'gallery_photo_input' }}" class="adw-entry-row-title">{{ gallery_upload_form.photo.label.text if gallery_upload_form else 'Photo File' }}</label>
-                            {% if gallery_upload_form and gallery_upload_form.photo.errors %}<span class="adw-entry-row-subtitle error-text">{{ gallery_upload_form.photo.errors|join(' ') }}</span>{% endif %}
+                            <label for="{{ gallery_upload_form.photos.id if gallery_upload_form else 'gallery_photos_input' }}" class="adw-entry-row-title">{{ gallery_upload_form.photos.label.text if gallery_upload_form else 'Photo Files' }}</label>
+                            {% if gallery_upload_form and gallery_upload_form.photos.errors %}<span class="adw-entry-row-subtitle error-text">{{ gallery_upload_form.photos.errors|join(' ') }}</span>{% endif %}
                         </div>
-                        {{ gallery_upload_form.photo(class="adw-entry adw-entry-row-entry") if gallery_upload_form }}
+                        {{ gallery_upload_form.photos(class="adw-entry adw-entry-row-entry", multiple="multiple") if gallery_upload_form }} {# Added multiple attribute and changed .photo to .photos #}
                     </div>
                     {# Caption Textarea - Revised Structure #}
                     <div class="form-field-container {{ 'has-error' if gallery_upload_form and gallery_upload_form.caption.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);">
-                        <label for="{{ gallery_upload_form.caption.id if gallery_upload_form else 'gallery_caption_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.caption.label.text if gallery_upload_form else 'Caption' }}</label>
+                        <label for="{{ gallery_upload_form.caption.id if gallery_upload_form else 'gallery_caption_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.caption.label.text if gallery_upload_form else 'Caption (for all photos)' }}</label>
                         {% if gallery_upload_form and gallery_upload_form.caption.errors %}
                             <p class="adw-label caption error-text" style="margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.caption.errors|join(' ') }}</p>
                         {% endif %}
-                        {{ gallery_upload_form.caption(class="adw-entry", rows="2", placeholder="Optional caption...", style="width: 100%; min-height: 60px; box-sizing: border-box;") if gallery_upload_form }}
+                        {{ gallery_upload_form.caption(class="adw-entry", rows="2", placeholder="Optional caption for all photos in this batch...", style="width: 100%; min-height: 60px; box-sizing: border-box;") if gallery_upload_form }}
                     </div>
                    <div class="form-actions-end" style="padding: 0 var(--spacing-m) var(--spacing-m) var(--spacing-m);">
-                       {{ gallery_upload_form.submit(class="adw-button suggested-action") if gallery_upload_form }}
+                       {{ gallery_upload_form.submit(class="adw-button suggested-action") if gallery_upload_form }} {# Submit button label already changed in forms.py #}
                    </div>
                 </form>
             </div>
@@ -418,7 +418,7 @@
                     </div>
                     {% endfor %}
                 </div>
-                {% if total_gallery_photos > 0 %} {# Show view all button if there's at least one photo #}
+                {% if total_gallery_photos > gallery_photos_preview|length %}
                 <div class="adw-box justify-center" style="margin-top: var(--spacing-m);">
                     <a href="{{ url_for('profile.view_gallery', user_id=user_profile.id) }}" class="adw-button">
                         View All Photos ({{ total_gallery_photos }}) <span class="adw-icon icon-actions-go-next-symbolic"></span>
