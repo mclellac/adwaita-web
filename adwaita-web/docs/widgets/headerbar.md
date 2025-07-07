@@ -108,14 +108,33 @@ A declarative way to define Adwaita header bars.
 
 ## Styling
 
-*   Primary SCSS: `scss/_headerbar.scss`
-*   Variables:
-    *   `--headerbar-bg-color`
-    *   `--headerbar-fg-color`
-    *   `--headerbar-border-color` (typically for the bottom border)
-    *   `--headerbar-shade-color` (used for subtle shadows or darker borders when scrolled)
-    *   `--headerbar-backdrop-color` (background when window is not focused, or for "transparent" header bars blending with content)
-*   The internal structure uses flexbox to arrange the start, center (title/subtitle), and end sections.
+*   **SCSS Source:** `scss/_headerbar.scss`
+*   **Key CSS Classes & Structure:**
+    *   `.adw-header-bar`: Main container element.
+        *   Background: `var(--headerbar-bg-color)`.
+        *   Text Color: `var(--headerbar-fg-color)`.
+        *   Bottom Border: `var(--border-width) solid var(--headerbar-shade-color)`.
+    *   `.adw-header-bar-start`: Container for elements at the start (left).
+    *   `.adw-header-bar-center-box`: Flex container for centered title and subtitle.
+        *   `.adw-header-bar-title`: For the main title text.
+        *   `.adw-header-bar-subtitle`: For the subtitle text (dimmed opacity).
+    *   `.adw-header-bar-end`: Container for elements at the end (right).
+*   **Button Styling:** Buttons placed directly in `.adw-header-bar-start` or `.adw-header-bar-end` are styled flat by default (transparent background, inherit header bar text color).
+    *   Use the `.raised` class on a button to make it retain its standard bordered/background appearance.
+    *   `suggested-action` and `destructive-action` buttons retain their specific styling.
+*   **States & Variants:**
+    *   `.scrolled` or `.raised-border`: Added to `.adw-header-bar` when content scrolls under it (e.g., in `AdwToolbarView`). Changes `border-bottom-color` to `var(--headerbar-darker-shade-color)`.
+    *   `.backdrop`: When the window is inactive, this class (or a parent `.window.backdrop`) changes the header bar's background to `var(--headerbar-backdrop-color)`.
+    *   `.flat` (DEPRECATED): Makes the header bar transparent with no border. `AdwToolbarView` should be used for this effect.
+    *   **Development Style:** If `.adw-header-bar` is inside an element with class `.devel`, it gets a striped background for visual distinction (e.g., for nightly application builds).
+*   **Theming Variables:**
+    *   `--headerbar-bg-color`, `--headerbar-fg-color`
+    *   `--headerbar-shade-color`, `--headerbar-darker-shade-color` (for borders)
+    *   `--headerbar-backdrop-color`
+    *   `--dim-opacity` (for subtitle)
+    *   Buttons use `var(--headerbar-fg-color-rgb)` for hover/active alpha overlays.
+
+Refer to `scss/_headerbar.scss` for detailed structure and variables.
 
 ---
 Next: [Window](./window.md)

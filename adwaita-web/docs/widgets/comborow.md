@@ -163,10 +163,33 @@ if(jsComboContainer) {
 
 ## Styling
 
-*   Primary SCSS: `scss/_combo_row.scss` (if exists), `scss/_row_types.scss`, and potentially styles for native `<select>` elements.
-*   The layout aligns the label part to the left and the select dropdown to the right.
-*   The standard Adwaita styling for `<select>` elements (often subtle, matching entry fields) will apply.
-*   Disabled state styles the entire row as inactive.
+*   **SCSS Sources:** `scss/_combo_row.scss` and the `AdwComboRow` section in `scss/_row_types.scss`.
+*   **Key Classes and Structure:**
+    *   The `.adw-combo-row` class is the main container, typically styled like an `AdwActionRow`.
+    *   **Manual HTML Structure (if not using Web Component):**
+        ```html
+        <div class="adw-combo-row">
+          <div class="adw-combo-row__text-content"> <!-- Or adw-action-row-content -->
+            <span class="adw-combo-row__title">Label Title</span>
+            <span class="adw-combo-row__subtitle">Optional Subtitle</span>
+          </div>
+          <select class="adw-combo-row-select">
+            <option value="1">Option 1</option>
+            <option value="2">Option 2</option>
+          </select>
+          <!-- The chevron might be part of the select's default UI,
+               or could be a separate .adw-combo-row__button span if native arrow is hidden -->
+        </div>
+        ```
+    *   **Web Component `<adw-combo-row>`:** This component likely generates an internal structure that utilizes these (or similar) classes. Refer to its specific implementation if you need to target internal parts not exposed via attributes/properties.
+    *   `.adw-combo-row__title`, `.adw-combo-row__subtitle`: Style the text parts.
+    *   `.adw-combo-row-select` (from `_row_types.scss`): This class is crucial for styling the native `<select>` element. It gives it a subtle bottom border, removes default browser appearance for cleaner integration, and applies an accent color border on focus.
+    *   `.adw-combo-row__selected-value` (from `_combo_row.scss`): An optional element to display the selected value text separately, often to the right.
+    *   `.adw-combo-row__button` (from `_combo_row.scss`): Styles a chevron icon, useful if the native dropdown arrow of `<select>` is hidden (which is complex and often avoided for native `<select>`).
+*   **Theming:**
+    *   The row itself inherits ActionRow theming (background, hover, active states).
+    *   The `<select>` element (`.adw-combo-row-select`) uses `var(--borders-color)` for its bottom border and `var(--accent-color)` for the border on focus.
+    *   Disabled state styles the entire row and the select element as inactive (e.g., dashed border for select, opacity).
 
 ---
 Next: [ViewSwitcher](./viewswitcher.md)

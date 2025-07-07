@@ -143,9 +143,18 @@ A declarative way to define Adwaita alert dialogs. This component internally use
 
 ## Styling
 
-*   Primary SCSS: `scss/_alert_dialog.scss` (which builds upon `scss/_dialog.scss`).
-*   Typically has a more focused layout than a generic `AdwDialog`, with clear visual separation for heading, body, and action buttons.
-*   Buttons are usually arranged in a specific order (e.g., cancel on the left, confirm on the right or destructive actions).
+*   **SCSS Source:** The specific styles for alert dialog content elements (like heading, body) are defined in `scss/_dialog.scss`. The `<adw-alert-dialog>` web component itself relies on the base `adw-dialog` styling for its container, also defined in `scss/_dialog.scss`.
+*   **Key CSS Classes (from `_dialog.scss`):**
+    *   When an `<adw-alert-dialog>` constructs its internal `<adw-dialog>`, its `heading` attribute typically maps to an element styled by `.adw-alert-dialog-heading`.
+    *   The `body` attribute or `body-content` slot maps to content styled by `.adw-alert-dialog-body`.
+    *   Slotted choice buttons are usually wrapped in a container styled by `.adw-alert-dialog-responses`.
+*   **Visual Appearance:**
+    *   The overall dialog frame (background, shadow, border-radius) is styled by the base `adw-dialog` rules.
+    *   Heading is centered and typically uses `var(--title-2-font-size)`.
+    *   Body text is centered and dimmed using `var(--dim-opacity)`.
+    *   Response buttons are arranged in a flex container, which can be vertical (default) or horizontal (if `.adw-alert-dialog-responses.horizontal` is used).
+
+Refer to [Dialog Styling](./dialog.md) for details on the base dialog container and the specific alert content classes.
 
 ---
 Next: [AboutDialog](./aboutdialog.md)
