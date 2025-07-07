@@ -232,6 +232,40 @@ class UserPhoto(db.Model):
     def __repr__(self):
         return f'<UserPhoto {self.image_filename} user_id={self.user_id}>'
 
+    # Relationship for comments on this photo
+    comments = db.relationship(
+        'PhotoComment',
+        backref='photo',
+        lazy='dynamic',
+        cascade='all, delete-orphan',
+        order_by=lambda: desc(PhotoComment.created_at) # Use lambda for PhotoComment ref
+    )
+
+class PhotoComment(db.Model):
+    __tablename__ = 'photo_comment'
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(
+        db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    photo_id = db.Column(db.Integer, db.ForeignKey('user_photo.id'), nullable=False)
+
+    # Relationships
+    author = db.relationship('User', backref=db.backref('photo_comments', lazy='dynamic'))
+    # 'photo' backref is defined in UserPhoto.comments
+
+    # parent_id = db.Column(db.Integer, db.ForeignKey('photo_comment.id'), nullable=True)
+    # replies = db.relationship(
+    #     'PhotoComment',
+    #     backref=db.backref('parent', remote_side=[id]),
+    #     lazy='dynamic',
+    #     order_by=lambda: desc(PhotoComment.created_at) # Sort replies newest first
+    # )
+
+    def __repr__(self):
+        return f'<PhotoComment {self.id} user_id={self.user_id} photo_id={self.photo_id}>'
+
 class CommentFlag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=False)

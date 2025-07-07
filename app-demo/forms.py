@@ -136,3 +136,11 @@ class GalleryPhotoUploadForm(FlaskForm):
         validators=[Optional(), Length(max=500)]
     )
     submit = SubmitField('Upload Photo')
+
+class PhotoCommentForm(FlaskForm):
+    text = TextAreaField(
+        'Comment',
+        validators=[DataRequired(), Length(min=1, max=2000)]
+    )
+    # photo_id and user_id will be handled by the route
+    submit = SubmitField('Post Comment')
