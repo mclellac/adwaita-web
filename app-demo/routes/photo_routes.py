@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request, abort, url_for
 from flask_login import current_user, login_required
-from app_demo import db
-from app_demo.models import UserPhoto, PhotoComment, User
-from app_demo.forms import PhotoCommentForm
+from .. import db  # Corrected import
+from ..models import UserPhoto, PhotoComment, User  # Corrected import
+from ..forms import PhotoCommentForm  # Corrected import
 
 photo_bp = Blueprint('photo', __name__, url_prefix='/photo')
 
