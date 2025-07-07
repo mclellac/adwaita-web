@@ -137,10 +137,35 @@ A declarative way to define Adwaita action rows.
 
 ## Styling
 
-*   Primary SCSS: `scss/_action_row.scss` (and inherits from `_listbox.scss` / `_row_types.scss`).
-*   The layout uses flexbox to arrange icon, title/subtitle block, suffix, and chevron.
-*   The `disabled` state will typically reduce opacity and disable pointer events.
-*   Interactive states (hover, active) are styled for visual feedback.
+*   **SCSS Source:** `scss/_action_row.scss`. Inherits base row styles through `@include mixins.row-base`.
+*   **Key Visual Aspects:**
+    *   **Layout:** Uses flexbox. Default `gap` is `var(--spacing-m)`.
+    *   **Padding & Height:** Typically `12px` top/bottom padding, aiming for standard Adwaita row heights (e.g., ~54px single line, ~70px with subtitle).
+    *   **Shadow:** Standalone ActionRows or those in flat listboxes have a `var(--subtle-box-shadow)`.
+    *   **Prefix/Suffix Icons:**
+        *   General icons (e.g., in `.adw-action-row-prefix` or as part of a suffix widget) use `var(--secondary-fg-color)` and are typically 16px.
+        *   Chevron icon (`.adw-action-row-chevron` in suffix for navigation) uses `pan-next-symbolic.svg` (or `go-next-symbolic.svg`), `currentColor` (thus `var(--secondary-fg-color)`), and `var(--icon-opacity)`.
+    *   **Title (`.adw-action-row-title`):** Normal weight, `var(--window-fg-color)`, ellipsis for overflow.
+    *   **Subtitle (`.adw-action-row-subtitle`):** Small size, `var(--secondary-fg-color)`, ellipsis for overflow. `margin-top: var(--spacing-xxs)`.
+    *   **Activatable State (`.activatable` class):**
+        *   Cursor becomes `pointer`.
+        *   Hover: `background-color: var(--list-row-hover-bg-color)`.
+        *   Active (pressed): `background-color: var(--list-row-active-bg-color)`.
+        *   Focus: Standard outline `var(--focus-ring-width) solid var(--accent-color)` with `var(--focus-outline-offset)`.
+    *   **Property Variant (`.property` class):**
+        *   Title becomes de-emphasized (normal weight, `var(--secondary-fg-color)`).
+        *   Subtitle becomes emphasized (`var(--primary-fg-color)`, normal weight, full opacity).
+        *   If also `.monospace`, subtitle uses `var(--font-family-monospace)`.
+    *   **Monospace Variant (`.monospace` class, if not also `.property`):**
+        *   Subtitle uses `var(--font-family-monospace)`.
+    *   **Destructive Variant (`.destructive-action` class):**
+        *   Title color becomes `var(--destructive-color)`.
+*   **Theming:**
+    *   Background color from `var(--list-row-bg-color)`.
+    *   Interactive states use variables like `var(--list-row-hover-bg-color)`, `var(--list-row-active-bg-color)`.
+    *   Text colors primarily from `var(--window-fg-color)` and `var(--secondary-fg-color)`.
+
+Refer to `scss/_action_row.scss` and [Theming Reference](../general/theming.md) for full details.
 
 ---
 Next: [EntryRow](./entryrow.md)

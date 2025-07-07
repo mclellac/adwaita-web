@@ -199,13 +199,43 @@ The TabView system provides a way to manage multiple pages of content, where eac
 </script>
 ```
 
-## Styling
+## Styling Details
 
-*   `scss/_tabs.scss` is the primary file.
-*   `AdwTabBar` styles the container for tab buttons (flex layout, borders).
-*   `AdwTabButton` styles individual tabs (padding, borders, active state, close button).
-*   `AdwTabPage` is usually a simple block container, with `display: none` toggled by `AdwTabView`.
-*   `AdwTabView` structures the tab bar and content area.
+*   **SCSS Source:** `scss/_tabs.scss`
+*   **Key CSS Classes & Structure:**
+    *   **`.adw-tab-button`**:
+        *   Styles the individual tab. Rounded top corners, transparent background when inactive, dimmed text.
+        *   Padding: `var(--spacing-s) var(--spacing-m)`.
+        *   Margin: `margin-right: var(--spacing-xxs)` and negative bottom margin to overlap `AdwTabBar`'s border.
+        *   Hover: Opacity 1, subtle background (`rgba(var(--headerbar-fg-color-rgb), 0.05)`).
+        *   Active (`.active` class): Background `var(--view-bg-color)`, text `var(--accent-color)` (bold), full opacity. Border color `var(--headerbar-border-color)` on sides/top, bottom border blends with view background.
+        *   Focus: Inset box shadow using `var(--accent-color)`.
+        *   Internal Structure (assumed by SCSS for full styling):
+            *   `.adw-tab-button-content-wrapper`: Flex container for icon and label.
+            *   `.adw-tab-button-icon`: For an optional icon.
+            *   `.adw-tab-button-label`: For the text label (handles overflow with ellipsis).
+            *   `.adw-tab-button-close`: A close button (styled like a small, flat `.adw-button`).
+    *   **`.adw-tab-bar`**:
+        *   The container for tab buttons. Uses `flex` display.
+        *   Background: `var(--headerbar-bg-color)`, text `var(--headerbar-fg-color)`.
+        *   Padding: Horizontal `var(--spacing-s)`.
+        *   Border: `border-bottom: var(--border-width) solid var(--headerbar-border-color)`.
+        *   `.adw-tab-bar-new-tab-button`: A small, circular, flat icon button for adding new tabs.
+        *   `.inline` variant: Transparent background (or `var(--window-bg-color)`), standard border. Active tabs look more like toggle buttons.
+    *   **`.adw-tab-page`**:
+        *   Container for a single tab's content.
+        *   Padding: `var(--spacing-l)`.
+        *   Background: `var(--view-bg-color)`. Text: `var(--view-fg-color)`.
+        *   Typically `display: block; height: 100%; overflow: auto;`. Visibility controlled by JavaScript.
+    *   **`.adw-tab-view`**:
+        *   Main container, uses flex column layout for tab bar and page container.
+        *   Background: `var(--window-bg-color)`.
+        *   `.adw-tab-view-pages-container`: Wraps the tab pages, handles overflow, and uses `position: relative` for absolute positioning of pages if needed for transitions.
+        *   Active page (e.g., with `.active-page` class) is made visible.
+    *   **`.adw-tab-overview`**: Placeholder styles for a grid view of tab thumbnails.
+*   **Theming Variables:** Many variables from `_headerbar.scss` and `_view.scss` are reused (e.g., `--headerbar-bg-color`, `--view-bg-color`, `--accent-color`).
+
+Refer to `scss/_tabs.scss` for comprehensive styling details.
 
 ---
 Next: [NavigationView](./navigationview.md)

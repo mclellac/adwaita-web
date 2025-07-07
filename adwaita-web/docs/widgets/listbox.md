@@ -75,14 +75,40 @@ Various types of rows can be placed inside an `adw-list-box`. Each has its own s
 
 ## Styling & Theming
 
-*   **SCSS Source:** `scss/_listbox.scss`, `scss/_row_types.scss` (and individual row SCSS).
-*   **CSS Variables:**
-    *   **Default ListBox:** Uses `var(--view-bg-color)` for background, `var(--border-color)` for border. Row separators use `var(--list-separator-color)`.
-    *   **`.boxed-list`:** Uses `var(--card-bg-color)`, `var(--card-fg-color)`, and `var(--card-shade-color)` for its "inner border" shadow effect and row separators.
-    *   **Selected/Active Rows:** Typically use `var(--accent-bg-color)` and `var(--accent-fg-color)`.
-    *   **Row Hover:** `var(--list-row-hover-bg-color)`.
+*   **SCSS Source:** `scss/_listbox.scss`. Also see individual row SCSS files (e.g., `_action_row.scss`).
+*   **Key Visual Aspects:**
+    *   **Default ListBox:**
+        *   Background: `var(--view-bg-color)`.
+        *   Border: `var(--border-width) solid var(--border-color)`.
+        *   Shadow: `var(--subtle-box-shadow)` is applied unless it's `.flat` or `.boxed-list`.
+        *   Row separators: `var(--border-width) solid var(--list-separator-color)`.
+        *   First/last rows have `var(--border-radius-default)`.
+    *   **`.boxed-list`:**
+        *   Background: `var(--card-bg-color)`. Text color: `var(--card-fg-color)`.
+        *   Border: None. Uses a composite shadow: `0 0 0 var(--border-width) var(--card-shade-color)` (for an inner border effect) and an outer shadow (`0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05)`).
+        *   Padding: None on the listbox itself; rows handle padding.
+        *   Row separators: `var(--border-width) solid var(--card-shade-color)`.
+        *   First/last rows have `var(--border-radius-large)`.
+    *   **`.boxed-list-separate`:**
+        *   ListBox itself is transparent and borderless.
+        *   Each child `.adw-row` is styled as a separate card (see `_card.scss`), with `margin-bottom: var(--spacing-s)` between them.
+    *   **`.flat`:**
+        *   Background, border, and shadow are removed from the listbox.
+        *   If also `.boxed-list`, it retains card-like separators. Otherwise, uses default list separators.
+        *   Rows within a flat listbox generally have no individual rounded corners.
+    *   **`.navigation-sidebar`:**
+        *   Background: `var(--sidebar-bg-color)`. Text color: `var(--sidebar-fg-color)`.
+        *   No borders or separators between rows.
+        *   Rows have `var(--border-radius-small)`.
+*   **Row States (General):**
+    *   **Hover:** `var(--list-row-hover-bg-color)`. Activatable rows might use `var(--list-row-active-bg-color)` for hover.
+    *   **Selected/Activated (`.selected`, `.activated` classes):**
+        *   Default listbox: `var(--list-row-selected-bg-color)` and `var(--list-row-selected-fg-color)` (typically accent colors).
+        *   Boxed list: `var(--accent-bg-color)` and `var(--accent-fg-color)`.
+        *   Navigation sidebar: `var(--accent-bg-color)` and `var(--accent-fg-color)`.
+    *   **Focus:** Activatable rows show a focus ring (`var(--focus-ring-width) solid var(--focus-ring-color)`), often slightly inset.
 
-Refer to the [Theming Reference](../general/theming.md) and relevant SCSS files for more details.
+Refer to the [Theming Reference](../general/theming.md) and `scss/_listbox.scss` for more details.
 
 ## Interactivity
 

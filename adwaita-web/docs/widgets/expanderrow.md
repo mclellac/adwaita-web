@@ -134,10 +134,36 @@ Log entry 3...</pre>
 
 ## Styling
 
-*   Primary SCSS: `scss/_expander_row.scss` (and inherits from `_listbox.scss` / `_row_types.scss`).
-*   Includes styling for the header part (title, subtitle, chevron icon) and the collapsible content area.
-*   The chevron icon rotates to indicate the expanded/collapsed state.
-*   The content area is typically hidden/shown using `display: none/block` or by adjusting `max-height` for CSS transitions.
+*   **SCSS Sources:** `scss/_expander_row.scss` and `scss/_row_types.scss` (for `AdwExpanderRow` sections).
+*   **Key Classes and Structure:**
+    *   `.adw-expander-row`: The main container for the expander row.
+        *   An inner element, typically an `<div class="adw-action-row activatable">`, serves as the clickable header.
+        *   Inside the header, an icon element (e.g., `<span class="adw-icon adw-expander-row-chevron"></span>`) displays the chevron. The chevron uses `pan-down-symbolic.svg` and rotates.
+            *   Default state (collapsed): Rotated -90 degrees (points right in LTR).
+            *   When `.adw-expander-row.expanded` or its header part has an `.expanded` class: Rotated 0 degrees (points down).
+    *   `.adw-expander-row-content`: The container for the collapsible content.
+        *   Hidden by default (e.g., `display: none` or `max-height: 0` with `overflow: hidden` and `opacity: 0`).
+        *   When the row is expanded (e.g., by adding an `.expanded` class to this element or its parent `.adw-expander-row`), it becomes visible (e.g., `display: block` or `max-height` increased, `opacity: 1`).
+        *   Styled with padding and a top border to separate it from the header.
+*   **CSS-Only Variant (`<details>`/`<summary>`):**
+    *   `_expander_row.scss` also includes styles for a CSS-only expander using the `<details>` HTML element with class `.adw-css-expander-row`.
+    *   The `<summary>` element is styled with `.adw-action-row` and gets a custom chevron via its `::after` pseudo-element.
+    *   The content within the `<details>` element (not the summary) should be wrapped in a `div` with class `.adw-expander-row-content` to pick up the correct styling.
+    ```html
+    <details class="adw-css-expander-row">
+      <summary class="adw-action-row activatable">
+        <span class="adw-action-row-title">CSS Expander Title</span>
+        <!-- The ::after pseudo-element on summary creates the chevron -->
+      </summary>
+      <div class="adw-expander-row-content">
+        <p>This content is revealed by the CSS-only expander.</p>
+      </div>
+    </details>
+    ```
+*   **Theming:**
+    *   `--expander-content-bg-color`: Background for the content area (defaults to `--window-bg-color`).
+    *   Chevron icon color is `currentColor` (inherited text color), opacity from `--icon-opacity`.
+    *   Animation uses `--animation-duration-short` and `--animation-ease-out-sine` or `--animation-ease-out-cubic`.
 
 ---
 Next: [SwitchRow](./switchrow.md) (as it's another common row type)
