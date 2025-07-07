@@ -58,7 +58,15 @@
                         {% endif %}
                     </div>
                     <div class="adw-switch-row__switch">
-                        {{ form.allow_registrations(class="adw-switch") }}
+                        {# The adw-switch class is now on the label wrapper for the switch itself #}
+                        <label class="adw-switch">
+                            <input type="checkbox"
+                                   name="{{ form.allow_registrations.name }}"
+                                   id="{{ form.allow_registrations.id or 'allow_registrations_input' }}"
+                                   {% if form.allow_registrations.data %}checked{% endif %}
+                                   >
+                            <span class="adw-switch-slider"></span>
+                        </label>
                     </div>
                 </div>
             </div>
