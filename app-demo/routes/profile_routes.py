@@ -207,44 +207,93 @@ def edit_profile():
 @login_required
 def upload_gallery_photo():
     form = GalleryPhotoUploadForm()
-    form.photo.validators.append(FileAllowed(current_app.config['ALLOWED_EXTENSIONS'], 'Images only!'))
+    # For MultipleFileField, FileAllowed needs to be applied carefully,
+    # often it's better to validate each file in the loop.
+    # However, we can add it to the form field directly if wtforms handles it for each file.
+    # Let's assume FileAllowed on MultipleFileField checks each file.
+    # If not, the loop below will catch it.
+    form.photos.validators.append(FileAllowed(current_app.config['ALLOWED_EXTENSIONS'], 'Images only!'))
+
     if form.validate_on_submit():
-        file = form.photo.data
-        caption = form.caption.data
-        file.stream.seek(0, os.SEEK_END)
-        actual_file_size = file.stream.tell()
-        file.stream.seek(0)
-        if actual_file_size > current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES']:
-            max_size_mb = current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES'] // 1024 // 1024
-            flash(f"Gallery photo is too large. Maximum size is {max_size_mb}MB.", "danger")
-            return redirect(url_for('profile.view_profile', user_id=current_user.id))
-        try:
-            original_filename = secure_filename(file.filename)
+        uploaded_count = 0
+        failed_count = 0
+        caption = form.caption.data  # Common caption for the batch
+
+        for file_storage in form.photos.data:
+            if not file_storage or not file_storage.filename:
+                failed_count += 1
+                current_app.logger.warning(f"Empty file storage object encountered in batch upload for user {current_user.id}.")
+                continue
+
+            # Check file size (important to do this early)
+            file_storage.stream.seek(0, os.SEEK_END)
+            actual_file_size = file_storage.stream.tell()
+            file_storage.stream.seek(0) # Reset stream position
+
+            if actual_file_size == 0: # Skip empty files that might pass initial checks
+                failed_count +=1
+                current_app.logger.warning(f"Skipped empty file: {secure_filename(file_storage.filename)} for user {current_user.id}")
+                continue
+
+
+            if actual_file_size > current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES']:
+                max_size_mb = current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES'] // 1024 // 1024
+                flash(f"Photo '{secure_filename(file_storage.filename)}' is too large. Maximum size is {max_size_mb}MB.", "danger")
+                failed_count += 1
+                continue
+
+            original_filename = secure_filename(file_storage.filename)
             ext = original_filename.rsplit('.', 1)[-1].lower() if '.' in original_filename else ''
+
             if not ext or ext not in current_app.config['ALLOWED_EXTENSIONS']:
-                flash(f"Invalid file type. Allowed types: {', '.join(current_app.config['ALLOWED_EXTENSIONS'])}.", 'warning')
-                return redirect(url_for('profile.view_profile', user_id=current_user.id))
-            unique_filename_stem = uuid.uuid4().hex
-            unique_filename = f"{unique_filename_stem}.{ext}"
-            user_gallery_folder_name = str(current_user.id)
-            user_specific_folder_abs = os.path.join(current_app.config['GALLERY_UPLOAD_FOLDER'], user_gallery_folder_name)
-            os.makedirs(user_specific_folder_abs, exist_ok=True)
-            save_path = os.path.join(user_specific_folder_abs, unique_filename)
-            file.save(save_path)
-            if os.path.exists(save_path):
-                db_image_path = os.path.join(user_gallery_folder_name, unique_filename).replace("\\", "/")
-                new_photo = UserPhoto(user_id=current_user.id, image_filename=db_image_path, caption=caption)
-                db.session.add(new_photo)
+                flash(f"Invalid file type for '{original_filename}'. Allowed types: {', '.join(current_app.config['ALLOWED_EXTENSIONS'])}.", 'warning')
+                failed_count += 1
+                continue
+
+            try:
+                unique_filename_stem = uuid.uuid4().hex
+                unique_filename = f"{unique_filename_stem}.{ext}"
+                user_gallery_folder_name = str(current_user.id)
+                user_specific_folder_abs = os.path.join(current_app.config['GALLERY_UPLOAD_FOLDER'], user_gallery_folder_name)
+                os.makedirs(user_specific_folder_abs, exist_ok=True)
+                save_path = os.path.join(user_specific_folder_abs, unique_filename)
+
+                file_storage.save(save_path) # Use FileStorage's save method
+
+                if os.path.exists(save_path):
+                    db_image_path = os.path.join(user_gallery_folder_name, unique_filename).replace("\\", "/")
+                    new_photo = UserPhoto(user_id=current_user.id, image_filename=db_image_path, caption=caption)
+                    db.session.add(new_photo)
+                    uploaded_count += 1
+                else:
+                    flash(f"Error saving photo '{original_filename}': File could not be written to disk.", 'danger')
+                    failed_count += 1
+            except Exception as e:
+                current_app.logger.error(f"Exception during gallery photo processing for {original_filename}: {e}", exc_info=True)
+                flash(f"Error processing gallery photo '{original_filename}': {str(e)}", 'danger')
+                failed_count += 1
+
+        if uploaded_count > 0:
+            try:
                 db.session.commit()
-                flash('Photo uploaded to gallery successfully!', 'toast_success')
-            else:
-                flash('Error saving photo: File could not be written to disk.', 'danger')
-        except Exception as e:
-            current_app.logger.error(f"Exception during gallery photo processing: {e}", exc_info=True)
-            flash(f'Error processing gallery photo: {str(e)}', 'danger')
-    else:
-        # flash_form_errors_util already uses 'danger'
-        flash_form_errors_util(form)
+                flash(f'{uploaded_count} photo(s) uploaded to gallery successfully!', 'toast_success')
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Database commit failed after uploading {uploaded_count} photos: {e}", exc_info=True)
+                flash('Database error after uploading photos. Some uploads may not have been saved.', 'danger')
+                # uploaded_count might not reflect actual DB saves here.
+
+        if failed_count > 0:
+            flash(f'{failed_count} photo(s) failed to upload.', 'warning')
+
+        if uploaded_count == 0 and failed_count == 0 and form.photos.data:
+             # This case might happen if all files were empty or some other edge case not caught above
+            flash('No photos were uploaded. Please ensure files are selected and not empty.', 'info')
+
+
+    else: # Form validation failed
+        flash_form_errors_util(form) # This helper flashes 'danger' messages
+
     return redirect(url_for('profile.view_profile', user_id=current_user.id))
 
 
@@ -276,8 +325,20 @@ def view_gallery(user_id):
     if not user_profile.is_profile_public and user_profile != current_user:
         flash("This profile's gallery is private.", "danger")
         abort(403)
-    gallery_photos = user_profile.gallery_photos.order_by(UserPhoto.uploaded_at.desc()).all()
-    return render_template('gallery_full.html', user_profile=user_profile, gallery_photos=gallery_photos)
+
+    page = request.args.get('page', 1, type=int)
+    # Use a specific config for gallery items per page, or fallback to POSTS_PER_PAGE or a default
+    per_page = current_app.config.get('GALLERY_PHOTOS_PER_PAGE', 12) # Example: 12 photos per page
+
+    gallery_photos_query = user_profile.gallery_photos.order_by(UserPhoto.uploaded_at.desc())
+    try:
+        gallery_photos_page = gallery_photos_query.paginate(page=page, per_page=per_page, error_out=False)
+    except Exception as e:
+        current_app.logger.error(f"Error fetching gallery photos for profile {user_profile.username} (page {page}): {e}", exc_info=True)
+        flash("Error loading gallery photos.", "danger")
+        gallery_photos_page = None
+
+    return render_template('gallery_full.html', user_profile=user_profile, gallery_photos_page=gallery_photos_page)
 
 
 @profile_bp.route('/follow/<int:user_id>', methods=['POST'])
