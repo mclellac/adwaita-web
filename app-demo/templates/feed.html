@@ -29,8 +29,8 @@
                                 <div class="adw-box adw-box-vertical">
                                     <a href="{{ url_for('profile.view_profile', user_id=item.author.id) }}" class="adw-link">
                                         <strong class="adw-label body-1">{{ item.author.full_name }}</strong>
-                                    </a>
-                                     <span class="adw-label caption">@{{ item.author.full_name }}</span>
+
+                                     <span class="adw-label caption">@{{ item.author.username }}</span></a>
                                 </div>
                             </div>
                             <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
@@ -84,26 +84,46 @@
                                 <div class="adw-box adw-box-vertical">
                                     <a href="{{ url_for('profile.view_profile', user_id=item.author.id) }}" class="adw-link">
                                         <strong class="adw-label body-1">{{ item.author.full_name }}</strong>
-                                    </a>
-                                     <span class="adw-label caption">@{{ item.author.full_name }}</span>
+
+                                     <span class="adw-label caption">@{{ item.author.username }}</span></a>
                                 </div>
                             </div>
                             <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
                                 Uploaded: <time datetime="{{ item.timestamp.isoformat() }}">{{ item.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time>
                             </div>
                         </header>
-                        <div class="adw-card__content photo-display-content" style="text-align: center;">
-                            <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo_item.image_filename) }}"
-                                 alt="{{ photo_item.caption or ('Photo by ' ~ item.author.full_name) }}"
-                                 style="max-width: 100%; max-height: 60vh; border-radius: var(--border-radius-medium); object-fit: contain;">
-                            {% if photo_item.caption %}
-                            <p class="adw-label body-1 photo-caption-text" style="margin-top: var(--spacing-s);">{{ photo_item.caption }}</p>
+                        {# Entire card content is a link to the gallery for the first photo in the set #}
+                        {# If photo_item is a list, use first photo for main card link, else use photo_item directly #}
+                        {% set first_photo = photo_item[0] if photo_item is iterable and not photo_item is string else photo_item %}
+                        {% set gallery_url = url_for('profile.view_gallery', user_id=item.author.id) + '#photo-' + (first_photo.id | string) %}
+
+                        <a href="{{ gallery_url }}" class="adw-card__content photo-display-content photo-card-clickable-content" style="text-decoration: none; color: inherit;">
+                            {# Container for multiple thumbnails if photo_item is a list #}
+                            <div class="photo-thumbnails-grid">
+                                {% if photo_item is iterable and not photo_item is string %}
+                                    {# Multiple photos: display as thumbnails in a grid #}
+                                    {% for photo_thumb in photo_item %}
+                                    <a href="{{ url_for('profile.view_gallery', user_id=item.author.id) }}#photo-{{photo_thumb.id}}" class="photo-thumbnail-link">
+                                        <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo_thumb.image_filename) }}"
+                                             alt="{{ photo_thumb.caption or ('Photo by ' ~ item.author.full_name) }}"
+                                             class="photo-thumbnail-img">
+                                    </a>
+                                    {% endfor %}
+                                {% else %}
+                                    {# Single photo: display as a larger thumbnail #}
+                                    <a href="{{ gallery_url }}" class="photo-thumbnail-link single-photo-link">
+                                        <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo_item.image_filename) }}"
+                                             alt="{{ photo_item.caption or ('Photo by ' ~ item.author.full_name) }}"
+                                             class="photo-thumbnail-img single-photo-thumbnail-img">
+                                    </a>
+                                {% endif %}
+                            </div>
+                            {% if first_photo.caption %} {# Show caption of the first photo or the single photo #}
+                            <p class="adw-label body-1 photo-caption-text" style="margin-top: var(--spacing-s); padding: 0 var(--spacing-m);">{{ first_photo.caption }}</p>
                             {% endif %}
-                        </div>
-                        {# Photos don't have comments or likes directly on them in this feed view for now #}
-                        {# Could add a link to view photo in gallery or on profile if a dedicated photo view page exists #}
-                         <footer class="blog-post-card__footer">
-                            <a href="{{ url_for('profile.view_gallery', user_id=item.author.id) }}#photo-{{photo_item.id}}" class="adw-button flat read-more-link">
+                        </a>
+                        <footer class="blog-post-card__footer" style="padding-top: 0;"> {# Adjust padding if caption is inside the link #}
+                            <a href="{{ gallery_url }}" class="adw-button flat read-more-link">
                                 View in Gallery <span class="adw-icon icon-actions-go-next-symbolic"></span>
                             </a>
                         </footer>
