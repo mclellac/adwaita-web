@@ -44,7 +44,7 @@ adw-dialog {
     justify-content: space-between;
     align-items: center;
     padding: var(--spacing-m);
-    border-bottom: 1px solid var(--border-color);
+    // border-bottom: 1px solid var(--border-color); // Removed to avoid line under title
 
     .adw-header-bar__title {
       font-size: var(--title-3-font-size);
