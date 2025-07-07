@@ -64,20 +64,22 @@
       }
     }
   }
-}
+
+  // Styling for the divider within the popover menu's list box
+  &.menu-popover, &.menu {
+    .adw-list-box .popover-divider {
+      border: none;
+      border-top: 1px solid var(--divider-color);
+      margin: var(--spacing-xs) var(--spacing-m); // Align with action-row horizontal padding
+    }
+  }
+} // This is the correct closing brace for .adw-popover
 
 // The .adw-popover-surface class can still be used for popovers that have a distinct
 // surface div inside the .adw-popover container (e.g. for content popovers with arrows).
 // The styles for .adw-popover-surface and .adw-popover-surface.menu can remain.
 // This change primarily ensures that if .adw-popover is used with .menu-popover or .menu,
 // it gets the visual styling of a menu directly.
-
-    .popover-divider {
-      border: none;
-      border-top: 1px solid var(--divider-color);
-      margin: var(--spacing-xs) 0; // Consistent with other popover/menu item spacing
-    }
-}
 
 .adw-popover-surface {
   // These styles are for when there's an explicit surface element
