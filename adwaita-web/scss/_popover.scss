@@ -72,6 +72,13 @@
 // This change primarily ensures that if .adw-popover is used with .menu-popover or .menu,
 // it gets the visual styling of a menu directly.
 
+    .popover-divider {
+      border: none;
+      border-top: 1px solid var(--divider-color);
+      margin: var(--spacing-xs) 0; // Consistent with other popover/menu item spacing
+    }
+}
+
 .adw-popover-surface {
   // These styles are for when there's an explicit surface element
   // For .adw-popover.menu-popover, the styles above apply directly to .adw-popover

@@ -108,15 +108,17 @@
                         <span class="adw-action-row-title">Pending Users</span>
                     </a>
                     {% endif %}
+                    <hr class="popover-divider">
+                    <a href="{{ url_for('auth.logout') }}" class="adw-action-row activatable" role="menuitem">
+                        <span class="adw-action-row-title">Logout</span>
+                    </a>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        {# Login/Logout #}
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('auth.logout') }}" class="adw-button flat">Logout</a>
-        {% else %}
+        {# Login Button (Logout moved to menu) #}
+        {% if not current_user.is_authenticated %}
             <a href="{{ url_for('auth.login') }}" class="adw-button">Login</a>
         {% endif %}
     </div>
@@ -180,8 +182,8 @@
                     <span class="adw-action-row-title">New Post</span>
                 </a>
                 <a href="{{ url_for('general.dashboard') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.dashboard' }}">
-                    <span class="adw-action-row-icon icon-apps-dashboard-symbolic"></span> {# Or a more generic icon #}
-                    <span class="adw-action-row-title">Dashboard</span>
+                    <span class="adw-action-row-icon icon-apps-dashboard-symbolic"></span> {# Or a more generic icon, icon-user-bookmarks-symbolic could fit "My Posts" #}
+                    <span class="adw-action-row-title">My Posts</span>
                 </a>
             {# Admin links moved to dropdown menu #}
             {% endif %}

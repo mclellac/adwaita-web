@@ -5,69 +5,110 @@
 {% block header_title %}Home{% endblock %}
 
 {% block content %}
-<div class="adw-clamp adw-clamp-xl">
+<div class="adw-clamp adw-clamp-lg"> {# Changed to adw-clamp-lg for a bit more width for single column #}
     {% from "_macros.html" import like_button_and_count %}
 
-    {% if posts and posts|length > 0 %}
-        <div class="blog-posts-container" style="margin-top: var(--spacing-l);"> {# Using grid like index.html #}
-            {% for post_item in posts %}
-                <article class="adw-card blog-post-item-card">
-                    <header class="blog-post-card__header">
-                        <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
-                            <a href="{{ url_for('profile.view_profile', user_id=post_item.author.id) }}" class="adw-link">
-                                <span class="adw-avatar size-m">
-                                    {% if post_item.author.profile_photo_url %}
-                                    <img src="{{ url_for('static', filename=post_item.author.profile_photo_url) }}" alt="{{ post_item.author.username }} avatar">
-                                    {% else %}
-                                    <img src="{{ default_avatar_url }}" alt="{{ post_item.author.username }} default avatar">
-                                    {% endif %}
-                                </span>
-                            </a>
-                            <div class="adw-box adw-box-vertical">
-                                <a href="{{ url_for('profile.view_profile', user_id=post_item.author.id) }}" class="adw-link">
-                                    <strong class="adw-label body-1">{{ post_item.author.full_name }}</strong>
+    {% if feed_items and feed_items|length > 0 %}
+        {# Changed from blog-posts-container (grid) to a flex column layout #}
+        <div class="feed-items-container" style="display: flex; flex-direction: column; gap: var(--spacing-l); margin-top: var(--spacing-l);">
+            {% for item in feed_items %}
+                {% if item.type == 'post' %}
+                    {% set post_item = item.data %}
+                    <article class="adw-card blog-post-item-card feed-item-card-post">
+                        <header class="blog-post-card__header">
+                            <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
+                                <a href="{{ url_for('profile.view_profile', user_id=item.author.id) }}" class="adw-link">
+                                    <span class="adw-avatar size-m">
+                                        {% if item.author.profile_photo_url %}
+                                        <img src="{{ url_for('static', filename=item.author.profile_photo_url) }}" alt="{{ item.author.username }} avatar">
+                                        {% else %}
+                                        <img src="{{ default_avatar_url }}" alt="{{ item.author.username }} default avatar">
+                                        {% endif %}
+                                    </span>
                                 </a>
-                                 <span class="adw-label caption">@{{ post_item.author.full_name }}</span>
+                                <div class="adw-box adw-box-vertical">
+                                    <a href="{{ url_for('profile.view_profile', user_id=item.author.id) }}" class="adw-link">
+                                        <strong class="adw-label body-1">{{ item.author.full_name }}</strong>
+                                    </a>
+                                     <span class="adw-label caption">@{{ item.author.full_name }}</span>
+                                </div>
                             </div>
+                            <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
+                                Posted: <time datetime="{{ item.timestamp.isoformat() }}">{{ item.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                            </div>
+                        </header>
+                        <div class="adw-card__content styled-text-content">
+                            {{ post_item.content | markdown }} {# No truncation for feed, show full content #}
                         </div>
-                        <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
-                            {% if post_item.published_at %}
-                                Published: <time datetime="{{ post_item.published_at.isoformat() }}">{{ post_item.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                            {% else %}
-                                Created: <time datetime="{{ post_item.created_at.isoformat() }}">{{ post_item.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                        <footer class="blog-post-card__footer">
+                             <div class="blog-post-card__terms">
+                                {% if post_item.categories %}
+                                <div class="meta-section">
+                                    <strong class="adw-label caption meta-label-strong">Categories:</strong>
+                                    {% for category in post_item.categories %}
+                                        <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact tag-pill">{{ category.name }}</a>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                {% if post_item.tags %}
+                                <div class="meta-section">
+                                    <strong class="adw-label caption meta-label-strong">Tags:</strong>
+                                    {% for tag in post_item.tags %}
+                                        <a href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact tag-pill">{{ tag.name }}</a>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <a href="{{ url_for('post.view_post', post_id=post_item.id) }}" class="adw-button flat read-more-link">
+                                View Post & Comments <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                            </a>
+                        </footer>
+                        <div class="adw-card__actions card-secondary-actions">
+                            {{ like_button_and_count(post_item, current_user, csrf_token()) }}
+                        </div>
+                    </article>
+                {% elif item.type == 'photo' %}
+                    {% set photo_item = item.data %}
+                    <article class="adw-card photo-item-card feed-item-card-photo">
+                         <header class="blog-post-card__header"> {# Re-use similar header structure #}
+                            <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
+                                <a href="{{ url_for('profile.view_profile', user_id=item.author.id) }}" class="adw-link">
+                                    <span class="adw-avatar size-m">
+                                        {% if item.author.profile_photo_url %}
+                                        <img src="{{ url_for('static', filename=item.author.profile_photo_url) }}" alt="{{ item.author.username }} avatar">
+                                        {% else %}
+                                        <img src="{{ default_avatar_url }}" alt="{{ item.author.username }} default avatar">
+                                        {% endif %}
+                                    </span>
+                                </a>
+                                <div class="adw-box adw-box-vertical">
+                                    <a href="{{ url_for('profile.view_profile', user_id=item.author.id) }}" class="adw-link">
+                                        <strong class="adw-label body-1">{{ item.author.full_name }}</strong>
+                                    </a>
+                                     <span class="adw-label caption">@{{ item.author.full_name }}</span>
+                                </div>
+                            </div>
+                            <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
+                                Uploaded: <time datetime="{{ item.timestamp.isoformat() }}">{{ item.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                            </div>
+                        </header>
+                        <div class="adw-card__content photo-display-content" style="text-align: center;">
+                            <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo_item.image_filename) }}"
+                                 alt="{{ photo_item.caption or ('Photo by ' ~ item.author.full_name) }}"
+                                 style="max-width: 100%; max-height: 60vh; border-radius: var(--border-radius-medium); object-fit: contain;">
+                            {% if photo_item.caption %}
+                            <p class="adw-label body-1 photo-caption-text" style="margin-top: var(--spacing-s);">{{ photo_item.caption }}</p>
                             {% endif %}
                         </div>
-                    </header>
-                    <div class="adw-card__content styled-text-content">
-                        {{ post_item.content | truncate(300, True, '...') | markdown }}
-                    </div>
-                    <footer class="blog-post-card__footer">
-                         <div class="blog-post-card__terms">
-                            {% if post_item.categories %}
-                            <div class="meta-section">
-                                <strong class="adw-label caption meta-label-strong">Categories:</strong>
-                                {% for category in post_item.categories %}
-                                    <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact tag-pill">{{ category.name }}</a>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                            {% if post_item.tags %}
-                            <div class="meta-section">
-                                <strong class="adw-label caption meta-label-strong">Tags:</strong>
-                                {% for tag in post_item.tags %}
-                                    <a href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact tag-pill">{{ tag.name }}</a>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-                        <a href="{{ url_for('post.view_post', post_id=post_item.id) }}" class="adw-button flat read-more-link">
-                            View Post & Comments <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                        </a>
-                    </footer>
-                    <div class="adw-card__actions card-secondary-actions">
-                        {{ like_button_and_count(post_item, current_user, csrf_token) }} {# Use csrf_token from context #}
-                    </div>
-                </article>
+                        {# Photos don't have comments or likes directly on them in this feed view for now #}
+                        {# Could add a link to view photo in gallery or on profile if a dedicated photo view page exists #}
+                         <footer class="blog-post-card__footer">
+                            <a href="{{ url_for('profile.view_gallery', user_id=item.author.id) }}#photo-{{photo_item.id}}" class="adw-button flat read-more-link">
+                                View in Gallery <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                            </a>
+                        </footer>
+                    </article>
+                {% endif %}
             {% endfor %}
         </div>
 
