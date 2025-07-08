@@ -117,8 +117,8 @@ def view_post(post_id):
                                 target_type='comment', # Primary target is the comment where mention occurs
                                 target_id=comment.id
                                 )
-                            # Contextual post_id for mentions in comments on posts
-                            mention_notification.related_post_id = post.id # Keep for context
+                                # Contextual post_id for mentions in comments on posts
+                                mention_notification.related_post_id = post.id # Keep for context
                                 db.session.add(mention_notification)
                                 new_mentions_created_comment = True
                                 current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in comment {comment.id}")
