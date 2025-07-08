@@ -28,13 +28,42 @@ The `app-demo/setup_db.py` script is crucial for initializing and managing the a
     *   Allows overriding configuration settings for the script's execution by providing a path to a YAML configuration file.
     *   Settings in this YAML file will take precedence over those defined in `app-demo/config.py` or environment variables.
     *   Flask configuration keys are typically uppercase (e.g., `SQLALCHEMY_DATABASE_URI`).
+    *   This file can also be used to define a list of users for batch creation/update using the `USERS` key.
     *   Example `config.yaml` structure:
         ```yaml
         SQLALCHEMY_DATABASE_URI: "postgresql://script_user:script_pass@localhost/script_db"
         SECRET_KEY: "custom_script_secret"
-        # Add other app.config keys as needed
+
+        USERS:
+          - username: "admin@example.com"
+            password: "securepassword1"
+            full_name: "Administrator"
+            bio: "Site admin."
+            is_admin: true
+            is_approved: true # Optional, defaults to true for YAML users
+            is_active: true   # Optional, defaults to true for YAML users
+          - username: "editor@example.com"
+            password: "anotherpassword"
+            full_name: "Editor User"
+            bio: "Content editor."
+            is_admin: false
+            # is_approved and is_active will default to true
+          - username: "existinguser@example.com" # If this user exists
+            password: "newpassword"             # Their password and other details will be updated
+            full_name: "Existing User Updated Name"
+            bio: "Updated bio."
+            is_admin: false # Ensure all fields are specified if updating
         ```
+    *   **Supported fields for each user in the `USERS` list:** `username` (required), `password` (required), `full_name` (required), `bio` (optional), `is_admin` (optional, defaults to `False`), `is_approved` (optional, defaults to `True`), `is_active` (optional, defaults to `True`).
     *   **Dependency:** This feature requires the `PyYAML` library. If not installed, the script will print an error. Install it via `pip install PyYAML`.
+
+**User Creation Precedence:**
+
+The script determines how to handle user creation/setup based on the following order:
+1.  **`--skipuser`**: If this flag is present, all user setup is skipped.
+2.  **`USERS` list in YAML (`--config <filepath>`):** If `--config` is used, a `USERS` list is present in the YAML file, and `--skipuser` is NOT used, the script will non-interactively create or update users based on this list. This takes precedence over CLI arguments for single admin user creation and interactive mode.
+3.  **Command-Line Admin Arguments (`--admin-user`, `--admin-pass`):** If `--skipuser` is not used and no users were processed from a YAML `USERS` list, the script checks for `--admin-user` and `--admin-pass` arguments. If provided, it will non-interactively create or update a single admin user with these details.
+4.  **Interactive Mode:** If none of the above conditions are met (not skipping, no YAML users, no CLI admin arguments), the script will fall back to prompting interactively for the details of a single initial admin user.
 
 **Important Considerations:**
 

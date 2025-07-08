@@ -30,128 +30,119 @@ User = app_module.models.User
 SiteSetting = app_module.models.SiteSetting # Import SiteSetting
 
 
-def create_initial_user(flask_app):
+def create_or_update_user(flask_app, username, password, full_name, profile_info=None,
+                          is_admin=False, is_approved=True, is_active=True,
+                          update_if_exists=True, interactive_password_update=False):
     """
-    Handles the creation or password update of an initial (admin) user.
+    Creates a new user or updates an existing user's password and details.
     Requires an active application context.
+
+    Args:
+        flask_app: The Flask application instance.
+        username (str): The username.
+        password (str): The user's password.
+        full_name (str): The user's full name.
+        profile_info (str, optional): The user's bio/profile information.
+        is_admin (bool): Whether the user should be an admin.
+        is_approved (bool): Whether the user account is approved.
+        is_active (bool): Whether the user account is active.
+        update_if_exists (bool): If True and user exists, update their details.
+        interactive_password_update (bool): If True and user exists, prompt interactively to update password.
+                                            (Only used if update_if_exists is True)
+    Returns:
+        True if user was created/updated, False otherwise.
     """
-    print("\nStarting initial user setup...")
-    script_args = flask_app.config.get('SETUP_DB_SCRIPT_ARGS') # Get args passed to the script
+    if not username or not password or not full_name:
+        print("Error: Username, password, and full name are required to create or update a user.")
+        return False
 
-    is_interactive = not (script_args and script_args.admin_user and script_args.admin_pass)
-    username = ""
-    password = ""
-    full_name_val = ""
-    profile_info = None
-
-    if not is_interactive:
-        username = script_args.admin_user
-        password = script_args.admin_pass
-        full_name_val = script_args.admin_fullname if script_args.admin_fullname else username # Default full_name to username
-        profile_info = script_args.admin_bio
-        print(f"Non-interactive mode: Creating/updating admin user '{username}' with display name '{full_name_val}'.")
-    else:
-        default_username = "admin"
-        try:
-            username_input = input(
-                f"Enter username for the initial user (default: {default_username}): "
-            )
-            username = username_input if username_input else default_username
-        except EOFError:  # Handle non-interactive environment
-            print(f"No input provided, using default username: {default_username}")
-            username = default_username
-
-    # This function is called with app, and establishes its own context for DB operations
     with flask_app.app_context():
         existing_user = User.query.filter_by(username=username).first()
 
         if existing_user:
             print(f"User '{username}' already exists.")
-            if not is_interactive: # Non-interactive: always update password and full_name if provided
-                print(f"Updating password and display name for user '{username}'.")
-                existing_user.set_password(password)
-                existing_user.full_name = full_name_val # Update full_name
-                if profile_info is not None: # Update bio if provided
-                    existing_user.profile_info = profile_info
-                db.session.commit()
-                print(f"User '{username}' updated non-interactively.")
-            else: # Interactive: ask to update
-                # For interactive mode, we assume full_name is handled by profile edit,
-                # but if user wants to update password, we could also ask for full_name if it's empty.
-                # For now, keeping interactive update focused on password as before.
-                # The main requirement is for *new* user creation.
+            if not update_if_exists:
+                print(f"Skipping update for user '{username}' as update_if_exists is False.")
+                return False
+
+            if interactive_password_update:
                 try:
                     update_choice = input(
-                        "Do you want to update the password for this user? (y/n): "
+                        f"Do you want to update the password for user '{username}'? (y/n): "
                     ).lower()
                     if update_choice == "y":
                         print(f"Updating password for user '{username}'.")
                         new_password = getpass.getpass("Enter new password: ")
                         if not new_password:
                             print("Password cannot be empty. Aborting password update.")
-                            return
+                            return False
                         new_password_confirm = getpass.getpass("Confirm new password: ")
                         if new_password != new_password_confirm:
                             print("Passwords do not match. Aborting password update.")
-                            return
+                            return False
                         existing_user.set_password(new_password)
+                        # Update other details as well
+                        existing_user.full_name = full_name
+                        if profile_info is not None:
+                            existing_user.profile_info = profile_info
+                        existing_user.is_admin = is_admin
+                        existing_user.is_approved = is_approved
+                        existing_user.is_active = is_active
                         db.session.commit()
-                        print(f"Password for user '{username}' updated successfully.")
+                        print(f"User '{username}' password and details updated interactively.")
+                        return True
                     else:
-                        print(f"Password for user '{username}' not updated.")
+                        print(f"Password for user '{username}' not updated interactively.")
+                        # Optionally update other details even if password isn't
+                        # For now, if password update is declined, we don't update other things.
+                        return False
                 except EOFError:
-                    print("Skipping password update for existing user in non-interactive mode.")
-            return
+                    print("Skipping interactive password update for existing user in non-interactive environment.")
+                    return False
+            else: # Non-interactive update
+                print(f"Updating password and details for user '{username}' non-interactively.")
+                existing_user.set_password(password)
+                existing_user.full_name = full_name
+                if profile_info is not None:
+                    existing_user.profile_info = profile_info
+                existing_user.is_admin = is_admin
+                existing_user.is_approved = is_approved
+                existing_user.is_active = is_active
+                db.session.commit()
+                print(f"User '{username}' updated non-interactively.")
+                return True
+        else:
+            # Create new user
+            print(f"Creating new user: '{username}' with full name '{full_name}'.")
+            new_user = User(
+                username=username,
+                full_name=full_name,
+                profile_info=profile_info,
+                is_admin=is_admin,
+                is_approved=is_approved,
+                is_active=is_active
+            )
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            print(f"User '{username}' created successfully. Admin: {is_admin}, Approved: {is_approved}, Active: {is_active}.")
 
-        # Create new user
-        print(f"Creating new user: '{username}'")
-        if is_interactive:
-            try:
-                password = getpass.getpass("Enter password: ")
-                if not password:
-                    print("Password cannot be empty. Aborting user creation.")
-                    return
-                password_confirm = getpass.getpass("Confirm password: ")
-                if password != password_confirm:
-                    print("Passwords do not match. Aborting user creation.")
-                    return
+            # Special handling for the very first admin user created non-interactively by CLI args
+            # to set initial site settings. This is a bit of a kludge.
+            # We assume if is_admin is True and interactive_password_update is False, it MIGHT be this case.
+            # A better way would be a specific flag or ensuring this only happens once.
+            script_args = flask_app.config.get('SETUP_DB_SCRIPT_ARGS')
+            is_cli_admin_creation = script_args and script_args.admin_user == username and not interactive_password_update
 
-                while not full_name_val:
-                    full_name_val = input(f"Enter Display Name for '{username}': ").strip()
-                    if not full_name_val:
-                        print("Display Name cannot be empty.")
-
-                profile_info_input = input(
-                    f"Enter profile information for '{username}' (optional, press Enter to skip): "
-                )
-                profile_info = profile_info_input if profile_info_input else None
-            except EOFError:
-                print("Cannot create user interactively without required inputs. Please run interactively or use args.")
-                return
-
-        # For both interactive and non-interactive new user creation
-        new_user = User(
-            username=username,
-            full_name=full_name_val, # Use gathered full_name
-            profile_info=profile_info,
-            is_admin=True,  # Initial user is admin
-            is_approved=True, # Admin user is auto-approved
-            is_active=True    # Admin user is auto-active
-        )
-        new_user.set_password(password)
-        db.session.add(new_user)
-
-        # Set default site settings on initial user creation if non-interactive
-        if not is_interactive:
-            print(f"DEBUG: Setting initial site settings for non-interactive setup.")
-            SiteSetting.set('site_title', 'Adwaita Social Demo', 'string')
-            SiteSetting.set('posts_per_page', 10, 'int')
-            SiteSetting.set('allow_registrations', True, 'bool')
-            print(f"DEBUG: allow_registrations set to True.")
-
-        db.session.commit()
-        print(f"User '{username}' created successfully and set as admin, approved, and active.")
-
+            if is_admin and is_cli_admin_creation:
+                 # Check if this is the only admin or first user to set defaults
+                if User.query.count() == 1 and User.query.filter_by(is_admin=True).count() == 1:
+                    print(f"DEBUG: Setting initial site settings as '{username}' is the first admin user.")
+                    SiteSetting.set('site_title', 'Adwaita Social Demo', 'string')
+                    SiteSetting.set('posts_per_page', 10, 'int')
+                    SiteSetting.set('allow_registrations', True, 'bool')
+                    print(f"DEBUG: Initial site settings set.")
+            return True
 
 def delete_database_tables(flask_app, script_args):
     """
@@ -275,25 +266,112 @@ if __name__ == "__main__":
     print("DEBUG: Exited app_context for db.create_all()")
 
     # Initialize default site settings if they don't exist
+    # This is done here so that if the first admin user is created via YAML,
+    # these settings are already in place.
     with app.app_context():
-        print("DEBUG: Checking/Initializing default site settings...")
+        print("DEBUG: Checking/Initializing default site settings (if not set by first admin creation)...")
+        if SiteSetting.query.filter_by(key='site_title').first() is None:
+            SiteSetting.set('site_title', 'Adwaita Social Demo', 'string')
+            print("DEBUG: Default 'site_title' set.")
+        if SiteSetting.query.filter_by(key='posts_per_page').first() is None:
+            SiteSetting.set('posts_per_page', 10, 'int')
+            print("DEBUG: Default 'posts_per_page' set.")
         if SiteSetting.query.filter_by(key='allow_registrations').first() is None:
             SiteSetting.set('allow_registrations', True, 'bool')
             print("DEBUG: Default 'allow_registrations' set to True as it was missing.")
-        if SiteSetting.query.filter_by(key='site_title').first() is None:
-            SiteSetting.set('site_title', 'Adwaita Social Demo', 'string')
-        if SiteSetting.query.filter_by(key='posts_per_page').first() is None:
-            SiteSetting.set('posts_per_page', 10, 'int')
-        # Ensure commit if SiteSetting.set doesn't commit itself (original did, current one in models.py does)
-        # db.session.commit() # Not needed if SiteSetting.set commits
+        # db.session.commit() # SiteSetting.set commits itself
 
+    users_processed_from_yaml = False
     if not args.skipuser:
-        print("DEBUG: --skipuser is false. Calling create_initial_user()")
-        # The create_initial_user function might also set allow_registrations True
-        # for non-interactive, which is fine (idempotent or last-write wins).
-        create_initial_user(app) # This function handles its own app context and gets args from app.config
-        print("DEBUG: create_initial_user() returned")
+        yaml_users = app.config.get('USERS')
+        if isinstance(yaml_users, list) and yaml_users:
+            print(f"\nProcessing {len(yaml_users)} user(s) from configuration (YAML)...")
+            for user_data in yaml_users:
+                username = user_data.get('username')
+                password = user_data.get('password')
+                full_name = user_data.get('full_name')
+                profile_info = user_data.get('bio') # Match example: bio
+                is_admin = user_data.get('is_admin', False)
+                # Default is_approved and is_active to True for YAML users, allow override
+                is_approved = user_data.get('is_approved', True)
+                is_active = user_data.get('is_active', True)
+
+                if not username or not password or not full_name:
+                    print(f"Skipping user due to missing username, password, or full_name: {user_data}")
+                    continue
+
+                print(f"Processing user from YAML: {username}")
+                create_or_update_user(
+                    flask_app=app,
+                    username=username,
+                    password=password,
+                    full_name=full_name,
+                    profile_info=profile_info,
+                    is_admin=is_admin,
+                    is_approved=is_approved,
+                    is_active=is_active,
+                    update_if_exists=True, # Default to update if user exists
+                    interactive_password_update=False # Never interactive for YAML users
+                )
+            users_processed_from_yaml = True
+            print("Finished processing users from YAML configuration.")
+        else:
+            print("DEBUG: No 'USERS' list found in app.config or list is empty.")
+
+        # Fallback to CLI args or interactive mode if not skipped and not processed from YAML
+        if not users_processed_from_yaml:
+            if args.admin_user and args.admin_pass:
+                print(f"\nCreating/updating admin user '{args.admin_user}' from command-line arguments...")
+                create_or_update_user(
+                    flask_app=app,
+                    username=args.admin_user,
+                    password=args.admin_pass,
+                    full_name=args.admin_fullname if args.admin_fullname else args.admin_user,
+                    profile_info=args.admin_bio,
+                    is_admin=True, # CLI admin is always admin
+                    is_approved=True,
+                    is_active=True,
+                    update_if_exists=True,
+                    interactive_password_update=False # Non-interactive for CLI args
+                )
+            else:
+                # Interactive mode for a single admin user
+                print("\nStarting interactive initial user setup...")
+                default_username = "admin"
+                try:
+                    username = input(f"Enter username for the initial user (default: {default_username}): ").strip() or default_username
+                    password = getpass.getpass("Enter password: ")
+                    if not password:
+                        print("Password cannot be empty. Aborting interactive user creation.")
+                    else:
+                        password_confirm = getpass.getpass("Confirm password: ")
+                        if password != password_confirm:
+                            print("Passwords do not match. Aborting interactive user creation.")
+                        else:
+                            full_name = ""
+                            while not full_name:
+                                full_name = input(f"Enter Display Name for '{username}': ").strip()
+                                if not full_name:
+                                    print("Display Name cannot be empty.")
+                            profile_info = input(f"Enter profile information for '{username}' (optional, press Enter to skip): ").strip() or None
+
+                            create_or_update_user(
+                                flask_app=app,
+                                username=username,
+                                password=password,
+                                full_name=full_name,
+                                profile_info=profile_info,
+                                is_admin=True, # Interactive setup creates an admin
+                                is_approved=True,
+                                is_active=True,
+                                update_if_exists=True, # Allow updating if user exists
+                                interactive_password_update=True # Allow interactive password prompt if user exists
+                            )
+                except EOFError:
+                    print("EOFError during interactive setup. Cannot create user without inputs.")
+                except KeyboardInterrupt:
+                    print("\nInteractive user setup aborted by user.")
     else:
-        print("Skipping initial user setup as per --skipuser flag.")
+        print("\nSkipping user setup as per --skipuser flag.")
 
     print("\nDatabase setup process complete.")
