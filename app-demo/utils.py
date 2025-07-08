@@ -6,7 +6,7 @@ from markupsafe import Markup, escape
 # Assuming bleach is used for sanitization, if not, this part would need adjustment
 # For now, to avoid dependency errors if bleach isn't in requirements.txt,
 # we'll make a very basic sanitizer. A proper setup would use bleach.
-# import bleach
+import bleach # <-- Ensure bleach is imported
 import markdown as md_lib # Use md_lib to avoid conflict with template filter name
 
 def generate_slug_util(text, max_length=255):
@@ -118,7 +118,18 @@ def markdown_to_html_and_sanitize_util(text):
     # The responsibility of full sanitization would be higher up or assumed by content trust.
     # For this demo, this might be acceptable if content sources are somewhat trusted or if
     # the markdown library itself does some level of safe HTML generation.
-    return Markup(html_content)
+    # ---- OLD CODE END ----
+
+    # Step 2: Sanitize the generated HTML using Bleach
+    # Uses the ALLOWED_TAGS_CONFIG and ALLOWED_ATTRIBUTES_CONFIG defined in this file.
+    sanitized_html = bleach.clean(
+        html_content,
+        tags=ALLOWED_TAGS_CONFIG,
+        attributes=ALLOWED_ATTRIBUTES_CONFIG,
+        strip=True  # Remove disallowed tags entirely
+    )
+
+    return Markup(sanitized_html)
 
 
 def init_app(app):
