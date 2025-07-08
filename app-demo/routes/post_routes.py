@@ -88,30 +88,32 @@ def view_post(post_id):
                  current_app.logger.info(f"Activity 'commented_on_post' (ID: {activity.id}) confirmed for user {current_user.username}, target comment ID {comment.id}, on post {post.id}.")
 
             # Process mentions in the comment
-            mentioned_users_in_comment = extract_mentions(comment.text)
+            mentioned_usernames_in_comment = extract_mentions(comment.text)
             new_mentions_created_comment = False
-            for mentioned_user in mentioned_users_in_comment:
-                if mentioned_user.id != current_user.id: # Don't notify for self-mentions
-                    # Avoid duplicate notifications (simple check)
-                    existing_notif = Notification.query.filter_by(
-                        user_id=mentioned_user.id,
-                        actor_id=current_user.id,
-                        type='mention_in_comment',
-                        target_type='comment', # Target is the comment where mention occurs
-                        target_id=comment.id
-                    ).first()
-                    if not existing_notif:
-                        mention_notification = Notification(
-                            user_id=mentioned_user.id,
-                            actor_id=current_user.id,
-                            type='mention_in_comment',
-                            target_type='comment',   # Target is the comment where mention occurs
-                            target_id=comment.id,
-                            context_post_id=post.id # Context is the post
-                        )
-                        db.session.add(mention_notification)
-                        new_mentions_created_comment = True
-                        current_app.logger.info(f"Mention notification created for user {mentioned_user.username} in comment {comment.id}")
+            if mentioned_usernames_in_comment:
+                from ..models import User # Ensure User model is available
+                for username_str in mentioned_usernames_in_comment:
+                    mentioned_user_obj = User.query.filter_by(username=username_str).first()
+                    if mentioned_user_obj: # Check if user exists
+                        if mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions
+                            # Avoid duplicate notifications (simple check)
+                            existing_notif = Notification.query.filter_by(
+                                user_id=mentioned_user_obj.id, # Use .id from User object
+                                actor_id=current_user.id,
+                                type='mention_in_comment',
+                                related_comment_id=comment.id
+                            ).first()
+                            if not existing_notif:
+                                mention_notification = Notification(
+                                    user_id=mentioned_user_obj.id, # Use .id from User object
+                                    actor_id=current_user.id,
+                                    type='mention_in_comment',
+                                    related_post_id=post.id,
+                                    related_comment_id=comment.id
+                                )
+                                db.session.add(mention_notification)
+                                new_mentions_created_comment = True
+                                current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in comment {comment.id}")
 
             if new_mentions_created_comment:
                 db.session.commit()
@@ -187,19 +189,33 @@ def create_post():
                  current_app.logger.info(f"Activity 'created_post' (ID: {activity.id}) confirmed for user {current_user.username}, target post ID {new_post.id}.")
 
             # Process mentions after initial commit
-            mentioned_users_in_post = extract_mentions(new_post.content)
-            for mentioned_user in mentioned_users_in_post:
-                if mentioned_user.id != current_user.id: # Don't notify for self-mentions
-                    mention_notification = Notification(
-                        user_id=mentioned_user.id,
-                        actor_id=current_user.id,
-                        type='mention_in_post',
-                        target_type='post',     # Target is the post where mention occurs
-                        target_id=new_post.id
-                    )
-                    db.session.add(mention_notification)
-                    current_app.logger.info(f"Mention notification created for user {mentioned_user.username} in post {new_post.id}")
-            if mentioned_users_in_post:
+            mentioned_usernames_in_post = extract_mentions(new_post.content)
+            new_mentions_created_post = False
+            if mentioned_usernames_in_post:
+                from ..models import User # Ensure User model is available
+                for username_str in mentioned_usernames_in_post:
+                    mentioned_user_obj = User.query.filter_by(username=username_str).first()
+                    if mentioned_user_obj: # Check if user exists
+                        if mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions
+                            # Avoid duplicate notifications (simple check for this post)
+                            existing_notif = Notification.query.filter_by(
+                                user_id=mentioned_user_obj.id,
+                                actor_id=current_user.id,
+                                type='mention_in_post',
+                                related_post_id=new_post.id
+                            ).first()
+                            if not existing_notif:
+                                mention_notification = Notification(
+                                    user_id=mentioned_user_obj.id,
+                                    actor_id=current_user.id,
+                                    type='mention_in_post',
+                                    related_post_id=new_post.id
+                                )
+                                db.session.add(mention_notification)
+                                new_mentions_created_post = True
+                                current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in post {new_post.id}")
+            if new_mentions_created_post:
+
                 db.session.commit() # Commit any mention notifications
 
             flash('Post created successfully!', 'toast_success')
@@ -250,33 +266,36 @@ def edit_post(post_id):
             # Note: This doesn't remove notifications for users no longer mentioned.
             # A more complex system would track existing mentions vs new ones.
             # For now, it just adds new notifications.
-            mentioned_users_in_post = extract_mentions(post.content)
+            mentioned_usernames_in_post = extract_mentions(post.content)
             new_mentions_created = False
-            for mentioned_user in mentioned_users_in_post:
-                if mentioned_user.id != current_user.id: # Don't notify for self-mentions
-                    # Avoid duplicate notifications if a user is mentioned multiple times or was already notified for this post edit session
-                    # A more robust solution would check existing notifications of this type for this post by this actor.
-                    # Simplified: just create if they are mentioned in current content.
-                    existing_notif = Notification.query.filter_by(
-                        user_id=mentioned_user.id,
-                        actor_id=current_user.id,
-                        type='mention_in_post',
-                        target_type='post', # Check against new polymorphic fields
-                        target_id=post.id
-                    ).first()
-                    # This check is still simplistic for multiple edits, but now uses new fields.
+            if mentioned_usernames_in_post:
+                from ..models import User # Ensure User model is available
+                for username_str in mentioned_usernames_in_post:
+                    mentioned_user_obj = User.query.filter_by(username=username_str).first()
+                    if mentioned_user_obj: # Check if user exists
+                        if mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions
+                            # Avoid duplicate notifications if a user is mentioned multiple times or was already notified for this post edit session
+                            # A more robust solution would check existing notifications of this type for this post by this actor.
+                            # Simplified: just create if they are mentioned in current content.
+                            existing_notif = Notification.query.filter_by(
+                                user_id=mentioned_user_obj.id, # Use .id from User object
+                                actor_id=current_user.id,
+                                type='mention_in_post',
+                                related_post_id=post.id
+                            ).first() # This check is simplistic; doesn't account for multiple edits creating multiple notifs over time.
+                                      # A real system might only notify once per post, or if a user is newly added.
 
-                    if not existing_notif:
-                        mention_notification = Notification(
-                            user_id=mentioned_user.id,
-                            actor_id=current_user.id,
-                            type='mention_in_post',
-                            target_type='post',
-                            target_id=post.id
-                        )
-                        db.session.add(mention_notification)
-                        new_mentions_created = True
-                        current_app.logger.info(f"Mention notification created for user {mentioned_user.username} in updated post {post.id}")
+                            if not existing_notif: # Only create if no similar notification exists (simplistic check)
+                                mention_notification = Notification(
+                                    user_id=mentioned_user_obj.id, # Use .id from User object
+                                    actor_id=current_user.id,
+                                    type='mention_in_post',
+                                    related_post_id=post.id
+                                )
+                                db.session.add(mention_notification)
+                                new_mentions_created = True
+                                current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in updated post {post.id}")
+
 
             if new_mentions_created:
                 db.session.commit()
