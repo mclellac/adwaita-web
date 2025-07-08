@@ -240,18 +240,17 @@ class Post(db.Model):
     # Relationship for top-level comments moved to be defined here
     comments = db.relationship(
         'Comment',
-        primaryjoin="and_(Post.id==Comment.target_id, Comment.target_type=='post', Comment.parent_id==None)", # Updated for polymorphic
-        backref='post', # This backref might be ambiguous now. Consider removing or making specific if Comment can only belong to one Post.
-                       # If a comment can only belong to one post OR one photo, this backref is okay for posts.
+        primaryjoin="and_(Post.id==Comment.target_id, Comment.target_type=='post', Comment.parent_id==None)",
+        foreign_keys="[Comment.target_id, Comment.target_type, Comment.parent_id]", # Explicitly mention involved "foreign" columns from Comment side
+        backref='post',
         lazy='dynamic',
-        order_by=lambda: desc(Comment.created_at) # Use lambda for Comment ref
+        order_by=lambda: desc(Comment.created_at)
     )
     # Relationship for likes on this post
     likers = db.relationship(
         'Like',
         primaryjoin="and_(Post.id==Like.target_id, Like.target_type=='post')",
-        # No backref here to avoid conflict if Like gets a generic 'target' property later.
-        # If 'Like' needs to know its 'post' specifically, a different backref name could be used.
+        foreign_keys="[Like.target_id, Like.target_type]",
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
@@ -310,10 +309,10 @@ class UserPhoto(db.Model):
 
     # Relationship for comments on this photo
     comments = db.relationship(
-        'Comment', # Now points to the unified Comment model
-        primaryjoin="and_(UserPhoto.id==Comment.target_id, Comment.target_type=='photo')", # Polymorphic join
-        # No backref here to avoid conflict with Comment.post; specific queries will be used.
-        # Or, could use a different backref name on Comment if Comment needs to know its photo parent directly.
+        'Comment',
+        primaryjoin="and_(UserPhoto.id==Comment.target_id, Comment.target_type=='photo')",
+        foreign_keys="[Comment.target_id, Comment.target_type]", # Explicitly mention involved "foreign" columns from Comment side
+        # No backref to avoid conflict with Comment.post. Access photo via Comment.target if needed.
         lazy='dynamic',
         cascade='all, delete-orphan',
         order_by=lambda: desc(Comment.created_at)
@@ -323,6 +322,7 @@ class UserPhoto(db.Model):
     likers = db.relationship(
         'Like',
         primaryjoin="and_(UserPhoto.id==Like.target_id, Like.target_type=='photo')",
+        foreign_keys="[Like.target_id, Like.target_type]",
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
