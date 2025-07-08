@@ -356,11 +356,24 @@ def follow_user(user_id):
         flash(f"You are already following {user_to_follow.username}.", "info")
     else:
         if current_user.follow(user_to_follow):
-            from ..models import Notification # Local import
-            notification = Notification(user_id=user_to_follow.id, actor_id=current_user.id, type='new_follower')
+            from ..models import Notification, Activity # Local import
+            # Notification for the user being followed
+            notification = Notification(
+                user_id=user_to_follow.id,  # User receiving the notification
+                actor_id=current_user.id,   # User who performed the action
+                type='new_follower'
+                # target_type='user',       # Optionally, target could be the actor (current_user)
+                # target_id=current_user.id
+            )
             db.session.add(notification)
-            from ..models import Activity # Local import
-            activity = Activity(user_id=current_user.id, type='started_following', target_user_id=user_to_follow.id)
+
+            # Activity by the current user
+            activity = Activity(
+                user_id=current_user.id,    # User who performed the action
+                type='started_following',
+                target_type='user',         # Target of the action is the user being followed
+                target_id=user_to_follow.id
+            )
             db.session.add(activity)
             db.session.commit()
             flash(f"You are now following {user_to_follow.username}.", "toast_success")

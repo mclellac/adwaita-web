@@ -74,11 +74,10 @@ def post_photo_comment(photo_id):
             notification = Notification(
                 user_id=photo.user.id, # Notify the photo owner
                 actor_id=current_user.id,
-                type='new_photo_comment', # Distinct type
-                related_post_id=photo.id, # Using related_post_id to store photo_id for now.
-                                          # Consider adding related_photo_id to Notification model if this feels too hacky.
-                                          # For now, we'll use related_post_id and understand its context via type.
-                related_comment_id=new_comment.id # Will be populated after flush/commit
+                type='new_photo_comment',
+                target_type='comment',         # Target is the comment
+                target_id=new_comment.id,      # Will be populated after flush/commit
+                context_photo_id=photo.id    # Context is the photo
             )
             db.session.add(notification)
             current_app.logger.info(f"Notification created for user {photo.user.username} about new comment on photo {photo.id} by {current_user.username}.")
@@ -86,17 +85,10 @@ def post_photo_comment(photo_id):
         # Create Activity entry for new photo comment
         activity = Activity(
             user_id=current_user.id,
-            type='commented_on_photo', # Distinct type
-            # target_post_id=photo.id, # Re-evaluate if target_post_id should store photo_id for activities
-                                       # Or add target_photo_id to Activity model.
-                                       # For now, let's assume we might add target_photo_id later or use a generic target_object_id.
-                                       # To keep it simple for now, we won't set target_post_id for photo comment activities
-                                       # unless we decide it's the placeholder for any "post-like" item.
-                                       # Let's be explicit:
-            # target_generic_id=photo.id, # (if we had a generic field)
-            # target_generic_type='photo',
-            # For now, let's link the comment directly
-            target_comment_id=new_comment.id # Will be populated after flush/commit
+            type='commented_on_photo',
+            target_type='comment',        # Target is the comment
+            target_id=new_comment.id,     # Will be populated after flush/commit
+            context_photo_id=photo.id   # Context is the photo
         )
         db.session.add(activity)
         current_app.logger.info(f"Activity 'commented_on_photo' logged for user {current_user.username} on photo {photo.id}, comment ID pending.")
@@ -112,16 +104,18 @@ def post_photo_comment(photo_id):
                 existing_notif = Notification.query.filter_by(
                     user_id=mentioned_user.id,
                     actor_id=current_user.id,
-                    type='mention_in_photo_comment', # New type
-                    related_comment_id=new_comment.id
+                    type='mention_in_photo_comment',
+                    target_type='comment',         # Target is the comment
+                    target_id=new_comment.id
                 ).first()
                 if not existing_notif:
                     mention_notification = Notification(
                         user_id=mentioned_user.id,
                         actor_id=current_user.id,
                         type='mention_in_photo_comment',
-                        # related_post_id=photo.id, # Context: photo ID
-                        related_comment_id=new_comment.id
+                        target_type='comment',        # Target is the comment
+                        target_id=new_comment.id,
+                        context_photo_id=photo.id   # Context is the photo
                     )
                     db.session.add(mention_notification)
                     new_mentions_created = True
@@ -165,10 +159,9 @@ def like_photo_route(photo_id):
             notification = Notification(
                 user_id=photo.user.id,
                 actor_id=current_user.id,
-                type='new_photo_like', # Distinct type
-                related_post_id=photo.id, # Using related_post_id to store photo_id for now
-                                          # Consider related_photo_id on Notification model
-                # related_comment_id=None
+                type='new_photo_like',
+                target_type='photo',    # Target is the photo
+                target_id=photo.id
             )
             db.session.add(notification)
             current_app.logger.info(f"Notification created for user {photo.user.username} about new like on photo {photo.id} by {current_user.username}.")
@@ -176,14 +169,9 @@ def like_photo_route(photo_id):
         # Create Activity entry for new photo like
         activity = Activity(
             user_id=current_user.id,
-            type='liked_photo', # Distinct type
-            # target_post_id=photo.id, # Or use a generic target_object_id / target_photo_id
-            # For now, we might need to decide how to store photo target in Activity.
-            # Let's assume we'll add a target_photo_id to Activity or use a generic system later.
-            # If using target_post_id as a generic field:
-            target_post_id=photo.id, # This implies target_post_id is generic for "likeable item id"
-            # Or, create a new target_photo_id field on Activity model.
-            # For now, will use target_post_id to mean "target_item_id_for_like_or_comment_activity"
+            type='liked_photo',
+            target_type='photo',   # Target is the photo
+            target_id=photo.id
         )
         db.session.add(activity)
         current_app.logger.info(f"Activity 'liked_photo' logged for user {current_user.username} on photo {photo.id}.")

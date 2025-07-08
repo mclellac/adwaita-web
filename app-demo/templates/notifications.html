@@ -26,16 +26,60 @@
                 </div>
                 <div class="adw-action-row-text-content">
                     <span class="adw-action-row-title notification-text">
-                        {% if notification.type == 'new_follower' and notification.actor %}
-                            <a href="{{ url_for('profile.view_profile', user_id=notification.actor.id) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> started following you.
-                        {% elif notification.type == 'new_like' and notification.actor and notification.related_post %}
-                            <a href="{{ url_for('profile.view_profile', user_id=notification.actor.id) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> liked your post: <a href="{{ url_for('post.view_post', post_id=notification.related_post.id) }}" class="adw-link">"{{ notification.related_post.content | striptags | truncate(50) }}"</a>.
-                        {% elif notification.type == 'new_comment' and notification.actor and notification.related_post %}
-                            <a href="{{ url_for('profile.view_profile', user_id=notification.actor.id) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> commented on your post "<a href="{{ url_for('post.view_post', post_id=notification.related_post.id, _anchor='comment-' ~ notification.related_comment_id if notification.related_comment_id else 'post-comments-area') }}" class="adw-link">{{ notification.related_post.content | striptags | truncate(30) }}</a>".
-                        {% elif notification.type == 'mention_in_post' and notification.actor and notification.related_post %}
-                            <a href="{{ url_for('profile.view_profile', user_id=notification.actor.id) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> mentioned you in the post: <a href="{{ url_for('post.view_post', post_id=notification.related_post.id) }}" class="adw-link">"{{ notification.related_post.content | striptags | truncate(50) }}"</a>.
-                        {% elif notification.type == 'mention_in_comment' and notification.actor and notification.related_comment and notification.related_post %}
-                            <a href="{{ url_for('profile.view_profile', user_id=notification.actor.id) }}" class="adw-link">{{ notification.actor.full_name or notification.actor.username }}</a> mentioned you in a <a href="{{ url_for('post.view_post', post_id=notification.related_post.id, _anchor='comment-' ~ notification.related_comment_id if notification.related_comment_id else 'post-comments-area') }}" class="adw-link">comment</a>: "{{ notification.related_comment.text | striptags | truncate(30) }}" on {{ notification.related_post.author.full_name or notification.related_post.author.username }}'s post.
+                        {% set actor_link = '<a href="' ~ url_for('profile.view_profile', user_id=notification.actor.id) ~ '" class="adw-link">' ~ (notification.actor.full_name or notification.actor.username) ~ '</a>' if notification.actor else 'Someone' %}
+
+                        {% if notification.type == 'new_follower' %}
+                            {{ actor_link | safe }} started following you.
+
+                        {% elif notification.type == 'new_like' %} {# Like on a Post #}
+                            {% if notification.target_type == 'post' and notification.target %}
+                                {{ actor_link | safe }} liked your post: <a href="{{ url_for('post.view_post', post_id=notification.target.id) }}" class="adw-link">"{{ notification.target.content | striptags | truncate(50) }}"</a>.
+                            {% else %}
+                                {{ actor_link | safe }} liked something. {# Fallback #}
+                            {% endif %}
+
+                        {% elif notification.type == 'new_comment' %} {# Comment on a Post #}
+                            {% if notification.target_type == 'comment' and notification.target and notification.context_post %}
+                                {{ actor_link | safe }} commented on your post "<a href="{{ url_for('post.view_post', post_id=notification.context_post.id, _anchor='comment-' ~ notification.target.id) }}" class="adw-link">{{ notification.context_post.content | striptags | truncate(30) }}</a>": "{{ notification.target.text | striptags | truncate(30)}}"
+                            {% else %}
+                                {{ actor_link | safe }} commented on something. {# Fallback #}
+                            {% endif %}
+
+                        {% elif notification.type == 'mention_in_post' %}
+                            {% if notification.target_type == 'post' and notification.target %}
+                                {{ actor_link | safe }} mentioned you in the post: <a href="{{ url_for('post.view_post', post_id=notification.target.id) }}" class="adw-link">"{{ notification.target.content | striptags | truncate(50) }}"</a>.
+                            {% else %}
+                                {{ actor_link | safe }} mentioned you in a post. {# Fallback #}
+                            {% endif %}
+
+                        {% elif notification.type == 'mention_in_comment' %} {# Mention in a Post Comment #}
+                            {% if notification.target_type == 'comment' and notification.target and notification.context_post %}
+                                {{ actor_link | safe }} mentioned you in a <a href="{{ url_for('post.view_post', post_id=notification.context_post.id, _anchor='comment-' ~ notification.target.id) }}" class="adw-link">comment</a>: "{{ notification.target.text | striptags | truncate(30) }}" on {{ notification.context_post.author.full_name or notification.context_post.author.username }}'s post.
+                            {% else %}
+                                {{ actor_link | safe }} mentioned you in a comment. {# Fallback #}
+                            {% endif %}
+
+                        {% elif notification.type == 'new_photo_like' %}
+                            {% if notification.target_type == 'photo' and notification.target %}
+                                {{ actor_link | safe }} liked your <a href="{{ url_for('profile.view_gallery', user_id=notification.target.user_id) }}#photo-{{ notification.target.id }}" class="adw-link">photo</a>{% if notification.target.caption %}: "{{ notification.target.caption | striptags | truncate(30) }}"{% endif %}.
+                            {% else %}
+                                {{ actor_link | safe }} liked a photo. {# Fallback #}
+                            {% endif %}
+
+                        {% elif notification.type == 'new_photo_comment' %}
+                             {% if notification.target_type == 'comment' and notification.target and notification.context_photo %}
+                                {{ actor_link | safe }} commented on your <a href="{{ url_for('profile.view_gallery', user_id=notification.context_photo.user_id) }}#photo-{{ notification.context_photo.id }}" class="adw-link">photo</a>: "{{ notification.target.text | striptags | truncate(30) }}"
+                            {% else %}
+                                {{ actor_link | safe }} commented on a photo. {# Fallback #}
+                            {% endif %}
+
+                        {% elif notification.type == 'mention_in_photo_comment' %}
+                            {% if notification.target_type == 'comment' and notification.target and notification.context_photo %}
+                                {{ actor_link | safe }} mentioned you in a comment on a <a href="{{ url_for('profile.view_gallery', user_id=notification.context_photo.user_id) }}#photo-{{ notification.context_photo.id }}" class="adw-link">photo</a>: "{{ notification.target.text | striptags | truncate(30) }}"
+                            {% else %}
+                                {{ actor_link | safe }} mentioned you in a comment on a photo. {# Fallback #}
+                            {% endif %}
+
                         {% else %}
                             {{ notification.type | replace('_', ' ') | title }} {# Generic display #}
                         {% endif %}
