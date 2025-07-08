@@ -40,7 +40,13 @@ def view_post(post_id):
             parent_id_int = int(parent_id_val) if parent_id_val and parent_id_val.isdigit() else None
             current_app.logger.info(f"User {current_user.username} submitting comment on post {post_id}. Parent ID: {parent_id_int}.")
 
-            comment = Comment(text=form.text.data, user_id=current_user.id, post_id=post_id, parent_id=parent_id_int)
+            comment = Comment(
+                text=form.text.data,
+                user_id=current_user.id,
+                target_type='post',
+                target_id=post_id,
+                parent_id=parent_id_int
+            )
             db.session.add(comment)
 
             # Notification for new comment
@@ -307,13 +313,15 @@ def delete_post(post_id): # Renamed from delete_post_route
 
         try:
             # Manually delete associated comment flags first
-            flags_to_delete = CommentFlag.query.join(Comment).filter(Comment.post_id == post.id).all()
+            # Ensure CommentFlag is joined with Comment, and Comment is filtered by target_type and target_id
+            flags_to_delete = CommentFlag.query.join(Comment, CommentFlag.comment_id == Comment.id)\
+                                               .filter(Comment.target_type == 'post', Comment.target_id == post.id).all()
             for flag in flags_to_delete:
                 db.session.delete(flag)
             current_app.logger.debug(f"Deleted {len(flags_to_delete)} flags for post {post_id}.")
 
             # Manually delete associated comments
-            all_comments_on_post = Comment.query.filter_by(post_id=post.id).all()
+            all_comments_on_post = Comment.query.filter_by(target_type='post', target_id=post.id).all()
             for comment in all_comments_on_post:
                 db.session.delete(comment)
             current_app.logger.debug(f"Deleted {len(all_comments_on_post)} comments for post {post_id}.")
@@ -360,7 +368,13 @@ def delete_comment(comment_id): # Renamed
     delete_form = DeleteCommentForm(request.form)
     if delete_form.validate_on_submit(): # Check CSRF
         comment = Comment.query.get_or_404(comment_id)
-        post_id = comment.post_id
+
+        # Ensure this comment is actually for a post before proceeding
+        if comment.target_type != 'post':
+            current_app.logger.warning(f"User {current_user.username} attempted to delete non-post comment ID: {comment_id} via post_routes.")
+            abort(404) # Or a more specific error
+
+        post_id = comment.target_id # Use target_id
         current_app.logger.info(f"User {current_user.username} attempting to delete comment ID: {comment_id} from post ID: {post_id}.")
 
         can_delete = False
@@ -433,7 +447,15 @@ def flag_comment(comment_id): # Renamed
         current_app.logger.warning(f"Flag comment form validation failed for comment {comment_id}. Errors: {form.errors}")
         flash_form_errors_util(form) # Will show CSRF error if that was the cause
 
-    return redirect(url_for('post.view_post', post_id=comment.post_id, _anchor=f"comment-{comment.id}"))
+    # Ensure comment is for a post before redirecting
+    if comment.target_type == 'post':
+        return redirect(url_for('post.view_post', post_id=comment.target_id, _anchor=f"comment-{comment.id}"))
+    else:
+        # Fallback or error if a non-post comment somehow got here
+        current_app.logger.error(f"Flagged comment {comment_id} is not a post comment. Target: {comment.target_type}/{comment.target_id}")
+        flash('Comment context error.', 'danger')
+        return redirect(url_for('general.index'))
+
 
 @post_bp.route('/category/<string:category_slug>')
 def posts_by_category(category_slug): # Renamed

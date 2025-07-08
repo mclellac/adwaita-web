@@ -64,7 +64,7 @@
                             </a>
                         </footer>
                         <div class="adw-card__actions card-secondary-actions">
-                            {{ like_button_and_count(post_item, current_user, csrf_token()) }}
+                            {{ like_button_and_count(post_item, 'post', current_user, csrf_token()) }}
                         </div>
                     </article>
                 {% elif item.type == 'photo' %}
@@ -127,6 +127,9 @@
                                 View in Gallery <span class="adw-icon icon-actions-go-next-symbolic"></span>
                             </a>
                         </footer>
+                        <div class="adw-card__actions card-secondary-actions">
+                            {{ like_button_and_count(first_photo, 'photo', current_user, csrf_token()) }}
+                        </div>
                     </article>
                 {% endif %}
             {% endfor %}

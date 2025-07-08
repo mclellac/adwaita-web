@@ -55,7 +55,11 @@ def view_profile(user_id):
 
     comments_page = request.args.get('comments_page', 1, type=int)
     comments_per_page = 5
-    comments_query = Comment.query.filter_by(user_id=user_profile.id).order_by(Comment.created_at.desc())
+    # Filter for comments made by the user that are specifically on posts
+    comments_query = Comment.query.filter_by(
+        user_id=user_profile.id,
+        target_type='post' # Ensure we only fetch comments on posts
+    ).order_by(Comment.created_at.desc())
     try:
         comments_pagination = comments_query.paginate(page=comments_page, per_page=comments_per_page, error_out=False)
         current_app.logger.debug(f"Found {len(comments_pagination.items)} comments by '{user_profile.username}' for comments_page {comments_page} (total: {comments_pagination.total}).")

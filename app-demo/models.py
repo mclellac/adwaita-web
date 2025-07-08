@@ -46,7 +46,9 @@ class User(UserMixin, db.Model):
         order_by=lambda: desc(UserPhoto.uploaded_at) # Use lambda for UserPhoto ref
     )
     # Relationship for posts liked by this user
-    liked_posts = db.relationship('PostLike', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    # liked_posts = db.relationship('PostLike', backref='user', lazy='dynamic', cascade='all, delete-orphan') # Old relationship
+    likes = db.relationship('Like', backref='user', lazy='dynamic', cascade='all, delete-orphan') # New generic like relationship
+
     notifications = db.relationship('Notification',
                                     foreign_keys='Notification.user_id',
                                     backref='user', lazy='dynamic',
@@ -90,22 +92,66 @@ class User(UserMixin, db.Model):
             followed_id=user.id
         ).count() > 0
 
-    def like_post(self, post):
-        if not self.has_liked_post(post):
-            like = PostLike(user_id=self.id, post_id=post.id)
+    def like_item(self, item): # Generic like method
+        if not self.has_liked_item(item):
+            target_type = None
+            if isinstance(item, Post):
+                target_type = 'post'
+            elif isinstance(item, UserPhoto):
+                target_type = 'photo'
+            else:
+                return False # Unsupported item type
+
+            like = Like(user_id=self.id, target_type=target_type, target_id=item.id)
             db.session.add(like)
             return True
         return False
 
-    def unlike_post(self, post):
-        like = PostLike.query.filter_by(user_id=self.id, post_id=post.id).first()
+    def unlike_item(self, item): # Generic unlike method
+        target_type = None
+        if isinstance(item, Post):
+            target_type = 'post'
+        elif isinstance(item, UserPhoto):
+            target_type = 'photo'
+        else:
+            return False # Unsupported item type
+
+        like = Like.query.filter_by(user_id=self.id, target_type=target_type, target_id=item.id).first()
         if like:
             db.session.delete(like)
             return True
         return False
 
+    def has_liked_item(self, item): # Generic has_liked method
+        target_type = None
+        if isinstance(item, Post):
+            target_type = 'post'
+        elif isinstance(item, UserPhoto):
+            target_type = 'photo'
+        else:
+            return False # Unsupported item type
+
+        return Like.query.filter_by(user_id=self.id, target_type=target_type, target_id=item.id).count() > 0
+
+    # Convenience methods for specific types (optional, can use like_item directly)
+    def like_post(self, post):
+        return self.like_item(post)
+
+    def unlike_post(self, post):
+        return self.unlike_item(post)
+
     def has_liked_post(self, post):
-        return PostLike.query.filter_by(user_id=self.id, post_id=post.id).count() > 0
+        return self.has_liked_item(post)
+
+    def like_photo(self, photo):
+        return self.like_item(photo)
+
+    def unlike_photo(self, photo):
+        return self.unlike_item(photo)
+
+    def has_liked_photo(self, photo):
+        return self.has_liked_item(photo)
+
 
 # Association table for the follow relationship
 class FollowerLink(db.Model):
@@ -194,13 +240,21 @@ class Post(db.Model):
     # Relationship for top-level comments moved to be defined here
     comments = db.relationship(
         'Comment',
-        primaryjoin="and_(Post.id==Comment.post_id, Comment.parent_id==None)",
-        backref='post',
+        primaryjoin="and_(Post.id==Comment.target_id, Comment.target_type=='post', Comment.parent_id==None)", # Updated for polymorphic
+        backref='post', # This backref might be ambiguous now. Consider removing or making specific if Comment can only belong to one Post.
+                       # If a comment can only belong to one post OR one photo, this backref is okay for posts.
         lazy='dynamic',
         order_by=lambda: desc(Comment.created_at) # Use lambda for Comment ref
     )
     # Relationship for likes on this post
-    likers = db.relationship('PostLike', backref='post', lazy='dynamic', cascade='all, delete-orphan')
+    likers = db.relationship(
+        'Like',
+        primaryjoin="and_(Post.id==Like.target_id, Like.target_type=='post')",
+        # No backref here to avoid conflict if Like gets a generic 'target' property later.
+        # If 'Like' needs to know its 'post' specifically, a different backref name could be used.
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
 
 
 class Comment(db.Model):
@@ -210,7 +264,13 @@ class Comment(db.Model):
         db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    # Polymorphic fields
+    target_type = db.Column(db.String(50), nullable=False, index=True) # e.g., 'post', 'photo'
+    target_id = db.Column(db.Integer, nullable=False, index=True)     # ID of the post or photo
+
+    # Foreign key for post_id is removed, replaced by polymorphic target_id/target_type
+    # post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+
     # author relationship defined in User.comments
     parent_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
     replies = db.relationship(
@@ -220,6 +280,22 @@ class Comment(db.Model):
         order_by=lambda: desc(Comment.created_at) # Sort replies newest first
     )
     # is_flagged_active property will be defined after CommentFlag model
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'comment',
+        # 'polymorphic_on': target_type # Not needed if not using joined table inheritance for Comment subtypes
+    }
+
+    # Generic way to get the target object (Post or UserPhoto)
+    # This is a Python property, not a SQLAlchemy relationship.
+    # For querying, you'd filter on target_type and target_id.
+    @property
+    def target(self):
+        if self.target_type == 'post':
+            return Post.query.get(self.target_id)
+        elif self.target_type == 'photo':
+            return UserPhoto.query.get(self.target_id)
+        return None
 
 class UserPhoto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -234,37 +310,24 @@ class UserPhoto(db.Model):
 
     # Relationship for comments on this photo
     comments = db.relationship(
-        'PhotoComment',
-        backref='photo',
+        'Comment', # Now points to the unified Comment model
+        primaryjoin="and_(UserPhoto.id==Comment.target_id, Comment.target_type=='photo')", # Polymorphic join
+        # No backref here to avoid conflict with Comment.post; specific queries will be used.
+        # Or, could use a different backref name on Comment if Comment needs to know its photo parent directly.
         lazy='dynamic',
         cascade='all, delete-orphan',
-        order_by=lambda: desc(PhotoComment.created_at) # Use lambda for PhotoComment ref
+        order_by=lambda: desc(Comment.created_at)
     )
 
-class PhotoComment(db.Model):
-    __tablename__ = 'photo_comment'
-    id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.Text, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    # Relationship for likes on this photo
+    likers = db.relationship(
+        'Like',
+        primaryjoin="and_(UserPhoto.id==Like.target_id, Like.target_type=='photo')",
+        lazy='dynamic',
+        cascade='all, delete-orphan'
     )
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    photo_id = db.Column(db.Integer, db.ForeignKey('user_photo.id'), nullable=False)
 
-    # Relationships
-    author = db.relationship('User', backref=db.backref('photo_comments', lazy='dynamic'))
-    # 'photo' backref is defined in UserPhoto.comments
-
-    # parent_id = db.Column(db.Integer, db.ForeignKey('photo_comment.id'), nullable=True)
-    # replies = db.relationship(
-    #     'PhotoComment',
-    #     backref=db.backref('parent', remote_side=[id]),
-    #     lazy='dynamic',
-    #     order_by=lambda: desc(PhotoComment.created_at) # Sort replies newest first
-    # )
-
-    def __repr__(self):
-        return f'<PhotoComment {self.id} user_id={self.user_id} photo_id={self.photo_id}>'
+# PhotoComment class is now removed.
 
 class CommentFlag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -288,18 +351,26 @@ Comment.is_flagged_active = db.column_property(
     ).correlate_except(CommentFlag).scalar_subquery()
 )
 
-class PostLike(db.Model):
-    __tablename__ = 'post_like'
+class Like(db.Model): # Renamed from PostLike
+    __tablename__ = 'like' # New table name
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+
+    # Polymorphic fields
+    target_type = db.Column(db.String(50), nullable=False, index=True) # e.g., 'post', 'photo'
+    target_id = db.Column(db.Integer, nullable=False, index=True)     # ID of the post or photo
+
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
-    # Add a unique constraint for (user_id, post_id)
-    __table_args__ = (db.UniqueConstraint('user_id', 'post_id', name='_user_post_uc'),)
+    # Unique constraint for (user_id, target_type, target_id)
+    __table_args__ = (db.UniqueConstraint('user_id', 'target_type', 'target_id', name='_user_target_uc'),)
+
+    # No direct backref to Post or UserPhoto here to keep Like generic.
+    # Relationships are defined on Post ('likers') and UserPhoto ('likers').
+    # User.likes backref is already defined.
 
     def __repr__(self):
-        return f'<PostLike user_id={self.user_id} post_id={self.post_id}>'
+        return f'<Like user_id={self.user_id} target_type={self.target_type} target_id={self.target_id}>'
 
 
 class Notification(db.Model):

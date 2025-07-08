@@ -138,10 +138,4 @@ class GalleryPhotoUploadForm(FlaskForm):
     )
     submit = SubmitField('Upload Photos') # Updated label
 
-class PhotoCommentForm(FlaskForm):
-    text = TextAreaField(
-        'Comment',
-        validators=[DataRequired(), Length(min=1, max=2000)]
-    )
-    # photo_id and user_id will be handled by the route
-    submit = SubmitField('Post Comment')
+# PhotoCommentForm is removed as CommentForm will be used for all comments.
