@@ -9,8 +9,6 @@ inside an `AdwListBox`.
 
 Adwaita-Web provides the `<adw-combo-row>` Web Component for creating this type of row.
 
-*(Note: Previous versions of this documentation may have described or implied a JavaScript factory like `Adw.createComboRow()`. As of the current review, a direct factory function for ComboRow was not found in the core `adwaita-web/js` source. Usage should primarily rely on the `<adw-combo-row>` Web Component or by applying CSS classes to a manually constructed HTML structure as detailed in the "Styling" section.)*
-
 **HTML Tag:** `<adw-combo-row>`
 
 **Attributes:**
@@ -94,35 +92,81 @@ Adwaita-Web provides the `<adw-combo-row>` Web Component for creating this type 
 </script>
 ```
 
+## JavaScript Factory Approach (Composite)
+
+A dedicated `Adw.createComboRow()` might not be available. If so, you would construct it by combining `Adw.createRow`, labels, and a styled `<select>` element.
+
+**Conceptual Example:**
+
+```javascript
+function createCustomComboRow(options = {}) {
+  const titleLabel = Adw.createLabel(options.title || "", { htmlTag: "span" });
+  titleLabel.classList.add("adw-combo-row-title"); // Or appropriate class
+
+  const textContentDiv = document.createElement("div");
+  textContentDiv.classList.add("adw-combo-row-text-content");
+  textContentDiv.appendChild(titleLabel);
+
+  if (options.subtitle) {
+    const subtitleLabel = Adw.createLabel(options.subtitle, { htmlTag: "span" });
+    subtitleLabel.classList.add("adw-combo-row-subtitle");
+    textContentDiv.appendChild(subtitleLabel);
+  }
+
+  const selectEl = document.createElement('select');
+  selectEl.classList.add('adw-combo-row-select'); // Ensure this class is styled
+  if (options.selectOptions && Array.isArray(options.selectOptions)) {
+    options.selectOptions.forEach(opt => {
+      const optionEl = document.createElement('option');
+      optionEl.value = opt.value;
+      optionEl.textContent = opt.label;
+      selectEl.appendChild(optionEl);
+    });
+  }
+  if (options.value) selectEl.value = options.value;
+  if (options.disabled) selectEl.disabled = true; // Disable select only
+
+  selectEl.addEventListener('change', () => {
+    if (options.onChanged) {
+      options.onChanged(selectEl.value);
+    }
+  });
+
+  const row = Adw.createRow({
+    children: [textContentDiv, selectEl],
+    disabled: options.disabled || false // Disables the whole row
+  });
+  row.classList.add('adw-combo-row');
+  if(options.disabled) row.classList.add('disabled');
+
+  // Add methods to mimic WC properties
+  row.getValue = () => selectEl.value;
+  row.setValue = (val) => { selectEl.value = val; };
+  // ... and for selectOptions, disabled
+
+  return row;
+}
+
+// Usage:
+const jsComboContainer = document.getElementById('js-comborow-container'); // Assuming div exists
+if(jsComboContainer) {
+    const myJsComboRow = createCustomComboRow({
+        title: "JS Combo Row",
+        selectOptions: [ {label: "Yes", value: "yes"}, {label: "No", value: "no"}],
+        value: "no",
+        onChanged: (value) => Adw.createToast(`JS Combo selected: ${value}`)
+    });
+    jsComboContainer.appendChild(myJsComboRow);
+}
+```
+*The `<adw-combo-row>` Web Component encapsulates this logic.*
+
 ## Styling
 
-*   **SCSS Sources:** `scss/_combo_row.scss` and the `AdwComboRow` section in `scss/_row_types.scss`.
-*   **Key Classes and Structure:**
-    *   The `.adw-combo-row` class is the main container, typically styled like an `AdwActionRow`.
-    *   **Manual HTML Structure (if not using Web Component):**
-        ```html
-        <div class="adw-combo-row">
-          <div class="adw-combo-row__text-content"> <!-- Or adw-action-row-content -->
-            <span class="adw-combo-row__title">Label Title</span>
-            <span class="adw-combo-row__subtitle">Optional Subtitle</span>
-          </div>
-          <select class="adw-combo-row-select">
-            <option value="1">Option 1</option>
-            <option value="2">Option 2</option>
-          </select>
-          <!-- The chevron might be part of the select's default UI,
-               or could be a separate .adw-combo-row__button span if native arrow is hidden -->
-        </div>
-        ```
-    *   **Web Component `<adw-combo-row>`:** This component likely generates an internal structure that utilizes these (or similar) classes. Refer to its specific implementation if you need to target internal parts not exposed via attributes/properties.
-    *   `.adw-combo-row__title`, `.adw-combo-row__subtitle`: Style the text parts.
-    *   `.adw-combo-row-select` (from `_row_types.scss`): This class is crucial for styling the native `<select>` element. It gives it a subtle bottom border, removes default browser appearance for cleaner integration, and applies an accent color border on focus.
-    *   `.adw-combo-row__selected-value` (from `_combo_row.scss`): An optional element to display the selected value text separately, often to the right.
-    *   `.adw-combo-row__button` (from `_combo_row.scss`): Styles a chevron icon, useful if the native dropdown arrow of `<select>` is hidden (which is complex and often avoided for native `<select>`).
-*   **Theming:**
-    *   The row itself inherits ActionRow theming (background, hover, active states).
-    *   The `<select>` element (`.adw-combo-row-select`) uses `var(--borders-color)` for its bottom border and `var(--accent-color)` for the border on focus.
-    *   Disabled state styles the entire row and the select element as inactive (e.g., dashed border for select, opacity).
+*   Primary SCSS: `scss/_combo_row.scss` (if exists), `scss/_row_types.scss`, and potentially styles for native `<select>` elements.
+*   The layout aligns the label part to the left and the select dropdown to the right.
+*   The standard Adwaita styling for `<select>` elements (often subtle, matching entry fields) will apply.
+*   Disabled state styles the entire row as inactive.
 
 ---
 Next: [ViewSwitcher](./viewswitcher.md)

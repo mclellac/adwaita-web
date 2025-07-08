@@ -89,15 +89,14 @@ While Adwaita Skin aims to be flexible, some styles might expect a certain HTML 
 
 Refer to the "Styled Elements (CSS Classes)" section in the main documentation and the examples provided in `adwaita-web/examples/` to see the recommended HTML structures and available classes for different Adwaita patterns.
 
-## Interactivity & JavaScript Components
+## Interactivity
 
-The core CSS of Adwaita Skin provides the visual styling for HTML elements. For many components, this styling can be applied to manually structured HTML, and you would implement all interactivity (event handling, dynamic updates) with your own JavaScript.
+Adwaita Skin is a **pure CSS library**. It **does not provide any JavaScript** for interactivity.
+*   Event handling (e.g., what happens when a button is clicked).
+*   Dynamic updates to the UI (e.g., showing/hiding elements, changing content).
+*   Complex widget behaviors (e.g., opening/closing dialogs, managing tabs).
 
-However, the Adwaita Web project also includes:
-*   **JavaScript-powered Web Components** (e.g., `<adw-dialog>`, `<adw-switch>`, `<adw-tab-view>`). These components encapsulate both structure and behavior. Their respective documentation pages detail their usage.
-*   **Helper JavaScript modules** (e.g., for managing toasts, banners, or application layout) located in the `adwaita-web/js/` directory.
-
-When using the pure CSS classes on your own HTML, you are responsible for all interactivity. When using the provided Web Components or JS helpers, they will handle much of their internal behavior.
+All such interactivity must be implemented by your application using your own JavaScript code. Adwaita Skin provides the visual styling, and your JavaScript provides the functionality.
 
 ## Theming
 

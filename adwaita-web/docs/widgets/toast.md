@@ -13,65 +13,72 @@ Creates an Adwaita-styled toast element. This function typically creates the toa
 **Signature:**
 
 ```javascript
-Adw.createToast(title, options = {}) -> HTMLElement | null
+Adw.createToast(title, options = {}) -> HTMLElement
 ```
 
 **Parameters:**
 
-*   `title` (String): The main message text to display in the toast. The factory currently supports a single string for the primary content.
+*   `title` (String): The main text to display in the toast.
 *   `options` (Object, optional): Configuration options:
     *   `timeout` (Number, optional): Duration in milliseconds before the toast
         automatically dismisses. Defaults to `3000` (3 seconds). A value of `0` or
-        negative makes the toast persistent until manually dismissed via its close button or action.
+        negative might mean it persists until an action or manual dismissal.
     *   `actionName` (String, optional): If provided, an action button with this
         label is added to the toast.
     *   `onAction` (Function, optional): A callback function executed when the
-        action button (if `actionName` is provided) is clicked. The toast element itself is passed as an argument to this function.
+        action button is clicked. The toast instance is passed as an argument.
+    *   `priority` (String, optional): Priority of the toast. Can be `'normal'` or
+        `'high'`. High priority toasts might be styled differently or placed
+        above normal priority ones. Defaults to `'normal'`.
     *   `id` (String, optional): A specific ID to set on the toast element.
-    *   `type` (String, optional): Intended for future styling (e.g., 'info', 'success'). Currently not implemented to change visual style.
 
 **Returns:**
 
-*   `(HTMLElement | null)`: The created toast `div` element (with class `adw-toast`), or `null` if the required toast overlay container (`#adw-toast-overlay`) is not found in the DOM. The toast is automatically appended to the overlay and managed.
+*   `(HTMLElement)`: The created toast element (typically a `div` with class `adw-toast`).
 
-**Example:**
+**Example (Conceptual - requires a toast manager/overlay):**
 
 ```html
-<!-- Ensure this overlay exists in your main HTML structure -->
-<div id="adw-toast-overlay" class="adw-toast-overlay"></div>
-
+<div id="toast-container" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1500; display: flex; flex-direction: column; gap: 10px;"></div>
 <button id="show-toast-btn">Show Toast</button>
 <button id="show-action-toast-btn">Show Toast with Action</button>
 
 <script>
-  // Adw.createToast is defined in adwaita-web/js/toast.js
-  // Ensure toast.js is loaded.
+  const toastContainer = document.getElementById('toast-container');
+
+  function showToast(toastElement) {
+    toastContainer.appendChild(toastElement);
+    // Basic dismissal logic for example
+    const timeout = parseInt(toastElement.dataset.timeout, 10) || 3000;
+    if (timeout > 0) {
+      setTimeout(() => {
+        toastElement.remove();
+      }, timeout);
+    }
+  }
 
   document.getElementById('show-toast-btn').addEventListener('click', () => {
-    Adw.createToast("File saved successfully!");
+    const myToast = Adw.createToast("File saved successfully!");
+    showToast(myToast);
   });
 
   document.getElementById('show-action-toast-btn').addEventListener('click', () => {
-    Adw.createToast("Update available.", {
+    const actionToast = Adw.createToast("Update available.", {
       actionName: "Install",
       timeout: 5000, // 5 seconds
-      onAction: (toastElement) => {
+      onAction: (toast) => {
         console.log("Install action clicked!");
-        // Toast will dismiss on action click if Adw.dismissToast is called within onAction,
-        // or if the action itself leads to a state where the toast is no longer relevant.
-        // The default behavior is that the toast remains until its timeout or manual close,
-        // unless onAction explicitly dismisses it.
-        Adw.dismissToast(toastElement); // Example: dismiss after action
+        toast.remove(); // Dismiss toast after action
       }
     });
+    showToast(actionToast);
   });
 </script>
 ```
-*Note: The `Adw.createToast` function handles appending the toast to an element with ID `adw-toast-overlay` and manages its show/hide lifecycle.*
 
 ## Web Component: `<adw-toast>`
 
-While toasts are typically created dynamically via the `Adw.createToast()` factory, a web component `<adw-toast>` can be defined for scenarios requiring declarative toast elements or for use within other web components. (Note: A web component for `<adw-toast>` is not explicitly provided in `toast.js`; this section describes a general pattern if one were to be used or created).
+While toasts are often created dynamically via the factory, a web component can be used for declarative scenarios or within other components.
 
 **HTML Tag:** `<adw-toast>`
 

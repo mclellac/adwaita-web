@@ -31,7 +31,7 @@
             {% if users %}
                 <div class="adw-list-box">
                     {% for user_result in users %}
-                    <a href="{{ url_for('profile.view_profile', user_id=user_result.id) }}" class="adw-action-row activatable">
+                    <a href="{{ url_for('profile.view_profile', username=user_result.username) }}" class="adw-action-row activatable">
                         <div class="adw-action-row-prefix">
                             <span class="adw-avatar size-m">
                                 {% if user_result.profile_photo_url %}
@@ -97,7 +97,7 @@
                     <article class="adw-card blog-post-item-card">
                         <header class="blog-post-card__header">
                             <div class="blog-post-card__meta adw-label caption">
-                                By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-link">{{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>
+                                By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>
                                 on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else 'Unknown date' }}</time>
                             </div>
                         </header>

@@ -134,139 +134,36 @@ def contact_page():
 
 @general_bp.route('/feed') # This is the "Home" page for logged-in users
 @login_required
-def activity_feed():
-    current_app.logger.info(f"Accessing activity feed for user {current_user.username}.")
+def activity_feed(): # Rename to home_feed or similar if preferred, but endpoint name stays for now
+    current_app.logger.info(f"Accessing main feed (posts) for user {current_user.username}.")
     page = request.args.get('page', 1, type=int)
-    per_page = current_app.config.get('POSTS_PER_PAGE', 10)
+    per_page = current_app.config.get('POSTS_PER_PAGE', 10) # Use POSTS_PER_PAGE
 
-    feed_items = []
+    posts_list, pagination = [], None
+
+    # For the main feed, show posts from users the current user is following, plus their own posts.
+    # Alternatively, show all public posts if that's the desired global feed behavior.
+    # For now, let's implement a feed of all public posts, similar to the anonymous index.
+    # A more advanced feed would involve `followed_users_posts`.
+
     try:
-        followed_user_ids = [user.id for user in current_user.followed]
-        user_ids_for_feed = followed_user_ids + [current_user.id]
+        # Fetch all published posts, newest first.
+        posts_query = Post.query.filter(Post.is_published == True)\
+                                .order_by(Post.published_at.desc(), Post.created_at.desc())
 
-        current_app.logger.debug(f"Fetching feed items for user IDs: {user_ids_for_feed}")
-
-        # Fetch posts
-        posts_query = Post.query.filter(
-            Post.user_id.in_(user_ids_for_feed),
-            Post.is_published == True
-        ).order_by(db.func.coalesce(Post.published_at, Post.created_at).desc())
-
-        # Fetch photos (UserPhoto model from ..models)
-        from ..models import UserPhoto # Ensure UserPhoto is imported
-        photos_query = UserPhoto.query.filter(
-            UserPhoto.user_id.in_(user_ids_for_feed)
-            # Assuming UserPhotos are always "public" if the user is followed or it's self.
-            # Add privacy checks if UserPhoto has its own or inherits from profile.
-        ).order_by(UserPhoto.uploaded_at.desc())
-
-        # Combine and sort
-        # This is a simplified combination. For robust pagination and large datasets,
-        # this approach (fetch all, then sort/paginate in Python) can be inefficient.
-        # A more complex SQL query (UNION ALL) or a different feed generation strategy
-        # might be needed for scale.
-
-        raw_posts = posts_query.all()
-        raw_photos = photos_query.all()
-
-        for post in raw_posts:
-            feed_items.append({
-                'type': 'post',
-                'timestamp': post.published_at or post.created_at,
-                'author': post.author, # Direct User object
-                'data': post, # The Post object itself
-                'id': f'post-{post.id}' # Unique ID for template key
-            })
-
-        for photo in raw_photos:
-            feed_items.append({
-                'type': 'photo',
-                'timestamp': photo.uploaded_at,
-                'author': photo.user, # Direct User object (backref from UserPhoto.user_id)
-                'data': photo, # The UserPhoto object itself
-                'id': f'photo-{photo.id}' # Unique ID for template key
-            })
-
-        # Sort all feed items by timestamp, newest first
-        feed_items.sort(key=lambda x: x['timestamp'], reverse=True)
-
-        # Manual pagination
-        total_items = len(feed_items)
-        start_index = (page - 1) * per_page
-        end_index = start_index + per_page
-        paginated_feed_items = feed_items[start_index:end_index]
-
-        # Create a simple pagination object for the template
-        from flask_sqlalchemy.pagination import Pagination # For object structure
-        # This is a mock pagination object, not a real SQLAlchemy one for this combined list.
-        # For a real solution, a custom pagination class or helper would be better.
-        class ManualPagination:
-            def __init__(self, page, per_page, total_items, items):
-                self.page = page
-                self.per_page = per_page
-                self.total = total_items
-                self.items = items
-
-            @property
-            def pages(self):
-                return (self.total + self.per_page - 1) // self.per_page if self.total > 0 else 0
-
-            @property
-            def has_prev(self):
-                return self.page > 1
-
-            @property
-            def has_next(self):
-                return self.page < self.pages
-
-            @property
-            def prev_num(self):
-                return self.page - 1 if self.has_prev else None
-
-            @property
-            def next_num(self):
-                return self.page + 1 if self.has_next else None
-
-            def iter_pages(self, left_edge=2, right_edge=2, left_current=2, right_current=5):
-                # Simplified iter_pages for manual pagination
-                if self.pages <= (left_edge + left_current + right_edge + right_current + 1):
-                    return range(1, self.pages + 1)
-                pages_iter = []
-                # Left Capped pages
-                for i in range(1, left_edge + 1):
-                    pages_iter.append(i)
-                pages_iter.append(None) # Ellipsis
-                # Middle pages
-                for i in range(self.page - left_current, self.page + right_current +1):
-                    if i > left_edge and i < self.pages - right_edge + 1 :
-                        pages_iter.append(i)
-                # Right Capped pages
-                if self.pages - right_edge > self.page + right_current : # check if ellipsis needed
-                    pages_iter.append(None)
-                for i in range(self.pages - right_edge + 1, self.pages + 1):
-                    if i not in pages_iter: # Avoid duplicates if ranges overlap
-                         pages_iter.append(i)
-                # Remove duplicate Nones if they occur consecutively
-                final_pages_iter = []
-                for i, val in enumerate(pages_iter):
-                    if val is None and (i == 0 or pages_iter[i-1] is None):
-                        continue
-                    final_pages_iter.append(val)
-                return final_pages_iter
-
-
-        pagination_obj = ManualPagination(page, per_page, total_items, paginated_feed_items)
-
-        current_app.logger.debug(f"Processed {len(paginated_feed_items)} items for feed page {page}. Total combined: {total_items}")
-
+        pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
+        posts_list = pagination.items
+        current_app.logger.debug(f"Found {len(posts_list)} posts for main feed page {page}. Total: {pagination.total}")
     except Exception as e:
-        current_app.logger.error(f"Error fetching or processing feed for user {current_user.username}: {e}", exc_info=True)
+        current_app.logger.error(f"Error fetching posts for main feed for user {current_user.username}: {e}", exc_info=True)
         flash("Error loading the feed. Please try again later.", "danger")
-        paginated_feed_items = []
-        pagination_obj = ManualPagination(page, per_page, 0, [])
+        # posts_list and pagination will remain empty or None
 
-
-    return render_template('feed.html', feed_items=paginated_feed_items, pagination=pagination_obj)
+    # The template 'feed.html' will need to be adjusted to render posts instead of activities.
+    # Or, we can point to 'index.html' if it's suitable for rendering a list of posts with pagination.
+    # Let's assume 'feed.html' will be adapted.
+    # csrf_token() is globally available in templates if CSRFProtect is setup, no need to pass it explicitly as a string.
+    return render_template('feed.html', posts=posts_list, pagination=pagination, current_user=current_user)
 
 
 # The '/users/find' route is now removed as search is unified.

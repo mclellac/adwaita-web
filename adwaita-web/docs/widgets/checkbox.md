@@ -1,18 +1,66 @@
 # Checkbox
 
-An AdwCheckbox is a standard checkbox input that allows users to select or deselect an option. It can be used standalone or in groups. Adwaita Web provides styling for checkboxes via the `.adw-checkbox` class (and wrapper) and an `<adw-checkbox>` Web Component.
+An AdwCheckbox is a standard checkbox input that allows users to select or deselect an option. It can be used standalone or in groups.
 
-*(Note: Previous versions of this documentation may have described a JavaScript factory like `Adw.createCheckbox()`. As of the current review, this specific factory function was not found in the core `adwaita-web/js` source. Usage should primarily rely on the CSS classes with the specified HTML structure, or the `<adw-checkbox>` Web Component.)*
+## JavaScript Factory: `Adw.createCheckbox()`
 
-## HTML Structure (for CSS Styling)
+Creates an Adwaita-styled checkbox.
 
-To style a checkbox manually, you typically wrap an `<input type="checkbox">` and its label text within a `<label>` element that has the `.adw-checkbox-wrapper` class. The input itself gets the `.adw-checkbox` class.
+**Signature:**
+
+```javascript
+Adw.createCheckbox(options = {}) -> HTMLLabelElement (wrapper)
+```
+
+**Parameters:**
+
+*   `options` (Object, optional): Configuration options:
+    *   `label` (String, optional): Text label to display next to the checkbox.
+    *   `checked` (Boolean, optional): Initial checked state. Defaults to `false`.
+    *   `disabled` (Boolean, optional): If `true`, disables the checkbox. Defaults to `false`.
+    *   `name` (String, optional): The `name` attribute for the underlying `<input type="checkbox">`.
+    *   `value` (String, optional): The `value` attribute for the input. Defaults to "on".
+    *   `onChanged` (Function, optional): Callback function executed when the checkbox state changes. Receives the `change` event as an argument, so `event.target.checked` gives the new state.
+
+**Returns:**
+
+*   `(HTMLLabelElement)`: The created `<label>` element which wraps the actual `<input type="checkbox">` and its visual representation.
+
+**Example:**
 
 ```html
-<label class="adw-checkbox-wrapper">
-  <input type="checkbox" class="adw-checkbox" name="option1" value="value1">
-  Option Text
-</label>
+<div id="js-checkbox-container" style="padding: 10px; display: flex; flex-direction: column; gap: 10px;"></div>
+<script>
+  const container = document.getElementById('js-checkbox-container');
+
+  // Checkbox with label
+  const rememberMeCheck = Adw.createCheckbox({
+    label: "Remember me on this computer",
+    name: "remember",
+    onChanged: (event) => Adw.createToast(`Remember me: ${event.target.checked}`)
+  });
+  container.appendChild(rememberMeCheck);
+
+  // Checked and disabled checkbox
+  const termsCheck = Adw.createCheckbox({
+    label: "I agree to the terms (already agreed)",
+    checked: true,
+    disabled: true,
+    name: "terms_agreed"
+  });
+  container.appendChild(termsCheck);
+
+  // Standalone checkbox (no label text via options)
+  const standaloneCheck = Adw.createCheckbox({
+    checked: false,
+    onChanged: (e) => console.log("Standalone checked:", e.target.checked)
+  });
+  // You might wrap this with an external label:
+  const externalLabel = Adw.createLabel("Enable option: ", {htmlTag: 'span'});
+  const box = Adw.createBox({children: [externalLabel, standaloneCheck], align: "center"});
+  container.appendChild(box)
+
+</script>
 ```
 
 ## Web Component: `<adw-checkbox>`
