@@ -27,7 +27,6 @@
     height: 100%;
     object-fit: cover; // Ensure image covers the avatar area nicely
     display: block;    // Remove extra space below image
-    border-radius: inherit; // Ensure the image itself is also rounded, helps with potential clipping issues
   }
 
   .adw-avatar-text {

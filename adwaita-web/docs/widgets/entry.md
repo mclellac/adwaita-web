@@ -79,16 +79,14 @@ To add icons inside an entry (e.g., a search icon or a clear button), use the `.
 ## Styling & Theming
 
 *   **SCSS Source:** `scss/_entry.scss`
-*   **Key Visual Aspects:**
-    *   **Appearance:** Entries have a subtle inset shadow (`box-shadow: inset 0 1px 1px var(--shade-color);`).
-    *   **Background:** `var(--view-bg-color)`.
-    *   **Text Color:** `var(--window-fg-color)`.
-    *   **Border:** `var(--border-width) solid var(--border-color)` for the default state.
-    *   **Focus:** Border color changes to `var(--accent-color)`, and an outer focus ring (`0 0 0 var(--focus-ring-width) var(--accent-color)`) is added while maintaining the inset shadow.
-    *   **Validation States:** Border and focus ring colors change to `var(--error-color)`, `var(--warning-color)`, or `var(--success-color)`.
+*   **CSS Variables:** Entry styles are primarily determined by global CSS custom properties:
+    *   **Background:** `var(--view-bg-color)`
+    *   **Text Color:** `var(--window-fg-color)`
+    *   **Border:** `var(--border-color)` for the default state.
+    *   **Focus:** Border and focus ring use `var(--accent-color)`.
+    *   **Validation States:** Borders and focus rings use `var(--error-color)`, `var(--warning-color)`, or `var(--success-color)`.
     *   **Placeholder:** Uses `currentColor` with `opacity: 0.5`.
     *   **Disabled State:** Uses `var(--disabled-opacity)`.
-    *   **Specific Input Type Resets:** For `input[type="number"]` and `input[type="search"]`, default browser spinners and clear buttons (on WebKit/Blink) are removed for a cleaner look.
 
 Refer to the [Theming Reference](../general/theming.md) and `scss/_variables.scss` for more details.
 

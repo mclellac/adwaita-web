@@ -144,12 +144,9 @@ A declarative way to use Adwaita breakpoint bins.
 
 ## Styling & Behavior
 
-*   **Styling:** There is no dedicated SCSS file (`_breakpoint_bin.scss`) for `AdwBreakpointBin` itself in Adwaita Web. The component is primarily JavaScript-driven.
-    *   The `AdwBreakpointBin` container is typically a simple `div` (`display: block;`). Its own styling (borders, padding, etc.) should be applied manually or via utility classes if needed for visual presentation (as seen in the `index.html` showcase).
-    *   The appearance of the children is determined by their own content and styling.
-*   **Behavior:**
-    *   It uses a `ResizeObserver` (if available) to monitor its own width.
-    *   Based on its width, it dynamically changes the `display` style of its direct child elements that have `data-name` and `data-condition` attributes (setting `display: none` for hidden children and restoring the original display style or setting `display: block` for the visible one).
+*   Primary SCSS: `scss/_breakpoint_bin.scss`.
+*   The BreakpointBin itself is usually a simple container (`display: block;`).
+*   It uses a `ResizeObserver` (if available) to monitor its own width and dynamically change the `display` style of its children (setting `display: none` for hidden children and `display: ''` or `display: block` for the visible one).
 *   Children are evaluated based on their `condition` (sorted by min-width), and the largest one that matches the current width is displayed.
 
 ---

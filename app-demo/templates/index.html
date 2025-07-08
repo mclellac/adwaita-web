@@ -13,7 +13,7 @@
             <header class="blog-post-card__header">
                 {# Post title removed #}
                 <div class="blog-post-card__meta adw-label caption">
-                    By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-link">{{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>
+                    By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
                     on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else 'Unknown date' }}</time> {# Show time as well #}
                 </div>
             </header>
@@ -49,7 +49,7 @@
             </footer>
                         <div class="adw-card__actions card-secondary-actions"> {# New container for likes etc. #}
                             {% from "_macros.html" import like_button_and_count %}
-                            {{ like_button_and_count(post, 'post', current_user, csrf_token()) }}
+                            {{ like_button_and_count(post, current_user, csrf_token()) }}
                             {# Add other actions like comments count link here if desired #}
                         </div>
         </article>

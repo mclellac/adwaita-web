@@ -240,14 +240,6 @@ These are primarily used by the `row-base` mixin and row components like `AdwAct
 *   `--toast-min-height`: Minimum height of toasts (e.g., `36px`).
 *   `--toast-border-radius`: Border radius for toasts (defaults to `var(--border-radius-large)`).
 
-### Switch Variables
-Used for styling `AdwSwitch` components.
-*   `--switch-knob-bg-color`: Background color of the switch knob in its default state.
-*   `--switch-slider-off-bg-color`: Background color of the switch track when in the "off" state.
-*   `--switch-slider-disabled-off-bg-color`: Background color of the switch track when disabled and "off".
-*   `--switch-knob-disabled-bg-color`: Background color of the switch knob when disabled and "off".
-    *   Note: When a switch is "on" and active, its track uses `var(--accent-bg-color)`. When "on" and disabled, it uses `var(--accent-bg-color)` with `var(--disabled-opacity)`.
-
 ## Fonts
 *   `--document-font-family`: Default sans-serif font stack.
 *   `--document-font-size`: Default base font size (e.g., `10pt`).

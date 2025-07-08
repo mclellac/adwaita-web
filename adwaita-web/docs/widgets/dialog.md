@@ -149,35 +149,9 @@ A declarative way to define Adwaita dialogs. This component does not use Shadow 
 
 ## Styling
 
-*   **SCSS Source:** `scss/_dialog.scss`. This file styles the base `adw-dialog` (and `adw-about-dialog` host elements) and also includes specific styling for content typically found in alert dialogs.
-*   **Base Dialog Structure & Classes (for `<adw-dialog>` Web Component's Light DOM / Slots):**
-    *   Host: `adw-dialog` (or `adw-about-dialog`, `adw-preferences-dialog`). Styled as a modal overlay with background, shadow, and border radius.
-        *   `max-width`: Default is `550px`, can be overridden by specialized dialogs.
-        *   Animated with `opacity` and `transform: scale()` on open/close.
-    *   Header: A `div` with class `adw-dialog__header` (typically not directly slotted, but part of the WC's template if a title is provided).
-        *   Contains `h2.adw-dialog__title` for the dialog title.
-        *   Contains a close button (e.g., `.adw-dialog-close-button`).
-    *   Content Area: A `div` with class `adw-dialog-content` (content provided via the default slot or `slot="content"` goes here).
-        *   `padding: var(--spacing-l)`.
-    *   Footer: A `div` with class `adw-dialog-footer` (content provided via `slot="buttons"` goes here).
-        *   `padding: var(--spacing-m)`, `border-top`, `gap` for buttons.
-*   **Alert Dialog Content Classes (styled within `_dialog.scss` inside `.adw-dialog-content`):**
-    *   `.adw-alert-dialog-heading`: For the main heading of an alert.
-    *   `.adw-alert-dialog-body`: For the descriptive body text of an alert.
-    *   `.adw-alert-dialog-responses`: A flex container for alert buttons. Can be `.horizontal`.
-*   **Backdrop:**
-    *   Class: `.adw-dialog-backdrop`.
-    *   Covers the entire viewport behind the dialog.
-    *   Styled with `background-color: var(--dialog-backdrop-color)`.
-*   **Key Theming Variables:**
-    *   `--dialog-bg-color`, `--dialog-fg-color`
-    *   `--dialog-box-shadow`, `--window-radius` (for dialog corners)
-    *   `--dialog-backdrop-color`
-    *   `--z-index-dialog`, `--z-index-dialog-backdrop`
-    *   `--animation-duration-short`, `--animation-ease-out-cubic` (for open/close transitions)
-    *   Border colors use `var(--border-color)`.
-
-Specialized dialogs like `<adw-about-dialog>` and `<adw-preferences-dialog>` use these base dialog styles and add their own specific content styling (see `_about_dialog.scss`, `_preferences.scss`). `<adw-alert-dialog>` also uses the base `adw-dialog` and the alert-specific content classes from `_dialog.scss`.
+*   Primary SCSS: `scss/_dialog.scss` (and potentially `scss/_alert_dialog.scss` for specialized versions).
+*   Variables: Uses general theme variables from `scss/_variables.scss` (e.g., `--dialog-bg-color`, `--dialog-fg-color`, `--popover-bg-color` as dialogs are popover-like).
+*   The backdrop is styled via `.adw-dialog-backdrop`.
 
 ---
-Next: [AlertDialog](./alertdialog.md)
+Next: [Avatar](./avatar.md)

@@ -54,28 +54,6 @@ Apply these classes in addition to `adw-button`:
     <button class="adw-button disabled">CSS Disabled Button</button>
     ```
     *Note: Using the `disabled` attribute on the `<button>` element is the standard HTML way and is preferred for accessibility and behavior.*
-*   `.osd`: For On-Screen Display contexts, providing a style that contrasts well with varied backgrounds (typically dark and semi-transparent).
-    ```html
-    <button class="adw-button osd">OSD Button</button>
-    <button class="adw-button osd suggested-action">OSD Suggested</button>
-    ```
-*   `.small`: For a smaller version of the button.
-    ```html
-    <button class="adw-button small">Small Button</button>
-    <button class="adw-button small suggested-action icon-only" aria-label="Small Add">
-      <span class="adw-icon adw-icon-plus-symbolic"></span>
-    </button>
-    ```
-
-### Toggle Buttons and `.active` State
-Buttons can also represent a toggle state (on/off) by adding the `.active` class (often managed by JavaScript). `aria-pressed="true"` should be used for accessibility.
-
-```html
-<button class="adw-button active" aria-pressed="true">Active Toggle</button>
-<button class="adw-button flat active" aria-pressed="true">Flat Active Toggle</button>
-<button class="adw-button suggested-action active" aria-pressed="true">Suggested Active Toggle</button>
-```
-The `.active` class has specific styling in combination with `.flat`, `.suggested-action`, and `.destructive-action`.
 
 ### Icons in Buttons
 For icon buttons, include your icon element (e.g., `<span>` with icon font classes, or an inline `<svg>`) inside the button.

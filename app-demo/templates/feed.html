@@ -5,133 +5,69 @@
 {% block header_title %}Home{% endblock %}
 
 {% block content %}
-<div class="adw-clamp adw-clamp-lg"> {# Changed to adw-clamp-lg for a bit more width for single column #}
+<div class="adw-clamp adw-clamp-xl">
     {% from "_macros.html" import like_button_and_count %}
 
-    {% if feed_items and feed_items|length > 0 %}
-        {# Changed from blog-posts-container (grid) to a flex column layout #}
-        <div class="feed-items-container" style="display: flex; flex-direction: column; gap: var(--spacing-l); margin-top: var(--spacing-l);">
-            {% for item in feed_items %}
-                {% if item.type == 'post' %}
-                    {% set post_item = item.data %}
-                    <article class="adw-card blog-post-item-card feed-item-card-post">
-                        <header class="blog-post-card__header">
-                            <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
-                                <a href="{{ url_for('profile.view_profile', user_id=item.author.id) }}" class="adw-link">
-                                    <span class="adw-avatar size-m">
-                                        {% if item.author.profile_photo_url %}
-                                        <img src="{{ url_for('static', filename=item.author.profile_photo_url) }}" alt="{{ item.author.username }} avatar">
-                                        {% else %}
-                                        <img src="{{ default_avatar_url }}" alt="{{ item.author.username }} default avatar">
-                                        {% endif %}
-                                    </span>
-                                </a>
-                                <div class="adw-box adw-box-vertical">
-                                    <a href="{{ url_for('profile.view_profile', user_id=item.author.id) }}" class="adw-link">
-                                        <strong class="adw-label body-1">{{ item.author.full_name }}</strong>
-
-                                     <span class="adw-label caption">@{{ item.author.username }}</span></a>
-                                </div>
-                            </div>
-                            <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
-                                Posted: <time datetime="{{ item.timestamp.isoformat() }}">{{ item.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                            </div>
-                        </header>
-                        <div class="adw-card__content styled-text-content">
-                            {{ post_item.content | markdown }} {# No truncation for feed, show full content #}
-                        </div>
-                        <footer class="blog-post-card__footer">
-                             <div class="blog-post-card__terms">
-                                {% if post_item.categories %}
-                                <div class="meta-section">
-                                    <strong class="adw-label caption meta-label-strong">Categories:</strong>
-                                    {% for category in post_item.categories %}
-                                        <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact tag-pill">{{ category.name }}</a>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                                {% if post_item.tags %}
-                                <div class="meta-section">
-                                    <strong class="adw-label caption meta-label-strong">Tags:</strong>
-                                    {% for tag in post_item.tags %}
-                                        <a href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact tag-pill">{{ tag.name }}</a>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                            <a href="{{ url_for('post.view_post', post_id=post_item.id) }}" class="adw-button flat read-more-link">
-                                View Post & Comments <span class="adw-icon icon-actions-go-next-symbolic"></span>
+    {% if posts and posts|length > 0 %}
+        <div class="blog-posts-container" style="margin-top: var(--spacing-l);"> {# Using grid like index.html #}
+            {% for post_item in posts %}
+                <article class="adw-card blog-post-item-card">
+                    <header class="blog-post-card__header">
+                        <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
+                            <a href="{{ url_for('profile.view_profile', username=post_item.author.username) }}" class="adw-link">
+                                <span class="adw-avatar size-m">
+                                    {% if post_item.author.profile_photo_url %}
+                                    <img src="{{ url_for('static', filename=post_item.author.profile_photo_url) }}" alt="{{ post_item.author.username }} avatar">
+                                    {% else %}
+                                    <img src="{{ default_avatar_url }}" alt="{{ post_item.author.username }} default avatar">
+                                    {% endif %}
+                                </span>
                             </a>
-                        </footer>
-                        <div class="adw-card__actions card-secondary-actions">
-                            {{ like_button_and_count(post_item, 'post', current_user, csrf_token()) }}
-                        </div>
-                    </article>
-                {% elif item.type == 'photo' %}
-                    {% set photo_item = item.data %}
-                    <article class="adw-card photo-item-card feed-item-card-photo">
-                         <header class="blog-post-card__header"> {# Re-use similar header structure #}
-                            <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
-                                <a href="{{ url_for('profile.view_profile', user_id=item.author.id) }}" class="adw-link">
-                                    <span class="adw-avatar size-m">
-                                        {% if item.author.profile_photo_url %}
-                                        <img src="{{ url_for('static', filename=item.author.profile_photo_url) }}" alt="{{ item.author.username }} avatar">
-                                        {% else %}
-                                        <img src="{{ default_avatar_url }}" alt="{{ item.author.username }} default avatar">
-                                        {% endif %}
-                                    </span>
+                            <div class="adw-box adw-box-vertical">
+                                <a href="{{ url_for('profile.view_profile', username=post_item.author.username) }}" class="adw-link">
+                                    <strong class="adw-label body-1">{{ post_item.author.full_name or post_item.author.username }}</strong>
                                 </a>
-                                <div class="adw-box adw-box-vertical">
-                                    <a href="{{ url_for('profile.view_profile', user_id=item.author.id) }}" class="adw-link">
-                                        <strong class="adw-label body-1">{{ item.author.full_name }}</strong>
-
-                                     <span class="adw-label caption">@{{ item.author.username }}</span></a>
-                                </div>
+                                 <span class="adw-label caption">@{{ post_item.author.username }}</span>
                             </div>
-                            <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
-                                Uploaded: <time datetime="{{ item.timestamp.isoformat() }}">{{ item.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                            </div>
-                        </header>
-                        {# Entire card content is a link to the gallery for the first photo in the set #}
-                        {# If photo_item is a list, use first photo for main card link, else use photo_item directly #}
-                        {% set first_photo = photo_item[0] if photo_item is iterable and not photo_item is string else photo_item %}
-                        {% set gallery_url = url_for('profile.view_gallery', user_id=item.author.id) + '#photo-' + (first_photo.id | string) %}
-
-                        <a href="{{ gallery_url }}" class="adw-card__content photo-display-content photo-card-clickable-content" style="text-decoration: none; color: inherit;">
-                            {# Container for multiple thumbnails if photo_item is a list #}
-                            <div class="photo-thumbnails-grid">
-                                {% if photo_item is iterable and not photo_item is string %}
-                                    {# Multiple photos: display as thumbnails in a grid #}
-                                    {% for photo_thumb in photo_item %}
-                                    <a href="{{ url_for('profile.view_gallery', user_id=item.author.id) }}#photo-{{photo_thumb.id}}" class="photo-thumbnail-link">
-                                        <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo_thumb.image_filename) }}"
-                                             alt="{{ photo_thumb.caption or ('Photo by ' ~ item.author.full_name) }}"
-                                             class="photo-thumbnail-img">
-                                    </a>
-                                    {% endfor %}
-                                {% else %}
-                                    {# Single photo: display as a larger thumbnail #}
-                                    <a href="{{ gallery_url }}" class="photo-thumbnail-link single-photo-link">
-                                        <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo_item.image_filename) }}"
-                                             alt="{{ photo_item.caption or ('Photo by ' ~ item.author.full_name) }}"
-                                             class="photo-thumbnail-img single-photo-thumbnail-img">
-                                    </a>
-                                {% endif %}
-                            </div>
-                            {% if first_photo.caption %} {# Show caption of the first photo or the single photo #}
-                            <p class="adw-label body-1 photo-caption-text" style="margin-top: var(--spacing-s); padding: 0 var(--spacing-m);">{{ first_photo.caption }}</p>
+                        </div>
+                        <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
+                            {% if post_item.published_at %}
+                                Published: <time datetime="{{ post_item.published_at.isoformat() }}">{{ post_item.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                            {% else %}
+                                Created: <time datetime="{{ post_item.created_at.isoformat() }}">{{ post_item.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
                             {% endif %}
-                        </a>
-                        <footer class="blog-post-card__footer" style="padding-top: 0;"> {# Adjust padding if caption is inside the link #}
-                            <a href="{{ gallery_url }}" class="adw-button flat read-more-link">
-                                View in Gallery <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                            </a>
-                        </footer>
-                        <div class="adw-card__actions card-secondary-actions">
-                            {{ like_button_and_count(first_photo, 'photo', current_user, csrf_token()) }}
                         </div>
-                    </article>
-                {% endif %}
+                    </header>
+                    <div class="adw-card__content styled-text-content">
+                        {{ post_item.content | truncate(300, True, '...') | markdown }}
+                    </div>
+                    <footer class="blog-post-card__footer">
+                         <div class="blog-post-card__terms">
+                            {% if post_item.categories %}
+                            <div class="meta-section">
+                                <strong class="adw-label caption meta-label-strong">Categories:</strong>
+                                {% for category in post_item.categories %}
+                                    <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact tag-pill">{{ category.name }}</a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if post_item.tags %}
+                            <div class="meta-section">
+                                <strong class="adw-label caption meta-label-strong">Tags:</strong>
+                                {% for tag in post_item.tags %}
+                                    <a href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact tag-pill">{{ tag.name }}</a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('post.view_post', post_id=post_item.id) }}" class="adw-button flat read-more-link">
+                            View Post & Comments <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                        </a>
+                    </footer>
+                    <div class="adw-card__actions card-secondary-actions">
+                        {{ like_button_and_count(post_item, current_user, csrf_token) }} {# Use csrf_token from context #}
+                    </div>
+                </article>
             {% endfor %}
         </div>
 

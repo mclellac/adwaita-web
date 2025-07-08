@@ -168,8 +168,6 @@
         .icon-status-weather-clear-night-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/weather-clear-night-symbolic.svg"); mask-image: url("build/data/icons/symbolic/weather-clear-night-symbolic.svg");}
         .icon-status-avatar-default-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/avatar-default-symbolic.svg"); mask-image: url("build/data/icons/symbolic/avatar-default-symbolic.svg");}
         .icon-ui-view-more-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/view-more-symbolic.svg"); mask-image: url("build/data/icons/symbolic/view-more-symbolic.svg");}
-        .icon-actions-view-reveal-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/view-reveal-symbolic.svg"); mask-image: url("build/data/icons/symbolic/view-reveal-symbolic.svg"); }
-        .icon-actions-view-conceal-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/view-conceal-symbolic.svg"); mask-image: url("build/data/icons/symbolic/view-conceal-symbolic.svg"); }
         /* For icons that might be directly in symbolic/ (like pan-up, pan-down, window-close from logs) */
         .icon-pan-up-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/pan-up-symbolic.svg"); mask-image: url("build/data/icons/symbolic/pan-up-symbolic.svg"); }
         .icon-pan-down-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/pan-down-symbolic.svg"); mask-image: url("build/data/icons/symbolic/pan-down-symbolic.svg"); }
@@ -280,21 +278,6 @@
                 <button class="adw-button pill">Pill Button 1</button>
                 <button class="adw-button pill active">Pill Active</button>
                  <button class="adw-button pill" disabled>Pill Disabled</button>
-            </div>
-            <h3 class="adw-label title-3">Small Buttons</h3>
-            <div class="control-group">
-                <button class="adw-button small">Small</button>
-                <button class="adw-button small suggested-action">Small Suggested</button>
-                <button class="adw-button small destructive-action">Small Destructive</button>
-                <button class="adw-button small flat"><span class="adw-icon icon-actions-view-refresh-symbolic"></span> Small Flat Icon</button>
-                <button class="adw-button small icon-only" aria-label="Small Icon"><span class="adw-icon icon-actions-system-search-symbolic"></span></button>
-            </div>
-            <h3 class="adw-label title-3">OSD (On-Screen Display) Buttons</h3>
-            <div class="control-group" style="background-color: #777; padding: var(--spacing-s); border-radius: var(--border-radius-small);">
-                <button class="adw-button osd">OSD Button</button>
-                <button class="adw-button osd suggested-action">OSD Suggested</button>
-                <button class="adw-button osd icon-only" aria-label="OSD Icon"><span class="adw-icon icon-status-weather-clear-night-symbolic"></span></button>
-                <button class="adw-button osd" disabled>OSD Disabled</button>
             </div>
         </section>
 
@@ -419,17 +402,10 @@
                     </div>
                 </div>
                 <div style="margin-bottom: var(--spacing-l);"> <!-- Added specific margin for better separation -->
-                    <h3 class="adw-label title-3">Toggle Buttons (Standalone - static <code>.active</code> state)</h3>
-                    <div class="control-group">
-                        <button class="adw-button active" aria-pressed="true">Active</button>
-                        <button class="adw-button flat active" aria-pressed="true">Flat Active</button>
-                        <button class="adw-button suggested-action active" aria-pressed="true">Suggested Active</button>
-                        <button class="adw-button flat suggested-action active" aria-pressed="true">Flat Suggested Active</button>
-                        <button class="adw-button destructive-action active" aria-pressed="true">Destructive Active</button>
-                        <button class="adw-button flat destructive-action active" aria-pressed="true">Flat Destructive Active</button>
-                        <button class="adw-button" aria-pressed="false">Inactive</button>
-                        <button class="adw-button" disabled aria-pressed="true">Disabled Active</button>
-                    </div>
+                    <h3 class="adw-label title-3">Toggle Buttons (Standalone)</h3>
+                    <button class="adw-button toggle">Toggle Me</button> <!-- Add .toggle class if needed, or rely on JS to add .active -->
+                    <button class="adw-button active" aria-pressed="true">Pressed Toggle</button>
+                    <button class="adw-button" disabled>Disabled Toggle</button>
 
                     <h3 class="adw-label title-3" style="margin-top:var(--spacing-s);">Toggle Group (Linked)</h3>
                     <div class="adw-toggle-group linked">
@@ -692,14 +668,6 @@
                 <span class="adw-label">Activatable Row</span>
                 <div style="flex-grow: 1;"></div>
                 <span class="adw-icon icon-actions-go-next-symbolic"></span>
-            </div>
-            <div class="adw-action-row activatable" style="margin-top: var(--spacing-s); border-radius: var(--border-radius-medium);">
-                <div class="adw-action-row-prefix"><span class="adw-icon icon-status-dialog-information-symbolic"></span></div>
-                <div class="adw-action-row-content">
-                    <div class="adw-action-row-title">Standalone Action Row</div>
-                    <div class="adw-action-row-subtitle">With prefix, content, and suffix</div>
-                </div>
-                <div class="adw-action-row-suffix"><span class="adw-icon icon-actions-go-next-symbolic"></span></div>
             </div>
         </section>
 

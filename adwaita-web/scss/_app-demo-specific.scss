@@ -605,59 +605,6 @@ $app-sidebar-breakpoint: 768px;
   // .adw-button {}
 }
 
-// Cropper.js circular style for profile photo editing
-.profile-photo-action-row {
-  // This is the .adw-action-row containing the photo upload elements
-
-  .adw-action-row-suffix {
-    // This is the container for the "Choose Photo" button, the cropper, and the current photo preview
-    // It's already set to flex-direction: column and align-items: flex-start in edit_profile.html's styles
-    // No new general styles needed here unless overriding something specific.
-  }
-
-  .cropper-container-wrapper {
-    // This is the direct wrapper for the <img> tag that Cropper.js uses.
-    // Styles for its size (width, height) are in edit_profile.html's specific styles for now.
-    // (e.g., width: 150px; height: 150px;)
-    // If a consistent size is desired across all cropper instances (if more were added),
-    // it could be defined here.
-
-    &.hidden { // This class is already defined in edit_profile.html styles
-      // display: none !important; // !important might be too strong, ensure it's not needed
-    }
-
-    // These styles make the cropper selection appear circular
-    .cropper-view-box,
-    .cropper-face {
-      border-radius: 50%;
-      outline-color: rgba(var(--accent-bg-color-rgb), 0.75); // Use Adwaita accent for outline
-    }
-
-    // Ensure the underlying image is visible if it's smaller than the container,
-    // and doesn't overflow if it's larger (Cropper.js usually handles this well).
-    img {
-      display: block; // Default for img, but good to ensure
-      max-width: 100%; // Important for responsiveness within the cropper
-      max-height: 100%; // ditto
-      // Cropper.js will set the actual width/height of this img element.
-      // object-fit: contain; // Might conflict with Cropper.js, usually not needed as Cropper controls the image display
-    }
-  }
-
-  .hidden-file-input { // This class is already defined in edit_profile.html styles
-    // display: none !important;
-  }
-
-  .current-photo-display { // This class is already defined in edit_profile.html styles
-    // display: flex;
-    // align-items: center;
-    // gap: var(--spacing-xs);
-    .adw-label { // If the "Current:" or "Default:" label is a p tag or similar
-      margin-bottom: 0; // Remove default bottom margin for paragraph if it's used as a label here
-    }
-  }
-}
-
 // Like Button & Count Styling
 .post-interaction-footer { // Used in post.html
   display: flex;
@@ -760,24 +707,4 @@ $app-sidebar-breakpoint: 768px;
 
   // Ensure it doesn't inherit unwanted styles from generic .adw-button if they conflict
   text-decoration: none; // Links shouldn't be underlined if they are buttons
-}
-
-// Notification dot styles (in _app-demo-specific.scss)
-.notification-icon-button {
-  position: relative;
-
-  .notification-dot {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    font-size: var(--font-size-caption);
-    line-height: 1;
-    padding: 2px 4px;
-    min-width: 16px;
-    height: 16px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 }

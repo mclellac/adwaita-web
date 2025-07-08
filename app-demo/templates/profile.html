@@ -9,12 +9,12 @@
         <a href="{{ url_for('profile.edit_profile') }}" class="adw-button suggested-action">Edit Profile</a>
     {% elif current_user.is_authenticated %} {# Only show follow/unfollow if logged in and not viewing own profile #}
         {% if current_user.is_following(user_profile) %}
-            <form action="{{ url_for('profile.unfollow_user', user_id=user_profile.id) }}" method="POST" style="display: inline;">
+            <form action="{{ url_for('profile.unfollow_user', username=user_profile.username) }}" method="POST" style="display: inline;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="adw-button">Unfollow</button>
             </form>
         {% else %}
-            <form action="{{ url_for('profile.follow_user', user_id=user_profile.id) }}" method="POST" style="display: inline;">
+            <form action="{{ url_for('profile.follow_user', username=user_profile.username) }}" method="POST" style="display: inline;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="adw-button suggested-action">Follow</button>
             </form>
@@ -34,25 +34,9 @@
 
 {# Dialog for Full-Size Gallery Photo #}
 <adw-dialog id="gallery-photo-dialog" title="Gallery Photo">
-    <div slot="content" class="dialog-image-content" style="text-align: center; padding: var(--spacing-m); position: relative;"> {# Added position: relative for nav buttons #}
-        {# Loading Spinner for Image #}
-        <div id="gallery-image-loader" class="adw-spinner large" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;"></div>
-
-        <img id="full-gallery-photo-img" src="" alt="Full-size gallery photo" style="max-width: 100%; max-height: 70vh; display: block; margin: auto; opacity: 1;"> {# Reduced max-height for comment space #}
-
-        {# Navigation Buttons #}
-        <button id="gallery-nav-prev" class="adw-button circular flat gallery-nav-button prev" aria-label="Previous photo" style="display:none;">
-            <span class="adw-icon icon-actions-go-previous-symbolic"></span>
-        </button>
-        <button id="gallery-nav-next" class="adw-button circular flat gallery-nav-button next" aria-label="Next photo" style="display:none;">
-            <span class="adw-icon icon-actions-go-next-symbolic"></span>
-        </button>
-
+    <div slot="content" class="dialog-image-content" style="text-align: center; padding: var(--spacing-m);">
+        <img id="full-gallery-photo-img" src="" alt="Full-size gallery photo" style="max-width: 100%; max-height: 70vh; display: block; margin: auto;"> {# Reduced max-height for comment space #}
         <p id="full-gallery-photo-caption" class="adw-label body-1" style="margin-top: var(--spacing-s); margin-bottom: var(--spacing-m);"></p>
-
-        <div id="gallery-photo-like-section-container" class="like-section-container" style="display: flex; justify-content: center; margin-bottom: var(--spacing-s);">
-            {# Like button and count will be populated by JS #}
-        </div>
 
         <hr style="margin: var(--spacing-m) 0;">
 
@@ -97,15 +81,15 @@
                 {% endif %}
             </div>
             <div class="adw-box adw-box-vertical adw-box-spacing-xs">
-                <h1 class="adw-label title-1">{{ user_profile.full_name }}</h1>
+                <h1 class="adw-label title-1">{{ user_profile.full_name or user_profile.username }}</h1>
                 {% if user_profile.full_name %}
-                <div><span class="adw-label adw-caption">@{{ user_profile.full_name }}</span></div>
+                <div><span class="adw-label adw-caption">@{{ user_profile.username }}</span></div>
                 {% endif %}
                 <div class="adw-box adw-box-horizontal adw-box-spacing-s profile-follow-stats">
-                    <a href="{{ url_for('profile.followers_list', user_id=user_profile.id) }}" class="adw-link">
+                    <a href="{{ url_for('profile.followers_list', username=user_profile.username) }}" class="adw-link">
                         <span class="adw-label body-2"><strong>{{ user_profile.followers.count() }}</strong> Followers</span>
                     </a>
-                    <a href="{{ url_for('profile.following_list', user_id=user_profile.id) }}" class="adw-link">
+                    <a href="{{ url_for('profile.following_list', username=user_profile.username) }}" class="adw-link">
                         <span class="adw-label body-2"><strong>{{ user_profile.followed.count() }}</strong> Following</span>
                     </a>
                 </div>
@@ -245,7 +229,7 @@
                         </footer>
                         <div class="adw-card__actions card-secondary-actions">
                             {% from "_macros.html" import like_button_and_count %}
-                            {{ like_button_and_count(post, 'post', current_user, csrf_token()) }}
+                            {{ like_button_and_count(post, current_user, csrf_token()) }}
                         </div>
                     </article>
                     {% endfor %}
@@ -256,7 +240,7 @@
                 <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
                     <div class="adw-toggle-group">
                         {% if posts_pagination.has_prev %}
-                            <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=posts_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
+                            <a href="{{ url_for('profile.view_profile', username=user_profile.username, page=posts_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
                                 <span class="adw-icon icon-actions-go-previous-symbolic"></span>
                             </a>
                         {% else %}
@@ -270,7 +254,7 @@
                                 {% if page_num == posts_pagination.page %}
                                     <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
                                 {% else %}
-                                    <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                                    <a href="{{ url_for('profile.view_profile', username=user_profile.username, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
                             {% elif loop.index != 1 and loop.index != posts_pagination.pages + posts_pagination.iter_pages()|length %}
                                 <button class="adw-button flat" disabled>…</button>
@@ -278,7 +262,7 @@
                         {% endfor %}
 
                         {% if posts_pagination.has_next %}
-                             <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=posts_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
+                             <a href="{{ url_for('profile.view_profile', username=user_profile.username, page=posts_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
                                 <span class="adw-icon icon-actions-go-next-symbolic"></span>
                             </a>
                         {% else %}
@@ -306,9 +290,7 @@
             {% if comments_pagination and comments_pagination.items %}
                 <div class="adw-list-box">
                     {% for comment in comments_pagination.items %}
-                    {# Assuming comments_pagination now only contains comments with target_type='post' #}
-                    {% if comment.target_type == 'post' and comment.post %} {# Double check for safety; comment.post should exist if target_type is 'post' and target_id is valid #}
-                    <a href="{{ url_for('post.view_post', post_id=comment.target_id, _anchor='comment-' ~ comment.id) }}" class="adw-action-row activatable">
+                    <a href="{{ url_for('post.view_post', post_id=comment.post_id, _anchor='comment-' ~ comment.id) }}" class="adw-action-row activatable">
                         <div class="adw-action-row__text">
                             <span class="adw-action-row__title">Comment on post by {{ comment.post.author.full_name or comment.post.author.username }}</span>
                             <span class="adw-action-row__subtitle">"{{ comment.text | truncate(100, True) }}"</span>
@@ -318,7 +300,6 @@
                         </div>
                         <span class="adw-action-row__chevron"></span>
                     </a>
-                    {% endif %} {# Corrected endif placement #}
                     {% endfor %}
                 </div>
 
@@ -327,7 +308,7 @@
                 <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
                     <div class="adw-toggle-group">
                         {% if comments_pagination.has_prev %}
-                            <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=comments_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous comments page">
+                            <a href="{{ url_for('profile.view_profile', username=user_profile.username, comments_page=comments_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous comments page">
                                 <span class="adw-icon icon-actions-go-previous-symbolic"></span>
                             </a>
                         {% else %}
@@ -341,7 +322,7 @@
                                 {% if page_num == comments_pagination.page %}
                                     <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
                                 {% else %}
-                                    <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                                    <a href="{{ url_for('profile.view_profile', username=user_profile.username, comments_page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
                             {% elif loop.index != 1 and loop.index != comments_pagination.pages + comments_pagination.iter_pages()|length %}
                                 <button class="adw-button flat" disabled>…</button>
@@ -349,7 +330,7 @@
                         {% endfor %}
 
                         {% if comments_pagination.has_next %}
-                             <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=comments_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next comments page">
+                             <a href="{{ url_for('profile.view_profile', username=user_profile.username, comments_page=comments_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next comments page">
                                 <span class="adw-icon icon-actions-go-next-symbolic"></span>
                             </a>
                         {% else %}
@@ -382,32 +363,23 @@
                 </div>
                 <form method="POST" action="{{ url_for('profile.upload_gallery_photo') }}" enctype="multipart/form-data" class="gallery-upload-form">
                     {{ gallery_upload_form.hidden_tag() if gallery_upload_form else '' }} {# CSRF token #}
-                    <div class="adw-entry-row {{ 'has-error' if gallery_upload_form and gallery_upload_form.photos.errors else '' }}">
+                    <div class="adw-entry-row {{ 'has-error' if gallery_upload_form and gallery_upload_form.photo.errors else '' }}">
                         <div class="adw-entry-row-text-content">
-                            {# The label for the actual input is not strictly needed if it's visually hidden, but good for accessibility if it were ever shown #}
-                            <label for="{{ gallery_upload_form.photos.id if gallery_upload_form else 'gallery_photos_input_actual' }}" class="adw-entry-row-title visually-hidden">{{ gallery_upload_form.photos.label.text if gallery_upload_form else 'Photo Files' }}</label>
-                            <span class="adw-entry-row-title">{{ gallery_upload_form.photos.label.text if gallery_upload_form else 'Photo Files' }}</span> {# Display label text separately #}
-                            {% if gallery_upload_form and gallery_upload_form.photos.errors %}<span class="adw-entry-row-subtitle error-text">{{ gallery_upload_form.photos.errors|join(' ') }}</span>{% endif %}
+                            <label for="{{ gallery_upload_form.photo.id if gallery_upload_form else 'gallery_photo_input' }}" class="adw-entry-row-title">{{ gallery_upload_form.photo.label.text if gallery_upload_form else 'Photo File' }}</label>
+                            {% if gallery_upload_form and gallery_upload_form.photo.errors %}<span class="adw-entry-row-subtitle error-text">{{ gallery_upload_form.photo.errors|join(' ') }}</span>{% endif %}
                         </div>
-                        {# Visually hide the actual input but keep it for functionality. Ensure ID matches if label `for` is used. #}
-                        {{ gallery_upload_form.photos(class="visually-hidden", multiple="multiple", id=(gallery_upload_form.photos.id if gallery_upload_form else 'gallery_photos_input_actual')) if gallery_upload_form }}
-                        <button type="button" class="adw-button outlined" id="custom_gallery_photo_upload_button" aria-controls="{{ gallery_upload_form.photos.id if gallery_upload_form else 'gallery_photos_input_actual' }}">
-                            <span class="adw-icon icon-actions-document-open-symbolic"></span> Choose Files...
-                        </button>
-                    </div>
-                    <div id="gallery_selected_files_display" class="adw-list-box flat compact" style="margin: var(--spacing-xs) var(--spacing-m) var(--spacing-m) var(--spacing-m); display: none; max-height: 150px; overflow-y: auto;">
-                        {# Selected file names will be populated here by JS #}
+                        {{ gallery_upload_form.photo(class="adw-entry adw-entry-row-entry") if gallery_upload_form }}
                     </div>
                     {# Caption Textarea - Revised Structure #}
                     <div class="form-field-container {{ 'has-error' if gallery_upload_form and gallery_upload_form.caption.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);">
-                        <label for="{{ gallery_upload_form.caption.id if gallery_upload_form else 'gallery_caption_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.caption.label.text if gallery_upload_form else 'Caption (for all photos)' }}</label>
+                        <label for="{{ gallery_upload_form.caption.id if gallery_upload_form else 'gallery_caption_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.caption.label.text if gallery_upload_form else 'Caption' }}</label>
                         {% if gallery_upload_form and gallery_upload_form.caption.errors %}
                             <p class="adw-label caption error-text" style="margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.caption.errors|join(' ') }}</p>
                         {% endif %}
-                        {{ gallery_upload_form.caption(class="adw-entry", rows="2", placeholder="Optional caption for all photos in this batch...", style="width: 100%; min-height: 60px; box-sizing: border-box;") if gallery_upload_form }}
+                        {{ gallery_upload_form.caption(class="adw-entry", rows="2", placeholder="Optional caption...", style="width: 100%; min-height: 60px; box-sizing: border-box;") if gallery_upload_form }}
                     </div>
                    <div class="form-actions-end" style="padding: 0 var(--spacing-m) var(--spacing-m) var(--spacing-m);">
-                       {{ gallery_upload_form.submit(class="adw-button suggested-action", id="gallery_upload_submit_button") if gallery_upload_form }} {# Submit button label already changed in forms.py, added ID #}
+                       {{ gallery_upload_form.submit(class="adw-button suggested-action") if gallery_upload_form }}
                    </div>
                 </form>
             </div>
@@ -446,9 +418,9 @@
                     </div>
                     {% endfor %}
                 </div>
-                {% if total_gallery_photos > gallery_photos_preview|length %}
+                {% if total_gallery_photos > 0 %} {# Show view all button if there's at least one photo #}
                 <div class="adw-box justify-center" style="margin-top: var(--spacing-m);">
-                    <a href="{{ url_for('profile.view_gallery', user_id=user_profile.id) }}" class="adw-button">
+                    <a href="{{ url_for('profile.view_gallery', username=user_profile.username) }}" class="adw-button">
                         View All Photos ({{ total_gallery_photos }}) <span class="adw-icon icon-actions-go-next-symbolic"></span>
                     </a>
                 </div>
@@ -509,177 +481,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const galleryCommentPhotoIdInput = document.getElementById('gallery-comment-photo-id');
     const galleryCommentError = document.getElementById('gallery-comment-error');
     const placeholderComment = galleryPhotoCommentsList ? galleryPhotoCommentsList.querySelector('.placeholder-comment') : null;
-    const clickableGalleryPhotos = document.querySelectorAll('.clickable-gallery-photo'); // These are the thumbnails
-
-    const galleryImageLoader = document.getElementById('gallery-image-loader');
-    const galleryNavPrev = document.getElementById('gallery-nav-prev');
-    const galleryNavNext = document.getElementById('gallery-nav-next');
-    const galleryPhotoLikeContainer = document.getElementById('gallery-photo-like-section-container');
-
-    let allGalleryPhotoData = [];
-    let currentGalleryPhotoIndex = -1;
-
-    // Populate allGalleryPhotoData from the thumbnails on the page
-    function collectGalleryPhotoData() {
-        allGalleryPhotoData = Array.from(clickableGalleryPhotos).map((thumb, index) => ({
-            index: index,
-            src: thumb.dataset.fullsrc,
-            caption: thumb.dataset.caption,
-            id: thumb.dataset.photoid,
-            thumbnailElement: thumb // Keep a reference if needed
-        }));
-    }
-    collectGalleryPhotoData(); // Initial collection
-
-    function showImageLoading(show) {
-        if (galleryImageLoader) galleryImageLoader.style.display = show ? 'block' : 'none';
-        if (fullGalleryPhotoImg) fullGalleryPhotoImg.classList.toggle('loading', show);
-    }
-
-    function updateGalleryDialogNavButtons() {
-        if (!galleryNavPrev || !galleryNavNext) return;
-        if (allGalleryPhotoData.length <= 1) {
-            galleryNavPrev.style.display = 'none';
-            galleryNavNext.style.display = 'none';
-            return;
-        }
-        galleryNavPrev.style.display = (currentGalleryPhotoIndex > 0) ? 'block' : 'none';
-        galleryNavNext.style.display = (currentGalleryPhotoIndex < allGalleryPhotoData.length - 1) ? 'block' : 'none';
-    }
-
-    async function loadPhotoInDialog(photoData) {
-        if (!photoData || !fullGalleryPhotoImg || !galleryPhotoDialog.open) return;
-
-        showImageLoading(true);
-
-        // Preload image to wait for it to be ready
-        const tempImg = new Image();
-        tempImg.onload = () => {
-            fullGalleryPhotoImg.src = photoData.src;
-            fullGalleryPhotoImg.alt = photoData.caption || "Full-size gallery photo";
-            if (fullGalleryPhotoCaption) fullGalleryPhotoCaption.textContent = photoData.caption || '';
-            if (galleryCommentPhotoIdInput) galleryCommentPhotoIdInput.value = photoData.id;
-
-            fetchGalleryComments(photoData.id); // Fetch comments for the new photo
-            fetchAndDisplayLikeStatus(photoData.id); // Fetch and display like status
-            showImageLoading(false);
-            updateGalleryDialogNavButtons();
-        };
-        tempImg.onerror = () => {
-            console.error("Failed to load image:", photoData.src);
-            if (fullGalleryPhotoCaption) fullGalleryPhotoCaption.textContent = "Error loading image.";
-            if (galleryPhotoLikeContainer) galleryPhotoLikeContainer.innerHTML = ''; // Clear like section on error
-            // Optionally, display a placeholder or error image
-            fullGalleryPhotoImg.src = ""; // Clear src or set to a placeholder
-            showImageLoading(false);
-            updateGalleryDialogNavButtons(); // Still update nav, maybe allow navigation away
-        };
-        tempImg.src = photoData.src;
-    }
-
-    async function fetchAndDisplayLikeStatus(photoId) {
-        if (!galleryPhotoLikeContainer) return;
-        galleryPhotoLikeContainer.innerHTML = '<span class="adw-label caption">Loading likes...</span>'; // Placeholder
-
-        try {
-            // This endpoint needs to be created in photo_routes.py
-            const response = await fetch(`/photo/api/photo/${photoId}/like_status`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const likeData = await response.json(); // Expects { likes_count: N, has_liked: true/false }
-            renderLikeButton(photoId, likeData.likes_count, likeData.has_liked);
-        } catch (error) {
-            console.error('Error fetching like status:', error);
-            galleryPhotoLikeContainer.innerHTML = '<span class="adw-label caption error-text">Could not load like status.</span>';
-        }
-    }
-
-    function renderLikeButton(photoId, likesCount, hasLiked) {
-        if (!galleryPhotoLikeContainer) return;
-
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const actionUrl = hasLiked ?
-            `/photo/${photoId}/unlike` :
-            `/photo/${photoId}/like`;
-
-        const iconClass = hasLiked ? 'icon-actions-starred-symbolic' : 'icon-actions-star-symbolic';
-        const buttonClass = hasLiked ? 'adw-button small flat' : 'adw-button small flat suggested-action';
-        const ariaLabel = hasLiked ? 'Unlike photo' : 'Like photo';
-
-        galleryPhotoLikeContainer.innerHTML = `
-            <form action="${actionUrl}" method="POST" style="display: inline;" class="like-form photo-like-form">
-                <input type="hidden" name="csrf_token" value="${csrfToken}">
-                <button type="submit" class="${buttonClass} like-button" aria-label="${ariaLabel}">
-                    <span class="adw-icon ${iconClass}"></span>
-                </button>
-            </form>
-            <span class="adw-label caption like-count" style="margin-left: var(--spacing-xs);">${likesCount}</span>
-        `;
-
-        const form = galleryPhotoLikeContainer.querySelector('.photo-like-form');
-        if (form) {
-            form.addEventListener('submit', async function(event) {
-                event.preventDefault();
-                try {
-                    const response = await fetch(actionUrl, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': csrfToken,
-                            'Content-Type': 'application/json' // Though body is empty, API might expect it
-                        },
-                        // No body needed for these like/unlike actions if photo_id is in URL
-                    });
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-                    }
-                    const result = await response.json(); // Expects { status: 'success', likes_count: N, message: '...' }
-                                                        // and has_liked will be implicitly the opposite of current state
-                    renderLikeButton(photoId, result.likes_count, !hasLiked); // Update UI
-                } catch (error) {
-                    console.error('Error submitting like/unlike:', error);
-                    // Optionally display an error message to the user in the dialog
-                    const errorSpan = document.createElement('span');
-                    errorSpan.className = 'adw-label caption error-text';
-                    errorSpan.textContent = ` Error: ${error.message}`;
-                    galleryPhotoLikeContainer.appendChild(errorSpan);
-                    setTimeout(() => { if(errorSpan.parentNode) errorSpan.parentNode.removeChild(errorSpan); }, 3000);
-                }
-            });
-        }
-    }
-
-    function showNextGalleryPhoto() {
-        if (currentGalleryPhotoIndex < allGalleryPhotoData.length - 1) {
-            currentGalleryPhotoIndex++;
-            loadPhotoInDialog(allGalleryPhotoData[currentGalleryPhotoIndex]);
-        }
-    }
-
-    function showPrevGalleryPhoto() {
-        if (currentGalleryPhotoIndex > 0) {
-            currentGalleryPhotoIndex--;
-            loadPhotoInDialog(allGalleryPhotoData[currentGalleryPhotoIndex]);
-        }
-    }
-
-    if (galleryNavNext) galleryNavNext.addEventListener('click', showNextGalleryPhoto);
-    if (galleryNavPrev) galleryNavPrev.addEventListener('click', showPrevGalleryPhoto);
-
-    // Keyboard navigation for gallery dialog
-    function handleGalleryKeydown(event) {
-        if (!galleryPhotoDialog || !galleryPhotoDialog.isOpen()) return; // Check if dialog is open
-
-        if (event.key === 'ArrowRight') {
-            showNextGalleryPhoto();
-        } else if (event.key === 'ArrowLeft') {
-            showPrevGalleryPhoto();
-        } else if (event.key === 'Escape') {
-            galleryPhotoDialog.close(); // Close dialog on Escape
-        }
-    }
-
+    const clickableGalleryPhotos = document.querySelectorAll('.clickable-gallery-photo');
 
     // Helper function to format date (basic, can be improved)
     function formatCommentDate(isoString) {
@@ -742,41 +544,24 @@ document.addEventListener('DOMContentLoaded', function () {
         customElements.whenDefined('adw-dialog').then(() => {
             clickableGalleryPhotos.forEach(thumb => {
                 thumb.addEventListener('click', () => {
-                    // Find the index of the clicked thumbnail in our collected data
-                    const clickedPhotoData = allGalleryPhotoData.find(p => p.thumbnailElement === thumb);
-                    if (clickedPhotoData) {
-                        currentGalleryPhotoIndex = clickedPhotoData.index;
-                        loadPhotoInDialog(clickedPhotoData); // Load the clicked photo
-                        galleryPhotoDialog.open(); // Open the dialog
-                        document.addEventListener('keydown', handleGalleryKeydown); // Add keydown listener when dialog opens
-                    } else {
-                        console.error("Clicked photo data not found in collected list.");
-                        // Fallback to original behavior if data not found (should not happen)
-                        const photoUrl = thumb.dataset.fullsrc;
-                        const caption = thumb.dataset.caption;
-                        const photoId = thumb.dataset.photoid;
-                        if (photoUrl && photoId) {
-                            fullGalleryPhotoImg.src = photoUrl; // This would bypass loading indicator
-                            if (fullGalleryPhotoCaption) fullGalleryPhotoCaption.textContent = caption || '';
-                            if (galleryCommentPhotoIdInput) galleryCommentPhotoIdInput.value = photoId;
-                            fetchGalleryComments(photoId);
-                            galleryPhotoDialog.open();
-                            document.addEventListener('keydown', handleGalleryKeydown);
+                    const photoUrl = thumb.dataset.fullsrc;
+                    const caption = thumb.dataset.caption;
+                    const photoId = thumb.dataset.photoid;
+
+                    if (photoUrl && photoId) {
+                        fullGalleryPhotoImg.src = photoUrl;
+                        fullGalleryPhotoImg.alt = caption || "Full-size gallery photo";
+                        if (fullGalleryPhotoCaption) {
+                             fullGalleryPhotoCaption.textContent = caption || '';
                         }
+                        if (galleryCommentPhotoIdInput) {
+                            galleryCommentPhotoIdInput.value = photoId;
+                        }
+                        fetchGalleryComments(photoId);
+                        galleryPhotoDialog.open();
                     }
                 });
             });
-
-            // Remove keydown listener when dialog closes
-            if (galleryPhotoDialog) {
-                galleryPhotoDialog.addEventListener('close', () => { // Assuming 'close' event is standard for <adw-dialog>
-                    document.removeEventListener('keydown', handleGalleryKeydown);
-                    // Hide nav buttons when dialog closes
-                    if(galleryNavPrev) galleryNavPrev.style.display = 'none';
-                    if(galleryNavNext) galleryNavNext.style.display = 'none';
-                });
-            }
-
         }).catch(error => {
             console.error("profile.html: Failed to initialize gallery photo dialog; adw-dialog definition not found.", error);
         });
@@ -844,181 +629,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
-
-    // Gallery Photo Upload Enhancement
-    const galleryUploadForm = document.querySelector('form.gallery-upload-form');
-    const customUploadButton = document.getElementById('custom_gallery_photo_upload_button');
-    {# Determine the actual file input ID carefully based on how WTForms generates it or if gallery_upload_form is None #}
-    {% if gallery_upload_form and gallery_upload_form.photos %}
-    const actualFileInput = document.getElementById('{{ gallery_upload_form.photos.id }}');
-    {% else %}
-    const actualFileInput = document.getElementById('gallery_photos_input_actual'); // Fallback ID
-    {% endif %}
-    const selectedFilesDisplay = document.getElementById('gallery_selected_files_display');
-    const gallerySubmitButton = document.getElementById('gallery_upload_submit_button');
-
-    if (customUploadButton && actualFileInput && selectedFilesDisplay) {
-        customUploadButton.addEventListener('click', () => {
-            actualFileInput.click(); // Trigger click on the hidden file input
-        });
-
-        actualFileInput.addEventListener('change', () => {
-            if (actualFileInput.files && actualFileInput.files.length > 0) {
-                selectedFilesDisplay.innerHTML = ''; // Clear previous selections
-                selectedFilesDisplay.style.display = 'block'; // Show the list box
-                Array.from(actualFileInput.files).forEach(file => {
-                    const fileRow = document.createElement('div');
-                    fileRow.classList.add('adw-action-row');
-                    fileRow.style.padding = 'var(--spacing-xxs) var(--spacing-xs)'; // Make it more compact
-
-                    const fileNameSpan = document.createElement('span');
-                    fileNameSpan.classList.add('adw-action-row-title');
-                    fileNameSpan.textContent = file.name;
-                    fileRow.appendChild(fileNameSpan);
-
-                    const fileSizeSpan = document.createElement('span');
-                    fileSizeSpan.classList.add('adw-action-row-subtitle');
-                    fileSizeSpan.textContent = `(${(file.size / 1024).toFixed(1)} KB)`;
-                    fileRow.appendChild(fileSizeSpan);
-
-                    selectedFilesDisplay.appendChild(fileRow);
-                });
-            } else {
-                selectedFilesDisplay.innerHTML = '';
-                selectedFilesDisplay.style.display = 'none'; // Hide if no files selected
-            }
-        });
-    }
-
-    if (galleryUploadForm && gallerySubmitButton) {
-        galleryUploadForm.addEventListener('submit', () => {
-            // Ensure files are selected before disabling and showing spinner,
-            // otherwise client-side validation (like 'required') might be bypassed visually.
-            // HTML5 validation should prevent form submission if 'required' is on the input.
-            // If using JS to check, do it here. For now, assume HTML5 'required' on original input works.
-            if (actualFileInput && actualFileInput.files && actualFileInput.files.length === 0 && actualFileInput.hasAttribute('required')) {
-                 // Optionally provide a visual cue here if the browser doesn't, though standard validation should handle it.
-                return; // Don't change button state if client-side validation fails early.
-            }
-
-            gallerySubmitButton.disabled = true;
-            // Attempt to use an Adwaita-like spinner.
-            // If adw-spinner and micro classes are not defined in the main CSS, this might not display correctly.
-            // A simple text change is a safe fallback.
-            gallerySubmitButton.innerHTML = '<span class="adw-spinner micro" role="status" aria-hidden="true"></span> Uploading...';
-            // Fallback if spinner class is not effective:
-            // gallerySubmitButton.textContent = 'Uploading...';
-        });
-    }
 });
 </script>
-
-{# TODO: Move this to a global CSS file #}
-<style>
-    .visually-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-    }
-    .adw-spinner.micro {
-        display: inline-block;
-        width: 1em; /* Adjust size as needed */
-        height: 1em; /* Adjust size as needed */
-        border: 2px solid currentColor; /* Use current text color for spinner */
-        border-right-color: transparent; /* Creates the spinning effect */
-        border-radius: 50%;
-        animation: adw-spinner-spin .75s linear infinite;
-        vertical-align: text-bottom; /* Aligns spinner nicely with text */
-        margin-right: .5em; /* Space between spinner and text */
-    }
-    @keyframes adw-spinner-spin {
-        to { transform: rotate(360deg); }
-    }
-
-    /* Styles for profile gallery grid */
-    .profile-gallery-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: var(--spacing-m, 16px);
-        margin-top: var(--spacing-m, 16px);
-    }
-
-    .gallery-photo-card {
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        border-radius: var(--radius-l); /* Match Adwaita card rounding */
-    }
-
-    .gallery-photo-image {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-        background-color: var(--img-bg-color, var(--secondary-bg-color, #f0f0f0)); /* Use theme variable or fallback */
-        /* Removed border-radius from here, apply to parent .gallery-photo-card or .adw-card */
-    }
-    .adw-card.gallery-photo-card .adw-card__content.gallery-photo-caption { /* Target more specifically if using adw-card structure */
-        padding: var(--spacing-s);
-        /* text-align: center; */ /* Optional */
-    }
-
-
-    /* Styles for gallery dialog navigation */
-    #gallery-photo-dialog .dialog-image-content {
-        /* Ensure position:relative is set on this element (done inline for now) */
-    }
-    .gallery-nav-button {
-        position: absolute;
-        top: calc(35% - 16px); /* Vertically center on the 70vh image approx, minus half button height */
-        transform: translateY(-50%);
-        background-color: var(--secondary-bg-color-alpha-75, rgba(0,0,0,0.3)); /* Use theme variable with alpha or fallback */
-        color: var(--primary-fg-color, white); /* Use theme variable or fallback */
-        border: none;
-        /* padding: var(--spacing-s); already on adw-button */
-        cursor: pointer;
-        z-index: 10; /* Above the image */
-        /* border-radius: var(--radius-full); already on adw-button circular */
-        /* font-size: 1.5em; /* Handled by icon size */
-        line-height: 1;
-        width: 32px; /* Explicit size for circular button */
-        height: 32px;
-        box-shadow: var(--shadow-s);
-    }
-    .gallery-nav-button.prev {
-        left: var(--spacing-m);
-    }
-    .gallery-nav-button.next {
-        right: var(--spacing-m);
-    }
-    .gallery-nav-button:hover {
-        background-color: var(--secondary-bg-color-alpha-90, rgba(0,0,0,0.6)); /* Darker on hover */
-    }
-    .gallery-nav-button .adw-icon {
-         /* Adwaita icons should adapt, but if they are SVG and need specific color: */
-        /* fill: currentColor; */
-    }
-
-    /* Spinner for image loading in dialog */
-    #gallery-image-loader.adw-spinner.large {
-        width: 48px; /* Example size */
-        height: 48px;
-        border-width: 4px;
-         /* Ensure it's above the semi-transparent image during loading */
-        z-index: 5; /* Below nav buttons, above image */
-    }
-    #full-gallery-photo-img.loading {
-        opacity: 0.3; /* Make image semi-transparent while its replacement loads */
-    }
-
-    .form-actions-end {
-        text-align: right; /* Aligns inline-block or inline children to the right */
-        margin-top: var(--spacing-m); /* Add some default margin if needed */
-    }
-</style>
 {% endblock %}
