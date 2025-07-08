@@ -174,6 +174,9 @@ def create_app(config_name=None):
     from .routes.photo_routes import photo_bp
     app.register_blueprint(photo_bp) # prefix is /photo from blueprint definition
 
+    from .routes.api_routes import api_bp # Import the new API blueprint
+    app.register_blueprint(api_bp) # Register it, prefix is /api/v1 from its definition
+
     # Error handlers
     @app.errorhandler(403)
     def forbidden_page(error):

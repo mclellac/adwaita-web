@@ -51,6 +51,7 @@ ALLOWED_EXTENSIONS: ['png', 'jpg', 'jpeg', 'gif', 'webp']
 # These are just examples; actual site settings are managed in the DB via SiteSetting model.
 # DEFAULT_SITE_TITLE: "My Awesome Flask App"
 # DEFAULT_MAINTENANCE_MODE: False
+DEFAULT_AVATAR_PATH: "img/default_avatar.png" # Default path for avatars if user has no profile photo
 
 # User list for setup_db.py --config (optional)
 # See app-demo/AGENTS.md for details on the USERS structure and setup_db.py user creation.
