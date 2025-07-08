@@ -49,7 +49,7 @@
             </footer>
                         <div class="adw-card__actions card-secondary-actions"> {# New container for likes etc. #}
                             {% from "_macros.html" import like_button_and_count %}
-                            {{ like_button_and_count(post, current_user, csrf_token()) }}
+                            {{ like_button_and_count(post, current_user) }}
                             {# Add other actions like comments count link here if desired #}
                         </div>
         </article>
