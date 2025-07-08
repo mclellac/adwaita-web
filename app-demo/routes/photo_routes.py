@@ -79,20 +79,21 @@ def post_photo_comment(photo_id):
                             user_id=mentioned_user_obj.id,
                             actor_id=current_user.id,
                             type='mention_in_photo_comment', # Specific type for photo comments
-                            related_comment_id=new_comment.id # Link to the photo comment
+                                # related_comment_id=new_comment.id # Old field
+                                target_type='photo_comment',      # New field - target is the photo comment
+                                target_id=new_comment.id          # New field
                         ).first()
                         if not existing_notif:
                             mention_notification = Notification(
                                 user_id=mentioned_user_obj.id,
                                 actor_id=current_user.id,
                                 type='mention_in_photo_comment',
-                                # related_post_id could be omitted or link to a "gallery view" if that exists
-                                # For now, linking to the photo's owner's profile might be an option, or just the comment.
-                                # Let's add related_photo_id if we add such a field to Notification model,
-                                # or just use related_comment_id.
-                                related_comment_id=new_comment.id
-                                # If you want to link to the photo itself, you might need a related_photo_id field in Notification model
-                                # Or, the frontend can construct context from related_comment_id -> photo_comment.photo
+                                    target_type='photo_comment', # Target is the photo comment itself
+                                    target_id=new_comment.id
+                                    # We could add related_photo_id if we decide to keep specific foreign keys
+                                    # For now, the template will use get_target_object() and navigate from there.
+                                    # Example: target_object = notification.get_target_object() (which is a PhotoComment)
+                                    # then photo = target_object.photo
                             )
                             db.session.add(mention_notification)
                             new_mentions_created = True

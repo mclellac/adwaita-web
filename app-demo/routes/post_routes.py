@@ -55,10 +55,18 @@ def view_post(post_id):
                     user_id=post.author.id,
                     actor_id=current_user.id,
                     type='new_comment',
-                    related_post_id=post.id,
-                    related_comment_id=comment.id # This will be None until flush/commit if comment is new
-                                                  # SQLAlchemy handles this; it will use the ID after insert.
+                    # related_post_id=post.id, # Old field
+                    # related_comment_id=comment.id # Old field
+                    target_type='comment', # New field
+                    target_id=comment.id   # New field (SQLAlchemy will handle getting ID after insert)
                 )
+                # Add context for the notification if comment is on a post
+                # This might be better handled by ensuring Notification.related_post_id is still populated
+                # if the primary target is a comment on a post.
+                # For now, the migration script handles related_post_id based on existing data.
+                # New notifications should primarily use target_type/target_id.
+                # We can still populate related_post_id for context if the target is a comment.
+                notification.related_post_id = post.id # Keep for context if target is comment
                 db.session.add(notification)
                 current_app.logger.info(f"Notification created for user {post.author.username} about new comment by {current_user.username} on post {post.id}.")
 
@@ -67,9 +75,13 @@ def view_post(post_id):
             activity = Activity(
                 user_id=current_user.id, # The user who commented
                 type='commented_on_post',
-                target_post_id=post.id,
-                target_comment_id=comment.id # Will be populated after flush/commit
+                # target_post_id=post.id, # Old field
+                # target_comment_id=comment.id # Old field
+                target_type='comment', # New field
+                target_id=comment.id   # New field
             )
+            # Contextual: if activity is about a comment on a post, also store post_id
+            activity.target_post_id = post.id # Keep for context
             db.session.add(activity)
             current_app.logger.info(f"Activity 'commented_on_post' logged for user {current_user.username} on post {post.id}, comment ID pending (will be {comment.id}).")
 
@@ -100,9 +112,13 @@ def view_post(post_id):
                                     user_id=mentioned_user_obj.id, # Use .id from User object
                                     actor_id=current_user.id,
                                     type='mention_in_comment',
-                                    related_post_id=post.id,
-                                    related_comment_id=comment.id
+                                # related_post_id=post.id, # Old field
+                                # related_comment_id=comment.id # Old field
+                                target_type='comment', # Primary target is the comment where mention occurs
+                                target_id=comment.id
                                 )
+                            # Contextual post_id for mentions in comments on posts
+                            mention_notification.related_post_id = post.id # Keep for context
                                 db.session.add(mention_notification)
                                 new_mentions_created_comment = True
                                 current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in comment {comment.id}")
@@ -168,7 +184,9 @@ def create_post():
             activity = Activity(
                 user_id=current_user.id,
                 type='created_post',
-                target_post_id=new_post.id # Will be populated after flush/commit
+                # target_post_id=new_post.id # Old field
+                target_type='post',       # New field
+                target_id=new_post.id     # New field
             )
             db.session.add(activity)
             current_app.logger.info(f"Activity 'created_post' logged for user {current_user.username}, post ID pending assignment (will be {new_post.id}).")
@@ -193,14 +211,18 @@ def create_post():
                                 user_id=mentioned_user_obj.id,
                                 actor_id=current_user.id,
                                 type='mention_in_post',
-                                related_post_id=new_post.id
+                                # related_post_id=new_post.id # Old field
+                                target_type='post',         # New field
+                                target_id=new_post.id       # New field
                             ).first()
                             if not existing_notif:
                                 mention_notification = Notification(
                                     user_id=mentioned_user_obj.id,
                                     actor_id=current_user.id,
                                     type='mention_in_post',
-                                    related_post_id=new_post.id
+                                    # related_post_id=new_post.id # Old field
+                                    target_type='post',         # New field
+                                    target_id=new_post.id       # New field
                                 )
                                 db.session.add(mention_notification)
                                 new_mentions_created_post = True
@@ -271,7 +293,9 @@ def edit_post(post_id):
                                 user_id=mentioned_user_obj.id, # Use .id from User object
                                 actor_id=current_user.id,
                                 type='mention_in_post',
-                                related_post_id=post.id
+                                # related_post_id=post.id # Old field
+                                target_type='post',     # New field
+                                target_id=post.id       # New field
                             ).first() # This check is simplistic; doesn't account for multiple edits creating multiple notifs over time.
                                       # A real system might only notify once per post, or if a user is newly added.
 
@@ -280,7 +304,9 @@ def edit_post(post_id):
                                     user_id=mentioned_user_obj.id, # Use .id from User object
                                     actor_id=current_user.id,
                                     type='mention_in_post',
-                                    related_post_id=post.id
+                                    # related_post_id=post.id # Old field
+                                    target_type='post',     # New field
+                                    target_id=post.id       # New field
                                 )
                                 db.session.add(mention_notification)
                                 new_mentions_created = True
@@ -399,11 +425,19 @@ def delete_comment(comment_id): # Renamed
             current_app.logger.debug(f"Deleted flags for comment ID: {comment_id}.")
 
             # Manually delete notifications associated with this comment
-            Notification.query.filter_by(related_comment_id=comment.id).delete(synchronize_session=False)
+            # Also consider notifications where this comment was the target_id and target_type='comment'
+            Notification.query.filter(
+                (Notification.related_comment_id == comment.id) |
+                ((Notification.target_type == 'comment') & (Notification.target_id == comment.id))
+            ).delete(synchronize_session=False)
             current_app.logger.debug(f"Deleted notifications for comment ID: {comment_id}.")
 
             # Manually delete activities associated with this comment
-            Activity.query.filter_by(target_comment_id=comment.id).delete(synchronize_session=False)
+            # Also consider activities where this comment was the target_id and target_type='comment'
+            Activity.query.filter(
+                (Activity.target_comment_id == comment.id) |
+                ((Activity.target_type == 'comment') & (Activity.target_id == comment.id))
+            ).delete(synchronize_session=False)
             current_app.logger.debug(f"Deleted activities for comment ID: {comment_id}.")
 
             db.session.delete(comment)
@@ -514,7 +548,9 @@ def like_post_route(post_id):
                     user_id=post.author.id,
                     actor_id=current_user.id,
                     type='new_like',
-                    related_post_id=post.id
+                    # related_post_id=post.id # Old field
+                    target_type='post',     # New field
+                    target_id=post.id       # New field
                 )
                 db.session.add(notification)
                 current_app.logger.info(f"Notification created for user {post.author.username} about new like on post {post.id} by {current_user.username}.")
@@ -524,7 +560,9 @@ def like_post_route(post_id):
             activity = Activity(
                 user_id=current_user.id, # The user who liked the post
                 type='liked_post',
-                target_post_id=post.id
+                # target_post_id=post.id # Old field
+                target_type='post',    # New field
+                target_id=post.id      # New field
             )
             db.session.add(activity)
             current_app.logger.info(f"Activity 'liked_post' logged for user {current_user.username} on post {post.id}.")
