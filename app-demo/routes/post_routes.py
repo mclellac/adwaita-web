@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from datetime import datetime, timezone
 
 from ..models import Post, Category, Tag, Comment, CommentFlag, Notification, Activity # Added Notification, Activity
-from ..forms import PostForm, CommentForm, DeleteCommentForm, DeletePostForm, FlagCommentForm
+from ..forms import PostForm, CommentForm, DeleteCommentForm, DeletePostForm, FlagCommentForm, LikeForm, UnlikeForm
 from .. import db
 from ..utils import flash_form_errors_util, update_post_relations_util, extract_mentions # Added extract_mentions
 
@@ -533,46 +533,58 @@ def posts_by_tag(tag_slug): # Renamed
 @post_bp.route('/post/<int:post_id>/like', methods=['POST'])
 @login_required
 def like_post_route(post_id):
-    post = Post.query.get_or_404(post_id)
-    if not post.is_published and post.user_id != current_user.id: # Can't like unpublished posts unless own
-        abort(404)
+    form = LikeForm()
+    post = Post.query.get_or_404(post_id) # Get post early for context even if form fails
 
-    if current_user.has_liked_post(post):
-        flash('You have already liked this post.', 'info')
-    else:
-        if current_user.like_post(post):
-            # Create notification for the post author, if not self-like
-            if post.author != current_user:
-                from ..models import Notification # Local import
-                notification = Notification(
-                    user_id=post.author.id,
-                    actor_id=current_user.id,
-                    type='new_like',
-                    # related_post_id=post.id # Old field
-                    target_type='post',     # New field
-                    target_id=post.id       # New field
-                )
-                db.session.add(notification)
-                current_app.logger.info(f"Notification created for user {post.author.username} about new like on post {post.id} by {current_user.username}.")
+    if form.validate_on_submit():
+        if not post.is_published and post.user_id != current_user.id: # Can't like unpublished posts unless own
+            current_app.logger.warning(f"User {current_user.username} attempt to like non-published post {post_id} they don't own.")
+            abort(404)
 
-            # Create Activity entry for new like
-            from ..models import Activity # Local import
-            activity = Activity(
-                user_id=current_user.id, # The user who liked the post
-                type='liked_post',
-                # target_post_id=post.id # Old field
-                target_type='post',    # New field
-                target_id=post.id      # New field
-            )
-            db.session.add(activity)
-            current_app.logger.info(f"Activity 'liked_post' logged for user {current_user.username} on post {post.id}.")
-
-            db.session.commit()
-            flash('Post liked!', 'toast_success')
-            current_app.logger.info(f"User {current_user.username} liked post {post_id}.")
+        if current_user.has_liked_post(post):
+            flash('You have already liked this post.', 'info')
         else:
-            flash('Could not like post. An unexpected error occurred.', 'danger')
-            db.session.rollback()
+            try:
+                if current_user.like_post(post):
+                    # Create notification for the post author, if not self-like
+                    if post.author != current_user:
+                        from ..models import Notification # Local import
+                        notification = Notification(
+                            user_id=post.author.id,
+                            actor_id=current_user.id,
+                            type='new_like',
+                            target_type='post',
+                            target_id=post.id
+                        )
+                        db.session.add(notification)
+                        current_app.logger.info(f"Notification created for user {post.author.username} about new like on post {post.id} by {current_user.username}.")
+
+                    # Create Activity entry for new like
+                    from ..models import Activity # Local import
+                    activity = Activity(
+                        user_id=current_user.id, # The user who liked the post
+                        type='liked_post',
+                        target_type='post',
+                        target_id=post.id
+                    )
+                    db.session.add(activity)
+                    current_app.logger.info(f"Activity 'liked_post' logged for user {current_user.username} on post {post.id}.")
+
+                    db.session.commit()
+                    flash('Post liked!', 'toast_success')
+                    current_app.logger.info(f"User {current_user.username} liked post {post_id}.")
+                else:
+                    # This else branch for current_user.like_post(post) might be redundant if it always returns True or raises
+                    flash('Could not like post. An unexpected error occurred.', 'danger')
+                    db.session.rollback() # Rollback if like_post indicated failure but didn't raise
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Error during like operation for post {post_id} by user {current_user.username}: {e}", exc_info=True)
+                flash('An error occurred while trying to like the post. Please try again.', 'danger')
+    else:
+        current_app.logger.warning(f"LikeForm validation failed for post {post_id}, user {current_user.username}. Errors: {form.errors}")
+        # flash_form_errors_util(form) # This might be too verbose for a simple like button
+        flash('Could not like post. Invalid request or session expired.', 'danger')
 
     return redirect(request.referrer or url_for('post.view_post', post_id=post_id))
 
@@ -580,18 +592,30 @@ def like_post_route(post_id):
 @post_bp.route('/post/<int:post_id>/unlike', methods=['POST'])
 @login_required
 def unlike_post_route(post_id):
-    post = Post.query.get_or_404(post_id)
-    # No need to check is_published here, can unlike any post they previously liked
+    form = UnlikeForm()
+    post = Post.query.get_or_404(post_id) # Get post early
 
-    if not current_user.has_liked_post(post):
-        flash('You have not liked this post yet.', 'info')
-    else:
-        if current_user.unlike_post(post):
-            db.session.commit()
-            flash('Post unliked.', 'toast_success')
-            current_app.logger.info(f"User {current_user.username} unliked post {post_id}.")
+    if form.validate_on_submit():
+        # No need to check is_published here, can unlike any post they previously liked
+        if not current_user.has_liked_post(post):
+            flash('You have not liked this post yet.', 'info')
         else:
-            flash('Could not unlike post. An unexpected error occurred.', 'danger')
-            db.session.rollback()
+            try:
+                if current_user.unlike_post(post):
+                    db.session.commit()
+                    flash('Post unliked.', 'toast_success')
+                    current_app.logger.info(f"User {current_user.username} unliked post {post_id}.")
+                else:
+                    # This else branch for current_user.unlike_post(post) might be redundant
+                    flash('Could not unlike post. An unexpected error occurred.', 'danger')
+                    db.session.rollback() # Rollback if unlike_post indicated failure
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Error during unlike operation for post {post_id} by user {current_user.username}: {e}", exc_info=True)
+                flash('An error occurred while trying to unlike the post. Please try again.', 'danger')
+    else:
+        current_app.logger.warning(f"UnlikeForm validation failed for post {post_id}, user {current_user.username}. Errors: {form.errors}")
+        # flash_form_errors_util(form)
+        flash('Could not unlike post. Invalid request or session expired.', 'danger')
 
     return redirect(request.referrer or url_for('post.view_post', post_id=post_id))

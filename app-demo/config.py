@@ -102,7 +102,7 @@ config_by_name = {
 class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # Use in-memory SQLite for tests
-    WTF_CSRF_ENABLED = False  # Disable CSRF protection for tests
+    WTF_CSRF_ENABLED = True  # ENABLE CSRF protection for tests
     SECRET_KEY = 'test-secret-key' # Explicit test secret key
     MAIL_SUPPRESS_SEND = True # Do not send emails during tests
     # Ensure UPLOAD_FOLDER and GALLERY_UPLOAD_FOLDER are set if needed by tests,
