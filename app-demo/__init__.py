@@ -8,16 +8,19 @@ from flask_login import LoginManager, current_user
 from flask_wtf import CSRFProtect
 from markupsafe import Markup
 
+from flask_mail import Mail # Import Flask-Mail
+
 # Initialize extensions
 db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
+mail = Mail() # Initialize Mail instance
 
 # Import models at the module level so they are registered with SQLAlchemy
 # and accessible via the package for scripts like setup_db.py
 from . import models # This will import app-demo/models.py
 
-def create_app(config_name=None):
+def create_app(config_name=None, yaml_config_override=None): # Added yaml_config_override
     app = Flask(__name__, instance_relative_config=True)
 
     # Load configuration
@@ -30,8 +33,16 @@ def create_app(config_name=None):
         app_config = config_by_name.get(flask_env, DevelopmentConfig)
     app.config.from_object(app_config)
 
+    # Apply overrides from YAML config if provided, before logging or extension init
+    if yaml_config_override and isinstance(yaml_config_override, dict):
+        for key, value in yaml_config_override.items():
+            app.config[key.upper()] = value # Flask config keys are typically uppercase
+            # Consider adding a debug log here if needed, but logger might not be set up yet.
+            # print(f"DEBUG (pre-log): Overriding from YAML in create_app: {key.upper()} = {value}")
+
     # Runtime check for insecure SECRET_KEY in production
-    if isinstance(app_config, ProductionConfig) and app.config.get('SECRET_KEY') == 'a_default_very_secret_key_for_development_only_CHANGE_ME':
+    if isinstance(app_config, ProductionConfig) and app.config.get('SECRET_KEY') == 'a_default_very_secret_key_for_development_only_CHANGE_ME' \
+       and not (yaml_config_override and yaml_config_override.get('SECRET_KEY') != 'a_default_very_secret_key_for_development_only_CHANGE_ME'):
         # Ensure app.logger is available if this check is very early or app_config is basic object
         # However, logger is configured a bit later. This check should be fine here.
         app.logger.critical("SECURITY WARNING: Running in PRODUCTION mode with the DEFAULT INSECURE SECRET_KEY. "
@@ -69,8 +80,29 @@ def create_app(config_name=None):
 
     app.logger.info(f"Starting Adwaita Web Demo with config: {type(app_config).__name__}")
     app.logger.info(f"Database URI configured to: {Config.get_log_db_uri()}") # Use static method from Config
-    app.logger.info(f"Upload folder set to: {app.config['UPLOAD_FOLDER']}")
 
+    # Ensure upload directories exist within the static folder.
+    # app.config['UPLOAD_FOLDER'] and app.config['GALLERY_UPLOAD_FOLDER'] should hold paths
+    # relative to the static directory, e.g., "uploads/profile_pics".
+
+    profile_upload_path_relative = app.config.get('UPLOAD_FOLDER', 'uploads/profile_pics')
+    profile_upload_path_abs = os.path.join(app.static_folder, profile_upload_path_relative)
+    try:
+        os.makedirs(profile_upload_path_abs, exist_ok=True)
+        app.logger.info(f"Profile upload directory ensured at: {profile_upload_path_abs}")
+    except OSError as e:
+        app.logger.error(f"Could not create profile upload directory {profile_upload_path_abs}: {e}")
+
+    gallery_upload_path_relative = app.config.get('GALLERY_UPLOAD_FOLDER', 'uploads/gallery_photos')
+    gallery_upload_path_abs = os.path.join(app.static_folder, gallery_upload_path_relative)
+    try:
+        os.makedirs(gallery_upload_path_abs, exist_ok=True)
+        app.logger.info(f"Gallery upload directory ensured at: {gallery_upload_path_abs}")
+    except OSError as e:
+        app.logger.error(f"Could not create gallery upload directory {gallery_upload_path_abs}: {e}")
+
+    app.logger.info(f"Profile upload path (relative to static): {profile_upload_path_relative}")
+    app.logger.info(f"Gallery upload path (relative to static): {gallery_upload_path_relative}")
 
     # Initialize Flask extensions
     db.init_app(app)
@@ -78,6 +110,7 @@ def create_app(config_name=None):
     login_manager.login_view = 'auth.login' # Blueprint.route_name
     login_manager.login_message_category = 'info'
     csrf.init_app(app)
+    mail.init_app(app) # Initialize Flask-Mail with the app
 
     # Models are imported at the module level now, no need to re-import here
     # Ensure they are registered with SQLAlchemy (which happens when models.py is imported)

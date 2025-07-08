@@ -2,8 +2,10 @@ from . import db  # Import db from __init__.py
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import desc, or_, select, func
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta # Added timedelta
 from .utils import generate_slug_util # Import the renamed utility
+import jwt # For token generation
+from flask import current_app # For accessing app config (SECRET_KEY)
 
 # Models (Copied from app.py, generate_slug replaced with generate_slug_util)
 class User(UserMixin, db.Model):
@@ -46,7 +48,10 @@ class User(UserMixin, db.Model):
         order_by=lambda: desc(UserPhoto.uploaded_at) # Use lambda for UserPhoto ref
     )
     # Relationship for posts liked by this user
-    liked_posts = db.relationship('PostLike', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    # Renamed from liked_posts to post_likes for clarity with PostLike model name
+    post_likes = db.relationship('PostLike', foreign_keys='PostLike.user_id',
+                                 backref='user', lazy='dynamic',
+                                 cascade='all, delete-orphan')
     notifications = db.relationship('Notification',
                                     foreign_keys='Notification.user_id',
                                     backref='user', lazy='dynamic',
@@ -106,6 +111,38 @@ class User(UserMixin, db.Model):
 
     def has_liked_post(self, post):
         return PostLike.query.filter_by(user_id=self.id, post_id=post.id).count() > 0
+
+    def get_reset_password_token(self, expires_in_seconds=1800): # Default 30 minutes
+        """Generates a password reset token."""
+        token = jwt.encode(
+            {
+                'reset_password_user_id': self.id,
+                'exp': datetime.now(timezone.utc) + timedelta(seconds=expires_in_seconds)
+            },
+            current_app.config['SECRET_KEY'],
+            algorithm='HS256'
+        )
+        return token
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        """Verifies the password reset token and returns the user if valid."""
+        try:
+            decoded_token = jwt.decode(
+                token,
+                current_app.config['SECRET_KEY'],
+                algorithms=['HS256']
+            )
+            user_id = decoded_token.get('reset_password_user_id')
+            if user_id is None:
+                return None # Token is invalid or doesn't have the expected payload
+            return User.query.get(user_id)
+        except jwt.ExpiredSignatureError:
+            current_app.logger.warning("Password reset token expired.")
+            return None # Token has expired
+        except jwt.InvalidTokenError:
+            current_app.logger.warning("Invalid password reset token.")
+            return None # Token is invalid for other reasons
 
 # Association table for the follow relationship
 class FollowerLink(db.Model):
@@ -200,8 +237,14 @@ class Post(db.Model):
         order_by=lambda: desc(Comment.created_at) # Use lambda for Comment ref
     )
     # Relationship for likes on this post
-    likers = db.relationship('PostLike', backref='post', lazy='dynamic', cascade='all, delete-orphan')
+    # Renamed from likers to likes for consistency with PostLike model
+    likes = db.relationship('PostLike', backref='post', lazy='dynamic',
+                            cascade='all, delete-orphan')
 
+    @property
+    def like_count(self):
+        """Returns the number of likes for this post."""
+        return self.likes.count() # Efficient way to count related items
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -291,8 +334,8 @@ Comment.is_flagged_active = db.column_property(
 class PostLike(db.Model):
     __tablename__ = 'post_like'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False)
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     # Add a unique constraint for (user_id, post_id)

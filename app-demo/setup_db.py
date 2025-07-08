@@ -221,31 +221,37 @@ if __name__ == "__main__":
 
     print("Starting database setup...")
 
-    # Instantiate the app using the factory
-    print("DEBUG: About to call create_app()")
-    app = create_app() # This loads default/env configurations
-    print("DEBUG: create_app() returned")
-
-    # Override config with YAML file if provided
+    loaded_yaml_config = None
     if args.config:
-        print(f"DEBUG: --config flag provided. Attempting to load config from {args.config}")
+        print(f"DEBUG: --config flag provided. Attempting to load config from {args.config} before app creation.")
         try:
             with open(args.config, 'r') as f:
-                yaml_config = yaml.safe_load(f)
-            if yaml_config:
-                for key, value in yaml_config.items():
-                    app.config[key.upper()] = value # Flask config keys are typically uppercase
-                    print(f"DEBUG: Overriding config: {key.upper()} = {value}")
-                print(f"Successfully loaded and applied configuration from {args.config}")
+                loaded_yaml_config = yaml.safe_load(f)
+            if loaded_yaml_config:
+                print(f"Successfully loaded configuration from {args.config} for pre-app override.")
+                # Debug: Print loaded YAML for verification
+                # for key, value in loaded_yaml_config.items():
+                #     print(f"DEBUG YAML Load: {key.upper()} = {value}")
             else:
-                print(f"Warning: Config file {args.config} is empty or not valid YAML.")
+                print(f"Warning: Config file {args.config} is empty or not valid YAML. No overrides will be passed to create_app.")
+                loaded_yaml_config = None # Ensure it's None if empty
         except FileNotFoundError:
-            print(f"Error: Config file {args.config} not found. Continuing with default/env config.")
+            print(f"Error: Config file {args.config} not found. Cannot pass overrides to create_app.")
+            loaded_yaml_config = None # Ensure it's None if not found
         except yaml.YAMLError as e:
-            print(f"Error parsing YAML config file {args.config}: {e}. Continuing with default/env config.")
+            print(f"Error parsing YAML config file {args.config}: {e}. Cannot pass overrides to create_app.")
+            loaded_yaml_config = None
         except Exception as e:
-            print(f"An unexpected error occurred while loading config from {args.config}: {e}. Continuing with default/env config.")
+            print(f"An unexpected error occurred while loading config from {args.config}: {e}. Cannot pass overrides to create_app.")
+            loaded_yaml_config = None
 
+    # Instantiate the app using the factory, passing the loaded YAML config
+    print("DEBUG: About to call create_app()")
+    app = create_app(yaml_config_override=loaded_yaml_config)
+    print("DEBUG: create_app() returned")
+
+    # The YAML config is now applied within create_app, so the manual override loop below is no longer needed.
+    # However, we still want to store the script arguments.
     app.config['SETUP_DB_SCRIPT_ARGS'] = args # Pass script args to app config
     print(f"DEBUG: Script args set in app.config: {args}")
 

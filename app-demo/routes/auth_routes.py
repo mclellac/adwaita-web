@@ -3,9 +3,10 @@ from flask_login import login_user, logout_user, current_user, login_required
 from datetime import datetime, timezone # For logging if restored
 
 from ..models import User, SiteSetting
-from ..forms import LoginForm, RegistrationForm, ChangePasswordForm
+from ..forms import LoginForm, RegistrationForm, ChangePasswordForm, RequestPasswordResetForm, ResetPasswordForm
 from .. import db # db instance from app-demo/__init__.py
 from ..utils import flash_form_errors_util
+from ..email_utils import send_password_reset_email # Import the email sending utility
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -169,3 +170,60 @@ def change_password_page():
 
     current_app.logger.debug(f"Rendering change_password template for {request.path}")
     return render_template('change_password.html', form=form)
+
+@auth_bp.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+    current_app.logger.debug(f"Accessing /auth/reset_password_request, Method: {request.method}")
+    if current_user.is_authenticated:
+        return redirect(url_for('general.index'))
+    form = RequestPasswordResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first() # Assuming username is email
+        if user:
+            try:
+                send_password_reset_email(user)
+                current_app.logger.info(f"Password reset email initiated for user {user.username} (Email: {user.email}).")
+                flash('An email has been sent with instructions to reset your password.', 'info')
+            except Exception as e:
+                current_app.logger.error(f"Failed to send password reset email for {form.email.data}: {e}", exc_info=True)
+                flash('Sorry, there was an error sending the password reset email. Please try again later.', 'danger')
+        else:
+            # Don't reveal if email exists or not for security, same message.
+            current_app.logger.info(f"Password reset request for non-existent or unconfirmed email: {form.email.data}.")
+            flash('An email has been sent with instructions to reset your password.', 'info')
+        return redirect(url_for('auth.login'))
+    elif request.method == 'POST':
+        flash_form_errors_util(form)
+    return render_template('request_reset_password.html', title='Request Password Reset', form=form)
+
+@auth_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password_with_token(token):
+    current_app.logger.debug(f"Accessing /auth/reset_password/{token}, Method: {request.method}")
+    if current_user.is_authenticated:
+        return redirect(url_for('general.index'))
+
+    user = User.verify_reset_password_token(token)
+    if not user:
+        current_app.logger.warning(f"Password reset token invalid or expired: {token}")
+        flash('That is an invalid or expired token. Please request a new password reset.', 'warning')
+        return redirect(url_for('auth.reset_password_request'))
+
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        try:
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.commit()
+            current_app.logger.info(f"Password has been reset for user {user.username} (ID: {user.id}).")
+            flash('Your password has been reset successfully! You can now log in.', 'success')
+            # Optional: Log the user in automatically
+            # login_user(user)
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error saving reset password for {user.username}: {e}", exc_info=True)
+            flash('An error occurred while resetting your password. Please try again.', 'danger')
+    elif request.method == 'POST':
+        flash_form_errors_util(form)
+
+    return render_template('reset_password_with_token.html', title='Reset Your Password', form=form, token=token)

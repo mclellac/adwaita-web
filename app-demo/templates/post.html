@@ -73,7 +73,7 @@
                         <span class="adw-icon icon-actions-star-symbolic"></span> Like
                     </a>
                 {% endif %}
-                <span class="adw-label caption like-count">{{ post.likers.count() }} like{% if post.likers.count() != 1 %}s{% endif %}</span>
+                <span class="adw-label caption like-count">{{ post.like_count }} like{% if post.like_count != 1 %}s{% endif %}</span>
             </div>
             {# Space for other actions like share, if not in a separate section #}
         </footer>
