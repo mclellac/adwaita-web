@@ -13,7 +13,7 @@ This repository contains two main projects:
     *   It utilizes the `adwaita-web` library to style its user interface.
     *   The application is structured using a Flask application factory (`create_app` located in `app-demo/__init__.py`) and is run using the `flask run` command (after setting `FLASK_APP=app_demo`).
     *   Currently, `app-demo` uses a manually included (or to-be-built and copied) version of the `adwaita-web` library's assets (CSS, JS, icons, fonts). Refer to `build-adwaita-web.sh` for an example of how these might be prepared and copied into `app-demo/static/`.
-    *   For specific instructions related to the `app-demo` application (e.g., running the Flask app, database setup, testing), please refer to the `app-demo/AGENTS.md` file.
+    *   For specific instructions related to the `app-demo` application (e.g., running the Flask app, database setup using `app-demo/setup_db.py`, testing), please refer to the `app-demo/AGENTS.md` file.
 
 **General Workflow:**
 

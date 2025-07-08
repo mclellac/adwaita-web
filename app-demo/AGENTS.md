@@ -2,41 +2,54 @@
 
 This document provides guidance for AI agents working with the `app-demo` portion of the `adwaita-web` project.
 
-## Database Setup (`setup_db.py`)
+## Database Setup and Management (`setup_db.py`)
 
-The `setup_db.py` script and the main Flask application (`app.py`) connect to a PostgreSQL database. The connection parameters are configured using environment variables.
+The `app-demo/setup_db.py` script is crucial for initializing and managing the application's PostgreSQL database schema and initial data. It should be run from the project root directory (e.g., `python app-demo/setup_db.py`).
 
-**Error: `FATAL: Ident authentication failed for user "postgres"` (or similar)**
+**Core Functionalities:**
 
-If you encounter an `OperationalError` from `psycopg2` with a message like `FATAL: Ident authentication failed for user "..."` or `FATAL: password authentication failed for user "..."`, it means the application could not successfully authenticate with your PostgreSQL server using the provided credentials (or lack thereof).
+*   **Table Creation:** Ensures all database tables defined in `app-demo/models.py` are created if they don't already exist. This is done by calling `db.create_all()`.
+*   **Initial Admin User:** Can create or update an initial administrative user. This can be done interactively (prompting for username/password) or non-interactively via command-line arguments.
+*   **Database Deletion (`--deletedb`):** Provides an option to completely wipe and recreate the database schema.
 
-**Required Environment Variables:**
+**Key Command-Line Arguments:**
 
-To ensure a successful database connection, you **must** set the following environment variables in your shell session *before* running `python app-demo/setup_db.py` or running the application (e.g., with `flask run`):
+*   `--deletedb`:
+    *   **WARNING: This is a destructive operation.**
+    *   When used, the script will execute `DROP SCHEMA public CASCADE;` followed by `CREATE SCHEMA public;` (for PostgreSQL). This effectively deletes all tables, data, sequences, and other objects within the `public` schema and then recreates an empty schema.
+    *   After this, `db.create_all()` is called to recreate the tables based on the current models.
+    *   Confirmation is required in interactive mode. Can be run non-interactively if admin user arguments are also provided.
+*   `--skipuser`: Skips the initial admin user setup/update process.
+*   `--admin-user <username>`: Sets the admin username non-interactively.
+*   `--admin-pass <password>`: Sets the admin password non-interactively. Requires `--admin-user`.
+*   `--admin-fullname <fullname>`: Sets the admin display name non-interactively.
+*   `--admin-bio <bio>`: Sets the admin bio non-interactively.
+*   `--config <filepath>`:
+    *   Allows overriding configuration settings for the script's execution by providing a path to a YAML configuration file.
+    *   Settings in this YAML file will take precedence over those defined in `app-demo/config.py` or environment variables.
+    *   Flask configuration keys are typically uppercase (e.g., `SQLALCHEMY_DATABASE_URI`).
+    *   Example `config.yaml` structure:
+        ```yaml
+        SQLALCHEMY_DATABASE_URI: "postgresql://script_user:script_pass@localhost/script_db"
+        SECRET_KEY: "custom_script_secret"
+        # Add other app.config keys as needed
+        ```
+    *   **Dependency:** This feature requires the `PyYAML` library. If not installed, the script will print an error. Install it via `pip install PyYAML`.
 
-1.  **`POSTGRES_USER`**: The username for your PostgreSQL database.
-    *   Defaults to `postgres` in the application if not set.
-    *   Example: `export POSTGRES_USER=myuser`
+**Important Considerations:**
 
-2.  **`POSTGRES_PASSWORD`**: The password for the specified PostgreSQL user.
-    *   **This is crucial if your PostgreSQL server uses password authentication (e.g., `md5` or `scram-sha-256` in `pg_hba.conf`).**
-    *   The application defaults to an empty password if this is not set, which will likely fail if your server requires a password.
-    *   Example: `export POSTGRES_PASSWORD=mypassword123`
-
-3.  **`POSTGRES_HOST`**: The hostname or IP address of your PostgreSQL server.
-    *   Defaults to `localhost` if not set.
-    *   Example: `export POSTGRES_HOST=db.example.com`
-
-4.  **`POSTGRES_DB`**: The name of the database to connect to.
-    *   Defaults to `appdb` if not set.
-    *   Example: `export POSTGRES_DB=mydemoapp_db`
-
-**Alternative: `DATABASE_URL`**
-
-Alternatively, you can provide the full database connection URI via the `DATABASE_URL` environment variable. If this is set, it will override the individual `POSTGRES_*` variables.
-
-*   Format: `postgresql://username:password@host:port/database`
-*   Example: `export DATABASE_URL="postgresql://myuser:mypassword123@localhost:5432/mydemoapp_db"`
+*   **Environment Variables for Database Connection:** The script (and the main application) relies on environment variables for database connection parameters if not overridden by a `--config` file. These include:
+    *   `POSTGRES_USER` (defaults to `postgres`)
+    *   `POSTGRES_PASSWORD` (defaults to empty if not set)
+    *   `POSTGRES_HOST` (defaults to `localhost`)
+    *   `POSTGRES_DB` (defaults to `appdb`)
+    *   Alternatively, `DATABASE_URL` can be set to the full connection string (e.g., `postgresql://user:pass@host:port/dbname`).
+*   **Error: `FATAL: Ident authentication failed...` or `FATAL: password authentication failed...`**: This means the script could not authenticate with PostgreSQL. Ensure your environment variables (`POSTGRES_USER`, `POSTGRES_PASSWORD`, etc.) are correctly set for your PostgreSQL server's authentication method (see `pg_hba.conf`).
+*   **Synchronization with Models:**
+    *   **CRITICAL WARNING:** This script directly manipulates the database schema. Any changes to SQLAlchemy models in `app-demo/models.py` (e.g., adding/removing tables or columns, altering relationships) require careful consideration of `setup_db.py`'s logic.
+    *   The `db.create_all()` command will attempt to create tables according to the current models.
+    *   The `--deletedb` option completely rebuilds the schema. Ensure this behavior is understood, especially in environments with existing data.
+    *   For more complex schema changes (migrations) in a production-like environment, a proper migration tool like Alembic (Flask-Migrate) would typically be used, but `setup_db.py` is suitable for initial setup and development/testing resets.
 
 **Running the Application (Post-Refactor):**
 
