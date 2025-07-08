@@ -308,19 +308,48 @@ class Notification(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Recipient
     actor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True) # User who performed action
     type = db.Column(db.String(50), nullable=False)  # e.g., 'new_follower', 'new_like', 'new_comment'
-    related_post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
-    related_comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
+    # related_post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True) # REMOVED
+    # related_comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True) # REMOVED
     is_read = db.Column(db.Boolean, default=False, nullable=False)
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     # Relationships to easily get related objects from a notification
     # user is defined by backref from User.notifications
     actor = db.relationship('User', foreign_keys=[actor_id])
-    related_post = db.relationship('Post', foreign_keys=[related_post_id])
-    related_comment = db.relationship('Comment', foreign_keys=[related_comment_id])
+    # related_post = db.relationship('Post', foreign_keys=[related_post_id]) # REMOVED
+    # related_comment = db.relationship('Comment', foreign_keys=[related_comment_id]) # REMOVED
+
+    # New polymorphic target fields
+    target_type = db.Column(db.String(50), nullable=True) # e.g., 'post', 'comment', 'user_photo', 'user'
+    target_id = db.Column(db.Integer, nullable=True)
+
+    # Remove ForeignKeyConstraints for old columns from __table_args__
+    __table_args__ = (db.Index('ix_notification_target', 'target_type', 'target_id'),)
+
+
+    def get_target_object(self):
+        """
+        Returns the actual target object based on target_type and target_id.
+        """
+        if not self.target_type or self.target_id is None:
+            return None
+
+        # Import models locally to avoid circular imports at module level if Notification is imported by these models
+        from .models import Post, Comment, UserPhoto, User
+
+        if self.target_type == 'post':
+            return db.session.get(Post, self.target_id)
+        elif self.target_type == 'comment':
+            return db.session.get(Comment, self.target_id)
+        elif self.target_type == 'photo': # Assuming 'photo' is used for UserPhoto
+            return db.session.get(UserPhoto, self.target_id)
+        elif self.target_type == 'user':
+            return db.session.get(User, self.target_id)
+        # Add other types as needed
+        return None
 
     def __repr__(self):
-        return f'<Notification {self.id} type={self.type} user_id={self.user_id} is_read={self.is_read}>'
+        return f'<Notification {self.id} type={self.type} user_id={self.user_id} is_read={self.is_read} target_type={self.target_type} target_id={self.target_id}>'
 
 class Activity(db.Model):
     __tablename__ = 'activity'
@@ -331,10 +360,10 @@ class Activity(db.Model):
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
 
     # Target fields - store IDs of related objects
-    target_post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
+    # target_post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True) # REMOVED
     # For 'started_following', this is the user being followed.
-    target_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    target_comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
+    # target_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True) # REMOVED
+    # target_comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True) # REMOVED
 
     # Relationships to fetch related objects
     # The user who performed the activity (actor)
@@ -345,11 +374,45 @@ class Activity(db.Model):
     # Need a different backref name if User.activities is already taken by the actor's activities.
     # Or, access this target user differently if not frequently needed as a direct backref on User.
     # For now, let's assume we primarily query activities and then get target_user.
-    target_user = db.relationship('User', foreign_keys=[target_user_id])
-    target_comment = db.relationship('Comment', foreign_keys=[target_comment_id])
+    # target_user = db.relationship('User', foreign_keys=[target_user_id]) # REMOVED
+    # target_comment = db.relationship('Comment', foreign_keys=[target_comment_id]) # REMOVED
+    # target_post = db.relationship('Post', foreign_keys=[target_post_id]) # REMOVED (was implicitly defined by FK)
+
+    # New polymorphic target fields
+    target_type = db.Column(db.String(50), nullable=True) # e.g., 'post', 'comment', 'user_photo', 'user'
+    target_id = db.Column(db.Integer, nullable=True)
+
+    # Add an index for common queries
+    # Include user_id in the index as activities are often queried per user
+    # Remove ForeignKeyConstraints for old columns from __table_args__
+    __table_args__ = (
+        db.Index('ix_activity_user_target', 'user_id', 'target_type', 'target_id'),
+        db.Index('ix_activity_target', 'target_type', 'target_id')
+    )
+
+    def get_target_object(self):
+        """
+        Returns the actual target object based on target_type and target_id.
+        """
+        if not self.target_type or self.target_id is None:
+            return None
+
+        # Import models locally
+        from .models import Post, Comment, UserPhoto, User
+
+        if self.target_type == 'post':
+            return db.session.get(Post, self.target_id)
+        elif self.target_type == 'comment':
+            return db.session.get(Comment, self.target_id)
+        elif self.target_type == 'photo': # Assuming 'photo' is used for UserPhoto
+            return db.session.get(UserPhoto, self.target_id)
+        elif self.target_type == 'user':
+            return db.session.get(User, self.target_id)
+        # Add other types as needed
+        return None
 
     def __repr__(self):
-        return f'<Activity {self.id} type={self.type} user_id={self.user_id}>'
+        return f'<Activity {self.id} type={self.type} user_id={self.user_id} target_type={self.target_type} target_id={self.target_id}>'
 
 
 class SiteSetting(db.Model):
