@@ -97,29 +97,35 @@ def post_photo_comment(photo_id):
         current_app.logger.info(f"Photo Comment (ID: {new_comment.id}) by {current_user.username} added to photo {photo.id}.")
 
         # Process mentions in the photo comment
-        mentioned_users_in_comment = extract_mentions(new_comment.text)
+        mentioned_usernames = extract_mentions(new_comment.text)
         new_mentions_created = False
-        for mentioned_user in mentioned_users_in_comment:
-            if mentioned_user.id != current_user.id: # Don't notify for self-mentions
-                existing_notif = Notification.query.filter_by(
-                    user_id=mentioned_user.id,
-                    actor_id=current_user.id,
-                    type='mention_in_photo_comment',
-                    target_type='comment',         # Target is the comment
-                    target_id=new_comment.id
-                ).first()
-                if not existing_notif:
-                    mention_notification = Notification(
-                        user_id=mentioned_user.id,
+        if mentioned_usernames:
+            # from ..models import User # User is already imported at the top of the file
+            # Need func for lower from sqlalchemy
+            from sqlalchemy import func
+
+            for username in mentioned_usernames:
+                mentioned_user_obj = User.query.filter(func.lower(User.username) == func.lower(username)).first()
+                if mentioned_user_obj and mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions or non-existent users
+                    existing_notif = Notification.query.filter_by(
+                        user_id=mentioned_user_obj.id,
                         actor_id=current_user.id,
                         type='mention_in_photo_comment',
-                        target_type='comment',        # Target is the comment
-                        target_id=new_comment.id,
-                        context_photo_id=photo.id   # Context is the photo
-                    )
-                    db.session.add(mention_notification)
-                    new_mentions_created = True
-                    current_app.logger.info(f"Mention notification created for user {mentioned_user.username} in photo comment {new_comment.id}")
+                        target_type='comment',         # Target is the comment
+                        target_id=new_comment.id
+                    ).first()
+                    if not existing_notif:
+                        mention_notification = Notification(
+                            user_id=mentioned_user_obj.id,
+                            actor_id=current_user.id,
+                            type='mention_in_photo_comment',
+                            target_type='comment',        # Target is the comment
+                            target_id=new_comment.id,
+                            context_photo_id=photo.id   # Context is the photo
+                        )
+                        db.session.add(mention_notification)
+                        new_mentions_created = True
+                        current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in photo comment {new_comment.id}")
         if new_mentions_created:
             db.session.commit()
 
