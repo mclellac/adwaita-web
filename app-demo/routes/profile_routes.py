@@ -11,7 +11,8 @@ from datetime import datetime
 from ..models import User, Post, Comment, UserPhoto, SiteSetting # Added SiteSetting
 from ..forms import ProfileEditForm, GalleryPhotoUploadForm, SiteSettingsForm # Added SiteSettingsForm
 from .. import db
-from ..utils import allowed_file_util, flash_form_errors_util, ALLOWED_TAGS_CONFIG, ALLOWED_ATTRIBUTES_CONFIG
+# Removed allowed_file_util as it's now encapsulated or used by save_uploaded_file
+from ..utils import flash_form_errors_util, ALLOWED_TAGS_CONFIG, ALLOWED_ATTRIBUTES_CONFIG, save_uploaded_file
 
 profile_bp = Blueprint('profile', __name__, url_prefix='/profile')
 
@@ -116,80 +117,89 @@ def edit_profile():
         current_user.birthdate = form.birthdate.data
 
         file = form.profile_photo.data
-        photo_update_attempted = False
-        photo_saved_successfully = False
+        photo_file = form.profile_photo.data
+        photo_updated_or_attempted = False # Flag to know if we should adjust flash message
 
-        if file and file.filename:
-            photo_update_attempted = True
-            current_app.logger.debug(f"Profile photo update attempt by {current_user.username}. Filename: {file.filename}, Content-Length: {getattr(file, 'content_length', 'N/A')}")
-            file_size = file.content_length if hasattr(file, 'content_length') else request.content_length
-            if file_size is None:
-                 current_app.logger.warning(f"Could not determine file size for {current_user.username}.")
-                 flash("Could not determine file size. Please try again.", "danger")
-            elif file_size > current_app.config['MAX_PROFILE_PHOTO_SIZE_BYTES']:
-                current_app.logger.warning(f"Profile photo for {current_user.username} too large: {file_size} bytes.")
-                max_size_mb = current_app.config['MAX_PROFILE_PHOTO_SIZE_BYTES'] // 1024 // 1024
-                flash(f"Profile photo too large. Max size: {max_size_mb}MB.", 'danger')
-            elif not allowed_file_util(file.filename):
-                current_app.logger.warning(f"Invalid file type for photo by {current_user.username}: {file.filename}")
-                flash(f"Invalid file type for photo. Allowed types are {', '.join(current_app.config['ALLOWED_EXTENSIONS'])}.", 'danger')
-            else:
+        if photo_file and photo_file.filename:
+            photo_updated_or_attempted = True
+            current_app.logger.debug(f"Profile photo update attempt by {current_user.username}. Filename: {photo_file.filename}")
+
+            crop_params = None
+            crop_x_str = request.form.get('crop_x')
+            crop_y_str = request.form.get('crop_y')
+            crop_width_str = request.form.get('crop_width')
+            crop_height_str = request.form.get('crop_height')
+
+            if crop_x_str and crop_y_str and crop_width_str and crop_height_str:
                 try:
-                    original_filename = secure_filename(file.filename)
-                    ext = original_filename.rsplit('.', 1)[-1].lower()
-                    unique_filename = f"{uuid.uuid4()}.{ext}"
-                    upload_folder_path = current_app.config['UPLOAD_FOLDER']
-                    save_path = os.path.join(upload_folder_path, unique_filename)
-                    os.makedirs(upload_folder_path, exist_ok=True)
-                    file.stream.seek(0)
-                    img = Image.open(file.stream)
-                    crop_x_str = request.form.get('crop_x')
-                    crop_y_str = request.form.get('crop_y')
-                    crop_width_str = request.form.get('crop_width')
-                    crop_height_str = request.form.get('crop_height')
-                    if (crop_x_str and crop_y_str and crop_width_str and crop_height_str):
-                        try:
-                            crop_x = int(float(crop_x_str))
-                            crop_y = int(float(crop_y_str))
-                            crop_width = int(float(crop_width_str))
-                            crop_height = int(float(crop_height_str))
-                            if crop_width > 0 and crop_height > 0:
-                                img = img.crop((crop_x, crop_y, crop_x + crop_width, crop_y + crop_height))
-                            else:
-                                flash("Invalid crop dimensions provided. Photo processed without cropping.", 'warning')
-                        except ValueError as ve:
-                            flash("Invalid crop coordinates provided. Photo processed without cropping.", 'warning')
-                    img.thumbnail((200, 200))
-                    img.save(save_path)
-                    if os.path.exists(save_path):
-                        if current_user.profile_photo_url:
-                            old_filename_rel = current_user.profile_photo_url
-                            old_photo_abs_path = os.path.join(upload_folder_path, os.path.basename(old_filename_rel))
-                            if os.path.commonpath([os.path.realpath(old_photo_abs_path), os.path.realpath(upload_folder_path)]) == os.path.realpath(upload_folder_path):
-                                if os.path.exists(old_photo_abs_path):
-                                    try:
-                                        os.remove(old_photo_abs_path)
-                                    except OSError as oe:
-                                        current_app.logger.error(f"Error deleting old photo {old_photo_abs_path}: {oe}", exc_info=True)
-                        db_photo_path = os.path.relpath(save_path, current_app.static_folder).replace("\\", "/")
-                        current_user.profile_photo_url = db_photo_path
-                        photo_saved_successfully = True
-                    else:
-                        flash('Error saving photo: File could not be written to disk.', 'danger')
-                except Exception as e:
-                    current_app.logger.error(f"Exception during photo processing for {current_user.username}: {e}", exc_info=True)
-                    flash(f'Error processing profile photo: {str(e)}', 'danger')
+                    crop_params = {
+                        'x': int(float(crop_x_str)),
+                        'y': int(float(crop_y_str)),
+                        'width': int(float(crop_width_str)),
+                        'height': int(float(crop_height_str))
+                    }
+                    if not (crop_params['width'] > 0 and crop_params['height'] > 0):
+                        flash("Invalid crop dimensions. Photo processed without custom cropping.", 'warning')
+                        crop_params = None # Reset if invalid
+                except ValueError:
+                    flash("Invalid crop coordinate values. Photo processed without custom cropping.", 'warning')
+                    crop_params = None
+            # photo_updated_or_attempted = bool(photo_file and photo_file.filename) # Moved definition earlier
+            # new_photo_db_path = None # Initialize to None
+
+            # Corrected structure:
+            photo_upload_attempted = bool(photo_file and photo_file.filename)
+            new_photo_db_path = None
+
+            if photo_upload_attempted:
+                current_app.logger.debug(f"Profile photo update attempt by {current_user.username}. Filename: {photo_file.filename}")
+
+                crop_params = None
+                crop_x_str = request.form.get('crop_x')
+                crop_y_str = request.form.get('crop_y')
+                crop_width_str = request.form.get('crop_width')
+                crop_height_str = request.form.get('crop_height')
+
+                if crop_x_str and crop_y_str and crop_width_str and crop_height_str:
+                    try:
+                        crop_params = {
+                            'x': int(float(crop_x_str)),
+                            'y': int(float(crop_y_str)),
+                            'width': int(float(crop_width_str)),
+                            'height': int(float(crop_height_str))
+                        }
+                        if not (crop_params['width'] > 0 and crop_params['height'] > 0):
+                            flash("Invalid crop dimensions. Photo processed without custom cropping.", 'warning')
+                            crop_params = None
+                    except ValueError:
+                        flash("Invalid crop coordinate values. Photo processed without custom cropping.", 'warning')
+                        crop_params = None
+
+                new_photo_db_path = save_uploaded_file( # Assign to new_photo_db_path
+                    file_storage_object=photo_file,
+                    upload_type="profile_photo",
+                    base_upload_path_config_key="UPLOAD_FOLDER",
+                    max_size_bytes_config_key="MAX_PROFILE_PHOTO_SIZE_BYTES",
+                    crop_coords=crop_params,
+                    thumbnail_size=(200, 200),
+                    existing_db_path=current_user.profile_photo_url
+                )
+
+                if new_photo_db_path:
+                    current_user.profile_photo_url = new_photo_db_path
+                # else: Error flash handled by save_uploaded_file utility
+
         try:
             db.session.add(current_user)
             db.session.commit()
-            flash_msg = 'Profile and photo updated successfully!' if photo_update_attempted and photo_saved_successfully else \
-                        ('Profile information updated, but there was an issue with the photo upload.' if photo_update_attempted else 'Profile updated successfully!')
-            original_flash_cat = 'success' if not photo_update_attempted or photo_saved_successfully else 'warning'
 
-            if original_flash_cat == 'success':
-                flash(flash_msg, 'toast_success')
+            if photo_updated_or_attempted:
+                if new_photo_db_path:
+                    flash('Profile and photo updated successfully!', 'toast_success')
+                else:
+                    flash('Profile information updated, but photo upload failed. Please see previous error message.', 'warning')
             else:
-                flash(flash_msg, original_flash_cat) # This will be 'warning'
+                flash('Profile updated successfully!', 'toast_success')
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error saving profile to DB for {current_user.username}: {e}", exc_info=True)
@@ -207,41 +217,43 @@ def edit_profile():
 @login_required
 def upload_gallery_photo():
     form = GalleryPhotoUploadForm()
-    form.photo.validators.append(FileAllowed(current_app.config['ALLOWED_EXTENSIONS'], 'Images only!'))
+    # FileAllowed validator is good, but save_uploaded_file will also check extensions based on config.
+    # form.photo.validators.append(FileAllowed(current_app.config['ALLOWED_EXTENSIONS'], 'Images only!')) # This can be kept or removed if redundant
     if form.validate_on_submit():
-        file = form.photo.data
+        photo_file = form.photo.data
         caption = form.caption.data
-        file.stream.seek(0, os.SEEK_END)
-        actual_file_size = file.stream.tell()
-        file.stream.seek(0)
-        if actual_file_size > current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES']:
-            max_size_mb = current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES'] // 1024 // 1024
-            flash(f"Gallery photo is too large. Maximum size is {max_size_mb}MB.", "danger")
+
+        if not photo_file or not photo_file.filename: # Should be caught by form's FileRequired if used.
+            flash("No photo file selected for gallery upload.", "warning")
             return redirect(url_for('profile.view_profile', username=current_user.username))
-        try:
-            original_filename = secure_filename(file.filename)
-            ext = original_filename.rsplit('.', 1)[-1].lower() if '.' in original_filename else ''
-            if not ext or ext not in current_app.config['ALLOWED_EXTENSIONS']:
-                flash(f"Invalid file type. Allowed types: {', '.join(current_app.config['ALLOWED_EXTENSIONS'])}.", 'warning')
-                return redirect(url_for('profile.view_profile', username=current_user.username))
-            unique_filename_stem = uuid.uuid4().hex
-            unique_filename = f"{unique_filename_stem}.{ext}"
-            user_gallery_folder_name = str(current_user.id)
-            user_specific_folder_abs = os.path.join(current_app.config['GALLERY_UPLOAD_FOLDER'], user_gallery_folder_name)
-            os.makedirs(user_specific_folder_abs, exist_ok=True)
-            save_path = os.path.join(user_specific_folder_abs, unique_filename)
-            file.save(save_path)
-            if os.path.exists(save_path):
-                db_image_path = os.path.join(user_gallery_folder_name, unique_filename).replace("\\", "/")
-                new_photo = UserPhoto(user_id=current_user.id, image_filename=db_image_path, caption=caption)
+
+        saved_db_path = save_uploaded_file(
+            file_storage_object=photo_file,
+            upload_type="gallery_photo",
+            base_upload_path_config_key="GALLERY_UPLOAD_FOLDER", # Relative to static
+            max_size_bytes_config_key="MAX_GALLERY_PHOTO_SIZE_BYTES",
+            current_user_id=current_user.id # For user-specific subfolder
+            # No crop_coords or thumbnail_size for gallery photos by default
+        )
+
+        if saved_db_path:
+            try:
+                new_photo = UserPhoto(
+                    user_id=current_user.id,
+                    image_filename=saved_db_path, # This path is relative to static folder
+                    caption=caption
+                )
                 db.session.add(new_photo)
                 db.session.commit()
                 flash('Photo uploaded to gallery successfully!', 'toast_success')
-            else:
-                flash('Error saving photo: File could not be written to disk.', 'danger')
-        except Exception as e:
-            current_app.logger.error(f"Exception during gallery photo processing: {e}", exc_info=True)
-            flash(f'Error processing gallery photo: {str(e)}', 'danger')
+            except Exception as e_db:
+                db.session.rollback()
+                current_app.logger.error(f"Error saving gallery photo record to DB: {e_db}", exc_info=True)
+                flash('Error saving photo details to database.', 'danger')
+                # Potentially delete the orphaned file from disk if DB save fails
+                # full_orphan_path = os.path.join(current_app.static_folder, saved_db_path)
+                # if os.path.exists(full_orphan_path): os.remove(full_orphan_path)
+        # else: Error flash handled by save_uploaded_file utility
     else:
         # flash_form_errors_util already uses 'danger'
         flash_form_errors_util(form)
