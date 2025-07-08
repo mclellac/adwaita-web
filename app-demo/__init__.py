@@ -178,6 +178,36 @@ def create_app(config_name=None):
     app.register_blueprint(api_bp) # Register it, prefix is /api/v1 from its definition
 
     # Error handlers
+    from sqlalchemy.exc import SQLAlchemyError # Import SQLAlchemyError
+
+    @app.errorhandler(SQLAlchemyError)
+    def handle_database_error(error):
+        # Log the error and rollback the session
+        current_app.logger.error(f"Unhandled SQLAlchemyError caught by global handler: {error}", exc_info=True)
+        # Check if db.session is active before trying to rollback.
+        # In some cases, like connection errors, the session might not be in a state to be rolled back,
+        # or might have already been invalidated.
+        try:
+            if db.session.is_active:
+                db.session.rollback()
+                current_app.logger.info("Database session rolled back due to SQLAlchemyError.")
+        except Exception as e_rollback:
+            current_app.logger.error(f"Error during session rollback in SQLAlchemyError handler: {e_rollback}", exc_info=True)
+
+        # Flash a generic message to the user
+        # Check if it's an API request or a web request
+        if request.blueprint == 'api' or (hasattr(request, 'accept_mimetypes') and 'application/json' in request.accept_mimetypes):
+            return jsonify({
+                "status": "error",
+                "message": "A database error occurred. Please try again later."
+            }), 500
+        else:
+            flash("A critical database error occurred. Please try again later. If the problem persists, contact support.", "danger")
+            # Render a generic 500 error page or redirect.
+            # Rendering 500.html is consistent with other server errors.
+            return render_template("500.html", error=error), 500
+
+
     @app.errorhandler(403)
     def forbidden_page(error):
         user_info = f"User: {current_user.username}" if current_user.is_authenticated else "User: Anonymous"
