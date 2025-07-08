@@ -1,26 +1,43 @@
-{% macro like_button_and_count(post, current_user, csrf_token) %}
-<div class="like-section adw-box adw-box-horizontal adw-box-spacing-xs align-center">
+{% macro like_button_and_count(item, item_type, current_user, csrf_token) %}
+{#
+    item: The Post or UserPhoto object.
+    item_type: String, either 'post' or 'photo'.
+    current_user: The current logged-in user.
+    csrf_token: The CSRF token.
+#}
+<div class="like-section adw-box adw-box-horizontal adw-box-spacing-xs align-center" data-item-id="{{ item.id }}" data-item-type="{{ item_type }}">
     {% if current_user.is_authenticated %}
-        {% if current_user.has_liked_post(post) %}
-            <form action="{{ url_for('post.unlike_post_route', post_id=post.id) }}" method="POST" style="display: inline;">
+        {% set has_liked = false %}
+        {% if item_type == 'post' %}
+            {% set has_liked = current_user.has_liked_post(item) %}
+            {% set like_url = url_for('post.like_post_route', post_id=item.id) %}
+            {% set unlike_url = url_for('post.unlike_post_route', post_id=item.id) %}
+        {% elif item_type == 'photo' %}
+            {% set has_liked = current_user.has_liked_photo(item) %}
+            {% set like_url = url_for('photo.like_photo_route', photo_id=item.id) %}
+            {% set unlike_url = url_for('photo.unlike_photo_route', photo_id=item.id) %}
+        {% endif %}
+
+        {% if has_liked %}
+            <form action="{{ unlike_url }}" method="POST" style="display: inline;" class="like-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <button type="submit" class="adw-button small flat" aria-label="Unlike post"> {# Keep it neutral #}
+                <button type="submit" class="adw-button small flat like-button" aria-label="Unlike {{ item_type }}">
                     <span class="adw-icon icon-actions-starred-symbolic"></span>
                 </button>
             </form>
         {% else %}
-            <form action="{{ url_for('post.like_post_route', post_id=post.id) }}" method="POST" style="display: inline;">
+            <form action="{{ like_url }}" method="POST" style="display: inline;" class="like-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <button type="submit" class="adw-button small flat suggested-action" aria-label="Like post">
+                <button type="submit" class="adw-button small flat suggested-action like-button" aria-label="Like {{ item_type }}">
                     <span class="adw-icon icon-actions-star-symbolic"></span>
                 </button>
             </form>
         {% endif %}
     {% else %}
-        <a href="{{ url_for('auth.login', next=request.url) }}" class="adw-button small flat" aria-label="Login to like post">
+        <a href="{{ url_for('auth.login', next=request.url) }}" class="adw-button small flat" aria-label="Login to like {{ item_type }}">
             <span class="adw-icon icon-actions-star-symbolic"></span>
         </a>
     {% endif %}
-    <span class="adw-label caption like-count">{{ post.likers.count() }}</span>
+    <span class="adw-label caption like-count">{{ item.likers.count() }}</span>
 </div>
 {% endmacro %}

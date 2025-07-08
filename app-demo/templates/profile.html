@@ -50,6 +50,10 @@
 
         <p id="full-gallery-photo-caption" class="adw-label body-1" style="margin-top: var(--spacing-s); margin-bottom: var(--spacing-m);"></p>
 
+        <div id="gallery-photo-like-section-container" class="like-section-container" style="display: flex; justify-content: center; margin-bottom: var(--spacing-s);">
+            {# Like button and count will be populated by JS #}
+        </div>
+
         <hr style="margin: var(--spacing-m) 0;">
 
         <div class="photo-comments-area" style="max-height: 30vh; overflow-y: auto; text-align: left; margin-bottom: var(--spacing-m);">
@@ -241,7 +245,7 @@
                         </footer>
                         <div class="adw-card__actions card-secondary-actions">
                             {% from "_macros.html" import like_button_and_count %}
-                            {{ like_button_and_count(post, current_user, csrf_token()) }}
+                            {{ like_button_and_count(post, 'post', current_user, csrf_token()) }}
                         </div>
                     </article>
                     {% endfor %}
@@ -302,7 +306,9 @@
             {% if comments_pagination and comments_pagination.items %}
                 <div class="adw-list-box">
                     {% for comment in comments_pagination.items %}
-                    <a href="{{ url_for('post.view_post', post_id=comment.post_id, _anchor='comment-' ~ comment.id) }}" class="adw-action-row activatable">
+                    {# Assuming comments_pagination now only contains comments with target_type='post' #}
+                    {% if comment.target_type == 'post' and comment.post %} {# Double check for safety; comment.post should exist if target_type is 'post' and target_id is valid #}
+                    <a href="{{ url_for('post.view_post', post_id=comment.target_id, _anchor='comment-' ~ comment.id) }}" class="adw-action-row activatable">
                         <div class="adw-action-row__text">
                             <span class="adw-action-row__title">Comment on post by {{ comment.post.author.full_name or comment.post.author.username }}</span>
                             <span class="adw-action-row__subtitle">"{{ comment.text | truncate(100, True) }}"</span>
@@ -507,6 +513,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const galleryImageLoader = document.getElementById('gallery-image-loader');
     const galleryNavPrev = document.getElementById('gallery-nav-prev');
     const galleryNavNext = document.getElementById('gallery-nav-next');
+    const galleryPhotoLikeContainer = document.getElementById('gallery-photo-like-section-container');
 
     let allGalleryPhotoData = [];
     let currentGalleryPhotoIndex = -1;
@@ -553,18 +560,93 @@ document.addEventListener('DOMContentLoaded', function () {
             if (galleryCommentPhotoIdInput) galleryCommentPhotoIdInput.value = photoData.id;
 
             fetchGalleryComments(photoData.id); // Fetch comments for the new photo
+            fetchAndDisplayLikeStatus(photoData.id); // Fetch and display like status
             showImageLoading(false);
             updateGalleryDialogNavButtons();
         };
         tempImg.onerror = () => {
             console.error("Failed to load image:", photoData.src);
             if (fullGalleryPhotoCaption) fullGalleryPhotoCaption.textContent = "Error loading image.";
+            if (galleryPhotoLikeContainer) galleryPhotoLikeContainer.innerHTML = ''; // Clear like section on error
             // Optionally, display a placeholder or error image
             fullGalleryPhotoImg.src = ""; // Clear src or set to a placeholder
             showImageLoading(false);
             updateGalleryDialogNavButtons(); // Still update nav, maybe allow navigation away
         };
         tempImg.src = photoData.src;
+    }
+
+    async function fetchAndDisplayLikeStatus(photoId) {
+        if (!galleryPhotoLikeContainer) return;
+        galleryPhotoLikeContainer.innerHTML = '<span class="adw-label caption">Loading likes...</span>'; // Placeholder
+
+        try {
+            // This endpoint needs to be created in photo_routes.py
+            const response = await fetch(`/photo/api/photo/${photoId}/like_status`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const likeData = await response.json(); // Expects { likes_count: N, has_liked: true/false }
+            renderLikeButton(photoId, likeData.likes_count, likeData.has_liked);
+        } catch (error) {
+            console.error('Error fetching like status:', error);
+            galleryPhotoLikeContainer.innerHTML = '<span class="adw-label caption error-text">Could not load like status.</span>';
+        }
+    }
+
+    function renderLikeButton(photoId, likesCount, hasLiked) {
+        if (!galleryPhotoLikeContainer) return;
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const actionUrl = hasLiked ?
+            `/photo/${photoId}/unlike` :
+            `/photo/${photoId}/like`;
+
+        const iconClass = hasLiked ? 'icon-actions-starred-symbolic' : 'icon-actions-star-symbolic';
+        const buttonClass = hasLiked ? 'adw-button small flat' : 'adw-button small flat suggested-action';
+        const ariaLabel = hasLiked ? 'Unlike photo' : 'Like photo';
+
+        galleryPhotoLikeContainer.innerHTML = `
+            <form action="${actionUrl}" method="POST" style="display: inline;" class="like-form photo-like-form">
+                <input type="hidden" name="csrf_token" value="${csrfToken}">
+                <button type="submit" class="${buttonClass} like-button" aria-label="${ariaLabel}">
+                    <span class="adw-icon ${iconClass}"></span>
+                </button>
+            </form>
+            <span class="adw-label caption like-count" style="margin-left: var(--spacing-xs);">${likesCount}</span>
+        `;
+
+        const form = galleryPhotoLikeContainer.querySelector('.photo-like-form');
+        if (form) {
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                try {
+                    const response = await fetch(actionUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/json' // Though body is empty, API might expect it
+                        },
+                        // No body needed for these like/unlike actions if photo_id is in URL
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                    }
+                    const result = await response.json(); // Expects { status: 'success', likes_count: N, message: '...' }
+                                                        // and has_liked will be implicitly the opposite of current state
+                    renderLikeButton(photoId, result.likes_count, !hasLiked); // Update UI
+                } catch (error) {
+                    console.error('Error submitting like/unlike:', error);
+                    // Optionally display an error message to the user in the dialog
+                    const errorSpan = document.createElement('span');
+                    errorSpan.className = 'adw-label caption error-text';
+                    errorSpan.textContent = ` Error: ${error.message}`;
+                    galleryPhotoLikeContainer.appendChild(errorSpan);
+                    setTimeout(() => { if(errorSpan.parentNode) errorSpan.parentNode.removeChild(errorSpan); }, 3000);
+                }
+            });
+        }
     }
 
     function showNextGalleryPhoto() {

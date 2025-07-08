@@ -55,7 +55,11 @@ def view_profile(user_id):
 
     comments_page = request.args.get('comments_page', 1, type=int)
     comments_per_page = 5
-    comments_query = Comment.query.filter_by(user_id=user_profile.id).order_by(Comment.created_at.desc())
+    # Filter for comments made by the user that are specifically on posts
+    comments_query = Comment.query.filter_by(
+        user_id=user_profile.id,
+        target_type='post' # Ensure we only fetch comments on posts
+    ).order_by(Comment.created_at.desc())
     try:
         comments_pagination = comments_query.paginate(page=comments_page, per_page=comments_per_page, error_out=False)
         current_app.logger.debug(f"Found {len(comments_pagination.items)} comments by '{user_profile.username}' for comments_page {comments_page} (total: {comments_pagination.total}).")
@@ -352,11 +356,24 @@ def follow_user(user_id):
         flash(f"You are already following {user_to_follow.username}.", "info")
     else:
         if current_user.follow(user_to_follow):
-            from ..models import Notification # Local import
-            notification = Notification(user_id=user_to_follow.id, actor_id=current_user.id, type='new_follower')
+            from ..models import Notification, Activity # Local import
+            # Notification for the user being followed
+            notification = Notification(
+                user_id=user_to_follow.id,  # User receiving the notification
+                actor_id=current_user.id,   # User who performed the action
+                type='new_follower'
+                # target_type='user',       # Optionally, target could be the actor (current_user)
+                # target_id=current_user.id
+            )
             db.session.add(notification)
-            from ..models import Activity # Local import
-            activity = Activity(user_id=current_user.id, type='started_following', target_user_id=user_to_follow.id)
+
+            # Activity by the current user
+            activity = Activity(
+                user_id=current_user.id,    # User who performed the action
+                type='started_following',
+                target_type='user',         # Target of the action is the user being followed
+                target_id=user_to_follow.id
+            )
             db.session.add(activity)
             db.session.commit()
             flash(f"You are now following {user_to_follow.username}.", "toast_success")
