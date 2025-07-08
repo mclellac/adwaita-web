@@ -18,6 +18,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 import importlib
+import yaml # For loading config from YAML file
 
 # Import create_app and necessary models/db instance
 # The actual directory/package name is 'app-demo'
@@ -161,20 +162,32 @@ def delete_database_tables(flask_app, script_args):
     """
     is_non_interactive_delete = script_args.deletedb and script_args.admin_user and script_args.admin_pass
 
+    # Import text for raw SQL
+    from sqlalchemy import text
+
     if is_non_interactive_delete:
         print("Non-interactive mode: Deleting all database tables as --deletedb is present with admin creation flags.")
         with flask_app.app_context():
-            db.drop_all()
-        print("All tables deleted non-interactively.")
+            print("Dropping and recreating public schema (CASCADE)...")
+            db.session.execute(text("DROP SCHEMA public CASCADE;"))
+            db.session.execute(text("CREATE SCHEMA public;"))
+            # Depending on the DB user's privileges, might need to grant usage on the new schema
+            # For simplicity, assuming the user has rights to create tables in the new public schema.
+            # db.session.execute(text(f"GRANT ALL ON SCHEMA public TO {flask_app.config.get('DB_USER', 'postgres')};"))
+            db.session.commit()
+        print("Public schema dropped and recreated. All tables deleted non-interactively.")
         return True
     elif script_args.deletedb: # Interactive deletion
         try:
-            confirm = input("Are you sure you want to delete all database tables? This cannot be undone. (yes/no): ").lower()
+            confirm = input("Are you sure you want to delete all database tables (by dropping and recreating the public schema)? This cannot be undone. (yes/no): ").lower()
             if confirm == 'yes':
-                print("Deleting database tables...")
+                print("Deleting database tables (dropping and recreating public schema)...")
                 with flask_app.app_context():
-                    db.drop_all()
-                print("All tables deleted.")
+                    db.session.execute(text("DROP SCHEMA public CASCADE;"))
+                    db.session.execute(text("CREATE SCHEMA public;"))
+                    # db.session.execute(text(f"GRANT ALL ON SCHEMA public TO {flask_app.config.get('DB_USER', 'postgres')};"))
+                    db.session.commit()
+                print("Public schema dropped and recreated. All tables deleted.")
                 return True
             else:
                 print("Table deletion cancelled.")
@@ -204,6 +217,7 @@ if __name__ == "__main__":
     # For now, will default full_name to admin_user for non-interactive.
     parser.add_argument('--admin-fullname', help='Set initial admin display name (full_name) non-interactively (optional, defaults to admin-user).')
     parser.add_argument('--admin-bio', help='Set initial admin bio non-interactively (optional).')
+    parser.add_argument('--config', help='Path to a YAML configuration file to override default settings.')
 
     # --skiptables is implicitly handled: if --deletedb is not followed by explicit creation, tables remain deleted.
     # The create_all() call below will ensure tables are present unless deleted and not recreated.
@@ -218,8 +232,29 @@ if __name__ == "__main__":
 
     # Instantiate the app using the factory
     print("DEBUG: About to call create_app()")
-    app = create_app()
+    app = create_app() # This loads default/env configurations
     print("DEBUG: create_app() returned")
+
+    # Override config with YAML file if provided
+    if args.config:
+        print(f"DEBUG: --config flag provided. Attempting to load config from {args.config}")
+        try:
+            with open(args.config, 'r') as f:
+                yaml_config = yaml.safe_load(f)
+            if yaml_config:
+                for key, value in yaml_config.items():
+                    app.config[key.upper()] = value # Flask config keys are typically uppercase
+                    print(f"DEBUG: Overriding config: {key.upper()} = {value}")
+                print(f"Successfully loaded and applied configuration from {args.config}")
+            else:
+                print(f"Warning: Config file {args.config} is empty or not valid YAML.")
+        except FileNotFoundError:
+            print(f"Error: Config file {args.config} not found. Continuing with default/env config.")
+        except yaml.YAMLError as e:
+            print(f"Error parsing YAML config file {args.config}: {e}. Continuing with default/env config.")
+        except Exception as e:
+            print(f"An unexpected error occurred while loading config from {args.config}: {e}. Continuing with default/env config.")
+
     app.config['SETUP_DB_SCRIPT_ARGS'] = args # Pass script args to app config
     print(f"DEBUG: Script args set in app.config: {args}")
 
