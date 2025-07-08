@@ -2,80 +2,31 @@
 
 An ActionRow is a specialized type of `AdwRow` designed for presenting an action or navigation item, often with a title, subtitle, and an optional icon or chevron. It's commonly used within an `AdwListBox`.
 
-## JavaScript Factory: `Adw.createActionRow()`
+*(Note: Previous versions of this documentation may have described a JavaScript factory like `Adw.createActionRow()`. As of the current review, this specific factory function was not found in the core `adwaita-web/js` source. Usage should primarily rely on the CSS classes with manual HTML structure, or the `<adw-action-row>` Web Component if available.)*
 
-Creates an Adwaita-styled action row.
+## HTML Structure (for CSS Styling)
 
-**Signature:**
-
-```javascript
-Adw.createActionRow(options = {}) -> HTMLDivElement
-```
-
-**Parameters:**
-
-*   `options` (Object, optional): Configuration options:
-    *   `title` (String, required): The main title text of the row.
-    *   `subtitle` (String, optional): Additional descriptive text displayed
-        below the title.
-    *   `iconHTML` (String, optional): HTML string for an SVG icon or an icon font
-        class to be displayed at the start of the row. *Security: Ensure
-        trusted/sanitized HTML if user-supplied.*
-    *   `onClick` (Function, optional): Callback function executed when the row is
-        clicked. Makes the row interactive.
-    *   `showChevron` (Boolean, optional): If `true`, displays a chevron (navigation
-        arrow) at the end of the row, indicating it leads to another view.
-        Defaults to `false` but might be implied if `onClick` is present and
-        it's a navigation action.
-    *   `suffix` (HTMLElement, optional): An element to place at the end of the row,
-        before any chevron (e.g., a switch, a small button, a spinner).
-    *   `disabled` (Boolean, optional): If `true`, disables the row, making it
-        non-interactive and visually muted.
-
-**Returns:**
-
-*   `(HTMLDivElement)`: The created `<div>` element representing the action row.
-
-**Example:**
+To create an action row manually, you would typically use a `div` with the class `.adw-action-row` and structure its content using helper classes:
 
 ```html
-<div id="js-actionrow-listbox" style="max-width: 400px;">
-  <!-- AdwListBox would typically wrap these -->
+<div class="adw-action-row activatable">
+  <div class="adw-action-row-prefix">
+    <span class="adw-icon icon-settings-symbolic"></span> <!-- Example -->
+  </div>
+  <div class="adw-action-row-content">
+    <span class="adw-action-row-title">Settings</span>
+    <span class="adw-action-row-subtitle">Configure application preferences</span>
+  </div>
+  <div class="adw-action-row-suffix">
+    <span class="adw-icon adw-action-row-chevron"></span> <!-- Navigational chevron -->
+  </div>
 </div>
-<script>
-  const container = document.getElementById('js-actionrow-listbox');
-
-  // ActionRow for navigation
-  const networkRow = Adw.createActionRow({
-    title: "Network",
-    subtitle: "Wi-Fi, Ethernet, VPN",
-    // Example icon (details omitted for brevity)
-    iconHTML: '<svg viewBox="0 0 16 16"><path d="M8 0C3.582Z"/></svg>',
-    showChevron: true,
-    onClick: () => Adw.createToast("Navigate to Network Settings")
-  });
-  container.appendChild(networkRow);
-
-  // ActionRow with a suffix (e.g., a spinner)
-  const updateSpinner = Adw.createSpinner({ active: true, size: 'small' }); // Assuming AdwSpinner exists
-  const updatesRow = Adw.createActionRow({
-    title: "Software Updates",
-    subtitle: "Checking for updates...",
-    suffix: updateSpinner,
-    onClick: () => Adw.createToast("Checking for updates action...")
-  });
-  container.appendChild(updatesRow);
-
-  // Disabled ActionRow
-  const disabledRow = Adw.createActionRow({
-    title: "Advanced Settings",
-    subtitle: "Requires admin privileges",
-    disabled: true,
-    showChevron: true
-  });
-  container.appendChild(disabledRow);
-</script>
 ```
+*   Add `.activatable` if the row should have hover/active states and be clickable.
+*   `.adw-action-row-prefix`: For icons or widgets at the start.
+*   `.adw-action-row-content`: Wraps title and subtitle.
+*   `.adw-action-row-title`, `.adw-action-row-subtitle`: For text content.
+*   `.adw-action-row-suffix`: For icons (like chevrons) or widgets (like switches, spinners) at the end.
 
 ## Web Component: `<adw-action-row>`
 
@@ -137,10 +88,35 @@ A declarative way to define Adwaita action rows.
 
 ## Styling
 
-*   Primary SCSS: `scss/_action_row.scss` (and inherits from `_listbox.scss` / `_row_types.scss`).
-*   The layout uses flexbox to arrange icon, title/subtitle block, suffix, and chevron.
-*   The `disabled` state will typically reduce opacity and disable pointer events.
-*   Interactive states (hover, active) are styled for visual feedback.
+*   **SCSS Source:** `scss/_action_row.scss`. Inherits base row styles through `@include mixins.row-base`.
+*   **Key Visual Aspects:**
+    *   **Layout:** Uses flexbox. Default `gap` is `var(--spacing-m)`.
+    *   **Padding & Height:** Typically `12px` top/bottom padding, aiming for standard Adwaita row heights (e.g., ~54px single line, ~70px with subtitle).
+    *   **Shadow:** Standalone ActionRows or those in flat listboxes have a `var(--subtle-box-shadow)`.
+    *   **Prefix/Suffix Icons:**
+        *   General icons (e.g., in `.adw-action-row-prefix` or as part of a suffix widget) use `var(--secondary-fg-color)` and are typically 16px.
+        *   Chevron icon (`.adw-action-row-chevron` in suffix for navigation) uses `pan-next-symbolic.svg` (or `go-next-symbolic.svg`), `currentColor` (thus `var(--secondary-fg-color)`), and `var(--icon-opacity)`.
+    *   **Title (`.adw-action-row-title`):** Normal weight, `var(--window-fg-color)`, ellipsis for overflow.
+    *   **Subtitle (`.adw-action-row-subtitle`):** Small size, `var(--secondary-fg-color)`, ellipsis for overflow. `margin-top: var(--spacing-xxs)`.
+    *   **Activatable State (`.activatable` class):**
+        *   Cursor becomes `pointer`.
+        *   Hover: `background-color: var(--list-row-hover-bg-color)`.
+        *   Active (pressed): `background-color: var(--list-row-active-bg-color)`.
+        *   Focus: Standard outline `var(--focus-ring-width) solid var(--accent-color)` with `var(--focus-outline-offset)`.
+    *   **Property Variant (`.property` class):**
+        *   Title becomes de-emphasized (normal weight, `var(--secondary-fg-color)`).
+        *   Subtitle becomes emphasized (`var(--primary-fg-color)`, normal weight, full opacity).
+        *   If also `.monospace`, subtitle uses `var(--font-family-monospace)`.
+    *   **Monospace Variant (`.monospace` class, if not also `.property`):**
+        *   Subtitle uses `var(--font-family-monospace)`.
+    *   **Destructive Variant (`.destructive-action` class):**
+        *   Title color becomes `var(--destructive-color)`.
+*   **Theming:**
+    *   Background color from `var(--list-row-bg-color)`.
+    *   Interactive states use variables like `var(--list-row-hover-bg-color)`, `var(--list-row-active-bg-color)`.
+    *   Text colors primarily from `var(--window-fg-color)` and `var(--secondary-fg-color)`.
+
+Refer to `scss/_action_row.scss` and [Theming Reference](../general/theming.md) for full details.
 
 ---
 Next: [EntryRow](./entryrow.md)

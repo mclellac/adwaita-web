@@ -76,6 +76,16 @@
             </button>
         </form>
 
+        {# Notification Icon Button #}
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('notification.list_notifications') }}" class="adw-button flat circular notification-icon-button" title="Notifications" style="position: relative;">
+            <span class="adw-icon icon-objects-alarm-symbolic"></span>
+            {% if unread_notifications_count > 0 %}
+                <span class="adw-badge suggested-action notification-dot" title="{{ unread_notifications_count }} unread notifications">{{ unread_notifications_count if unread_notifications_count <= 9 else '9+' }}</span>
+            {% endif %}
+        </a>
+        {% endif %}
+
         {# Main App Menu Button (About) - Moved here #}
         <div class="main-app-menu-container" style="position: relative;">
             <button id="main-app-menu-button" class="adw-button circular flat" aria-label="Main menu" aria-haspopup="true" aria-expanded="false">
@@ -86,16 +96,29 @@
                     <button class="adw-action-row activatable" id="about-dialog-trigger" role="menuitem">
                         <span class="adw-action-row-title">About</span>
                     </button>
-                    {# Add other menu items here if needed in the future #}
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('general.settings_page') }}" class="adw-action-row activatable" role="menuitem">
+                        <span class="adw-action-row-title">Settings</span>
+                    </a>
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin.view_flags') }}" class="adw-action-row activatable" role="menuitem">
+                        <span class="adw-action-row-title">Review Flags</span>
+                    </a>
+                    <a href="{{ url_for('admin.pending_users') }}" class="adw-action-row activatable" role="menuitem">
+                        <span class="adw-action-row-title">Pending Users</span>
+                    </a>
+                    {% endif %}
+                    <hr class="popover-divider">
+                    <a href="{{ url_for('auth.logout') }}" class="adw-action-row activatable" role="menuitem">
+                        <span class="adw-action-row-title">Logout</span>
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        {# Settings, Login/Logout #}
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('general.settings_page') }}" class="adw-button flat" title="Settings">Settings</a>
-            <a href="{{ url_for('auth.logout') }}" class="adw-button flat">Logout</a>
-        {% else %}
+        {# Login Button (Logout moved to menu) #}
+        {% if not current_user.is_authenticated %}
             <a href="{{ url_for('auth.login') }}" class="adw-button">Login</a>
         {% endif %}
     </div>
@@ -117,7 +140,7 @@
     <aside class="app-sidebar" id="app-sidebar"> {# Added id for ARIA #}
         {% if current_user.is_authenticated %}
         <div class="sidebar-profile-area">
-            <a href="{{ url_for('profile.view_profile', username=current_user.username) }}" class="sidebar-profile-avatar-link" title="View Profile">
+            <a href="{{ url_for('profile.view_profile', user_id=current_user.id) }}" class="sidebar-profile-avatar-link" title="View Profile">
                 <span class="adw-avatar size-large"> {# Changed to size-large #}
                     {% if current_user.profile_photo_url %}
                         <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Avatar">
@@ -159,24 +182,10 @@
                     <span class="adw-action-row-title">New Post</span>
                 </a>
                 <a href="{{ url_for('general.dashboard') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.dashboard' }}">
-                    <span class="adw-action-row-icon icon-apps-dashboard-symbolic"></span> {# Or a more generic icon #}
-                    <span class="adw-action-row-title">Dashboard</span>
+                    <span class="adw-action-row-icon icon-apps-dashboard-symbolic"></span> {# Or a more generic icon, icon-user-bookmarks-symbolic could fit "My Posts" #}
+                    <span class="adw-action-row-title">My Posts</span>
                 </a>
-            {% if current_user.is_admin %}
-                <a href="{{ url_for('admin.view_flags') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'admin.view_flags' }}">
-                    <span class="adw-action-row-icon icon-status-flag-symbolic"></span>
-                    <span class="adw-action-row-title">Review Flags</span>
-                </a>
-                <a href="{{ url_for('admin.site_settings') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'admin.site_settings' }}">
-                    <span class="adw-action-row-icon icon-actions-document-properties-symbolic"></span>
-                    <span class="adw-action-row-title">Site Settings</span>
-                </a>
-                <a href="{{ url_for('admin.pending_users') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'admin.pending_users' }}">
-                    <span class="adw-action-row-icon icon-community-users-symbolic"></span> {# Or similar relevant icon #}
-                    <span class="adw-action-row-title">Pending Users</span>
-                    {# Optionally, add a badge for count of pending users if available in context #}
-                </a>
-            {% endif %}
+            {# Admin links moved to dropdown menu #}
             {% endif %}
             {% endblock sidebar_nav %}
         </nav>
@@ -261,10 +270,53 @@
                         menuButton.setAttribute('aria-expanded', 'false');
                     } else {
                         menuPopover.removeAttribute('hidden');
-                        // CSS should handle visibility of popover via :not([hidden]) or a class toggled by JS if animations are complex.
-                        // For simplicity, direct attribute toggling is used. Add .open class if SCSS relies on it for animation.
-                        menuPopover.classList.add('open'); // Assuming SCSS uses .open for visibility/animation
+                        menuPopover.classList.add('open');
                         menuButton.setAttribute('aria-expanded', 'true');
+
+                        // Position the popover
+                        const buttonRect = menuButton.getBoundingClientRect();
+                        // Ensure popover is open and rendered to get accurate dimensions
+                        const popoverRect = menuPopover.getBoundingClientRect();
+
+                        let popTop = buttonRect.bottom + window.scrollY + 2; // Default below button
+                        let popLeft = buttonRect.right + window.scrollX - popoverRect.width; // Default: align right edges
+
+                        menuPopover.style.transformOrigin = 'top right'; // Default for right-aligned
+
+                        // Check if aligning right makes it go off-screen left
+                        if (popLeft < 0) {
+                            popLeft = buttonRect.left + window.scrollX; // Align left edges
+                            menuPopover.style.transformOrigin = 'top left';
+                        }
+
+                        // Check if it overflows right viewport edge (even after potential switch to left align)
+                        if (popLeft + popoverRect.width > window.innerWidth) {
+                            popLeft = window.innerWidth - popoverRect.width - 5; // 5px padding from edge
+                        }
+                         // Ensure it doesn't go off-screen left after all adjustments
+                        if (popLeft < 5) {
+                           popLeft = 5;
+                        }
+
+
+                        // Check if it overflows bottom viewport edge
+                        if (popTop + popoverRect.height > window.innerHeight) {
+                            popTop = buttonRect.top + window.scrollY - popoverRect.height - 2; // Place above button
+                            // Adjust transform origin if it flips above
+                            if (menuPopover.style.transformOrigin.includes('left')) {
+                                menuPopover.style.transformOrigin = 'bottom left';
+                            } else {
+                                menuPopover.style.transformOrigin = 'bottom right';
+                            }
+                        }
+                        // Ensure it doesn't go off-screen top
+                        if (popTop < 5) {
+                            popTop = 5; // 5px padding from edge
+                        }
+
+                        menuPopover.style.top = `${popTop}px`;
+                        menuPopover.style.left = `${popLeft}px`;
+
                         const firstFocusable = menuPopover.querySelector('[role="menuitem"]');
                         if (firstFocusable) {
                             firstFocusable.focus();

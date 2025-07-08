@@ -3,262 +3,226 @@
 # This script handles the initial setup of the database,
 # including table creation and initial user setup.
 
-import os
-import sys
 import argparse
-import getpass  # For hidden password input
+import getpass
+import importlib
+import os
+import re
+import sys
+
+import yaml
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine.url import make_url
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 # Adjust sys.path to allow imports from the app_demo package
-# when running this script directly.
-# This adds the parent directory of the script's directory (app-demo) to sys.path,
-# which is the project root.
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-import importlib
-
 # Import create_app and necessary models/db instance
-# The actual directory/package name is 'app-demo'
-# We use importlib to load it because of the hyphen.
 app_module = importlib.import_module("app-demo")
 create_app = app_module.create_app
 db = app_module.db
 User = app_module.models.User
-SiteSetting = app_module.models.SiteSetting # Import SiteSetting
+SiteSetting = app_module.models.SiteSetting
 
 
-def create_initial_user(flask_app):
-    """
-    Handles the creation or password update of an initial (admin) user.
-    Requires an active application context.
-    """
-    print("\nStarting initial user setup...")
-    script_args = flask_app.config.get('SETUP_DB_SCRIPT_ARGS') # Get args passed to the script
+def is_valid_email(email):
+    """A simple regex check for email format validation."""
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
-    is_interactive = not (script_args and script_args.admin_user and script_args.admin_pass)
-    username = ""
-    password = ""
-    full_name_val = ""
-    profile_info = None
 
-    if not is_interactive:
-        username = script_args.admin_user
-        password = script_args.admin_pass
-        full_name_val = script_args.admin_fullname if script_args.admin_fullname else username # Default full_name to username
-        profile_info = script_args.admin_bio
-        print(f"Non-interactive mode: Creating/updating admin user '{username}' with display name '{full_name_val}'.")
+def _create_or_update_user(username, password, full_name, bio, is_admin=False):
+    """Creates a new user or updates an existing user's password."""
+    if not is_valid_email(username):
+        print(f"Error: Invalid email format for username '{username}'. Skipping.")
+        return
+
+    existing_user = User.query.filter_by(username=username).first()
+
+    if existing_user:
+        print(f"User '{username}' already exists. Updating password and info.")
+        existing_user.set_password(password)
+        existing_user.full_name = full_name
+        existing_user.profile_info = bio
     else:
-        default_username = "admin"
-        try:
-            username_input = input(
-                f"Enter username for the initial user (default: {default_username}): "
-            )
-            username = username_input if username_input else default_username
-        except EOFError:  # Handle non-interactive environment
-            print(f"No input provided, using default username: {default_username}")
-            username = default_username
-
-    # This function is called with app, and establishes its own context for DB operations
-    with flask_app.app_context():
-        existing_user = User.query.filter_by(username=username).first()
-
-        if existing_user:
-            print(f"User '{username}' already exists.")
-            if not is_interactive: # Non-interactive: always update password and full_name if provided
-                print(f"Updating password and display name for user '{username}'.")
-                existing_user.set_password(password)
-                existing_user.full_name = full_name_val # Update full_name
-                if profile_info is not None: # Update bio if provided
-                    existing_user.profile_info = profile_info
-                db.session.commit()
-                print(f"User '{username}' updated non-interactively.")
-            else: # Interactive: ask to update
-                # For interactive mode, we assume full_name is handled by profile edit,
-                # but if user wants to update password, we could also ask for full_name if it's empty.
-                # For now, keeping interactive update focused on password as before.
-                # The main requirement is for *new* user creation.
-                try:
-                    update_choice = input(
-                        "Do you want to update the password for this user? (y/n): "
-                    ).lower()
-                    if update_choice == "y":
-                        print(f"Updating password for user '{username}'.")
-                        new_password = getpass.getpass("Enter new password: ")
-                        if not new_password:
-                            print("Password cannot be empty. Aborting password update.")
-                            return
-                        new_password_confirm = getpass.getpass("Confirm new password: ")
-                        if new_password != new_password_confirm:
-                            print("Passwords do not match. Aborting password update.")
-                            return
-                        existing_user.set_password(new_password)
-                        db.session.commit()
-                        print(f"Password for user '{username}' updated successfully.")
-                    else:
-                        print(f"Password for user '{username}' not updated.")
-                except EOFError:
-                    print("Skipping password update for existing user in non-interactive mode.")
-            return
-
-        # Create new user
         print(f"Creating new user: '{username}'")
-        if is_interactive:
-            try:
-                password = getpass.getpass("Enter password: ")
-                if not password:
-                    print("Password cannot be empty. Aborting user creation.")
-                    return
-                password_confirm = getpass.getpass("Confirm password: ")
-                if password != password_confirm:
-                    print("Passwords do not match. Aborting user creation.")
-                    return
-
-                while not full_name_val:
-                    full_name_val = input(f"Enter Display Name for '{username}': ").strip()
-                    if not full_name_val:
-                        print("Display Name cannot be empty.")
-
-                profile_info_input = input(
-                    f"Enter profile information for '{username}' (optional, press Enter to skip): "
-                )
-                profile_info = profile_info_input if profile_info_input else None
-            except EOFError:
-                print("Cannot create user interactively without required inputs. Please run interactively or use args.")
-                return
-
-        # For both interactive and non-interactive new user creation
         new_user = User(
             username=username,
-            full_name=full_name_val, # Use gathered full_name
-            profile_info=profile_info,
-            is_admin=True,  # Initial user is admin
-            is_approved=True, # Admin user is auto-approved
-            is_active=True    # Admin user is auto-active
+            full_name=full_name,
+            profile_info=bio,
+            is_admin=is_admin,
+            is_approved=True,
+            is_active=True,
         )
         new_user.set_password(password)
         db.session.add(new_user)
-
-        # Set default site settings on initial user creation if non-interactive
-        if not is_interactive:
-            print(f"DEBUG: Setting initial site settings for non-interactive setup.")
-            SiteSetting.set('site_title', 'Adwaita Social Demo', 'string')
-            SiteSetting.set('posts_per_page', 10, 'int')
-            SiteSetting.set('allow_registrations', True, 'bool')
-            print(f"DEBUG: allow_registrations set to True.")
-
-        db.session.commit()
-        print(f"User '{username}' created successfully and set as admin, approved, and active.")
+    db.session.commit()
+    print(f"User '{username}' processed successfully.")
 
 
-def delete_database_tables(flask_app, script_args):
-    """
-    Drops all known tables from the database.
-    Handles interactive confirmation or non-interactive deletion based on script_args.
-    Requires an active application context.
-    Returns True if deletion occurred, False otherwise.
-    """
-    is_non_interactive_delete = script_args.deletedb and script_args.admin_user and script_args.admin_pass
+def _get_interactive_user_input():
+    """Handles the interactive prompts for creating a single admin user."""
+    default_email = "admin@example.com"
+    username = ""
+    while not username:
+        email_input = input(
+            f"Enter email address for the initial admin user (default: {default_email}): "
+        ).strip()
+        username = email_input or default_email
+        if not is_valid_email(username):
+            print("Invalid email format. Please try again.")
+            username = ""
 
-    if is_non_interactive_delete:
-        print("Non-interactive mode: Deleting all database tables as --deletedb is present with admin creation flags.")
-        with flask_app.app_context():
-            db.drop_all()
-        print("All tables deleted non-interactively.")
-        return True
-    elif script_args.deletedb: # Interactive deletion
+    password = getpass.getpass("Enter password: ")
+    if not password:
+        print("Password cannot be empty. Aborting.")
+        return None
+    password_confirm = getpass.getpass("Confirm password: ")
+    if password != password_confirm:
+        print("Passwords do not match. Aborting.")
+        return None
+
+    full_name = ""
+    while not full_name:
+        full_name = input(f"Enter Display Name for '{username}': ").strip()
+        if not full_name:
+            print("Display Name cannot be empty.")
+
+    bio = input(f"Enter profile information for '{username}' (optional): ").strip()
+
+    return {
+        "username": username,
+        "password": password,
+        "full_name": full_name,
+        "bio": bio,
+        "is_admin": True,
+    }
+
+
+def process_config_users(users_config):
+    """Processes a list of users from the configuration file."""
+    print("\nProcessing users from configuration file...")
+    if not users_config:
+        print("No users found in configuration.")
+        return
+
+    for user_data in users_config:
+        _create_or_update_user(
+            username=user_data["username"],
+            password=user_data["password"],
+            full_name=user_data["full_name"],
+            bio=user_data.get("bio", ""),
+            is_admin=user_data.get("is_admin", False),
+        )
+
+
+def _execute_sql_on_maintenance_db(db_uri_string, sql_command):
+    """Connects to the default 'postgres' database to run a command."""
+    try:
+        url = make_url(db_uri_string)
+        maintenance_db_url = url._replace(database="postgres")
+        engine = create_engine(maintenance_db_url)
+        with engine.connect() as connection:
+            connection = connection.execution_options(isolation_level="AUTOCOMMIT")
+            connection.execute(text(sql_command))
+        print(f"Successfully executed: {sql_command}")
+    except ProgrammingError as e:
+        print(f"Info: {e.orig}")
+    except OperationalError as e:
+        print(f"Error connecting to the maintenance database: {e}")
+        print("Please ensure the PostgreSQL server is running and accessible.")
+        sys.exit(1)
+
+
+def delete_database(db_uri):
+    """Drops the target database."""
+    url = make_url(db_uri)
+    db_name = url.database
+    print(f"Attempting to drop database '{db_name}'...")
+    _execute_sql_on_maintenance_db(db_uri, f'DROP DATABASE IF EXISTS "{db_name}"')
+
+
+def ensure_database_exists(db_uri):
+    """Creates the target database if it does not already exist."""
+    url = make_url(db_uri)
+    db_name = url.database
+    print(f"Ensuring database '{db_name}' exists...")
+    _execute_sql_on_maintenance_db(db_uri, f'CREATE DATABASE "{db_name}"')
+
+
+def main(args):
+    """Main script execution logic."""
+    config = None
+    if args.config:
         try:
-            confirm = input("Are you sure you want to delete all database tables? This cannot be undone. (yes/no): ").lower()
-            if confirm == 'yes':
-                print("Deleting database tables...")
-                with flask_app.app_context():
-                    db.drop_all()
-                print("All tables deleted.")
-                return True
+            with open(args.config, "r") as f:
+                config = yaml.safe_load(f)
+            print(f"Loaded configuration from '{args.config}'.")
+        except FileNotFoundError:
+            print(
+                f"Warning: Config file '{args.config}' not found. Proceeding with interactive setup."
+            )
+        except yaml.YAMLError as e:
+            print(f"Error parsing YAML file: {e}")
+            sys.exit(1)
+
+    # Use the URI from the config file, or None if no config is provided.
+    # This will let create_app use its own default if the URI isn't in the config.
+    db_uri_from_config = config.get("database", {}).get("uri") if config else None
+
+    # Create a single app instance that will be used for all operations.
+    app = create_app(db_uri_from_config)
+    db_uri = app.config["SQLALCHEMY_DATABASE_URI"]
+
+    if args.deletedb:
+        delete_database(db_uri)
+
+    ensure_database_exists(db_uri)
+
+    # Use the app's context for all database operations.
+    with app.app_context():
+        print("Initializing database tables...")
+        db.create_all()
+        print("Tables created successfully.")
+
+        if config and "site_settings" in config:
+            print("Applying site settings from configuration file...")
+            for key, value_info in config["site_settings"].items():
+                SiteSetting.set(key, value_info["value"], value_info["type"])
+        else:
+            if SiteSetting.query.first() is None:
+                print("Setting default site settings...")
+                SiteSetting.set("site_title", "Adwaita Social Demo", "string")
+                SiteSetting.set("posts_per_page", 10, "int")
+                SiteSetting.set("allow_registrations", True, "bool")
+
+        if not args.skipuser:
+            if config and "users" in config:
+                process_config_users(config["users"])
             else:
-                print("Table deletion cancelled.")
-                return False
-        except EOFError:
-            print("Non-interactive mode (--deletedb without admin args): Cannot confirm table deletion. Aborting.")
-            return False
-    return False # No deletion was triggered or completed
+                user_data = _get_interactive_user_input()
+                if user_data:
+                    _create_or_update_user(**user_data)
+        else:
+            print("Skipping user setup as per --skipuser flag.")
+
+    print("\nDatabase setup process complete.")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Manage the application database.")
     parser.add_argument(
-        '--deletedb',
-        action='store_true',
-        help='Delete all database tables. Warning: This is destructive and requires confirmation.'
+        "--config", help="Path to a YAML configuration file for non-interactive setup."
     )
     parser.add_argument(
-        '--skipuser',
-        action='store_true',
-        help='Skip initial user setup/update.'
+        "--deletedb",
+        action="store_true",
+        help="Delete the database file before setup. Warning: This is destructive.",
     )
-    parser.add_argument('--admin-user', help='Set initial admin username non-interactively.')
-    parser.add_argument('--admin-pass', help='Set initial admin password non-interactively.')
-    # --admin-bio is less relevant now full_name is mandatory. Let's use admin-user for full_name if not specified.
-    # For more control, a dedicated --admin-fullname could be added.
-    # For now, will default full_name to admin_user for non-interactive.
-    parser.add_argument('--admin-fullname', help='Set initial admin display name (full_name) non-interactively (optional, defaults to admin-user).')
-    parser.add_argument('--admin-bio', help='Set initial admin bio non-interactively (optional).')
+    parser.add_argument("--skipuser", action="store_true", help="Skip initial user setup/update.")
 
-    # --skiptables is implicitly handled: if --deletedb is not followed by explicit creation, tables remain deleted.
-    # The create_all() call below will ensure tables are present unless deleted and not recreated.
-
-    args = parser.parse_args()
-
-    # Validate non-interactive admin creation args
-    if (args.admin_user and not args.admin_pass) or (not args.admin_user and args.admin_pass):
-        parser.error("--admin-user and --admin-pass must be used together.")
-
-    print("Starting database setup...")
-
-    # Instantiate the app using the factory
-    print("DEBUG: About to call create_app()")
-    app = create_app()
-    print("DEBUG: create_app() returned")
-    app.config['SETUP_DB_SCRIPT_ARGS'] = args # Pass script args to app config
-    print(f"DEBUG: Script args set in app.config: {args}")
-
-    if args.deletedb:
-        print("DEBUG: --deletedb flag is present. Calling delete_database_tables()")
-        delete_database_tables(app, args)
-        print("DEBUG: delete_database_tables() returned")
-
-
-    # Always ensure tables exist by this point, creating them if necessary.
-    # This will create tables if they don't exist, or do nothing if they do.
-    # If --deletedb was used and tables were dropped, this will recreate them.
-    print("DEBUG: About to enter app_context for db.create_all()")
-    with app.app_context():
-        print("DEBUG: Entered app_context. Calling db.create_all()...")
-        db.create_all()
-        print("DEBUG: db.create_all() returned.")
-    print("DEBUG: Exited app_context for db.create_all()")
-
-    # Initialize default site settings if they don't exist
-    with app.app_context():
-        print("DEBUG: Checking/Initializing default site settings...")
-        if SiteSetting.query.filter_by(key='allow_registrations').first() is None:
-            SiteSetting.set('allow_registrations', True, 'bool')
-            print("DEBUG: Default 'allow_registrations' set to True as it was missing.")
-        if SiteSetting.query.filter_by(key='site_title').first() is None:
-            SiteSetting.set('site_title', 'Adwaita Social Demo', 'string')
-        if SiteSetting.query.filter_by(key='posts_per_page').first() is None:
-            SiteSetting.set('posts_per_page', 10, 'int')
-        # Ensure commit if SiteSetting.set doesn't commit itself (original did, current one in models.py does)
-        # db.session.commit() # Not needed if SiteSetting.set commits
-
-    if not args.skipuser:
-        print("DEBUG: --skipuser is false. Calling create_initial_user()")
-        # The create_initial_user function might also set allow_registrations True
-        # for non-interactive, which is fine (idempotent or last-write wins).
-        create_initial_user(app) # This function handles its own app context and gets args from app.config
-        print("DEBUG: create_initial_user() returned")
-    else:
-        print("Skipping initial user setup as per --skipuser flag.")
-
-    print("\nDatabase setup process complete.")
+    cli_args = parser.parse_args()
+    main(cli_args)

@@ -23,11 +23,10 @@
                 <article class="adw-card blog-post-item-card">
                     <header class="blog-post-card__header">
                         <h2 class="adw-title-2 blog-post-card__title">
-                            <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-link">{{ post.title }}</a>
+                            <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-link">Post by {{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>
                         </h2>
                         <div class="blog-post-card__meta adw-label caption">
-                            By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
-                            on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
+                            On <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
                         </div>
                     </header>
                     {% if post.content %}

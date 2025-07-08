@@ -15,12 +15,12 @@ from ..utils import allowed_file_util, flash_form_errors_util, ALLOWED_TAGS_CONF
 
 profile_bp = Blueprint('profile', __name__, url_prefix='/profile')
 
-@profile_bp.route('/<username>')
+@profile_bp.route('/<int:user_id>')
 @login_required
-def view_profile(username):
+def view_profile(user_id):
     # Ensure datetime is available; moved back to top-level import.
-    current_app.logger.debug(f"Accessing profile for {username}, requested by {current_user.username}")
-    user_profile = User.query.filter_by(username=username).first_or_404()
+    current_app.logger.debug(f"Accessing profile for user_id {user_id}, requested by {current_user.username}")
+    user_profile = User.query.filter_by(id=user_id).first_or_404()
     current_app.logger.debug(f"Displaying profile for '{user_profile.username}' (ID: {user_profile.id}).")
 
     calculated_age = None
@@ -55,7 +55,11 @@ def view_profile(username):
 
     comments_page = request.args.get('comments_page', 1, type=int)
     comments_per_page = 5
-    comments_query = Comment.query.filter_by(user_id=user_profile.id).order_by(Comment.created_at.desc())
+    # Filter for comments made by the user that are specifically on posts
+    comments_query = Comment.query.filter_by(
+        user_id=user_profile.id,
+        target_type='post' # Ensure we only fetch comments on posts
+    ).order_by(Comment.created_at.desc())
     try:
         comments_pagination = comments_query.paginate(page=comments_page, per_page=comments_per_page, error_out=False)
         current_app.logger.debug(f"Found {len(comments_pagination.items)} comments by '{user_profile.username}' for comments_page {comments_page} (total: {comments_pagination.total}).")
@@ -194,7 +198,7 @@ def edit_profile():
             db.session.rollback()
             current_app.logger.error(f"Error saving profile to DB for {current_user.username}: {e}", exc_info=True)
             flash(f'Error saving profile changes: {str(e)}', 'danger')
-        return redirect(url_for('profile.view_profile', username=current_user.username))
+        return redirect(url_for('profile.view_profile', user_id=current_user.id))
 
     elif request.method == 'POST':
         current_app.logger.warning(f"Edit profile form validation failed for {current_user.username}. Errors: {form.errors}")
@@ -207,45 +211,94 @@ def edit_profile():
 @login_required
 def upload_gallery_photo():
     form = GalleryPhotoUploadForm()
-    form.photo.validators.append(FileAllowed(current_app.config['ALLOWED_EXTENSIONS'], 'Images only!'))
+    # For MultipleFileField, FileAllowed needs to be applied carefully,
+    # often it's better to validate each file in the loop.
+    # However, we can add it to the form field directly if wtforms handles it for each file.
+    # Let's assume FileAllowed on MultipleFileField checks each file.
+    # If not, the loop below will catch it.
+    form.photos.validators.append(FileAllowed(current_app.config['ALLOWED_EXTENSIONS'], 'Images only!'))
+
     if form.validate_on_submit():
-        file = form.photo.data
-        caption = form.caption.data
-        file.stream.seek(0, os.SEEK_END)
-        actual_file_size = file.stream.tell()
-        file.stream.seek(0)
-        if actual_file_size > current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES']:
-            max_size_mb = current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES'] // 1024 // 1024
-            flash(f"Gallery photo is too large. Maximum size is {max_size_mb}MB.", "danger")
-            return redirect(url_for('profile.view_profile', username=current_user.username))
-        try:
-            original_filename = secure_filename(file.filename)
+        uploaded_count = 0
+        failed_count = 0
+        caption = form.caption.data  # Common caption for the batch
+
+        for file_storage in form.photos.data:
+            if not file_storage or not file_storage.filename:
+                failed_count += 1
+                current_app.logger.warning(f"Empty file storage object encountered in batch upload for user {current_user.id}.")
+                continue
+
+            # Check file size (important to do this early)
+            file_storage.stream.seek(0, os.SEEK_END)
+            actual_file_size = file_storage.stream.tell()
+            file_storage.stream.seek(0) # Reset stream position
+
+            if actual_file_size == 0: # Skip empty files that might pass initial checks
+                failed_count +=1
+                current_app.logger.warning(f"Skipped empty file: {secure_filename(file_storage.filename)} for user {current_user.id}")
+                continue
+
+
+            if actual_file_size > current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES']:
+                max_size_mb = current_app.config['MAX_GALLERY_PHOTO_SIZE_BYTES'] // 1024 // 1024
+                flash(f"Photo '{secure_filename(file_storage.filename)}' is too large. Maximum size is {max_size_mb}MB.", "danger")
+                failed_count += 1
+                continue
+
+            original_filename = secure_filename(file_storage.filename)
             ext = original_filename.rsplit('.', 1)[-1].lower() if '.' in original_filename else ''
+
             if not ext or ext not in current_app.config['ALLOWED_EXTENSIONS']:
-                flash(f"Invalid file type. Allowed types: {', '.join(current_app.config['ALLOWED_EXTENSIONS'])}.", 'warning')
-                return redirect(url_for('profile.view_profile', username=current_user.username))
-            unique_filename_stem = uuid.uuid4().hex
-            unique_filename = f"{unique_filename_stem}.{ext}"
-            user_gallery_folder_name = str(current_user.id)
-            user_specific_folder_abs = os.path.join(current_app.config['GALLERY_UPLOAD_FOLDER'], user_gallery_folder_name)
-            os.makedirs(user_specific_folder_abs, exist_ok=True)
-            save_path = os.path.join(user_specific_folder_abs, unique_filename)
-            file.save(save_path)
-            if os.path.exists(save_path):
-                db_image_path = os.path.join(user_gallery_folder_name, unique_filename).replace("\\", "/")
-                new_photo = UserPhoto(user_id=current_user.id, image_filename=db_image_path, caption=caption)
-                db.session.add(new_photo)
+                flash(f"Invalid file type for '{original_filename}'. Allowed types: {', '.join(current_app.config['ALLOWED_EXTENSIONS'])}.", 'warning')
+                failed_count += 1
+                continue
+
+            try:
+                unique_filename_stem = uuid.uuid4().hex
+                unique_filename = f"{unique_filename_stem}.{ext}"
+                user_gallery_folder_name = str(current_user.id)
+                user_specific_folder_abs = os.path.join(current_app.config['GALLERY_UPLOAD_FOLDER'], user_gallery_folder_name)
+                os.makedirs(user_specific_folder_abs, exist_ok=True)
+                save_path = os.path.join(user_specific_folder_abs, unique_filename)
+
+                file_storage.save(save_path) # Use FileStorage's save method
+
+                if os.path.exists(save_path):
+                    db_image_path = os.path.join(user_gallery_folder_name, unique_filename).replace("\\", "/")
+                    new_photo = UserPhoto(user_id=current_user.id, image_filename=db_image_path, caption=caption)
+                    db.session.add(new_photo)
+                    uploaded_count += 1
+                else:
+                    flash(f"Error saving photo '{original_filename}': File could not be written to disk.", 'danger')
+                    failed_count += 1
+            except Exception as e:
+                current_app.logger.error(f"Exception during gallery photo processing for {original_filename}: {e}", exc_info=True)
+                flash(f"Error processing gallery photo '{original_filename}': {str(e)}", 'danger')
+                failed_count += 1
+
+        if uploaded_count > 0:
+            try:
                 db.session.commit()
-                flash('Photo uploaded to gallery successfully!', 'toast_success')
-            else:
-                flash('Error saving photo: File could not be written to disk.', 'danger')
-        except Exception as e:
-            current_app.logger.error(f"Exception during gallery photo processing: {e}", exc_info=True)
-            flash(f'Error processing gallery photo: {str(e)}', 'danger')
-    else:
-        # flash_form_errors_util already uses 'danger'
-        flash_form_errors_util(form)
-    return redirect(url_for('profile.view_profile', username=current_user.username))
+                flash(f'{uploaded_count} photo(s) uploaded to gallery successfully!', 'toast_success')
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Database commit failed after uploading {uploaded_count} photos: {e}", exc_info=True)
+                flash('Database error after uploading photos. Some uploads may not have been saved.', 'danger')
+                # uploaded_count might not reflect actual DB saves here.
+
+        if failed_count > 0:
+            flash(f'{failed_count} photo(s) failed to upload.', 'warning')
+
+        if uploaded_count == 0 and failed_count == 0 and form.photos.data:
+             # This case might happen if all files were empty or some other edge case not caught above
+            flash('No photos were uploaded. Please ensure files are selected and not empty.', 'info')
+
+
+    else: # Form validation failed
+        flash_form_errors_util(form) # This helper flashes 'danger' messages
+
+    return redirect(url_for('profile.view_profile', user_id=current_user.id))
 
 
 @profile_bp.route('/gallery/delete/<int:photo_id>', methods=['POST'])
@@ -266,71 +319,96 @@ def delete_gallery_photo(photo_id):
         db.session.rollback()
         current_app.logger.error(f"Error deleting gallery photo ID {photo_id}: {e}", exc_info=True)
         flash(f'Error deleting photo: {str(e)}', 'danger')
-    return redirect(url_for('profile.view_profile', username=photo.user.username if photo.user else current_user.username))
+    return redirect(url_for('profile.view_profile', user_id=photo.user.id if photo.user else current_user.id))
 
 
-@profile_bp.route('/<username>/gallery')
+@profile_bp.route('/<int:user_id>/gallery')
 @login_required
-def view_gallery(username):
-    user_profile = User.query.filter_by(username=username).first_or_404()
+def view_gallery(user_id):
+    user_profile = User.query.filter_by(id=user_id).first_or_404()
     if not user_profile.is_profile_public and user_profile != current_user:
         flash("This profile's gallery is private.", "danger")
         abort(403)
-    gallery_photos = user_profile.gallery_photos.order_by(UserPhoto.uploaded_at.desc()).all()
-    return render_template('gallery_full.html', user_profile=user_profile, gallery_photos=gallery_photos)
+
+    page = request.args.get('page', 1, type=int)
+    # Use a specific config for gallery items per page, or fallback to POSTS_PER_PAGE or a default
+    per_page = current_app.config.get('GALLERY_PHOTOS_PER_PAGE', 12) # Example: 12 photos per page
+
+    gallery_photos_query = user_profile.gallery_photos.order_by(UserPhoto.uploaded_at.desc())
+    try:
+        gallery_photos_page = gallery_photos_query.paginate(page=page, per_page=per_page, error_out=False)
+    except Exception as e:
+        current_app.logger.error(f"Error fetching gallery photos for profile {user_profile.username} (page {page}): {e}", exc_info=True)
+        flash("Error loading gallery photos.", "danger")
+        gallery_photos_page = None
+
+    return render_template('gallery_full.html', user_profile=user_profile, gallery_photos_page=gallery_photos_page)
 
 
-@profile_bp.route('/follow/<username>', methods=['POST'])
+@profile_bp.route('/follow/<int:user_id>', methods=['POST'])
 @login_required
-def follow_user(username):
-    user_to_follow = User.query.filter_by(username=username).first_or_404()
+def follow_user(user_id):
+    user_to_follow = User.query.filter_by(id=user_id).first_or_404()
     if user_to_follow == current_user:
         flash("You cannot follow yourself.", "warning")
-        return redirect(url_for('profile.view_profile', username=username))
+        return redirect(url_for('profile.view_profile', user_id=user_id))
     if current_user.is_following(user_to_follow):
-        flash(f"You are already following {username}.", "info")
+        flash(f"You are already following {user_to_follow.username}.", "info")
     else:
         if current_user.follow(user_to_follow):
-            from ..models import Notification # Local import
-            notification = Notification(user_id=user_to_follow.id, actor_id=current_user.id, type='new_follower')
+            from ..models import Notification, Activity # Local import
+            # Notification for the user being followed
+            notification = Notification(
+                user_id=user_to_follow.id,  # User receiving the notification
+                actor_id=current_user.id,   # User who performed the action
+                type='new_follower'
+                # target_type='user',       # Optionally, target could be the actor (current_user)
+                # target_id=current_user.id
+            )
             db.session.add(notification)
-            from ..models import Activity # Local import
-            activity = Activity(user_id=current_user.id, type='started_following', target_user_id=user_to_follow.id)
+
+            # Activity by the current user
+            activity = Activity(
+                user_id=current_user.id,    # User who performed the action
+                type='started_following',
+                target_type='user',         # Target of the action is the user being followed
+                target_id=user_to_follow.id
+            )
             db.session.add(activity)
             db.session.commit()
-            flash(f"You are now following {username}.", "toast_success")
+            flash(f"You are now following {user_to_follow.username}.", "toast_success")
         else:
-            flash(f"Could not follow {username}. An unexpected error occurred or it was a self-follow.", "danger")
+            flash(f"Could not follow {user_to_follow.username}. An unexpected error occurred or it was a self-follow.", "danger")
             db.session.rollback()
-    return redirect(url_for('profile.view_profile', username=username))
+    return redirect(url_for('profile.view_profile', user_id=user_id))
 
 
-@profile_bp.route('/unfollow/<username>', methods=['POST'])
+@profile_bp.route('/unfollow/<int:user_id>', methods=['POST'])
 @login_required
-def unfollow_user(username):
-    user_to_unfollow = User.query.filter_by(username=username).first_or_404()
+def unfollow_user(user_id):
+    user_to_unfollow = User.query.filter_by(id=user_id).first_or_404()
     if user_to_unfollow == current_user:
         flash("You cannot unfollow yourself.", "warning")
-        return redirect(url_for('profile.view_profile', username=username))
+        return redirect(url_for('profile.view_profile', user_id=user_id))
     if not current_user.is_following(user_to_unfollow):
-        flash(f"You are not currently following {username}.", "info")
+        flash(f"You are not currently following {user_to_unfollow.username}.", "info")
     else:
         if current_user.unfollow(user_to_unfollow):
             db.session.commit()
-            flash(f"You have unfollowed {username}.", "toast_success")
+            flash(f"You have unfollowed {user_to_unfollow.username}.", "toast_success")
         else:
-            flash(f"Could not unfollow {username}. An unexpected error occurred.", "danger")
+            flash(f"Could not unfollow {user_to_unfollow.username}. An unexpected error occurred.", "danger")
             db.session.rollback()
-    return redirect(url_for('profile.view_profile', username=username))
+    return redirect(url_for('profile.view_profile', user_id=user_id))
 
 
-@profile_bp.route('/<username>/followers')
+@profile_bp.route('/<int:user_id>/followers')
 @login_required
-def followers_list(username):
-    user = User.query.filter_by(username=username).first_or_404()
+def followers_list(user_id):
+    user = User.query.filter_by(id=user_id).first_or_404()
     if not user.is_profile_public and user != current_user:
         flash("This user's connections are private.", "danger")
-        return redirect(url_for('profile.view_profile', username=username))
+        return redirect(url_for('profile.view_profile', user_id=user_id))
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 15)
     followers_query = user.followers.order_by(User.username.asc())
@@ -344,13 +422,13 @@ def followers_list(username):
     return render_template('followers_list.html', user_profile=user, users_list=users_list, pagination=pagination, list_type="Followers")
 
 
-@profile_bp.route('/<username>/following')
+@profile_bp.route('/<int:user_id>/following')
 @login_required
-def following_list(username):
-    user = User.query.filter_by(username=username).first_or_404()
+def following_list(user_id):
+    user = User.query.filter_by(id=user_id).first_or_404()
     if not user.is_profile_public and user != current_user:
         flash("This user's connections are private.", "danger")
-        return redirect(url_for('profile.view_profile', username=username))
+        return redirect(url_for('profile.view_profile', user_id=user_id))
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 15)
     following_query = user.followed.order_by(User.username.asc())
