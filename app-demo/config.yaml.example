@@ -40,8 +40,9 @@ COMMENTS_PER_PAGE: 20 # Example for comments pagination
 NOTIFICATIONS_PER_PAGE: 15
 
 # File Upload Configuration
-UPLOAD_FOLDER: "app-demo/static/uploads/profile_pics" # Relative to project root for app context
-GALLERY_UPLOAD_FOLDER: "app-demo/static/uploads/gallery_photos" # Relative to project root
+# Paths should be relative to the 'static' folder.
+UPLOAD_FOLDER: "uploads/profile_pics" # e.g., app-demo/static/uploads/profile_pics
+GALLERY_UPLOAD_FOLDER: "uploads/gallery_photos" # e.g., app-demo/static/uploads/gallery_photos
 MAX_PROFILE_PHOTO_SIZE_BYTES: 2097152    # 2MB
 MAX_GALLERY_PHOTO_SIZE_BYTES: 10485760   # 10MB
 ALLOWED_EXTENSIONS: ['png', 'jpg', 'jpeg', 'gif', 'webp']

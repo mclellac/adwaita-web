@@ -246,3 +246,139 @@ def update_post_relations_util(post, form_data, current_user_id, is_new_post=Fal
     # Note: db.session.commit() should be handled by the calling route function
     # after all updates are done. This utility should not commit itself.
     return post
+
+
+# New file upload utility
+import os
+import uuid
+from PIL import Image # Ensure Pillow is installed: pip install Pillow
+from werkzeug.utils import secure_filename
+from flask import current_app, flash
+
+# Assuming allowed_file_util is already defined in this file or imported.
+# If not, it should be:
+# def allowed_file_util(filename):
+#     """Checks if the filename has an allowed extension."""
+#     return '.' in filename and \
+#            filename.rsplit('.', 1)[1].lower() in current_app.config.get('ALLOWED_EXTENSIONS', [])
+
+
+def save_uploaded_file(
+    file_storage_object,
+    upload_type,
+    base_upload_path_config_key,
+    max_size_bytes_config_key,
+    current_user_id=None,
+    crop_coords=None,
+    thumbnail_size=None,
+    existing_db_path=None
+):
+    """
+    Handles common logic for validating and saving uploaded files.
+    Returns a path relative to app.static_folder for DB storage, or None.
+    """
+    if not file_storage_object or not file_storage_object.filename:
+        # flash("No file selected.", "warning") # Route should handle "no file if optional"
+        return None # Or a specific indicator like "NO_FILE_PROVIDED"
+
+    filename = secure_filename(file_storage_object.filename)
+
+    if not allowed_file_util(filename):
+        allowed_ext_list = current_app.config.get('ALLOWED_EXTENSIONS', [])
+        flash(f"Invalid file type: '{filename.rsplit('.', 1)[-1] if '.' in filename else 'unknown'}'. Allowed types are {', '.join(allowed_ext_list)}.", 'danger')
+        return None
+
+    file_size = file_storage_object.content_length
+    max_size_bytes = current_app.config.get(max_size_bytes_config_key)
+
+    if file_size is None:
+        current_app.logger.warning(f"Could not determine file size via content_length for {upload_type} upload: {filename}. This might bypass size checks if not handled by client-side validation.")
+        # Consider adding a server-side stream read size check as a fallback if this is a concern.
+    elif max_size_bytes is not None and file_size > max_size_bytes:
+        max_size_mb = max_size_bytes // 1024 // 1024
+        flash(f"File for {upload_type.replace('_', ' ')} is too large ({(file_size / 1024 / 1024):.2f}MB). Max size: {max_size_mb}MB.", 'danger')
+        return None
+
+    ext = filename.rsplit('.', 1)[-1].lower()
+    unique_stem = uuid.uuid4().hex if upload_type == "gallery_photo" else str(uuid.uuid4())
+    unique_filename = f"{unique_stem}.{ext}"
+
+    relative_base_path = current_app.config.get(base_upload_path_config_key)
+    if not relative_base_path:
+        current_app.logger.error(f"Upload path config key '{base_upload_path_config_key}' not found or empty in app config.")
+        flash("Server configuration error for file uploads. Path not configured.", "danger")
+        return None
+
+    final_save_dir_abs = os.path.join(current_app.static_folder, relative_base_path)
+    db_path_prefix = relative_base_path
+
+    if upload_type == "gallery_photo" and current_user_id is not None:
+        user_specific_folder_name = str(current_user_id)
+        final_save_dir_abs = os.path.join(final_save_dir_abs, user_specific_folder_name)
+        db_path_prefix = os.path.join(db_path_prefix, user_specific_folder_name)
+
+    try:
+        os.makedirs(final_save_dir_abs, exist_ok=True)
+    except OSError as e:
+        current_app.logger.error(f"Could not create directory {final_save_dir_abs}: {e}", exc_info=True)
+        flash("Error creating upload directory on server.", "danger")
+        return None
+
+    save_path_abs = os.path.join(final_save_dir_abs, unique_filename)
+
+    try:
+        file_storage_object.stream.seek(0)
+        if upload_type == "profile_photo" and (crop_coords or thumbnail_size):
+            img = Image.open(file_storage_object.stream)
+            if crop_coords and crop_coords.get('width', 0) > 0 and crop_coords.get('height', 0) > 0:
+                try:
+                    x = int(float(crop_coords['x']))
+                    y = int(float(crop_coords['y']))
+                    w = int(float(crop_coords['width']))
+                    h = int(float(crop_coords['height']))
+                    img = img.crop((x, y, x + w, y + h))
+                except (ValueError, TypeError, KeyError) as e_crop:
+                    current_app.logger.warning(f"Invalid crop coordinates for profile photo: {crop_coords}. Error: {e_crop}")
+                    flash("Invalid crop coordinates provided. Photo processed without custom cropping.", "warning")
+
+            if thumbnail_size:
+                img.thumbnail(thumbnail_size, Image.Resampling.LANCZOS) # Use LANCZOS for better quality
+
+            if ext in ['jpg', 'jpeg'] and img.mode == 'RGBA':
+                img = img.convert('RGB')
+            img.save(save_path_abs)
+        else:
+            file_storage_object.save(save_path_abs)
+
+        if not os.path.exists(save_path_abs):
+            current_app.logger.error(f"Failed to save file to disk at {save_path_abs} for {upload_type}.")
+            flash(f"Error saving {upload_type.replace('_', ' ')}: File could not be written to disk.", "danger")
+            return None
+
+        # Delete old file if existing_db_path is provided (path relative to static folder)
+        if upload_type == "profile_photo" and existing_db_path:
+            old_file_abs_path = os.path.join(current_app.static_folder, existing_db_path)
+            # Basic check: ensure old file is within static folder to prevent arbitrary deletion
+            if old_file_abs_path.startswith(current_app.static_folder) and os.path.exists(old_file_abs_path):
+                 if old_file_abs_path != save_path_abs: # Don't delete if it's the same file (e.g. re-saving without change)
+                    try:
+                        os.remove(old_file_abs_path)
+                        current_app.logger.info(f"Old {upload_type} file deleted: {old_file_abs_path}")
+                    except OSError as oe:
+                        current_app.logger.error(f"Error deleting old {upload_type} file {old_file_abs_path}: {oe}", exc_info=True)
+            elif existing_db_path: # Log if path seems problematic but was provided
+                 current_app.logger.warning(f"Old file path {existing_db_path} for profile_photo not found or invalid for deletion from {current_app.static_folder}.")
+
+
+        db_final_relative_path = os.path.join(db_path_prefix, unique_filename).replace("\\", "/")
+        return db_final_relative_path
+
+    except Exception as e_save:
+        current_app.logger.error(f"Exception during {upload_type} file processing or saving to {save_path_abs}: {e_save}", exc_info=True)
+        flash(f"Error processing {upload_type.replace('_', ' ')} file: An unexpected error occurred.", 'danger')
+        if os.path.exists(save_path_abs): # Attempt to clean up partially saved file
+            try:
+                os.remove(save_path_abs)
+            except OSError:
+                pass
+        return None
