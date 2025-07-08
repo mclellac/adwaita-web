@@ -369,7 +369,7 @@ class Activity(db.Model):
     # The user who performed the activity (actor)
     actor = db.relationship('User', foreign_keys=[user_id], backref=db.backref('activities', lazy='dynamic', order_by=lambda: desc(Activity.timestamp)))
 
-    target_post = db.relationship('Post', foreign_keys=[target_post_id])
+    # target_post = db.relationship('Post', foreign_keys=[target_post_id]) # This line caused NameError
     # User being targeted by the activity (e.g., user being followed)
     # Need a different backref name if User.activities is already taken by the actor's activities.
     # Or, access this target user differently if not frequently needed as a direct backref on User.

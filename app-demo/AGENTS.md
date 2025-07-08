@@ -164,3 +164,22 @@ When implementing UI elements, choose the Adwaita widget that semantically and v
 *   **Toggle Switches vs. Checkboxes**: For boolean settings (on/off, enable/disable), an Adwaita Switch (visual toggle switch) should **always** be preferred over a simple checkbox. Adwaita's implementation typically involves an `<input type='checkbox' class='adw-switch'>` styled accordingly, wrapped in a `<label class='adw-switch'>` with a sibling `<span class='adw-switch-slider'>`. Ensure the HTML structure matches what the Adwaita CSS expects for that widget, as detailed in the component's SCSS file (e.g., `adwaita-web/scss/_switch.scss` requires a specific structure for `.adw-switch` to render correctly). Simple checkboxes (`<input type="checkbox">` without switch styling) should generally be avoided for settings.
 
 Ensure the HTML structure matches what the Adwaita CSS expects for that widget, as detailed in the component's SCSS file.
+
+---
+
+## Database Model Changes (NEW SECTION)
+
+**IMPORTANT**: After any changes to database models in `app-demo/models.py` (e.g., adding, removing, or altering tables or columns), you **MUST** also update the `app-demo/setup_db.py` script accordingly.
+
+This script is responsible for initializing the database schema. If it's not kept in sync with the models, errors will occur during database setup or application runtime.
+
+**Procedure:**
+1.  Modify `app-demo/models.py`.
+2.  Carefully review `app-demo/setup_db.py` and make any necessary adjustments to reflect the model changes. This might involve:
+    *   Ensuring `db.create_all()` correctly creates the new schema.
+    *   Updating any initial data seeding logic if model structures have changed.
+    *   Modifying how tables are dropped or created if specific logic beyond `db.create_all()` is used.
+    *   If new tables or columns are added, ensure they are correctly initialized or populated if `setup_db.py` handles initial data.
+3.  Test `app-demo/setup_db.py` (e.g., by running `python app-demo/setup_db.py --config your_config.yaml --deletedb`) to confirm it works with the updated models.
+
+Failure to update `setup_db.py` is a common source of errors and will likely be caught by the user. Always remember this step.
