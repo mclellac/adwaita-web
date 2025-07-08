@@ -144,3 +144,39 @@ class PhotoCommentForm(FlaskForm):
     )
     # photo_id and user_id will be handled by the route
     submit = SubmitField('Post Comment')
+
+# Empty forms for CSRF-protected actions like Like/Unlike
+class LikeForm(FlaskForm):
+    submit = SubmitField('Like') # Text can be changed in template if needed for context
+
+class UnlikeForm(FlaskForm):
+    submit = SubmitField('Unlike') # Text can be changed in template if needed for context
+
+# Password Reset Request Form
+class RequestPasswordResetForm(FlaskForm):
+    email = StringField(
+        'Your Email Address',
+        validators=[
+            DataRequired(message="Please enter your email address."),
+            Email(message="Invalid email address.")
+        ]
+    )
+    submit = SubmitField('Request Password Reset')
+
+# Password Reset Form (with token)
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField(
+        'New Password',
+        validators=[
+            DataRequired(message="Please enter a new password."),
+            Length(min=8, message="Password must be at least 8 characters long.")
+        ]
+    )
+    confirm_password = PasswordField(
+        'Confirm New Password',
+        validators=[
+            DataRequired(message="Please confirm your new password."),
+            EqualTo('password', message='Passwords must match.')
+        ]
+    )
+    submit = SubmitField('Reset Password')

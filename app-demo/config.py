@@ -35,6 +35,17 @@ class Config:
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', DEFAULT_DB_URI)
 
+    # Flask-Mail configuration (sensible defaults for development/testing)
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'localhost')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 25)) # Default to 25 for local SMTP, 587 for TLS, 465 for SSL
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'false').lower() in ['true', '1', 't']
+    MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'false').lower() in ['true', '1', 't']
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', '"Your App Name" <noreply@example.com>')
+    # For development, you might use a local SMTP debugging server like `python -m smtpd -c DebuggingServer -n localhost:1025`
+    # And set MAIL_PORT = 1025, MAIL_SERVER = 'localhost', MAIL_USE_TLS/SSL = False
+
     @staticmethod
     def get_log_db_uri():
         # Utility to get a log-safe version of the DB URI
@@ -87,6 +98,30 @@ config_by_name = {
     'production': ProductionConfig,
     'default': DevelopmentConfig
 }
+
+class TestConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # Use in-memory SQLite for tests
+    WTF_CSRF_ENABLED = False  # Disable CSRF protection for tests
+    SECRET_KEY = 'test-secret-key' # Explicit test secret key
+    MAIL_SUPPRESS_SEND = True # Do not send emails during tests
+    # Ensure UPLOAD_FOLDER and GALLERY_UPLOAD_FOLDER are set if needed by tests,
+    # or rely on defaults from Config class if they are suitable.
+    # They are defined in Config, so they will be inherited.
+    # For tests, we might want to ensure they point to temporary, test-specific locations
+    # if actual file uploads are tested and files are written.
+    # However, for unit tests focusing on logic, this might not be needed.
+    # The default 'static/uploads/profile_pics' from Config class is fine if app.static_folder is mocked/handled.
+    # My conftest.py already sets UPLOAD_FOLDER in yaml_config_override, so this will be overridden again.
+    # For consistency, I can set them here too.
+    UPLOAD_FOLDER = 'uploads/test_profile_pics' # Relative to static folder for tests
+    GALLERY_UPLOAD_FOLDER = 'uploads/test_gallery_photos' # Relative to static folder for tests
+    DEBUG = True # Often useful for tests to get more detailed error output
+    SQLALCHEMY_ECHO = False # Keep SQL queries quiet during tests unless specifically debugging
+
+
+# Update config_by_name to include TestConfig
+config_by_name['testing'] = TestConfig
 
 def get_config():
     flask_env = os.getenv('FLASK_ENV', 'development')
