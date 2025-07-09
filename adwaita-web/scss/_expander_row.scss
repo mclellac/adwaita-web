@@ -147,7 +147,7 @@
     // Content for the CSS-only version
     .adw-expander-row-content {
         padding: var(--spacing-m) var(--spacing-l) var(--spacing-m) var(--spacing-xl);
-        white-space: pre-wrap; // For preserving formatting in bio (app-demo specific need)
+        white-space: pre-wrap; // For preserving formatting in bio (antisocialnet specific need)
         border-top: 1px solid var(--border-color); // Separator from summary
         background-color: var(--expander-content-bg-color, var(--window-bg-color));
 

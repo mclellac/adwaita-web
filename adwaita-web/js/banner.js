@@ -40,7 +40,7 @@ window.Adw = window.Adw || {};
         }
 
         // If the banner has fixed positioning and animation, use class-based hiding
-        // For banners that are statically positioned (like app-demo flash messages),
+        // For banners that are statically positioned (like antisocialnet flash messages),
         // direct removal might be fine, but class-based is more flexible.
         if (bannerElement.classList.contains('visible')) {
             bannerElement.classList.remove('visible');

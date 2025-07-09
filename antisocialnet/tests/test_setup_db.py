@@ -3,8 +3,8 @@ import subprocess
 import os
 import yaml
 import tempfile
-from app_demo.models import User, SiteSetting, db as main_app_db # To inspect DB state after script runs
-from app_demo.config import TestConfig # To get DB URI details if needed
+from antisocialnet.models import User, SiteSetting, db as main_app_db # To inspect DB state after script runs
+from antisocialnet.config import TestConfig # To get DB URI details if needed
 
 # Note: These tests will run setup_db.py as a subprocess.
 # This means they need to configure the environment for that subprocess,
@@ -33,7 +33,7 @@ def setup_db_env_vars(temp_sqlite_db_file):
     # setup_db.py also looks for POSTGRES_ env vars if SQLALCHEMY_DATABASE_URI is not enough
     # or if it constructs its own URI. Let's ensure it uses the SQLite URI.
     # The script uses create_app, which respects FLASK_ENV for config.
-    env['FLASK_APP'] = 'app_demo' # Important for create_app within setup_db.py
+    env['FLASK_APP'] = 'antisocialnet' # Important for create_app within setup_db.py
     env['FLASK_ENV'] = 'testing'   # To use TestConfig, which we want to use SQLALCHEMY_DATABASE_URI
                                    # However, TestConfig sets sqlite:///:memory:
                                    # We need setup_db.py to use our temp_sqlite_db_file.
@@ -49,10 +49,10 @@ def setup_db_env_vars(temp_sqlite_db_file):
     # The easiest way is via a temporary YAML config file passed to --config.
     return env
 
-def run_setup_db_script(args, env_vars, script_path="app-demo/setup_db.py"):
+def run_setup_db_script(args, env_vars, script_path="antisocialnet/setup_db.py"):
     """Helper to run the setup_db.py script as a subprocess."""
     command = ["python", script_path] + args
-    # Ensure PYTHONPATH includes the project root so 'app_demo' can be imported by the script
+    # Ensure PYTHONPATH includes the project root so 'antisocialnet' can be imported by the script
     script_env = env_vars.copy()
     project_root = os.getcwd() # Assuming tests are run from project root
     if 'PYTHONPATH' in script_env:
@@ -82,7 +82,7 @@ def temp_db_app_instance(temp_sqlite_db_file):
         TESTING = True
         WTF_CSRF_ENABLED = False # Not relevant for DB inspection
 
-    temp_app = pytest.importorskip("app_demo").create_app(config_object=TempDBTestConfig)
+    temp_app = pytest.importorskip("antisocialnet").create_app(config_object=TempDBTestConfig)
 
     with temp_app.app_context():
         # main_app_db.init_app(temp_app) # db object is already initialized by create_app

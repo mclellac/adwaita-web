@@ -5,11 +5,11 @@
 adwaita-web/css/adwaita-skin.css
 adwaita-web/css/adwaita-skin.css.map
 
-# Generated Adwaita-Web assets (destination in app-demo)
-app-demo/static/css/*
-app-demo/static/js/*
-app-demo/static/fonts
-app-demo/static/data
+# Generated Adwaita-Web assets (destination in antisocialnet)
+antisocialnet/static/css/*
+antisocialnet/static/js/*
+antisocialnet/static/fonts
+antisocialnet/static/data
 
 # Python
 __pycache__/
@@ -30,11 +30,11 @@ env/
 instance/
 
 #പറ_CONFIG_SECRETS_DB_DIR_
-# Example: app-demo/instance/
+# Example: antisocialnet/instance/
 
 # Operating System files
 .DS_Store
 Thumbs.db
 
 # Uploads - if profile_pics shouldn't be versioned
-# app-demo/static/uploads/profile_pics/
+# antisocialnet/static/uploads/profile_pics/

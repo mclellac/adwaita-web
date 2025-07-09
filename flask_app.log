@@ -1,11 +1,11 @@
 [2025-07-08 22:33:56,672] INFO in __init__: Starting Adwaita Web Demo with config: type
 [2025-07-08 22:33:56,672] INFO in __init__: Database URI configured to: postgresql://USER:********@HOST/DB (details hidden)
-[2025-07-08 22:33:56,672] INFO in __init__: Profile upload directory ensured at: /app/app-demo/static/uploads/profile_pics
-[2025-07-08 22:33:56,672] INFO in __init__: Gallery upload directory ensured at: /app/app-demo/static/uploads/gallery_pics
-[2025-07-08 22:33:56,672] INFO in __init__: Profile upload path (relative to static): /app/app-demo/static/uploads/profile_pics
-[2025-07-08 22:33:56,672] INFO in __init__: Gallery upload path (relative to static): /app/app-demo/static/uploads/gallery_pics
+[2025-07-08 22:33:56,672] INFO in __init__: Profile upload directory ensured at: /app/antisocialnet/static/uploads/profile_pics
+[2025-07-08 22:33:56,672] INFO in __init__: Gallery upload directory ensured at: /app/antisocialnet/static/uploads/gallery_pics
+[2025-07-08 22:33:56,672] INFO in __init__: Profile upload path (relative to static): /app/antisocialnet/static/uploads/profile_pics
+[2025-07-08 22:33:56,672] INFO in __init__: Gallery upload path (relative to static): /app/antisocialnet/static/uploads/gallery_pics
 [2025-07-08 22:33:56,774] INFO in __init__: Flask application instance created and configured.
- * Serving Flask app 'app-demo'
+ * Serving Flask app 'antisocialnet'
  * Debug mode: off
 [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on all addresses (0.0.0.0)

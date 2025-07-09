@@ -1,8 +1,8 @@
 import pytest
 import os
-from app-demo import create_app, db as _db
-from app-demo.models import User, Post, Category, Tag, PostLike, Notification, Activity, SiteSetting
-from app-demo.config import TestConfig # Will need to ensure TestConfig exists and is appropriate
+from antisocialnet import create_app, db as _db
+from antisocialnet.models import User, Post, Category, Tag, PostLike, Notification, Activity, SiteSetting
+from antisocialnet.config import TestConfig # Will need to ensure TestConfig exists and is appropriate
 
 @pytest.fixture(scope='session')
 def app():
@@ -75,7 +75,7 @@ def db(app):
 @pytest.fixture
 def new_user(app, db_session): # db_session will be another fixture
     """Create a new user instance (not saved to DB)."""
-    user = User(username='testuser', email='test@example.com', full_name='Test User')
+    user = User(username='testuser', email='test@example.com', full_name='Test User') # noqa: E501
     user.set_password('password')
     return user
 
@@ -138,11 +138,11 @@ def db_session_txn(app): # app is session-scoped, _db is the SQLAlchemy instance
 
 
 # The primary 'db' fixture used by tests should now provide the transactional session.
-# Tests typically import 'db' from 'app-demo' which is '_db' here.
+# Tests typically import 'db' from 'antisocialnet' which is '_db' here.
 # So, tests that need to commit or rollback will use `db.session`.
 # We want `db.session` within a test to be this transactional session.
 # The fixture `db_session_txn` now correctly overrides `_db.session`.
-# So tests can continue to use `_db.session` or `from app-demo import db` and then `db.session`.
+# So tests can continue to use `_db.session` or `from antisocialnet import db` and then `db.session`.
 
 # Fixture that provides the SQLAlchemy instance itself, now mostly for convenience if needed.
 # Most tests will interact via the session provided by db_session_txn (which is now _db.session during test).
@@ -165,7 +165,7 @@ def db_instance(app): # Changed from 'db' to 'db_instance' to avoid confusion wi
 
 # Let's make the primary 'db' fixture for tests return the SQLAlchemy object,
 # and ensure 'db_session_txn' is used by tests that need to interact with the session.
-# Or, more commonly, tests will import `db` from `app_demo` and then use `db.session`.
+# Or, more commonly, tests will import `db` from `antisocialnet` and then use `db.session`.
 # The `db_session_txn` fixture should be auto-used if tests depend on a clean session.
 # We can make it an autouse fixture or have tests explicitly request it.
 # For now, let's make it the primary way to get a session for database operations in tests.

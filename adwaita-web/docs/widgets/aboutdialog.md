@@ -57,8 +57,8 @@ Adw.createAboutDialog(options = {}) -> { dialog: HTMLDivElement, open: function,
     onClick: () => {
       const aboutDialog = Adw.createAboutDialog({
         appName: "My Awesome App",
-        appIcon: "app-demo/static/img/default_avatar.png", // Path to a small icon
-        logo: "app-demo/static/img/default_avatar.png",    // Path to a larger logo
+        appIcon: "antisocialnet/static/img/default_avatar.png", // Path to a small icon
+        logo: "antisocialnet/static/img/default_avatar.png",    // Path to a larger logo
         version: "1.2.3",
         copyright: "© 2023 Developer Name",
         developerName: "The Developer Team",
@@ -139,7 +139,7 @@ A declarative way to define Adwaita "About" dialogs.
   website="https://acme.example.com"
   license-type="MIT">
   <!-- Logo via slot -->
-  <img slot="logo" src="app-demo/static/img/default_avatar.png" alt="App Logo"
+  <img slot="logo" src="antisocialnet/static/img/default_avatar.png" alt="App Logo"
        style="width: 64px; height: 64px; border-radius: var(--border-radius-default);">
   <!-- Comments via slot -->
   <p slot="comments">

@@ -49,7 +49,7 @@ Adw.createAdwCarousel(options = {}) -> HTMLDivElement (with methods)
   slide1.textContent = "Slide 1";
 
   const slide2 = document.createElement('img');
-  slide2.src = "app-demo/static/img/default_avatar.png"; // Replace with actual image
+  slide2.src = "antisocialnet/static/img/default_avatar.png"; // Replace with actual image
   slide2.alt = "Slide 2 Image";
   slide2.style.cssText = "object-fit: cover; width: 100%; height: 200px;";
 
@@ -58,7 +58,7 @@ Adw.createAdwCarousel(options = {}) -> HTMLDivElement (with methods)
   const myCarousel = Adw.createAdwCarousel({
     slides: [
       slide1,
-      { content: slide2, thumbnail: "app-demo/static/img/default_avatar.png" }, // Thumbnail for image slide
+      { content: slide2, thumbnail: "antisocialnet/static/img/default_avatar.png" }, // Thumbnail for image slide
       { content: slide3Content }
     ],
     showNavButtons: true,
@@ -119,8 +119,8 @@ A declarative way to define Adwaita carousels.
               color: var(--adw-purple-5); font-size: 2.5em;">
     First Slide (Declarative)
   </div>
-  <img src="app-demo/static/img/default_avatar.png" alt="Image Slide"
-       data-thumbnail="app-demo/static/img/default_avatar.png"
+  <img src="antisocialnet/static/img/default_avatar.png" alt="Image Slide"
+       data-thumbnail="antisocialnet/static/img/default_avatar.png"
        style="width:100%; height:250px; object-fit:contain;
               background-color: var(--shade-color);">
   <div style="background-color: var(--adw-green-1); height: 250px; padding: 20px;">

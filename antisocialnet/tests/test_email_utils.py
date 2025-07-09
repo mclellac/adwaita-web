@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from flask import url_for
-from app-demo.email_utils import send_password_reset_email
-from app-demo.models import User
+from antisocialnet.email_utils import send_password_reset_email
+from antisocialnet.models import User
 
 # This fixture will use the main `app` fixture from conftest.py for app context
 def test_send_password_reset_email_sends_correct_email(app, db, create_test_user):
@@ -11,7 +11,7 @@ def test_send_password_reset_email_sends_correct_email(app, db, create_test_user
 
     with app.app_context(): # For url_for and current_app.config
         # Mock Flask-Mail's mail.send() method
-        with patch('app-demo.email_utils.mail.send') as mock_mail_send:
+        with patch('antisocialnet.email_utils.mail.send') as mock_mail_send:
             send_password_reset_email(user)
 
             mock_mail_send.assert_called_once()
@@ -41,7 +41,7 @@ def test_send_password_reset_email_suppressed_logging(app, db, create_test_user,
     app.config['MAIL_SUPPRESS_SEND'] = True # Ensure it's true for this test
 
     with app.app_context():
-        with patch('app-demo.email_utils.mail.send') as mock_mail_send: # Still mock to ensure it's NOT called
+        with patch('antisocialnet.email_utils.mail.send') as mock_mail_send: # Still mock to ensure it's NOT called
             send_password_reset_email(user)
 
             mock_mail_send.assert_not_called() # mail.send() should not be called
@@ -60,7 +60,7 @@ def test_send_password_reset_email_suppressed_logging(app, db, create_test_user,
     app.config['MAIL_SUPPRESS_SEND'] = original_suppress_send # Restore original setting
 
 
-@patch('app-demo.email_utils.mail.send', side_effect=Exception("SMTP Error"))
+@patch('antisocialnet.email_utils.mail.send', side_effect=Exception("SMTP Error"))
 def test_send_password_reset_email_handles_send_exception(mock_mail_send_exception, app, db, create_test_user, caplog):
     """Test that exceptions during mail.send() are caught and logged."""
     user = create_test_user(username="sendfailuser", email="sendfail@example.com")
