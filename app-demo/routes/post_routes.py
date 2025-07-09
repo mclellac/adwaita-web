@@ -367,15 +367,16 @@ def delete_post(post_id): # Renamed from delete_post_route
             current_app.logger.debug(f"Deleted {len(all_comments_on_post)} comments for post {post_id}.")
 
             # Manually delete associated activities
-            # Types of activities related to a post: 'created_post', 'liked_post', 'commented_on_post' (via comment which links to post)
-            # We only need to delete activities that directly reference the post via target_post_id.
-            # Activity types like 'commented_on_post' might have target_comment_id, and target_post_id for context.
-            # If a comment is deleted, its related 'commented_on_post' activity should also be handled.
-            # For now, focus on activities directly linked to the post via target_post_id.
-            activities_to_delete = Activity.query.filter_by(target_post_id=post.id).all()
+            # Activities directly related to the post (e.g., 'created_post', 'liked_post')
+            # should use target_type='post' and target_id=post.id
+            activities_to_delete = Activity.query.filter_by(target_type='post', target_id=post.id).all()
             for activity in activities_to_delete:
                 db.session.delete(activity)
-            current_app.logger.debug(f"Deleted {len(activities_to_delete)} activities directly targeting post {post_id}.")
+            current_app.logger.debug(f"Deleted {len(activities_to_delete)} activities directly targeting post {post_id} (type='post', id={post.id}).")
+
+            # Activities related to comments on this post (e.g., 'commented_on_post')
+            # are deleted when the comments themselves are deleted, if those activities target the comment.
+            # The loop for deleting comments already handles deleting activities that target those comments.
 
             # Also, consider activities where the post is the target of a notification that generated an activity.
             # Example: 'new_comment' notification has related_post_id. If an activity was logged for this notification itself,

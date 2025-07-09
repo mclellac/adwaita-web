@@ -80,6 +80,9 @@ def linkify_mentions(text):
         # This function is more about identifying and formatting, less about final URL generation here.
         # The existing template filter for linkify_mentions in __init__ seems to expect this to return text.
         # Then markdown_to_html_and_sanitize_util probably makes it a link.
+        # This function is more about identifying and formatting, less about final URL generation here.
+        # The existing template filter for linkify_mentions in __init__ seems to expect this to return text.
+        # Then markdown_to_html_and_sanitize_util probably makes it a link.
         # Let's assume this is used by a filter that will then use url_for.
         # A more direct approach would be for this to generate the <a> tag if it had url_for.
         # Based on its usage in `actual_markdown_filter` in `__init__.py`, it seems this function
