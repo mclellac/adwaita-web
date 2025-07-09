@@ -9,9 +9,9 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-# Now we can import from app-demo
-from app-demo.models import db, Notification, Activity, Post, Comment, UserPhoto, User  # noqa: E402
-from app-demo import create_app  # noqa: E402
+# Now we can import from antisocialnet
+from antisocialnet.models import db, Notification, Activity, Post, Comment, UserPhoto, User  # noqa: E402
+from antisocialnet import create_app  # noqa: E402
 
 def run_migration(app):
     """

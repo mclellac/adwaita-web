@@ -1,6 +1,6 @@
 import pytest
-from app-demo.models import User, Post, PostLike, Notification, Activity
-from app-demo import db # db fixture from conftest.py
+from antisocialnet.models import User, Post, PostLike, Notification, Activity
+from antisocialnet import db # db fixture from conftest.py
 
 def test_like_post(db, create_test_user, create_test_post):
     """Test liking a post."""

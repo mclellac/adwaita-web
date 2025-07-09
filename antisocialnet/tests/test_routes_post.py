@@ -1,8 +1,8 @@
 import pytest
 from flask import url_for
-from app-demo.models import User, Post, PostLike, Notification, Activity
-from app-demo import db # db fixture from conftest.py
-from app-demo.forms import LikeForm, UnlikeForm # Import forms
+from antisocialnet.models import User, Post, PostLike, Notification, Activity
+from antisocialnet import db # db fixture from conftest.py
+from antisocialnet.forms import LikeForm, UnlikeForm # Import forms
 
 def test_like_post_route_authenticated(client, app, db, create_test_user, create_test_post, logged_in_client): # Added app
     """Test POST /post/<id>/like when authenticated."""
@@ -22,6 +22,7 @@ def test_like_post_route_authenticated(client, app, db, create_test_user, create
     initial_activities = Activity.query.filter_by(user_id=liking_user.id, type='liked_post').count()
 
     with app.app_context(): # Ensure app context for form creation
+        from antisocialnet.forms import LikeForm # Ensure LikeForm is imported if not already
         form = LikeForm()
         token = form.csrf_token.current_token
 
@@ -56,6 +57,7 @@ def test_unlike_post_route_authenticated(client, app, db, create_test_user, crea
     initial_like_count = test_post.like_count
 
     with app.app_context(): # Ensure app context for form creation
+        from antisocialnet.forms import UnlikeForm # Ensure UnlikeForm is imported
         form = UnlikeForm()
         token = form.csrf_token.current_token
 
@@ -89,6 +91,7 @@ def test_like_already_liked_post_route(client, app, db, create_test_post, logged
 
     initial_like_count = test_post.like_count
     with app.app_context(): # Ensure app context for form creation
+        from antisocialnet.forms import LikeForm # Ensure LikeForm is imported
         form = LikeForm()
         token = form.csrf_token.current_token
 
@@ -105,6 +108,7 @@ def test_unlike_not_liked_post_route(client, app, create_test_post, logged_in_cl
     initial_like_count = test_post.like_count
 
     with app.app_context(): # Ensure app context for form creation
+        from antisocialnet.forms import UnlikeForm # Ensure UnlikeForm is imported
         form = UnlikeForm()
         token = form.csrf_token.current_token
 
@@ -131,6 +135,7 @@ def test_like_unpublished_post_route(client, app, db, create_test_user, logged_i
     # if not post.is_published and post.user_id != current_user.id: abort(404)
     # This check happens before CSRF.
     with app.app_context():
+        from antisocialnet.forms import LikeForm # Ensure LikeForm is imported
         form = LikeForm()
         token_for_loginuser = form.csrf_token.current_token # Token for 'loginuser'
 
@@ -146,6 +151,7 @@ def test_like_unpublished_post_route(client, app, db, create_test_user, logged_i
     assert login_resp.status_code == 200
     # After login, the session is new, so we need a new CSRF token for this new session
     with app.app_context(): # New app context to get token for the new session
+        from antisocialnet.forms import LikeForm # Ensure LikeForm is imported
         form_author = LikeForm()
         token_for_author = form_author.csrf_token.current_token
 
@@ -197,6 +203,7 @@ def test_unlike_post_csrf_missing_token(client, app, db, create_test_post, logge
 
     # First, like the post legitimately
     with app.app_context():
+        from antisocialnet.forms import LikeForm # Ensure LikeForm is imported
         form = LikeForm()
         token = form.csrf_token.current_token
     client.post(url_for('post.like_post_route', post_id=test_post.id), data={'csrf_token': token}, follow_redirects=True)
@@ -226,7 +233,7 @@ def test_create_comment_successful(client, app, logged_in_client, create_test_po
     # For this test, logged_in_user is the post author. No notification for self-comment on own post.
 
     with app.app_context():
-        from app_demo.forms import CommentForm
+        from antisocialnet.forms import CommentForm # Ensure CommentForm is imported
         form = CommentForm(); token = form.csrf_token.current_token
 
     comment_text = "This is a new comment."
@@ -260,7 +267,7 @@ def test_create_comment_reply_successful(client, app, logged_in_client, create_t
     replying_user = User.query.filter_by(username="loginuser").first()
 
     with app.app_context():
-        from app_demo.forms import CommentForm
+        from antisocialnet.forms import CommentForm # Ensure CommentForm is imported
         form = CommentForm(); token = form.csrf_token.current_token
 
     reply_text = "This is a reply."
@@ -290,7 +297,7 @@ def test_create_comment_empty_text_validation(client, app, logged_in_client, cre
     """Test comment creation with empty text."""
     test_post = create_test_post(content="Post for empty comment test.")
     with app.app_context():
-        from app_demo.forms import CommentForm
+        from antisocialnet.forms import CommentForm # Ensure CommentForm is imported
         form = CommentForm(); token = form.csrf_token.current_token
 
     form_data = {'text': '', 'csrf_token': token}
@@ -333,7 +340,7 @@ def test_delete_comment_author_self(client, app, logged_in_client, create_test_p
     assert Comment.query.get(comment_id) is not None
 
     with app.app_context():
-        from app_demo.forms import DeleteCommentForm
+        from antisocialnet.forms import DeleteCommentForm # Ensure DeleteCommentForm is imported
         form = DeleteCommentForm(); token = form.csrf_token.current_token
 
     response = logged_in_client.post(url_for('post.delete_comment', comment_id=comment_id), data={'csrf_token': token}, follow_redirects=True)
@@ -354,7 +361,7 @@ def test_delete_comment_post_author_deletes_other(client, app, logged_in_client,
     assert Comment.query.get(comment_id) is not None
 
     with app.app_context():
-        from app_demo.forms import DeleteCommentForm
+        from antisocialnet.forms import DeleteCommentForm # Ensure DeleteCommentForm is imported
         form = DeleteCommentForm(); token = form.csrf_token.current_token
 
     response = logged_in_client.post(url_for('post.delete_comment', comment_id=comment_id), data={'csrf_token': token}, follow_redirects=True)
@@ -372,10 +379,10 @@ def test_delete_comment_admin_deletes_any(client, app, db, create_test_user, cre
     comment_id = comment_to_delete.id
 
     admin = create_test_user(username="superadmin_comment_deleter", email="sacd@example.com", is_admin=True)
-    with app.app_context(): from app_demo.forms import LoginForm; form=LoginForm(); token=form.csrf_token.current_token
+    with app.app_context(): from antisocialnet.forms import LoginForm; form=LoginForm(); token=form.csrf_token.current_token # Ensure LoginForm is imported
     client.post(url_for('auth.login'), data={'username': admin.email, 'password': 'password', 'csrf_token': token})
 
-    with app.app_context(): from app_demo.forms import DeleteCommentForm; form=DeleteCommentForm(); token=form.csrf_token.current_token
+    with app.app_context(): from antisocialnet.forms import DeleteCommentForm; form=DeleteCommentForm(); token=form.csrf_token.current_token # Ensure DeleteCommentForm is imported
     response = client.post(url_for('post.delete_comment', comment_id=comment_id), data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Comment deleted.' in response.data
@@ -394,7 +401,7 @@ def test_delete_comment_unauthorized(client, app, logged_in_client, create_test_
     # logged_in_client is 'loginuser', who is none of the above.
     assert User.query.filter_by(username="loginuser").first().id not in [post_owner.id, comment_owner.id]
 
-    with app.app_context(): from app_demo.forms import DeleteCommentForm; form=DeleteCommentForm(); token=form.csrf_token.current_token
+    with app.app_context(): from antisocialnet.forms import DeleteCommentForm; form=DeleteCommentForm(); token=form.csrf_token.current_token # Ensure DeleteCommentForm is imported
     response = logged_in_client.post(url_for('post.delete_comment', comment_id=comment_id), data={'csrf_token': token})
     assert response.status_code == 403
     assert Comment.query.get(comment_id) is not None
@@ -429,7 +436,7 @@ def test_flag_comment_successful(client, app, logged_in_client, create_test_post
 
     initial_flag_count = CommentFlag.query.filter_by(comment_id=comment_id).count()
 
-    with app.app_context(): from app_demo.forms import FlagCommentForm; form=FlagCommentForm(); token=form.csrf_token.current_token
+    with app.app_context(): from antisocialnet.forms import FlagCommentForm; form=FlagCommentForm(); token=form.csrf_token.current_token # Ensure FlagCommentForm is imported
     response = logged_in_client.post(url_for('post.flag_comment', comment_id=comment_id), data={'csrf_token': token}, follow_redirects=True)
 
     assert response.status_code == 200
@@ -447,7 +454,7 @@ def test_flag_comment_own_comment_fails(client, app, logged_in_client, create_te
     db.session.add(own_comment); db.session.commit()
     comment_id = own_comment.id
 
-    with app.app_context(): from app_demo.forms import FlagCommentForm; form=FlagCommentForm(); token=form.csrf_token.current_token
+    with app.app_context(): from antisocialnet.forms import FlagCommentForm; form=FlagCommentForm(); token=form.csrf_token.current_token # Ensure FlagCommentForm is imported
     response = logged_in_client.post(url_for('post.flag_comment', comment_id=comment_id), data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b"You cannot flag your own comment." in response.data
@@ -466,7 +473,7 @@ def test_flag_comment_already_flagged_by_user(client, app, logged_in_client, cre
     db.session.add(existing_flag); db.session.commit()
     initial_flag_count = CommentFlag.query.filter_by(comment_id=comment_id).count() # Should be 1
 
-    with app.app_context(): from app_demo.forms import FlagCommentForm; form=FlagCommentForm(); token=form.csrf_token.current_token
+    with app.app_context(): from antisocialnet.forms import FlagCommentForm; form=FlagCommentForm(); token=form.csrf_token.current_token # Ensure FlagCommentForm is imported
     response = logged_in_client.post(url_for('post.flag_comment', comment_id=comment_id), data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b'You have already flagged this comment.' in response.data
@@ -492,7 +499,7 @@ def test_posts_by_category_loads_correct_posts(client, app, db, create_test_post
     """Test that the category page lists only relevant, published posts."""
     author = create_test_user(username="cat_tag_author", email="cta@example.com")
 
-    from app_demo.models import Category
+    from antisocialnet.models import Category # Ensure Category is imported
     cat_tech = Category.query.filter_by(name="Tech").first() or Category(name="Tech")
     cat_news = Category.query.filter_by(name="News").first() or Category(name="News")
     db.session.add_all([cat_tech, cat_news])
@@ -533,7 +540,7 @@ def test_posts_by_tag_loads_correct_posts(client, app, db, create_test_post, cre
     """Test that the tag page lists only relevant, published posts."""
     author = User.query.filter_by(username="cat_tag_author").first() or create_test_user(username="cat_tag_author", email="cta@example.com")
 
-    from app_demo.models import Tag
+    from antisocialnet.models import Tag # Ensure Tag is imported
     tag_python = Tag.query.filter_by(name="python").first() or Tag(name="python")
     tag_flask = Tag.query.filter_by(name="flask").first() or Tag(name="flask")
     db.session.add_all([tag_python, tag_flask])
@@ -563,7 +570,7 @@ def test_posts_by_tag_loads_correct_posts(client, app, db, create_test_post, cre
 
 def test_posts_by_category_empty(client, app, db):
     """Test category page with no posts."""
-    from app_demo.models import Category
+    from antisocialnet.models import Category # Ensure Category is imported
     cat_empty = Category.query.filter_by(name="EmptyCat").first() or Category(name="EmptyCat")
     db.session.add(cat_empty); db.session.commit()
 
@@ -574,7 +581,7 @@ def test_posts_by_category_empty(client, app, db):
 
 def test_posts_by_tag_empty(client, app, db):
     """Test tag page with no posts."""
-    from app_demo.models import Tag
+    from antisocialnet.models import Tag # Ensure Tag is imported
     tag_empty = Tag.query.filter_by(name="emptytag").first() or Tag(name="emptytag")
     db.session.add(tag_empty); db.session.commit()
 
@@ -596,7 +603,7 @@ def test_posts_by_tag_nonexistent(client):
 def test_posts_by_category_pagination(client, app, db, create_test_user, create_test_post):
     """Test pagination for category pages."""
     author = User.query.filter_by(username="cat_tag_author").first() or create_test_user(username="cat_tag_author", email="cta_pag@example.com")
-    from app_demo.models import Category
+    from antisocialnet.models import Category # Ensure Category is imported
     cat_paged = Category.query.filter_by(name="PagedCat").first() or Category(name="PagedCat")
     db.session.add(cat_paged); db.session.commit()
 
@@ -664,7 +671,7 @@ def test_create_post_successful_simple(client, app, logged_in_client, db):
     initial_activity_count = Activity.query.filter_by(user_id=user.id, type='created_post').count()
 
     with app.app_context():
-        from app_demo.forms import PostForm
+        from antisocialnet.forms import PostForm # Ensure PostForm is imported
         form = PostForm()
         token = form.csrf_token.current_token
 
@@ -699,7 +706,7 @@ def test_create_post_successful_with_new_tags(client, app, logged_in_client, db)
     initial_tag_count = db.session.query(db.func.count(Post.tags.mapper.class_.id)).scalar() # Count existing tags
 
     with app.app_context():
-        from app_demo.forms import PostForm
+        from antisocialnet.forms import PostForm # Ensure PostForm is imported
         form = PostForm()
         token = form.csrf_token.current_token
 
@@ -732,7 +739,7 @@ def test_create_post_successful_with_existing_and_new_tags(client, app, logged_i
     user = User.query.filter_by(username="loginuser").first()
 
     # Create an existing tag
-    from app_demo.models import Tag
+    from antisocialnet.models import Tag # Ensure Tag is imported
     existing_tag_name = "existingtag"
     existing_tag = Tag.query.filter_by(name=existing_tag_name).first()
     if not existing_tag:
@@ -743,7 +750,7 @@ def test_create_post_successful_with_existing_and_new_tags(client, app, logged_i
     initial_tag_count_db = Tag.query.count()
 
     with app.app_context():
-        from app_demo.forms import PostForm
+        from antisocialnet.forms import PostForm # Ensure PostForm is imported
         form = PostForm()
         token = form.csrf_token.current_token
 
@@ -773,7 +780,7 @@ def test_create_post_successful_with_categories(client, app, logged_in_client, d
     """Test creating a post and associating it with existing categories."""
     user = User.query.filter_by(username="loginuser").first()
 
-    from app_demo.models import Category
+    from antisocialnet.models import Category # Ensure Category is imported
     cat1 = Category.query.filter_by(name="Tech").first()
     if not cat1: cat1 = Category(name="Tech"); db.session.add(cat1)
     cat2 = Category.query.filter_by(name="Travel").first()
@@ -781,7 +788,7 @@ def test_create_post_successful_with_categories(client, app, logged_in_client, d
     db.session.commit()
 
     with app.app_context():
-        from app_demo.forms import PostForm
+        from antisocialnet.forms import PostForm # Ensure PostForm is imported
         form = PostForm() # For CSRF token
         token = form.csrf_token.current_token
 
@@ -806,7 +813,7 @@ def test_create_post_successful_with_categories(client, app, logged_in_client, d
 def test_create_post_content_missing_validation(client, app, logged_in_client):
     """Test form validation when post content is missing."""
     with app.app_context():
-        from app_demo.forms import PostForm
+        from antisocialnet.forms import PostForm # Ensure PostForm is imported
         form = PostForm()
         token = form.csrf_token.current_token
 
@@ -847,7 +854,7 @@ def test_edit_post_page_loads(client, app, logged_in_client, create_test_post, d
     test_post = create_test_post(author=user, content="Content to edit.")
 
     # Add a tag and category to test pre-population
-    from app_demo.models import Tag, Category
+    from antisocialnet.models import Tag, Category # Ensure Tag and Category are imported
     tag1 = Tag.query.filter_by(name="edittesttag").first() or Tag(name="edittesttag")
     cat1 = Category.query.filter_by(name="EditTestCat").first() or Category(name="EditTestCat")
     test_post.tags.append(tag1)
@@ -903,7 +910,7 @@ def test_edit_post_admin_can_access(client, app, db, create_test_user, create_te
 
     # Log in admin
     with app.app_context():
-        from app_demo.forms import LoginForm
+        from antisocialnet.forms import LoginForm # Ensure LoginForm is imported
         form = LoginForm()
         token = form.csrf_token.current_token
     client.post(url_for('auth.login'), data={
@@ -924,7 +931,7 @@ def test_edit_post_successful_content_change(client, app, logged_in_client, crea
     original_updated_at = test_post.updated_at
 
     with app.app_context():
-        from app_demo.forms import PostForm
+        from antisocialnet.forms import PostForm # Ensure PostForm is imported
         form = PostForm() # For CSRF
         token = form.csrf_token.current_token
 
@@ -950,7 +957,7 @@ def test_edit_post_successful_tags_change(client, app, logged_in_client, create_
     user = User.query.filter_by(username="loginuser").first()
     test_post = create_test_post(author=user, content="Content with tags to change.")
 
-    from app_demo.models import Tag
+    from antisocialnet.models import Tag # Ensure Tag is imported
     tag_before = Tag.query.filter_by(name="beforeedit").first() or Tag(name="beforeedit")
     test_post.tags.append(tag_before)
     db.session.add(test_post)
@@ -958,7 +965,7 @@ def test_edit_post_successful_tags_change(client, app, logged_in_client, create_
     assert "beforeedit" in [t.name for t in test_post.tags]
 
     with app.app_context():
-        from app_demo.forms import PostForm
+        from antisocialnet.forms import PostForm # Ensure PostForm is imported
         form = PostForm(); token = form.csrf_token.current_token
 
     new_tags_string = "afteredit, anothertag"
@@ -981,7 +988,7 @@ def test_edit_post_successful_categories_change(client, app, logged_in_client, c
     user = User.query.filter_by(username="loginuser").first()
     test_post = create_test_post(author=user, content="Content with categories to change.")
 
-    from app_demo.models import Category
+    from antisocialnet.models import Category # Ensure Category is imported
     cat_before = Category.query.filter_by(name="CatBefore").first() or Category(name="CatBefore")
     cat_after1 = Category.query.filter_by(name="CatAfter1").first() or Category(name="CatAfter1")
     cat_after2 = Category.query.filter_by(name="CatAfter2").first() or Category(name="CatAfter2")
@@ -993,7 +1000,7 @@ def test_edit_post_successful_categories_change(client, app, logged_in_client, c
     assert "CatBefore" in [c.name for c in test_post.categories]
 
     with app.app_context():
-        from app_demo.forms import PostForm
+        from antisocialnet.forms import PostForm # Ensure PostForm is imported
         form = PostForm(); token = form.csrf_token.current_token
 
     form_data = {
@@ -1016,7 +1023,7 @@ def test_edit_post_empty_content_validation(client, app, logged_in_client, creat
     test_post = create_test_post(author=user, content="Some content.")
 
     with app.app_context():
-        from app_demo.forms import PostForm
+        from antisocialnet.forms import PostForm # Ensure PostForm is imported
         form = PostForm(); token = form.csrf_token.current_token
 
     form_data = {'content': '', 'csrf_token': token}
@@ -1066,7 +1073,7 @@ def test_delete_post_successful_author(client, app, logged_in_client, create_tes
     assert Post.query.get(post_id) is not None
 
     with app.app_context():
-        from app_demo.forms import DeletePostForm
+        from antisocialnet.forms import DeletePostForm # Ensure DeletePostForm is imported
         form = DeletePostForm(); token = form.csrf_token.current_token
 
     response = logged_in_client.post(url_for('post.delete_post', post_id=post_id), data={'csrf_token': token}, follow_redirects=True)
@@ -1085,13 +1092,14 @@ def test_delete_post_successful_admin(client, app, db, create_test_user, create_
     # Create and log in as an admin user
     admin_user = create_test_user(username="admindeleteuser", email="admindelete@example.com", is_admin=True)
     with app.app_context():
-        from app_demo.forms import LoginForm, DeletePostForm
+        from antisocialnet.forms import LoginForm, DeletePostForm # Ensure forms are imported
         login_form = LoginForm(); login_token = login_form.csrf_token.current_token
     client.post(url_for('auth.login'), data={
         'username': admin_user.email, 'password': 'password', 'csrf_token': login_token
     }, follow_redirects=True)
 
     with app.app_context(): # New context for new session if login changes it
+        from antisocialnet.forms import DeletePostForm # Ensure DeletePostForm is imported for this context if needed
         delete_form = DeletePostForm(); delete_token = delete_form.csrf_token.current_token
 
     response = client.post(url_for('post.delete_post', post_id=post_id), data={'csrf_token': delete_token}, follow_redirects=True)
@@ -1107,7 +1115,7 @@ def test_delete_post_unauthorized_user(client, app, logged_in_client, create_tes
     post_id = post_by_other.id
 
     with app.app_context():
-        from app_demo.forms import DeletePostForm
+        from antisocialnet.forms import DeletePostForm # Ensure DeletePostForm is imported
         form = DeletePostForm(); token = form.csrf_token.current_token
 
     response = logged_in_client.post(url_for('post.delete_post', post_id=post_id), data={'csrf_token': token})
@@ -1150,7 +1158,7 @@ def test_delete_post_csrf_invalid(client, logged_in_client, create_test_post):
 def test_delete_post_nonexistent_post(client, app, logged_in_client):
     """Test POST delete for a non-existent post."""
     with app.app_context():
-        from app_demo.forms import DeletePostForm
+        from antisocialnet.forms import DeletePostForm # Ensure DeletePostForm is imported
         form = DeletePostForm(); token = form.csrf_token.current_token
     # This should result in a 404 because Post.query.get_or_404(post_id) is called first.
     response = logged_in_client.post(url_for('post.delete_post', post_id=99999), data={'csrf_token': token})
@@ -1178,7 +1186,7 @@ def test_delete_post_deletes_associated_data(client, app, logged_in_client, db, 
     assert PostLike.query.filter_by(post_id=post_id).count() == 2
 
     # 3. Add comments to the post
-    from app_demo.models import Comment, CommentFlag
+    from antisocialnet.models import Comment, CommentFlag # Ensure models are imported
     comment1 = Comment(text="Test comment 1", user_id=other_user.id, post_id=post_id)
     comment2 = Comment(text="Test comment 2 by author", user_id=user.id, post_id=post_id)
     db.session.add_all([comment1, comment2])
@@ -1211,7 +1219,7 @@ def test_delete_post_deletes_associated_data(client, app, logged_in_client, db, 
 
     # Now, delete the post
     with app.app_context():
-        from app_demo.forms import DeletePostForm
+        from antisocialnet.forms import DeletePostForm # Ensure DeletePostForm is imported
         form = DeletePostForm(); token = form.csrf_token.current_token
 
     logged_in_client.post(url_for('post.delete_post', post_id=post_id), data={'csrf_token': token}, follow_redirects=True)
@@ -1235,6 +1243,7 @@ def test_unlike_post_csrf_invalid_token(client, app, db, create_test_post, logge
 
     # Like the post legitimately
     with app.app_context():
+        from antisocialnet.forms import LikeForm # Ensure LikeForm is imported
         form = LikeForm()
         token = form.csrf_token.current_token
     client.post(url_for('post.like_post_route', post_id=test_post.id), data={'csrf_token': token}, follow_redirects=True)

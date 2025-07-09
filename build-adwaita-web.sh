@@ -28,13 +28,13 @@ COMPILED_CSS_FILE_PATH="${ADWAITA_WEB_COMPILED_CSS_DIR}/${COMPILED_CSS_FILENAME}
 # Target for the root index.html
 ROOT_INDEX_CSS_TARGET_PATH="${BUILD_CSS_DIR}/${COMPILED_CSS_FILENAME}"
 
-# Target for app-demo
-APP_DEMO_STATIC_DIR="app-demo/static"
-APP_DEMO_CSS_DIR="${APP_DEMO_STATIC_DIR}/css"
-APP_DEMO_CSS_TARGET_PATH="${APP_DEMO_CSS_DIR}/${COMPILED_CSS_FILENAME}"
-APP_DEMO_JS_DIR="${APP_DEMO_STATIC_DIR}/js"
-APP_DEMO_DATA_DIR="${APP_DEMO_STATIC_DIR}/data"
-APP_DEMO_FONTS_DIR="${APP_DEMO_STATIC_DIR}/fonts"
+# Target for antisocialnet
+ANTISOCIALNET_STATIC_DIR="antisocialnet/static"
+ANTISOCIALNET_CSS_DIR="${ANTISOCIALNET_STATIC_DIR}/css"
+ANTISOCIALNET_CSS_TARGET_PATH="${ANTISOCIALNET_CSS_DIR}/${COMPILED_CSS_FILENAME}"
+ANTISOCIALNET_JS_DIR="${ANTISOCIALNET_STATIC_DIR}/js"
+ANTISOCIALNET_DATA_DIR="${ANTISOCIALNET_STATIC_DIR}/data"
+ANTISOCIALNET_FONTS_DIR="${ANTISOCIALNET_STATIC_DIR}/fonts"
 
 echo "--- Starting Build Script ---"
 
@@ -82,17 +82,17 @@ else
 fi
 
 
-# Copy JavaScript files directly to APP_DEMO_JS_DIR and also to BUILD_JS_DIR for consistency if build dir is used later
+# Copy JavaScript files directly to ANTISOCIALNET_JS_DIR and also to BUILD_JS_DIR for consistency if build dir is used later
 echo "--- Copying JavaScript Files ---"
 # Debug lines removed
-mkdir -p "${APP_DEMO_JS_DIR}" # Ensure target directory exists
+mkdir -p "${ANTISOCIALNET_JS_DIR}" # Ensure target directory exists
 mkdir -p "${BUILD_JS_DIR}"    # Ensure build directory exists
 
 if [ -f "${JS_INPUT_DIR}/components.js" ]; then
     cp "${JS_INPUT_DIR}/components.js" "${BUILD_JS_DIR}/components.js"
     echo "Copied ${JS_INPUT_DIR}/components.js to ${BUILD_JS_DIR}/components.js"
-    cp "${JS_INPUT_DIR}/components.js" "${APP_DEMO_JS_DIR}/components.js"
-    echo "Copied ${JS_INPUT_DIR}/components.js to ${APP_DEMO_JS_DIR}/components.js"
+    cp "${JS_INPUT_DIR}/components.js" "${ANTISOCIALNET_JS_DIR}/components.js"
+    echo "Copied ${JS_INPUT_DIR}/components.js to ${ANTISOCIALNET_JS_DIR}/components.js"
 else
     echo "WARNING: Main JS file ${JS_INPUT_DIR}/components.js not found."
 fi
@@ -101,8 +101,8 @@ fi
 if [ -f "${JS_INPUT_DIR}/app-layout.js" ]; then
     cp "${JS_INPUT_DIR}/app-layout.js" "${BUILD_JS_DIR}/app-layout.js"
     echo "Copied ${JS_INPUT_DIR}/app-layout.js to ${BUILD_JS_DIR}/app-layout.js"
-    cp "${JS_INPUT_DIR}/app-layout.js" "${APP_DEMO_JS_DIR}/app-layout.js"
-    echo "Copied ${JS_INPUT_DIR}/app-layout.js to ${APP_DEMO_JS_DIR}/app-layout.js"
+    cp "${JS_INPUT_DIR}/app-layout.js" "${ANTISOCIALNET_JS_DIR}/app-layout.js"
+    echo "Copied ${JS_INPUT_DIR}/app-layout.js to ${ANTISOCIALNET_JS_DIR}/app-layout.js"
 else
     echo "WARNING: JS file ${JS_INPUT_DIR}/app-layout.js not found."
 fi
@@ -111,8 +111,8 @@ fi
 if [ -f "${JS_INPUT_DIR}/toast.js" ]; then
     cp "${JS_INPUT_DIR}/toast.js" "${BUILD_JS_DIR}/toast.js"
     echo "Copied ${JS_INPUT_DIR}/toast.js to ${BUILD_JS_DIR}/toast.js"
-    cp "${JS_INPUT_DIR}/toast.js" "${APP_DEMO_JS_DIR}/toast.js"
-    echo "Copied ${JS_INPUT_DIR}/toast.js to ${APP_DEMO_JS_DIR}/toast.js"
+    cp "${JS_INPUT_DIR}/toast.js" "${ANTISOCIALNET_JS_DIR}/toast.js"
+    echo "Copied ${JS_INPUT_DIR}/toast.js to ${ANTISOCIALNET_JS_DIR}/toast.js"
 else
     echo "WARNING: JS file ${JS_INPUT_DIR}/toast.js not found."
 fi
@@ -121,38 +121,38 @@ fi
 if [ -f "${JS_INPUT_DIR}/banner.js" ]; then
     cp "${JS_INPUT_DIR}/banner.js" "${BUILD_JS_DIR}/banner.js"
     echo "Copied ${JS_INPUT_DIR}/banner.js to ${BUILD_JS_DIR}/banner.js"
-    cp "${JS_INPUT_DIR}/banner.js" "${APP_DEMO_JS_DIR}/banner.js"
-    echo "Copied ${JS_INPUT_DIR}/banner.js to ${APP_DEMO_JS_DIR}/banner.js"
+    cp "${JS_INPUT_DIR}/banner.js" "${ANTISOCIALNET_JS_DIR}/banner.js"
+    echo "Copied ${JS_INPUT_DIR}/banner.js to ${ANTISOCIALNET_JS_DIR}/banner.js"
 else
     echo "WARNING: JS file ${JS_INPUT_DIR}/banner.js not found."
 fi
 
 JS_COMPONENTS_SOURCE_DIR="${JS_INPUT_DIR}/components"
 JS_COMPONENTS_DEST_DIR_BUILD="${BUILD_JS_DIR}/components"
-JS_COMPONENTS_DEST_DIR_APP_DEMO="${APP_DEMO_JS_DIR}/components"
+JS_COMPONENTS_DEST_DIR_ANTISOCIALNET="${ANTISOCIALNET_JS_DIR}/components"
 if [ -d "${JS_COMPONENTS_SOURCE_DIR}" ]; then
     mkdir -p "${JS_COMPONENTS_DEST_DIR_BUILD}"
     cp -r "${JS_COMPONENTS_SOURCE_DIR}/." "${JS_COMPONENTS_DEST_DIR_BUILD}/"
     echo "Copied JS components from ${JS_COMPONENTS_SOURCE_DIR} to ${JS_COMPONENTS_DEST_DIR_BUILD}"
 
-    mkdir -p "${JS_COMPONENTS_DEST_DIR_APP_DEMO}"
-    cp -r "${JS_COMPONENTS_SOURCE_DIR}/." "${JS_COMPONENTS_DEST_DIR_APP_DEMO}/"
-    echo "Copied JS components from ${JS_COMPONENTS_SOURCE_DIR} to ${JS_COMPONENTS_DEST_DIR_APP_DEMO}"
+    mkdir -p "${JS_COMPONENTS_DEST_DIR_ANTISOCIALNET}"
+    cp -r "${JS_COMPONENTS_SOURCE_DIR}/." "${JS_COMPONENTS_DEST_DIR_ANTISOCIALNET}/"
+    echo "Copied JS components from ${JS_COMPONENTS_SOURCE_DIR} to ${JS_COMPONENTS_DEST_DIR_ANTISOCIALNET}"
 else
     echo "WARNING: JS components directory ${JS_COMPONENTS_SOURCE_DIR} not found."
 fi
 
 JS_UTILS_SOURCE_DIR="${JS_INPUT_DIR}/utils"
 JS_UTILS_DEST_DIR_BUILD="${BUILD_JS_DIR}/utils"
-JS_UTILS_DEST_DIR_APP_DEMO="${APP_DEMO_JS_DIR}/utils"
+JS_UTILS_DEST_DIR_ANTISOCIALNET="${ANTISOCIALNET_JS_DIR}/utils"
 if [ -d "${JS_UTILS_SOURCE_DIR}" ]; then
     mkdir -p "${JS_UTILS_DEST_DIR_BUILD}"
     cp -r "${JS_UTILS_SOURCE_DIR}/." "${JS_UTILS_DEST_DIR_BUILD}/"
     echo "Copied JS utils from ${JS_UTILS_SOURCE_DIR} to ${JS_UTILS_DEST_DIR_BUILD}"
 
-    mkdir -p "${JS_UTILS_DEST_DIR_APP_DEMO}"
-    cp -r "${JS_UTILS_SOURCE_DIR}/." "${JS_UTILS_DEST_DIR_APP_DEMO}/"
-    echo "Copied JS utils from ${JS_UTILS_SOURCE_DIR} to ${JS_UTILS_DEST_DIR_APP_DEMO}"
+    mkdir -p "${JS_UTILS_DEST_DIR_ANTISOCIALNET}"
+    cp -r "${JS_UTILS_SOURCE_DIR}/." "${JS_UTILS_DEST_DIR_ANTISOCIALNET}/"
+    echo "Copied JS utils from ${JS_UTILS_SOURCE_DIR} to ${JS_UTILS_DEST_DIR_ANTISOCIALNET}"
 else
     echo "WARNING: JS utils directory ${JS_UTILS_SOURCE_DIR} not found."
 fi
@@ -196,54 +196,54 @@ else
     echo "WARNING: Compiled CSS file ${COMPILED_CSS_FILE_PATH} not found. Skipping copy to ${BUILD_CSS_DIR}."
 fi
 
-# Copy compiled CSS to app-demo/static/css
-# Ensure app-demo static CSS directory exists
-mkdir -p "${APP_DEMO_CSS_DIR}"
+# Copy compiled CSS to antisocialnet/static/css
+# Ensure antisocialnet static CSS directory exists
+mkdir -p "${ANTISOCIALNET_CSS_DIR}"
 if [ -f "${COMPILED_CSS_FILE_PATH}" ]; then
-    cp "${COMPILED_CSS_FILE_PATH}" "${APP_DEMO_CSS_TARGET_PATH}"
-    echo "Copied ${COMPILED_CSS_FILE_PATH} to ${APP_DEMO_CSS_TARGET_PATH}"
-    # Also copy the map file to app-demo
+    cp "${COMPILED_CSS_FILE_PATH}" "${ANTISOCIALNET_CSS_TARGET_PATH}"
+    echo "Copied ${COMPILED_CSS_FILE_PATH} to ${ANTISOCIALNET_CSS_TARGET_PATH}"
+    # Also copy the map file to antisocialnet
     if [ -f "${COMPILED_CSS_FILE_PATH}.map" ]; then
-        cp "${COMPILED_CSS_FILE_PATH}.map" "${APP_DEMO_CSS_TARGET_PATH}.map"
-        echo "Copied ${COMPILED_CSS_FILE_PATH}.map to ${APP_DEMO_CSS_TARGET_PATH}.map"
+        cp "${COMPILED_CSS_FILE_PATH}.map" "${ANTISOCIALNET_CSS_TARGET_PATH}.map"
+        echo "Copied ${COMPILED_CSS_FILE_PATH}.map to ${ANTISOCIALNET_CSS_TARGET_PATH}.map"
     else
-        echo "WARNING: Compiled CSS map file ${COMPILED_CSS_FILE_PATH}.map not found for app-demo."
+        echo "WARNING: Compiled CSS map file ${COMPILED_CSS_FILE_PATH}.map not found for antisocialnet."
     fi
 else
-    echo "WARNING: Compiled CSS file '${COMPILED_CSS_FILE_PATH}' not found. Skipping copy to app-demo."
+    echo "WARNING: Compiled CSS file '${COMPILED_CSS_FILE_PATH}' not found. Skipping copy to antisocialnet."
 fi
 
 
-echo "--- Copying Other Built Assets to app-demo/static ---"
-# Definitions for APP_DEMO_JS_DIR, APP_DEMO_DATA_DIR, APP_DEMO_FONTS_DIR moved to the top.
+echo "--- Copying Other Built Assets to antisocialnet/static ---"
+# Definitions for ANTISOCIALNET_JS_DIR, ANTISOCIALNET_DATA_DIR, ANTISOCIALNET_FONTS_DIR moved to the top.
 
-mkdir -p "${APP_DEMO_JS_DIR}/components"
-mkdir -p "${APP_DEMO_DATA_DIR}/icons/symbolic"
-mkdir -p "${APP_DEMO_FONTS_DIR}/mono" # Assuming these subdirs exist in source
-mkdir -p "${APP_DEMO_FONTS_DIR}/sans"
+mkdir -p "${ANTISOCIALNET_JS_DIR}/components"
+mkdir -p "${ANTISOCIALNET_DATA_DIR}/icons/symbolic"
+mkdir -p "${ANTISOCIALNET_FONTS_DIR}/mono" # Assuming these subdirs exist in source
+mkdir -p "${ANTISOCIALNET_FONTS_DIR}/sans"
 
-# Copy JS from BUILD to app-demo
+# Copy JS from BUILD to antisocialnet
 if [ -d "${BUILD_JS_DIR}" ] && [ "$(ls -A ${BUILD_JS_DIR})" ]; then
-    cp -r "${BUILD_JS_DIR}/." "${APP_DEMO_JS_DIR}/"
-    echo "Copied JS files from ${BUILD_JS_DIR} to ${APP_DEMO_JS_DIR}"
+    cp -r "${BUILD_JS_DIR}/." "${ANTISOCIALNET_JS_DIR}/"
+    echo "Copied JS files from ${BUILD_JS_DIR} to ${ANTISOCIALNET_JS_DIR}"
 else
-    echo "WARNING: Built JS directory ${BUILD_JS_DIR} not found or empty. Skipping copy to app-demo."
+    echo "WARNING: Built JS directory ${BUILD_JS_DIR} not found or empty. Skipping copy to antisocialnet."
 fi
 
-# Copy Data from BUILD to app-demo
+# Copy Data from BUILD to antisocialnet
 if [ -d "${BUILD_DATA_DIR}" ] && [ "$(ls -A ${BUILD_DATA_DIR})" ]; then
-    cp -r "${BUILD_DATA_DIR}/." "${APP_DEMO_DATA_DIR}/"
-    echo "Copied data files from ${BUILD_DATA_DIR} to ${APP_DEMO_DATA_DIR}"
+    cp -r "${BUILD_DATA_DIR}/." "${ANTISOCIALNET_DATA_DIR}/"
+    echo "Copied data files from ${BUILD_DATA_DIR} to ${ANTISOCIALNET_DATA_DIR}"
 else
-    echo "INFO: Built data directory ${BUILD_DATA_DIR} not found or empty. Skipping copy to app-demo."
+    echo "INFO: Built data directory ${BUILD_DATA_DIR} not found or empty. Skipping copy to antisocialnet."
 fi
 
-# Copy Fonts from BUILD to app-demo
+# Copy Fonts from BUILD to antisocialnet
 if [ -d "${BUILD_FONTS_DIR}" ] && [ "$(ls -A ${BUILD_FONTS_DIR})" ]; then
-    cp -r "${BUILD_FONTS_DIR}/." "${APP_DEMO_FONTS_DIR}/"
-    echo "Copied font files from ${BUILD_FONTS_DIR} to ${APP_DEMO_FONTS_DIR}"
+    cp -r "${BUILD_FONTS_DIR}/." "${ANTISOCIALNET_FONTS_DIR}/"
+    echo "Copied font files from ${BUILD_FONTS_DIR} to ${ANTISOCIALNET_FONTS_DIR}"
 else
-    echo "INFO: Built fonts directory ${BUILD_FONTS_DIR} not found or empty. Skipping copy to app-demo."
+    echo "INFO: Built fonts directory ${BUILD_FONTS_DIR} not found or empty. Skipping copy to antisocialnet."
 fi
 
 echo "--- Build Script Finished ---"

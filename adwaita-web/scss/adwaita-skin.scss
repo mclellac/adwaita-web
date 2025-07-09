@@ -54,8 +54,8 @@
 @use 'window';
 // @use 'card'; // Removed duplicate, ensured it's loaded before listbox
 
-// App-demo specific styles
-@use 'app-demo-specific';
+// antisocialnet specific styles
+@use 'antisocialnet-specific';
 
 // TODO: Add more specific skin styles or overrides if needed.
 // TODO: Review each imported file to ensure selectors are class-based and not web-component specific.

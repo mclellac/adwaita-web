@@ -36,7 +36,7 @@ Adw.createAvatar(options = {}) -> HTMLDivElement
   // Avatar with image
   const avatarWithImage = Adw.createAvatar({
     size: 64,
-    imageSrc: "app-demo/static/img/default_avatar.png", // Replace with a valid image path
+    imageSrc: "antisocialnet/static/img/default_avatar.png", // Replace with a valid image path
     alt: "User Avatar"
   });
   container.appendChild(avatarWithImage);
@@ -91,7 +91,7 @@ A declarative way to use Adwaita avatars.
 
 ```html
 <!-- Avatar with image -->
-<adw-avatar size="72" image-src="app-demo/static/img/default_avatar.png" alt="Profile Picture"></adw-avatar>
+<adw-avatar size="72" image-src="antisocialnet/static/img/default_avatar.png" alt="Profile Picture"></adw-avatar>
 
 <!-- Avatar with text initials and custom colors -->
 <adw-avatar size="50" text="AW" background-color="var(--adw-purple-3)" text-color="#fff"></adw-avatar>

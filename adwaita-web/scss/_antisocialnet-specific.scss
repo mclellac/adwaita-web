@@ -1,4 +1,4 @@
-// Styles moved from app-demo/templates/base.html
+// Styles moved from antisocialnet/templates/base.html
 @use 'variables'; // Added to access SASS variables like $adw-dark-5
 
 // Header styles
@@ -395,7 +395,7 @@ $app-sidebar-breakpoint: 768px;
   padding: var(--spacing-s) 0;
 }
 
-// --- Card Styles (app-demo specific extensions/compositions of .adw-card) ---
+// --- Card Styles (antisocialnet specific extensions/compositions of .adw-card) ---
 .blog-post-item-card.adw-card {
   // Base styles like background, border, radius, shadow, padding are inherited from .adw-card
   // display: flex; flex-direction: column; // This is default for .adw-card now

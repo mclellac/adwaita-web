@@ -8,7 +8,7 @@ This document provides instructions and guidelines for AI agents (like Jules) wo
 
 **Directory Structure & Asset Placement:**
 *   **SCSS:** All SASS source files are located in `adwaita-web/scss/`. These are compiled into `adwaita-web/css/adwaita-skin.css` by the build script.
-*   **JavaScript:** Any JavaScript associated with the `adwaita-web` library itself (e.g., for interactive components or demo-specific enhancements like `app-layout.js`) should be placed in `adwaita-web/js/`. These are typically copied to `app-demo/static/js/` by the build script.
+*   **JavaScript:** Any JavaScript associated with the `adwaita-web` library itself (e.g., for interactive components or demo-specific enhancements like `app-layout.js`) should be placed in `adwaita-web/js/`. These are typically copied to `antisocialnet/static/js/` by the build script.
 *   **Static Assets:** Icons, fonts, and other static data used by the library are in `adwaita-web/data/` and `adwaita-web/fonts/`.
 
 ## Key Principles
@@ -32,7 +32,7 @@ This document provides instructions and guidelines for AI agents (like Jules) wo
     sass scss/adwaita-skin.scss css/adwaita-skin.css
     ```
     Ensure the SASS compiler is installed (e.g., `npm install -g sass`).
-3.  **Test:** Test the changes by viewing HTML pages that use `adwaita-skin.css`. The `examples/` directory can be used for this, or the main `index.html` and `app-demo` if they are up-to-date.
+3.  **Test:** Test the changes by viewing HTML pages that use `adwaita-skin.css`. The `examples/` directory can be used for this, or the main `index.html` and `antisocialnet` if they are up-to-date.
 
 ## Iconography
 

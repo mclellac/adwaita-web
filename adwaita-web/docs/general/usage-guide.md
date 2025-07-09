@@ -24,7 +24,7 @@ To use Adwaita Skin, you need to include its compiled CSS file in your HTML docu
           <link rel="stylesheet" href="adwaita-skin.css">
         - If it's in a css subdirectory:
           <link rel="stylesheet" href="css/adwaita-skin.css">
-        - If using with the app-demo structure:
+        - If using with the antisocialnet structure:
           <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-skin.css') }}">
       -->
     </head>

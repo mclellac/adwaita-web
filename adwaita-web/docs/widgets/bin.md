@@ -79,7 +79,7 @@ A declarative way to use an Adwaita bin container.
 </p>
 <adw-bin>
   <div> <!-- The single child of the bin -->
-    <img src="app-demo/static/img/default_avatar.png" alt="Avatar"
+    <img src="antisocialnet/static/img/default_avatar.png" alt="Avatar"
          style="width: 80px; height: 80px; border-radius: 4px;">
     <p style="font-size: var(--font-size-small); text-align: center;">Avatar Image</p>
   </div>

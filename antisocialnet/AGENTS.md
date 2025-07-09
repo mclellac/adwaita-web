@@ -1,14 +1,14 @@
-# Agent Instructions for adwaita-web/app-demo
+# Agent Instructions for adwaita-web/antisocialnet
 
-This document provides guidance for AI agents working with the `app-demo` portion of the `adwaita-web` project.
+This document provides guidance for AI agents working with the `antisocialnet` portion of the `adwaita-web` project.
 
 ## Database Setup and Management (`setup_db.py`)
 
-The `app-demo/setup_db.py` script is crucial for initializing and managing the application's PostgreSQL database schema and initial data. It should be run from the project root directory (e.g., `python app-demo/setup_db.py`).
+The `antisocialnet/setup_db.py` script is crucial for initializing and managing the application's PostgreSQL database schema and initial data. It should be run from the project root directory (e.g., `python antisocialnet/setup_db.py`).
 
 **Core Functionalities:**
 
-*   **Table Creation:** Ensures all database tables defined in `app-demo/models.py` are created if they don't already exist. This is done by calling `db.create_all()`.
+*   **Table Creation:** Ensures all database tables defined in `antisocialnet/models.py` are created if they don't already exist. This is done by calling `db.create_all()`.
 *   **Initial Admin User:** Can create or update an initial administrative user. This can be done interactively (prompting for username/password) or non-interactively via command-line arguments.
 *   **Database Deletion (`--deletedb`):** Provides an option to completely wipe and recreate the database schema.
 
@@ -26,7 +26,7 @@ The `app-demo/setup_db.py` script is crucial for initializing and managing the a
 *   `--admin-bio <bio>`: Sets the admin bio non-interactively.
 *   `--config <filepath>`:
     *   Allows overriding configuration settings for the script's execution by providing a path to a YAML configuration file.
-    *   Settings in this YAML file will take precedence over those defined in `app-demo/config.py` or environment variables.
+    *   Settings in this YAML file will take precedence over those defined in `antisocialnet/config.py` or environment variables.
     *   Flask configuration keys are typically uppercase (e.g., `SQLALCHEMY_DATABASE_URI`).
     *   This file can also be used to define a list of users for batch creation/update using the `USERS` key.
     *   Example `config.yaml` structure:
@@ -75,20 +75,20 @@ The script determines how to handle user creation/setup based on the following o
     *   Alternatively, `DATABASE_URL` can be set to the full connection string (e.g., `postgresql://user:pass@host:port/dbname`).
 *   **Error: `FATAL: Ident authentication failed...` or `FATAL: password authentication failed...`**: This means the script could not authenticate with PostgreSQL. Ensure your environment variables (`POSTGRES_USER`, `POSTGRES_PASSWORD`, etc.) are correctly set for your PostgreSQL server's authentication method (see `pg_hba.conf`).
 *   **Synchronization with Models:**
-    *   **CRITICAL WARNING:** This script directly manipulates the database schema. Any changes to SQLAlchemy models in `app-demo/models.py` (e.g., adding/removing tables or columns, altering relationships) require careful consideration of `setup_db.py`'s logic.
+    *   **CRITICAL WARNING:** This script directly manipulates the database schema. Any changes to SQLAlchemy models in `antisocialnet/models.py` (e.g., adding/removing tables or columns, altering relationships) require careful consideration of `setup_db.py`'s logic.
     *   The `db.create_all()` command will attempt to create tables according to the current models.
     *   The `--deletedb` option completely rebuilds the schema. Ensure this behavior is understood, especially in environments with existing data.
     *   For more complex schema changes (migrations) in a production-like environment, a proper migration tool like Alembic (Flask-Migrate) would typically be used, but `setup_db.py` is suitable for initial setup and development/testing resets.
 
 **Running the Application (Post-Refactor):**
 
-After the refactor to use an application factory (`create_app` in `app-demo/__init__.py`), the application is run using the `flask` command-line interface. Ensure you are in the `app-demo` directory.
+After the refactor to use an application factory (`create_app` in `antisocialnet/__init__.py`), the application is run using the `flask` command-line interface. Ensure you are in the `antisocialnet` directory.
 
 1.  Set `FLASK_APP`:
     ```bash
-    export FLASK_APP=app_demo
+    export FLASK_APP=antisocialnet
     ```
-    (The `app_demo` here refers to the directory `app-demo/` which is treated as a package, and `flask` will look for `create_app` or `make_app` within its `__init__.py`).
+    (The `antisocialnet` here refers to the directory `antisocialnet/` which is treated as a package, and `flask` will look for `create_app` or `make_app` within its `__init__.py`).
 
 2.  Set `FLASK_ENV` (optional, recommended for development):
     ```bash
@@ -111,20 +111,20 @@ PostgreSQL uses a file named `pg_hba.conf` to control client authentication.
 
 ## Static Assets (CSS, JS)
 
-The `app-demo` application sources its primary CSS (`adwaita-skin.css`) and core JavaScript components from the `adwaita-web` library. These assets are:
+The `antisocialnet` application sources its primary CSS (`adwaita-skin.css`) and core JavaScript components from the `adwaita-web` library. These assets are:
 1.  Developed and stored within the `adwaita-web/scss/` and `adwaita-web/js/` directories, respectively.
-2.  Compiled and/or copied into `app-demo/static/` by the `../build-adwaita-web.sh` script.
+2.  Compiled and/or copied into `antisocialnet/static/` by the `../build-adwaita-web.sh` script.
 
-Key JavaScript files from `adwaita-web/js/` used by `app-demo` include:
+Key JavaScript files from `adwaita-web/js/` used by `antisocialnet` include:
 *   `app-layout.js`: For managing the responsive sidebar and overall page layout.
 *   `banner.js`: For handling dismissible banner notifications.
 *   `toast.js`: For managing toast notifications.
 
-These are typically included in `app-demo/templates/base.html`.
+These are typically included in `antisocialnet/templates/base.html`.
 
-**Do not directly place or modify source SCSS or JavaScript files in `app-demo/static/css/` or `app-demo/static/js/`.** Such changes will be ignored by `.gitignore` or overwritten by the build process. All styling and JavaScript development should occur within the `adwaita-web` directory.
+**Do not directly place or modify source SCSS or JavaScript files in `antisocialnet/static/css/` or `antisocialnet/static/js/`.** Such changes will be ignored by `.gitignore` or overwritten by the build process. All styling and JavaScript development should occur within the `adwaita-web` directory.
 
-Refer to the root `AGENTS.md` and `adwaita-web/AGENTS.md` for more details on asset management and the role of `adwaita-web/scss/_app-demo-specific.scss` for styles unique to this application's layout.
+Refer to the root `AGENTS.md` and `adwaita-web/AGENTS.md` for more details on asset management and the role of `adwaita-web/scss/_antisocialnet-specific.scss` for styles unique to this application's layout.
 
 ## Navigation and Core UI
 
@@ -151,8 +151,8 @@ To maintain UI consistency and adherence to Adwaita principles, **do not** use c
     *   Text colors of standard buttons (e.g., `.adw-button.suggested-action` text should come from `var(--accent-fg-color)`).
     *   Default border colors or shadows of widgets.
 
-Always rely on the core Adwaita CSS variables and the cascade for such properties. Custom SCSS in `_app-demo-specific.scss` should be reserved for:
-    *   Layout adjustments specific to `app-demo`'s structure.
+Always rely on the core Adwaita CSS variables and the cascade for such properties. Custom SCSS in `_antisocialnet-specific.scss` should be reserved for:
+    *   Layout adjustments specific to `antisocialnet`'s structure.
     *   Styling entirely new components not provided by Adwaita.
     *   Minor thematic alterations that *complement* Adwaita, not fight its base design (e.g., a specific border on a custom element, not changing all card backgrounds).
 
@@ -169,17 +169,17 @@ Ensure the HTML structure matches what the Adwaita CSS expects for that widget, 
 
 ## Database Model Changes (NEW SECTION)
 
-**IMPORTANT**: After any changes to database models in `app-demo/models.py` (e.g., adding, removing, or altering tables or columns), you **MUST** also update the `app-demo/setup_db.py` script accordingly.
+**IMPORTANT**: After any changes to database models in `antisocialnet/models.py` (e.g., adding, removing, or altering tables or columns), you **MUST** also update the `antisocialnet/setup_db.py` script accordingly.
 
 This script is responsible for initializing the database schema. If it's not kept in sync with the models, errors will occur during database setup or application runtime.
 
 **Procedure:**
-1.  Modify `app-demo/models.py`.
-2.  Carefully review `app-demo/setup_db.py` and make any necessary adjustments to reflect the model changes. This might involve:
+1.  Modify `antisocialnet/models.py`.
+2.  Carefully review `antisocialnet/setup_db.py` and make any necessary adjustments to reflect the model changes. This might involve:
     *   Ensuring `db.create_all()` correctly creates the new schema.
     *   Updating any initial data seeding logic if model structures have changed.
     *   Modifying how tables are dropped or created if specific logic beyond `db.create_all()` is used.
     *   If new tables or columns are added, ensure they are correctly initialized or populated if `setup_db.py` handles initial data.
-3.  Test `app-demo/setup_db.py` (e.g., by running `python app-demo/setup_db.py --config your_config.yaml --deletedb`) to confirm it works with the updated models.
+3.  Test `antisocialnet/setup_db.py` (e.g., by running `python antisocialnet/setup_db.py --config your_config.yaml --deletedb`) to confirm it works with the updated models.
 
 Failure to update `setup_db.py` is a common source of errors and will likely be caught by the user. Always remember this step.

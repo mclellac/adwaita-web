@@ -1,8 +1,8 @@
 import pytest
 from flask import url_for, get_flashed_messages
 from unittest.mock import patch
-from app-demo.models import User
-from app-demo import db
+from antisocialnet.models import User
+from antisocialnet import db
 
 # Fixture to create a user for auth tests if not using the global one from conftest
 @pytest.fixture
