@@ -184,3 +184,4 @@ if __name__ == '__main__':
     print(f"Using database: {flask_app.config['SQLALCHEMY_DATABASE_URI']}")
     run_migration(flask_app)
     print("Migration script finished.")
+
