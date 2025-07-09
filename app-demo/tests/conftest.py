@@ -107,31 +107,94 @@ def db_session(app):
                        # For faster tests, table creation could be session-scoped and only data cleared/rolled back.
                        # Given the current 'app' fixture is session-scoped, let's refine.
 
-@pytest.fixture(scope='function') # Changed to function scope for isolation
-def init_database(app):
+@pytest.fixture(scope='function')
+def db_session_txn(app): # app is session-scoped, _db is the SQLAlchemy instance
     """
-    Function-scoped fixture to ensure a clean database for each test.
-    Relies on the session-scoped 'app' fixture for the app instance.
+    Provides a transactional scope for tests. Rolls back changes after each test.
+    Tables are created once by the session-scoped 'app' fixture.
+    SiteSettings are also set once by the 'app' fixture.
+    This fixture ensures data isolation between tests.
     """
     with app.app_context():
-        _db.drop_all() # Drop all tables
-        _db.create_all() # Create all tables
+        connection = _db.engine.connect()
+        transaction = connection.begin()
 
-        # Seed essential data if needed for most tests
-        SiteSetting.set('allow_registrations', True, 'bool')
-        SiteSetting.set('auto_approve_users', True, 'bool')
-        _db.session.commit() # Commit seed data
+        # Use a specific session bound to this transaction/connection for the test
+        # This overrides the default scoped_session from Flask-SQLAlchemy for this test's scope
+        options = {'bind': connection, 'binds': {}}
+        test_session = _db.create_scoped_session(options=options)
 
-        yield _db # Provide the db object for convenience in tests
+        # Store original session and replace it
+        original_session = _db.session
+        _db.session = test_session
+
+        yield _db.session # Test uses this session
+
+        # Teardown
+        test_session.remove() # Or test_session.close()
+        transaction.rollback()
+        connection.close()
+        _db.session = original_session # Restore original session for other potential uses (though typically not needed if all tests use this)
+
+
+# The primary 'db' fixture used by tests should now provide the transactional session.
+# Tests typically import 'db' from 'app-demo' which is '_db' here.
+# So, tests that need to commit or rollback will use `db.session`.
+# We want `db.session` within a test to be this transactional session.
+# The fixture `db_session_txn` now correctly overrides `_db.session`.
+# So tests can continue to use `_db.session` or `from app-demo import db` and then `db.session`.
+
+# Fixture that provides the SQLAlchemy instance itself, now mostly for convenience if needed.
+# Most tests will interact via the session provided by db_session_txn (which is now _db.session during test).
+@pytest.fixture
+def db_instance(app): # Changed from 'db' to 'db_instance' to avoid confusion with the session
+    """Provides the raw SQLAlchemy DB instance, primarily for _db.metadata etc."""
+    return _db
+
+# Alias the transactional session fixture to `db_session` for clarity if tests import it,
+# or they can just use `db.session` (which is overridden by `db_session_txn`).
+# For tests that take `db` as an argument, they are getting the SQLAlchemy instance.
+# They then use `db.session`. So, `db_session_txn` correctly makes `db.session` transactional.
+# The old `db(init_database)` alias is no longer needed.
+# Tests that used `db` fixture expecting the SQLAlchemy instance will still work,
+# and `db.session` will be the transactional one.
+# The `init_database` fixture is removed.
+# The `db` fixture that tests import should be the SQLAlchemy object.
+# The `db_session_txn` fixture should be used by tests that need a session,
+# or we make `db_session_txn` the primary way to get a session.
+
+# Let's make the primary 'db' fixture for tests return the SQLAlchemy object,
+# and ensure 'db_session_txn' is used by tests that need to interact with the session.
+# Or, more commonly, tests will import `db` from `app_demo` and then use `db.session`.
+# The `db_session_txn` fixture should be auto-used if tests depend on a clean session.
+# We can make it an autouse fixture or have tests explicitly request it.
+# For now, let's make it the primary way to get a session for database operations in tests.
+
+@pytest.fixture(scope="function")
+def db(app, request): # request is a pytest fixture
+    """
+    Provides a transactional scope for tests. Rolls back changes after each test.
+    This replaces the old 'db' and 'init_database' fixtures.
+    Tests will receive the SQLAlchemy `_db` object through this fixture,
+    and `_db.session` will be managed transactionally.
+    """
+    with app.app_context():
+        connection = _db.engine.connect()
+        transaction = connection.begin()
+
+        options = {'bind': connection, 'binds': {}}
+        scoped_session_factory = _db.create_scoped_session(options=options)
+
+        original_session = _db.session
+        _db.session = scoped_session_factory
+
+        # Yield the SQLAlchemy instance, tests will use _db.session
+        yield _db
 
         _db.session.remove()
-        _db.drop_all() # Clean up after the test
-
-
-# Re-aliasing db to use the function-scoped init_database for test functions
-@pytest.fixture()
-def db(init_database):
-    return init_database
+        transaction.rollback()
+        connection.close()
+        _db.session = original_session
 
 # Fixture to create a test user and add to session
 @pytest.fixture

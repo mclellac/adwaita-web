@@ -200,3 +200,203 @@ def test_save_gallery_photo_path_generation_with_user_id(mock_os_exists, mock_os
     mock_image_open.assert_called_once_with(mock_file_storage.stream)
     # No thumbnail by default for gallery in save_uploaded_file unless thumbnail_size is passed
     mock_img_instance.thumbnail.assert_not_called()
+
+# --- Tests for other utility functions ---
+
+from app_demo.utils import generate_slug_util, extract_mentions, human_readable_date, linkify_mentions, markdown_to_html_and_sanitize_util
+
+def test_generate_slug_util():
+    assert generate_slug_util("Hello World") == "hello-world"
+    assert generate_slug_util("  Leading and Trailing Spaces  ") == "leading-and-trailing-spaces"
+    assert generate_slug_util("Special!@#$%^&*()_+Chars") == "special-chars"
+    assert generate_slug_util("Long Text That Exceeds Fifty Characters Limit For Slug Generation") == "long-text-that-exceeds-fifty-characters-limit-fo" # Default max_length 50
+    assert generate_slug_util("Short", max_length=10) == "short"
+    assert generate_slug_util("Another Very Long Text String To Test Custom Max Length", max_length=20) == "another-very-long-te"
+    assert generate_slug_util("") == ""
+    assert generate_slug_util(None) == "" # Or should it raise error? Current behavior is likely empty string or error.
+                                          # Based on `str(text or '').lower()`, it will be empty string.
+    assert generate_slug_util("連続したハイフン--は一つに") == "連続したハイフン-は一つに" # Non-ASCII, current slugify might not handle well, or pass through.
+                                                                    # python-slugify handles unicode well. The custom one might not.
+                                                                    # The current custom one only replaces non-alphanum with '-', so unicode might pass.
+                                                                    # Let's assume it passes unicode characters as is if they are not whitespace/punctuation.
+                                                                    # The re.sub(r'[^\w\s-]', '', text) part will keep unicode \w.
+    assert generate_slug_util("你好世界 hello") == "你好世界-hello"
+
+
+def test_extract_mentions():
+    assert extract_mentions("Hello @world and @test_user!") == {"world", "test_user"}
+    assert extract_mentions("No mentions here.") == set()
+    assert extract_mentions("@user1 @user2 @user1") == {"user1", "user2"} # Unique mentions
+    assert extract_mentions("Mention with dot @user.name should be user") == {"user"} # Current regex stops at non-alphanum_
+    assert extract_mentions("Email like test@example.com should not be a mention") == set()
+    assert extract_mentions("@_underscore_user_") == {"_underscore_user_"}
+    assert extract_mentions("@user-with-hyphen") == {"user"} # Hyphen likely stops it
+    assert extract_mentions("Text\n@nextline_user") == {"nextline_user"}
+    assert extract_mentions("@123numeric") == {"123numeric"}
+    assert extract_mentions("Hello @ world") == set() # Space invalidates
+    assert extract_mentions("Hello @!invalid") == set() # Invalid char
+    # Based on regex: r'@([a-zA-Z0-9_]+)'
+    assert extract_mentions("dot.after@user not a mention") == set()
+    assert extract_mentions("@user_at_end") == {"user_at_end"}
+
+def test_human_readable_date_current_implementation():
+    from datetime import datetime, timezone
+
+    # Test datetime object formatting
+    dt_example = datetime(2023, 1, 5, 15, 45, 0, tzinfo=timezone.utc) # Jan 5, 2023, 3:45 PM UTC
+
+    # Test with show_time=True (default)
+    # Expected: "Jan 05, 2023, 03:45 PM" (Note: %d gives 05, %I gives 03. Leading zero removal is custom)
+    # The custom logic: if formatted_date.startswith('0'): formatted_date = formatted_date[1:]
+    # This applies only if the month abbreviation makes it start with 0, which is not typical.
+    # E.g. if strftime was "%m/%d/%Y...", then "01/05/2023..." would become "1/05/2023..."
+    # For "%b %d, %Y, %I:%M %p", it's unlikely to start with '0' unless month is like "01" (not %b)
+    # Let's assume the startswith('0') was for a previous strftime format.
+    # Current format: "Jan 05, 2023, 03:45 PM"
+    assert human_readable_date(dt_example, show_time=True) == "Jan 05, 2023, 03:45 PM"
+
+    dt_early_month_am = datetime(2023, 7, 5, 9, 5, 0, tzinfo=timezone.utc) # Jul 5, 2023, 09:05 AM
+    # Expected: "Jul 05, 2023, 09:05 AM"
+    assert human_readable_date(dt_early_month_am, show_time=True) == "Jul 05, 2023, 09:05 AM"
+
+    # Test with show_time=False
+    assert human_readable_date(dt_example, show_time=False) == "Jan 05, 2023"
+
+    # Test with non-datetime input (should return as is)
+    assert human_readable_date(None) is None
+    assert human_readable_date("not a date") == "not a date"
+    assert human_readable_date(12345) == 12345
+
+    # Test future date - current implementation will just format it
+    dt_future = datetime(2099, 12, 25, 10, 0, 0, tzinfo=timezone.utc)
+    assert human_readable_date(dt_future, show_time=True) == "Dec 25, 2099, 10:00 AM"
+    assert human_readable_date(dt_future, show_time=False) == "Dec 25, 2099"
+
+def test_linkify_mentions():
+    # This function is basic, assumes User model query is mocked or app context is available if it hits DB.
+    # The current util in utils.py does not hit DB; it just creates mailto links.
+    # The one in __init__.py template_filter *does* hit DB.
+    # The `linkify_mentions_util` from utils.py is the one we are testing here.
+    # It creates mailto links for @mentions which is incorrect for user profiles.
+    # This utility seems to be wrongly implemented or named if it's for user profile links.
+    # Regex: r'@([a-zA-Z0-9_.]+)' - this is different from extract_mentions.
+    # It replaces with: f'<a href="mailto:{username_part}@{domain_part}">{text}</a>'
+    # This is clearly for emails, not user mentions.
+    # The template filter `linkify_mentions` in __init__.py uses `url_for('profile.view_profile', username=username_str)`
+
+    # Let's test the template filter's intended behavior (needs app context and User model)
+    # This means it's not a pure unit test for utils.linkify_mentions_util.
+    # For now, I'll test the `utils.linkify_mentions_util` as written, acknowledging it's for emails.
+
+    text_with_email_mentions = "Contact @admin@example.com or @support@example.org for help."
+    # This utility is probably misnamed or misused if it's intended for user profile linking.
+    # The actual user mention linking is likely handled by the template filter in __init__.py,
+    # which calls a different `linkify_mentions_util` (or should).
+    # The provided `linkify_mentions_util` in `utils.py` is for emails.
+    # Let's assume the task implies testing the one that would link to user profiles.
+    # The template filter in `__init__.py` is `actual_linkify_mentions_filter` which calls `linkify_mentions_util` from `utils.py`
+    # This means `utils.linkify_mentions` is indeed the one called. Its current email logic is problematic for user mentions.
+
+    # Given the current utils.py implementation for linkify_mentions:
+    # It's designed to linkify email patterns like @username@domain, not @username for profiles.
+    # This seems to be a bug in its usage for user mentions.
+    # If used with "@username", it will try to form "mailto:username@username" if domain_part is missing.
+
+    # Let's test the version from __init__.py's template filter context.
+    # This requires an app, db, and user.
+    # For a unit test of utils.py, this is not ideal.
+    # I will skip testing this specific `linkify_mentions` from `utils.py` as it seems to be
+    # incorrectly applied for user profile mentions. The real logic is in the app context filter.
+    # The `extract_mentions` is more relevant for finding users.
+    # The function has been reverted to generate Markdown profile links.
+    # No app context needed for this version of the test.
+
+    text_no_mentions = "Hello world, no mentions here."
+    assert linkify_mentions(text_no_mentions) == text_no_mentions
+
+    text_with_mention = "Hello @testuser, how are you?"
+    expected_md_link = "[@testuser](/profile/testuser)"
+    assert linkify_mentions(text_with_mention) == f"Hello {expected_md_link}, how are you?"
+
+    text_multiple_mentions = "@user1 check this out, also @user2."
+    expected_md_link1 = "[@user1](/profile/user1)"
+    expected_md_link2 = "[@user2](/profile/user2)"
+    assert linkify_mentions(text_multiple_mentions) == f"{expected_md_link1} check this out, also {expected_md_link2}."
+
+    text_with_punctuation = "Is @user.name (aka @user_name) there?"
+    # Regex is r'@([a-zA-Z0-9_]+)', so "@user.name" matches "user"
+    expected_md_link_user = "[@user](/profile/user)"
+    expected_md_link_user_name = "[@user_name](/profile/user_name)"
+    assert linkify_mentions(text_with_punctuation) == f"Is {expected_md_link_user}.name (aka {expected_md_link_user_name}) there?"
+
+    # Test None and empty string
+    assert linkify_mentions(None) == "" # Util returns '' for None
+    assert linkify_mentions("") == ""
+
+
+# @pytest.mark.usefixtures("app") # Apply app fixture to this test function
+# def test_linkify_mentions_generates_profile_links(app): # Inject app fixture
+#     """Test that linkify_mentions correctly generates profile links."""
+#     # Need to be within an app context and request context for url_for
+#     with app.test_request_context('/'): # Simulate a request context
+#         # Create a dummy user for profile URL generation if needed by url_for, though not strictly necessary
+#         # as url_for will generate the link even if the user doesn't exist.
+#         # However, if User.query is hit by some part of the link generation logic, this would be needed.
+#         # The current linkify_mentions does not query User model.
+
+#         text_no_mentions = "Hello world, no mentions here."
+#         assert linkify_mentions(text_no_mentions) == text_no_mentions
+
+#         text_with_mention = "Hello @testuser, how are you?"
+#         # url_for will generate something like /profile/testuser
+#         # The exact URL depends on blueprint registration. Assuming 'profile.view_profile'
+#         expected_link = '<a href="/profile/testuser" class="adw-link user-mention-link">@testuser</a>'
+#         # Need to escape it because the output of linkify_mentions is Markup(escaped_html)
+#         # Or, compare the unescaped versions if easier.
+#         # The function itself now calls escape on profile_url and username.
+#         rendered_html = linkify_mentions(text_with_mention)
+#         assert f'<a href="{escape(url_for("profile.view_profile", username="testuser"))}" class="adw-link user-mention-link">@{escape("testuser")}</a>' in str(rendered_html)
+#         assert "Hello " in str(rendered_html)
+#         assert ", how are you?" in str(rendered_html)
+
+
+#         text_multiple_mentions = "@user1 check this out, also @user2."
+#         rendered_multiple = linkify_mentions(text_multiple_mentions)
+#         assert f'<a href="{escape(url_for("profile.view_profile", username="user1"))}" class="adw-link user-mention-link">@{escape("user1")}</a>' in str(rendered_multiple)
+#         assert f'<a href="{escape(url_for("profile.view_profile", username="user2"))}" class="adw-link user-mention-link">@{escape("user2")}</a>' in str(rendered_multiple)
+
+#         text_with_punctuation = "Is @user.name (aka @user_name) there?"
+#         # Current regex in extract_mentions (and linkify_mentions) is r'@([a-zA-Z0-9_]+)'
+#         # So "@user.name" will only match "user".
+#         rendered_punctuation = linkify_mentions(text_with_punctuation)
+#         assert f'<a href="{escape(url_for("profile.view_profile", username="user"))}" class="adw-link user-mention-link">@{escape("user")}</a>.name' in str(rendered_punctuation)
+#         assert f'<a href="{escape(url_for("profile.view_profile", username="user_name"))}" class="adw-link user-mention-link">@{escape("user_name")}</a>' in str(rendered_punctuation)
+
+#         # Test None and empty string
+#         assert linkify_mentions(None) == ""
+#         assert linkify_mentions("") == ""
+
+
+def test_markdown_to_html_and_sanitize_util():
+    # Basic markdown
+    assert markdown_to_html_and_sanitize_util("**bold**") == "<p><strong>bold</strong></p>"
+    assert markdown_to_html_and_sanitize_util("*italic*") == "<p><em>italic</em></p>"
+    # Link
+    assert markdown_to_html_and_sanitize_util("[link](http://example.com)") == '<p><a href="http://example.com" rel="noopener noreferrer">link</a></p>'
+    # Sanitization: script tag
+    assert markdown_to_html_and_sanitize_util("<script>alert('XSS')</script>") == "<p>&lt;script&gt;alert('XSS')&lt;/script&gt;</p>" # Bleach escapes it
+    # Sanitization: onclick attribute
+    assert markdown_to_html_and_sanitize_util('<a href="#" onclick="alert(\'XSS\')">Click me</a>') == '<p><a href="#">Click me</a></p>' # onclick should be stripped
+    # Image (default bleach policy might strip img src if not http/https, or if img not allowed)
+    # Current policy in utils.py allows 'img' tag with 'src', 'alt', 'title', 'width', 'height'.
+    # It does not explicitly restrict scheme for img src, so http/https should work.
+    assert markdown_to_html_and_sanitize_util("![alt text](http://example.com/image.png)") == '<p><img alt="alt text" src="http://example.com/image.png"></p>'
+    # Test None or empty input
+    assert markdown_to_html_and_sanitize_util(None) == "" # Returns empty string for None
+    assert markdown_to_html_and_sanitize_util("") == ""   # Returns empty string for empty
+    # Test headers
+    assert markdown_to_html_and_sanitize_util("# Header 1") == "<h1>Header 1</h1>" # Markdown lib might add \n
+    # Test list
+    md_list = "* Item 1\n* Item 2"
+    html_list = "<ul>\n<li>Item 1</li>\n<li>Item 2</li>\n</ul>" # Markdown output can vary slightly (e.g. trailing \n)
+    assert markdown_to_html_and_sanitize_util(md_list).replace("\n", "") == html_list.replace("\n", "")
