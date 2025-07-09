@@ -7,6 +7,7 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
 *   Python 3.x
 *   pip (Python package installer)
 *   PostgreSQL server
+*   [Dart Sass](https://sass-lang.com/install) (for compiling Adwaita-Web SCSS). The `build-adwaita-web.sh` script, located in the repository root, is used for building the Adwaita-Web assets and expects `dart-sass/sass` to be executable.
 
 ## Setup and Running
 
@@ -28,7 +29,18 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
     pip install -r requirements.txt
     ```
 
-4.  **Database Setup**:
+4.  **Build Adwaita-Web Assets:**
+    The `adwaita-web` SCSS and JavaScript assets need to be compiled/copied into the `app-demo/static` directory.
+    Navigate to the **root of the repository** (e.g., `cd ..` if you are in `app-demo`) and run the build script:
+    ```bash
+    ./build-adwaita-web.sh
+    ```
+    After the script completes, navigate back to the `app-demo` directory for subsequent steps:
+    ```bash
+    cd app-demo
+    ```
+
+5.  **Database Setup**:
 
     This application uses a PostgreSQL database to store user and blog post data.
 
@@ -97,7 +109,7 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
         *   Create the necessary database tables if they don't already exist.
         *   Guide you through creating an initial admin user for the application.
 
-5.  **Run the Flask development server:**
+6.  **Run the Flask development server:**
     Once the database is set up, you can run the application using the Flask CLI.
     Ensure you are in the `app-demo` directory.
 
@@ -115,7 +127,37 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
     ```
     The `app_demo` in `FLASK_APP=app_demo` refers to the `app-demo` directory (which is a Python package containing `__init__.py` where `create_app()` is defined).
 
-6.  Open your web browser and go to `http://127.0.0.1:5000/` (or the address shown in the `flask run` output) to see the application.
+7.  Open your web browser and go to `http://127.0.0.1:5000/` (or the address shown in the `flask run` output) to see the application.
+
+## Running Tests
+
+The application includes a test suite using `pytest`.
+
+1.  **Navigate to the `app-demo` directory** (if not already there).
+2.  **Ensure dependencies are installed**, including `pytest` (it's part of `requirements.txt`).
+3.  **Configure Test Database Environment Variables:**
+    The tests will create and destroy their own database tables. It's recommended to use a separate database for testing. You can configure this using the same environment variables as for development (e.g., `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_DB`), but point `POSTGRES_DB` to a dedicated test database name.
+    ```bash
+    export POSTGRES_USER="your_test_db_user"      # Default: postgres
+    export POSTGRES_PASSWORD="your_test_db_password" # Default: postgres
+    export POSTGRES_HOST="localhost"             # Default: localhost
+    export POSTGRES_DB="appdb_test"              # Example: appdb_test (choose a name for your test DB)
+    ```
+    The `setup_db.py` script (which can be invoked by tests or manually) will handle table creation. If the test database itself doesn't exist, you might need to create it once using `psql` before running tests for the first time:
+    ```pql
+    -- In psql, connected as a superuser or a user with CREATEDB rights:
+    CREATE DATABASE appdb_test OWNER your_test_db_user;
+    ```
+
+4.  **Run tests using pytest:**
+    From the `app-demo` directory:
+    ```bash
+    python -m pytest
+    ```
+    Or simply:
+    ```bash
+    pytest
+    ```
 
 ## Key Features
 
