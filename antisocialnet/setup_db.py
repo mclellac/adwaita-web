@@ -21,8 +21,7 @@ import importlib
 import yaml # For loading config from YAML file
 
 # Import create_app and necessary models/db instance
-# The actual directory/package name is 'antisocialnet'
-# We use importlib to load it because of the hyphen.
+# from the 'antisocialnet' package.
 app_module = importlib.import_module("antisocialnet")
 create_app = app_module.create_app
 db = app_module.db
