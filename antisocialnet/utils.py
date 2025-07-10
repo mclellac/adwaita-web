@@ -157,7 +157,7 @@ ALLOWED_TAGS_CONFIG = [
 ]
 
 ALLOWED_ATTRIBUTES_CONFIG = {
-    '*': ['class', 'id', 'style'],  # Allow class, id, style on any allowed tag (style should be used with caution)
+    '*': ['class', 'id'],  # Allow class, id on any allowed tag
     'a': ['href', 'title', 'target', 'rel'],
     'img': ['src', 'alt', 'title', 'width', 'height'],
     'table': ['summary'],

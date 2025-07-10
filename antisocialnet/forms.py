@@ -66,8 +66,7 @@ class PostForm(FlaskForm):
         get_pk=get_category_pk,
         get_label='name',
         widget=ListWidget(prefix_label=False),
-        option_widget=CheckboxInput(),
-        allow_blank=True
+        option_widget=CheckboxInput()
     )
     tags_string = StringField(
         'Tags (comma-separated)',
