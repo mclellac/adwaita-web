@@ -121,7 +121,7 @@ def create_app(config_name=None, yaml_config_override=None): # Added yaml_config
             user_id_int = int(user_id_str)
             user = db.session.get(models.User, user_id_int) # Use models.User
             # if user:
-            #     app.logger.info(f"[LOAD_USER] User ID: {user.id} (Handle: {user.handle}) loaded.")
+            #     app.logger.info(f"[LOAD_USER] User {user.username} (ID: {user.id}) loaded.")
             # else:
             #     app.logger.warning(f"[LOAD_USER] No user found for ID: {user_id_int}")
             return user
@@ -239,19 +239,19 @@ def create_app(config_name=None, yaml_config_override=None): # Added yaml_config
 
     @app.errorhandler(403)
     def forbidden_page(error):
-        user_info = f"User ID: {current_user.id} (Handle: {current_user.handle})" if current_user.is_authenticated else "User: Anonymous"
+        user_info = f"User: {current_user.username}" if current_user.is_authenticated else "User: Anonymous"
         app.logger.warning(f"[ERROR_HANDLER] 403 Forbidden - Path: {request.path}, IP: {request.remote_addr}, {user_info}, Error: {error}")
         return render_template('403.html'), 403
 
     @app.errorhandler(404)
     def page_not_found(error):
-        user_info = f"User ID: {current_user.id} (Handle: {current_user.handle})" if current_user.is_authenticated else "User: Anonymous"
+        user_info = f"User: {current_user.username}" if current_user.is_authenticated else "User: Anonymous"
         app.logger.warning(f"[ERROR_HANDLER] 404 Not Found - Path: {request.path}, IP: {request.remote_addr}, {user_info}, Error: {error}")
         return render_template('404.html'), 404
 
     @app.errorhandler(500)
     def server_error_page(error):
-        user_info = f"User ID: {current_user.id} (Handle: {current_user.handle})" if current_user.is_authenticated else "User: Anonymous"
+        user_info = f"User: {current_user.username}" if current_user.is_authenticated else "User: Anonymous"
         app.logger.error(f"[ERROR_HANDLER] 500 Server Error - Path: {request.path}, IP: {request.remote_addr}, {user_info}, Error: {error}", exc_info=True)
         db.session.rollback() # Rollback in case of DB error leading to 500
         return render_template('500.html'), 500

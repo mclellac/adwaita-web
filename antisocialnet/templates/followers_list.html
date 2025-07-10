@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}Followers of {{ user_profile.full_name or ('@' + user_profile.handle if user_profile.handle else user_profile.username) }}{% endblock %}
+{% block title %}Followers of {{ user_profile.full_name or user_profile.username }}{% endblock %}
 
-{% block header_title %}Followers of {{ user_profile.full_name or ('@' + user_profile.handle if user_profile.handle else user_profile.username) }}{% endblock %}
+{% block header_title %}Followers of {{ user_profile.full_name or user_profile.username }}{% endblock %}
 
 {% block content %}
 <div class="adw-clamp adw-clamp-lg"> {# Wider clamp for user lists potentially #}
@@ -11,37 +11,35 @@
             {% for listed_user in users_list %}
             <div class="adw-action-row user-list-item-row">
                 <div class="adw-action-row-start-content">
-                    <a href="{{ url_for('profile.view_profile', handle=listed_user.handle) if listed_user.handle else '#' }}">
+                    <a href="{{ url_for('profile.view_profile', username=listed_user.username) }}">
                         <span class="adw-avatar size-m">
                             {% if listed_user.profile_photo_url %}
-                            <img src="{{ url_for('static', filename=listed_user.profile_photo_url) }}" alt="{{ listed_user.full_name or ('@' + listed_user.handle if listed_user.handle else listed_user.username) }} avatar">
+                            <img src="{{ url_for('static', filename=listed_user.profile_photo_url) }}" alt="{{ listed_user.full_name or listed_user.username }} avatar">
                             {% else %}
-                            <img src="{{ default_avatar_url }}" alt="{{ listed_user.full_name or ('@' + listed_user.handle if listed_user.handle else listed_user.username) }} default avatar">
+                            <img src="{{ default_avatar_url }}" alt="{{ listed_user.full_name or listed_user.username }} default avatar">
                             {% endif %}
                         </span>
                     </a>
                 </div>
                 <div class="adw-action-row-text-content">
-                    <a href="{{ url_for('profile.view_profile', handle=listed_user.handle) if listed_user.handle else '#' }}" class="adw-link">
-                        <span class="adw-action-row-title">{{ listed_user.full_name or ('@' + listed_user.handle if listed_user.handle else listed_user.username) }}</span>
+                    <a href="{{ url_for('profile.view_profile', username=listed_user.username) }}" class="adw-link">
+                        <span class="adw-action-row-title">{{ listed_user.full_name or listed_user.username }}</span>
                     </a>
-                    {% if listed_user.handle %}
-                    <span class="adw-action-row-subtitle">@{{ listed_user.handle }}</span>
-                    {% elif listed_user.full_name %} {# Fallback for older users if handle is somehow missing but full_name exists #}
+                    {% if listed_user.full_name %}
                     <span class="adw-action-row-subtitle">@{{ listed_user.username }}</span>
                     {% endif %}
                 </div>
                 <div class="adw-action-row-end-content">
                     {% if current_user.is_authenticated and current_user != listed_user %}
                         {% if current_user.is_following(listed_user) %}
-                            <form action="{{ url_for('profile.unfollow_user', handle=listed_user.handle) if listed_user.handle else '#' }}" method="POST" style="display: inline;">
+                            <form action="{{ url_for('profile.unfollow_user', username=listed_user.username) }}" method="POST" style="display: inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="adw-button small" {% if not listed_user.handle %}disabled{% endif %}>Unfollow</button> {# Using .small button variant #}
+                                <button type="submit" class="adw-button small">Unfollow</button> {# Using .small button variant #}
                             </form>
                         {% else %}
-                            <form action="{{ url_for('profile.follow_user', handle=listed_user.handle) if listed_user.handle else '#' }}" method="POST" style="display: inline;">
+                            <form action="{{ url_for('profile.follow_user', username=listed_user.username) }}" method="POST" style="display: inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="adw-button small suggested-action" {% if not listed_user.handle %}disabled{% endif %}>Follow</button>
+                                <button type="submit" class="adw-button small suggested-action">Follow</button>
                             </form>
                         {% endif %}
                     {% endif %}
@@ -55,7 +53,7 @@
         <div class="adw-box adw-box-horizontal justify-center list-pagination-box">
             <div class="adw-toggle-group">
                 {% if pagination.has_prev %}
-                    <a href="{{ url_for('profile.followers_list', handle=user_profile.handle, page=pagination.prev_num) if user_profile.handle else '#' }}" class="adw-button icon-only" aria-label="Previous page">
+                    <a href="{{ url_for('profile.followers_list', username=user_profile.username, page=pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
                         <span class="adw-icon icon-actions-go-previous-symbolic"></span>
                     </a>
                 {% else %}
@@ -69,7 +67,7 @@
                         {% if page_num == pagination.page %}
                             <button class="adw-button suggested-action" disabled aria-current="page">{{ page_num }}</button>
                         {% else %}
-                            <a href="{{ url_for('profile.followers_list', handle=user_profile.handle, page=page_num) if user_profile.handle else '#' }}" class="adw-button">{{ page_num }}</a>
+                            <a href="{{ url_for('profile.followers_list', username=user_profile.username, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                         {% endif %}
                     {% elif loop.index != 1 and loop.index != pagination.pages + pagination.iter_pages()|length %}
                         <button class="adw-button flat" disabled>…</button>
@@ -77,7 +75,7 @@
                 {% endfor %}
 
                 {% if pagination.has_next %}
-                     <a href="{{ url_for('profile.followers_list', handle=user_profile.handle, page=pagination.next_num) if user_profile.handle else '#' }}" class="adw-button icon-only" aria-label="Next page">
+                     <a href="{{ url_for('profile.followers_list', username=user_profile.username, page=pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
                         <span class="adw-icon icon-actions-go-next-symbolic"></span>
                     </a>
                 {% else %}
@@ -92,7 +90,7 @@
     {% else %}
         <div class="adw-status-page">
             <span class="adw-icon icon-status-user-offline-symbolic adw-status-page-icon app-status-page-icon"></span> {# Example icon #}
-            <h3 class="adw-status-page-title">{{ user_profile.full_name or ('@' + user_profile.handle if user_profile.handle else user_profile.username) }} has no followers yet.</h3>
+            <h3 class="adw-status-page-title">{{ user_profile.full_name or user_profile.username }} has no followers yet.</h3>
             {# <p class="adw-status-page-description">Check back later!</p> #}
         </div>
     {% endif %}

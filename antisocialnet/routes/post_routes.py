@@ -16,10 +16,10 @@ def view_post(post_id):
 
     if not post.is_published:
         if not current_user.is_authenticated or current_user.id != post.user_id:
-            user_desc = f"User ID: {current_user.id} (Handle: {current_user.handle})" if current_user.is_authenticated else 'Anonymous'
-            current_app.logger.warning(f"{user_desc} attempted to view unpublished post ID: {post_id}. Denying access.")
+            user_desc = current_user.username if current_user.is_authenticated else 'Anonymous'
+            current_app.logger.warning(f"User {user_desc} attempted to view unpublished post ID: {post_id}. Denying access.")
             abort(404)
-        current_app.logger.debug(f"Author User ID: {current_user.id} (Handle: {current_user.handle}) viewing their own unpublished post ID: {post.id}.")
+        current_app.logger.debug(f"Author {current_user.username} viewing their own unpublished post ID: {post.id}.")
     else:
         current_app.logger.debug(f"Viewing published post ID: {post_id}.")
 
@@ -38,7 +38,7 @@ def view_post(post_id):
         try:
             parent_id_val = form.parent_id.data
             parent_id_int = int(parent_id_val) if parent_id_val and parent_id_val.isdigit() else None
-            current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) submitting comment on post {post_id}. Parent ID: {parent_id_int}.")
+            current_app.logger.info(f"User {current_user.username} submitting comment on post {post_id}. Parent ID: {parent_id_int}.")
 
             comment = Comment(text=form.text.data, user_id=current_user.id, post_id=post_id, parent_id=parent_id_int)
             db.session.add(comment)
@@ -68,7 +68,7 @@ def view_post(post_id):
                 # We can still populate related_post_id for context if the target is a comment.
                 notification.related_post_id = post.id # Keep for context if target is comment
                 db.session.add(notification)
-                current_app.logger.info(f"Notification created for User ID: {post.author.id} (Handle: {post.author.handle}) about new comment by User ID: {current_user.id} (Handle: {current_user.handle}) on post {post.id}.")
+                current_app.logger.info(f"Notification created for user {post.author.username} about new comment by {current_user.username} on post {post.id}.")
 
             # Create Activity entry for new comment
             from ..models import Activity # Local import (already imported for like, but good practice if separated)
@@ -83,52 +83,45 @@ def view_post(post_id):
             # Contextual: if activity is about a comment on a post, also store post_id
             activity.target_post_id = post.id # Keep for context
             db.session.add(activity)
-            current_app.logger.info(f"Activity 'commented_on_post' logged for User ID: {current_user.id} (Handle: {current_user.handle}) on post {post.id}, comment ID pending (will be {comment.id}).")
+            current_app.logger.info(f"Activity 'commented_on_post' logged for user {current_user.username} on post {post.id}, comment ID pending (will be {comment.id}).")
 
             db.session.commit() # Commit comment, notification, and activity together
 
-            current_app.logger.info(f"Comment (ID: {comment.id}) by User ID: {current_user.id} (Handle: {current_user.handle}) added to post {post_id}.")
+            current_app.logger.info(f"Comment (ID: {comment.id}) by {current_user.username} added to post {post_id}.")
             if 'activity' in locals(): # Check if activity was created
-                 current_app.logger.info(f"Activity 'commented_on_post' (ID: {activity.id}) confirmed for User ID: {current_user.id} (Handle: {current_user.handle}), post ID {post.id}, comment ID {comment.id}.")
+                 current_app.logger.info(f"Activity 'commented_on_post' (ID: {activity.id}) confirmed for user {current_user.username}, post ID {post.id}, comment ID {comment.id}.")
 
-            # Process mentions in the comment (extract_mentions now looks for handles)
-            mentioned_handles_in_comment = extract_mentions(comment.text)
+            # Process mentions in the comment
+            mentioned_usernames_in_comment = extract_mentions(comment.text)
             new_mentions_created_comment = False
-            if mentioned_handles_in_comment:
+            if mentioned_usernames_in_comment:
                 from ..models import User # Ensure User model is available
-                for handle_str in mentioned_handles_in_comment: # Iterate handles
-                    mentioned_user_obj = User.query.filter_by(handle=handle_str).first() # Query by handle
+                for username_str in mentioned_usernames_in_comment:
+                    mentioned_user_obj = User.query.filter_by(username=username_str).first()
                     if mentioned_user_obj: # Check if user exists
                         if mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions
                             # Avoid duplicate notifications (simple check)
-                            # Existing related_comment_id is problematic if Notification model changed fully to polymorphic
-                            # Assuming related_comment_id is still there or needs to be target_id/target_type
                             existing_notif = Notification.query.filter_by(
-                                user_id=mentioned_user_obj.id,
+                                user_id=mentioned_user_obj.id, # Use .id from User object
                                 actor_id=current_user.id,
                                 type='mention_in_comment',
-                                target_type='comment', # Check against new polymorphic fields
-                                target_id=comment.id
+                                related_comment_id=comment.id
                             ).first()
                             if not existing_notif:
                                 mention_notification = Notification(
-                                    user_id=mentioned_user_obj.id,
+                                    user_id=mentioned_user_obj.id, # Use .id from User object
                                     actor_id=current_user.id,
                                     type='mention_in_comment',
-                                    target_type='comment',
-                                    target_id=comment.id
+                                # related_post_id=post.id, # Old field
+                                # related_comment_id=comment.id # Old field
+                                target_type='comment', # Primary target is the comment where mention occurs
+                                target_id=comment.id
                                 )
                                 # Contextual post_id for mentions in comments on posts
-                                # This logic might be redundant if the target_object relationship is robust enough
-                                # For now, let's assume it's okay to keep it if Notification model supports it.
-                                # If Notification.related_post_id was removed, this line would error.
-                                # Let's check Notification model: related_post_id was REMOVED.
-                                # So, this line must be removed or Notification model changed.
-                                # For now, removing. The target is the comment, context comes from comment.post.
-                                # mention_notification.related_post_id = post.id # REMOVE IF related_post_id is removed from Notification
+                                mention_notification.related_post_id = post.id # Keep for context
                                 db.session.add(mention_notification)
                                 new_mentions_created_comment = True
-                                current_app.logger.info(f"Mention notification created for User ID: {mentioned_user_obj.id} (Handle: {mentioned_user_obj.handle}) in comment {comment.id}")
+                                current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in comment {comment.id}")
 
             if new_mentions_created_comment:
                 db.session.commit()
@@ -172,11 +165,11 @@ def view_post(post_id):
 @post_bp.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_post():
-    current_app.logger.debug(f"Accessing /create post, Method: {request.method}, User ID: {current_user.id} (Handle: {current_user.handle})")
+    current_app.logger.debug(f"Accessing /create post, Method: {request.method}, User: {current_user.username}")
     form = PostForm(request.form)
     if form.validate_on_submit():
         content = form.content.data # Raw Markdown
-        current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) creating post.")
+        current_app.logger.info(f"User {current_user.username} creating post.")
         try:
             # Posts are now immediately published by default
             new_post = Post(content=content, user_id=current_user.id,
@@ -196,21 +189,21 @@ def create_post():
                 target_id=new_post.id     # New field
             )
             db.session.add(activity)
-            current_app.logger.info(f"Activity 'created_post' logged for User ID: {current_user.id} (Handle: {current_user.handle}), post ID pending assignment (will be {new_post.id}).")
+            current_app.logger.info(f"Activity 'created_post' logged for user {current_user.username}, post ID pending assignment (will be {new_post.id}).")
 
             db.session.commit() # Commit post and activity first to get IDs
 
-            current_app.logger.info(f"Post ID: {new_post.id} (Published: True) created by User ID: {current_user.id} (Handle: {current_user.handle}).")
+            current_app.logger.info(f"Post ID: {new_post.id} (Published: True) created by {current_user.username}.")
             if 'activity' in locals(): # Check if activity was created
-                 current_app.logger.info(f"Activity 'created_post' (ID: {activity.id}) confirmed for User ID: {current_user.id} (Handle: {current_user.handle}), post ID {new_post.id}.")
+                 current_app.logger.info(f"Activity 'created_post' (ID: {activity.id}) confirmed for user {current_user.username}, post ID {new_post.id}.")
 
-            # Process mentions after initial commit (extract_mentions now looks for handles)
-            mentioned_handles_in_post = extract_mentions(new_post.content)
+            # Process mentions after initial commit
+            mentioned_usernames_in_post = extract_mentions(new_post.content)
             new_mentions_created_post = False
-            if mentioned_handles_in_post:
+            if mentioned_usernames_in_post:
                 from ..models import User # Ensure User model is available
-                for handle_str in mentioned_handles_in_post: # Iterate handles
-                    mentioned_user_obj = User.query.filter_by(handle=handle_str).first() # Query by handle
+                for username_str in mentioned_usernames_in_post:
+                    mentioned_user_obj = User.query.filter_by(username=username_str).first()
                     if mentioned_user_obj: # Check if user exists
                         if mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions
                             # Avoid duplicate notifications (simple check for this post)
@@ -218,20 +211,22 @@ def create_post():
                                 user_id=mentioned_user_obj.id,
                                 actor_id=current_user.id,
                                 type='mention_in_post',
-                                target_type='post',
-                                target_id=new_post.id
+                                # related_post_id=new_post.id # Old field
+                                target_type='post',         # New field
+                                target_id=new_post.id       # New field
                             ).first()
                             if not existing_notif:
                                 mention_notification = Notification(
                                     user_id=mentioned_user_obj.id,
                                     actor_id=current_user.id,
                                     type='mention_in_post',
-                                    target_type='post',
-                                    target_id=new_post.id
+                                    # related_post_id=new_post.id # Old field
+                                    target_type='post',         # New field
+                                    target_id=new_post.id       # New field
                                 )
                                 db.session.add(mention_notification)
                                 new_mentions_created_post = True
-                                current_app.logger.info(f"Mention notification created for User ID: {mentioned_user_obj.id} (Handle: {mentioned_user_obj.handle}) in post {new_post.id}")
+                                current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in post {new_post.id}")
             if new_mentions_created_post:
                 db.session.commit() # Commit any mention notifications
 
@@ -239,10 +234,10 @@ def create_post():
             return redirect(url_for('post.view_post', post_id=new_post.id))
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error creating post by User ID: {current_user.id} (Handle: {current_user.handle}) or processing mentions: {e}", exc_info=True)
+            current_app.logger.error(f"Error creating post by {current_user.username} or processing mentions: {e}", exc_info=True)
             flash(f'Error creating post: {str(e)}', 'danger')
     elif request.method == 'POST':
-        current_app.logger.warning(f"Create post form validation failed for User ID: {current_user.id} (Handle: {current_user.handle}). Errors: {form.errors}")
+        current_app.logger.warning(f"Create post form validation failed. Errors: {form.errors}")
         flash_form_errors_util(form)
 
     return render_template('create_post.html', form=form)
@@ -250,10 +245,10 @@ def create_post():
 @post_bp.route('/posts/<int:post_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_post(post_id):
-    current_app.logger.debug(f"Accessing /posts/{post_id}/edit, Method: {request.method}, User ID: {current_user.id} (Handle: {current_user.handle})")
+    current_app.logger.debug(f"Accessing /posts/{post_id}/edit, Method: {request.method}, User: {current_user.username}")
     post = Post.query.get_or_404(post_id)
     if post.user_id != current_user.id and not current_user.is_admin: # Allow admin to edit
-        current_app.logger.warning(f"User ID: {current_user.id} (Handle: {current_user.handle}) not authorized to edit post {post_id}.")
+        current_app.logger.warning(f"User {current_user.username} not authorized to edit post {post_id}.")
         abort(403)
 
     # Ensure post is treated as published; editing does not change published status
@@ -268,7 +263,7 @@ def edit_post(post_id):
     delete_form = DeletePostForm(prefix=f"del-eff-post-{post.id}-")
 
     if form.validate_on_submit():
-        current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) updating post ID: {post_id}.")
+        current_app.logger.info(f"User {current_user.username} updating post ID: {post_id}.")
         post.content = form.content.data # Raw Markdown
         # is_published and published_at are not changed during an edit
 
@@ -277,36 +272,45 @@ def edit_post(post_id):
             db.session.add(post)
             db.session.commit() # Commit post content changes first
 
-            current_app.logger.info(f"Post ID {post.id} (Published: {post.is_published}) updated by User ID: {current_user.id} (Handle: {current_user.handle}).")
+            current_app.logger.info(f"Post ID {post.id} (Published: {post.is_published}) updated by {current_user.username}.")
 
-            # Process mentions for updated content (extract_mentions now looks for handles)
-            mentioned_handles_in_post = extract_mentions(post.content)
+            # Process mentions for updated content
+            # Note: This doesn't remove notifications for users no longer mentioned.
+            # A more complex system would track existing mentions vs new ones.
+            # For now, it just adds new notifications.
+            mentioned_usernames_in_post = extract_mentions(post.content)
             new_mentions_created = False
-            if mentioned_handles_in_post:
+            if mentioned_usernames_in_post:
                 from ..models import User # Ensure User model is available
-                for handle_str in mentioned_handles_in_post: # Iterate handles
-                    mentioned_user_obj = User.query.filter_by(handle=handle_str).first() # Query by handle
+                for username_str in mentioned_usernames_in_post:
+                    mentioned_user_obj = User.query.filter_by(username=username_str).first()
                     if mentioned_user_obj: # Check if user exists
                         if mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions
+                            # Avoid duplicate notifications if a user is mentioned multiple times or was already notified for this post edit session
+                            # A more robust solution would check existing notifications of this type for this post by this actor.
+                            # Simplified: just create if they are mentioned in current content.
                             existing_notif = Notification.query.filter_by(
-                                user_id=mentioned_user_obj.id,
+                                user_id=mentioned_user_obj.id, # Use .id from User object
                                 actor_id=current_user.id,
                                 type='mention_in_post',
-                                target_type='post',
-                                target_id=post.id
-                            ).first()
+                                # related_post_id=post.id # Old field
+                                target_type='post',     # New field
+                                target_id=post.id       # New field
+                            ).first() # This check is simplistic; doesn't account for multiple edits creating multiple notifs over time.
+                                      # A real system might only notify once per post, or if a user is newly added.
 
-                            if not existing_notif:
+                            if not existing_notif: # Only create if no similar notification exists (simplistic check)
                                 mention_notification = Notification(
-                                    user_id=mentioned_user_obj.id,
+                                    user_id=mentioned_user_obj.id, # Use .id from User object
                                     actor_id=current_user.id,
                                     type='mention_in_post',
-                                    target_type='post',
-                                    target_id=post.id
+                                    # related_post_id=post.id # Old field
+                                    target_type='post',     # New field
+                                    target_id=post.id       # New field
                                 )
                                 db.session.add(mention_notification)
                                 new_mentions_created = True
-                                current_app.logger.info(f"Mention notification created for User ID: {mentioned_user_obj.id} (Handle: {mentioned_user_obj.handle}) in updated post {post.id}")
+                                current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in updated post {post.id}")
 
             if new_mentions_created:
                 db.session.commit()
@@ -315,10 +319,10 @@ def edit_post(post_id):
             return redirect(url_for('post.view_post', post_id=post.id))
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error updating post {post.id} by User ID: {current_user.id} (Handle: {current_user.handle}) or processing mentions: {e}", exc_info=True)
+            current_app.logger.error(f"Error updating post {post.id} or processing mentions: {e}", exc_info=True)
             flash(f'Error updating post: {str(e)}', 'danger')
     elif request.method == 'POST':
-        current_app.logger.warning(f"Edit post form validation failed for post {post_id} by User ID: {current_user.id} (Handle: {current_user.handle}). Errors: {form.errors}")
+        current_app.logger.warning(f"Edit post form validation failed for post {post_id}. Errors: {form.errors}")
         flash_form_errors_util(form)
 
     if request.method == 'GET':
@@ -331,7 +335,7 @@ def edit_post(post_id):
 @post_bp.route('/posts/<int:post_id>/delete', methods=['POST'])
 @login_required
 def delete_post(post_id): # Renamed from delete_post_route
-    current_app.logger.debug(f"Accessing /posts/{post_id}/delete, User ID: {current_user.id} (Handle: {current_user.handle})")
+    current_app.logger.debug(f"Accessing /posts/{post_id}/delete, User: {current_user.username}")
 
     # Instantiate DeletePostForm for explicit CSRF validation
     form = DeletePostForm(request.form)
@@ -346,7 +350,7 @@ def delete_post(post_id): # Renamed from delete_post_route
 
     if form.validate_on_submit(): # Explicit CSRF validation
         if post.user_id != current_user.id and not current_user.is_admin:
-            current_app.logger.warning(f"User ID: {current_user.id} (Handle: {current_user.handle}) not authorized to delete post {post_id}.")
+            current_app.logger.warning(f"User {current_user.username} not authorized to delete post {post_id}.")
             abort(403)
 
         try:
@@ -384,15 +388,15 @@ def delete_post(post_id): # Renamed from delete_post_route
 
             db.session.delete(post)
             db.session.commit()
-            current_app.logger.info(f"Post ID: {post_id} successfully deleted by User ID: {current_user.id} (Handle: {current_user.handle}).")
+            current_app.logger.info(f"Post ID: {post_id} successfully deleted by {current_user.username}.")
             flash('Post deleted successfully!', 'toast_success')
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error deleting post ID {post_id} by User ID: {current_user.id} (Handle: {current_user.handle}): {e}", exc_info=True)
+            current_app.logger.error(f"Error deleting post ID {post_id}: {e}", exc_info=True)
             flash('Error deleting post. Please try again.', 'danger')
         return redirect(url_for('general.dashboard'))
     else: # CSRF validation failed
-        current_app.logger.warning(f"Delete post form validation failed for post ID: {post_id} by User ID: {current_user.id} (Handle: {current_user.handle}). Errors: {form.errors}")
+        current_app.logger.warning(f"Delete post form validation failed for post ID: {post_id}. Errors: {form.errors}")
         flash('Failed to delete post. Invalid request or session expired.', 'danger')
         # Attempt to redirect to a sensible page. Dashboard is the most likely origin.
         return redirect(url_for('general.dashboard'))
@@ -400,13 +404,13 @@ def delete_post(post_id): # Renamed from delete_post_route
 @post_bp.route('/comment/<int:comment_id>/delete', methods=['POST'])
 @login_required
 def delete_comment(comment_id): # Renamed
-    current_app.logger.debug(f"Accessing /comment/{comment_id}/delete, User ID: {current_user.id} (Handle: {current_user.handle})")
+    current_app.logger.debug(f"Accessing /comment/{comment_id}/delete, User: {current_user.username}")
     # Using a specific delete form for CSRF protection on this action
     delete_form = DeleteCommentForm(request.form)
     if delete_form.validate_on_submit(): # Check CSRF
         comment = Comment.query.get_or_404(comment_id)
         post_id = comment.post_id
-        current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) attempting to delete comment ID: {comment_id} from post ID: {post_id}.")
+        current_app.logger.info(f"User {current_user.username} attempting to delete comment ID: {comment_id} from post ID: {post_id}.")
 
         can_delete = False
         if comment.user_id == current_user.id: can_delete = True
@@ -414,7 +418,7 @@ def delete_comment(comment_id): # Renamed
         elif current_user.is_admin: can_delete = True
 
         if not can_delete:
-            current_app.logger.warning(f"User ID: {current_user.id} (Handle: {current_user.handle}) not authorized to delete comment {comment_id}.")
+            current_app.logger.warning(f"User {current_user.username} not authorized to delete comment {comment_id}.")
             abort(403)
         try:
             # Manually delete flags associated with this comment
@@ -424,7 +428,7 @@ def delete_comment(comment_id): # Renamed
             # Manually delete notifications associated with this comment
             # Also consider notifications where this comment was the target_id and target_type='comment'
             Notification.query.filter(
-                (Notification.related_comment_id == comment.id) | # This condition might be obsolete if related_comment_id removed from Notification
+                (Notification.related_comment_id == comment.id) |
                 ((Notification.target_type == 'comment') & (Notification.target_id == comment.id))
             ).delete(synchronize_session=False)
             current_app.logger.debug(f"Deleted notifications for comment ID: {comment_id}.")
@@ -432,7 +436,7 @@ def delete_comment(comment_id): # Renamed
             # Manually delete activities associated with this comment
             # Also consider activities where this comment was the target_id and target_type='comment'
             Activity.query.filter(
-                (Activity.target_comment_id == comment.id) | # This condition might be obsolete if target_comment_id removed from Activity
+                (Activity.target_comment_id == comment.id) |
                 ((Activity.target_type == 'comment') & (Activity.target_id == comment.id))
             ).delete(synchronize_session=False)
             current_app.logger.debug(f"Deleted activities for comment ID: {comment_id}.")
@@ -440,14 +444,14 @@ def delete_comment(comment_id): # Renamed
             db.session.delete(comment)
             db.session.commit()
             flash('Comment deleted.', 'toast_success')
-            current_app.logger.info(f"Comment ID: {comment_id} successfully deleted by User ID: {current_user.id} (Handle: {current_user.handle}).")
+            current_app.logger.info(f"Comment ID: {comment_id} successfully deleted by {current_user.username}.")
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error deleting comment ID: {comment_id} by User ID: {current_user.id} (Handle: {current_user.handle}): {e}", exc_info=True)
+            current_app.logger.error(f"Error deleting comment ID: {comment_id}: {e}", exc_info=True)
             flash('Error deleting comment. Please try again.', 'danger')
         return redirect(url_for('post.view_post', post_id=post_id, _anchor=f"post-comments-area")) # Redirect to general comments area
     else: # CSRF validation failed or other form error (if any were added)
-        current_app.logger.warning(f"Delete comment form validation failed for comment ID: {comment_id} by User ID: {current_user.id} (Handle: {current_user.handle}). Errors: {delete_form.errors}")
+        current_app.logger.warning(f"Delete comment form validation failed for comment ID: {comment_id}. Errors: {delete_form.errors}")
         flash('Failed to delete comment. Invalid request or session expired.', 'danger')
         # Try to redirect back to the post page even if comment_id was bad for some reason
         # This part might need a comment_id that is still valid in the DB to get post_id
@@ -459,31 +463,31 @@ def delete_comment(comment_id): # Renamed
 @post_bp.route('/comment/<int:comment_id>/flag', methods=['POST'])
 @login_required
 def flag_comment(comment_id): # Renamed
-    current_app.logger.debug(f"Accessing /comment/{comment_id}/flag, User ID: {current_user.id} (Handle: {current_user.handle})")
+    current_app.logger.debug(f"Accessing /comment/{comment_id}/flag, User: {current_user.username}")
     comment = Comment.query.get_or_404(comment_id)
     form = FlagCommentForm(request.form)
 
     if form.validate_on_submit(): # CSRF check
         existing_flag = CommentFlag.query.filter_by(comment_id=comment_id, flagger_user_id=current_user.id, is_resolved=False).first()
         if existing_flag:
-            current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) already actively flagged comment {comment_id}.")
+            current_app.logger.info(f"User {current_user.username} already actively flagged comment {comment_id}.")
             flash('You have already flagged this comment.', 'info')
         elif comment.user_id == current_user.id:
-            current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) attempted to flag their own comment {comment_id}.")
+            current_app.logger.info(f"User {current_user.username} attempted to flag their own comment {comment_id}.")
             flash("You cannot flag your own comment.", "warning")
         else:
             try:
                 new_flag = CommentFlag(comment_id=comment.id, flagger_user_id=current_user.id)
                 db.session.add(new_flag)
                 db.session.commit()
-                current_app.logger.info(f"Comment {comment_id} flagged by User ID: {current_user.id} (Handle: {current_user.handle}).")
+                current_app.logger.info(f"Comment {comment_id} flagged by user {current_user.username}.")
                 flash('Comment flagged for review.', 'toast_success')
             except Exception as e:
                 db.session.rollback()
-                current_app.logger.error(f"Error flagging comment {comment_id} by User ID: {current_user.id} (Handle: {current_user.handle}): {e}", exc_info=True)
+                current_app.logger.error(f"Error flagging comment {comment_id}: {e}", exc_info=True)
                 flash('Error flagging comment. Please try again.', 'danger')
     else:
-        current_app.logger.warning(f"Flag comment form validation failed for comment {comment_id} by User ID: {current_user.id} (Handle: {current_user.handle}). Errors: {form.errors}")
+        current_app.logger.warning(f"Flag comment form validation failed for comment {comment_id}. Errors: {form.errors}")
         flash_form_errors_util(form) # Will show CSRF error if that was the cause
 
     return redirect(url_for('post.view_post', post_id=comment.post_id, _anchor=f"comment-{comment.id}"))
@@ -535,7 +539,7 @@ def like_post_route(post_id):
 
     if form.validate_on_submit():
         if not post.is_published and post.user_id != current_user.id: # Can't like unpublished posts unless own
-            current_app.logger.warning(f"User ID: {current_user.id} (Handle: {current_user.handle}) attempt to like non-published post {post_id} they don't own.")
+            current_app.logger.warning(f"User {current_user.username} attempt to like non-published post {post_id} they don't own.")
             abort(404)
 
         if current_user.has_liked_post(post):
@@ -554,7 +558,7 @@ def like_post_route(post_id):
                             target_id=post.id
                         )
                         db.session.add(notification)
-                        current_app.logger.info(f"Notification created for User ID: {post.author.id} (Handle: {post.author.handle}) about new like on post {post.id} by User ID: {current_user.id} (Handle: {current_user.handle}).")
+                        current_app.logger.info(f"Notification created for user {post.author.username} about new like on post {post.id} by {current_user.username}.")
 
                     # Create Activity entry for new like
                     from ..models import Activity # Local import
@@ -565,21 +569,21 @@ def like_post_route(post_id):
                         target_id=post.id
                     )
                     db.session.add(activity)
-                    current_app.logger.info(f"Activity 'liked_post' logged for User ID: {current_user.id} (Handle: {current_user.handle}) on post {post.id}.")
+                    current_app.logger.info(f"Activity 'liked_post' logged for user {current_user.username} on post {post.id}.")
 
                     db.session.commit()
                     flash('Post liked!', 'toast_success')
-                    current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) liked post {post_id}.")
+                    current_app.logger.info(f"User {current_user.username} liked post {post_id}.")
                 else:
                     # This else branch for current_user.like_post(post) might be redundant if it always returns True or raises
                     flash('Could not like post. An unexpected error occurred.', 'danger')
                     db.session.rollback() # Rollback if like_post indicated failure but didn't raise
             except Exception as e:
                 db.session.rollback()
-                current_app.logger.error(f"Error during like operation for post {post_id} by User ID: {current_user.id} (Handle: {current_user.handle}): {e}", exc_info=True)
+                current_app.logger.error(f"Error during like operation for post {post_id} by user {current_user.username}: {e}", exc_info=True)
                 flash('An error occurred while trying to like the post. Please try again.', 'danger')
     else:
-        current_app.logger.warning(f"LikeForm validation failed for post {post_id}, User ID: {current_user.id} (Handle: {current_user.handle}). Errors: {form.errors}")
+        current_app.logger.warning(f"LikeForm validation failed for post {post_id}, user {current_user.username}. Errors: {form.errors}")
         # flash_form_errors_util(form) # This might be too verbose for a simple like button
         flash('Could not like post. Invalid request or session expired.', 'danger')
 
@@ -601,17 +605,17 @@ def unlike_post_route(post_id):
                 if current_user.unlike_post(post):
                     db.session.commit()
                     flash('Post unliked.', 'toast_success')
-                    current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) unliked post {post_id}.")
+                    current_app.logger.info(f"User {current_user.username} unliked post {post_id}.")
                 else:
                     # This else branch for current_user.unlike_post(post) might be redundant
                     flash('Could not unlike post. An unexpected error occurred.', 'danger')
                     db.session.rollback() # Rollback if unlike_post indicated failure
             except Exception as e:
                 db.session.rollback()
-                current_app.logger.error(f"Error during unlike operation for post {post_id} by User ID: {current_user.id} (Handle: {current_user.handle}): {e}", exc_info=True)
+                current_app.logger.error(f"Error during unlike operation for post {post_id} by user {current_user.username}: {e}", exc_info=True)
                 flash('An error occurred while trying to unlike the post. Please try again.', 'danger')
     else:
-        current_app.logger.warning(f"UnlikeForm validation failed for post {post_id}, User ID: {current_user.id} (Handle: {current_user.handle}). Errors: {form.errors}")
+        current_app.logger.warning(f"UnlikeForm validation failed for post {post_id}, user {current_user.username}. Errors: {form.errors}")
         # flash_form_errors_util(form)
         flash('Could not unlike post. Invalid request or session expired.', 'danger')
 
