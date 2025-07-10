@@ -51,30 +51,8 @@
 
         {# Likes and Actions Section - Placed before Author Bio for prominence #}
         <footer class="adw-card__actions post-interaction-footer" style="padding-top: var(--spacing-m); margin-top: var(--spacing-m); border-top: 1px solid var(--border-color);">
-            <div class="like-section adw-box adw-box-horizontal adw-box-spacing-s align-center">
-                {% if current_user.is_authenticated %}
-                    {% if current_user.has_liked_post(post) %}
-                        <form action="{{ url_for('post.unlike_post_route', post_id=post.id) }}" method="POST" style="display: inline;">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="adw-button flat" aria-label="Unlike post"> {# Keep it neutral, not destructive for "unlike" #}
-                                <span class="adw-icon icon-actions-starred-symbolic"></span> Liked
-                            </button>
-                        </form>
-                    {% else %}
-                        <form action="{{ url_for('post.like_post_route', post_id=post.id) }}" method="POST" style="display: inline;">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="adw-button flat suggested-action" aria-label="Like post">
-                                <span class="adw-icon icon-actions-star-symbolic"></span> Like
-                            </button>
-                        </form>
-                    {% endif %}
-                {% else %} {# If user not logged in, show a disabled-like or link to login #}
-                    <a href="{{ url_for('auth.login', next=request.url) }}" class="adw-button flat">
-                        <span class="adw-icon icon-actions-star-symbolic"></span> Like
-                    </a>
-                {% endif %}
-                <span class="adw-label caption like-count">{{ post.like_count }} like{% if post.like_count != 1 %}s{% endif %}</span>
-            </div>
+            {# Use the generic like_button_and_count macro #}
+            {{ self.like_button_and_count(post, 'post', current_user) }}
             {# Space for other actions like share, if not in a separate section #}
         </footer>
 
@@ -147,10 +125,13 @@
         </header>
         <div class="comment-text styled-text-content">{{ comment.text | markdown }}</div>
 
-        <div class="comment-actions">
+        <div class="comment-actions adw-box adw-box-horizontal adw-box-spacing-s align-center">
             {% if current_user.is_authenticated %}
             <button class="adw-button flat compact reply-button" data-comment-id="{{ comment.id }}" data-comment-author="{{ (comment.author.full_name or ('User ' ~ comment.author.id)) | e }}">Reply</button>
             {% endif %}
+            {# Add like button for comment here #}
+            {{ self.like_button_and_count(comment, 'comment', current_user) }}
+
             {% if current_user.is_authenticated and comment.author != current_user %}
                 {% if comment.is_flagged_active %}
                     <button class="adw-button flat compact" disabled title="This comment has been flagged">Flagged</button>

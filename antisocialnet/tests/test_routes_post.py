@@ -1,14 +1,14 @@
 import pytest
 from flask import url_for
-from antisocialnet.models import User, Post, PostLike, Notification, Activity, Comment, CommentFlag, Category, Tag
+from antisocialnet.models import User, Post, Like, Notification, Activity, Comment, CommentFlag, Category, Tag # Updated PostLike to Like
 from antisocialnet import db # db fixture from conftest.py
 from antisocialnet.forms import (
     LikeForm, UnlikeForm, PostForm, CommentForm,
     DeletePostForm, DeleteCommentForm, FlagCommentForm
 )
 
-def test_like_post_route_authenticated(client, app, db, create_test_user, create_test_post, logged_in_client): # Added app
-    """Test POST /post/<id>/like when authenticated."""
+def test_like_item_route_for_post_authenticated(client, app, db, create_test_user, create_test_post, logged_in_client): # Added app, renamed test
+    """Test POST /like/post/<id> when authenticated."""
     # logged_in_client is already authenticated as 'login_fixture_user@example.com'
 
     post_author = create_test_user(email_address="p_author_lr@example.com", full_name="post_author_for_like_route")
@@ -17,159 +17,180 @@ def test_like_post_route_authenticated(client, app, db, create_test_user, create
     liking_user = User.query.filter_by(username="login_fixture_user@example.com").first()
     assert liking_user is not None
 
-    assert not liking_user.has_liked_post(test_post)
+    assert not liking_user.has_liked_item('post', test_post.id) # Updated method
     initial_like_count = test_post.like_count
-    initial_notifications = Notification.query.filter_by(user_id=post_author.id).count()
-    initial_activities = Activity.query.filter_by(user_id=liking_user.id, type='liked_post').count()
+    initial_notifications = Notification.query.filter_by(user_id=post_author.id, type='new_like', target_type='post', target_id=test_post.id).count()
+    initial_activities = Activity.query.filter_by(user_id=liking_user.id, type='liked_item', target_type='post', target_id=test_post.id).count() # Updated type
 
     with app.app_context(): # For CSRF and url_for
         form = LikeForm()
         token = form.csrf_token.current_token
-        url = url_for('post.like_post_route', post_id=test_post.id)
+        url = url_for('like.like_item_route', target_type='post', target_id=test_post.id) # Updated route
 
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True) # Use logged_in_client for session
 
     assert response.status_code == 200 # Assuming redirect to post view
-    assert b'Post liked!' in response.data # Check flash message
+    assert b'Post liked!' in response.data # Check flash message (route specific)
 
     db.session.refresh(liking_user) # Refresh user from db session
     db.session.refresh(test_post)   # Refresh post from db session
 
-    assert liking_user.has_liked_post(test_post)
+    assert liking_user.has_liked_item('post', test_post.id) # Updated method
     assert test_post.like_count == initial_like_count + 1
 
     # Check notification for post author (if not self-like)
     if post_author.id != liking_user.id:
-        assert Notification.query.filter_by(user_id=post_author.id, type='new_like', target_id=test_post.id).count() == initial_notifications + 1
+        assert Notification.query.filter_by(user_id=post_author.id, type='new_like', target_type='post', target_id=test_post.id).count() == initial_notifications + 1
 
     # Check activity log for liking user
-    assert Activity.query.filter_by(user_id=liking_user.id, type='liked_post', target_id=test_post.id).count() == initial_activities + 1
+    assert Activity.query.filter_by(user_id=liking_user.id, type='liked_item', target_type='post', target_id=test_post.id).count() == initial_activities + 1 # Updated type
 
-def test_unlike_post_route_authenticated(client, app, db, create_test_user, create_test_post, logged_in_client): # Added app
-    """Test POST /post/<id>/unlike when authenticated."""
+def test_unlike_item_route_for_post_authenticated(client, app, db, create_test_user, create_test_post, logged_in_client): # Added app, renamed test
+    """Test POST /like/unlike/post/<id> when authenticated."""
     post_author = create_test_user(email_address="p_author_ulr@example.com", full_name="post_author_for_unlike_route")
     test_post = create_test_post(author=post_author, content="A post to be unliked via route")
     liking_user = User.query.filter_by(username="login_fixture_user@example.com").first() # User from logged_in_client
 
-    # First, like the post
-    liking_user.like_post(test_post)
+    # First, like the item
+    liking_user.like_item('post', test_post.id) # Updated method
     db.session.commit()
-    assert liking_user.has_liked_post(test_post)
+    assert liking_user.has_liked_item('post', test_post.id) # Updated method
     initial_like_count = test_post.like_count
 
     with app.app_context(): # For CSRF and url_for
         form = UnlikeForm()
         token = form.csrf_token.current_token
-        url = url_for('post.unlike_post_route', post_id=test_post.id)
+        url = url_for('like.unlike_item_route', target_type='post', target_id=test_post.id) # Updated route
 
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True) # Use logged_in_client for session
 
     assert response.status_code == 200
-    assert b'Post unliked.' in response.data
+    assert b'Post unliked.' in response.data # Flash message from new route
 
     db.session.refresh(liking_user)
     db.session.refresh(test_post)
 
-    assert not liking_user.has_liked_post(test_post)
+    assert not liking_user.has_liked_item('post', test_post.id) # Updated method
     assert test_post.like_count == initial_like_count - 1
     # Note: Unliking typically doesn't create a notification or activity in this app's logic
 
-def test_like_post_route_unauthenticated(client, create_test_post):
-    """Test POST /post/<id>/like when not authenticated."""
+def test_like_item_route_for_post_unauthenticated(client, create_test_post): # Renamed test
+    """Test POST /like/post/<id> when not authenticated."""
     test_post = create_test_post(content="Post for unauth like test")
     with client.application.test_request_context():
-        url = url_for('post.like_post_route', post_id=test_post.id)
-    response = client.post(url, follow_redirects=True)
+        url = url_for('like.like_item_route', target_type='post', target_id=test_post.id) # Updated route
+    response = client.post(url, data={'csrf_token':'dummy'}, follow_redirects=True) # Added dummy CSRF to pass form validation if it's checked before auth
 
     assert response.status_code == 200 # Redirects to login
     assert b'Please log in to access this page.' in response.data # Flash message from login_required
 
-def test_like_already_liked_post_route(client, app, db, create_test_post, logged_in_client): # Added app
-    """Test liking a post that is already liked by the user."""
+def test_like_already_liked_item_route_for_post(client, app, db, create_test_post, logged_in_client): # Added app, renamed test
+    """Test liking a post (item) that is already liked by the user."""
     test_post = create_test_post(content="Post already liked test")
     liking_user = User.query.filter_by(username="login_fixture_user@example.com").first()
 
-    liking_user.like_post(test_post) # Like it first
+    liking_user.like_item('post', test_post.id) # Like it first - Updated method
     db.session.commit()
 
     initial_like_count = test_post.like_count
     with app.app_context(): # For CSRF and url_for
         form = LikeForm()
         token = form.csrf_token.current_token
-        url = url_for('post.like_post_route', post_id=test_post.id)
+        url = url_for('like.like_item_route', target_type='post', target_id=test_post.id) # Updated route
 
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True) # Use logged_in_client
 
     assert response.status_code == 200
-    assert b'You have already liked this post.' in response.data
+    assert b'You have already liked this item.' in response.data # Updated flash message from generic route
     db.session.refresh(test_post)
     assert test_post.like_count == initial_like_count # Count should not change
 
-def test_unlike_not_liked_post_route(client, app, create_test_post, logged_in_client, db): # Added app, db
-    """Test unliking a post that was not liked."""
+def test_unlike_not_liked_item_route_for_post(client, app, create_test_post, logged_in_client, db): # Added app, db, renamed test
+    """Test unliking a post (item) that was not liked."""
     test_post = create_test_post(content="Post not liked for unlike test")
     initial_like_count = test_post.like_count
 
     with app.app_context(): # For CSRF and url_for
         form = UnlikeForm()
         token = form.csrf_token.current_token
-        url = url_for('post.unlike_post_route', post_id=test_post.id)
+        url = url_for('like.unlike_item_route', target_type='post', target_id=test_post.id) # Updated route
 
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True) # Use logged_in_client
 
     assert response.status_code == 200
-    assert b'You have not liked this post yet.' in response.data
+    assert b'You have not liked this item yet.' in response.data # Updated flash message
     db.session.refresh(test_post)
     assert test_post.like_count == initial_like_count
 
-def test_like_nonexistent_post_route(client, logged_in_client):
-    """Test liking a post that does not exist."""
-    with logged_in_client.application.test_request_context(): # Using logged_in_client's context for url_for
-        url = url_for('post.like_post_route', post_id=99999)
-    response = logged_in_client.post(url, data={'csrf_token': 'dummy_token_but_route_is_404'}, follow_redirects=False) # Don't follow redirects to check 404
-    assert response.status_code == 404
+def test_like_item_route_for_nonexistent_post(client, logged_in_client, app): # Renamed test, added app
+    """Test liking a post (item) that does not exist."""
+    with app.app_context(): # Using app.app_context for url_for if client's context is tricky
+        # form = LikeForm() # For CSRF, if needed before 404
+        # token = form.csrf_token.current_token
+        url = url_for('like.like_item_route', target_type='post', target_id=99999) # Updated route
+    # The new route checks CSRF first. So, a valid token is needed even if item doesn't exist.
+    # However, if the item doesn't exist, it might 404 before full form validation, depending on route structure.
+    # The new route validates CSRF then target_type then fetches item.
+    # For a truly non-existent item, it will 404 after CSRF and target_type check.
+    # We need a CSRF token.
+    with app.app_context():
+        form = LikeForm()
+        token = form.csrf_token.current_token
+    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=False)
+    assert response.status_code == 404 # Or could be 400 if CSRF fails and that's prioritized. New route makes it 404.
 
-def test_like_unpublished_post_route(client, app, db, create_test_user, logged_in_client): # Added app, removed create_test_post
-    """Test liking an unpublished post (should be allowed if viewable, but typically not shown to others)."""
+def test_like_item_route_for_unpublished_post(client, app, db, create_test_user, logged_in_client): # Renamed test
+    """Test liking an unpublished post (item)."""
     post_author = create_test_user(email_address="unpub@example.com", full_name="unpublished_author")
     unpublished_post = Post(content="Unpublished", user_id=post_author.id, is_published=False)
     db.session.add(unpublished_post)
     db.session.commit()
 
     # The logged_in_client ('login_fixture_user@example.com') is not the author.
+    like_url = None
+    logout_url = None
+    login_url = None
     with app.app_context(): # For CSRF and url_for
         form = LikeForm()
         token_for_loginuser = form.csrf_token.current_token
-        like_url = url_for('post.like_post_route', post_id=unpublished_post.id)
+        like_url = url_for('like.like_item_route', target_type='post', target_id=unpublished_post.id) # Updated route
         logout_url = url_for('auth.logout_route')
         login_url = url_for('auth.login')
 
     response = logged_in_client.post(like_url, data={'csrf_token': token_for_loginuser}, follow_redirects=False)
+    # The new route checks if post is published. If not, and user is not author, it aborts (404 or 403).
+    # The like_item_route has:
+    # if target_item:
+    #     if not target_item.is_published and target_item.user_id != current_user.id:
+    #         abort(404) # Or 403
     assert response.status_code == 404
 
     # Test if author can like their own unpublished post
-    logged_in_client.get(logout_url, follow_redirects=True) # Use logged_in_client to logout its session
+    logged_in_client.get(logout_url, follow_redirects=True)
 
-    # Log in as post_author using the base client
+    csrf_login_author = None
     with app.app_context(): # For CSRF for login
-        login_form_author = LikeForm() # Can use any form for CSRF
-        csrf_login_author = login_form_author.csrf_token.current_token
+        # Re-initialize a form in the current app context to get a valid token for this login attempt
+        login_form_for_author_session = LikeForm() # Can use any form for CSRF token generation
+        csrf_login_author = login_form_for_author_session.csrf_token.current_token
     login_resp = client.post(login_url, data={'username': post_author.username, 'password': 'password', 'csrf_token': csrf_login_author}, follow_redirects=True)
     assert login_resp.status_code == 200
+    # After this, 'client' is now authenticated as post_author
 
+    token_for_author_like = None
     with app.app_context(): # New app context to get token for the new session (author's session)
         form_author_like = LikeForm()
         token_for_author_like = form_author_like.csrf_token.current_token
-        # like_url is still valid as defined above
+        # like_url was defined above and is still correct
 
     response_author_like = client.post(like_url, data={'csrf_token': token_for_author_like}, follow_redirects=True)
     assert response_author_like.status_code == 200
-    assert b'Post liked!' in response_author_like.data
+    assert b'Post liked!' in response_author_like.data # Message from like_item_route
     db.session.refresh(unpublished_post)
     assert unpublished_post.like_count == 1
 
     # Clean up by logging out the author if other tests expect 'loginuser'
-    client.get(url_for('auth.logout_route'), follow_redirects=True) # Use GET for logout
+    client.get(logout_url, follow_redirects=True) # Use GET for logout
     # Re-login the default test user ('loginuser') to ensure subsequent tests using logged_in_client are not affected
     # This is important if tests share client state in some way, though function-scoped fixtures should isolate.
     # However, if logged_in_client somehow reuses the same client instance without re-login, this ensures it.
@@ -181,54 +202,220 @@ def test_like_unpublished_post_route(client, app, db, create_test_user, logged_i
 
 # New tests for CSRF protection
 
-def test_like_post_csrf_missing_token(client, create_test_post, logged_in_client):
-    """Test liking a post with a missing CSRF token."""
+def test_like_item_csrf_missing_token_for_post(client, app, db, create_test_post, logged_in_client): # Renamed, added app, db
+    """Test liking a post (item) with a missing CSRF token."""
     test_post = create_test_post(content="CSRF missing token test for like")
 
-    with logged_in_client.application.test_request_context(): # Use logged_in_client's context for url_for
-        url = url_for('post.like_post_route', post_id=test_post.id)
-    response = logged_in_client.post(url, data={}, follow_redirects=True) # Use logged_in_client for session
-
-    assert response.status_code == 200 # Should redirect, then show page with flash
-    assert b'Could not like post. Invalid request or session expired.' in response.data
-    db.session.refresh(test_post)
-    assert test_post.like_count == 0 # Like should not have occurred
-
-def test_like_post_csrf_invalid_token(client, create_test_post, logged_in_client):
-    """Test liking a post with an invalid CSRF token."""
-    test_post = create_test_post(content="CSRF invalid token test for like")
-
-    with logged_in_client.application.test_request_context():
-        url = url_for('post.like_post_route', post_id=test_post.id)
-    response = logged_in_client.post(url, data={'csrf_token': 'thisisnotavalidtoken'}, follow_redirects=True)
+    with app.app_context(): # Use app.app_context for url_for
+        url = url_for('like.like_item_route', target_type='post', target_id=test_post.id) # Updated route
+    response = logged_in_client.post(url, data={}, follow_redirects=True)
 
     assert response.status_code == 200
-    assert b'Could not like post. Invalid request or session expired.' in response.data
+    assert b'Invalid request or session expired. Could not like item.' in response.data # Updated flash
     db.session.refresh(test_post)
     assert test_post.like_count == 0
 
-def test_unlike_post_csrf_missing_token(client, app, db, create_test_post, logged_in_client):
-    """Test unliking a post with a missing CSRF token."""
+def test_like_item_csrf_invalid_token_for_post(client, app, db, create_test_post, logged_in_client): # Renamed, added app, db
+    """Test liking a post (item) with an invalid CSRF token."""
+    test_post = create_test_post(content="CSRF invalid token test for like")
+
+    with app.app_context(): # Use app.app_context for url_for
+        url = url_for('like.like_item_route', target_type='post', target_id=test_post.id) # Updated route
+    response = logged_in_client.post(url, data={'csrf_token': 'thisisnotavalidtoken'}, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Invalid request or session expired. Could not like item.' in response.data # Updated flash
+    db.session.refresh(test_post)
+    assert test_post.like_count == 0
+
+def test_unlike_item_csrf_missing_token_for_post(client, app, db, create_test_post, logged_in_client): # Renamed
+    """Test unliking a post (item) with a missing CSRF token."""
     test_post = create_test_post(content="CSRF missing token test for unlike")
     liking_user = User.query.filter_by(username="login_fixture_user@example.com").first()
 
     # First, like the post legitimately
-    with app.app_context(): # For CSRF and url_for
+    with app.app_context():
         form = LikeForm()
         token = form.csrf_token.current_token
-        like_url = url_for('post.like_post_route', post_id=test_post.id)
-        unlike_url = url_for('post.unlike_post_route', post_id=test_post.id)
-    logged_in_client.post(like_url, data={'csrf_token': token}, follow_redirects=True) # Use logged_in_client for session
+        like_url = url_for('like.like_item_route', target_type='post', target_id=test_post.id) # Updated route
+        unlike_url = url_for('like.unlike_item_route', target_type='post', target_id=test_post.id) # Updated route
+    logged_in_client.post(like_url, data={'csrf_token': token}, follow_redirects=True)
     db.session.refresh(test_post)
     assert test_post.like_count == 1
 
     # Attempt to unlike without CSRF token
-    response = logged_in_client.post(unlike_url, data={}, follow_redirects=True) # Use logged_in_client for session
+    response = logged_in_client.post(unlike_url, data={}, follow_redirects=True)
 
     assert response.status_code == 200
-    assert b'Could not unlike post. Invalid request or session expired.' in response.data
+    assert b'Invalid request or session expired. Could not unlike item.' in response.data # Updated flash
     db.session.refresh(test_post)
     assert test_post.like_count == 1 # Unlike should not have occurred
+
+def test_unlike_item_csrf_invalid_token_for_post(client, app, db, create_test_post, logged_in_client): # Renamed
+    """Test unliking a post (item) with an invalid CSRF token."""
+    test_post = create_test_post(content="CSRF invalid token test for unlike")
+    # liking_user = User.query.filter_by(username="login_fixture_user@example.com").first() # Not strictly needed for this test path
+
+    # First, like the post legitimately
+    with app.app_context():
+        form = LikeForm()
+        token = form.csrf_token.current_token
+        like_url = url_for('like.like_item_route', target_type='post', target_id=test_post.id)
+        unlike_url = url_for('like.unlike_item_route', target_type='post', target_id=test_post.id)
+    logged_in_client.post(like_url, data={'csrf_token': token}, follow_redirects=True)
+    db.session.refresh(test_post)
+    assert test_post.like_count == 1
+
+    # Attempt to unlike with invalid CSRF token
+    response = logged_in_client.post(unlike_url, data={'csrf_token': 'thisisnotavalidtokeneither'}, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Invalid request or session expired. Could not unlike item.' in response.data # Updated flash
+    db.session.refresh(test_post)
+    assert test_post.like_count == 1 # Unlike should not have occurred
+
+
+# --- Test Comment Like Routes (New) ---
+
+def test_like_item_route_for_comment_authenticated(client, app, db, create_test_user, create_test_post, logged_in_client):
+    """Test POST /like/comment/<id> when authenticated."""
+    post_author = create_test_user(email_address="comment_post_author_lc@example.com", full_name="Comment Post Author LC")
+    test_post = create_test_post(author=post_author, content="A post with comments to be liked.")
+
+    comment_author = create_test_user(email_address="comment_author_lc@example.com", full_name="Comment Author LC")
+    test_comment = Comment(text="A comment to be liked", user_id=comment_author.id, post_id=test_post.id)
+    db.session.add(test_comment)
+    db.session.commit()
+
+    liking_user = User.query.filter_by(username="login_fixture_user@example.com").first()
+    assert liking_user is not None
+    assert liking_user.id != comment_author.id # Ensure not self-liking for notification test simplicity
+
+    assert not liking_user.has_liked_item('comment', test_comment.id)
+    initial_like_count = test_comment.like_count
+    initial_notifications = Notification.query.filter_by(user_id=comment_author.id, type='new_like', target_type='comment', target_id=test_comment.id).count()
+    initial_activities = Activity.query.filter_by(user_id=liking_user.id, type='liked_item', target_type='comment', target_id=test_comment.id).count()
+
+    with app.app_context():
+        form = LikeForm()
+        token = form.csrf_token.current_token
+        url = url_for('like.like_item_route', target_type='comment', target_id=test_comment.id)
+
+    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Comment liked!' in response.data # Check flash message
+
+    db.session.refresh(liking_user)
+    db.session.refresh(test_comment)
+
+    assert liking_user.has_liked_item('comment', test_comment.id)
+    assert test_comment.like_count == initial_like_count + 1
+
+    # Check notification for comment author
+    assert Notification.query.filter_by(user_id=comment_author.id, type='new_like', target_type='comment', target_id=test_comment.id).count() == initial_notifications + 1
+
+    # Check activity log for liking user
+    assert Activity.query.filter_by(user_id=liking_user.id, type='liked_item', target_type='comment', target_id=test_comment.id).count() == initial_activities + 1
+
+def test_unlike_item_route_for_comment_authenticated(client, app, db, create_test_user, create_test_post, logged_in_client):
+    """Test POST /like/unlike/comment/<id> when authenticated."""
+    post_author = create_test_user(email_address="comment_post_author_ulc@example.com", full_name="Comment Post Author ULC")
+    test_post = create_test_post(author=post_author, content="A post with comments to be unliked.")
+
+    comment_author = create_test_user(email_address="comment_author_ulc@example.com", full_name="Comment Author ULC")
+    test_comment = Comment(text="A comment to be unliked", user_id=comment_author.id, post_id=test_post.id)
+    db.session.add(test_comment)
+    db.session.commit()
+
+    liking_user = User.query.filter_by(username="login_fixture_user@example.com").first()
+    assert liking_user is not None
+
+    # First, like the comment
+    liking_user.like_item('comment', test_comment.id)
+    db.session.commit()
+    db.session.refresh(test_comment) # Refresh to get updated like_count
+    assert liking_user.has_liked_item('comment', test_comment.id)
+    initial_like_count = test_comment.like_count
+    assert initial_like_count > 0 # Ensure it was actually liked
+
+    with app.app_context():
+        form = UnlikeForm()
+        token = form.csrf_token.current_token
+        url = url_for('like.unlike_item_route', target_type='comment', target_id=test_comment.id)
+
+    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Comment unliked!' in response.data
+
+    db.session.refresh(liking_user)
+    db.session.refresh(test_comment)
+
+    assert not liking_user.has_liked_item('comment', test_comment.id)
+    assert test_comment.like_count == initial_like_count - 1
+
+def test_like_already_liked_item_route_for_comment(client, app, db, create_test_user, create_test_post, logged_in_client):
+    """Test liking a comment that is already liked by the user."""
+    test_post = create_test_post(author=create_test_user(email_address="cal_post_author@example.com"), content="Post for already liked comment")
+    comment_author = create_test_user(email_address="cal_comment_author@example.com")
+    test_comment = Comment(text="Already liked comment", user_id=comment_author.id, post_id=test_post.id)
+    db.session.add(test_comment)
+    db.session.commit()
+
+    liking_user = User.query.filter_by(username="login_fixture_user@example.com").first()
+    liking_user.like_item('comment', test_comment.id) # Like it first
+    db.session.commit()
+    db.session.refresh(test_comment)
+    initial_like_count = test_comment.like_count
+
+    with app.app_context():
+        form = LikeForm()
+        token = form.csrf_token.current_token
+        url = url_for('like.like_item_route', target_type='comment', target_id=test_comment.id)
+    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'You have already liked this item.' in response.data
+    db.session.refresh(test_comment)
+    assert test_comment.like_count == initial_like_count
+
+def test_unlike_not_liked_item_route_for_comment(client, app, db, create_test_user, create_test_post, logged_in_client):
+    """Test unliking a comment that was not liked."""
+    test_post = create_test_post(author=create_test_user(email_address="cunl_post_author@example.com"), content="Post for unliked comment")
+    comment_author = create_test_user(email_address="cunl_comment_author@example.com")
+    test_comment = Comment(text="Not liked comment", user_id=comment_author.id, post_id=test_post.id)
+    db.session.add(test_comment)
+    db.session.commit()
+    initial_like_count = test_comment.like_count # Should be 0
+
+    with app.app_context():
+        form = UnlikeForm()
+        token = form.csrf_token.current_token
+        url = url_for('like.unlike_item_route', target_type='comment', target_id=test_comment.id)
+    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'You have not liked this item yet.' in response.data
+    db.session.refresh(test_comment)
+    assert test_comment.like_count == initial_like_count
+
+def test_like_item_csrf_missing_token_for_comment(client, app, db, create_test_user, create_test_post, logged_in_client):
+    """Test liking a comment with a missing CSRF token."""
+    test_post = create_test_post(author=create_test_user(email_address="csrf_comment_post_author@example.com"), content="Post for CSRF comment like")
+    comment_author = create_test_user(email_address="csrf_comment_author@example.com")
+    test_comment = Comment(text="CSRF like comment", user_id=comment_author.id, post_id=test_post.id)
+    db.session.add(test_comment)
+    db.session.commit()
+
+    with app.app_context():
+        url = url_for('like.like_item_route', target_type='comment', target_id=test_comment.id)
+    response = logged_in_client.post(url, data={}, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Invalid request or session expired. Could not like item.' in response.data
+    db.session.refresh(test_comment)
+    assert test_comment.like_count == 0
 
 
 # --- Test Comment Routes ---
@@ -1248,11 +1435,11 @@ def test_delete_post_deletes_associated_data(client, app, logged_in_client, db, 
     post_id = test_post.id
 
     # 2. Add likes to the post
-    like1 = PostLike(user_id=user.id, post_id=post_id)
-    like2 = PostLike(user_id=other_user.id, post_id=post_id)
+    like1 = Like(user_id=user.id, target_type='post', target_id=post_id) # Updated to generic Like
+    like2 = Like(user_id=other_user.id, target_type='post', target_id=post_id) # Updated to generic Like
     db.session.add_all([like1, like2])
     db.session.commit()
-    assert PostLike.query.filter_by(post_id=post_id).count() == 2
+    assert Like.query.filter_by(target_type='post', target_id=post_id).count() == 2 # Updated query
 
     # 3. Add comments to the post
     from antisocialnet.models import Comment, CommentFlag # Ensure models are imported
@@ -1301,7 +1488,7 @@ def test_delete_post_deletes_associated_data(client, app, logged_in_client, db, 
 
     # Assertions
     assert Post.query.get(post_id) is None
-    assert PostLike.query.filter_by(post_id=post_id).count() == 0
+    assert Like.query.filter_by(target_type='post', target_id=post_id).count() == 0 # Updated query
     assert Comment.query.filter_by(post_id=post_id).count() == 0
     assert CommentFlag.query.filter_by(comment_id=comment1_id).count() == 0 # Flags for comments on this post
 

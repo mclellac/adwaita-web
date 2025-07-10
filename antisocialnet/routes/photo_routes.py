@@ -43,6 +43,20 @@ def get_photo_comments(photo_id):
         })
     return jsonify(comments_data)
 
+@photo_bp.route('/view/<int:photo_id>', methods=['GET'])
+def view_photo_detail(photo_id):
+    photo = UserPhoto.query.get_or_404(photo_id)
+    # Permission check (basic: public profile or owner/admin for private)
+    if not photo.user.is_profile_public and (not current_user.is_authenticated or (current_user.id != photo.user.id and not current_user.is_admin)):
+        current_app.logger.warning(f"User (ID: {current_user.id if current_user.is_authenticated else 'Anonymous'}) "
+                                   f"attempted to view photo {photo_id} from private profile of user {photo.user.id}")
+        abort(403)
+
+    comment_form = PhotoCommentForm() if current_user.is_authenticated else None
+    # Likes and other details can be accessed directly from photo object in template
+    return render_template('photo_detail.html', photo=photo, comment_form=comment_form)
+
+
 @photo_bp.route('/api/photos/<int:photo_id>/comments', methods=['POST'])
 @login_required
 def post_photo_comment(photo_id):

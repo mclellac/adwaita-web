@@ -2,6 +2,7 @@ from . import db  # Import db from __init__.py
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import desc, or_, select, func
+from sqlalchemy.orm import foreign # Added for polymorphic relationships
 from datetime import datetime, timezone, timedelta # Added timedelta
 from .utils import generate_slug_util # Import the renamed utility
 import jwt # For token generation
@@ -49,7 +50,7 @@ class User(UserMixin, db.Model):
     )
     # Relationship for posts liked by this user
     # Renamed from liked_posts to post_likes for clarity with PostLike model name
-    post_likes = db.relationship('PostLike', foreign_keys='PostLike.user_id',
+    likes = db.relationship('Like', foreign_keys='Like.user_id',
                                  backref='user', lazy='dynamic',
                                  cascade='all, delete-orphan')
     notifications = db.relationship('Notification',
@@ -95,22 +96,25 @@ class User(UserMixin, db.Model):
             followed_id=user.id
         ).count() > 0
 
-    def like_post(self, post):
-        if not self.has_liked_post(post):
-            like = PostLike(user_id=self.id, post_id=post.id)
+    def like_item(self, target_type: str, target_id: int):
+        if not self.has_liked_item(target_type, target_id):
+            # Ensure the Like model is correctly referenced here
+            like = Like(user_id=self.id, target_type=target_type, target_id=target_id)
             db.session.add(like)
             return True
         return False
 
-    def unlike_post(self, post):
-        like = PostLike.query.filter_by(user_id=self.id, post_id=post.id).first()
+    def unlike_item(self, target_type: str, target_id: int):
+        # Ensure the Like model is correctly referenced here
+        like = Like.query.filter_by(user_id=self.id, target_type=target_type, target_id=target_id).first()
         if like:
             db.session.delete(like)
             return True
         return False
 
-    def has_liked_post(self, post):
-        return PostLike.query.filter_by(user_id=self.id, post_id=post.id).count() > 0
+    def has_liked_item(self, target_type: str, target_id: int):
+        # Ensure the Like model is correctly referenced here
+        return Like.query.filter_by(user_id=self.id, target_type=target_type, target_id=target_id).count() > 0
 
     def get_reset_password_token(self, expires_in_seconds=1800): # Default 30 minutes
         """Generates a password reset token."""
@@ -238,7 +242,9 @@ class Post(db.Model):
     )
     # Relationship for likes on this post
     # Renamed from likers to likes for consistency with PostLike model
-    likes = db.relationship('PostLike', backref='post', lazy='dynamic',
+    likes = db.relationship('Like',
+                            primaryjoin="and_(Like.target_type=='post', foreign(Like.target_id)==Post.id)",
+                            lazy='dynamic',
                             cascade='all, delete-orphan')
 
     @property
@@ -264,6 +270,17 @@ class Comment(db.Model):
     )
     # is_flagged_active property will be defined after CommentFlag model
 
+    # Generic likes for comments
+    likes = db.relationship('Like',
+                            primaryjoin="and_(Like.target_type=='comment', foreign(Like.target_id)==Comment.id)",
+                            lazy='dynamic',
+                            cascade='all, delete-orphan')
+
+    @property
+    def like_count(self):
+        """Returns the number of likes for this comment."""
+        return self.likes.count()
+
 class UserPhoto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -283,6 +300,17 @@ class UserPhoto(db.Model):
         cascade='all, delete-orphan',
         order_by=lambda: desc(PhotoComment.created_at) # Use lambda for PhotoComment ref
     )
+
+    # Generic likes for photos
+    likes = db.relationship('Like',
+                            primaryjoin="and_(Like.target_type=='photo', foreign(Like.target_id)==UserPhoto.id)",
+                            lazy='dynamic',
+                            cascade='all, delete-orphan')
+
+    @property
+    def like_count(self):
+        """Returns the number of likes for this photo."""
+        return self.likes.count()
 
 class PhotoComment(db.Model):
     __tablename__ = 'photo_comment'
@@ -331,18 +359,27 @@ Comment.is_flagged_active = db.column_property(
     ).correlate_except(CommentFlag).scalar_subquery()
 )
 
-class PostLike(db.Model):
-    __tablename__ = 'post_like'
+class Like(db.Model):
+    __tablename__ = 'like' # Renamed from post_like
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False)
+    # post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False) # Removed
+    target_type = db.Column(db.String(50), nullable=False) # e.g., 'post', 'comment', 'photo'
+    target_id = db.Column(db.Integer, nullable=False) # ID of the liked item
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
-    # Add a unique constraint for (user_id, post_id)
-    __table_args__ = (db.UniqueConstraint('user_id', 'post_id', name='_user_post_uc'),)
+    # Add a unique constraint for (user_id, target_type, target_id)
+    # Also add an index for querying by target_type and target_id
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'target_type', 'target_id', name='_user_target_uc'),
+        db.Index('ix_like_target', 'target_type', 'target_id'),
+    )
+
+    # user relationship will be defined by backref from User.likes
+    # No direct backref needed for target_type/target_id as they are polymorphic
 
     def __repr__(self):
-        return f'<PostLike user_id={self.user_id} post_id={self.post_id}>'
+        return f'<Like user_id={self.user_id} target_type={self.target_type} target_id={self.target_id}>'
 
 
 class Notification(db.Model):

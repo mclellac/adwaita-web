@@ -206,6 +206,9 @@ def create_app(config_name=None, yaml_config_override=None): # Added yaml_config
     from .routes.api_routes import api_bp # Import the new API blueprint
     app.register_blueprint(api_bp) # Register it, prefix is /api/v1 from its definition
 
+    from .routes.like_routes import like_bp # Import the new Like blueprint
+    app.register_blueprint(like_bp) # Register it, prefix is /like from its definition
+
     # Error handlers
     from sqlalchemy.exc import SQLAlchemyError # Import SQLAlchemyError
 

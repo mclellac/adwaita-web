@@ -36,7 +36,13 @@
 <adw-dialog id="gallery-photo-dialog" title="Gallery Photo">
     <div slot="content" class="dialog-image-content" style="text-align: center; padding: var(--spacing-m);">
         <img id="full-gallery-photo-img" src="" alt="Full-size gallery photo" style="max-width: 100%; max-height: 70vh; display: block; margin: auto;"> {# Reduced max-height for comment space #}
-        <p id="full-gallery-photo-caption" class="adw-label body-1" style="margin-top: var(--spacing-s); margin-bottom: var(--spacing-m);"></p>
+        <p id="full-gallery-photo-caption" class="adw-label body-1" style="margin-top: var(--spacing-s);"></p> {# Removed margin-bottom #}
+
+        {# Like button for the photo itself in the dialog - Will need JS to update this dynamically #}
+        <div id="gallery-photo-dialog-like-section" class="adw-box justify-center" style="margin-bottom: var(--spacing-m);">
+            {# This section will be populated by JS with the like_button_and_count macro output or similar structure #}
+            {# Placeholder for JS to fill based on current photo's like status and count #}
+        </div>
 
         <hr style="margin: var(--spacing-m) 0;">
 
@@ -407,11 +413,18 @@
                               data-photoid="{{ photo.id }}" {# Added photo ID #}
                              style="cursor: pointer;"
                              title="View full-size photo">
-                        {% if photo.caption %}
-                        <div class="adw-card__content gallery-photo-caption">
-                            <p class="adw-label body-2">{{ photo.caption }}</p>
+
+                        <div class="adw-card__content gallery-photo-caption-and-likes">
+                            {% if photo.caption %}
+                                <p class="adw-label body-2" style="margin-bottom: var(--spacing-xs);">{{ photo.caption }}</p>
+                            {% endif %}
+                            {# Add like button for photo preview card #}
+                            {% from "_macros.html" import like_button_and_count %}
+                            <div class="profile-gallery-preview-like-section">
+                                {{ like_button_and_count(photo, 'photo', current_user) }}
+                            </div>
                         </div>
-                        {% endif %}
+
                         {% if current_user == user_profile or current_user.is_admin %}
                         <div class="adw-card__actions gallery-photo-actions">
                              <form method="POST" action="{{ url_for('profile.delete_gallery_photo', photo_id=photo.id) }}" style="display: inline;">
@@ -483,6 +496,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const fullGalleryPhotoImg = document.getElementById('full-gallery-photo-img');
     const fullGalleryPhotoCaption = document.getElementById('full-gallery-photo-caption');
     const galleryPhotoCommentsList = document.getElementById('gallery-photo-comments-list');
+    const galleryPhotoDialogLikeSection = document.getElementById('gallery-photo-dialog-like-section');
     const newGalleryCommentForm = document.getElementById('new-gallery-comment-form');
     const galleryCommentText = document.getElementById('gallery-comment-text');
     const galleryCommentPhotoIdInput = document.getElementById('gallery-comment-photo-id');
@@ -552,6 +566,88 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Function to render like button (simplified, assumes current_user context is available or not needed for display)
+    // This is a simplified version. A full Jinja macro render via JS is more complex.
+    // We'll create the HTML structure directly. This assumes `csrf_token()` is globally available or fetched.
+    // For a more robust solution, an API endpoint returning the like status and count would be better
+    // than trying to replicate the macro's HTML generation perfectly in JS.
+    // However, for now, we construct it.
+    async function renderLikeButtonForDialog(photoId, likeSectionElement) {
+        if (!likeSectionElement) return;
+
+        // Fetch current like status and count (this would ideally be an API endpoint)
+        // For now, we'll assume we need to know if the current user has liked it and the total count.
+        // This part is tricky without a dedicated API endpoint for "get like status of item X for current user".
+        // The User.has_liked_item and item.like_count are server-side.
+        // For the demo, we'll make the like button always appear as "Like" and show a placeholder count,
+        // as dynamically getting this info without a new API endpoint is complex.
+        // A better approach: fetch the photo details including like count and if user liked it.
+        // Let's assume `photoData` is fetched that includes `photoData.like_count` and `photoData.user_has_liked`.
+        // Since we don't have that endpoint, we'll create a generic structure.
+        // The forms will still work correctly due to server-side checks.
+
+        // Simplified: Get the photo object again to access its like_count and user's like status.
+        // This is inefficient. An API endpoint for this would be much better.
+        // We can't directly call Python methods like current_user.has_liked_item from JS.
+        // So, the button will be functional but might not reflect the immediate state correctly without a page reload after like/unlike.
+        // The macro in Jinja has this context. JS here does not directly.
+
+        // To make this *actually* reflect state, the /like and /unlike routes would need to return JSON
+        // with the new like count and liked status, and JS would update the button.
+        // Or, a separate GET API endpoint: /api/item/<type>/<id>/like_status
+
+        // For now, let's just build the form structure that points to the right place.
+        // The visual state (starred icon, "Liked" text) won't be dynamic here without more API work.
+        // We will rely on the server to handle the actual like/unlike action.
+
+        // Fetching the photo again to get its like_count. This is a workaround.
+        // In a real app, this data might come with the initial photo data for the dialog
+        // or be fetched from a dedicated API endpoint.
+        let likeCount = 0;
+        let userHasLiked = false;
+        // This is a placeholder. We cannot truly get this dynamic data here without an API call.
+        // The photo object available in JS from `thumb.dataset` doesn't have like_count or user_has_liked.
+
+        // Constructing a simplified like button.
+        // It won't show "Liked" state correctly without an API call for that state.
+        // The action (like/unlike) will be determined by the server when the form is submitted.
+        // This is a limitation of not having a dedicated API for like status.
+        // We will render both forms and let the server-side logic in routes handle it.
+        // This is not ideal UX but makes it work without new API endpoints for now.
+
+        const csrfTokenVal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // We need the actual item to get its like_count. We don't have it directly here.
+        // The `photo` object in the template context isn't directly available in this JS scope.
+        // This is a significant simplification. The like count will be missing or static.
+        // The `like_button_and_count` macro logic is more complex.
+
+        // Due to the complexity of replicating the macro and its server-side data dependencies (current_user.has_liked_item, item.like_count)
+        // in JavaScript without new API endpoints, the like button in the dialog will be simplified:
+        // It will show a "Like" and "Unlike" button. The server will handle the logic.
+        // The count display here will be omitted for simplicity as it's hard to get accurately.
+
+        likeSectionElement.innerHTML = `
+            <form action="/like/photo/${photoId}" method="POST" style="display: inline-block; margin-right: 5px;">
+                <input type="hidden" name="csrf_token" value="${csrfTokenVal}">
+                <button type="submit" class="adw-button small flat suggested-action" aria-label="Like photo">
+                    <span class="adw-icon icon-actions-star-symbolic"></span> Like
+                </button>
+            </form>
+            <form action="/like/unlike/photo/${photoId}" method="POST" style="display: inline-block;">
+                <input type="hidden" name="csrf_token" value="${csrfTokenVal}">
+                <button type="submit" class="adw-button small flat" aria-label="Unlike photo">
+                    <span class="adw-icon icon-actions-starred-symbolic"></span> Unlike
+                </button>
+            </form>
+            <!-- Like count would ideally be here, fetched dynamically -->
+        `;
+        // The above is a simplified approach. The best way is an API that returns like status and count.
+        // Then JS can build the button correctly.
+        // For now, this provides the *functionality* but not perfect UI feedback without reload.
+    }
+
+
     if (galleryPhotoDialog && fullGalleryPhotoImg && fullGalleryPhotoCaption && galleryPhotoCommentsList && clickableGalleryPhotos.length > 0) {
         customElements.whenDefined('adw-dialog').then(() => {
             clickableGalleryPhotos.forEach(thumb => {
@@ -570,6 +666,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             galleryCommentPhotoIdInput.value = photoId;
                         }
                         fetchGalleryComments(photoId);
+                        if (galleryPhotoDialogLikeSection) { // Ensure like section exists
+                            renderLikeButtonForDialog(photoId, galleryPhotoDialogLikeSection);
+                        }
                         galleryPhotoDialog.open();
                     }
                 });
