@@ -60,7 +60,7 @@ def linkify_mentions(text):
 
     # Regex to find @Full Name patterns (alphanumeric, underscore, apostrophe, spaces)
     # This must match the one in extract_mentions
-    mention_regex = r'@([A-Za-z0-9_\']+(?:\s[A-Za-z0-9_\']+)*)'
+    mention_regex = r'@([A-Za-z0-9_\']+(?:\s[A-Za-z0-9_\']+)*)' # Regex for @FullName
 
     def replace_mention(match):
         full_name_mention = ' '.join(match.group(1).split()) # Normalize spaces in extracted name
@@ -72,7 +72,9 @@ def linkify_mentions(text):
 
         if len(users_found) == 1:
             user = users_found[0]
-            # Profile URLs are now ID-based
+            # TODO: AGENTS.md specifies profile URLs should use user.handle.
+            # This requires adding a 'handle' field to the User model.
+            # For now, linking by user.id.
             return f'[@{full_name_mention}](/profile/{user.id})' # Generates a markdown link
         else:
             # If no user or multiple users found, don't linkify, return original mention text

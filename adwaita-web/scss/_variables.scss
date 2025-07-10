@@ -395,6 +395,9 @@ $accent-definitions: (
   // Pill button radius - fine
   --pill-button-border-radius: 100px;
 
+  // Inline code background
+  --inline-code-bg-color: #{rgba($adw-dark-5, 0.05)}; // For light theme
+
   // Icon URLs - fine
   --icon-window-close-symbolic-url: url('/static/data/icons/symbolic/window-close-symbolic.svg');
 
@@ -527,6 +530,9 @@ $accent-definitions: (
 
     // Row specific for dark theme - fine
     --secondary-fg-color: rgba(var(--window-fg-color-rgb), var(--dim-opacity));
+
+    // Inline code background for dark theme
+    --inline-code-bg-color: #{rgba($adw-light-1, 0.08)};
   }
 
   // Accent color overrides loop - this logic is fine, uses updated $accent-definitions

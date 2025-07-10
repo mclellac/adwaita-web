@@ -1,24 +1,33 @@
-# Adwaita Skin Documentation
+# Adwaita-Web Documentation
 
-Welcome to the official documentation for Adwaita Skin, a pure CSS library for bringing the Adwaita design language to web applications.
+Welcome to the documentation for Adwaita-Web, a CSS and JavaScript UI library for bringing the Adwaita design language to web applications.
 
-This documentation provides guidance on how to apply Adwaita styling to standard HTML elements using CSS classes and understand the theming system.
+This documentation provides guidance on how to apply Adwaita styling, primarily using CSS classes, and how to use its JavaScript components and utilities.
 
 ## Core Concepts
 
-Before diving into individual styled elements, it's helpful to understand the foundational aspects of Adwaita Skin:
+Adwaita-Web follows a hybrid approach:
 
-*   **[Introduction](./general/README.md)**: What Adwaita Skin is, key features, and how to quickly get started by including its CSS in your project.
+*   **CSS-First Styling**: The primary way to style your application is by applying Adwaita CSS classes (e.g., `.adw-button`, `.adw-entry`) to standard HTML elements. The core styling is provided by `adwaita-web/css/adwaita-skin.css` (compiled from SCSS).
+*   **JavaScript Web Components**: For more complex, interactive elements like Dialogs (`<adw-dialog>`, `<adw-about-dialog>`), the library provides JavaScript-defined Custom Elements. These are loaded via `adwaita-web/js/components.js`.
+*   **JavaScript Utilities**: Helper functions and scripts (e.g., `Adw.createToast()` in `toast.js`, `banner.js` for dismissible banners) are available for enhancing interactivity.
 *   **[Theming](./general/theming.md)**: Learn about the light and dark themes, accent color customization, and the underlying CSS variable system.
-*   **[Usage Guide](./general/usage-guide.md)**: Understand how to apply Adwaita styles to your HTML using the provided CSS classes. This section replaces the previous JavaScript API and Web Components documentation.
+*   **[Usage Guide](./general/usage-guide.md)**: Understand how to apply Adwaita styles to your HTML using CSS classes and how to interact with the JavaScript components/utilities.
 
-## Styled Elements (CSS Classes) Documentation
+For general setup and installation, please refer to the main [README.md](../../README.md) in the repository root.
 
-This section provides examples of how to style common HTML elements using Adwaita Skin CSS classes to achieve the Adwaita look and feel. Each linked page aims to cover the recommended HTML structure and the specific CSS classes to apply.
+## Styled Elements and Components Documentation
 
-**Important Note:** This documentation is in transition. While key examples like Button, Entry, and ListBox are being updated to reflect the pure CSS approach, many other individual widget pages listed below may still contain outdated information referring to JavaScript APIs or Web Components. For the most accurate and current usage for all elements, please refer to the HTML structures used in the `adwaita-web/examples/` directory and consult the `adwaita-web/scss/` files to see how styles are defined and applied.
+This section provides examples of how to style common HTML elements using Adwaita-Web CSS classes and how to use its JavaScript components. Each linked page aims to cover the recommended HTML structure and usage.
 
-Adwaita Skin itself is a **pure CSS library**. All interactivity seen in examples or desired in your application must be implemented using your own JavaScript.
+**Important Note:** This documentation is in transition.
+*   Many elements are styled using **CSS classes** (e.g., `.adw-button`, `.adw-entry`).
+*   Specific components like **Dialogs** are JavaScript Web Components (e.g., `<adw-dialog>`).
+*   Utilities like **Toasts** are used via JavaScript functions (e.g., `Adw.createToast()`).
+
+While being updated, some individual widget pages listed below may still contain outdated information. For the most accurate current usage, consult the main [README.md](../../README.md), the `adwaita-web/examples/` directory, the `adwaita-web/scss/` files (for CSS class details), and `adwaita-web/js/` files (for Web Components and utilities).
+
+Interactivity for CSS-styled elements generally needs to be implemented with your own JavaScript. Web Components encapsulate their own behavior.
 
 *   **Actions & Input:**
     *   [Button](./widgets/button.md) (e.g., `.adw-button`)
