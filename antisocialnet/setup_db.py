@@ -29,7 +29,7 @@ User = app_module.models.User
 SiteSetting = app_module.models.SiteSetting # Import SiteSetting
 
 
-def create_or_update_user(flask_app, username, password, full_name, handle, profile_info=None, # Added handle
+def create_or_update_user(flask_app, username, password, full_name, profile_info=None,
                           is_admin=False, is_approved=True, is_active=True,
                           update_if_exists=True, interactive_password_update=False):
     """
@@ -38,10 +38,9 @@ def create_or_update_user(flask_app, username, password, full_name, handle, prof
 
     Args:
         flask_app: The Flask application instance.
-        username (str): The username (email for login).
+        username (str): The username.
         password (str): The user's password.
         full_name (str): The user's full name.
-        handle (str): The user's public handle.
         profile_info (str, optional): The user's bio/profile information.
         is_admin (bool): Whether the user should be an admin.
         is_approved (bool): Whether the user account is approved.
@@ -52,24 +51,15 @@ def create_or_update_user(flask_app, username, password, full_name, handle, prof
     Returns:
         True if user was created/updated, False otherwise.
     """
-    if not username or not password or not full_name or not handle:
-        print("Error: Username (email), password, full name, and handle are required to create or update a user.")
+    if not username or not password or not full_name:
+        print("Error: Username, password, and full name are required to create or update a user.")
         return False
 
     with flask_app.app_context():
-        # Check for handle uniqueness before proceeding, if it's an update or new user
-        # If it's an existing user, ensure the handle isn't taken by *another* user.
-        existing_user_by_handle = User.query.filter(User.handle == handle).first()
-        existing_user_by_username = User.query.filter_by(username=username).first()
+        existing_user = User.query.filter_by(username=username).first()
 
-        if existing_user_by_handle and (not existing_user_by_username or existing_user_by_handle.id != existing_user_by_username.id):
-            print(f"Error: Handle '{handle}' is already taken by another user. Please choose a different one.")
-            return False
-
-        user_to_process = existing_user_by_username
-
-        if user_to_process:
-            print(f"User with email '{username}' already exists.")
+        if existing_user:
+            print(f"User '{username}' already exists.")
             if not update_if_exists:
                 print(f"Skipping update for user '{username}' as update_if_exists is False.")
                 return False
@@ -77,7 +67,7 @@ def create_or_update_user(flask_app, username, password, full_name, handle, prof
             if interactive_password_update:
                 try:
                     update_choice = input(
-                        f"Do you want to update the password for user '{username}' (Handle: {user_to_process.handle})? (y/n): "
+                        f"Do you want to update the password for user '{username}'? (y/n): "
                     ).lower()
                     if update_choice == "y":
                         print(f"Updating password for user '{username}'.")
@@ -89,36 +79,42 @@ def create_or_update_user(flask_app, username, password, full_name, handle, prof
                         if new_password != new_password_confirm:
                             print("Passwords do not match. Aborting password update.")
                             return False
-                        user_to_process.set_password(new_password)
+                        existing_user.set_password(new_password)
+                        # Update other details as well
+                        existing_user.full_name = full_name
+                        if profile_info is not None:
+                            existing_user.profile_info = profile_info
+                        existing_user.is_admin = is_admin
+                        existing_user.is_approved = is_approved
+                        existing_user.is_active = is_active
+                        db.session.commit()
+                        print(f"User '{username}' password and details updated interactively.")
+                        return True
                     else:
                         print(f"Password for user '{username}' not updated interactively.")
-                        # If password update is skipped, we might still want to update other details.
-                        # For simplicity, if 'n' is chosen for password, we proceed to update other details.
-                        pass # Continue to update other details
+                        # Optionally update other details even if password isn't
+                        # For now, if password update is declined, we don't update other things.
+                        return False
                 except EOFError:
                     print("Skipping interactive password update for existing user in non-interactive environment.")
-                    # Continue to update other details non-interactively for password.
-                    user_to_process.set_password(password) # Fallback to provided password
-            else: # Non-interactive update for password if exists
-                user_to_process.set_password(password)
-
-            # Update other details
-            user_to_process.full_name = full_name
-            user_to_process.handle = handle # Update handle
-            if profile_info is not None:
-                user_to_process.profile_info = profile_info
-            user_to_process.is_admin = is_admin
-            user_to_process.is_approved = is_approved
-            user_to_process.is_active = is_active
-            db.session.commit()
-            print(f"User '{username}' (Handle: '{handle}') details updated.")
-            return True
+                    return False
+            else: # Non-interactive update
+                print(f"Updating password and details for user '{username}' non-interactively.")
+                existing_user.set_password(password)
+                existing_user.full_name = full_name
+                if profile_info is not None:
+                    existing_user.profile_info = profile_info
+                existing_user.is_admin = is_admin
+                existing_user.is_approved = is_approved
+                existing_user.is_active = is_active
+                db.session.commit()
+                print(f"User '{username}' updated non-interactively.")
+                return True
         else:
             # Create new user
-            print(f"Creating new user: Email '{username}', Handle '{handle}', Full Name '{full_name}'.")
+            print(f"Creating new user: '{username}' with full name '{full_name}'.")
             new_user = User(
                 username=username,
-                handle=handle,
                 full_name=full_name,
                 profile_info=profile_info,
                 is_admin=is_admin,
@@ -128,7 +124,7 @@ def create_or_update_user(flask_app, username, password, full_name, handle, prof
             new_user.set_password(password)
             db.session.add(new_user)
             db.session.commit()
-            print(f"User '{username}' (Handle: '{handle}') created successfully. Admin: {is_admin}, Approved: {is_approved}, Active: {is_active}.")
+            print(f"User '{username}' created successfully. Admin: {is_admin}, Approved: {is_approved}, Active: {is_active}.")
 
             # Special handling for the very first admin user created non-interactively by CLI args
             # to set initial site settings. This is a bit of a kludge.
@@ -210,7 +206,6 @@ if __name__ == "__main__":
     # For more control, a dedicated --admin-fullname could be added.
     # For now, will default full_name to admin_user for non-interactive.
     parser.add_argument('--admin-fullname', help='Set initial admin display name (full_name) non-interactively (optional, defaults to admin-user).')
-    parser.add_argument('--admin-handle', help='Set initial admin public handle non-interactively (required if admin-user set).')
     parser.add_argument('--admin-bio', help='Set initial admin bio non-interactively (optional).')
     parser.add_argument('--config', help='Path to a YAML configuration file to override default settings.')
 
@@ -220,10 +215,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Validate non-interactive admin creation args
-    if (args.admin_user and not args.admin_pass) or \
-       (not args.admin_user and args.admin_pass) or \
-       (args.admin_user and not args.admin_handle): # admin_handle is required if admin_user is set
-        parser.error("--admin-user, --admin-pass, and --admin-handle must be used together.")
+    if (args.admin_user and not args.admin_pass) or (not args.admin_user and args.admin_pass):
+        parser.error("--admin-user and --admin-pass must be used together.")
 
     print("Starting database setup...")
 
@@ -299,27 +292,25 @@ if __name__ == "__main__":
         if isinstance(yaml_users, list) and yaml_users:
             print(f"\nProcessing {len(yaml_users)} user(s) from configuration (YAML)...")
             for user_data in yaml_users:
-                username = user_data.get('username') # This is the email
+                username = user_data.get('username')
                 password = user_data.get('password')
                 full_name = user_data.get('full_name')
-                handle = user_data.get('handle') # Get the handle
                 profile_info = user_data.get('bio') # Match example: bio
                 is_admin = user_data.get('is_admin', False)
                 # Default is_approved and is_active to True for YAML users, allow override
                 is_approved = user_data.get('is_approved', True)
                 is_active = user_data.get('is_active', True)
 
-                if not username or not password or not full_name or not handle: # Added handle check
-                    print(f"Skipping user due to missing username, password, full_name, or handle: {user_data}")
+                if not username or not password or not full_name:
+                    print(f"Skipping user due to missing username, password, or full_name: {user_data}")
                     continue
 
-                print(f"Processing user from YAML: Email='{username}', Handle='{handle}'")
+                print(f"Processing user from YAML: {username}")
                 create_or_update_user(
                     flask_app=app,
                     username=username,
                     password=password,
                     full_name=full_name,
-                    handle=handle, # Pass handle
                     profile_info=profile_info,
                     is_admin=is_admin,
                     is_approved=is_approved,
@@ -341,7 +332,6 @@ if __name__ == "__main__":
                     username=args.admin_user,
                     password=args.admin_pass,
                     full_name=args.admin_fullname if args.admin_fullname else args.admin_user,
-                    handle=args.admin_handle, # Use the new admin_handle argument
                     profile_info=args.admin_bio,
                     is_admin=True, # CLI admin is always admin
                     is_approved=True,
@@ -368,14 +358,6 @@ if __name__ == "__main__":
                                 full_name = input(f"Enter Display Name for '{username}': ").strip()
                                 if not full_name:
                                     print("Display Name cannot be empty.")
-
-                            handle_interactive = ""
-                            while not handle_interactive: # Basic validation, could add regex check here too
-                                handle_interactive = input(f"Enter Public Handle for '{username}' (e.g., your_unique_handle): ").strip()
-                                if not handle_interactive:
-                                    print("Public Handle cannot be empty.")
-                                # TODO: Add regex check for handle format consistency if desired, e.g. r'^[a-zA-Z0-9_]+$'
-
                             profile_info = input(f"Enter profile information for '{username}' (optional, press Enter to skip): ").strip() or None
 
                             create_or_update_user(
@@ -383,7 +365,6 @@ if __name__ == "__main__":
                                 username=username,
                                 password=password,
                                 full_name=full_name,
-                                handle=handle_interactive, # Pass interactive handle
                                 profile_info=profile_info,
                                 is_admin=True, # Interactive setup creates an admin
                                 is_approved=True,

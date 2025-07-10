@@ -35,10 +35,10 @@ def get_photo_comments(photo_id):
             'created_at': comment.created_at.isoformat() + "Z", # Add Z for UTC indication
             'author': {
                 'id': comment.author.id,
-                'handle': comment.author.handle, # Use handle
-                'full_name': comment.author.full_name or ('@' + comment.author.handle if comment.author.handle else comment.author.username), # Display full_name or @handle
+                'username': comment.author.username,
+                'full_name': comment.author.full_name or comment.author.username,
                 'profile_photo_url': get_avatar_url(comment.author),
-                'profile_url': url_for('profile.view_profile', handle=comment.author.handle, _external=False) if comment.author.handle else None # Link to profile via handle
+                'profile_url': url_for('profile.view_profile', username=comment.author.username, _external=False)
             }
         })
     return jsonify(comments_data)
@@ -69,33 +69,38 @@ def post_photo_comment(photo_id):
         # Commit the comment first to get its ID for notifications
         db.session.commit()
 
-        # Process mentions in the comment (now using handles)
-        mentioned_handles = extract_mentions(new_comment.text) # extract_mentions now looks for handles
+        # Process mentions in the comment
+        mentioned_usernames = extract_mentions(new_comment.text)
         new_mentions_created = False
-        if mentioned_handles:
-            for handle_str in mentioned_handles:
-                mentioned_user_obj = User.query.filter_by(handle=handle_str).first() # Query by handle
+        if mentioned_usernames:
+            for username_str in mentioned_usernames:
+                mentioned_user_obj = User.query.filter_by(username=username_str).first()
                 if mentioned_user_obj: # Check if user exists
                     if mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions
                         # Avoid duplicate notifications for this specific comment
                         existing_notif = Notification.query.filter_by(
                             user_id=mentioned_user_obj.id,
                             actor_id=current_user.id,
-                            type='mention_in_photo_comment',
-                            target_type='photo_comment',
-                            target_id=new_comment.id
+                            type='mention_in_photo_comment', # Specific type for photo comments
+                                # related_comment_id=new_comment.id # Old field
+                                target_type='photo_comment',      # New field - target is the photo comment
+                                target_id=new_comment.id          # New field
                         ).first()
                         if not existing_notif:
                             mention_notification = Notification(
                                 user_id=mentioned_user_obj.id,
                                 actor_id=current_user.id,
                                 type='mention_in_photo_comment',
-                                target_type='photo_comment',
-                                target_id=new_comment.id
+                                    target_type='photo_comment', # Target is the photo comment itself
+                                    target_id=new_comment.id
+                                    # We could add related_photo_id if we decide to keep specific foreign keys
+                                    # For now, the template will use get_target_object() and navigate from there.
+                                    # Example: target_object = notification.get_target_object() (which is a PhotoComment)
+                                    # then photo = target_object.photo
                             )
                             db.session.add(mention_notification)
                             new_mentions_created = True
-                            current_app.logger.info(f"Mention notification created for user (handle: {mentioned_user_obj.handle}) in photo comment {new_comment.id}")
+                            current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in photo comment {new_comment.id}")
 
         if new_mentions_created:
             db.session.commit() # Commit any new mention notifications
@@ -103,13 +108,13 @@ def post_photo_comment(photo_id):
         return jsonify({
             'id': new_comment.id,
             'text': new_comment.text,
-            'created_at': new_comment.created_at.isoformat() + "Z",
+            'created_at': new_comment.created_at.isoformat() + "Z", # Add Z for UTC indication
             'author': {
                 'id': current_user.id,
-                'handle': current_user.handle, # Return handle
-                'full_name': current_user.full_name or ('@' + current_user.handle if current_user.handle else current_user.username), # Display full_name or @handle
+                'username': current_user.username,
+                'full_name': current_user.full_name or current_user.username,
                 'profile_photo_url': get_avatar_url(current_user),
-                'profile_url': url_for('profile.view_profile', handle=current_user.handle, _external=False) if current_user.handle else None # Link via handle
+                'profile_url': url_for('profile.view_profile', username=current_user.username, _external=False)
             }
         }), 201
     else:

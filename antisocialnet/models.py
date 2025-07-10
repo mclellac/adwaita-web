@@ -10,8 +10,7 @@ from flask import current_app # For accessing app config (SECRET_KEY)
 # Models (Copied from app.py, generate_slug replaced with generate_slug_util)
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False) # Stores email, used for login
-    handle = db.Column(db.String(80), unique=True, nullable=True, index=True) # TODO: Make nullable=False after data migration and form updates
+    username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     profile_info = db.Column(db.Text, nullable=True)
     profile_photo_url = db.Column(db.String(512), nullable=True)

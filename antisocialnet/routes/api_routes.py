@@ -150,10 +150,9 @@ def serialize_actor(user_model_instance):
 
     return {
         "id": user_model_instance.id,
-        "handle": user_model_instance.handle, # Added handle
+        "username": user_model_instance.username,
         "full_name": user_model_instance.full_name,
         "profile_photo_url": profile_photo_url_val
-        # Removed username (which is email) from public API actor serialization
     }
 
 def serialize_post_item(post):
@@ -204,7 +203,7 @@ def serialize_photo_item(photo):
             "image_url_large": url_for('static', filename=photo.image_filename, _external=True) if photo.image_filename else None,
             # "image_url_thumbnail": ..., # Placeholder
             "comment_count": photo.comments.count(),
-            "gallery_url": url_for('profile.view_gallery', handle=photo.user.handle, _anchor=f'photo-{photo.id}', _external=True) if photo.user else None
+            "gallery_url": url_for('profile.view_gallery', username=photo.user.username, _anchor=f'photo-{photo.id}', _external=True)
         }
     }
 # Add other API routes here in the future
