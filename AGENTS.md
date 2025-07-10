@@ -40,3 +40,26 @@ This repository contains two main projects:
     *   For web components with Shadow DOM, if internal styles need access to asset paths (like icons), prefer using CSS Custom Properties defined in global SCSS to pass these paths rather than hardcoding them in JS or inline styles within the component.
 
 Please consult the respective `AGENTS.md` files in each subdirectory for more detailed, context-specific instructions.
+
+**PII (Personally Identifiable Information) and User Display Guidelines (IMPORTANT for `antisocialnet/`):**
+
+*   **User Identifiers:** The `antisocialnet.models.User` model has the following key fields for identification:
+    *   `username`: Stores the user's email address. **This field MUST ONLY be used for login, password reset, and internal account management. It MUST NOT be used for public display, in user-facing URLs, or for @mention style identifiers.**
+    *   `full_name`: Stores the user's chosen display name (e.g., "Jane Doe"). This is the **primary name to be displayed** in most UI contexts (e.g., author of a post, user lists).
+    *   `handle`: Stores a unique, user-chosen, URL-safe public identifier (e.g., "janedoe123"). This field is used for:
+        *   Profile URLs (e.g., `/profile/janedoe123`).
+        *   `@mention` style displays (e.g., `@janedoe123`), often shown beneath or alongside the `full_name`.
+
+*   **Displaying Users:**
+    *   When displaying a user's name, always prefer `user.full_name`.
+    *   For `@mention` style text or as a secondary identifier (like under `full_name` on a profile card), use `'@' + user.handle`.
+    *   If `user.full_name` is not available, use `'@' + user.handle` as the fallback.
+    *   **Under no circumstances should `user.username` (the email address) be displayed directly to other users or used as a fallback display name if `full_name` or `handle` are missing.** Use a generic placeholder like "User" or "Anonymous" if absolutely necessary, but ensure `full_name` and `handle` are populated.
+
+*   **Avatar Alt Text & Fallbacks:**
+    *   Avatar `alt` attributes should use `user.full_name` or `'@' + user.handle`.
+    *   Text-based avatar fallbacks (e.g., initials) should be derived from `user.full_name` or `user.handle`, not `user.username` (email).
+
+*   **Profile URLs:** All links to user profiles must be generated using the `user.handle` (e.g., `url_for('profile.view_profile', handle=user.handle)`).
+
+*   **Logging:** While User ID is preferred for logging, if user-facing identifiers are logged for context, prefer `handle`. Log `username` (email) only when essential for debugging authentication or account-specific issues, and be mindful of PII in logs.

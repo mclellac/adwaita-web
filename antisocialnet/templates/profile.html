@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Profile: {{ user_profile.full_name or user_profile.username }}{% endblock %}
+{% block title %}Profile: {{ user_profile.full_name or ('User ' ~ user_profile.id) }}{% endblock %}
 
-{% block header_title %}{{ user_profile.full_name or user_profile.username }}'s Profile{% endblock %}
+{% block header_title %}{{ user_profile.full_name or ('User ' ~ user_profile.id) }}'s Profile{% endblock %}
 
 {% block header_actions_start %}
     {% if current_user == user_profile %}
         <a href="{{ url_for('profile.edit_profile') }}" class="adw-button suggested-action">Edit Profile</a>
     {% elif current_user.is_authenticated %} {# Only show follow/unfollow if logged in and not viewing own profile #}
         {% if current_user.is_following(user_profile) %}
-            <form action="{{ url_for('profile.unfollow_user', username=user_profile.username) }}" method="POST" style="display: inline;">
+            <form action="{{ url_for('profile.unfollow_user', user_id=user_profile.id) }}" method="POST" style="display: inline;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="adw-button">Unfollow</button>
             </form>
         {% else %}
-            <form action="{{ url_for('profile.follow_user', username=user_profile.username) }}" method="POST" style="display: inline;">
+            <form action="{{ url_for('profile.follow_user', user_id=user_profile.id) }}" method="POST" style="display: inline;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="adw-button suggested-action">Follow</button>
             </form>
@@ -75,21 +75,28 @@
         <div class="adw-box adw-box-spacing-xl align-center"> {# Horizontal by default #}
             <div class="adw-avatar size-huge" id="profile-page-avatar-container" style="cursor: pointer;" title="View full-size photo"> {# size-huge for 96px, added ID and style #}
                 {% if user_profile.profile_photo_url %}
-                <img id="profile-page-avatar-img" src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ user_profile.full_name or user_profile.username }} avatar">
+                <img id="profile-page-avatar-img" src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ user_profile.full_name or ('User ' ~ user_profile.id) }} avatar">
                 {% else %}
-                <img id="profile-page-avatar-img" src="{{ default_avatar_url }}" alt="{{ user_profile.full_name or user_profile.username }} default avatar">
+                <img id="profile-page-avatar-img" src="{{ default_avatar_url }}" alt="{{ user_profile.full_name or ('User ' ~ user_profile.id) }} default avatar">
                 {% endif %}
             </div>
             <div class="adw-box adw-box-vertical adw-box-spacing-xs">
-                <h1 class="adw-label title-1">{{ user_profile.full_name or user_profile.username }}</h1>
+                <h1 class="adw-label title-1">{{ user_profile.full_name or ('User ' ~ user_profile.id) }}</h1>
+                {# The @mention style display based on full_name will be tricky here if full_name has spaces.
+                   For now, let's use full_name directly if it exists, or a generic user ID as a placeholder.
+                   A proper @mention token might need to be a separate field or derived carefully.
+                   The AGENTS.md now specifies @Full Name.
+                #}
                 {% if user_profile.full_name %}
-                <div><span class="adw-label adw-caption">@{{ user_profile.username }}</span></div>
+                <div><span class="adw-label adw-caption">@{{ user_profile.full_name }}</span></div>
+                {% else %}
+                <div><span class="adw-label adw-caption">User ID: {{ user_profile.id }}</span></div>
                 {% endif %}
                 <div class="adw-box adw-box-horizontal adw-box-spacing-s profile-follow-stats">
-                    <a href="{{ url_for('profile.followers_list', username=user_profile.username) }}" class="adw-link">
+                    <a href="{{ url_for('profile.followers_list', user_id=user_profile.id) }}" class="adw-link">
                         <span class="adw-label body-2"><strong>{{ user_profile.followers.count() }}</strong> Followers</span>
                     </a>
-                    <a href="{{ url_for('profile.following_list', username=user_profile.username) }}" class="adw-link">
+                    <a href="{{ url_for('profile.following_list', user_id=user_profile.id) }}" class="adw-link">
                         <span class="adw-label body-2"><strong>{{ user_profile.followed.count() }}</strong> Following</span>
                     </a>
                 </div>
@@ -99,7 +106,7 @@
         {# Profile Details Group #}
         <div class="adw-preferences-group" role="group" aria-labelledby="profile-details-title-{{user_profile.id}}">
              <div class="adw-preferences-group__title-container">
-                <h2 class="adw-preferences-group__title title-2" id="profile-details-title-{{user_profile.id}}">About {{user_profile.full_name or user_profile.username}}</h2>
+                <h2 class="adw-preferences-group__title title-2" id="profile-details-title-{{user_profile.id}}">About {{ user_profile.full_name or ('User ' ~ user_profile.id) }}</h2>
             </div>
             <div class="adw-list-box">
                 {% if user_profile.profile_info %}
@@ -204,7 +211,7 @@
         {# User Posts Section #}
         <div class="adw-preferences-group" role="group" aria-labelledby="user-posts-title-{{user_profile.id}}">
             <div class="adw-preferences-group__title-container">
-                <h2 class="adw-preferences-group__title title-2" id="user-posts-title-{{user_profile.id}}">Posts by {{ user_profile.full_name or user_profile.username }}</h2>
+                <h2 class="adw-preferences-group__title title-2" id="user-posts-title-{{user_profile.id}}">Posts by {{ user_profile.full_name or ('User ' ~ user_profile.id) }}</h2>
             </div>
             {% if posts_pagination and posts_pagination.items %}
                 <div class="blog-posts-container"> {# Use new card container #}
@@ -240,7 +247,7 @@
                 <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
                     <div class="adw-toggle-group">
                         {% if posts_pagination.has_prev %}
-                            <a href="{{ url_for('profile.view_profile', username=user_profile.username, page=posts_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
+                            <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=posts_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
                                 <span class="adw-icon icon-actions-go-previous-symbolic"></span>
                             </a>
                         {% else %}
@@ -254,7 +261,7 @@
                                 {% if page_num == posts_pagination.page %}
                                     <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
                                 {% else %}
-                                    <a href="{{ url_for('profile.view_profile', username=user_profile.username, page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                                    <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
                             {% elif loop.index != 1 and loop.index != posts_pagination.pages + posts_pagination.iter_pages()|length %}
                                 <button class="adw-button flat" disabled>…</button>
@@ -262,7 +269,7 @@
                         {% endfor %}
 
                         {% if posts_pagination.has_next %}
-                             <a href="{{ url_for('profile.view_profile', username=user_profile.username, page=posts_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
+                             <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=posts_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
                                 <span class="adw-icon icon-actions-go-next-symbolic"></span>
                             </a>
                         {% else %}
@@ -277,7 +284,7 @@
                 <div class="adw-status-page">
                     <span class="adw-icon icon-content-document-new-symbolic adw-status-page-icon app-status-page-icon"></span>
                     <h3 class="adw-status-page-title">No Posts Yet</h3>
-                    <p class="adw-status-page-description">{{ user_profile.full_name or user_profile.username }} has not made any posts.</p>
+                    <p class="adw-status-page-description">{{ user_profile.full_name or ('User ' ~ user_profile.id) }} has not made any posts.</p>
                 </div>
             {% endif %}
         </div>
@@ -285,14 +292,14 @@
         {# User Comments Section #}
         <div class="adw-preferences-group" role="group" aria-labelledby="user-comments-title-{{user_profile.id}}">
             <div class="adw-preferences-group__title-container">
-                <h2 class="adw-preferences-group__title title-2" id="user-comments-title-{{user_profile.id}}">Comments by {{ user_profile.full_name or user_profile.username }}</h2>
+                <h2 class="adw-preferences-group__title title-2" id="user-comments-title-{{user_profile.id}}">Comments by {{ user_profile.full_name or ('User ' ~ user_profile.id) }}</h2>
             </div>
             {% if comments_pagination and comments_pagination.items %}
                 <div class="adw-list-box">
                     {% for comment in comments_pagination.items %}
                     <a href="{{ url_for('post.view_post', post_id=comment.post_id, _anchor='comment-' ~ comment.id) }}" class="adw-action-row activatable">
                         <div class="adw-action-row__text">
-                            <span class="adw-action-row__title">Comment on post by {{ comment.post.author.full_name or comment.post.author.username }}</span>
+                            <span class="adw-action-row__title">Comment on post by {{ comment.post.author.full_name or ('User ' ~ comment.post.author.id) }}</span>
                             <span class="adw-action-row__subtitle">"{{ comment.text | truncate(100, True) }}"</span>
                             <small class="adw-label caption">
                                 <time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
@@ -308,7 +315,7 @@
                 <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
                     <div class="adw-toggle-group">
                         {% if comments_pagination.has_prev %}
-                            <a href="{{ url_for('profile.view_profile', username=user_profile.username, comments_page=comments_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous comments page">
+                            <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=comments_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous comments page">
                                 <span class="adw-icon icon-actions-go-previous-symbolic"></span>
                             </a>
                         {% else %}
@@ -322,7 +329,7 @@
                                 {% if page_num == comments_pagination.page %}
                                     <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
                                 {% else %}
-                                    <a href="{{ url_for('profile.view_profile', username=user_profile.username, comments_page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                                    <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
                             {% elif loop.index != 1 and loop.index != comments_pagination.pages + comments_pagination.iter_pages()|length %}
                                 <button class="adw-button flat" disabled>…</button>
@@ -330,7 +337,7 @@
                         {% endfor %}
 
                         {% if comments_pagination.has_next %}
-                             <a href="{{ url_for('profile.view_profile', username=user_profile.username, comments_page=comments_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next comments page">
+                             <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=comments_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next comments page">
                                 <span class="adw-icon icon-actions-go-next-symbolic"></span>
                             </a>
                         {% else %}
@@ -345,7 +352,7 @@
                 <div class="adw-status-page">
                     <span class="adw-icon icon-content-message-symbolic adw-status-page-icon app-status-page-icon"></span>
                     <h3 class="adw-status-page-title">No Comments Yet</h3>
-                    <p class="adw-status-page-description">{{ user_profile.full_name or user_profile.username }} has not made any comments.</p>
+                    <p class="adw-status-page-description">{{ user_profile.full_name or ('User ' ~ user_profile.id) }} has not made any comments.</p>
                 </div>
             {% endif %}
         </div>
@@ -393,7 +400,7 @@
                     {% for photo in gallery_photos_preview %}
                     <div class="adw-card gallery-photo-card">
                         <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo.image_filename) }}"
-                             alt="{{ photo.caption or ('Gallery image by ' ~ (user_profile.full_name or user_profile.username)) }}"
+                             alt="{{ photo.caption or ('Gallery image by ' ~ (user_profile.full_name or ('User ' ~ user_profile.id))) }}"
                              class="gallery-photo-image clickable-gallery-photo"
                              data-fullsrc="{{ url_for('static', filename='uploads/gallery_pics/' + photo.image_filename) }}"
                              data-caption="{{ photo.caption or '' }}"
@@ -420,7 +427,7 @@
                 </div>
                 {% if total_gallery_photos > 0 %} {# Show view all button if there's at least one photo #}
                 <div class="adw-box justify-center" style="margin-top: var(--spacing-m);">
-                    <a href="{{ url_for('profile.view_gallery', username=user_profile.username) }}" class="adw-button">
+                    <a href="{{ url_for('profile.view_gallery', user_id=user_profile.id) }}" class="adw-button">
                         View All Photos ({{ total_gallery_photos }}) <span class="adw-icon icon-actions-go-next-symbolic"></span>
                     </a>
                 </div>
@@ -429,7 +436,7 @@
                 <div class="adw-status-page">
                     <span class="adw-icon icon-media-image-symbolic adw-status-page-icon app-status-page-icon"></span>
                     <h3 class="adw-status-page-title">Empty Gallery</h3>
-                    <p class="adw-status-page-description">{{ user_profile.full_name or user_profile.username }} has not uploaded any photos to their gallery yet.</p>
+                    <p class="adw-status-page-description">{{ user_profile.full_name or ('User ' ~ user_profile.id) }} has not uploaded any photos to their gallery yet.</p>
                     {% if current_user != user_profile %}
                     <p class="adw-status-page-description">Check back later!</p>
                     {% endif %}
@@ -505,12 +512,17 @@ document.addEventListener('DOMContentLoaded', function () {
         comments.forEach(comment => {
             const commentDiv = document.createElement('div');
             commentDiv.classList.add('adw-action-row'); // Use Adwaita styling for list items
+            // API now provides full_name (with 'User ID' fallback) and correct profile_url (ID-based)
+            const authorDisplayName = comment.author.full_name;
+            const authorProfileUrl = comment.author.profile_url;
+            const authorAvatarAlt = comment.author.full_name;
+
             commentDiv.innerHTML = `
                 <span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">
-                    <img src="${comment.author.profile_photo_url}" alt="${comment.author.full_name || comment.author.username} avatar">
+                    <img src="${comment.author.profile_photo_url}" alt="${authorAvatarAlt} avatar">
                 </span>
                 <span class="adw-action-row-text-content">
-                    <a href="${comment.author.profile_url}" class="adw-link adw-action-row-title">${comment.author.full_name || comment.author.username}</a>
+                    ${authorProfileUrl ? `<a href="${authorProfileUrl}" class="adw-link adw-action-row-title">${authorDisplayName}</a>` : `<span class="adw-action-row-title">${authorDisplayName}</span>`}
                     <span class="adw-action-row-subtitle">${comment.text}</span>
                     <small class="adw-label caption">${formatCommentDate(comment.created_at)}</small>
                 </span>

@@ -35,10 +35,10 @@ def get_photo_comments(photo_id):
             'created_at': comment.created_at.isoformat() + "Z", # Add Z for UTC indication
             'author': {
                 'id': comment.author.id,
-                'username': comment.author.username,
-                'full_name': comment.author.full_name or comment.author.username,
+                # 'username' (email) removed from public API response
+                'full_name': comment.author.full_name or ('User ' + str(comment.author.id)),
                 'profile_photo_url': get_avatar_url(comment.author),
-                'profile_url': url_for('profile.view_profile', username=comment.author.username, _external=False)
+                'profile_url': url_for('profile.view_profile', user_id=comment.author.id, _external=False) # Use user_id
             }
         })
     return jsonify(comments_data)
@@ -68,39 +68,41 @@ def post_photo_comment(photo_id):
         db.session.add(new_comment)
         # Commit the comment first to get its ID for notifications
         db.session.commit()
+        from sqlalchemy import func # For func.lower
 
-        # Process mentions in the comment
-        mentioned_usernames = extract_mentions(new_comment.text)
+        # Process mentions in the comment (using full_name)
+        mentioned_full_names = extract_mentions(new_comment.text) # extract_mentions now gets full names
         new_mentions_created = False
-        if mentioned_usernames:
-            for username_str in mentioned_usernames:
-                mentioned_user_obj = User.query.filter_by(username=username_str).first()
-                if mentioned_user_obj: # Check if user exists
+        if mentioned_full_names:
+            for name_str in mentioned_full_names:
+                # Case-insensitive query for full_name. Only notify if unique user found.
+                mentioned_users = User.query.filter(func.lower(User.full_name) == func.lower(name_str)).all()
+                if len(mentioned_users) == 1:
+                    mentioned_user_obj = mentioned_users[0]
                     if mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions
-                        # Avoid duplicate notifications for this specific comment
                         existing_notif = Notification.query.filter_by(
                             user_id=mentioned_user_obj.id,
                             actor_id=current_user.id,
-                            type='mention_in_photo_comment', # Specific type for photo comments
-                                # related_comment_id=new_comment.id # Old field
-                                target_type='photo_comment',      # New field - target is the photo comment
-                                target_id=new_comment.id          # New field
+                            type='mention_in_photo_comment',
+                            target_type='photo_comment',
+                            target_id=new_comment.id
                         ).first()
                         if not existing_notif:
                             mention_notification = Notification(
                                 user_id=mentioned_user_obj.id,
                                 actor_id=current_user.id,
                                 type='mention_in_photo_comment',
-                                    target_type='photo_comment', # Target is the photo comment itself
-                                    target_id=new_comment.id
-                                    # We could add related_photo_id if we decide to keep specific foreign keys
-                                    # For now, the template will use get_target_object() and navigate from there.
-                                    # Example: target_object = notification.get_target_object() (which is a PhotoComment)
-                                    # then photo = target_object.photo
+                                target_type='photo_comment',
+                                target_id=new_comment.id
                             )
                             db.session.add(mention_notification)
                             new_mentions_created = True
-                            current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in photo comment {new_comment.id}")
+                            current_app.logger.info(f"Mention notification created for user '{mentioned_user_obj.full_name}' (ID: {mentioned_user_obj.id}) in photo comment {new_comment.id}")
+                elif len(mentioned_users) > 1:
+                    current_app.logger.info(f"Ambiguous mention for '{name_str}' in photo comment {new_comment.id}: {len(mentioned_users)} users found. No notification sent.")
+                else:
+                    current_app.logger.info(f"Mentioned name '{name_str}' in photo comment {new_comment.id} does not correspond to any user. No notification sent.")
+
 
         if new_mentions_created:
             db.session.commit() # Commit any new mention notifications
@@ -108,13 +110,13 @@ def post_photo_comment(photo_id):
         return jsonify({
             'id': new_comment.id,
             'text': new_comment.text,
-            'created_at': new_comment.created_at.isoformat() + "Z", # Add Z for UTC indication
+            'created_at': new_comment.created_at.isoformat() + "Z",
             'author': {
                 'id': current_user.id,
-                'username': current_user.username,
-                'full_name': current_user.full_name or current_user.username,
+                # 'username' (email) removed
+                'full_name': current_user.full_name or ('User ' + str(current_user.id)),
                 'profile_photo_url': get_avatar_url(current_user),
-                'profile_url': url_for('profile.view_profile', username=current_user.username, _external=False)
+                'profile_url': url_for('profile.view_profile', user_id=current_user.id, _external=False) # Use user_id
             }
         }), 201
     else:

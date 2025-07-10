@@ -53,42 +53,40 @@ def linkify_mentions(text):
     if text is None:
         return ''
     text = str(text)
-    # Regex to find @username patterns
-    # Allows alphanumeric characters and underscores in usernames
-    mention_regex = r'@([a-zA-Z0-9_]+)'
+
+    from .models import User # Local import to avoid circular dependency at module level
+    from . import db # Assuming db is SQLAlchemy instance from __init__
+    from sqlalchemy import func # For func.lower
+
+    # Regex to find @Full Name patterns (alphanumeric, underscore, apostrophe, spaces)
+    # This must match the one in extract_mentions
+    mention_regex = r'@([A-Za-z0-9_']+(?:\s[A-Za-z0-9_']+)*)'
 
     def replace_mention(match):
-        username = match.group(1)
-        # In a real app, you'd use url_for here, but that's not available directly in utils
-        # without app context. This filter is applied in app context, so this is conceptual.
-        # For direct usage if needed outside app context, the URL structure would be hardcoded or passed.
-        # Here, we just format it, assuming url_for will be used in the template filter call.
-        # This utility function should just return the structure that the template filter can use.
-        # For now, it prepares a string that can be made into a link.
-        # The actual href creation is better handled in the template filter or by passing url_for.
-        # However, the current app structure calls this from the markdown filter.
+        full_name_mention = ' '.join(match.group(1).split()) # Normalize spaces in extracted name
 
-        # Simple version for now, actual URL generation might need app context or url_for
-        # from flask import url_for # This would cause circular import if utils is imported by __init__ too early
-        # For now, let's assume the markdown filter will handle the final URL construction if this
-        # function is only returning the username. Or, we create a placeholder link.
+        # Query for the user by full_name (case-insensitive)
+        # This is a simplified approach. For production, consider performance implications of func.lower()
+        # and how to handle multiple users with the same full_name.
+        users_found = User.query.filter(func.lower(User.full_name) == func.lower(full_name_mention)).all()
 
-        # Placeholder link structure, actual linking happens in template filter context
-        # This function is more about identifying and formatting, less about final URL generation here.
-        # The existing template filter for linkify_mentions in __init__ seems to expect this to return text.
-        # Then markdown_to_html_and_sanitize_util probably makes it a link.
-        # This function is more about identifying and formatting, less about final URL generation here.
-        # The existing template filter for linkify_mentions in __init__ seems to expect this to return text.
-        # Then markdown_to_html_and_sanitize_util probably makes it a link.
-        # Let's assume this is used by a filter that will then use url_for.
-        # A more direct approach would be for this to generate the <a> tag if it had url_for.
-        # Based on its usage in `actual_markdown_filter` in `__init__.py`, it seems this function
-        # should return text that `markdown_to_html_and_sanitize_util` then processes.
-        # The `linkify_mentions_util` is called *before* markdown.
+        if len(users_found) == 1:
+            user = users_found[0]
+            # Profile URLs are now ID-based
+            return f'[@{full_name_mention}](/profile/{user.id})' # Generates a markdown link
+        else:
+            # If no user or multiple users found, don't linkify, return original mention text
+            # This prevents linking to wrong profile or dead links.
+            # UI could potentially offer disambiguation if multiple users are found.
+            # For now, just return the text.
+            current_app.logger.info(f"Mention '@{full_name_mention}' not linked: {len(users_found)} users found.")
+            return f'@{full_name_mention}' # Return as plain text
 
-        # Let's make it generate a markdown link, which markdown_to_html_and_sanitize_util will process.
-        # This is a common pattern.
-        return f'[@{username}](/profile/{username})' # Generates a markdown link
+    # Need access to current_app for logging inside replace_mention,
+    # which is tricky as this util might be called outside app context by Jinja filter.
+    # A better way is to pass current_app or its logger if needed, or handle logging outside.
+    # For now, assuming this function is called within an app context (e.g., by the template filter).
+    from flask import current_app
 
     linked_text = re.sub(mention_regex, replace_mention, text)
     return linked_text
@@ -176,15 +174,30 @@ def allowed_file_util(filename):
 
 def extract_mentions(text):
     """
-    Extracts @username mentions from text.
-    Returns a list of unique usernames without the '@'.
+    Extracts @Full Name mentions from text.
+    A name can consist of words (alphanumeric + underscore) separated by single spaces.
+    Returns a list of unique full names without the '@'.
     """
     if not text:
         return []
-    # Regex to find @username patterns (alphanumeric, underscores, and hyphens)
-    mention_regex = r'@([a-zA-Z0-9_-]+)'
+    # Regex:
+    # @                         - literal @
+    # (                         - start capture group 1
+    #   [A-Za-z0-9_']+          - first word (alphanumeric, underscore, apostrophe)
+    #   (?:                     - start non-capturing group for subsequent words
+    #     \s                    - a single space
+    #     [A-Za-z0-9_']+        - subsequent word
+    #   )*                      - zero or more subsequent words
+    # )                         - end capture group 1
+    # This regex allows for names like @Jane, @Jane_Doe, @Jane Doe, @J'Doe
+    # It stops if there are multiple spaces or other punctuation (except apostrophe within words).
+    mention_regex = r'@([A-Za-z0-9_']+(?:\s[A-Za-z0-9_']+)*)'
     mentions = re.findall(mention_regex, text)
-    return list(set(mentions)) # Return unique mentions
+    # Strip trailing spaces from extracted mentions, just in case regex captures it with lookaheads/behinds (though current one shouldn't)
+    # Also, normalize multiple spaces within a name to a single space if the regex were more lenient.
+    # For this regex, it should be fine, but good practice if regex changes.
+    processed_mentions = [ ' '.join(m.split()) for m in mentions]
+    return list(set(processed_mentions)) # Return unique mentions
 
 def update_post_relations_util(post, form_data, current_user_id, is_new_post=False):
     """
@@ -223,28 +236,42 @@ def update_post_relations_util(post, form_data, current_user_id, is_new_post=Fal
     # This part is highly dependent on how mentions are handled (e.g., in form_data or extracted from content)
     # Let's assume form_data might contain an explicit list of mentioned usernames,
     # or we re-extract from post.content. For now, re-extracting from content.
+    from sqlalchemy import func # For func.lower for case-insensitive query
 
-    mentioned_usernames = extract_mentions(post.content)
-    if mentioned_usernames:
-        for username in mentioned_usernames:
-            mentioned_user = User.query.filter_by(username=username).first()
-            if mentioned_user and mentioned_user.id != current_user_id:
-                # Check if a notification already exists for this post and user to avoid duplicates
-                existing_notification = Notification.query.filter_by(
-                    user_id=mentioned_user.id,
-                    related_post_id=post.id,
-                    type='mention_in_post' # Or a more general mention type
-                ).first()
+    mentioned_full_names = extract_mentions(post.content) # Now extracts full names
+    if mentioned_full_names:
+        for full_name in mentioned_full_names:
+            # Case-insensitive query for full_name. This might return multiple users.
+            # For notifications, we should only notify if we find a *single* unique match.
+            mentioned_users = User.query.filter(func.lower(User.full_name) == func.lower(full_name)).all()
 
-                if not existing_notification:
-                    notification = Notification(
+            if len(mentioned_users) == 1:
+                mentioned_user = mentioned_users[0]
+                if mentioned_user.id != current_user_id: # Don't notify for self-mentions
+                    # Check if a notification already exists for this post and user to avoid duplicates
+                    existing_notification = Notification.query.filter_by(
                         user_id=mentioned_user.id,
-                        actor_id=current_user_id,
-                        type='mention_in_post', # Be specific if possible
-                        related_post_id=post.id
-                        # related_comment_id could be added if mentions in comments are handled here too
-                    )
-                    db.session.add(notification)
+                        actor_id=current_user_id, # Also check actor to allow different users to mention same person in same post
+                        type='mention_in_post',
+                        target_type='post', # Using new polymorphic fields
+                        target_id=post.id
+                    ).first()
+
+                    if not existing_notification:
+                        notification = Notification(
+                            user_id=mentioned_user.id,
+                            actor_id=current_user_id,
+                            type='mention_in_post',
+                            target_type='post',
+                            target_id=post.id
+                        )
+                        db.session.add(notification)
+                        current_app.logger.info(f"Mention notification to be created for user '{mentioned_user.full_name}' (ID: {mentioned_user.id}) in post {post.id}")
+            elif len(mentioned_users) > 1:
+                current_app.logger.info(f"Ambiguous mention for '{full_name}' in post {post.id}: {len(mentioned_users)} users found. No notification sent.")
+            else:
+                current_app.logger.info(f"Mentioned name '{full_name}' in post {post.id} does not correspond to any user. No notification sent.")
+
 
     # Note: db.session.commit() should be handled by the calling route function
     # after all updates are done. This utility should not commit itself.

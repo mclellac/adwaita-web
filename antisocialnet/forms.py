@@ -10,7 +10,7 @@ from wtforms import (
     IntegerField
 )
 from wtforms.fields import DateField # Changed import for DateField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange # Added Email
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange, Regexp # Added Email and Regexp
 from wtforms.widgets import CheckboxInput, ListWidget # Ensure ListWidget is imported if used by QuerySelectMultipleField
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from .models import Category # Import Category from models.py

@@ -16,13 +16,13 @@ from ..utils import flash_form_errors_util, ALLOWED_TAGS_CONFIG, ALLOWED_ATTRIBU
 
 profile_bp = Blueprint('profile', __name__, url_prefix='/profile')
 
-@profile_bp.route('/<username>')
+@profile_bp.route('/<int:user_id>') # Changed to use user_id
 @login_required
-def view_profile(username):
+def view_profile(user_id): # Changed to use user_id
     # Ensure datetime is available; moved back to top-level import.
-    current_app.logger.debug(f"Accessing profile for {username}, requested by {current_user.username}")
-    user_profile = User.query.filter_by(username=username).first_or_404()
-    current_app.logger.debug(f"Displaying profile for '{user_profile.username}' (ID: {user_profile.id}).")
+    current_app.logger.debug(f"Accessing profile for user_id {user_id}, requested by User ID: {current_user.id}")
+    user_profile = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
+    current_app.logger.debug(f"Displaying profile for User ID: {user_profile.id} (Username: {user_profile.username}).")
 
     calculated_age = None
     if user_profile.birthdate:
@@ -31,7 +31,7 @@ def view_profile(username):
                ((today.month, today.day) < (user_profile.birthdate.month, user_profile.birthdate.day))
 
     if not user_profile.is_profile_public and user_profile != current_user:
-        current_app.logger.warning(f"User {current_user.username} attempted to view private profile of {user_profile.username}.")
+        current_app.logger.warning(f"User ID: {current_user.id} attempted to view private profile of User ID: {user_profile.id}.")
         flash("This profile is private.", "danger")
         abort(403)
 
@@ -40,17 +40,17 @@ def view_profile(username):
 
     posts_query = Post.query.filter_by(user_id=user_profile.id)
     if current_user == user_profile:
-        current_app.logger.debug(f"Fetching all posts (published and drafts) for own profile '{user_profile.username}', page {page}.")
+        current_app.logger.debug(f"Fetching all posts for own profile User ID: {user_profile.id}, page {page}.")
         posts_query = posts_query.order_by(Post.updated_at.desc())
     else:
-        current_app.logger.debug(f"Fetching only published posts for profile '{user_profile.username}', page {page}.")
+        current_app.logger.debug(f"Fetching published posts for profile User ID: {user_profile.id}, page {page}.")
         posts_query = posts_query.filter_by(is_published=True).order_by(Post.published_at.desc(), Post.created_at.desc())
 
     try:
         posts_pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
-        current_app.logger.debug(f"Found {len(posts_pagination.items)} posts for '{user_profile.username}' page {page} (total: {posts_pagination.total}).")
+        current_app.logger.debug(f"Found {len(posts_pagination.items)} posts for User ID: {user_profile.id}, page {page} (total: {posts_pagination.total}).")
     except Exception as e:
-        current_app.logger.error(f"Error fetching posts for profile {user_profile.username}: {e}", exc_info=True)
+        current_app.logger.error(f"Error fetching posts for profile User ID: {user_profile.id}: {e}", exc_info=True)
         flash("Error loading posts for this profile.", "danger")
         posts_pagination = None
 
@@ -59,24 +59,24 @@ def view_profile(username):
     comments_query = Comment.query.filter_by(user_id=user_profile.id).order_by(Comment.created_at.desc())
     try:
         comments_pagination = comments_query.paginate(page=comments_page, per_page=comments_per_page, error_out=False)
-        current_app.logger.debug(f"Found {len(comments_pagination.items)} comments by '{user_profile.username}' for comments_page {comments_page} (total: {comments_pagination.total}).")
+        current_app.logger.debug(f"Found {len(comments_pagination.items)} comments by User ID: {user_profile.id} for comments_page {comments_page} (total: {comments_pagination.total}).")
     except Exception as e:
-        current_app.logger.error(f"Error fetching comments for profile {user_profile.username}: {e}", exc_info=True)
+        current_app.logger.error(f"Error fetching comments for profile User ID: {user_profile.id}: {e}", exc_info=True)
         flash("Error loading comments for this profile.", "danger")
         comments_pagination = None
 
     if user_profile.profile_photo_url:
         try:
             generated_photo_url = url_for('static', filename=user_profile.profile_photo_url, _external=False)
-            current_app.logger.info(f"Profile page for {user_profile.username}: Stored profile_photo_url: '{user_profile.profile_photo_url}'")
-            current_app.logger.info(f"Profile page for {user_profile.username}: Generated static URL for photo: '{generated_photo_url}'")
+            current_app.logger.info(f"Profile page for User ID: {user_profile.id}: Stored profile_photo_url: '{user_profile.profile_photo_url}'")
+            current_app.logger.info(f"Profile page for User ID: {user_profile.id}: Generated static URL for photo: '{generated_photo_url}'")
             expected_photo_path_abs = os.path.join(current_app.static_folder, user_profile.profile_photo_url)
             current_app.logger.info(f"Expected absolute photo path for check: {expected_photo_path_abs}")
             current_app.logger.info(f"Does expected photo path exist? {os.path.exists(expected_photo_path_abs)}")
         except Exception as e_url_for:
             current_app.logger.error(f"Error during photo URL or path logging for '{user_profile.profile_photo_url}': {e_url_for}", exc_info=True)
     else:
-        current_app.logger.info(f"Profile page for {user_profile.username}: No profile_photo_url stored.")
+        current_app.logger.info(f"Profile page for User ID: {user_profile.id}: No profile_photo_url stored.")
 
     gallery_upload_form = None
     if current_user == user_profile:
@@ -92,11 +92,11 @@ def view_profile(username):
 @profile_bp.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    current_app.logger.debug(f"Accessing /profile/edit, Method: {request.method}, User: {current_user.username}")
+    current_app.logger.debug(f"Accessing /profile/edit, Method: {request.method}, User ID: {current_user.id}")
     form = ProfileEditForm(obj=current_user)
 
     if form.validate_on_submit():
-        current_app.logger.info(f"User {current_user.username} updating profile.")
+        current_app.logger.info(f"User ID: {current_user.id} updating profile.")
         raw_profile_info = form.profile_info.data
         current_user.profile_info = bleach.clean(
             raw_profile_info,
@@ -122,7 +122,7 @@ def edit_profile():
 
         if photo_file and photo_file.filename:
             photo_updated_or_attempted = True
-            current_app.logger.debug(f"Profile photo update attempt by {current_user.username}. Filename: {photo_file.filename}")
+            current_app.logger.debug(f"Profile photo update attempt by User ID: {current_user.id}. Filename: {photo_file.filename}")
 
             crop_params = None
             crop_x_str = request.form.get('crop_x')
@@ -152,7 +152,7 @@ def edit_profile():
             new_photo_db_path = None
 
             if photo_upload_attempted:
-                current_app.logger.debug(f"Profile photo update attempt by {current_user.username}. Filename: {photo_file.filename}")
+                current_app.logger.debug(f"Profile photo update attempt by User ID: {current_user.id}. Filename: {photo_file.filename}") # Repeated log
 
                 crop_params = None
                 crop_x_str = request.form.get('crop_x')
@@ -202,12 +202,12 @@ def edit_profile():
                 flash('Profile updated successfully!', 'toast_success')
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error saving profile to DB for {current_user.username}: {e}", exc_info=True)
+            current_app.logger.error(f"Error saving profile to DB for User ID: {current_user.id}: {e}", exc_info=True)
             flash(f'Error saving profile changes: {str(e)}', 'danger')
-        return redirect(url_for('profile.view_profile', username=current_user.username))
+        return redirect(url_for('profile.view_profile', user_id=current_user.id)) # Use user_id
 
     elif request.method == 'POST':
-        current_app.logger.warning(f"Edit profile form validation failed for {current_user.username}. Errors: {form.errors}")
+        current_app.logger.warning(f"Edit profile form validation failed for User ID: {current_user.id}. Errors: {form.errors}")
         flash_form_errors_util(form)
 
     return render_template('edit_profile.html', form=form, user_profile=current_user)
@@ -225,7 +225,7 @@ def upload_gallery_photo():
 
         if not photo_file or not photo_file.filename: # Should be caught by form's FileRequired if used.
             flash("No photo file selected for gallery upload.", "warning")
-            return redirect(url_for('profile.view_profile', username=current_user.username))
+            return redirect(url_for('profile.view_profile', user_id=current_user.id)) # Use user_id
 
         saved_db_path = save_uploaded_file(
             file_storage_object=photo_file,
@@ -257,7 +257,7 @@ def upload_gallery_photo():
     else:
         # flash_form_errors_util already uses 'danger'
         flash_form_errors_util(form)
-    return redirect(url_for('profile.view_profile', username=current_user.username))
+    return redirect(url_for('profile.view_profile', user_id=current_user.id)) # Use user_id
 
 
 @profile_bp.route('/gallery/delete/<int:photo_id>', methods=['POST'])
@@ -278,13 +278,14 @@ def delete_gallery_photo(photo_id):
         db.session.rollback()
         current_app.logger.error(f"Error deleting gallery photo ID {photo_id}: {e}", exc_info=True)
         flash(f'Error deleting photo: {str(e)}', 'danger')
-    return redirect(url_for('profile.view_profile', username=photo.user.username if photo.user else current_user.username))
+    user_id_for_redirect = photo.user.id if photo.user else current_user.id
+    return redirect(url_for('profile.view_profile', user_id=user_id_for_redirect)) # Use user_id
 
 
-@profile_bp.route('/<username>/gallery')
+@profile_bp.route('/<int:user_id>/gallery') # Changed to user_id
 @login_required
-def view_gallery(username):
-    user_profile = User.query.filter_by(username=username).first_or_404()
+def view_gallery(user_id): # Changed to user_id
+    user_profile = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
     if not user_profile.is_profile_public and user_profile != current_user:
         flash("This profile's gallery is private.", "danger")
         abort(403)
@@ -292,15 +293,15 @@ def view_gallery(username):
     return render_template('gallery_full.html', user_profile=user_profile, gallery_photos=gallery_photos)
 
 
-@profile_bp.route('/follow/<username>', methods=['POST'])
+@profile_bp.route('/follow/<int:user_id>', methods=['POST']) # Changed to user_id
 @login_required
-def follow_user(username):
-    user_to_follow = User.query.filter_by(username=username).first_or_404()
+def follow_user(user_id): # Changed to user_id
+    user_to_follow = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
     if user_to_follow == current_user:
         flash("You cannot follow yourself.", "warning")
-        return redirect(url_for('profile.view_profile', username=username))
+        return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
     if current_user.is_following(user_to_follow):
-        flash(f"You are already following {username}.", "info")
+        flash(f"You are already following {user_to_follow.full_name or ('@' + user_to_follow.username)}.", "info") # Display full_name or username (email)
     else:
         if current_user.follow(user_to_follow):
             from ..models import Notification # Local import
@@ -322,42 +323,42 @@ def follow_user(username):
             )
             db.session.add(activity)
             db.session.commit()
-            flash(f"You are now following {username}.", "toast_success")
+            flash(f"You are now following {user_to_follow.full_name or ('@' + user_to_follow.username)}.", "toast_success") # Display full_name or username
         else:
-            flash(f"Could not follow {username}. An unexpected error occurred or it was a self-follow.", "danger")
+            flash(f"Could not follow {user_to_follow.full_name or ('@' + user_to_follow.username)}. An unexpected error occurred or it was a self-follow.", "danger") # Display full_name or username
             db.session.rollback()
-    return redirect(url_for('profile.view_profile', username=username))
+    return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
 
 
-@profile_bp.route('/unfollow/<username>', methods=['POST'])
+@profile_bp.route('/unfollow/<int:user_id>', methods=['POST']) # Changed to user_id
 @login_required
-def unfollow_user(username):
-    user_to_unfollow = User.query.filter_by(username=username).first_or_404()
+def unfollow_user(user_id): # Changed to user_id
+    user_to_unfollow = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
     if user_to_unfollow == current_user:
         flash("You cannot unfollow yourself.", "warning")
-        return redirect(url_for('profile.view_profile', username=username))
+        return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
     if not current_user.is_following(user_to_unfollow):
-        flash(f"You are not currently following {username}.", "info")
+        flash(f"You are not currently following {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}.", "info") # Display full_name or username
     else:
         if current_user.unfollow(user_to_unfollow):
             db.session.commit()
-            flash(f"You have unfollowed {username}.", "toast_success")
+            flash(f"You have unfollowed {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}.", "toast_success") # Display full_name or username
         else:
-            flash(f"Could not unfollow {username}. An unexpected error occurred.", "danger")
+            flash(f"Could not unfollow {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}. An unexpected error occurred.", "danger") # Display full_name or username
             db.session.rollback()
-    return redirect(url_for('profile.view_profile', username=username))
+    return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
 
 
-@profile_bp.route('/<username>/followers')
+@profile_bp.route('/<int:user_id>/followers') # Changed to user_id
 @login_required
-def followers_list(username):
-    user = User.query.filter_by(username=username).first_or_404()
+def followers_list(user_id): # Changed to user_id
+    user = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
     if not user.is_profile_public and user != current_user:
         flash("This user's connections are private.", "danger")
-        return redirect(url_for('profile.view_profile', username=username))
+        return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 15)
-    followers_query = user.followers.order_by(User.username.asc())
+    followers_query = user.followers.order_by(User.full_name.asc()) # Order by full_name
     try:
         pagination = followers_query.paginate(page=page, per_page=per_page, error_out=False)
         users_list = pagination.items
@@ -368,21 +369,21 @@ def followers_list(username):
     return render_template('followers_list.html', user_profile=user, users_list=users_list, pagination=pagination, list_type="Followers")
 
 
-@profile_bp.route('/<username>/following')
+@profile_bp.route('/<int:user_id>/following') # Changed to user_id
 @login_required
-def following_list(username):
-    user = User.query.filter_by(username=username).first_or_404()
+def following_list(user_id): # Changed to user_id
+    user = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
     if not user.is_profile_public and user != current_user:
         flash("This user's connections are private.", "danger")
-        return redirect(url_for('profile.view_profile', username=username))
+        return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 15)
-    following_query = user.followed.order_by(User.username.asc())
+    following_query = user.followed.order_by(User.full_name.asc()) # Order by full_name
     try:
         pagination = following_query.paginate(page=page, per_page=per_page, error_out=False)
         users_list = pagination.items
     except Exception as e:
-        current_app.logger.error(f"Error fetching following list for {username}: {e}", exc_info=True)
+        current_app.logger.error(f"Error fetching following list for User ID: {user_id}: {e}", exc_info=True)
         flash("Error loading following list.", "danger")
         users_list, pagination = [], None
     return render_template('following_list.html', user_profile=user, users_list=users_list, pagination=pagination, list_type="Following")
