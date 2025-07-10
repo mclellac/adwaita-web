@@ -178,6 +178,71 @@ def test_linkify_mentions():
     assert linkify_mentions(None) == ""
     assert linkify_mentions("") == ""
 
+# Updated test_linkify_mentions to use app_context and check user existence
+def test_linkify_mentions_with_user_check(app_with_db): # Using app_with_db fixture from conftest.py
+    from antisocialnet.models import User
+    from antisocialnet import db as app_db # Use the db instance from the app
+
+    # Create test users
+    user1 = User(username="existing_user", email="user1@example.com", full_name="User One")
+    user1.set_password("password")
+    app_db.session.add(user1)
+    app_db.session.commit()
+
+    with app_with_db.app_context():
+        # Test case 1: Existing user
+        text_existing = "Hello @existing_user, welcome!"
+        expected_existing = "Hello [@existing_user](/profile/existing_user), welcome!"
+        assert linkify_mentions(text_existing) == expected_existing
+
+        # Test case 2: Non-existing user
+        text_non_existing = "Maybe @missing_user will join."
+        expected_non_existing = "Maybe @missing_user will join." # Should remain plain text
+        assert linkify_mentions(text_non_existing) == expected_non_existing
+
+        # Test case 3: Mixed existing and non-existing users
+        text_mixed = "@existing_user knows @another_missing_user."
+        expected_mixed = "[@existing_user](/profile/existing_user) knows @another_missing_user."
+        assert linkify_mentions(text_mixed) == expected_mixed
+
+        # Test case 4: No mentions
+        text_no_mentions = "Just plain text."
+        assert linkify_mentions(text_no_mentions) == text_no_mentions
+
+        # Test case 5: Mention at the beginning of the string
+        text_start_mention = "@existing_user said hello."
+        expected_start_mention = "[@existing_user](/profile/existing_user) said hello."
+        assert linkify_mentions(text_start_mention) == expected_start_mention
+
+        # Test case 6: Mention at the end of the string
+        text_end_mention = "A message from @existing_user"
+        expected_end_mention = "A message from [@existing_user](/profile/existing_user)"
+        assert linkify_mentions(text_end_mention) == expected_end_mention
+
+        # Test case 7: Mention with underscore (valid user)
+        user_underscore = User(username="user_with_underscore", email="user_underscore@example.com", full_name="User Underscore")
+        user_underscore.set_password("password")
+        app_db.session.add(user_underscore)
+        app_db.session.commit()
+        text_underscore = "Check @user_with_underscore."
+        expected_underscore = "Check [@user_with_underscore](/profile/user_with_underscore)."
+        assert linkify_mentions(text_underscore) == expected_underscore
+
+        # Test case 8: Mention with hyphen (invalid character for our regex, should only capture up to hyphen)
+        # User "user-hyphen" will not be found. "user" might or might not exist.
+        # The regex r'@([a-zA-Z0-9_]+)' stops at the hyphen.
+        text_hyphen = "User @user-hyphen mentioned."
+        # If "user" doesn't exist:
+        expected_hyphen_no_user = "User @user-hyphen mentioned."
+        # If "user" exists (let's create one to be sure):
+        user_simple = User(username="user", email="user@example.com", full_name="Simple User")
+        user_simple.set_password("password")
+        app_db.session.add(user_simple)
+        app_db.session.commit()
+        expected_hyphen_with_user = "User [@user](/profile/user)-hyphen mentioned."
+        assert linkify_mentions(text_hyphen) == expected_hyphen_with_user
+
+
 def test_markdown_to_html_and_sanitize_util():
     assert markdown_to_html_and_sanitize_util("**bold**") == "<p><strong>bold</strong></p>"
     assert markdown_to_html_and_sanitize_util("*italic*") == "<p><em>italic</em></p>"
