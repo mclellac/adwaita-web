@@ -258,13 +258,7 @@ from PIL import Image # Ensure Pillow is installed: pip install Pillow
 from werkzeug.utils import secure_filename
 from flask import current_app, flash
 
-# Assuming allowed_file_util is already defined in this file or imported.
-# If not, it should be:
-# def allowed_file_util(filename):
-#     """Checks if the filename has an allowed extension."""
-#     return '.' in filename and \
-#            filename.rsplit('.', 1)[1].lower() in current_app.config.get('ALLOWED_EXTENSIONS', [])
-
+# allowed_file_util is defined earlier in this file.
 
 def save_uploaded_file(
     file_storage_object,

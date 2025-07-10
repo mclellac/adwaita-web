@@ -47,28 +47,9 @@ def get_feed():
     # Example: Use POSTS_PER_PAGE for now, can be a new config later e.g., ITEMS_PER_FEED_PAGE
     per_page = request.args.get('per_page', current_app.config.get('POSTS_PER_PAGE', 10), type=int)
 
-    # Placeholder for actual data fetching and serialization logic
-    # This will be implemented in the next step.
-
-    # Example data structure to guide implementation:
-    feed_items_data = []
-    total_items = 0
-    total_pages = 0
-    has_next = False
-    has_prev = False
-    next_page_url = None
-    prev_page_url = None
-
-    # TODO:
-    # 1. Fetch Posts, UserPhotos, (optionally Activities)
-    # 2. Combine and sort them by timestamp
-    # 3. Paginate the combined list
-    # 4. Serialize items into the defined JSON structure
-    # 5. Populate pagination metadata
-
     raw_feed_items = []
 
-    # 1. Fetch Posts
+    # Fetch Posts
     # For now, all public posts. A real feed would be more personalized.
     # Ensure correct timezone handling if not already UTC in DB. Assume created_at/published_at are UTC.
     posts_query = Post.query.filter(Post.is_published == True)
