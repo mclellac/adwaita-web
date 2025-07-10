@@ -3,10 +3,7 @@ import re
 import unicodedata
 from datetime import datetime
 from markupsafe import Markup, escape
-# Assuming bleach is used for sanitization, if not, this part would need adjustment
-# For now, to avoid dependency errors if bleach isn't in requirements.txt,
-# we'll make a very basic sanitizer. A proper setup would use bleach.
-import bleach # <-- Ensure bleach is imported
+import bleach
 import markdown as md_lib # Use md_lib to avoid conflict with template filter name
 
 def generate_slug_util(text, max_length=255):
