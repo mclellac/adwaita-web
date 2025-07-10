@@ -14,7 +14,7 @@ general_bp = Blueprint('general', __name__) # template_folder defaults to app's
 def index():
     current_app.logger.info(f"Accessing index page / {request.path}")
     if current_user.is_authenticated:
-        current_app.logger.info(f"User {current_user.username} is authenticated, redirecting to activity feed.")
+        current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) is authenticated, redirecting to activity feed.")
         return redirect(url_for('general.activity_feed'))
 
     # For anonymous users, show the public posts page
@@ -38,7 +38,7 @@ def index():
 @general_bp.route('/dashboard')
 @login_required
 def dashboard():
-    current_app.logger.debug(f"Accessing dashboard, User: {current_user.username}")
+    current_app.logger.debug(f"Accessing dashboard, User ID: {current_user.id} (Handle: {current_user.handle})")
     # Fetch all posts by the current user (published and drafts)
     user_posts = Post.query.filter_by(user_id=current_user.id)\
                            .order_by(Post.updated_at.desc()).all()
@@ -47,13 +47,13 @@ def dashboard():
     delete_forms = {
         post.id: DeletePostForm(prefix=f"del-post-{post.id}-") for post in user_posts
     }
-    current_app.logger.debug(f"Fetched {len(user_posts)} posts for user {current_user.username} for dashboard.")
+    current_app.logger.debug(f"Fetched {len(user_posts)} posts for User ID: {current_user.id} (Handle: {current_user.handle}) for dashboard.")
     return render_template('dashboard.html', user_posts=user_posts, delete_forms=delete_forms)
 
 @general_bp.route('/settings')
 @login_required
 def settings_page():
-    current_app.logger.debug(f"Displaying settings page for user {current_user.username}.")
+    current_app.logger.debug(f"Displaying settings page for User ID: {current_user.id} (Handle: {current_user.handle}).")
     site_settings_form = None
     if current_user.is_admin:
         # Instantiate the form. Population for GET will happen here.
@@ -66,7 +66,7 @@ def settings_page():
         site_settings_form.site_title.data = SiteSetting.get('site_title', current_app.config.get('SITE_TITLE', 'Adwaita Social Demo'))
         site_settings_form.posts_per_page.data = str(SiteSetting.get('posts_per_page', current_app.config.get('POSTS_PER_PAGE', 10)))
         site_settings_form.allow_registrations.data = SiteSetting.get('allow_registrations', False)
-        current_app.logger.debug(f"Admin user {current_user.username} viewing settings, site_settings_form populated for display.")
+        current_app.logger.debug(f"Admin User ID: {current_user.id} (Handle: {current_user.handle}) viewing settings, site_settings_form populated for display.")
 
     return render_template('settings.html', site_settings_form=site_settings_form)
 
@@ -95,16 +95,17 @@ def search_results():
             current_app.logger.debug(f"Search for '{query_param}' found {len(posts_results)} posts on page {page}. Total: {posts_pagination.total}")
 
             # User search (excluding current user if logged in)
+            # Search by handle or full_name, not username (email)
             user_query_base = User.query.filter(
                 or_(
-                    User.username.ilike(search_term),
+                    User.handle.ilike(search_term), # Search by handle
                     User.full_name.ilike(search_term)
                 )
             )
             if current_user.is_authenticated:
                 user_query_base = user_query_base.filter(User.id != current_user.id)
 
-            user_query = user_query_base.order_by(User.username.asc())
+            user_query = user_query_base.order_by(User.handle.asc()) # Order by handle
             users_pagination = user_query.paginate(page=page, per_page=users_per_page, error_out=False)
             users_results = users_pagination.items
             current_app.logger.debug(f"Search for '{query_param}' found {len(users_results)} users on page {page}. Total: {users_pagination.total}")
@@ -135,7 +136,7 @@ def contact_page():
 @general_bp.route('/feed') # This is the "Home" page for logged-in users
 @login_required
 def activity_feed(): # Rename to home_feed or similar if preferred, but endpoint name stays for now
-    current_app.logger.info(f"Accessing main feed (posts) for user {current_user.username}.")
+    current_app.logger.info(f"Accessing main feed (posts) for User ID: {current_user.id} (Handle: {current_user.handle}).")
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 10) # Use POSTS_PER_PAGE
 
@@ -155,7 +156,7 @@ def activity_feed(): # Rename to home_feed or similar if preferred, but endpoint
         posts_list = pagination.items
         current_app.logger.debug(f"Found {len(posts_list)} posts for main feed page {page}. Total: {pagination.total}")
     except Exception as e:
-        current_app.logger.error(f"Error fetching posts for main feed for user {current_user.username}: {e}", exc_info=True)
+        current_app.logger.error(f"Error fetching posts for main feed for User ID: {current_user.id} (Handle: {current_user.handle}): {e}", exc_info=True)
         flash("Error loading the feed. Please try again later.", "danger")
         # posts_list and pagination will remain empty or None
 
@@ -172,49 +173,49 @@ def activity_feed(): # Rename to home_feed or similar if preferred, but endpoint
 @general_bp.route('/api/settings/theme', methods=['POST'])
 @login_required
 def save_theme_preference():
-    current_app.logger.debug(f"API call to /api/settings/theme by {current_user.username}")
+    current_app.logger.debug(f"API call to /api/settings/theme by User ID: {current_user.id} (Handle: {current_user.handle})")
     data = request.get_json()
     if not data or 'theme' not in data:
-        current_app.logger.warning(f"API /api/settings/theme: Missing theme data. Data: {data}")
+        current_app.logger.warning(f"API /api/settings/theme: Missing theme data for User ID: {current_user.id}. Data: {data}")
         return jsonify({'status': 'error', 'message': 'Missing theme data'}), 400
 
     new_theme = data['theme']
-    current_app.logger.info(f"User {current_user.username} setting theme to: '{new_theme}'.")
+    current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) setting theme to: '{new_theme}'.")
 
     if new_theme not in current_app.config['ALLOWED_THEMES']:
-        current_app.logger.warning(f"API /api/settings/theme: Invalid theme '{new_theme}'.")
+        current_app.logger.warning(f"API /api/settings/theme: Invalid theme '{new_theme}' for User ID: {current_user.id}.")
         return jsonify({'status': 'error', 'message': 'Invalid theme value'}), 400
 
     current_user.theme = new_theme
     try:
         db.session.add(current_user) # Add to session before commit
         db.session.commit()
-        current_app.logger.info(f"Theme '{new_theme}' saved for {current_user.username}.")
+        current_app.logger.info(f"Theme '{new_theme}' saved for User ID: {current_user.id} (Handle: {current_user.handle}).")
         return jsonify({'status': 'success', 'message': 'Theme updated successfully'})
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"DB Error saving theme for {current_user.username}: {e}", exc_info=True)
+        current_app.logger.error(f"DB Error saving theme for User ID: {current_user.id} (Handle: {current_user.handle}): {e}", exc_info=True)
         return jsonify({'status': 'error', 'message': 'Failed to save theme preference'}), 500
 
 @general_bp.route('/api/settings/accent_color', methods=['POST'])
 @login_required
 def save_accent_color_preference():
-    current_app.logger.debug(f"API call to /api/settings/accent_color by {current_user.username}")
+    current_app.logger.debug(f"API call to /api/settings/accent_color by User ID: {current_user.id} (Handle: {current_user.handle})")
     data = request.get_json()
     if not data or 'accent_color' not in data:
-        current_app.logger.warning(f"API /api/settings/accent_color: Missing accent_color data. Data: {data}")
+        current_app.logger.warning(f"API /api/settings/accent_color: Missing accent_color data for User ID: {current_user.id}. Data: {data}")
         return jsonify({'status': 'error', 'message': 'Missing accent_color data'}), 400
 
     new_accent_color = data['accent_color'] # Basic validation could be added here if there's a fixed list
-    current_app.logger.info(f"User {current_user.username} setting accent_color to: '{new_accent_color}'.")
+    current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) setting accent_color to: '{new_accent_color}'.")
 
     current_user.accent_color = new_accent_color
     try:
         db.session.add(current_user) # Add to session before commit
         db.session.commit()
-        current_app.logger.info(f"Accent color '{new_accent_color}' saved for {current_user.username}.")
+        current_app.logger.info(f"Accent color '{new_accent_color}' saved for User ID: {current_user.id} (Handle: {current_user.handle}).")
         return jsonify({'status': 'success', 'message': 'Accent color updated successfully'})
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"DB Error saving accent_color for {current_user.username}: {e}", exc_info=True)
+        current_app.logger.error(f"DB Error saving accent_color for User ID: {current_user.id} (Handle: {current_user.handle}): {e}", exc_info=True)
         return jsonify({'status': 'error', 'message': 'Failed to save accent color preference'}), 500

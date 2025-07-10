@@ -40,3 +40,15 @@ This repository contains two main projects:
     *   For web components with Shadow DOM, if internal styles need access to asset paths (like icons), prefer using CSS Custom Properties defined in global SCSS to pass these paths rather than hardcoding them in JS or inline styles within the component.
 
 Please consult the respective `AGENTS.md` files in each subdirectory for more detailed, context-specific instructions.
+
+**PII (Personally Identifiable Information) Guidelines:**
+
+*   **User Email Addresses:**
+    *   Email addresses are primarily for user login, account recovery, and notifications.
+    *   They should **not** be used as public-facing identifiers such as in @mentions or as part of avatar display logic (unless explicitly for a service like Gravatar where the user understands their email is used, and even then, prefer anonymized or user-chosen identifiers if possible).
+    *   Users may choose to display their email on their profile, but this should be an explicit choice and not the default way their identity is represented.
+*   **User Mentions and Display:**
+    *   For @mentions, user lists, and general display of user identity within the application, always prefer `username` or `full_name` (display name).
+    *   Ensure that any system that generates user links or displays user information defaults to these non-sensitive identifiers.
+*   **Avatar Display:**
+    *   Avatar generation or display logic should not depend on or expose email addresses. If a default avatar system is used (e.g., identicons), it should be based on a non-sensitive, stable user ID or username.

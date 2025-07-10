@@ -53,42 +53,14 @@ def linkify_mentions(text):
     if text is None:
         return ''
     text = str(text)
-    # Regex to find @username patterns
-    # Allows alphanumeric characters and underscores in usernames
+    # Regex to find @handle patterns
+    # Allows alphanumeric characters and underscores in handles, consistent with form validation
     mention_regex = r'@([a-zA-Z0-9_]+)'
 
     def replace_mention(match):
-        username = match.group(1)
-        # In a real app, you'd use url_for here, but that's not available directly in utils
-        # without app context. This filter is applied in app context, so this is conceptual.
-        # For direct usage if needed outside app context, the URL structure would be hardcoded or passed.
-        # Here, we just format it, assuming url_for will be used in the template filter call.
-        # This utility function should just return the structure that the template filter can use.
-        # For now, it prepares a string that can be made into a link.
-        # The actual href creation is better handled in the template filter or by passing url_for.
-        # However, the current app structure calls this from the markdown filter.
-
-        # Simple version for now, actual URL generation might need app context or url_for
-        # from flask import url_for # This would cause circular import if utils is imported by __init__ too early
-        # For now, let's assume the markdown filter will handle the final URL construction if this
-        # function is only returning the username. Or, we create a placeholder link.
-
-        # Placeholder link structure, actual linking happens in template filter context
-        # This function is more about identifying and formatting, less about final URL generation here.
-        # The existing template filter for linkify_mentions in __init__ seems to expect this to return text.
-        # Then markdown_to_html_and_sanitize_util probably makes it a link.
-        # This function is more about identifying and formatting, less about final URL generation here.
-        # The existing template filter for linkify_mentions in __init__ seems to expect this to return text.
-        # Then markdown_to_html_and_sanitize_util probably makes it a link.
-        # Let's assume this is used by a filter that will then use url_for.
-        # A more direct approach would be for this to generate the <a> tag if it had url_for.
-        # Based on its usage in `actual_markdown_filter` in `__init__.py`, it seems this function
-        # should return text that `markdown_to_html_and_sanitize_util` then processes.
-        # The `linkify_mentions_util` is called *before* markdown.
-
-        # Let's make it generate a markdown link, which markdown_to_html_and_sanitize_util will process.
-        # This is a common pattern.
-        return f'[@{username}](/profile/{username})' # Generates a markdown link
+        handle = match.group(1)
+        # Generates a markdown link. The profile URL uses the handle.
+        return f'[@{handle}](/profile/{handle})'
 
     linked_text = re.sub(mention_regex, replace_mention, text)
     return linked_text
@@ -176,13 +148,14 @@ def allowed_file_util(filename):
 
 def extract_mentions(text):
     """
-    Extracts @username mentions from text.
-    Returns a list of unique usernames without the '@'.
+    Extracts @handle mentions from text.
+    Returns a list of unique handles without the '@'.
     """
     if not text:
         return []
-    # Regex to find @username patterns (alphanumeric, underscores, and hyphens)
-    mention_regex = r'@([a-zA-Z0-9_-]+)'
+    # Regex to find @handle patterns (alphanumeric, underscores)
+    # Consistent with form validation and linkify_mentions
+    mention_regex = r'@([a-zA-Z0-9_]+)'
     mentions = re.findall(mention_regex, text)
     return list(set(mentions)) # Return unique mentions
 
@@ -224,25 +197,32 @@ def update_post_relations_util(post, form_data, current_user_id, is_new_post=Fal
     # Let's assume form_data might contain an explicit list of mentioned usernames,
     # or we re-extract from post.content. For now, re-extracting from content.
 
-    mentioned_usernames = extract_mentions(post.content)
-    if mentioned_usernames:
-        for username in mentioned_usernames:
-            mentioned_user = User.query.filter_by(username=username).first()
+    mentioned_handles = extract_mentions(post.content)
+    if mentioned_handles:
+        for handle in mentioned_handles:
+            mentioned_user = User.query.filter_by(handle=handle).first() # Query by handle
             if mentioned_user and mentioned_user.id != current_user_id:
                 # Check if a notification already exists for this post and user to avoid duplicates
+                # Assuming Notification model's related_post_id is still in use or polymorphic target is set correctly
+                # For now, keeping related_post_id as per original structure.
+                # TODO: Review Notification target logic if it was intended to be polymorphic for mentions too.
+                # The Notification model has target_type and target_id, so this should be:
+                # target_type='post', target_id=post.id
                 existing_notification = Notification.query.filter_by(
                     user_id=mentioned_user.id,
-                    related_post_id=post.id,
-                    type='mention_in_post' # Or a more general mention type
+                    actor_id=current_user_id,
+                    type='mention_in_post',
+                    target_type='post',
+                    target_id=post.id
                 ).first()
 
                 if not existing_notification:
                     notification = Notification(
                         user_id=mentioned_user.id,
                         actor_id=current_user_id,
-                        type='mention_in_post', # Be specific if possible
-                        related_post_id=post.id
-                        # related_comment_id could be added if mentions in comments are handled here too
+                        type='mention_in_post',
+                        target_type='post',
+                        target_id=post.id
                     )
                     db.session.add(notification)
 

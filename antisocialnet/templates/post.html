@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
-{% block page_title %}Post by {{ post.author.full_name or post.author.username }}{% endblock %} {# Keep username as fallback if full_name somehow missing for old data #}
+{% block page_title %}Post by {{ post.author.full_name or ('@' + post.author.handle if post.author.handle else post.author.username) }}{% endblock %}
 
-{% block header_title %}Post by {{ post.author.full_name or post.author.username }}{% endblock %}
+{% block header_title %}Post by {{ post.author.full_name or ('@' + post.author.handle if post.author.handle else post.author.username) }}{% endblock %}
 
 {% block content %}
 <div class="post-view"> {# Removed adw-clamp content-clamp as base.html provides clamp #}
@@ -11,7 +11,7 @@
             {# Title h1 removed #}
             <div class="post-meta-detail">
                 <p class="adw-label body">
-                    By: <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-link">{{ post.author.full_name or post.author.username if post.author else 'Unknown Author' }}</a>&nbsp;
+                    By: <a href="{{ url_for('profile.view_profile', handle=post.author.handle) if post.author.handle else '#' }}" class="adw-link">{{ post.author.full_name or ('@' + post.author.handle if post.author.handle else post.author.username) if post.author else 'Unknown Author' }}</a>&nbsp;
                     {%- if post.published_at -%}
                         on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at | human_readable_date }}</time>
                     {%- else -%} {# Should not happen for new posts, fallback for old data or if published_at was somehow not set #}
@@ -80,11 +80,11 @@
 
         {% if post.author %}
         <section class="author-bio-section adw-card">
-            <h3 class="adw-title-3">About {{ post.author.full_name }}</h3>
+            <h3 class="adw-title-3">About {{ post.author.full_name or ('@' + post.author.handle if post.author.handle else post.author.username) }}</h3>
             <div class="adw-box adw-box-spacing-m author-bio-content">
                 <span class="adw-avatar size-large">
                      {% set author_avatar = url_for('static', filename=post.author.profile_photo_url) if post.author.profile_photo_url else url_for('static', filename='img/default_avatar.png') %}
-                     <img src="{{ author_avatar }}" alt="{{ post.author.full_name }} avatar" class="adw-avatar__image">
+                     <img src="{{ author_avatar }}" alt="{{ post.author.full_name or ('@' + post.author.handle if post.author.handle else post.author.username) }} avatar" class="adw-avatar__image">
                 </span>
                 <div class="author-bio-text-content">
                     {% if post.author.profile_info %}
@@ -94,7 +94,7 @@
                     {% else %}
                     <p class="adw-label body author-bio-text-placeholder">This author has not provided a bio yet.</p>
                     {% endif %}
-                    <a href="{{ url_for('profile.view_profile', username=post.author.username) }}" class="adw-button flat view-profile-button">View Profile of {{ post.author.full_name }}</a>
+                    <a href="{{ url_for('profile.view_profile', handle=post.author.handle) if post.author.handle else '#' }}" class="adw-button flat view-profile-button">View Profile of {{ post.author.full_name or ('@' + post.author.handle if post.author.handle else post.author.username) }}</a>
                 </div>
             </div>
         </section>
@@ -138,18 +138,18 @@
         <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
             <span class="adw-avatar size-medium">
                {% set comment_avatar = url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else default_avatar_url %}
-               <img src="{{ comment_avatar }}" alt="{{ comment.author.full_name }} avatar" class="adw-avatar__image">
+               <img src="{{ comment_avatar }}" alt="{{ comment.author.full_name or ('@' + comment.author.handle if comment.author.handle else comment.author.username) }} avatar" class="adw-avatar__image">
             </span>
             <div class="comment-author-meta">
-                 <a href="{{ url_for('profile.view_profile', username=comment.author.username) }}" class="adw-link comment-author-link-strong">{{ comment.author.full_name }}</a>
+                 <a href="{{ url_for('profile.view_profile', handle=comment.author.handle) if comment.author.handle else '#' }}" class="adw-link comment-author-link-strong">{{ comment.author.full_name or ('@' + comment.author.handle if comment.author.handle else comment.author.username) }}</a>
                 <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at | human_readable_date }}</time></small>
             </div>
         </header>
-        <div class="comment-text styled-text-content">{{ comment.text | markdown }}</div>
+        <div class="comment-text styled-text-content">{{ comment.text | markdown }}</div> {# Mentions in comment.text are linkified by the markdown filter calling linkify_mentions util #}
 
         <div class="comment-actions">
             {% if current_user.is_authenticated %}
-            <button class="adw-button flat compact reply-button" data-comment-id="{{ comment.id }}" data-comment-author="{{ comment.author.full_name | e }}">Reply</button>
+            <button class="adw-button flat compact reply-button" data-comment-id="{{ comment.id }}" data-comment-author="{{ (comment.author.full_name or ('@' + comment.author.handle if comment.author.handle else comment.author.username)) | e }}">Reply</button>
             {% endif %}
             {% if current_user.is_authenticated and comment.author != current_user %}
                 {% if comment.is_flagged_active %}
@@ -235,7 +235,7 @@
             {% for related_post in related_posts %}
             <a href="{{ url_for('post.view_post', post_id=related_post.id) }}" class="adw-action-row activatable">
                 <div class="adw-action-row-content">
-                    <span class="adw-action-row-title">Post by {{ related_post.author.full_name or related_post.author.username }}</span>
+                    <span class="adw-action-row-title">Post by {{ related_post.author.full_name or ('@' + related_post.author.handle if related_post.author.handle else related_post.author.username) }}</span>
                     {% if related_post.content %}
                     <span class="adw-action-row-subtitle">{{ related_post.content | striptags | truncate(80) }}</span>
                     {% endif %}

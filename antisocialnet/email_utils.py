@@ -12,10 +12,11 @@ def send_password_reset_email(user):
     # For now, email content will be basic. Could use templates later.
     subject = "Password Reset Request for Your App"
     sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'noreply@example.com')
-    recipients = [user.email] # Assuming user model has an 'email' field
+    recipients = [user.username] # User.username stores the email address
 
     # Simple text body, consider HTML template for richer emails
-    text_body = f"""Dear {user.username or 'User'},
+    salutation_name = user.full_name or (('@' + user.handle) if user.handle else 'User')
+    text_body = f"""Dear {salutation_name},
 
 To reset your password, please visit the following link:
 {reset_url}
