@@ -10,7 +10,7 @@ from wtforms import (
     IntegerField
 )
 from wtforms.fields import DateField # Changed import for DateField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange # Added Email
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange, Regexp # Added Email and Regexp
 from wtforms.widgets import CheckboxInput, ListWidget # Ensure ListWidget is imported if used by QuerySelectMultipleField
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from .models import Category # Import Category from models.py
@@ -24,7 +24,17 @@ class LoginForm(FlaskForm):
 
 class RegistrationForm(FlaskForm):
     full_name = StringField('Display Name', validators=[DataRequired(), Length(min=1, max=120)])
-    email = StringField('Email (Username)', validators=[DataRequired(), Length(min=6, max=120), Email(message="Please enter a valid email address.")])
+    email = StringField('Email (for login)', validators=[DataRequired(), Length(min=6, max=120), Email(message="Please enter a valid email address.")])
+    handle = StringField(
+        'Public Handle (@yourhandle)',
+        validators=[
+            DataRequired(),
+            Length(min=3, max=80),
+            # Basic regex for valid characters (alphanumeric and underscores)
+            # More complex validation (like no leading/trailing underscores, no double underscores) can be added
+            Regexp(r'^[a-zA-Z0-9_]+$', message="Handle can only contain letters, numbers, and underscores.")
+        ]
+    )
     password = PasswordField('Password', validators=[DataRequired(), Length(min=8, message="Password must be at least 8 characters long.")])
     confirm_password = PasswordField(
         'Confirm Password',

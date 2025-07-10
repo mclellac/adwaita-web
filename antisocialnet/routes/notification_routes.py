@@ -8,7 +8,7 @@ notification_bp = Blueprint('notification', __name__, url_prefix='/notifications
 @notification_bp.route('/')
 @login_required
 def list_notifications():
-    current_app.logger.info(f"User {current_user.username} accessing notifications page.")
+    current_app.logger.info(f"User ID: {current_user.id} (Handle: {current_user.handle}) accessing notifications page.")
     page = request.args.get('page', 1, type=int)
     # Consider a specific config for NOTIFICATIONS_PER_PAGE or use an existing one
     per_page = current_app.config.get('POSTS_PER_PAGE', 20)
@@ -29,15 +29,15 @@ def list_notifications():
             Notification.query.filter(Notification.id.in_(ids_to_mark_read))\
                               .update({'is_read': True}, synchronize_session=False)
             db.session.commit()
-            current_app.logger.info(f"Marked {len(ids_to_mark_read)} notifications as read for user {current_user.username}.")
+            current_app.logger.info(f"Marked {len(ids_to_mark_read)} notifications as read for User ID: {current_user.id} (Handle: {current_user.handle}).")
             # Note: The unread_notifications_count in base.html might not update on this same page load
             # without a redirect or AJAX, as it's calculated before this route logic runs fully for the render.
             # A redirect(url_for('notification.list_notifications', page=page)) could fix this, but might be too much.
             # For now, count will update on next page load/navigation.
 
-        current_app.logger.debug(f"Found {len(notifications_list)} notifications for {current_user.username} on page {page}. Total: {pagination.total}")
+        current_app.logger.debug(f"Found {len(notifications_list)} notifications for User ID: {current_user.id} (Handle: {current_user.handle}) on page {page}. Total: {pagination.total}")
     except Exception as e:
-        current_app.logger.error(f"Error fetching notifications for {current_user.username}: {e}", exc_info=True)
+        current_app.logger.error(f"Error fetching notifications for User ID: {current_user.id} (Handle: {current_user.handle}): {e}", exc_info=True)
         flash("Error loading notifications.", "danger")
         notifications_list, pagination = [], None
 

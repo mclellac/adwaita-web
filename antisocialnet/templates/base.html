@@ -117,18 +117,18 @@
     <aside class="app-sidebar" id="app-sidebar"> {# Added id for ARIA #}
         {% if current_user.is_authenticated %}
         <div class="sidebar-profile-area">
-            <a href="{{ url_for('profile.view_profile', username=current_user.username) }}" class="sidebar-profile-avatar-link" title="View Profile">
+            <a href="{{ url_for('profile.view_profile', handle=current_user.handle) if current_user.handle else '#' }}" class="sidebar-profile-avatar-link" title="View Profile">
                 <span class="adw-avatar size-large"> {# Changed to size-large #}
                     {% if current_user.profile_photo_url %}
-                        <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="Avatar">
+                        <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="{{ current_user.full_name or ('@' + current_user.handle if current_user.handle else '') }} avatar">
                     {% else %}
                         <span class="adw-avatar-text">
-                            {{ current_user.username[0]|upper if current_user.username else 'U' }}
+                            {{ (current_user.full_name[0] if current_user.full_name else (current_user.handle[0] if current_user.handle else 'U'))|upper }}
                         </span>
                     {% endif %}
                 </span>
             </a>
-            <div class="sidebar-profile-name adw-label title-3">{{ current_user.full_name }}</div> {# Prefer full_name directly #}
+            <div class="sidebar-profile-name adw-label title-3">{{ current_user.full_name or ('@' + current_user.handle if current_user.handle else current_user.username) }}</div>
         </div>
         {% endif %}
         <nav class="adw-list-box flat sidebar-nav" aria-label="Main Navigation">

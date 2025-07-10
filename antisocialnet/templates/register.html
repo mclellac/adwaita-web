@@ -46,6 +46,23 @@
                     {% endif %}
                 </div>
 
+                {# Public Handle Field #}
+                <div class="adw-entry-row {{ 'has-error' if form.handle.errors else '' }}">
+                    <label for="{{ form.handle.id or 'handle_input' }}" class="adw-entry-row-title">{{ form.handle.label.text }}</label>
+                    <input type="text"
+                           name="{{ form.handle.name }}"
+                           id="{{ form.handle.id or 'handle_input' }}"
+                           class="adw-entry adw-entry-row-entry"
+                           required
+                           placeholder="your_public_handle"
+                           value="{{ form.handle.data or '' }}"
+                           aria-describedby="handle-help">
+                    <small id="handle-help" class="adw-label caption" style="margin-top: 2px; display: block;">This will be part of your profile URL. Letters, numbers, and underscores only.</small>
+                    {% if form.handle.errors %}
+                        <span class="adw-label caption error-text adw-entry-row-subtitle">{{ form.handle.errors|join(' ') }}</span>
+                    {% endif %}
+                </div>
+
                 {# Password Field #}
                 <div class="adw-entry-row {{ 'has-error' if form.password.errors else '' }}">
                     <label for="{{ form.password.id or 'password_input' }}" class="adw-entry-row-title">{{ form.password.label.text }}</label>
