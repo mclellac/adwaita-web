@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_macros.html" import like_button_and_count %}
 
 {% block page_title %}Post by {{ post.author.full_name or ('User ' ~ post.author.id) }}{% endblock %}
 
@@ -50,7 +51,7 @@
         {# Likes and Actions Section - Placed before Author Bio for prominence #}
         <footer class="adw-card__actions post-interaction-footer" style="padding-top: var(--spacing-m); margin-top: var(--spacing-m); border-top: 1px solid var(--border-color);">
             {# Use the generic like_button_and_count macro #}
-            {{ self.like_button_and_count(post, 'post', current_user) }}
+            {{ like_button_and_count(post, 'post', current_user) }}
             {# Space for other actions like share, if not in a separate section #}
         </footer>
 
@@ -128,7 +129,7 @@
             <button class="adw-button flat compact reply-button" data-comment-id="{{ comment.id }}" data-comment-author="{{ (comment.author.full_name or ('User ' ~ comment.author.id)) | e }}">Reply</button>
             {% endif %}
             {# Add like button for comment here #}
-            {{ self.like_button_and_count(comment, 'comment', current_user) }}
+            {{ like_button_and_count(comment, 'comment', current_user) }}
 
             {% if current_user.is_authenticated and comment.author != current_user %}
                 {% if comment.is_flagged_active %}
