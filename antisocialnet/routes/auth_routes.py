@@ -4,7 +4,7 @@ from datetime import datetime, timezone # For logging if restored
 
 from ..models import User, SiteSetting
 from ..forms import LoginForm, RegistrationForm, ChangePasswordForm, RequestPasswordResetForm, ResetPasswordForm
-from .. import db # db instance from app-demo/__init__.py
+from .. import db # db instance from antisocialnet/__init__.py
 from ..utils import flash_form_errors_util
 from ..email_utils import send_password_reset_email # Import the email sending utility
 

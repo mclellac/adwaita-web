@@ -22,8 +22,8 @@ def generate_slug_util(text, max_length=255):
     text = text.lower()
     # Remove special characters (allow alphanumeric and hyphens)
     text = re.sub(r'[^\w\s-]', '', text)
-    # Replace whitespace and multiple hyphens with a single hyphen
-    text = re.sub(r'\s+', '-', text)
+    # Replace whitespace, underscores and multiple hyphens with a single hyphen
+    text = re.sub(r'[\s_]+', '-', text) # Modified to include underscore
     text = re.sub(r'-+', '-', text)
     # Trim leading/trailing hyphens
     text = text.strip('-')
@@ -104,9 +104,13 @@ def markdown_to_html_and_sanitize_util(text):
         return ''
     text = str(text)
 
+    # First, escape any raw HTML in the input text to prevent it from being processed as HTML by markdown
+    # and to ensure it's treated as literal text.
+    text_escaped = escape(text)
+
     # Convert markdown to HTML
     # Using extensions like 'fenced_code' for code blocks, 'tables' for tables
-    html_content = md_lib.markdown(text, extensions=['fenced_code', 'tables', 'extra'])
+    html_content = md_lib.markdown(text_escaped, extensions=['fenced_code', 'tables', 'extra'])
 
     # Sanitize HTML (very basic, replace with Bleach in a real app)
     # This basic version just escapes unknown tags, not truly secure.
@@ -192,8 +196,8 @@ def extract_mentions(text):
     """
     if not text:
         return []
-    # Regex to find @username patterns (alphanumeric and underscores)
-    mention_regex = r'@([a-zA-Z0-9_]+)'
+    # Regex to find @username patterns (alphanumeric, underscores, and hyphens)
+    mention_regex = r'@([a-zA-Z0-9_-]+)'
     mentions = re.findall(mention_regex, text)
     return list(set(mentions)) # Return unique mentions
 

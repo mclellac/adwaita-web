@@ -11,12 +11,12 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
 
 ## Setup and Running
 
-1.  **Navigate to the `app-demo` directory (if not already there):**
-    If your current directory is the root of the repository, change to the `app-demo` directory:
+1.  **Navigate to the `antisocialnet` directory (if not already there):**
+    If your current directory is the root of the repository, change to the `antisocialnet` directory:
     ```bash
-    cd app-demo
+    cd antisocialnet
     ```
-    All subsequent commands assume you are in the `app-demo` directory.
+    All subsequent commands assume you are in the `antisocialnet` directory.
 
 2.  **Create a virtual environment (recommended):**
     ```bash
@@ -30,14 +30,14 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
     ```
 
 4.  **Build Adwaita-Web Assets:**
-    The `adwaita-web` SCSS and JavaScript assets need to be compiled/copied into the `app-demo/static` directory.
-    Navigate to the **root of the repository** (e.g., `cd ..` if you are in `app-demo`) and run the build script:
+    The `adwaita-web` SCSS and JavaScript assets need to be compiled/copied into the `antisocialnet/static` directory.
+    Navigate to the **root of the repository** (e.g., `cd ..` if you are in `antisocialnet`) and run the build script:
     ```bash
     ./build-adwaita-web.sh
     ```
-    After the script completes, navigate back to the `app-demo` directory for subsequent steps:
+    After the script completes, navigate back to the `antisocialnet` directory for subsequent steps:
     ```bash
-    cd app-demo
+    cd antisocialnet
     ```
 
 5.  **Database Setup**:
@@ -100,9 +100,9 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
         If you are using the default application user `postgres` and have set its password to `postgres`, you might not need to create a new user, but ensure the `postgres` user has a password set in the database.
 
     *   **Initialize Database and Create Admin User**:
-        After configuring your environment variables and ensuring the database and user exist, navigate into the `app-demo` directory if you aren't already there. Then, run the setup script:
+        After configuring your environment variables and ensuring the database and user exist, navigate into the `antisocialnet` directory if you aren't already there. Then, run the setup script:
         ```bash
-        # Make sure you are in the app-demo directory
+        # Make sure you are in the antisocialnet directory
         python setup_db.py
         ```
         This script will:
@@ -111,11 +111,11 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
 
 6.  **Run the Flask development server:**
     Once the database is set up, you can run the application using the Flask CLI.
-    Ensure you are in the `app-demo` directory.
+    Ensure you are in the `antisocialnet` directory.
 
     Set the `FLASK_APP` environment variable to point to the application factory:
     ```bash
-    export FLASK_APP=app_demo
+    export FLASK_APP=antisocialnet
     ```
     For development mode (enables debugger and automatic reloading), also set `FLASK_ENV`:
     ```bash
@@ -125,7 +125,7 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
     ```bash
     flask run
     ```
-    The `app_demo` in `FLASK_APP=app_demo` refers to the `app-demo` directory (which is a Python package containing `__init__.py` where `create_app()` is defined).
+    The `antisocialnet` in `FLASK_APP=antisocialnet` refers to the `antisocialnet` directory (which is a Python package containing `__init__.py` where `create_app()` is defined).
 
 7.  Open your web browser and go to `http://127.0.0.1:5000/` (or the address shown in the `flask run` output) to see the application.
 
@@ -133,7 +133,7 @@ This is a simple Flask-based Blog Content Management System that uses `libadwait
 
 The application includes a test suite using `pytest`.
 
-1.  **Navigate to the `app-demo` directory** (if not already there).
+1.  **Navigate to the `antisocialnet` directory** (if not already there).
 2.  **Ensure dependencies are installed**, including `pytest` (it's part of `requirements.txt`).
 3.  **Configure Test Database Environment Variables:**
     The tests will create and destroy their own database tables. It's recommended to use a separate database for testing. You can configure this using the same environment variables as for development (e.g., `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_DB`), but point `POSTGRES_DB` to a dedicated test database name.
@@ -150,7 +150,7 @@ The application includes a test suite using `pytest`.
     ```
 
 4.  **Run tests using pytest:**
-    From the `app-demo` directory:
+    From the `antisocialnet` directory:
     ```bash
     python -m pytest
     ```
@@ -173,7 +173,7 @@ The application includes a test suite using `pytest`.
 
 ## Project Structure
 
-*   `__init__.py`: (Inside `app-demo/`) Main application package initializer. Contains the Flask `create_app` factory function and initializes extensions.
+*   `__init__.py`: (Inside `antisocialnet/`) Main application package initializer. Contains the Flask `create_app` factory function and initializes extensions.
 *   `config.py`: Contains application configuration classes (e.g., for development, production).
 *   `models.py`: Defines SQLAlchemy database models.
 *   `forms.py`: Defines WTForms classes for handling web forms.
