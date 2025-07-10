@@ -18,11 +18,9 @@
                         on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at | human_readable_date }}</time>
                     {%- endif -%}
                 </p>
-                {% set updated_str = post.updated_at | human_readable_date %}
-                {% set created_str = (post.published_at or post.created_at) | human_readable_date %}
-
-                {% if post.updated_at and updated_str != created_str %}
-                    <p class="adw-label caption last-updated">(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ updated_str }}</time>)</p>
+                {% set created_datetime = post.published_at or post.created_at %}
+                {% if post.updated_at and created_datetime and (post.updated_at.timestamp() - created_datetime.timestamp()) > 60 %}
+                    <p class="adw-label caption last-updated">(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at | human_readable_date }}</time>)</p>
                 {% endif %}
             </div>
 

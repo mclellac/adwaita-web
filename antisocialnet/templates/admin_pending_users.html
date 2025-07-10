@@ -20,7 +20,8 @@
             {% for user_account in pending_users %}
             <div class="adw-action-row">
                 <div class="adw-action-row__text">
-                    <span class="adw-action-row__title">{{ user_account.username }}</span>
+                    <span class="adw-action-row__title">{{ user_account.full_name or "Unnamed User" }}</span>
+                    <span class="adw-action-row__subtitle">({{ user_account.username }})</span>
                     {# Could add registration date here if available and desired #}
                     {# <span class="adw-action-row__subtitle">Registered: {{ user_account.created_at|datetimeformat }}</span> #}
                 </div>
