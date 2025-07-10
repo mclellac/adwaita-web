@@ -1,7 +1,7 @@
 import pytest
 import os
 from antisocialnet import create_app, db as _db
-from antisocialnet.models import User, Post, Category, Tag, PostLike, Notification, Activity, SiteSetting
+from antisocialnet.models import User, Post, Category, Tag, Like, Notification, Activity, SiteSetting # Changed PostLike to Like
 from antisocialnet.config import TestConfig # Will need to ensure TestConfig exists and is appropriate
 
 @pytest.fixture(scope='session')
@@ -209,6 +209,15 @@ def create_test_user(db): # db fixture provides transactional session
                      full_name=None, is_admin=False, is_approved=True, is_active=True,
                      profile_info=None, website_url=None, is_profile_public=True):
 
+        # Try to fetch existing user first to make fixture idempotent for fixed users
+        user = User.query.filter_by(username=email_address).first()
+        if user:
+            # Optionally update attributes if needed, or just return
+            # For simplicity here, we'll just return the existing user
+            # Potentially, one might want to ensure other flags like is_admin are set correctly.
+            # For now, this primarily solves the UNIQUE constraint for username.
+            return user
+
         user = User()
         user.username = email_address # User model's username is the email
         user.set_password(password)
@@ -221,7 +230,7 @@ def create_test_user(db): # db fixture provides transactional session
         user.is_profile_public = is_profile_public
 
         db.session.add(user)
-        db.session.commit()
+        db.session.commit() # Commit is necessary here for other fixtures to see this user
         return user
     return _create_user
 

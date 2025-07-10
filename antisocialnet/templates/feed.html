@@ -65,7 +65,7 @@
                         </a>
                     </footer>
                     <div class="adw-card__actions card-secondary-actions">
-                        {{ like_button_and_count(post_item, current_user) }} {# Use csrf_token from context #}
+                        {{ like_button_and_count(post_item, 'post', current_user) }} {# Use csrf_token from context #}
                     </div>
                 </article>
             {% endfor %}

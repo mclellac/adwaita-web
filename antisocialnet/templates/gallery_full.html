@@ -25,7 +25,10 @@
                     <p class="adw-label body-2">{{ photo.caption }}</p>
                 </div>
                 {% endif %}
-                {# Actions like delete could be added here if desired, similar to profile page, but maybe not for a public view #}
+                <div class="adw-card__actions card-secondary-actions">
+                    {% from "_macros.html" import like_button_and_count %}
+                    {{ like_button_and_count(photo, 'photo', current_user) }}
+                </div>
             </div>
             {% endfor %}
         </div>
