@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, abort, url_for, current_app # Added current_app
 from flask_login import current_user, login_required
+import bleach # Import bleach
 from .. import db
 from ..models import UserPhoto, PhotoComment, User, Notification # Added Notification
 from ..forms import PhotoCommentForm
@@ -57,8 +58,10 @@ def post_photo_comment(photo_id):
     form = PhotoCommentForm(data=request.json) # Pass request.json to the form
 
     if form.validate(): # Use validate() for JSON data if meta is not configured for CSRF
+        # Sanitize the comment text using bleach, stripping all HTML tags
+        sanitized_text = bleach.clean(form.text.data.strip(), tags=[], strip=True)
         new_comment = PhotoComment(
-            text=form.text.data.strip(),
+            text=sanitized_text,
             user_id=current_user.id,
             photo_id=photo.id
         )
