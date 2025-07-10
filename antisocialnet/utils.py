@@ -60,7 +60,7 @@ def linkify_mentions(text):
 
     # Regex to find @Full Name patterns (alphanumeric, underscore, apostrophe, spaces)
     # This must match the one in extract_mentions
-    mention_regex = r'@([A-Za-z0-9_']+(?:\s[A-Za-z0-9_']+)*)'
+    mention_regex = r'@([A-Za-z0-9_\']+(?:\s[A-Za-z0-9_\']+)*)'
 
     def replace_mention(match):
         full_name_mention = ' '.join(match.group(1).split()) # Normalize spaces in extracted name
@@ -191,7 +191,7 @@ def extract_mentions(text):
     # )                         - end capture group 1
     # This regex allows for names like @Jane, @Jane_Doe, @Jane Doe, @J'Doe
     # It stops if there are multiple spaces or other punctuation (except apostrophe within words).
-    mention_regex = r'@([A-Za-z0-9_']+(?:\s[A-Za-z0-9_']+)*)'
+    mention_regex = r'@([A-Za-z0-9_\']+(?:\s[A-Za-z0-9_\']+)*)'
     mentions = re.findall(mention_regex, text)
     # Strip trailing spaces from extracted mentions, just in case regex captures it with lookaheads/behinds (though current one shouldn't)
     # Also, normalize multiple spaces within a name to a single space if the regex were more lenient.
