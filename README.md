@@ -1,265 +1,294 @@
 # Adwaita Web UI Framework
 
-Vanilla JavaScript UI framework that mimics the look and feel of GNOME's GTK4 and libdwaita, making it easy to create web applications with a consistent Adwaita/GTK4 style. It uses HTML, CSS (via SCSS), and JavaScript, with no external dependencies.
+A CSS and JavaScript UI library that mimics the look and feel of GNOME's GTK4 and libadwaita, making it easy to create web applications with a consistent Adwaita/GTK4 style. It uses HTML, CSS (via SCSS), and minimal JavaScript.
 
 ![Light Theme](images/light.png)
 
 ## Features
 
-- **Adwaita Styling:** Aims to closely follow the visual style and naming conventions of libadwaita for a consistent GNOME desktop look on the web.
+- **Adwaita Styling:** Aims to closely follow the visual style and naming conventions of libadwaita for a consistent GNOME desktop look on the web. Styling is primarily delivered via CSS classes applied to standard HTML elements.
 - **Light and Dark Themes:** Built-in support for both light and dark themes. Includes automatic detection of system preference via `prefers-color-scheme`, manual toggling, and remembers the user's choice via `localStorage`.
-- **Component-Based:** Primarily delivered as [Custom Elements (Web Components)](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) for easy declarative use in HTML. Helper JavaScript factory functions are also provided for imperative creation.
+- **CSS First:** Most Adwaita elements are styled by applying CSS classes (e.g., `.adw-button`, `.adw-entry`) to standard HTML tags.
+- **Web Components for Specific Widgets:** For more complex interactive elements like Dialogs (`<adw-dialog>`, `<adw-about-dialog>`), JavaScript-defined Custom Elements (Web Components) are provided.
+- **Helper JavaScript Utilities:** JavaScript utilities like `Adw.createToast()` for toasts and `banner.js` for dismissible banners enhance interactivity.
 - **CSS Variables:** Extensively uses CSS custom properties (variables) for theming, making customization of colors, fonts, and spacing straightforward, inspired by libadwaita's own variable system.
 - **Accent Colors:** Supports dynamic accent color switching, allowing users to choose from a predefined palette, with preferences saved.
-- **Responsive Design:** Components are designed to be reasonably responsive where applicable.
+- **Responsive Design:** Components and styles are designed to be reasonably responsive where applicable.
 - **Accessibility (ARIA):** Incorporates ARIA roles and attributes to improve accessibility for users of assistive technologies.
 - **No External Dependencies:** Written in pure JavaScript, HTML, and SCSS.
 
 ## Installation
 
-1. **Clone or Download:** Get the code from the repository (or copy the code files directly):
+1.  **Get the Code:** Clone this repository or download/copy the `adwaita-web/` directory.
 
-   ```
-   adwaita-web/
-   ├── js/
-   │   ├── components.js  (Main script, includes all component logic)
-   │   └── components/    (Individual component JS modules)
-   │       ├── button.js
-   │       └── ...
-   ├── scss/
-   │   ├── style.scss     (Main SCSS file, imports all component styles)
-   │   ├── _variables.scss
-   │   ├── _base.scss
-   │   └── _*.scss        (Individual component SCSS partials)
-   ├── style.css          (Generated CSS output)
-   └── ... (docs/, examples/, etc.)
-   ```
+    ```
+    adwaita-web/
+    ├── css/
+    │   └── adwaita-skin.css  (Generated CSS output)
+    ├── js/
+    │   ├── components.js     (Main script for loading JS-defined web components like dialogs)
+    │   ├── components/
+    │   │   ├── dialog.js
+    │   │   └── aboutdialog.js
+    │   ├── toast.js          (Utility for toast notifications)
+    │   ├── banner.js         (Utility for dismissible banners)
+    │   └── app-layout.js     (Example layout helper, used by antisocialnet demo)
+    ├── scss/
+    │   ├── adwaita-skin.scss (Main SCSS file, imports all component styles)
+    │   ├── _variables.scss
+    │   ├── _base.scss
+    │   └── _*.scss           (Individual component SCSS partials)
+    ├── data/                 (Icons and other static data)
+    ├── fonts/                (Font files)
+    └── ... (docs/, examples/, etc.)
+    ```
 
-2. **Install Sass:** You need a Sass compiler to convert the SCSS files into CSS. The recommended method is the Dart Sass command-line tool:
+2.  **Compile SCSS to CSS:**
+    You need a Sass compiler (Dart Sass is recommended: `npm install -g sass`).
+    The primary SCSS file is `adwaita-web/scss/adwaita-skin.scss`.
+    A build script `build-adwaita-web.sh` is provided in the repository root. This script:
+    *   Compiles `adwaita-web/scss/adwaita-skin.scss` to `adwaita-web/css/adwaita-skin.css`.
+    *   Copies the compiled CSS, JavaScript files, icons, and fonts to the `antisocialnet/static/` directory for the demo application.
+    *   You can adapt this script or run the SASS command directly:
+        ```bash
+        sass adwaita-web/scss/adwaita-skin.scss adwaita-web/css/adwaita-skin.css --style compressed
+        ```
+        For development, use `--watch`:
+        ```bash
+        sass --watch adwaita-web/scss/adwaita-skin.scss:adwaita-web/css/adwaita-skin.css
+        ```
 
-   ```bash
-   npm install -g sass
-   ```
+3.  **Include in your HTML:**
+    Include the compiled `adwaita-skin.css`. If you use the JavaScript-defined web components (like dialogs) or utilities (like toasts), also include the relevant JS files.
+    `components.js` loads the dialog components.
 
-   You can also use a VS Code extension like "Live Sass Compiler" if you prefer.
+    ```html
+    <head>
+      <link rel="stylesheet" href="path/to/adwaita-web/css/adwaita-skin.css" />
+      <!-- For Dialogs -->
+      <script type="module" src="path/to/adwaita-web/js/components.js" defer></script>
+      <!-- For Toasts (optional) -->
+      <script src="path/to/adwaita-web/js/toast.js" defer></script>
+      <!-- For Banners (optional) -->
+      <script src="path/to/adwaita-web/js/banner.js" defer></script>
+    </head>
+    <body>
+      <div id="app">
+        <button class="adw-button suggested">Click Me!</button>
+        <input type="text" class="adw-entry" placeholder="Enter text...">
+      </div>
 
-3. **Compile CSS:** Navigate to the `gtk-web-framework` directory in your terminal and run:
-
-   ```bash
-   sass scss/style.scss style.css
-   ```
-
-   For continuous development, use the `--watch` flag:
-
-   ```bash
-   sass --watch scss/style.scss:style.css
-   ```
-
-   This will automatically recompile `style.css` whenever you make changes to any of the SCSS files.
-
-4. **Include in your HTML:** Include the compiled `style.css` and the `components.js` file in your HTML. `components.js` should be loaded as a module if you are using ES6 imports within your own scripts, or ensure it's loaded before scripts that use `Adw`. For web components to be defined, it must be included.
-
-   ```html
-   <head>
-     <link rel="stylesheet" href="style.css" />
-     <!-- Ensure components.js is loaded, ideally as a module or before your app script -->
-     <script src="js/components.js" defer></script>
-   </head>
-   <body>
-     <div id="app">
-       <!-- You can now use Adwaita Web Components directly -->
-       <adw-button id="my-declarative-button" suggested>Click Me Declaratively!</adw-button>
-     </div>
-     <script>
-       // Example of interacting with the declarative button
-       document.getElementById('my-declarative-button').addEventListener('click', () => {
-         Adw.createToast("Declarative button clicked!");
-       });
-     </script>
-   </body>
-   ```
+      <!-- Example: Using a Toast -->
+      <div id="adw-toast-overlay" class="adw-toast-overlay"></div>
+      <script>
+        document.querySelector('.adw-button.suggested').addEventListener('click', () => {
+          if (window.Adw && Adw.createToast) {
+            Adw.createToast("Button clicked!");
+          }
+        });
+      </script>
+    </body>
+    ```
 
 ## Usage
 
-Adwaita Web components can be used in two main ways:
+Adwaita Web is used as follows:
 
-1.  **Declaratively in HTML:** Most components are provided as [Custom Elements (Web Components)](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) that you can use directly in your HTML markup. This is the recommended approach for structuring your UI.
+1.  **CSS Classes for Styling:** Apply CSS classes (e.g., `.adw-button`, `.adw-entry`, `.adw-list-box`) to standard HTML elements to style them according to the Adwaita theme. This is the primary way to use the library.
     Example:
     ```html
-    <adw-button suggested>Save</adw-button>
-    <adw-entry placeholder="Enter your name..."></adw-entry>
+    <button class="adw-button suggested">Save</button>
+    <input type="text" class="adw-entry" placeholder="Enter your name...">
+    <div class="adw-list-box">
+      <div class="adw-action-row interactive">
+        <span class="adw-action-row-title">Settings</span>
+      </div>
+    </div>
     ```
 
-2.  **Imperatively via JavaScript:** The framework also provides a global `Adw` object containing factory functions (e.g., `Adw.createButton(...)`) for creating UI components from JavaScript. This is useful for dynamic content generation, one-off elements like toasts and dialogs, or if you prefer a JavaScript-driven approach.
+2.  **JavaScript Web Components (for specific widgets):**
+    Certain complex widgets like Dialogs are provided as Custom Elements.
+    Example:
+    ```html
+    <button id="open-about-dialog-btn">About</button>
+    <adw-about-dialog id="my-about-dialog" app-name="My App">
+      <!-- content -->
+    </adw-about-dialog>
+    <script>
+      // Ensure js/components.js is loaded
+      customElements.whenDefined('adw-about-dialog').then(() => {
+        const dialog = document.getElementById('my-about-dialog');
+        document.getElementById('open-about-dialog-btn').addEventListener('click', () => {
+          dialog.open(); // Use the component's method
+        });
+      });
+    </script>
+    ```
+    The `Adw.Dialog.factory()` and `Adw.AboutDialog.factory()` can also be used to create dialogs imperatively.
+
+3.  **JavaScript Helper Utilities:**
+    Functions like `Adw.createToast()` are provided for dynamic UI elements that are not structured as web components.
     Example:
     ```javascript
-    const myButton = Adw.createButton("Click Me Imperatively", {
-      onClick: () => {
-        Adw.createToast("Imperative button clicked!");
-      },
-      suggested: true,
-    });
-    document.getElementById("app").appendChild(myButton);
+    // Ensure toast.js is loaded
+    if (window.Adw && Adw.createToast) {
+      Adw.createToast("File saved successfully!", { type: 'success' });
+    }
     ```
 
 ## Component Documentation
 
-Components can be used as HTML custom elements (e.g., `<adw-button>`) or created imperatively using JavaScript functions from the global `Adw` object (e.g., `Adw.createButton(...)`). Attributes in HTML map to options in the JavaScript factory functions.
+Refer to `adwaita-web/docs/README.md` for links to documentation on how to use CSS classes for various Adwaita elements.
+The primary approach is to structure your HTML and apply the appropriate `.adw-*` classes.
 
-Detailed API information for JavaScript factories, including all options for each component, can be found in the JSDoc comments within the respective `js/components/*.js` files. For web components, attributes often mirror these options.
+For the JavaScript-defined web components (`<adw-dialog>`, `<adw-about-dialog>`) and utilities (`Adw.createToast`), refer to their respective JS files in `adwaita-web/js/` for usage details and available options/attributes.
 
-Here's an overview of common components:
+Here's an overview of common elements styled with CSS classes:
 
-### Buttons (`<adw-button>` / `Adw.createButton()`)
+### Buttons (CSS: `.adw-button`)
 
-Creates a button.
-
--   **HTML Example:**
-    ```html
-    <adw-button id="save-btn" suggested>Save</adw-button>
-    <adw-button id="icon-btn" icon-name="document-new-symbolic" circular aria-label="New Document"></adw-button>
-    <adw-button flat>Flat</adw-button>
-    ```
-    Common attributes: `suggested`, `destructive`, `flat`, `disabled`, `icon-name`, `circular`. Text content goes inside the tags.
--   **JS Factory:** `Adw.createButton(text, options = {})`
-    - `text`: `string` - Text displayed on the button.
-    - `options`: `object` (corresponds to HTML attributes)
-        - `onClick`: `function` - Callback for click events.
-        - `suggested`, `destructive`, `flat`, `disabled`, `iconName`, `isCircular` (maps to `circular`), `href`. (Note: `icon` option is deprecated).
-
-### Entries (`<adw-entry>` / `Adw.createEntry()`)
-
-Creates a text input field.
+Apply to `<button>` or `<a>` elements.
 
 -   **HTML Example:**
     ```html
-    <adw-entry placeholder="Enter your name..." value="Initial Text"></adw-entry>
-    <adw-entry disabled value="Cannot edit"></adw-entry>
+    <button class="adw-button suggested" id="save-btn">Save</button>
+    <button class="adw-button circular flat" aria-label="New Document">
+      <span class="adw-icon icon-document-new-symbolic"></span>
+    </button>
+    <a href="#" class="adw-button flat">Flat Link Button</a>
     ```
-    Common attributes: `placeholder`, `value`, `disabled`.
--   **JS Factory:** `Adw.createEntry(options = {})`
-    - `options`: `placeholder`, `value`, `onInput`, `disabled`.
+    Common classes: `.suggested-action` (for accent color, often just `.suggested`), `.destructive-action` (for red, often just `.destructive`), `.flat`, `.circular`. Use icon span classes like `.icon-*` for icons.
 
-### Switches (`<adw-switch>` / `Adw.createSwitch()`)
+### Entries (CSS: `.adw-entry`)
 
-Creates a toggle switch.
+Apply to `<input type="text/search/password/etc.">` or `<textarea>`.
 
 -   **HTML Example:**
     ```html
-    <adw-switch label="Enable Notifications" checked></adw-switch>
-    <adw-switch label="Disabled Switch" disabled></adw-switch>
+    <input type="text" class="adw-entry" placeholder="Enter your name..." value="Initial Text">
+    <textarea class="adw-entry" disabled>Cannot edit</textarea>
     ```
-    Common attributes: `label`, `checked`, `disabled`.
--   **JS Factory:** `Adw.createSwitch(options = {})`
-    - `options`: `label`, `checked`, `onChanged`, `disabled`.
 
-### Labels (`<adw-label>` / `Adw.createLabel()`)
+### Switches (CSS: `.adw-switch` on `<input type="checkbox">`)
 
-Creates a text label. Can also be used for headings and other text elements.
+Use a specific HTML structure for switches:
+-   **HTML Example:**
+    ```html
+    <label class="adw-switch" for="notif-switch">
+      <input type="checkbox" class="adw-switch" id="notif-switch" checked>
+      <span class="adw-switch-slider"></span>
+      <span class="adw-label">Enable Notifications</span>
+    </label>
+    ```
+    The outer label wraps the checkbox, a slider span, and the text label.
+
+### Labels (CSS: `.adw-label`, or utility classes like `.title-1`, `.caption`)
+
+Apply to `<span>`, `<p>`, `<h1>-<h6>`, etc.
 
 -   **HTML Example:**
     ```html
-    <adw-label title-level="1">Main Application Title</adw-label>
-    <adw-label is-caption>A small note or caption.</adw-label>
-    <adw-label is-body>Standard body text.</adw-label>
+    <h1 class="adw-title-1">Main Application Title</h1>
+    <p><span class="adw-label caption">A small note or caption.</span></p>
+    <label class="adw-label" for="my-input">Standard body text label.</label>
     ```
-    Common attributes: `title-level` (1-4), `is-caption`, `is-body`, `is-link`, `disabled`. Text content goes inside.
--   **JS Factory:** `Adw.createLabel(text, options = {})`
-    - `options`: `htmlTag`, `title` (maps to `title-level`), `isCaption`, `isLink`, `isDisabled`.
+    Utility classes like `.title-1`, `.title-2`, `.title-3`, `.title-4`, `.caption`, `.body` (often default) control typography.
 
-### Header Bars (`<adw-header-bar>` / `Adw.createHeaderBar()`)
+### Header Bars (CSS: `.adw-header-bar`)
 
-Creates a header bar, typically used at the top of a window or view. Uses slots for content.
+Typically a `<header class="adw-header-bar">`. Structure its children for start, center, and end sections.
 
 -   **HTML Example:**
     ```html
-    <adw-header-bar>
-      <adw-button slot="start" icon="<svg><!-- menu --></svg>" circular></adw-button>
-      <adw-window-title slot="title" title="My App" subtitle="Version 1.0"></adw-window-title>
-      <adw-button slot="end">Action</adw-button>
-    </adw-header-bar>
+    <header class="adw-header-bar">
+      <div class="adw-header-bar__start">
+        <button class="adw-button circular flat"><span class="adw-icon icon-actions-open-menu-symbolic"></span></button>
+      </div>
+      <div class="adw-header-bar__center">
+        <h1 class="adw-header-bar__title">My App</h1>
+        <span class="adw-header-bar__subtitle">Version 1.0</span>
+      </div>
+      <div class="adw-header-bar__end">
+        <button class="adw-button">Action</button>
+      </div>
+    </header>
     ```
-    Use `<adw-window-title slot="title">` for the title area.
--   **JS Factory:** `Adw.createHeaderBar(options = {})`
-    - `options`: `title`, `subtitle` (for simple text titles), `start` (HTMLElement[]), `end` (HTMLElement[]).
 
-### Application Windows (`<adw-application-window>` / `Adw.createWindow()`)
+### Application Windows (CSS: `.adw-window`)
 
 A top-level container, often holding a header bar and main content area.
-
 -   **HTML Example:**
     ```html
-    <adw-application-window>
-      <adw-header-bar slot="header">
+    <div class="adw-window">
+      <header class="adw-header-bar">
         <!-- ... header content ... -->
-      </adw-header-bar>
-      <div class="main-content">
+      </header>
+      <main class="adw-window-content"> <!-- Or any other main content wrapper -->
         <p>Window content goes here.</p>
+      </main>
+    </div>
+    ```
+
+### Boxes (CSS: `.adw-box`)
+
+A flexbox container. Add modifier classes for orientation, spacing, alignment.
+-   **HTML Example:**
+    ```html
+    <div class="adw-box horizontal spacing-s align-center">
+      <button class="adw-button">OK</button>
+      <button class="adw-button">Cancel</button>
+    </div>
+    ```
+    Classes: `.horizontal` or `.vertical`, `.spacing-[xs|s|m|l|xl]`, `.align-[start|center|end|stretch]`, `.justify-[start|center|end|between|around|evenly]`, `.fill-children`.
+
+### List Boxes (CSS: `.adw-list-box`) & Rows (CSS: `.adw-action-row`, `.adw-entry-row`, etc.)
+
+A container for list items. Rows are typically children.
+-   **HTML Example:**
+    ```html
+    <div class="adw-list-box selectable">
+      <div class="adw-action-row interactive">
+        <span class="adw-action-row-title">Setting 1</span>
       </div>
-    </adw-application-window>
+      <div class="adw-action-row">
+        <span class="adw-action-row-title">Open Settings</span>
+        <span class="adw-action-row-subtitle">Configure preferences</span>
+      </div>
+    </div>
     ```
--   **JS Factory:** `Adw.createWindow(options = {})` (Primarily for simpler, non-slotted content)
-    - `options`: `header` (HTMLElement), `content` (HTMLElement).
+    Classes for `<div class="adw-list-box">`: `.flat` (removes outer border), `.selectable`.
+    See `adwaita-web/scss/` for row types like `.adw-action-row`, `.adw-entry-row`, `.adw-expander-row`, `.adw-combo-row`, `.adw-switch-row`.
 
-### Boxes (`<adw-box>` / `Adw.createBox()`)
+### Progress Bars (CSS: `.adw-progress-bar`)
 
-A flexbox container.
-
+Apply to a `<div>` or `<progress>` element.
 -   **HTML Example:**
     ```html
-    <adw-box class="adw-box adw-box-horizontal adw-box-spacing-s align-center">
-      <adw-button>OK</adw-button>
-      <adw-button>Cancel</adw-button>
-    </adw-box>
+    <div class="adw-progress-bar" style="--progress-value: 50;" aria-valuenow="50"></div>
+    <progress class="adw-progress-bar" value="50" max="100"></progress>
+    <div class="adw-progress-bar indeterminate"></div>
     ```
-    Classes: `adw-box-vertical` or `adw-box-horizontal`, `adw-box-spacing-[xs|s|m|l|xl]`, `align-[start|center|end|stretch]`, `justify-[start|center|end|between|around|evenly]`, `adw-box-fill-children`.
--   **JS Factory:** `Adw.createBox(options = {})`
-    - `options`: `orientation`, `align`, `justify`, `spacing`, `fillChildren`, `children` (these options will now map to classes).
+    Set `--progress-value` CSS custom property (0-100) for determinate state or use `<progress>` tag. Add `.indeterminate` class for indeterminate state.
 
-### List Boxes (`<adw-list-box>` / `Adw.createListBox()`) & Rows
+### Checkboxes & Radio Buttons (CSS: `.adw-checkbox`, `.adw-radio-button` on `<input>`)
 
-Creates a list box container. Rows are typically children.
-
+Structure with a label.
 -   **HTML Example:**
     ```html
-    <adw-list-box selectable>
-      <adw-row interactive>
-        <adw-label>Setting 1</adw-label>
-      </adw-row>
-      <adw-action-row title="Open Settings" subtitle="Configure preferences"></adw-action-row>
-    </adw-list-box>
+    <div class="adw-checkbox-row"> <!-- Optional wrapper for alignment -->
+      <input type="checkbox" class="adw-checkbox" id="agree-cb" checked>
+      <label for="agree-cb" class="adw-label">I agree</label>
+    </div>
+
+    <div class="adw-radio-row"> <!-- Optional wrapper -->
+      <input type="radio" class="adw-radio-button" name="group1" id="option1-rb" checked>
+      <label for="option1-rb" class="adw-label">Option 1</label>
+    </div>
+    <div class="adw-radio-row">
+      <input type="radio" class="adw-radio-button" name="group1" id="option2-rb">
+      <label for="option2-rb" class="adw-label">Option 2</label>
+    </div>
     ```
-    Attributes for `<adw-list-box>`: `flat` (removes outer border), `selectable`.
-    See specialized row components below.
--   **JS Factory:** `Adw.createListBox(options = {})`
-    - `options`: `children` (HTMLElement[], typically created rows), `isFlat`, `selectable`.
-    **JS Factory for basic `<adw-row>`:** `Adw.createRow(options = {})`
-    - `options`: `children`, `activated`, `interactive`, `onClick`.
-
-### Progress Bars (`<adw-progress-bar>` / `Adw.createProgressBar()`)
-
-Creates a progress bar.
-
--   **HTML Example:**
-    ```html
-    <adw-progress-bar value="50"></adw-progress-bar>
-    <adw-progress-bar indeterminate></adw-progress-bar>
-    ```
-    Attributes: `value` (0-100), `indeterminate`, `disabled`.
--   **JS Factory:** `Adw.createProgressBar(options = {})`
-    - `options`: `value`, `isIndeterminate`, `disabled`.
-
-### Checkboxes & Radio Buttons (`<adw-checkbox>`, `<adw-radio-button>` / `Adw.createCheckbox()`, `Adw.createRadioButton()`)
-
--   **HTML Example:**
-    ```html
-    <adw-checkbox label="I agree" checked></adw-checkbox>
-    <adw-radio-button label="Option 1" name="group1" checked></adw-radio-button>
-    <adw-radio-button label="Option 2" name="group1"></adw-radio-button>
-    ```
-    Attributes: `label`, `checked`, `disabled`, `name` (required for radio).
--   **JS Factory:** `Adw.createCheckbox(options = {})`, `Adw.createRadioButton(options = {})`
-    - `options`: `label`, `checked`, `onChanged`, `disabled`, `name`.
 
 ### Dialogs (`<adw-dialog>` / `Adw.createDialog()`)
 

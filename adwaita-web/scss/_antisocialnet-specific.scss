@@ -219,14 +219,12 @@
     }
     code {
         font-family: var(--monospace-font-family);
-        background-color: rgba(variables.$adw-dark-5, 0.05);
+        background-color: var(--inline-code-bg-color); // Use new CSS variable
         padding: 0.1em 0.3em;
         border-radius: var(--border-radius-small);
         font-size: 0.9em;
     }
-    :root.theme-dark .styled-text-content code {
-        background-color: rgba(variables.$adw-light-1, 0.08);
-    }
+    // :root.theme-dark .styled-text-content code {} // No longer needed as --inline-code-bg-color handles dark theme
     pre code {
       background-color: transparent;
       padding: 0;

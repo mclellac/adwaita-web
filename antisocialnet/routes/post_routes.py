@@ -16,10 +16,10 @@ def view_post(post_id):
 
     if not post.is_published:
         if not current_user.is_authenticated or current_user.id != post.user_id:
-            user_desc = current_user.username if current_user.is_authenticated else 'Anonymous'
+            user_desc = f"'{current_user.full_name}' (ID: {current_user.id}, Username: {current_user.username})" if current_user.is_authenticated else 'Anonymous'
             current_app.logger.warning(f"User {user_desc} attempted to view unpublished post ID: {post_id}. Denying access.")
             abort(404)
-        current_app.logger.debug(f"Author {current_user.username} viewing their own unpublished post ID: {post.id}.")
+        current_app.logger.debug(f"Author '{current_user.full_name}' (ID: {current_user.id}) viewing their own unpublished post ID: {post.id}.")
     else:
         current_app.logger.debug(f"Viewing published post ID: {post_id}.")
 
@@ -38,7 +38,7 @@ def view_post(post_id):
         try:
             parent_id_val = form.parent_id.data
             parent_id_int = int(parent_id_val) if parent_id_val and parent_id_val.isdigit() else None
-            current_app.logger.info(f"User {current_user.username} submitting comment on post {post_id}. Parent ID: {parent_id_int}.")
+            current_app.logger.info(f"User '{current_user.full_name}' (ID: {current_user.id}) submitting comment on post {post_id}. Parent ID: {parent_id_int}.")
 
             comment = Comment(text=form.text.data, user_id=current_user.id, post_id=post_id, parent_id=parent_id_int)
             db.session.add(comment)
@@ -68,7 +68,7 @@ def view_post(post_id):
                 # We can still populate related_post_id for context if the target is a comment.
                 notification.related_post_id = post.id # Keep for context if target is comment
                 db.session.add(notification)
-                current_app.logger.info(f"Notification created for user {post.author.username} about new comment by {current_user.username} on post {post.id}.")
+                current_app.logger.info(f"Notification created for user '{post.author.full_name}' (ID: {post.author.id}) about new comment by '{current_user.full_name}' (ID: {current_user.id}) on post {post.id}.")
 
             # Create Activity entry for new comment
             from ..models import Activity # Local import (already imported for like, but good practice if separated)
@@ -83,22 +83,27 @@ def view_post(post_id):
             # Contextual: if activity is about a comment on a post, also store post_id
             activity.target_post_id = post.id # Keep for context
             db.session.add(activity)
-            current_app.logger.info(f"Activity 'commented_on_post' logged for user {current_user.username} on post {post.id}, comment ID pending (will be {comment.id}).")
+            current_app.logger.info(f"Activity 'commented_on_post' logged for user '{current_user.full_name}' (ID: {current_user.id}) on post {post.id}, comment ID pending (will be {comment.id}).")
 
             db.session.commit() # Commit comment, notification, and activity together
 
-            current_app.logger.info(f"Comment (ID: {comment.id}) by {current_user.username} added to post {post_id}.")
+            current_app.logger.info(f"Comment (ID: {comment.id}) by '{current_user.full_name}' (ID: {current_user.id}) added to post {post_id}.")
             if 'activity' in locals(): # Check if activity was created
-                 current_app.logger.info(f"Activity 'commented_on_post' (ID: {activity.id}) confirmed for user {current_user.username}, post ID {post.id}, comment ID {comment.id}.")
+                 current_app.logger.info(f"Activity 'commented_on_post' (ID: {activity.id}) confirmed for user '{current_user.full_name}' (ID: {current_user.id}), post ID {post.id}, comment ID {comment.id}.")
 
             # Process mentions in the comment
-            mentioned_usernames_in_comment = extract_mentions(comment.text)
+            mentioned_full_names_in_comment = extract_mentions(comment.text) # Now extracts full names
             new_mentions_created_comment = False
-            if mentioned_usernames_in_comment:
+            if mentioned_full_names_in_comment:
                 from ..models import User # Ensure User model is available
-                for username_str in mentioned_usernames_in_comment:
-                    mentioned_user_obj = User.query.filter_by(username=username_str).first()
-                    if mentioned_user_obj: # Check if user exists
+                from sqlalchemy import func # For case-insensitive query
+
+                for name_str in mentioned_full_names_in_comment:
+                    # Query by full_name, case-insensitive. Handle potential multiple matches.
+                    mentioned_users = User.query.filter(func.lower(User.full_name) == func.lower(name_str)).all()
+
+                    if len(mentioned_users) == 1:
+                        mentioned_user_obj = mentioned_users[0]
                         if mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions
                             # Avoid duplicate notifications (simple check)
                             existing_notif = Notification.query.filter_by(
@@ -121,7 +126,7 @@ def view_post(post_id):
                                 mention_notification.related_post_id = post.id # Keep for context
                                 db.session.add(mention_notification)
                                 new_mentions_created_comment = True
-                                current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in comment {comment.id}")
+                                current_app.logger.info(f"Mention notification created for user '{mentioned_user_obj.full_name}' (ID: {mentioned_user_obj.id}) in comment {comment.id}")
 
             if new_mentions_created_comment:
                 db.session.commit()
@@ -165,11 +170,11 @@ def view_post(post_id):
 @post_bp.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_post():
-    current_app.logger.debug(f"Accessing /create post, Method: {request.method}, User: {current_user.username}")
+    current_app.logger.debug(f"Accessing /create post, Method: {request.method}, User: '{current_user.full_name}' (ID: {current_user.id})")
     form = PostForm(request.form)
     if form.validate_on_submit():
         content = form.content.data # Raw Markdown
-        current_app.logger.info(f"User {current_user.username} creating post.")
+        current_app.logger.info(f"User '{current_user.full_name}' (ID: {current_user.id}) creating post.")
         try:
             # Posts are now immediately published by default
             new_post = Post(content=content, user_id=current_user.id,
@@ -189,22 +194,27 @@ def create_post():
                 target_id=new_post.id     # New field
             )
             db.session.add(activity)
-            current_app.logger.info(f"Activity 'created_post' logged for user {current_user.username}, post ID pending assignment (will be {new_post.id}).")
+            current_app.logger.info(f"Activity 'created_post' logged for user '{current_user.full_name}' (ID: {current_user.id}), post ID pending assignment (will be {new_post.id}).")
 
             db.session.commit() # Commit post and activity first to get IDs
 
-            current_app.logger.info(f"Post ID: {new_post.id} (Published: True) created by {current_user.username}.")
+            current_app.logger.info(f"Post ID: {new_post.id} (Published: True) created by '{current_user.full_name}' (ID: {current_user.id}).")
             if 'activity' in locals(): # Check if activity was created
-                 current_app.logger.info(f"Activity 'created_post' (ID: {activity.id}) confirmed for user {current_user.username}, post ID {new_post.id}.")
+                 current_app.logger.info(f"Activity 'created_post' (ID: {activity.id}) confirmed for user '{current_user.full_name}' (ID: {current_user.id}), post ID {new_post.id}.")
 
             # Process mentions after initial commit
-            mentioned_usernames_in_post = extract_mentions(new_post.content)
+            mentioned_full_names_in_post = extract_mentions(new_post.content) # Now extracts full names
             new_mentions_created_post = False
-            if mentioned_usernames_in_post:
+            if mentioned_full_names_in_post:
                 from ..models import User # Ensure User model is available
-                for username_str in mentioned_usernames_in_post:
-                    mentioned_user_obj = User.query.filter_by(username=username_str).first()
-                    if mentioned_user_obj: # Check if user exists
+                from sqlalchemy import func # For case-insensitive query
+
+                for name_str in mentioned_full_names_in_post:
+                    # Query by full_name, case-insensitive. Handle potential multiple matches.
+                    mentioned_users = User.query.filter(func.lower(User.full_name) == func.lower(name_str)).all()
+
+                    if len(mentioned_users) == 1:
+                        mentioned_user_obj = mentioned_users[0]
                         if mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions
                             # Avoid duplicate notifications (simple check for this post)
                             existing_notif = Notification.query.filter_by(
@@ -226,7 +236,7 @@ def create_post():
                                 )
                                 db.session.add(mention_notification)
                                 new_mentions_created_post = True
-                                current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in post {new_post.id}")
+                                current_app.logger.info(f"Mention notification created for user '{mentioned_user_obj.full_name}' (ID: {mentioned_user_obj.id}) in post {new_post.id}")
             if new_mentions_created_post:
                 db.session.commit() # Commit any mention notifications
 
@@ -234,10 +244,10 @@ def create_post():
             return redirect(url_for('post.view_post', post_id=new_post.id))
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error creating post by {current_user.username} or processing mentions: {e}", exc_info=True)
+            current_app.logger.error(f"Error creating post by '{current_user.full_name}' (ID: {current_user.id}) or processing mentions: {e}", exc_info=True)
             flash(f'Error creating post: {str(e)}', 'danger')
     elif request.method == 'POST':
-        current_app.logger.warning(f"Create post form validation failed. Errors: {form.errors}")
+        current_app.logger.warning(f"Create post form validation failed for user '{current_user.full_name}' (ID: {current_user.id}). Errors: {form.errors}")
         flash_form_errors_util(form)
 
     return render_template('create_post.html', form=form)
@@ -245,10 +255,10 @@ def create_post():
 @post_bp.route('/posts/<int:post_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_post(post_id):
-    current_app.logger.debug(f"Accessing /posts/{post_id}/edit, Method: {request.method}, User: {current_user.username}")
+    current_app.logger.debug(f"Accessing /posts/{post_id}/edit, Method: {request.method}, User: '{current_user.full_name}' (ID: {current_user.id})")
     post = Post.query.get_or_404(post_id)
     if post.user_id != current_user.id and not current_user.is_admin: # Allow admin to edit
-        current_app.logger.warning(f"User {current_user.username} not authorized to edit post {post_id}.")
+        current_app.logger.warning(f"User '{current_user.full_name}' (ID: {current_user.id}) not authorized to edit post {post_id}.")
         abort(403)
 
     # Ensure post is treated as published; editing does not change published status
@@ -263,7 +273,7 @@ def edit_post(post_id):
     delete_form = DeletePostForm(prefix=f"del-eff-post-{post.id}-")
 
     if form.validate_on_submit():
-        current_app.logger.info(f"User {current_user.username} updating post ID: {post_id}.")
+        current_app.logger.info(f"User '{current_user.full_name}' (ID: {current_user.id}) updating post ID: {post_id}.")
         post.content = form.content.data # Raw Markdown
         # is_published and published_at are not changed during an edit
 
@@ -272,19 +282,24 @@ def edit_post(post_id):
             db.session.add(post)
             db.session.commit() # Commit post content changes first
 
-            current_app.logger.info(f"Post ID {post.id} (Published: {post.is_published}) updated by {current_user.username}.")
+            current_app.logger.info(f"Post ID {post.id} (Published: {post.is_published}) updated by '{current_user.full_name}' (ID: {current_user.id}).")
 
             # Process mentions for updated content
             # Note: This doesn't remove notifications for users no longer mentioned.
             # A more complex system would track existing mentions vs new ones.
             # For now, it just adds new notifications.
-            mentioned_usernames_in_post = extract_mentions(post.content)
+            mentioned_full_names_in_post = extract_mentions(post.content) # Now extracts full names
             new_mentions_created = False
-            if mentioned_usernames_in_post:
+            if mentioned_full_names_in_post:
                 from ..models import User # Ensure User model is available
-                for username_str in mentioned_usernames_in_post:
-                    mentioned_user_obj = User.query.filter_by(username=username_str).first()
-                    if mentioned_user_obj: # Check if user exists
+                from sqlalchemy import func # For case-insensitive query
+
+                for name_str in mentioned_full_names_in_post:
+                    # Query by full_name, case-insensitive. Handle potential multiple matches.
+                    mentioned_users = User.query.filter(func.lower(User.full_name) == func.lower(name_str)).all()
+
+                    if len(mentioned_users) == 1:
+                        mentioned_user_obj = mentioned_users[0]
                         if mentioned_user_obj.id != current_user.id: # Don't notify for self-mentions
                             # Avoid duplicate notifications if a user is mentioned multiple times or was already notified for this post edit session
                             # A more robust solution would check existing notifications of this type for this post by this actor.
@@ -310,7 +325,7 @@ def edit_post(post_id):
                                 )
                                 db.session.add(mention_notification)
                                 new_mentions_created = True
-                                current_app.logger.info(f"Mention notification created for user {mentioned_user_obj.username} in updated post {post.id}")
+                                current_app.logger.info(f"Mention notification created for user '{mentioned_user_obj.full_name}' (ID: {mentioned_user_obj.id}) in updated post {post.id}")
 
             if new_mentions_created:
                 db.session.commit()
@@ -319,10 +334,10 @@ def edit_post(post_id):
             return redirect(url_for('post.view_post', post_id=post.id))
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error updating post {post.id} or processing mentions: {e}", exc_info=True)
+            current_app.logger.error(f"Error updating post {post.id} by user '{current_user.full_name}' (ID: {current_user.id}) or processing mentions: {e}", exc_info=True)
             flash(f'Error updating post: {str(e)}', 'danger')
     elif request.method == 'POST':
-        current_app.logger.warning(f"Edit post form validation failed for post {post_id}. Errors: {form.errors}")
+        current_app.logger.warning(f"Edit post form validation failed for post {post_id} by user '{current_user.full_name}' (ID: {current_user.id}). Errors: {form.errors}")
         flash_form_errors_util(form)
 
     if request.method == 'GET':
@@ -335,7 +350,7 @@ def edit_post(post_id):
 @post_bp.route('/posts/<int:post_id>/delete', methods=['POST'])
 @login_required
 def delete_post(post_id): # Renamed from delete_post_route
-    current_app.logger.debug(f"Accessing /posts/{post_id}/delete, User: {current_user.username}")
+    current_app.logger.debug(f"Accessing /posts/{post_id}/delete, User: '{current_user.full_name}' (ID: {current_user.id})")
 
     # Instantiate DeletePostForm for explicit CSRF validation
     form = DeletePostForm(request.form)
@@ -350,7 +365,7 @@ def delete_post(post_id): # Renamed from delete_post_route
 
     if form.validate_on_submit(): # Explicit CSRF validation
         if post.user_id != current_user.id and not current_user.is_admin:
-            current_app.logger.warning(f"User {current_user.username} not authorized to delete post {post_id}.")
+            current_app.logger.warning(f"User '{current_user.full_name}' (ID: {current_user.id}) not authorized to delete post {post_id}.")
             abort(403)
 
         try:
@@ -388,7 +403,7 @@ def delete_post(post_id): # Renamed from delete_post_route
 
             db.session.delete(post)
             db.session.commit()
-            current_app.logger.info(f"Post ID: {post_id} successfully deleted by {current_user.username}.")
+            current_app.logger.info(f"Post ID: {post_id} successfully deleted by '{current_user.full_name}' (ID: {current_user.id}).")
             flash('Post deleted successfully!', 'toast_success')
         except Exception as e:
             db.session.rollback()
@@ -404,13 +419,13 @@ def delete_post(post_id): # Renamed from delete_post_route
 @post_bp.route('/comment/<int:comment_id>/delete', methods=['POST'])
 @login_required
 def delete_comment(comment_id): # Renamed
-    current_app.logger.debug(f"Accessing /comment/{comment_id}/delete, User: {current_user.username}")
+    current_app.logger.debug(f"Accessing /comment/{comment_id}/delete, User: '{current_user.full_name}' (ID: {current_user.id})")
     # Using a specific delete form for CSRF protection on this action
     delete_form = DeleteCommentForm(request.form)
     if delete_form.validate_on_submit(): # Check CSRF
         comment = Comment.query.get_or_404(comment_id)
         post_id = comment.post_id
-        current_app.logger.info(f"User {current_user.username} attempting to delete comment ID: {comment_id} from post ID: {post_id}.")
+        current_app.logger.info(f"User '{current_user.full_name}' (ID: {current_user.id}) attempting to delete comment ID: {comment_id} from post ID: {post_id}.")
 
         can_delete = False
         if comment.user_id == current_user.id: can_delete = True
@@ -418,7 +433,7 @@ def delete_comment(comment_id): # Renamed
         elif current_user.is_admin: can_delete = True
 
         if not can_delete:
-            current_app.logger.warning(f"User {current_user.username} not authorized to delete comment {comment_id}.")
+            current_app.logger.warning(f"User '{current_user.full_name}' (ID: {current_user.id}) not authorized to delete comment {comment_id}.")
             abort(403)
         try:
             # Manually delete flags associated with this comment
@@ -444,10 +459,10 @@ def delete_comment(comment_id): # Renamed
             db.session.delete(comment)
             db.session.commit()
             flash('Comment deleted.', 'toast_success')
-            current_app.logger.info(f"Comment ID: {comment_id} successfully deleted by {current_user.username}.")
+            current_app.logger.info(f"Comment ID: {comment_id} successfully deleted by '{current_user.full_name}' (ID: {current_user.id}).")
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error deleting comment ID: {comment_id}: {e}", exc_info=True)
+            current_app.logger.error(f"Error deleting comment ID: {comment_id} by user '{current_user.full_name}' (ID: {current_user.id}): {e}", exc_info=True)
             flash('Error deleting comment. Please try again.', 'danger')
         return redirect(url_for('post.view_post', post_id=post_id, _anchor=f"post-comments-area")) # Redirect to general comments area
     else: # CSRF validation failed or other form error (if any were added)
@@ -463,28 +478,28 @@ def delete_comment(comment_id): # Renamed
 @post_bp.route('/comment/<int:comment_id>/flag', methods=['POST'])
 @login_required
 def flag_comment(comment_id): # Renamed
-    current_app.logger.debug(f"Accessing /comment/{comment_id}/flag, User: {current_user.username}")
+    current_app.logger.debug(f"Accessing /comment/{comment_id}/flag, User: '{current_user.full_name}' (ID: {current_user.id})")
     comment = Comment.query.get_or_404(comment_id)
     form = FlagCommentForm(request.form)
 
     if form.validate_on_submit(): # CSRF check
         existing_flag = CommentFlag.query.filter_by(comment_id=comment_id, flagger_user_id=current_user.id, is_resolved=False).first()
         if existing_flag:
-            current_app.logger.info(f"User {current_user.username} already actively flagged comment {comment_id}.")
+            current_app.logger.info(f"User '{current_user.full_name}' (ID: {current_user.id}) already actively flagged comment {comment_id}.")
             flash('You have already flagged this comment.', 'info')
         elif comment.user_id == current_user.id:
-            current_app.logger.info(f"User {current_user.username} attempted to flag their own comment {comment_id}.")
+            current_app.logger.info(f"User '{current_user.full_name}' (ID: {current_user.id}) attempted to flag their own comment {comment_id}.")
             flash("You cannot flag your own comment.", "warning")
         else:
             try:
                 new_flag = CommentFlag(comment_id=comment.id, flagger_user_id=current_user.id)
                 db.session.add(new_flag)
                 db.session.commit()
-                current_app.logger.info(f"Comment {comment_id} flagged by user {current_user.username}.")
+                current_app.logger.info(f"Comment {comment_id} flagged by user '{current_user.full_name}' (ID: {current_user.id}).")
                 flash('Comment flagged for review.', 'toast_success')
             except Exception as e:
                 db.session.rollback()
-                current_app.logger.error(f"Error flagging comment {comment_id}: {e}", exc_info=True)
+                current_app.logger.error(f"Error flagging comment {comment_id} by user '{current_user.full_name}' (ID: {current_user.id}): {e}", exc_info=True)
                 flash('Error flagging comment. Please try again.', 'danger')
     else:
         current_app.logger.warning(f"Flag comment form validation failed for comment {comment_id}. Errors: {form.errors}")

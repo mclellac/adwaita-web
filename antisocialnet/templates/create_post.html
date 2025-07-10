@@ -22,6 +22,7 @@
                     <p class="adw-label caption error-text" style="margin-bottom: var(--spacing-xs);">{{ form.content.errors|join(' ') }}</p>
                 {% endif %}
                 <textarea name="{{ form.content.name }}" id="{{ form.content.id or 'content_input' }}" class="adw-entry" rows="10" placeholder="Enter your post content here..." style="width: 100%; min-height: 150px; box-sizing: border-box;">{{ form.content.data or '' }}</textarea>
+                <span class="adw-label caption" style="display: block; margin-top: var(--spacing-xxs);">Mention users with @FullName.</span> {# Added mention guidance #}
             </div>
         </section>
 
@@ -66,7 +67,7 @@
 
         <div class="adw-box horizontal justify-end adw-box-spacing-s" style="margin-top: var(--spacing-l);" id="create-post-form-actions">
             {{ form.submit(class="adw-button suggested-action", id="submit-button") }} {# Changed to single submit button #}
-            <adw-spinner size="small" active="false" style="margin-left: var(--spacing-xs);"></adw-spinner>
+            <span class="adw-spinner small" id="form-submit-spinner" style="margin-left: var(--spacing-xs); display: none;"></span> {# Changed to span, added id, initially hidden #}
         </div>
     </form>
   </div>
@@ -79,20 +80,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form.stacked-form');
     const submitButton = document.getElementById('submit-button');
-    const actionsContainer = document.getElementById('create-post-form-actions');
-    let spinner;
-    if (actionsContainer) {
-        spinner = actionsContainer.querySelector('adw-spinner');
-    }
+    const spinner = document.getElementById('form-submit-spinner');
 
-    if (form && spinner && submitButton) {
+    if (form && submitButton && spinner) {
         form.addEventListener('submit', function() {
             // Disable button
             submitButton.disabled = true;
             // Show spinner
-            if (spinner) {
-                spinner.setAttribute('active', 'true');
-            }
+            spinner.style.display = 'inline-block';
         });
     }
 });

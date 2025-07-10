@@ -194,7 +194,8 @@
                 {% if form.text.errors %}
                     <span class="adw-action-row-subtitle error-text" style="margin-bottom: var(--spacing-xs);">{{form.text.errors|join(' ')}}</span>
                 {% endif %}
-                <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry" rows="4" style="width: 100%; min-height: 80px; box-sizing: border-box;">{{ form.text.data or ''}}</textarea>
+                <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry" rows="4" style="width: 100%; min-height: 80px; box-sizing: border-box;" placeholder="Enter your comment here...">{{ form.text.data or ''}}</textarea>
+                <span class="adw-label caption" style="display: block; margin-top: var(--spacing-xxs);">Mention users with @FullName.</span> {# Added mention guidance #}
             </div>
 
             <div class="form-actions-container form-actions-end comment-form-actions" style="margin-top: var(--spacing-m); padding: 0;"> {# Simplified padding as form has it now #}
