@@ -17,17 +17,17 @@
                             <a href="{{ url_for('profile.view_profile', user_id=post_item.author.id) }}" class="adw-link">
                                 <span class="adw-avatar size-m">
                                     {% if post_item.author.profile_photo_url %}
-                                    <img src="{{ url_for('static', filename=post_item.author.profile_photo_url) }}" alt="{{ post_item.author.username }} avatar">
+                                    <img src="{{ url_for('static', filename=post_item.author.profile_photo_url) }}" alt="{{ post_item.author.full_name or ('User ' ~ post_item.author.id) }} avatar">
                                     {% else %}
-                                    <img src="{{ default_avatar_url }}" alt="{{ post_item.author.username }} default avatar">
+                                    <img src="{{ default_avatar_url }}" alt="{{ post_item.author.full_name or ('User ' ~ post_item.author.id) }} default avatar">
                                     {% endif %}
                                 </span>
                             </a>
                             <div class="adw-box adw-box-vertical">
                                 <a href="{{ url_for('profile.view_profile', user_id=post_item.author.id) }}" class="adw-link">
-                                    <strong class="adw-label body-1">{{ post_item.author.full_name or post_item.author.username }}</strong>
+                                    <strong class="adw-label body-1">{{ post_item.author.full_name or ('User ' ~ post_item.author.id) }}</strong>
                                 </a>
-                                 <span class="adw-label caption">@{{ post_item.author.username }}</span>
+                                 <span class="adw-label caption">@{{ post_item.author.full_name | replace(' ', '') if post_item.author.full_name else ('User' ~ post_item.author.id) }}</span>
                             </div>
                         </div>
                         <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">

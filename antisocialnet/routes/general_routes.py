@@ -33,7 +33,7 @@ def index():
         flash("Error loading posts. Please try again later.", "danger")
         posts, pagination = [], None
 
-    return render_template('index.html', posts=posts, pagination=pagination)
+    return render_template('index.html', posts=posts, pagination=pagination, current_user=current_user)
 
 @general_bp.route('/dashboard')
 @login_required
