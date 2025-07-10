@@ -470,4 +470,124 @@ def test_delete_photo_nonexistent(client, app, logged_in_client):
     response = logged_in_client.post(url, data={'csrf_token': token})
     assert response.status_code == 404
 
+
+# --- API Photo Comment Tests ---
+
+def test_api_add_photo_comment_successful_and_get_comments(client, app, logged_in_client, db, create_test_user):
+    """Test successfully adding a comment via API and then retrieving it."""
+    photo_uploader = create_test_user(email_address="api_pu@example.com", full_name="API Photo Uploader")
+    test_photo = create_photo_for_testing(db, photo_uploader, caption="Photo for API comments.")
+    # logged_in_client is 'login_fixture_user@example.com'
+
+    comment_text_raw = "API comment with <b>bold</b> and <script>alert('XSS')</script> tags."
+    # With bleach.clean(..., tags=[], strip=True), <b>bold</b> becomes "bold".
+    # <script>alert('XSS')</script> and its content are removed.
+    # So the expected text is "API comment with bold and  tags." (note the double space if script was between words)
+    # The route code does form.text.data.strip() before bleach, and bleach itself doesn't add extra spaces.
+    # If the original input was "word1 <script>...</script> word2", it becomes "word1  word2".
+    # If the input to bleach is "API comment with <b>bold</b> and <script>alert('XSS')</script> tags.",
+    # after stripping script tag and content: "API comment with <b>bold</b> and  tags."
+    # then after stripping b tag: "API comment with bold and  tags."
+    # The .strip() in the route is on form.text.data *before* bleach.clean.
+    # bleach.clean itself does not strip leading/trailing whitespace from the overall string.
+    comment_text_expected_final = "API comment with bold and  tags." # Adjusted for script content removal
+
+
+    post_comment_url = None
+    get_comments_url = None
+    csrf_token_val = None
+
+    with app.test_client() as test_client: # Use a fresh test_client for CSRF or session consistency if needed
+                                          # Or ensure logged_in_client's session has CSRF
+        # Simulate logged_in_client for CSRF token generation if forms are involved server-side for JSON validation
+        # For pure JSON API, CSRF might be handled differently (e.g. headers, or disabled for API blueprint if stateless)
+        # The PhotoCommentForm is used, so CSRF is likely active.
+        # However, the route uses form = PhotoCommentForm(data=request.json) and form.validate()
+        # This typically bypasses WTForms CSRF if meta={'csrf': False} or if no CSRFField in form.
+        # Let's assume CSRF is needed for WTForms by default unless explicitly disabled.
+        # The PhotoCommentForm does not include a CSRFTokenField.
+        # And it's initialized with request.json, so standard session-based CSRF might not apply directly.
+        # Let's proceed assuming the API route as written handles validation without session CSRF for JSON.
+        # If it fails, we'll know CSRF is an issue.
+        # The route photo_bp.route('/api/photos/<int:photo_id>/comments', methods=['POST'])
+        # does not have CSRFProtect(api_bp) or similar. It uses PhotoCommentForm.
+        # PhotoCommentForm in forms.py does not have CSRF. So, direct POST should be fine.
+
+
+        with logged_in_client.application.app_context(): # Ensure context for url_for
+            post_comment_url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
+            get_comments_url = url_for('photo.get_photo_comments', photo_id=test_photo.id)
+
+    # POST the comment
+    response_post = logged_in_client.post(
+        post_comment_url,
+        json={'text': comment_text_raw}
+    )
+    assert response_post.status_code == 201
+    posted_comment_data = response_post.get_json()
+    assert posted_comment_data['text'] == comment_text_expected_final # Check sanitized text in response
+
+    # GET the comments to verify storage
+    response_get = logged_in_client.get(get_comments_url)
+    assert response_get.status_code == 200
+    comments_data = response_get.get_json()
+    assert len(comments_data) == 1
+    retrieved_comment = comments_data[0]
+    assert retrieved_comment['text'] == comment_text_expected_final
+    assert "<b>" not in retrieved_comment['text']
+    assert "<script>" not in retrieved_comment['text']
+
+def test_api_add_photo_comment_empty(logged_in_client, app, db, create_test_user):
+    """Test posting an empty comment via API results in a 400 error."""
+    photo_uploader = create_test_user(email_address="api_pu_empty@example.com", full_name="API Photo Uploader Empty")
+    test_photo = create_photo_for_testing(db, photo_uploader)
+
+    post_comment_url = None
+    with app.app_context():
+         post_comment_url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
+
+    response_post = logged_in_client.post(post_comment_url, json={'text': '   '}) # Empty or whitespace only
+    assert response_post.status_code == 400
+    errors = response_post.get_json().get('errors', {})
+    assert 'text' in errors
+    assert "required" in errors['text'].lower() or "empty" in errors['text'].lower()
+
+
+def test_api_get_photo_comments_unauthorized_private_profile(client, app, db, create_test_user):
+    """Test GET comments API fails for private profile if not owner."""
+    private_user = create_test_user(email_address="api_private@example.com", full_name="API Private User", is_profile_public=False)
+    test_photo = create_photo_for_testing(db, private_user)
+    # Add a comment so there's something to fetch
+    comment = PhotoComment(text="A private comment", user_id=private_user.id, photo_id=test_photo.id)
+    db.session.add(comment)
+    db.session.commit()
+
+
+    # Unauthenticated client
+    with app.app_context():
+        get_comments_url = url_for('photo.get_photo_comments', photo_id=test_photo.id)
+    response_unauth = client.get(get_comments_url)
+    assert response_unauth.status_code == 403
+
+    # Authenticated non-owner client
+    other_user = create_test_user(email_address="api_other@example.com", full_name="API Other User")
+    with app.test_client() as other_client:
+        with app.app_context(): # for url_for and login
+            login_form = app.blueprints['auth'].endpoints['login']().form # Assuming this gets the form
+            csrf_token = login_form.csrf_token.current_token if hasattr(login_form, 'csrf_token') else 'dummy_csrf_for_test'
+            other_client.post(url_for('auth.login'), data={'username': other_user.email, 'password': 'password', 'csrf_token': csrf_token})
+        response_other_auth = other_client.get(get_comments_url)
+        assert response_other_auth.status_code == 403
+
+    # Owner client should succeed
+    with app.test_client() as owner_client:
+        with app.app_context():
+            login_form = app.blueprints['auth'].endpoints['login']().form
+            csrf_token = login_form.csrf_token.current_token if hasattr(login_form, 'csrf_token') else 'dummy_csrf_for_test'
+            owner_client.post(url_for('auth.login'), data={'username': private_user.email, 'password': 'password', 'csrf_token': csrf_token})
+        response_owner = owner_client.get(get_comments_url)
+        assert response_owner.status_code == 200
+        assert len(response_owner.get_json()) == 1
+
+
 # End of photo_routes tests for now.

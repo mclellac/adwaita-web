@@ -112,20 +112,8 @@ def markdown_to_html_and_sanitize_util(text):
     # Using extensions like 'fenced_code' for code blocks, 'tables' for tables
     html_content = md_lib.markdown(text_escaped, extensions=['fenced_code', 'tables', 'extra'])
 
-    # Sanitize HTML (very basic, replace with Bleach in a real app)
-    # This basic version just escapes unknown tags, not truly secure.
-    # For now, to avoid adding a new dependency (bleach) if not present.
-    # A production app MUST use a robust sanitizer like Bleach.
-    # allowed_tags = ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'img', 'pre', 'code', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'thead', 'tbody', 'tr', 'th', 'td']
-    # allowed_attrs = {'a': ['href', 'title'], 'img': ['src', 'alt', 'title']}
-    # sanitized_html = bleach.clean(html_content, tags=allowed_tags, attributes=allowed_attrs, strip=True)
-    # return Markup(sanitized_html)
-
-    # Since bleach is not assumed, just return the markdown-generated HTML.
-    # The responsibility of full sanitization would be higher up or assumed by content trust.
-    # For this demo, this might be acceptable if content sources are somewhat trusted or if
-    # the markdown library itself does some level of safe HTML generation.
-    # ---- OLD CODE END ----
+    # Old comments regarding basic sanitization or bleach not being assumed have been removed,
+    # as bleach is now actively used.
 
     # Step 2: Sanitize the generated HTML using Bleach
     # Uses the ALLOWED_TAGS_CONFIG and ALLOWED_ATTRIBUTES_CONFIG defined in this file.
