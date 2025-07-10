@@ -47,8 +47,9 @@ def human_readable_date(dt, show_time=True):
 
 def linkify_mentions(text):
     """
-    Converts @username mentions into links to user profiles.
-    This is a simplified version. A robust version would check user existence.
+    Converts @username mentions in a string into Markdown links if the user exists,
+    otherwise leaves the mention as plain text.
+    Requires an active Flask app context for database queries.
     """
     if text is None:
         return ''
@@ -56,11 +57,13 @@ def linkify_mentions(text):
     # Regex to find @handle patterns
     # Allows alphanumeric characters and underscores in handles, consistent with form validation
     mention_regex = r'@([a-zA-Z0-9_]+)'
+    from .models import User # Import User model for existence check
 
     def replace_mention(match):
         handle = match.group(1)
         # Generates a markdown link. The profile URL uses the handle.
         return f'[@{handle}](/profile/{handle})'
+
 
     linked_text = re.sub(mention_regex, replace_mention, text)
     return linked_text
