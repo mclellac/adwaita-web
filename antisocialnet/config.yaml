@@ -1,4 +1,4 @@
-# Configuration for app-demo
+# Configuration for antisocialnet
 # Values in config.yaml will override environment variables and defaults in config.py.
 
 # Flask App Configuration

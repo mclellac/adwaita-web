@@ -1,7 +1,7 @@
 import pytest
 from flask import url_for
-from app_demo.models import User, Post, UserPhoto, PostLike, Activity # Added Activity for potential future feed items
-from app_demo import db
+from antisocialnet.models import User, Post, UserPhoto, PostLike, Activity # Added Activity for potential future feed items
+from antisocialnet import db
 from datetime import datetime, timedelta, timezone
 
 # Helper to create photos, similar to the one in test_photo_routes
@@ -37,7 +37,11 @@ def create_api_test_post(db_session, user, content="API Test Post Content", days
 
 def test_api_feed_unauthenticated(client):
     """Test GET /api/v1/feed when not authenticated."""
-    response = client.get(url_for('api.get_feed'))
+    with client.application.test_request_context('/'): # Ensure context for url_for
+        url = url_for('api.get_feed')
+        login_url = url_for('auth.login') # Also get login_url for assertion
+
+    response = client.get(url)
     # Flask-Login usually redirects to login_view for web requests.
     # For API, it might return 401 if configured, or redirect if not AJAX.
     # Current setup: @login_required without specific API handling will likely redirect.

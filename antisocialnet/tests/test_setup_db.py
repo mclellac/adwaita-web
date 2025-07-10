@@ -82,11 +82,24 @@ def temp_db_app_instance(temp_sqlite_db_file):
         TESTING = True
         WTF_CSRF_ENABLED = False # Not relevant for DB inspection
 
-    temp_app = pytest.importorskip("antisocialnet").create_app(config_object=TempDBTestConfig)
+    # Use yaml_config_override to set the specific database URI for this test app instance
+    yaml_override = {
+        'SQLALCHEMY_DATABASE_URI': f'sqlite:///{temp_sqlite_db_file}',
+        'TESTING': True,
+        'WTF_CSRF_ENABLED': False
+    }
+    temp_app = pytest.importorskip("antisocialnet").create_app(
+        config_name='testing', # Start with the base testing config
+        yaml_config_override=yaml_override
+    )
 
     with temp_app.app_context():
         # main_app_db.init_app(temp_app) # db object is already initialized by create_app
+        # Tables should be created if this app instance is used for DB operations.
+        # If setup_db.py script creates them, this app instance just needs to connect.
+        main_app_db.create_all() # Ensure tables exist for inspection by this app instance
         yield temp_app
+        main_app_db.drop_all() # Clean up tables used by this inspection app instance
 
 
 def test_setup_db_deletedb_and_create_admin(setup_db_env_vars, temp_sqlite_db_file, temp_db_app_instance):
@@ -119,7 +132,7 @@ def test_setup_db_deletedb_and_create_admin(setup_db_env_vars, temp_sqlite_db_fi
 
     # Now inspect the temp_sqlite_db_file using the temp_db_app_instance
     with temp_db_app_instance.app_context():
-        admin_user = User.query.filter_by(email=admin_email).first()
+        admin_user = User.query.filter_by(username=admin_email).first() # User.username stores the email
         assert admin_user is not None
         assert admin_user.full_name == admin_name
         assert admin_user.is_admin
@@ -170,14 +183,14 @@ def test_setup_db_yaml_user_creation(setup_db_env_vars, temp_sqlite_db_file, tem
     assert result.returncode == 0, f"setup_db.py failed: {result.stderr}"
 
     with temp_db_app_instance.app_context():
-        user1 = User.query.filter_by(email='yamluser1@example.com').first()
+        user1 = User.query.filter_by(username='yamluser1@example.com').first() # User.username stores the email
         assert user1 is not None
         assert user1.full_name == 'YAML User One'
         assert user1.is_admin
         assert user1.is_approved # Default for YAML users
         assert user1.is_active   # Default for YAML users
 
-        user2 = User.query.filter_by(email='yamluser2@example.com').first()
+        user2 = User.query.filter_by(username='yamluser2@example.com').first() # User.username stores the email
         assert user2 is not None
         assert user2.full_name == 'YAML User Two'
         assert not user2.is_admin # Default is_admin is False

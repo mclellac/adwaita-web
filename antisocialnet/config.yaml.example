@@ -1,4 +1,4 @@
-# Example configuration for app-demo/setup_db.py and app-demo application
+# Example configuration for antisocialnet/setup_db.py and antisocialnet application
 # Copy this file to config.yaml and update with your actual settings.
 # Values in config.yaml will override environment variables and defaults in config.py.
 
@@ -11,10 +11,10 @@ DEBUG: True # Set to False in production
 
 # Option 1: SQLite (simple, file-based)
 # The path is relative to the instance folder if not absolute.
-# For app-demo, if instance_path is 'instance' in project root, this would be 'instance/app_demo.db'.
-# If running setup_db.py from project root, 'sqlite:///app_demo.db' creates it in project root.
+# For antisocialnet, if instance_path is 'instance' in project root, this would be 'instance/antisocialnet.db'.
+# If running setup_db.py from project root, 'sqlite:///antisocialnet.db' creates it in project root.
 # For consistency with the app, it's often better to use an absolute path or ensure instance_relative_config.
-SQLALCHEMY_DATABASE_URI: "sqlite:///app_demo.db"
+SQLALCHEMY_DATABASE_URI: "sqlite:///antisocialnet.db"
 
 # To use SQLite in-memory (for quick tests, data lost on script/app exit):
 # SQLALCHEMY_DATABASE_URI: "sqlite:///:memory:"
@@ -41,8 +41,8 @@ NOTIFICATIONS_PER_PAGE: 15
 
 # File Upload Configuration
 # Paths should be relative to the 'static' folder.
-UPLOAD_FOLDER: "uploads/profile_pics" # e.g., app-demo/static/uploads/profile_pics
-GALLERY_UPLOAD_FOLDER: "uploads/gallery_photos" # e.g., app-demo/static/uploads/gallery_photos
+UPLOAD_FOLDER: "uploads/profile_pics" # e.g., antisocialnet/static/uploads/profile_pics
+GALLERY_UPLOAD_FOLDER: "uploads/gallery_photos" # e.g., antisocialnet/static/uploads/gallery_photos
 MAX_PROFILE_PHOTO_SIZE_BYTES: 2097152    # 2MB
 MAX_GALLERY_PHOTO_SIZE_BYTES: 10485760   # 10MB
 ALLOWED_EXTENSIONS: ['png', 'jpg', 'jpeg', 'gif', 'webp']
@@ -54,7 +54,7 @@ ALLOWED_EXTENSIONS: ['png', 'jpg', 'jpeg', 'gif', 'webp']
 DEFAULT_AVATAR_PATH: "img/default_avatar.png" # Default path for avatars if user has no profile photo
 
 # User list for setup_db.py --config (optional)
-# See app-demo/AGENTS.md for details on the USERS structure and setup_db.py user creation.
+# See antisocialnet/AGENTS.md for details on the USERS structure and setup_db.py user creation.
 # USERS:
 #   - username: "admin@example.com"
 #     password: "securepassword1"

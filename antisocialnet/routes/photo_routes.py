@@ -119,7 +119,7 @@ def post_photo_comment(photo_id):
         errors = {field: error[0] for field, error in form.errors.items()}
         return jsonify({'errors': errors}), 400
 
-# Need to register this blueprint in app-demo/__init__.py's create_app()
+# Need to register this blueprint in antisocialnet/__init__.py's create_app()
 # Example:
 # from .routes.photo_routes import photo_bp
 # app.register_blueprint(photo_bp)

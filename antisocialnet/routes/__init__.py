@@ -1,7 +1,7 @@
 # This file makes 'routes' a Python package.
 
 # You can optionally import blueprints here to make them available
-# when 'from app-demo.routes import ...' is used, but it's often cleaner
+# when 'from antisocialnet.routes import ...' is used, but it's often cleaner
 # to register them in the main __init__.py or app.py.
 
 # Example (will be defined in respective files):

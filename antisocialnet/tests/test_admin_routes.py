@@ -1,14 +1,14 @@
 import pytest
 from flask import url_for
-from app_demo.models import User, SiteSetting, Post, Comment, CommentFlag
-from app_demo import db
+from antisocialnet.models import User, SiteSetting, Post, Comment, CommentFlag
+from antisocialnet import db
 
 # Helper fixture to create and log in an admin user
 @pytest.fixture
 def admin_client(client, app, create_test_user):
     admin_user = create_test_user(username="admin_user", email="admin@example.com", password="password", is_admin=True, is_approved=True, is_active=True)
     with app.app_context():
-        from app_demo.forms import LoginForm
+        from antisocialnet.forms import LoginForm
         form = LoginForm()
         token = form.csrf_token.current_token
     client.post(url_for('auth.login'), data={
@@ -21,10 +21,20 @@ def admin_client(client, app, create_test_user):
 # --- Admin Access Control Tests (applied to one route, assume decorator handles others) ---
 def test_admin_route_unauthenticated_redirects(client):
     """Test unauthenticated access to an admin route (e.g., site_settings) redirects to login."""
-    response = client.get(url_for('admin.site_settings'), follow_redirects=True)
+    # Use test_request_context for url_for calls within the test function
+    with client.application.test_request_context('/'):
+        url_to_access = url_for('admin.site_settings')
+        expected_redirect_target_path = url_for('auth.login')
+
+    response = client.get(url_to_access, follow_redirects=True)
     assert response.status_code == 200 # Due to redirect
-    assert b"Please log in to access this page." in response.data
-    assert b"Log In" in response.data # On login page
+    assert b"Please log in to access this page." in response.data # Flash message
+    assert b"Log In" in response.data # Should be on the login page
+
+    # response.request.path is the path of the final page after redirects.
+    # Compare the path component of the URL.
+    from urllib.parse import urlparse
+    assert urlparse(response.request.path).path == urlparse(expected_redirect_target_path).path
 
 def test_admin_route_non_admin_authenticated_forbidden(client, logged_in_client):
     """Test non-admin authenticated user gets 403 from an admin route."""
@@ -56,8 +66,9 @@ def test_site_settings_page_loads_for_admin(admin_client):
 def test_site_settings_update_successful(admin_client, app, db):
     """Test POST /admin/site-settings successfully updates settings."""
     with app.app_context(): # Use app context for form token
-        from app_demo.forms import SiteSettingsForm
-        form = SiteSettingsForm(); token = form.csrf_token.current_token
+        from antisocialnet.forms import SiteSettingsForm
+        form = SiteSettingsForm()
+        token = form.csrf_token.current_token
 
     new_title = "Updated Awesome Site"
     new_ppp = "25"
@@ -80,7 +91,10 @@ def test_site_settings_update_successful(admin_client, app, db):
         assert SiteSetting.get('allow_registrations') == True
 
     # Test updating to False for boolean
-    with app.app_context(): from app_demo.forms import SiteSettingsForm; form=SiteSettingsForm(); token=form.csrf_token.current_token
+    with app.app_context():
+        from antisocialnet.forms import SiteSettingsForm
+        form = SiteSettingsForm()
+        token = form.csrf_token.current_token
     form_data_uncheck = {
         'site_title': new_title,
         'posts_per_page': new_ppp,
@@ -95,8 +109,9 @@ def test_site_settings_update_successful(admin_client, app, db):
 def test_site_settings_update_validation_error(admin_client, app):
     """Test POST /admin/site-settings with validation errors (e.g., empty title)."""
     with app.app_context():
-        from app_demo.forms import SiteSettingsForm
-        form = SiteSettingsForm(); token = form.csrf_token.current_token
+        from antisocialnet.forms import SiteSettingsForm
+        form = SiteSettingsForm()
+        token = form.csrf_token.current_token
 
     form_data = {
         'site_title': '', # Empty, which is required
@@ -111,8 +126,9 @@ def test_site_settings_update_validation_error(admin_client, app):
 def test_site_settings_update_invalid_ppp(admin_client, app):
     """Test POST /admin/site-settings with invalid posts_per_page value."""
     with app.app_context():
-        from app_demo.forms import SiteSettingsForm
-        form = SiteSettingsForm(); token = form.csrf_token.current_token
+        from antisocialnet.forms import SiteSettingsForm
+        form = SiteSettingsForm()
+        token = form.csrf_token.current_token
 
     form_data = {
         'site_title': 'Valid Title',
@@ -187,7 +203,9 @@ def test_approve_user_successful(admin_client, app, db, create_test_user):
     assert not pending_user.is_approved and not pending_user.is_active
 
     with app.app_context(): # For CSRF token
-        from flask_wtf import FlaskForm; class D(FlaskForm):pass; token=D().csrf_token.current_token
+        from flask_wtf import FlaskForm
+        form = FlaskForm()
+        token = form.csrf_token.current_token
 
     response = admin_client.post(url_for('admin.approve_user', user_id=user_id), data={'csrf_token':token}, follow_redirects=True)
     assert response.status_code == 200
@@ -205,7 +223,10 @@ def test_reject_user_successful(admin_client, app, db, create_test_user):
     user_id = pending_user.id
     assert User.query.get(user_id) is not None
 
-    with app.app_context(): from flask_wtf import FlaskForm; class D(FlaskForm):pass; token=D().csrf_token.current_token
+    with app.app_context():
+        from flask_wtf import FlaskForm
+        form = FlaskForm()
+        token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.reject_user', user_id=user_id), data={'csrf_token':token}, follow_redirects=True)
     assert response.status_code == 200
     assert b"User rejectme@example.com rejected and deleted." in response.data
@@ -214,14 +235,20 @@ def test_reject_user_successful(admin_client, app, db, create_test_user):
 
 def test_approve_nonexistent_user(admin_client, app):
     """Attempt to approve a non-existent user returns 404."""
-    with app.app_context(): from flask_wtf import FlaskForm; class D(FlaskForm):pass; token=D().csrf_token.current_token
+    with app.app_context():
+        from flask_wtf import FlaskForm
+        form = FlaskForm()
+        token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.approve_user', user_id=99999), data={'csrf_token':token})
     assert response.status_code == 404
 
 def test_approve_user_already_approved(admin_client, app, db, create_test_user):
     """Attempt to approve an already approved user."""
     approved_user = create_test_user(username="already_ok", email="alreadyok@example.com", is_approved=True, is_active=True)
-    with app.app_context(): from flask_wtf import FlaskForm; class D(FlaskForm):pass; token=D().csrf_token.current_token
+    with app.app_context():
+        from flask_wtf import FlaskForm
+        form = FlaskForm()
+        token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.approve_user', user_id=approved_user.id), data={'csrf_token':token}, follow_redirects=True)
     assert response.status_code == 200
     assert b"User is already approved." in response.data
@@ -314,7 +341,10 @@ def test_resolve_flag_successful(admin_client, app, db, create_test_user, create
 
     assert not active_flag.is_resolved
 
-    with app.app_context(): from flask_wtf import FlaskForm; class D(FlaskForm):pass; token=D().csrf_token.current_token
+    with app.app_context():
+        from flask_wtf import FlaskForm
+        form = FlaskForm()
+        token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.resolve_flag', flag_id=flag_id), data={'csrf_token':token}, follow_redirects=True)
     assert response.status_code == 200
     assert b"Flag marked as resolved." in response.data
@@ -328,7 +358,10 @@ def test_resolve_flag_successful(admin_client, app, db, create_test_user, create
 
 def test_resolve_flag_nonexistent(admin_client, app):
     """Attempt to resolve a non-existent flag returns 404."""
-    with app.app_context(): from flask_wtf import FlaskForm; class D(FlaskForm):pass; token=D().csrf_token.current_token
+    with app.app_context():
+        from flask_wtf import FlaskForm
+        form = FlaskForm()
+        token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.resolve_flag', flag_id=999888), data={'csrf_token':token})
     assert response.status_code == 404
 
@@ -341,7 +374,10 @@ def test_resolve_flag_already_resolved(admin_client, app, db, create_test_user, 
     resolved_flag = CommentFlag(comment_id=comment.id, flagger_user_id=flagger.id, is_resolved=True, resolver_user_id=admin_user_obj.id)
     db.session.add(resolved_flag); db.session.commit()
 
-    with app.app_context(): from flask_wtf import FlaskForm; class D(FlaskForm):pass; token=D().csrf_token.current_token
+    with app.app_context():
+        from flask_wtf import FlaskForm
+        form = FlaskForm()
+        token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.resolve_flag', flag_id=resolved_flag.id), data={'csrf_token':token}, follow_redirects=True)
     assert response.status_code == 200
     assert b"This flag has already been resolved." in response.data

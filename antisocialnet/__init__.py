@@ -2,7 +2,7 @@ import logging
 import os
 import urllib.parse
 from datetime import datetime, timezone
-from flask import Flask, render_template, request, session, url_for, current_app, redirect # Added current_app, redirect
+from flask import Flask, render_template, request, session, url_for, current_app, redirect, flash # Added flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_wtf import CSRFProtect
@@ -18,7 +18,7 @@ mail = Mail() # Initialize Mail instance
 
 # Import models at the module level so they are registered with SQLAlchemy
 # and accessible via the package for scripts like setup_db.py
-from . import models # This will import app-demo/models.py
+from . import models # This will import antisocialnet/models.py
 
 def create_app(config_name=None, yaml_config_override=None): # Added yaml_config_override
     app = Flask(__name__, instance_relative_config=True)
@@ -57,16 +57,12 @@ def create_app(config_name=None, yaml_config_override=None): # Added yaml_config
         app.logger.error(f"Could not create instance path: {app.instance_path}")
         pass # Or handle more gracefully
 
-    # Make UPLOAD_FOLDER absolute, relative to app.root_path (app-demo directory)
-    # app.root_path is the directory where __init__.py (this file) is.
-    if not os.path.isabs(app.config['UPLOAD_FOLDER']):
-        app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
+    # UPLOAD_FOLDER and GALLERY_UPLOAD_FOLDER are now expected to be relative to app.static_folder
+    # Their absolute paths for directory creation are handled below.
 
-    if 'GALLERY_UPLOAD_FOLDER' in app.config and not os.path.isabs(app.config['GALLERY_UPLOAD_FOLDER']):
-        app.config['GALLERY_UPLOAD_FOLDER'] = os.path.join(app.root_path, app.config['GALLERY_UPLOAD_FOLDER'])
-        # Ensure the base gallery upload directory exists
-        os.makedirs(app.config['GALLERY_UPLOAD_FOLDER'], exist_ok=True)
-
+    # Ensure upload directories exist within the static folder.
+    # app.config['UPLOAD_FOLDER'] and app.config['GALLERY_UPLOAD_FOLDER'] should hold paths
+    # relative to the static directory, e.g., "uploads/profile_pics".
 
     # Setup logging
     if not app.debug and not app.testing: # pragma: no cover

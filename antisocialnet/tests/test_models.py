@@ -4,8 +4,8 @@ from antisocialnet import db # db fixture from conftest.py
 
 def test_like_post(db, create_test_user, create_test_post):
     """Test liking a post."""
-    user1 = create_test_user(username="liker", email="liker@example.com")
-    post_author = create_test_user(username="postauthor", email="postauthor@example.com")
+    user1 = create_test_user(email_address="liker@example.com", full_name="liker")
+    post_author = create_test_user(email_address="postauthor@example.com", full_name="postauthor")
     post1 = create_test_post(author=post_author, content="A post to be liked")
 
     assert user1.has_liked_post(post1) == False
@@ -31,7 +31,7 @@ def test_like_post(db, create_test_user, create_test_post):
 
 def test_unlike_post(db, create_test_user, create_test_post):
     """Test unliking a post."""
-    user1 = create_test_user(username="unliker", email="unliker@example.com")
+    user1 = create_test_user(email_address="unliker@example.com", full_name="unliker")
     post1 = create_test_post(content="A post to be unliked")
 
     # First, like the post
@@ -53,7 +53,7 @@ def test_unlike_post(db, create_test_user, create_test_post):
 
 def test_like_own_post(db, create_test_user, create_test_post):
     """Test if a user can like their own post (usually allowed)."""
-    user1 = create_test_user(username="selfliker", email="selfliker@example.com")
+    user1 = create_test_user(email_address="selfliker@example.com", full_name="selfliker")
     post1 = create_test_post(author=user1, content="My own post")
 
     result = user1.like_post(post1)
@@ -65,7 +65,7 @@ def test_like_own_post(db, create_test_user, create_test_post):
 
 def test_multiple_likes_same_user(db, create_test_user, create_test_post):
     """Test that a user cannot like the same post multiple times."""
-    user1 = create_test_user(username="multiliker", email="multiliker@example.com")
+    user1 = create_test_user(email_address="multiliker@example.com", full_name="multiliker")
     post1 = create_test_post(content="Post for multi-like test")
 
     user1.like_post(post1)
@@ -81,8 +81,8 @@ def test_multiple_likes_same_user(db, create_test_user, create_test_post):
 
 def test_multiple_users_like_post(db, create_test_user, create_test_post):
     """Test that multiple users can like the same post."""
-    user1 = create_test_user(username="userone", email="userone@example.com")
-    user2 = create_test_user(username="usertwo", email="usertwo@example.com")
+    user1 = create_test_user(email_address="userone@example.com", full_name="userone")
+    user2 = create_test_user(email_address="usertwo@example.com", full_name="usertwo")
     post1 = create_test_post(content="Popular post")
 
     user1.like_post(post1)
@@ -98,7 +98,7 @@ def test_multiple_users_like_post(db, create_test_user, create_test_post):
 
 def test_unlike_not_liked_post(db, create_test_user, create_test_post):
     """Test unliking a post that was not liked by the user."""
-    user1 = create_test_user(username="cautiousunliker", email="cautious@example.com")
+    user1 = create_test_user(email_address="cautious@example.com", full_name="cautiousunliker")
     post1 = create_test_post(content="A post never liked")
 
     result = user1.unlike_post(post1) # Should return False
@@ -109,7 +109,7 @@ def test_unlike_not_liked_post(db, create_test_user, create_test_post):
 
 def test_post_like_cascade_delete_on_user_delete(db, create_test_user, create_test_post):
     """Test that PostLike records are deleted when a user is deleted."""
-    user_to_delete = create_test_user(username="userdel", email="userdel@example.com")
+    user_to_delete = create_test_user(email_address="userdel@example.com", full_name="userdel")
     post1 = create_test_post(content="Post liked by user_to_delete")
     post2 = create_test_post(content="Another post liked by user_to_delete")
 
@@ -131,8 +131,8 @@ def test_post_like_cascade_delete_on_user_delete(db, create_test_user, create_te
 
 def test_post_like_cascade_delete_on_post_delete(db, create_test_user, create_test_post):
     """Test that PostLike records are deleted when a post is deleted."""
-    user1 = create_test_user(username="user1fordelpost", email="u1@example.com")
-    user2 = create_test_user(username="user2fordelpost", email="u2@example.com")
+    user1 = create_test_user(email_address="u1@example.com", full_name="user1fordelpost")
+    user2 = create_test_user(email_address="u2@example.com", full_name="user2fordelpost")
     post_to_delete = create_test_post(content="Post to be deleted")
 
     user1.like_post(post_to_delete)
@@ -164,7 +164,7 @@ def test_post_like_cascade_delete_on_post_delete(db, create_test_user, create_te
 # Tests for Password Reset Token
 def test_get_reset_password_token(db, create_test_user, app): # Added app fixture for app.config
     """Test token generation."""
-    user = create_test_user(username="tokenuser", email="token@example.com")
+    user = create_test_user(email_address="token@example.com", full_name="tokenuser")
     with app.app_context(): # Need app context for current_app.config['SECRET_KEY']
         token = user.get_reset_password_token()
     assert token is not None
@@ -172,7 +172,7 @@ def test_get_reset_password_token(db, create_test_user, app): # Added app fixtur
 
 def test_verify_reset_password_token_valid(db, create_test_user, app):
     """Test token verification with a valid token."""
-    user = create_test_user(username="validtokenuser", email="validtoken@example.com")
+    user = create_test_user(email_address="validtoken@example.com", full_name="validtokenuser")
     with app.app_context():
         token = user.get_reset_password_token()
         verified_user = User.verify_reset_password_token(token)
@@ -182,7 +182,7 @@ def test_verify_reset_password_token_valid(db, create_test_user, app):
 
 def test_verify_reset_password_token_expired(db, create_test_user, app):
     """Test token verification with an expired token."""
-    user = create_test_user(username="expiredtokenuser", email="expiredtoken@example.com")
+    user = create_test_user(email_address="expiredtoken@example.com", full_name="expiredtokenuser")
     with app.app_context():
         token = user.get_reset_password_token(expires_in_seconds=-1) # Expired token
         verified_user = User.verify_reset_password_token(token)
@@ -190,7 +190,7 @@ def test_verify_reset_password_token_expired(db, create_test_user, app):
 
 def test_verify_reset_password_token_invalid_signature(db, create_test_user, app):
     """Test token verification with an invalid signature (tampered token)."""
-    user = create_test_user(username="tamperedtokenuser", email="tampered@example.com")
+    user = create_test_user(email_address="tampered@example.com", full_name="tamperedtokenuser")
     with app.app_context():
         token_good_user = user.get_reset_password_token()
 
@@ -211,8 +211,8 @@ def test_verify_reset_password_token_invalid_signature(db, create_test_user, app
 
 def test_verify_reset_password_token_different_user_id_payload(db, create_test_user, app):
     """Test token verification with a validly signed token but incorrect user_id in payload."""
-    user1 = create_test_user(username="user1payload", email="user1payload@example.com")
-    # user2 = create_test_user(username="user2payload", email="user2payload@example.com")
+    user1 = create_test_user(email_address="user1payload@example.com", full_name="user1payload")
+    # user2 = create_test_user(email_address="user2payload@example.com", full_name="user2payload")
 
     import jwt
     from datetime import datetime, timedelta, timezone

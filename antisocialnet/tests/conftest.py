@@ -183,10 +183,11 @@ def db(app, request): # request is a pytest fixture
         transaction = connection.begin()
 
         options = {'bind': connection, 'binds': {}}
-        scoped_session_factory = _db.create_scoped_session(options=options)
+        # Corrected method name based on AttributeError hint
+        scoped_session = _db._make_scoped_session(options=options) # Using _make_scoped_session
 
         original_session = _db.session
-        _db.session = scoped_session_factory
+        _db.session = scoped_session
 
         # Yield the SQLAlchemy instance, tests will use _db.session
         yield _db
@@ -196,12 +197,29 @@ def db(app, request): # request is a pytest fixture
         connection.close()
         _db.session = original_session
 
+import re # For CSRF token extraction
+from datetime import datetime, timezone # For create_test_post
+from flask import url_for # For logged_in_client and admin_client
+
 # Fixture to create a test user and add to session
 @pytest.fixture
-def create_test_user(db):
-    def _create_user(username="testuser", email="test@example.com", password="password", is_admin=False, is_approved=True):
-        user = User(username=username, email=email, full_name=username.capitalize(), is_admin=is_admin, is_approved=is_approved, is_active=True)
+def create_test_user(db): # db fixture provides transactional session
+    # Parameter 'email_address' is used for the User model's 'username' field.
+    def _create_user(email_address="testuser@example.com", password="password",
+                     full_name=None, is_admin=False, is_approved=True, is_active=True,
+                     profile_info=None, website_url=None, is_profile_public=True):
+
+        user = User()
+        user.username = email_address # User model's username is the email
         user.set_password(password)
+        user.full_name = full_name if full_name else email_address.split('@')[0].capitalize()
+        user.is_admin = is_admin
+        user.is_approved = is_approved
+        user.is_active = is_active
+        user.profile_info = profile_info
+        user.website_url = website_url
+        user.is_profile_public = is_profile_public
+
         db.session.add(user)
         db.session.commit()
         return user
@@ -210,24 +228,87 @@ def create_test_user(db):
 # Fixture to create a test post
 @pytest.fixture
 def create_test_post(db, create_test_user):
-    def _create_post(author=None, content="Test post content"):
+    _default_author_counter = 0
+    def _create_post(author=None, content="Test post content", is_published=True, published_at=None):
+        nonlocal _default_author_counter
         if author is None:
-            author = create_test_user(username="postauthor", email="author@example.com")
-        post = Post(content=content, user_id=author.id, is_published=True, published_at=datetime.utcnow())
+            # Use a unique email for the default post author to avoid conflicts
+            _default_author_counter += 1
+            author_email = f"default_post_author_{_default_author_counter}@example.com"
+            author = create_test_user(email_address=author_email)
+
+        if published_at is None:
+            published_at = datetime.now(timezone.utc)
+
+        post = Post(content=content, user_id=author.id, is_published=is_published, published_at=published_at)
         db.session.add(post)
         db.session.commit()
         return post
     return _create_post
 
+def _get_csrf_token(client, login_url):
+    """Helper to fetch CSRF token from a form page."""
+    rv = client.get(login_url)
+    assert rv.status_code == 200
+    match = re.search(r'name="csrf_token" type="hidden" value="([^"]+)"', rv.data.decode())
+    assert match, "CSRF token not found in login page"
+    return match.group(1)
+
 # Fixture to log in a user
 @pytest.fixture
-def logged_in_client(client, create_test_user):
-    user = create_test_user(username="loginuser", email="login@example.com", password="password")
-    # Simulate login - directly manipulating session is complex with Flask-Login
-    # It's better to use the login route with the test client
-    response = client.post('/login', data=dict(
-        username=user.email, # Assuming login uses email as username field
-        password="password"
-    ), follow_redirects=True)
-    assert response.status_code == 200 # Check login was successful
-    return client # client is now authenticated
+def logged_in_client(client, app, create_test_user, db): # Added db to ensure user creation within session
+    # Ensure this email is unique or managed if multiple logged_in_clients are used in one test.
+    user_email = "login_fixture_user@example.com"
+    user_password = "password"
+
+    # Use the db (transactional session) provided by the db fixture
+    user = create_test_user(email_address=user_email, password=user_password, is_approved=True, is_active=True)
+
+    with app.test_request_context(): # For url_for
+        login_url = url_for('auth.login')
+        csrf_token = _get_csrf_token(client, login_url)
+
+    response = client.post(login_url, data={
+        'username': user.username, # User model uses email as username
+        'password': user_password,
+        'csrf_token': csrf_token
+    }, follow_redirects=True)
+
+    assert response.status_code == 200, f"Login failed: {response.data.decode()}"
+    assert b"Logout" in response.data, "Logout link not found, login might have failed."
+
+    return client
+
+@pytest.fixture
+def admin_client(client, app, create_test_user, db): # Added db
+    admin_email = "admin_fixture_user@example.com" # Ensure this is unique if used alongside other fixtures
+    admin_password = "password"
+
+    admin_user = create_test_user(
+        email_address=admin_email,
+        password=admin_password,
+        is_admin=True,
+        is_approved=True,
+        is_active=True
+    )
+
+    with app.test_request_context(): # For url_for
+        login_url = url_for('auth.login')
+        csrf_token = _get_csrf_token(client, login_url) # Use helper
+
+    response = client.post(login_url, data={
+        'username': admin_user.username, # User model uses email as username
+        'password': admin_password,
+        'csrf_token': csrf_token
+    }, follow_redirects=True)
+
+    assert response.status_code == 200, f"Admin login failed: {response.data.decode()}"
+    assert b"Logout" in response.data, "Logout link not found, admin login might have failed."
+    # Add a check specific to admin users, e.g., visibility of an "Admin" link or section
+    # This depends on your application's templates.
+    # For example, if admins see an "Admin Dashboard" link:
+    # assert b"Admin Dashboard" in response.data
+    # Or if there's a specific part of the layout for admins:
+    assert b"Admin" in response.data # A simple check, adjust as per your app's admin indicators
+
+    return client
