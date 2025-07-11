@@ -12,6 +12,10 @@
   transform: scale(0.95) translateY(-10px); // Initial state for animation
   transform-origin: top center; // Default origin, JS might adjust based on arrow
   visibility: hidden;
+  // Default positioning if JS doesn't override (e.g. for the header menu)
+  // Set a default top, but right/left should be specific to context.
+  // top: var(--headerbar-height, 56px); // Example if headerbar-height is a var
+
   transition: opacity var(--animation-duration-short) var(--animation-ease-out-cubic),
               transform var(--animation-duration-short) var(--animation-ease-out-cubic),
               visibility 0s linear var(--animation-duration-short);
@@ -28,9 +32,25 @@
   &.menu-popover, &.menu { // Allow .menu as a general class for menu popovers
     background-color: var(--popover-bg-color);
     color: var(--window-fg-color);
-    border-radius: var(--border-radius-large); // Libadwaita popovers often use larger radius
+    border-radius: var(--border-radius-large);
     box-shadow: var(--popover-box-shadow);
-    padding: var(--spacing-xs) 0; // Menus have tighter vertical padding, no horizontal on surface
+    padding: var(--spacing-xs) 0;
+    min-width: 200px; // Ensure a reasonable minimum width for menus
+
+    // Default positioning for a menu popover, e.g. the main app menu in the header.
+    // Applied if JS doesn't set top/left inline styles.
+    // Assumes .main-app-menu-container is the reference for this specific menu.
+    // Since .adw-popover is position:fixed, these are viewport relative.
+    &.menu-popover { // Be more specific for the headerbar's menu popover
+        // Check if it's the one in the headerbar (which has no explicit JS positioning)
+        // This is a bit of a heuristic. A dedicated class would be better.
+        &:not([style*="top:"]):not([style*="left:"]) {
+             // Approx header height (48px from _headerbar.scss) + small gap (4px)
+            top: calc(48px + 4px);
+            right: var(--spacing-s, 6px); // Offset from the right viewport edge
+            transform-origin: top right; // Animation origin for right-aligned popover
+        }
+    }
 
     .adw-list-box { // ListBox inside a menu popover
       background-color: transparent; // ListBox itself is transparent

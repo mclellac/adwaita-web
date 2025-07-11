@@ -4182,6 +4182,12 @@ $icon-base-path: '../data/icons/symbolic/';
   mask-image: url($icon-base-path + 'web-browser-symbolic.svg');
 }
 
+.icon-actions-close-symbolic { // Added definition for dialogs
+  @extend %symbolic-icon-base;
+  -webkit-mask-image: url($icon-base-path + 'window-close-symbolic.svg'); // Assuming same icon as window-close
+  mask-image: url($icon-base-path + 'window-close-symbolic.svg');
+}
+
 .icon-window-close-symbolic {
   @extend %symbolic-icon-base;
   -webkit-mask-image: url($icon-base-path + 'window-close-symbolic.svg');

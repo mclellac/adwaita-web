@@ -30,8 +30,9 @@
         display: none; /* Hide title */
       }
       .adw-dialog-close-button { /* This is the close button inside the header */
-        order: -1; /* Move to start of flex container */
-        margin-right: auto; /* Push other items (none visible) to the right */
+        // order: -1; /* Removed */
+        // margin-right: auto; /* Removed */
+        margin-left: auto; /* Pushes button to the far right of the flex container */
       }
       /* Close button styling relies on global .adw-button, .circular, .flat, .adw-icon, .icon-window-close-symbolic */
       /* Ensure these classes are effective or provide minimal overrides if needed for shadow DOM context */
