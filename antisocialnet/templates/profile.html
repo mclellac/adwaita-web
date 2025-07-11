@@ -376,13 +376,24 @@
                 </div>
                 <form method="POST" action="{{ url_for('profile.upload_gallery_photo') }}" enctype="multipart/form-data" class="gallery-upload-form">
                     {{ gallery_upload_form.hidden_tag() if gallery_upload_form else '' }} {# CSRF token #}
-                    <div class="adw-entry-row {{ 'has-error' if gallery_upload_form and gallery_upload_form.photos.errors else '' }}">
-                        <div class="adw-entry-row-text-content">
-                            <label for="{{ gallery_upload_form.photos.id if gallery_upload_form else 'gallery_photos_input' }}" class="adw-entry-row-title">{{ gallery_upload_form.photos.label.text if gallery_upload_form else 'Photo Files' }}</label>
-                            {% if gallery_upload_form and gallery_upload_form.photos.errors %}<span class="adw-entry-row-subtitle error-text">{{ gallery_upload_form.photos.errors|join(' ') }}</span>{% endif %}
+
+                    {# File Input - Custom Styling Approach #}
+                    <div class="form-field-container {{ 'has-error' if gallery_upload_form and gallery_upload_form.photos.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-s) var(--spacing-m);">
+                        <label class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.photos.label.text if gallery_upload_form else 'Photo Files' }}</label>
+                        {% if gallery_upload_form and gallery_upload_form.photos.errors %}
+                            <p class="adw-label caption error-text" style="margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.photos.errors|join(' ') }}</p>
+                        {% endif %}
+                        <div class="adw-box adw-box-horizontal adw-box-spacing-s align-center">
+                            {# Visually hidden actual file input #}
+                            {{ gallery_upload_form.photos(style="display:none;", id="gallery_photos_input_actual") if gallery_upload_form }}
+                            {# Styled label acting as a button #}
+                            <label for="gallery_photos_input_actual" class="adw-button">
+                                <span class="adw-icon icon-actions-document-open-symbolic"></span> Choose Files
+                            </label>
+                            <span id="gallery-photo-filenames" class="adw-label caption" style="margin-left: var(--spacing-s);">No files selected</span>
                         </div>
-                        {{ gallery_upload_form.photos(class="adw-entry adw-entry-row-entry") if gallery_upload_form }}
                     </div>
+
                     {# Caption Textarea - Revised Structure #}
                     <div class="form-field-container {{ 'has-error' if gallery_upload_form and gallery_upload_form.caption.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);">
                         <label for="{{ gallery_upload_form.caption.id if gallery_upload_form else 'gallery_caption_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.caption.label.text if gallery_upload_form else 'Caption' }}</label>
@@ -739,6 +750,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 profileBioExpander.classList.toggle('expanded', !isExpanded); // For icon rotation
             });
         }
+    }
+
+    // JavaScript for styled file input
+    const actualFileInput = document.getElementById('gallery_photos_input_actual');
+    const fileNamesSpan = document.getElementById('gallery-photo-filenames');
+
+    if (actualFileInput && fileNamesSpan) {
+        actualFileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                if (this.files.length === 1) {
+                    fileNamesSpan.textContent = this.files[0].name;
+                } else {
+                    fileNamesSpan.textContent = `${this.files.length} files selected`;
+                }
+            } else {
+                fileNamesSpan.textContent = 'No files selected';
+            }
+        });
     }
 });
 </script>
