@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import (
     BooleanField,
+    FileField,  # Added FileField back
     MultipleFileField,
     PasswordField,
     StringField,
