@@ -53,8 +53,9 @@ adw-dialog {
     }
 
     .adw-dialog-close-button {
-      order: -1; // Move to start of flex container
-      margin-right: auto; // Push other items (none visible) to the right
+      // order: -1; // Removed
+      // margin-right: auto; // Removed
+      margin-left: auto; // Pushes button to the far right of the flex container
       // Ensure it's visible and clickable, additional styling if needed:
       // e.g., color if it was inheriting from a now-transparent header
     }
