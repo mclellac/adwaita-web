@@ -54,7 +54,7 @@ def test_site_settings_page_loads_for_admin(admin_client):
 
 def test_site_settings_update_successful(admin_client, app, db):
     """Test POST /admin/site-settings successfully updates settings."""
-    with app.app_context(): # Use app context for form token
+    with admin_client.application.test_request_context(): # Use test_request_context for form token
         from antisocialnet.forms import SiteSettingsForm
         form = SiteSettingsForm()
         token = form.csrf_token.current_token
@@ -80,7 +80,7 @@ def test_site_settings_update_successful(admin_client, app, db):
         assert SiteSetting.get('allow_registrations') == True
 
     # Test updating to False for boolean
-    with app.app_context():
+    with admin_client.application.test_request_context(): # Use test_request_context for form token
         from antisocialnet.forms import SiteSettingsForm
         form = SiteSettingsForm()
         token = form.csrf_token.current_token
@@ -97,7 +97,7 @@ def test_site_settings_update_successful(admin_client, app, db):
 
 def test_site_settings_update_validation_error(admin_client, app):
     """Test POST /admin/site-settings with validation errors (e.g., empty title)."""
-    with app.app_context():
+    with admin_client.application.test_request_context(): # Use test_request_context for form token
         from antisocialnet.forms import SiteSettingsForm
         form = SiteSettingsForm()
         token = form.csrf_token.current_token
@@ -114,7 +114,7 @@ def test_site_settings_update_validation_error(admin_client, app):
 
 def test_site_settings_update_invalid_ppp(admin_client, app):
     """Test POST /admin/site-settings with invalid posts_per_page value."""
-    with app.app_context():
+    with admin_client.application.test_request_context(): # Use test_request_context for form token
         from antisocialnet.forms import SiteSettingsForm
         form = SiteSettingsForm()
         token = form.csrf_token.current_token
@@ -191,9 +191,9 @@ def test_approve_user_successful(admin_client, app, db, create_test_user):
     user_id = pending_user.id
     assert not pending_user.is_approved and not pending_user.is_active
 
-    with app.app_context(): # For CSRF token
+    with admin_client.application.test_request_context(): # For CSRF token
         from flask_wtf import FlaskForm
-        form = FlaskForm()
+        form = FlaskForm() # Basic form for CSRF token generation
         token = form.csrf_token.current_token
 
     response = admin_client.post(url_for('admin.approve_user', user_id=user_id), data={'csrf_token':token}, follow_redirects=True)
@@ -212,9 +212,9 @@ def test_reject_user_successful(admin_client, app, db, create_test_user):
     user_id = pending_user.id
     assert User.query.get(user_id) is not None
 
-    with app.app_context():
+    with admin_client.application.test_request_context(): # For CSRF token
         from flask_wtf import FlaskForm
-        form = FlaskForm()
+        form = FlaskForm() # Basic form for CSRF token generation
         token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.reject_user', user_id=user_id), data={'csrf_token':token}, follow_redirects=True)
     assert response.status_code == 200
@@ -224,9 +224,9 @@ def test_reject_user_successful(admin_client, app, db, create_test_user):
 
 def test_approve_nonexistent_user(admin_client, app):
     """Attempt to approve a non-existent user returns 404."""
-    with app.app_context():
+    with admin_client.application.test_request_context(): # For CSRF token
         from flask_wtf import FlaskForm
-        form = FlaskForm()
+        form = FlaskForm() # Basic form for CSRF token generation
         token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.approve_user', user_id=99999), data={'csrf_token':token})
     assert response.status_code == 404
@@ -234,9 +234,9 @@ def test_approve_nonexistent_user(admin_client, app):
 def test_approve_user_already_approved(admin_client, app, db, create_test_user):
     """Attempt to approve an already approved user."""
     approved_user = create_test_user(email_address="alreadyok@example.com", full_name="Already OK", is_approved=True, is_active=True)
-    with app.app_context():
+    with admin_client.application.test_request_context(): # For CSRF token
         from flask_wtf import FlaskForm
-        form = FlaskForm()
+        form = FlaskForm() # Basic form for CSRF token generation
         token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.approve_user', user_id=approved_user.id), data={'csrf_token':token}, follow_redirects=True)
     assert response.status_code == 200
@@ -330,9 +330,9 @@ def test_resolve_flag_successful(admin_client, app, db, create_test_user, create
 
     assert not active_flag.is_resolved
 
-    with app.app_context():
+    with admin_client.application.test_request_context(): # For CSRF token
         from flask_wtf import FlaskForm
-        form = FlaskForm()
+        form = FlaskForm() # Basic form for CSRF token generation
         token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.resolve_flag', flag_id=flag_id), data={'csrf_token':token}, follow_redirects=True)
     assert response.status_code == 200
@@ -350,9 +350,9 @@ def test_resolve_flag_successful(admin_client, app, db, create_test_user, create
 
 def test_resolve_flag_nonexistent(admin_client, app):
     """Attempt to resolve a non-existent flag returns 404."""
-    with app.app_context():
+    with admin_client.application.test_request_context(): # For CSRF token
         from flask_wtf import FlaskForm
-        form = FlaskForm()
+        form = FlaskForm() # Basic form for CSRF token generation
         token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.resolve_flag', flag_id=999888), data={'csrf_token':token})
     assert response.status_code == 404
@@ -360,15 +360,20 @@ def test_resolve_flag_nonexistent(admin_client, app):
 def test_resolve_flag_already_resolved(admin_client, app, db, create_test_user, create_test_post):
     """Attempt to resolve an already resolved flag."""
     flagger = create_test_user(email_address="farf@example.com", full_name="Flag AlreadyRes Flagger")
-    admin_user_obj = User.query.filter_by(username="admin@example.com").first() # admin_client uses admin@example.com
-    comment = Comment(text="Comment for already resolved flag", user_id=flagger.id, post_id=create_test_post().id)
+    # Get the admin user created by the admin_client fixture
+    with admin_client.application.app_context():
+        admin_user_for_setup = User.query.filter_by(username="admin_fixture_user@example.com").first()
+        assert admin_user_for_setup is not None, "Admin user 'admin_fixture_user@example.com' not found for test setup."
+
+    comment_post = create_test_post() # Create post in the same session
+    comment = Comment(text="Comment for already resolved flag", user_id=flagger.id, post_id=comment_post.id)
     db.session.add(comment); db.session.commit()
-    resolved_flag = CommentFlag(comment_id=comment.id, flagger_user_id=flagger.id, is_resolved=True, resolver_user_id=admin_user_obj.id)
+    resolved_flag = CommentFlag(comment_id=comment.id, flagger_user_id=flagger.id, is_resolved=True, resolver_user_id=admin_user_for_setup.id)
     db.session.add(resolved_flag); db.session.commit()
 
-    with app.app_context():
+    with admin_client.application.test_request_context(): # For CSRF token
         from flask_wtf import FlaskForm
-        form = FlaskForm()
+        form = FlaskForm() # Basic form for CSRF token generation
         token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.resolve_flag', flag_id=resolved_flag.id), data={'csrf_token':token}, follow_redirects=True)
     assert response.status_code == 200
