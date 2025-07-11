@@ -133,8 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const authorProfileUrl = comment.author.profile_url;
             const authorAvatarAlt = comment.author.full_name;
 
-            commentDiv.innerHTML = \`
-                <span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">
+            commentDiv.innerHTML = \`                <span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">
                     <img src="\${comment.author.profile_photo_url}" alt="\${authorAvatarAlt} avatar">
                 </span>
                 <span class="adw-action-row-text-content">
@@ -199,8 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let formHtml;
         if (userHasLiked) {
-            formHtml = \`
-                <form action="/like/unlike/\${itemType}/\${itemId}" method="POST" style="display: inline;" class="like-form">
+            formHtml = \`                <form action="/like/unlike/\${itemType}/\${itemId}" method="POST" style="display: inline;" class="like-form">
                     <input type="hidden" name="csrf_token" value="\${csrfTokenVal}">
                     <input type="hidden" name="action_type" value="unlike">
                     <button type="submit" class="adw-button small flat unlike-button" aria-label="Unlike \${itemType}">
@@ -209,8 +207,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </form>
             \`;
         } else {
-            formHtml = \`
-                <form action="/like/\${itemType}/\${itemId}" method="POST" style="display: inline;" class="like-form">
+            formHtml = \`                <form action="/like/\${itemType}/\${itemId}" method="POST" style="display: inline;" class="like-form">
                     <input type="hidden" name="csrf_token" value="\${csrfTokenVal}">
                     <input type="hidden" name="action_type" value="like">
                     <button type="submit" class="adw-button small flat suggested-action like-button" aria-label="Like \${itemType}">
