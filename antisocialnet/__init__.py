@@ -209,7 +209,7 @@ def create_app(config_name=None, yaml_config_override=None):
         # DENY: Prevents the page from being displayed in a frame, regardless of the site attempting to do so.
         # SAMEORIGIN: Allows the page to be displayed in a frame on the same origin as the page itself.
         # ALLOW-FROM uri: Allows the page to be displayed in a frame only on the specified origin uri. (Obsolete in modern browsers)
-        if not isinstance(app.config, TestConfig): # Don't add for tests if it interferes
+        if not current_app.testing: # Use current_app.testing to check if in testing mode
              response.headers['X-Frame-Options'] = 'SAMEORIGIN'
         # Other headers like Content-Security-Policy (CSP) could also be added here
         # response.headers['Content-Security-Policy'] = "default-src 'self'"
