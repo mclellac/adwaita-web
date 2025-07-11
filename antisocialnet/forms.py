@@ -144,6 +144,9 @@ class PhotoCommentForm(FlaskForm):
     # photo_id and user_id will be handled by the route
     submit = SubmitField('Post Comment')
 
+    class Meta:
+        csrf = False # Disable CSRF for this API-specific form
+
 # Empty forms for CSRF-protected actions like Like/Unlike
 class LikeForm(FlaskForm):
     submit = SubmitField('Like') # Text can be changed in template if needed for context

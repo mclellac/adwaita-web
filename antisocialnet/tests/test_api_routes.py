@@ -57,8 +57,14 @@ def test_api_feed_unauthenticated(client):
         # json_data = response.get_json()
         # assert json_data['message'] == "Unauthenticated" # Or similar
 
-def test_api_feed_authenticated_empty(client, logged_in_client):
+def test_api_feed_authenticated_empty(client, logged_in_client, db): # Added db fixture
     """Test authenticated GET /api/v1/feed with no posts or photos."""
+    # Clean up existing posts and photos to ensure isolation for this test
+    Post.query.delete()
+    UserPhoto.query.delete()
+    Activity.query.delete() # Also clear activities as they might become feed items
+    db.session.commit()
+
     response = logged_in_client.get(url_for('api.get_feed'))
     assert response.status_code == 200
     json_data = response.get_json()

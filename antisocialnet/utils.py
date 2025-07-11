@@ -27,6 +27,8 @@ def generate_slug_util(text, max_length=255):
     # Truncate to max_length
     if max_length > 0:
         text = text[:max_length]
+        # Strip hyphens that might have become trailing due to truncation
+        text = text.strip('-')
     return text
 
 def human_readable_date(dt, show_time=True):
@@ -193,7 +195,9 @@ def extract_mentions(text):
     # )                         - end capture group 1
     # This regex allows for names like @Jane, @Jane_Doe, @Jane Doe, @J'Doe
     # It stops if there are multiple spaces or other punctuation (except apostrophe within words).
-    mention_regex = r'@([A-Za-z0-9_\']+(?:\s[A-Za-z0-9_\']+)*)'
+    # To align with test_extract_mentions which expects single-token mentions for "@world and" -> "world"
+    # the regex should only capture the first word-like token.
+    mention_regex = r'@([A-Za-z0-9_\']+)' # Simplified to capture single tokens
     mentions = re.findall(mention_regex, text)
     # Strip trailing spaces from extracted mentions, just in case regex captures it with lookaheads/behinds (though current one shouldn't)
     # Also, normalize multiple spaces within a name to a single space if the regex were more lenient.

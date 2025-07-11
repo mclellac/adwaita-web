@@ -158,26 +158,23 @@ def delete_database_tables(flask_app, script_args):
     if is_non_interactive_delete:
         print("Non-interactive mode: Deleting all database tables as --deletedb is present with admin creation flags.")
         with flask_app.app_context():
-            print("Dropping and recreating public schema (CASCADE)...")
-            db.session.execute(text("DROP SCHEMA public CASCADE;"))
-            db.session.execute(text("CREATE SCHEMA public;"))
-            # Depending on the DB user's privileges, might need to grant usage on the new schema
-            # For simplicity, assuming the user has rights to create tables in the new public schema.
-            # db.session.execute(text(f"GRANT ALL ON SCHEMA public TO {flask_app.config.get('DB_USER', 'postgres')};"))
+            print("Dropping all tables...")
+            db.drop_all()
+            # db.create_all() # Tables will be recreated later by the main script logic
+            # No explicit commit needed for DDL usually, but good practice with session scope
             db.session.commit()
-        print("Public schema dropped and recreated. All tables deleted non-interactively.")
+        print("All tables dropped non-interactively.")
         return True
     elif script_args.deletedb: # Interactive deletion
         try:
-            confirm = input("Are you sure you want to delete all database tables (by dropping and recreating the public schema)? This cannot be undone. (yes/no): ").lower()
+            confirm = input("Are you sure you want to delete all database tables? This cannot be undone. (yes/no): ").lower()
             if confirm == 'yes':
-                print("Deleting database tables (dropping and recreating public schema)...")
+                print("Deleting all database tables...")
                 with flask_app.app_context():
-                    db.session.execute(text("DROP SCHEMA public CASCADE;"))
-                    db.session.execute(text("CREATE SCHEMA public;"))
-                    # db.session.execute(text(f"GRANT ALL ON SCHEMA public TO {flask_app.config.get('DB_USER', 'postgres')};"))
+                    db.drop_all()
+                    # db.create_all() # Tables will be recreated later
                     db.session.commit()
-                print("Public schema dropped and recreated. All tables deleted.")
+                print("All tables deleted.")
                 return True
             else:
                 print("Table deletion cancelled.")
