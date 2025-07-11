@@ -314,30 +314,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Helper to fetch initial photo data for dialog, including like status
     async function fetchPhotoData(photoId) {
-        // This is a placeholder. You'd have an API endpoint like /api/photo/<photoId>/details
-        // that returns { id, caption, image_filename, like_count, user_has_liked }
-        // For now, simulate it based on what's on the page, which is incomplete for user_has_liked.
-        // This part requires backend changes if such an endpoint doesn't exist.
-        // For the demo, we'll try to guess based on existing UI elements if possible, or assume 'false'.
-        const gridPhotoCard = document.querySelector(`.gallery-photo-card .clickable-gallery-photo[data-photoid="\${photoId}"]`);
-        let like_count = 0;
-        let user_has_liked = false; // Default assumption
-
-        if (gridPhotoCard) {
-            const likeSection = gridPhotoCard.closest('.gallery-photo-card').querySelector('.like-section');
-            if (likeSection) {
-                const countEl = likeSection.querySelector('.like-count');
-                if (countEl) like_count = parseInt(countEl.textContent) || 0;
-                if (likeSection.querySelector('.unlike-button')) user_has_liked = true;
+        try {
+            const response = await fetch(`/photo/api/photos/\${photoId}/details`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({})); // Try to parse JSON error, fallback to empty obj
+                console.error(`Error fetching photo details for \${photoId}: \${response.status}`, errorData.message || 'Server returned an error');
+                return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: errorData.message || 'Could not load photo details.' };
             }
+            const data = await response.json();
+            if (data.status === 'success') {
+                return {
+                    id: data.id,
+                    like_count: data.like_count,
+                    user_has_liked: data.user_has_liked,
+                    error: false
+                };
+            } else { // API returned success HTTP code but status field in JSON is 'error'
+                console.error(`API error fetching photo details for \${photoId}:`, data.message);
+                return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: data.message || 'Failed to get photo details.'};
+            }
+        } catch (error) { // Network error or JSON parsing error
+            console.error('Network or JavaScript error fetching photo details:', error);
+            return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: 'Network error or invalid response.' };
         }
-        // This is a rough estimation. A proper API is better.
-        return {
-            id: photoId,
-            like_count: like_count,
-            user_has_liked: user_has_liked
-            // caption and image_filename are already passed to openDialog
-        };
     }
 
 

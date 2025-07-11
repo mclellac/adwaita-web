@@ -56,6 +56,30 @@ def view_photo_detail(photo_id):
     # Likes and other details can be accessed directly from photo object in template
     return render_template('photo_detail.html', photo=photo, comment_form=comment_form)
 
+@photo_bp.route('/api/photos/<int:photo_id>/details', methods=['GET'])
+def get_photo_details_api(photo_id):
+    photo = db.session.get(UserPhoto, photo_id)
+    if not photo:
+        return jsonify(status="error", message="Photo not found"), 404
+
+    # Basic permission check (similar to get_photo_comments)
+    # Adjust as per actual privacy model for photos/galleries
+    if not photo.user.is_profile_public and (not current_user.is_authenticated or current_user.id != photo.user.id):
+        # Could also add admin bypass here: and not current_user.is_admin
+        return jsonify(status="error", message="Forbidden"), 403
+
+    user_has_liked = False
+    if current_user.is_authenticated:
+        user_has_liked = current_user.has_liked_item('photo', photo.id)
+
+    return jsonify(
+        status="success",
+        id=photo.id,
+        # caption=photo.caption, # Client has this from data-caption
+        # image_filename=photo.image_filename, # Client has this from data-fullsrc
+        like_count=photo.like_count,
+        user_has_liked=user_has_liked
+    )
 
 @photo_bp.route('/api/photos/<int:photo_id>/comments', methods=['POST'])
 @login_required
