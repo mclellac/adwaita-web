@@ -68,6 +68,11 @@ def test_api_feed_authenticated_empty(client, logged_in_client):
 
 def test_api_feed_with_only_posts(client, logged_in_client, db, create_test_user):
     """Test API feed when only posts exist."""
+    # Clean up existing posts and photos to ensure isolation for item count
+    Post.query.delete()
+    UserPhoto.query.delete()
+    db.session.commit()
+
     author = create_test_user(email_address="aposta@example.com", full_name="API Post Author")
     post1 = create_api_test_post(db, author, content="API Post 1", days_offset=1) # Older
     post2 = create_api_test_post(db, author, content="API Post 2", days_offset=0) # Newer
@@ -100,6 +105,11 @@ def test_api_feed_with_only_posts(client, logged_in_client, db, create_test_user
 
 def test_api_feed_with_only_photos(client, logged_in_client, db, create_test_user):
     """Test API feed when only photos exist."""
+    # Clean up existing posts and photos to ensure isolation for item count
+    Post.query.delete()
+    UserPhoto.query.delete()
+    db.session.commit()
+
     uploader = create_test_user(email_address="aphou@example.com", full_name="API Photo Uploader")
     photo1 = create_api_test_photo(db, uploader, caption="API Photo 1", days_offset=2) # Oldest
     photo2 = create_api_test_photo(db, uploader, caption="API Photo 2", days_offset=0) # Newest
@@ -127,6 +137,11 @@ def test_api_feed_with_only_photos(client, logged_in_client, db, create_test_use
 
 def test_api_feed_mixed_content_sorted_correctly(client, logged_in_client, db, create_test_user):
     """Test API feed with mixed posts and photos, ensuring correct chronological order."""
+    # Clean up existing posts and photos
+    Post.query.delete()
+    UserPhoto.query.delete()
+    db.session.commit()
+
     user1 = create_test_user(email_address="mix1@example.com", full_name="Mixer User 1")
     user2 = create_test_user(email_address="mix2@example.com", full_name="Mixer User 2")
 
@@ -149,6 +164,11 @@ def test_api_feed_mixed_content_sorted_correctly(client, logged_in_client, db, c
 
 def test_api_feed_pagination(client, app, logged_in_client, db, create_test_user):
     """Test pagination for the API feed."""
+    # Clean up existing posts and photos to ensure isolation for item count
+    Post.query.delete()
+    UserPhoto.query.delete()
+    db.session.commit()
+
     user = create_test_user(email_address="apage@example.com", full_name="API Pager")
 
     # Override POSTS_PER_PAGE for this test via app config directly (SiteSetting not used by API for per_page)
@@ -168,7 +188,7 @@ def test_api_feed_pagination(client, app, logged_in_client, db, create_test_user
     response_p1 = logged_in_client.get(url_for('api.get_feed', page=1, per_page=2))
     json_p1 = response_p1.get_json()
     assert len(json_p1['items']) == 2
-    assert json_p1['items'][0]['data']['content_html_preview'].startswith(b"Feed Item 0") # Newest (days_offset=0)
+    assert json_p1['items'][0]['data']['content_html_preview'].startswith("<p>Feed Item 0") # Newest (days_offset=0)
     assert json_p1['pagination']['page'] == 1
     assert json_p1['pagination']['per_page'] == 2
     assert json_p1['pagination']['total_items'] == num_items
@@ -181,7 +201,7 @@ def test_api_feed_pagination(client, app, logged_in_client, db, create_test_user
     response_p3 = logged_in_client.get(url_for('api.get_feed', page=3, per_page=2))
     json_p3 = response_p3.get_json()
     assert len(json_p3['items']) == 1 # Last page has 1 item
-    assert json_p3['items'][0]['data']['content_html_preview'].startswith(b"Feed Item 4") # Oldest (days_offset=4)
+    assert json_p3['items'][0]['data']['content_html_preview'].startswith("<p>Feed Item 4") # Oldest (days_offset=4)
     assert json_p3['pagination']['page'] == 3
     assert json_p3['pagination']['has_next'] == False
     assert json_p3['pagination']['has_prev'] == True
@@ -202,7 +222,7 @@ def test_api_feed_post_liked_by_current_user(client, logged_in_client, db, creat
     assert json_not_liked['items'][0]['data']['is_liked_by_current_user'] == False
 
     # Scenario 2: Post liked by current user
-    like = PostLike(user_id=liking_user.id, post_id=test_post.id)
+    like = Like(user_id=liking_user.id, target_type='post', target_id=test_post.id)
     db.session.add(like)
     db.session.commit()
 

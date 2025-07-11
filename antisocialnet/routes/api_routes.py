@@ -97,7 +97,7 @@ def get_feed():
             serialized_item = serialize_post_item(item["original_object"])
             # Add is_liked_by_current_user if Post model has this method or similar check
             if current_user.is_authenticated: # current_user is available due to @login_required
-                 serialized_item["data"]["is_liked_by_current_user"] = current_user.has_liked_post(item["original_object"])
+                 serialized_item["data"]["is_liked_by_current_user"] = current_user.has_liked_item('post', item["original_object"].id)
             else:
                  serialized_item["data"]["is_liked_by_current_user"] = False
             serialized_feed_items.append(serialized_item)
@@ -177,7 +177,7 @@ def serialize_post_item(post):
             "title": None, # Assuming posts don't have titles, use content preview
             "content_html_preview": content_html_preview,
             "comment_count": post.comments.count(),
-            "like_count": post.likers.count(),
+                "like_count": post.like_count, # Use the existing property
             "url": url_for('post.view_post', post_id=post.id, _external=True),
             "categories": [{"slug": c.slug, "name": c.name} for c in post.categories],
             "tags": [{"slug": t.slug, "name": t.name} for t in post.tags],
@@ -203,7 +203,7 @@ def serialize_photo_item(photo):
             "image_url_large": url_for('static', filename=photo.image_filename, _external=True) if photo.image_filename else None,
             # "image_url_thumbnail": ..., # Placeholder
             "comment_count": photo.comments.count(),
-            "gallery_url": url_for('profile.view_gallery', username=photo.user.username, _anchor=f'photo-{photo.id}', _external=True)
+            "gallery_url": url_for('profile.view_gallery', user_id=photo.user.id, _anchor=f'photo-{photo.id}', _external=True)
         }
     }
 # Add other API routes here in the future

@@ -86,15 +86,20 @@ def login():
                 # Log email as it's relevant to a specific account status issue.
                 current_app.logger.warning(f"Login attempt by inactive user: '{user.username}' (ID: {user.id}).")
                 flash('Your account is not active. Please contact an administrator.', 'danger')
+                return redirect(url_for('auth.login')) # Stay on login page
             elif not user.is_approved:
                 # Log email as it's relevant to a specific account status issue.
                 current_app.logger.warning(f"Login attempt by unapproved user: '{user.username}' (ID: {user.id}).")
                 flash('Your account is pending admin approval.', 'danger')
-            else:
+                return redirect(url_for('auth.login')) # Stay on login page
+            else: # User is active and approved
                 login_user(user)
                 current_app.logger.info(f"User '{user.full_name}' (ID: {user.id}, Username/Email: {user.username}) logged in successfully.")
                 current_app.logger.debug(f"Session after login for user '{user.full_name}' (ID: {user.id}): {dict(session)}")
-            flash('Logged in successfully.', 'toast_success') # Changed to toast_success
+                flash('Logged in successfully.', 'toast_success') # Flash success only on actual login
+
+            # This block should only be reached if login_user() was called.
+            # The redirects for inactive/unapproved users prevent reaching here.
             next_page = request.args.get('next')
             # More robust security check for next_page
             if next_page:
