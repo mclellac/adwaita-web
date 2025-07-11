@@ -98,169 +98,130 @@ document.addEventListener('DOMContentLoaded', function () {
     const galleryPhotoDialogEl = document.getElementById('gallery-photo-dialog');
     const fullGalleryPhotoImgEl = document.getElementById('full-gallery-photo-img');
     const fullGalleryPhotoCaptionEl = document.getElementById('full-gallery-photo-caption');
-    const galleryPhotoCommentsListEl = document.getElementById('gallery-photo-comments-list');
-    const galleryPhotoDialogLikeSectionEl = document.getElementById('gallery-photo-dialog-like-section');
-    const placeholderCommentEl = galleryPhotoCommentsListEl ? galleryPhotoCommentsListEl.querySelector('.placeholder-comment') : null;
-    const newGalleryCommentFormEl = document.getElementById('new-gallery-comment-form');
-    const galleryCommentTextEl = document.getElementById('gallery-comment-text'); // Textarea for comment
-    const galleryCommentPhotoIdInputEl = document.getElementById('gallery-comment-photo-id'); // Hidden input in form
-    const galleryCommentErrorEl = document.getElementById('gallery-comment-error'); // Error display for comment form
-
-
     const clickableGalleryPhotos = document.querySelectorAll('.clickable-gallery-photo');
 
-    if (!galleryPhotoDialogEl || !fullGalleryPhotoImgEl || !fullGalleryPhotoCaptionEl || !galleryPhotoDialogLikeSectionEl || !galleryPhotoCommentsListEl ||
-        !newGalleryCommentFormEl || !galleryCommentTextEl || !galleryCommentPhotoIdInputEl || !galleryCommentErrorEl) {
-        console.warn("One or more gallery dialog elements (dialog, image, caption, like section, comments list, or comment form elements) not found. Full size photo viewing or interactions may not work.");
-        return;
+    // For later steps (likes, comments)
+    const galleryPhotoDialogLikeSectionEl = document.getElementById('gallery-photo-dialog-like-section');
+    const galleryPhotoCommentsListEl = document.getElementById('gallery-photo-comments-list');
+    const placeholderCommentEl = galleryPhotoCommentsListEl ? galleryPhotoCommentsListEl.querySelector('.placeholder-comment') : null;
+    const newGalleryCommentFormEl = document.getElementById('new-gallery-comment-form');
+    const galleryCommentTextEl = document.getElementById('gallery-comment-text');
+    const galleryCommentPhotoIdInputEl = document.getElementById('gallery-comment-photo-id'); // Already in HTML for the form
+    const galleryCommentErrorEl = document.getElementById('gallery-comment-error');
+
+
+    if (!galleryPhotoDialogEl || !fullGalleryPhotoImgEl || !fullGalleryPhotoCaptionEl || !galleryPhotoDialogLikeSectionEl ||
+        !galleryPhotoCommentsListEl || !newGalleryCommentFormEl || !galleryCommentTextEl || !galleryCommentPhotoIdInputEl || !galleryCommentErrorEl) {
+        console.warn("One or more key gallery dialog elements for basic display, likes, or comments are missing. Functionality may be affected.");
+        // Do not return yet, other functionalities might still be set up if elements exist.
     }
 
-    // --- Like Functionality ---
-    async function fetchPhotoDetails(photoId) {
+    // --- Minimal Like Functionality ---
+    function renderLikeButtonAndCount(photoId, likeCount, userHasLiked) {
+        if (!galleryPhotoDialogLikeSectionEl) return;
+        galleryPhotoDialogLikeSectionEl.innerHTML = ''; // Clear previous
+
+        const csrfTokenVal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const itemType = 'photo';
+        let actionUrl, buttonClass, buttonLabel, iconClass;
+
+        if (userHasLiked) {
+            actionUrl = \`/like/unlike/\${itemType}/\${photoId}\`;
+            buttonClass = 'adw-button small flat unlike-button'; // No 'suggested-action' for unlike
+            buttonLabel = \`Unlike \${itemType}\`;
+            iconClass = 'icon-actions-starred-symbolic';
+        } else {
+            actionUrl = \`/like/\${itemType}/\${photoId}\`;
+            buttonClass = 'adw-button small flat suggested-action like-button';
+            buttonLabel = \`Like \${itemType}\`;
+            iconClass = 'icon-actions-star-symbolic';
+        }
+
+        const formHtml = \`
+            <form action="\${actionUrl}" method="POST" style="display: inline;" class="like-form" data-item-type="\${itemType}" data-item-id="\${photoId}">
+                <input type="hidden" name="csrf_token" value="\${csrfTokenVal}">
+                <button type="submit" class="\${buttonClass}" aria-label="\${buttonLabel}">
+                    <span class="adw-icon \${iconClass}"></span>
+                </button>
+            </form>
+            <span class="adw-label caption like-count">\${likeCount}</span>
+        \`;
+        galleryPhotoDialogLikeSectionEl.innerHTML = formHtml;
+    }
+
+    async function fetchAndRenderLikes(photoId) {
+        if (!galleryPhotoDialogLikeSectionEl) return;
+        galleryPhotoDialogLikeSectionEl.innerHTML = '<span class="adw-label caption">Loading likes...</span>';
         try {
             const response = await fetch(\`/photo/api/photos/\${photoId}/details\`);
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                console.error(\`Error fetching photo details for \${photoId}: \${response.status}\`, errorData.message || \`Server returned an error\`);
-                return { error: true, message: errorData.message || \`Could not load photo details.\` };
+                throw new Error(\`Failed to fetch photo details: \${response.status}\`);
             }
             const data = await response.json();
-            if (data.status === \`success\`) {
-                return {
-                    id: data.id,
-                    like_count: data.like_count,
-                    user_has_liked: data.user_has_liked,
-                    error: false
-                };
+            if (data.status === 'success') {
+                renderLikeButtonAndCount(photoId, data.like_count, data.user_has_liked);
             } else {
-                console.error(\`API error fetching photo details for \${photoId}:\`, data.message);
-                return { error: true, message: data.message || \`Failed to get photo details.\` };
+                throw new Error(data.message || 'Could not parse photo details.');
             }
         } catch (error) {
-            console.error(\`Network or JavaScript error fetching photo details:\`, error);
-            return { error: true, message: \`Network error or invalid response while fetching photo details.\` };
+            console.error('Error fetching photo details for likes:', error);
+            galleryPhotoDialogLikeSectionEl.innerHTML = '<span class="adw-label caption error-text">Could not load likes.</span>';
         }
     }
 
-    function updateLikeSectionUI(likeSectionElement, photoId, itemType, likeCount, userHasLiked) {
-        likeSectionElement.innerHTML = ''; // Clear previous content
-        const csrfTokenVal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.style.display = 'inline';
-        form.classList.add('like-form'); // For event delegation
-
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrf_token';
-        csrfInput.value = csrfTokenVal;
-        form.appendChild(csrfInput);
-
-        const actionInput = document.createElement('input');
-        actionInput.type = 'hidden';
-        actionInput.name = 'action_type';
-        form.appendChild(actionInput);
-
-        const button = document.createElement('button');
-        button.type = 'submit';
-        button.classList.add('adw-button', 'small', 'flat');
-
-        const iconSpan = document.createElement('span');
-        iconSpan.classList.add('adw-icon');
-        button.appendChild(iconSpan);
-
-        if (userHasLiked) {
-            form.action = \`/like/unlike/\${itemType}/\${photoId}\`;
-            actionInput.value = 'unlike';
-            button.classList.add('unlike-button'); // Add class for specific styling if needed
-            button.setAttribute('aria-label', \`Unlike \${itemType}\`);
-            iconSpan.classList.add('icon-actions-starred-symbolic');
-        } else {
-            form.action = \`/like/\${itemType}/\${photoId}\`;
-            actionInput.value = 'like';
-            button.classList.add('suggested-action', 'like-button'); // Add classes for specific styling
-            button.setAttribute('aria-label', \`Like \${itemType}\`);
-            iconSpan.classList.add('icon-actions-star-symbolic');
-        }
-        form.appendChild(button);
-        likeSectionElement.appendChild(form);
-
-        const countSpan = document.createElement('span');
-        countSpan.classList.add('adw-label', 'caption', 'like-count');
-        countSpan.id = \`dialog-like-count-\${itemType}-\${photoId}\`; // Context prefix for dialog
-        countSpan.textContent = likeCount;
-        likeSectionElement.appendChild(countSpan);
-    }
-
-    async function handleLikeUnlikeSubmit(event) {
+    async function handleDialogLikeSubmit(event) {
         event.preventDefault();
         const form = event.target.closest('.like-form');
         if (!form) return;
 
-        const photoId = galleryPhotoDialogEl.dataset.currentPhotoId;
-        const itemType = 'photo'; // Hardcoded for gallery photos
-
+        const photoId = galleryPhotoDialogEl.dataset.currentPhotoId; // Get from dialog dataset
         if (!photoId) {
-            console.error("No currentPhotoId found on dialog for like/unlike action.");
+            console.error("No photoId found on dialog for like action");
             return;
         }
 
-        const actionUrl = form.action;
         const csrfToken = form.querySelector('input[name="csrf_token"]').value;
-        // const actionType = form.querySelector('input[name="action_type"]').value; // Not strictly needed for body if using form action
 
         try {
-            const response = await fetch(actionUrl, {
+            const response = await fetch(form.action, {
                 method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/x-www-form-urlencoded' // Standard for form submission
-                },
-                body: new URLSearchParams({ csrf_token: csrfToken }) // Minimal body, action in URL
+                headers: { 'X-CSRFToken': csrfToken },
+                body: new URLSearchParams({ csrf_token: csrfToken }) // Minimal body for form submission
             });
-
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: 'Unknown error during like/unlike.' }));
-                throw new Error(errorData.message || \`HTTP error! status: \${response.status}\`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || \`Like/Unlike action failed: \${response.status}\`);
             }
-
             const data = await response.json();
-
             if (data.status === 'success') {
-                updateLikeSectionUI(galleryPhotoDialogLikeSectionEl, photoId, itemType, data.new_like_count, data.user_has_liked);
+                // Re-render the like section with new data
+                renderLikeButtonAndCount(photoId, data.new_like_count, data.user_has_liked);
             } else {
-                throw new Error(data.message || 'Like/unlike action failed.');
+                throw new Error(data.message || 'Like/Unlike action response indicates failure.');
             }
         } catch (error) {
-            console.error('Error handling like/unlike:', error);
+            console.error('Error processing like/unlike:', error);
             if (window.Adw && Adw.createToast) {
-                Adw.createToast(error.message || 'Could not perform like/unlike action.', { type: 'error' });
+                Adw.createToast(error.message || 'Could not process like/unlike action.', {type: 'error'});
             } else {
-                alert(error.message || 'Could not perform like/unlike action.');
+                alert(error.message || 'Could not process like/unlike action.');
             }
+            // Optionally, re-fetch to ensure UI consistency even on error
+            fetchAndRenderLikes(photoId);
         }
     }
 
-    galleryPhotoDialogLikeSectionEl.addEventListener('submit', function(event) {
-        if (event.target.matches('.like-form')) {
-            handleLikeUnlikeSubmit(event);
-        }
-    });
-
-    async function fetchAndRenderLikes(photoId, likeSectionElement) {
-        const details = await fetchPhotoDetails(photoId);
-        if (details.error) {
-            likeSectionElement.innerHTML = \`<p class='adw-label caption error-text'>\${details.message}</p>\`;
-        } else {
-            updateLikeSectionUI(likeSectionElement, details.id, 'photo', details.like_count, details.user_has_liked);
-        }
+    if (galleryPhotoDialogLikeSectionEl) {
+        galleryPhotoDialogLikeSectionEl.addEventListener('submit', function(event) {
+            if (event.target.matches('.like-form')) {
+                handleDialogLikeSubmit(event);
+            }
+        });
     }
+    // --- End Minimal Like Functionality ---
 
-    // --- End Like Functionality ---
-
-    // --- Comment Display Functionality ---
-    function formatCommentDate(isoString) { // Keep this helper if it's not already global
+    // --- Minimal Comment Display & Post Functionality ---
+    function formatCommentDate(isoString) {
         const date = new Date(isoString);
         return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) + ' ' +
                date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
@@ -270,21 +231,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const commentDiv = document.createElement('div');
         commentDiv.classList.add('adw-action-row');
 
-        // Avatar
         const avatarSpan = document.createElement('span');
         avatarSpan.classList.add('adw-avatar', 'size-small');
-        // avatarSpan.style.marginRight = 'var(--spacing-s)'; // Removed: Styling should be CSS based
+        // avatarSpan.style.marginRight = 'var(--spacing-s)'; // CSS should handle this
         const avatarImg = document.createElement('img');
         avatarImg.src = comment.author.profile_photo_url;
         avatarImg.alt = \`\${comment.author.full_name} avatar\`;
         avatarSpan.appendChild(avatarImg);
         commentDiv.appendChild(avatarSpan);
 
-        // Text Content (Name, Comment, Date)
         const textContentSpan = document.createElement('span');
         textContentSpan.classList.add('adw-action-row-text-content');
-
-        // Author Name (Link or Span)
         if (comment.author.profile_url) {
             const authorLink = document.createElement('a');
             authorLink.href = comment.author.profile_url;
@@ -297,26 +254,21 @@ document.addEventListener('DOMContentLoaded', function () {
             authorSpan.textContent = comment.author.full_name;
             textContentSpan.appendChild(authorSpan);
         }
-
-        // Comment Text
         const commentTextSpan = document.createElement('span');
         commentTextSpan.classList.add('adw-action-row-subtitle');
-        commentTextSpan.textContent = comment.text; // Assuming comment.text is plain text
+        commentTextSpan.textContent = comment.text;
         textContentSpan.appendChild(commentTextSpan);
-
-        // Date
         const dateSmall = document.createElement('small');
         dateSmall.classList.add('adw-label', 'caption');
         dateSmall.textContent = formatCommentDate(comment.created_at);
         textContentSpan.appendChild(dateSmall);
-
         commentDiv.appendChild(textContentSpan);
         return commentDiv;
     }
 
     function displayGalleryComments(comments) {
-        galleryPhotoCommentsListEl.innerHTML = ''; // Clear previous comments
-
+        if (!galleryPhotoCommentsListEl) return;
+        galleryPhotoCommentsListEl.innerHTML = '';
         if (!comments || comments.length === 0) {
             if (placeholderCommentEl) {
                 placeholderCommentEl.hidden = false;
@@ -325,49 +277,38 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             return;
         }
-
-        if (placeholderCommentEl) {
-            placeholderCommentEl.hidden = true;
-        }
-
-        comments.forEach(comment => {
-            const commentItemEl = renderCommentItem(comment);
-            galleryPhotoCommentsListEl.appendChild(commentItemEl);
-        });
+        if (placeholderCommentEl) placeholderCommentEl.hidden = true;
+        comments.forEach(comment => galleryPhotoCommentsListEl.appendChild(renderCommentItem(comment)));
     }
 
     async function fetchAndRenderComments(photoId) {
         if (!galleryPhotoCommentsListEl) return;
-
         if (placeholderCommentEl) {
-            galleryPhotoCommentsListEl.innerHTML = ''; // Clear before showing loading
+            galleryPhotoCommentsListEl.innerHTML = '';
             placeholderCommentEl.hidden = false;
             placeholderCommentEl.querySelector('.adw-action-row-subtitle').textContent = 'Loading comments...';
             galleryPhotoCommentsListEl.appendChild(placeholderCommentEl);
         }
-
         try {
             const response = await fetch(\`/photo/api/photos/\${photoId}/comments\`);
-            if (!response.ok) {
-                throw new Error(\`HTTP error fetching comments: \${response.status}\`);
-            }
+            if (!response.ok) throw new Error(\`HTTP error fetching comments: \${response.status}\`);
             const comments = await response.json();
-            displayGalleryComments(comments); // This will hide placeholder if comments are found
+            displayGalleryComments(comments);
         } catch (error) {
             console.error('Error fetching gallery comments:', error);
             if (placeholderCommentEl) {
-                galleryPhotoCommentsListEl.innerHTML = ''; // Clear before showing error
+                galleryPhotoCommentsListEl.innerHTML = '';
                 placeholderCommentEl.hidden = false;
                 placeholderCommentEl.querySelector('.adw-action-row-subtitle').textContent = 'Could not load comments.';
                 galleryPhotoCommentsListEl.appendChild(placeholderCommentEl);
             }
         }
     }
-    // --- End Comment Display Functionality ---
 
-    // --- Comment Posting Functionality ---
     async function handlePostCommentSubmit(event) {
         event.preventDefault();
+        if (!galleryCommentPhotoIdInputEl || !galleryCommentTextEl || !galleryCommentErrorEl) return;
+
         const photoId = galleryCommentPhotoIdInputEl.value;
         const commentText = galleryCommentTextEl.value.trim();
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -377,79 +318,74 @@ document.addEventListener('DOMContentLoaded', function () {
             galleryCommentErrorEl.hidden = false;
             return;
         }
-        galleryCommentErrorEl.hidden = true; // Clear previous error
+        galleryCommentErrorEl.hidden = true;
 
         try {
             const response = await fetch(\`/photo/api/photos/\${photoId}/comments\`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
                 body: JSON.stringify({ text: commentText })
             });
-
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ errors: { general: 'Failed to post comment. Server error.'} }));
-                // Try to get specific error, otherwise general
-                const errorMessage = errorData.errors ?
-                                     (errorData.errors.text ? errorData.errors.text.join(', ') : JSON.stringify(errorData.errors)) :
-                                     'Failed to post comment.';
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.errors ? (errorData.errors.text ? errorData.errors.text.join(', ') : JSON.stringify(errorData.errors)) : 'Failed to post comment.';
                 throw new Error(errorMessage);
             }
-
-            // const newComment = await response.json(); // Assuming API returns the new comment or success
-            galleryCommentTextEl.value = ''; // Clear textarea
-            fetchAndRenderComments(photoId); // Refresh comments list
-            galleryCommentErrorEl.hidden = true;
-
+            galleryCommentTextEl.value = '';
+            fetchAndRenderComments(photoId);
         } catch (error) {
             console.error('Error posting comment:', error);
-            galleryCommentErrorEl.textContent = error.message || 'Could not post comment due to a network or server issue.';
+            galleryCommentErrorEl.textContent = error.message || 'Could not post comment.';
             galleryCommentErrorEl.hidden = false;
         }
     }
 
-    if (newGalleryCommentFormEl) { // Ensure form exists before adding listener
+    if (newGalleryCommentFormEl) {
         newGalleryCommentFormEl.addEventListener('submit', handlePostCommentSubmit);
     }
-    // --- End Comment Posting Functionality ---
+    // --- End Minimal Comment Display & Post Functionality ---
 
-    clickableGalleryPhotos.forEach(thumb => {
-        thumb.addEventListener('click', function() {
-            const photoId = this.dataset.photoid;
-            const photoUrl = this.dataset.fullsrc;
-            const caption = this.dataset.caption || ''; // Default to empty string if no caption
+    if (clickableGalleryPhotos.length > 0 && galleryPhotoDialogEl && fullGalleryPhotoImgEl && fullGalleryPhotoCaptionEl) {
+        clickableGalleryPhotos.forEach(thumb => {
+            thumb.addEventListener('click', function() {
+                const photoId = this.dataset.photoid;
+                const photoUrl = this.dataset.fullsrc;
+                const caption = this.dataset.caption || ''; // Default to empty string
 
-            if (!photoUrl || !photoId) {
-                console.error("Clicked photo thumbnail is missing data-fullsrc or data-photoid.", this);
-                return;
-            }
-
-            fullGalleryPhotoImgEl.setAttribute('src', photoUrl);
-            fullGalleryPhotoImgEl.setAttribute('alt', caption || `Full-size gallery photo for ID \${photoId}`);
-            fullGalleryPhotoCaptionEl.textContent = caption;
-
-            galleryPhotoDialogEl.dataset.currentPhotoId = photoId;
-            // Also update the hidden input in the comment form
-            if (galleryCommentPhotoIdInputEl) {
-                galleryCommentPhotoIdInputEl.value = photoId;
-            }
-
-            fetchAndRenderLikes(photoId, galleryPhotoDialogLikeSectionEl);
-            fetchAndRenderComments(photoId); // Fetch and render comments
-
-            customElements.whenDefined('adw-dialog').then(() => {
-                if (typeof galleryPhotoDialogEl.open === 'function') {
-                    galleryPhotoDialogEl.open();
-                } else {
-                    console.error("adw-dialog element does not have an open method.", galleryPhotoDialogEl);
+                if (!photoUrl || !photoId) {
+                    console.error("Clicked photo thumbnail is missing data-fullsrc or data-photoid.", this);
+                    return;
                 }
-            }).catch(err => {
-                console.error("Error waiting for adw-dialog definition:", err);
+
+                fullGalleryPhotoImgEl.setAttribute('src', photoUrl);
+                fullGalleryPhotoImgEl.setAttribute('alt', caption || \`Full-size gallery photo ID \${photoId}\`);
+                fullGalleryPhotoCaptionEl.textContent = caption;
+
+                galleryPhotoDialogEl.dataset.currentPhotoId = photoId;
+
+                const galleryCommentPhotoIdInputEl = document.getElementById('gallery-comment-photo-id');
+                if (galleryCommentPhotoIdInputEl) {
+                    galleryCommentPhotoIdInputEl.value = photoId;
+                }
+
+                customElements.whenDefined('adw-dialog').then(() => {
+                    if (typeof galleryPhotoDialogEl.open === 'function') {
+                        galleryPhotoDialogEl.open();
+                    } else {
+                        console.error("The #gallery-photo-dialog element does not have an .open() method.", galleryPhotoDialogEl);
+                    }
+                }).catch(err => {
+                    console.error("Error waiting for adw-dialog definition:", err);
+                });
+
+                // Call functions for likes and comments
+                fetchAndRenderLikes(photoId);
+                // fetchAndRenderComments(photoId); // To be done in next step
             });
         });
-    });
+    } else if (clickableGalleryPhotos.length === 0) {
+        // console.log("No clickable gallery photos found on this page.");
+    }
 });
 </script>
 {% endblock %}
