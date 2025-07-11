@@ -80,7 +80,7 @@
             </p>
         </div>
         {# The form submission will go to the admin.site_settings endpoint #}
-        <form method="POST" action="{{ url_for('admin.site_settings') }}" class="stacked-form" style="padding-top: var(--spacing-s);">
+        <form method="POST" action="{{ url_for('admin.site_settings') }}" class="stacked-form" id="site-settings-admin-form" style="padding-top: var(--spacing-s);">
             {{ site_settings_form.hidden_tag() }} {# CSRF token for this specific form #}
 
             <div class="adw-list-box"> {# Wrap settings in a list-box for consistent styling #}
@@ -135,8 +135,9 @@
                 </div>
             </div> {# End adw-list-box for Site Settings #}
 
-            <div class="adw-box horizontal justify-end form-actions-container" style="margin-top: var(--spacing-l); padding: var(--spacing-m); border-top: 1px solid var(--border-color); background-color: var(--list-row-bg-color);">
-                {{ site_settings_form.submit(class="adw-button suggested-action", value="Save Site Settings") }}
+            <div class="adw-box horizontal justify-end form-actions-container adw-box-spacing-s" style="margin-top: var(--spacing-l); padding: var(--spacing-m); border-top: 1px solid var(--border-color); background-color: var(--list-row-bg-color);">
+                {{ site_settings_form.submit(class="adw-button suggested-action", value="Save Site Settings", id="site-settings-submit-button") }}
+                <span class="adw-spinner small" id="site-settings-spinner" style="display: none;"></span>
             </div>
         </form>
     </section>
@@ -241,6 +242,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+    }
+
+    // Site Settings form spinner
+    const siteSettingsForm = document.getElementById('site-settings-admin-form');
+    const siteSettingsSubmitButton = document.getElementById('site-settings-submit-button');
+    const siteSettingsSpinner = document.getElementById('site-settings-spinner');
+
+    if (siteSettingsForm && siteSettingsSubmitButton && siteSettingsSpinner) {
+        siteSettingsForm.addEventListener('submit', function() {
+            siteSettingsSubmitButton.disabled = true;
+            siteSettingsSpinner.style.display = 'inline-block';
+        });
     }
 });
 </script>

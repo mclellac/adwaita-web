@@ -126,7 +126,19 @@ class User(UserMixin, db.Model):
         return Like.query.filter_by(user_id=self.id, target_type=target_type, target_id=target_id).count() > 0
 
     def get_reset_password_token(self, expires_in_seconds=1800): # Default 30 minutes
-        """Generates a password reset token."""
+        """
+        Generates a secure, timed token for password reset.
+
+        The token contains the user's ID and an expiration timestamp.
+        It is signed using the application's SECRET_KEY.
+
+        Args:
+            expires_in_seconds (int, optional): The duration (in seconds) for which the token
+                                                will be valid. Defaults to 1800 (30 minutes).
+
+        Returns:
+            str: The generated JWT token for password reset.
+        """
         token = jwt.encode(
             {
                 'reset_password_user_id': self.id,
@@ -139,7 +151,20 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def verify_reset_password_token(token):
-        """Verifies the password reset token and returns the user if valid."""
+        """
+        Verifies a password reset token and returns the associated User object if valid.
+
+        This static method decodes the provided token using the application's SECRET_KEY
+        and checks for its expiration and correct payload.
+
+        Args:
+            token (str): The password reset token to verify.
+
+        Returns:
+            User | None: The User object if the token is valid and not expired,
+                         None otherwise (e.g., if token is expired, invalid, or
+                         doesn't contain the expected user ID).
+        """
         try:
             decoded_token = jwt.decode(
                 token,
@@ -420,7 +445,16 @@ class Notification(db.Model):
 
     def get_target_object(self):
         """
-        Returns the actual target object based on target_type and target_id.
+        Retrieves the actual target object (e.g., Post, Comment, UserPhoto, User)
+        associated with this notification based on its `target_type` and `target_id`.
+
+        This method dynamically imports model classes to avoid circular dependencies
+        at the module level and uses `db.session.get()` for efficient lookup.
+
+        Returns:
+            db.Model | None: The SQLAlchemy model instance corresponding to the
+                             notification's target, or None if the target_type is
+                             unrecognized, or if target_type/target_id are not set.
         """
         if not self.target_type or self.target_id is None:
             return None
@@ -483,7 +517,16 @@ class Activity(db.Model):
 
     def get_target_object(self):
         """
-        Returns the actual target object based on target_type and target_id.
+        Retrieves the actual target object (e.g., Post, Comment, UserPhoto, User)
+        associated with this activity based on its `target_type` and `target_id`.
+
+        This method dynamically imports model classes to avoid circular dependencies
+        at the module level and uses `db.session.get()` for efficient lookup.
+
+        Returns:
+            db.Model | None: The SQLAlchemy model instance corresponding to the
+                             activity's target, or None if the target_type is
+                             unrecognized, or if target_type/target_id are not set.
         """
         if not self.target_type or self.target_id is None:
             return None

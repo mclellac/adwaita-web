@@ -8,7 +8,22 @@ import markdown as md_lib # Use md_lib to avoid conflict with template filter na
 
 def generate_slug_util(text, max_length=255):
     """
-    Generates a URL-friendly slug from a string.
+    Generates a URL-friendly slug from a given text string.
+
+    The process involves:
+    1. Normalizing Unicode characters to their closest ASCII representation.
+    2. Converting the text to lowercase.
+    3. Removing characters that are not alphanumeric or hyphens.
+    4. Replacing whitespace, underscores, and multiple hyphens with a single hyphen.
+    5. Trimming leading/trailing hyphens.
+    6. Truncating the slug to a specified maximum length and ensuring it doesn't end with a hyphen post-truncation.
+
+    Args:
+        text (str): The input string to be slugified.
+        max_length (int, optional): The maximum length of the generated slug. Defaults to 255.
+
+    Returns:
+        str: The generated URL-friendly slug. Returns an empty string if input text is None.
     """
     if text is None:
         return ''
@@ -49,8 +64,21 @@ def human_readable_date(dt, show_time=True):
 
 def linkify_mentions(text):
     """
-    Converts @username mentions into links to user profiles.
-    This is a simplified version. A robust version would check user existence.
+    Converts @FullName mentions in a given text into Markdown links
+    pointing to user profiles.
+
+    It uses a regular expression to find mentions (e.g., "@John Doe") and
+    queries the database for users with a matching full name (case-insensitive).
+    If a unique user is found, the mention is replaced with a Markdown link
+    to their profile (e.g., "[@John Doe](/profile/user_id)").
+    If no user or multiple users are found for a mention, it remains plain text.
+
+    Args:
+        text (str): The input text possibly containing @FullName mentions.
+
+    Returns:
+        str: The text with @FullName mentions converted to Markdown profile links where possible.
+             Returns an empty string if the input text is None.
     """
     if text is None:
         return ''
@@ -178,9 +206,18 @@ def allowed_file_util(filename):
 
 def extract_mentions(text):
     """
-    Extracts @Full Name mentions from text.
-    A name can consist of words (alphanumeric + underscore) separated by single spaces.
-    Returns a list of unique full names without the '@'.
+    Extracts @FullName mentions from a given text string.
+
+    Uses a regular expression to find patterns like "@John Doe" or "@Jane_Doe".
+    The extracted names are normalized (e.g., extra spaces collapsed) and returned
+    as a list of unique strings, without the leading '@'.
+
+    Args:
+        text (str): The input text to search for mentions.
+
+    Returns:
+        list[str]: A list of unique full names found as mentions.
+                   Returns an empty list if the input text is None or no mentions are found.
     """
     if not text:
         return []
@@ -208,10 +245,31 @@ def extract_mentions(text):
 
 def update_post_relations_util(post, form_data, current_user_id, is_new_post=False):
     """
-    Updates post relationships like categories, tags, and mentions.
-    This is a placeholder and will need access to models and db.session.
-    It's better if this logic resides within the Post model or a service layer.
-    For now, providing a structure.
+    Updates a Post object's relationships for categories, tags, and creates
+    notifications for mentions found in the post content.
+
+    This utility function is designed to be called after a Post object is created
+    or updated and before the database session is committed.
+
+    - Categories: Clears existing categories and adds new ones based on IDs from `form_data`.
+    - Tags: Clears existing tags and adds new ones based on a comma-separated string from
+      `form_data`. New tags are created if they don't already exist.
+    - Mentions: Extracts @FullName mentions from `post.content`. For each unique valid mention
+      (corresponding to a single user who is not the `current_user_id`), it creates a
+      'mention_in_post' notification if one doesn't already exist for that user and post.
+
+    Args:
+        post (Post): The Post model instance to update.
+        form_data (WTForm): The form instance containing data for categories (as `categories.data` - list of IDs)
+                             and tags (as `tags_string.data` - comma-separated string).
+                             It's assumed `post.content` is already set on the `post` object.
+        current_user_id (int): The ID of the user performing the action (author of the post),
+                               used to avoid self-mentions and as the actor in notifications.
+        is_new_post (bool, optional): Flag indicating if the post is new. Currently unused but
+                                      could be used for different logic on create vs update. Defaults to False.
+
+    Returns:
+        Post: The updated Post object. The caller is responsible for committing the db.session.
     """
     from flask import current_app
     from . import db # Assuming db is SQLAlchemy instance from __init__
@@ -305,8 +363,43 @@ def save_uploaded_file(
     existing_db_path=None
 ):
     """
-    Handles common logic for validating and saving uploaded files.
-    Returns a path relative to app.static_folder for DB storage, or None.
+    Handles the validation, processing, and saving of uploaded files, typically images.
+
+    This function performs several steps:
+    1.  Validates that a file is provided and has an allowed extension.
+    2.  Checks if the file size is within configured limits.
+    3.  Generates a unique filename for the uploaded file.
+    4.  Constructs save paths based on `upload_type` and `current_user_id` (for gallery photos).
+    5.  Ensures the target directory exists.
+    6.  For "profile_photo" type, optionally crops and/or resizes the image using Pillow.
+    7.  Saves the processed file to the server.
+    8.  If it's a profile photo update and `existing_db_path` is provided, attempts to delete the old photo.
+    9.  Returns a path relative to the application's static folder for database storage.
+
+    Flashes error messages to the user for issues like invalid file type, excessive size,
+    or server-side saving errors.
+
+    Args:
+        file_storage_object (FileStorage): The file object from `request.files`.
+        upload_type (str): Type of upload, e.g., "profile_photo", "gallery_photo".
+                           Used for naming and path logic.
+        base_upload_path_config_key (str): App config key for the base upload directory
+                                           (relative to static folder).
+        max_size_bytes_config_key (str): App config key for max allowed file size in bytes.
+        current_user_id (int, optional): ID of the current user, used for creating
+                                         user-specific subfolders (e.g., for gallery photos).
+                                         Defaults to None.
+        crop_coords (dict, optional): A dictionary with 'x', 'y', 'width', 'height' for cropping.
+                                      Applicable mainly to profile photos. Defaults to None.
+        thumbnail_size (tuple, optional): A tuple (width, height) for resizing the image.
+                                          Applicable mainly to profile photos. Defaults to None.
+        existing_db_path (str, optional): Relative path (from static folder) to an existing file
+                                          that should be deleted (e.g., old profile photo).
+                                          Defaults to None.
+
+    Returns:
+        str | None: The database-storable relative path to the saved file (from static folder)
+                    if successful, otherwise None.
     """
     if not file_storage_object or not file_storage_object.filename:
         # flash("No file selected.", "warning") # Route should handle "no file if optional"

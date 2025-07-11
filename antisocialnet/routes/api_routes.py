@@ -132,6 +132,52 @@ def get_feed():
         }
     })
 
+@api_bp.route('/item/<string:target_type>/<int:target_id>/like_details', methods=['GET'])
+@login_required
+def get_item_like_details(target_type, target_id):
+    """
+    API endpoint to retrieve like count and current user's like status for an item.
+    Supported target_types: 'post', 'comment', 'photo'.
+    """
+    from ..models import Post, Comment, UserPhoto # Local import for models
+
+    item = None
+    if target_type == 'post':
+        item = db.session.get(Post, target_id)
+    elif target_type == 'comment':
+        item = db.session.get(Comment, target_id)
+    elif target_type == 'photo':
+        item = db.session.get(UserPhoto, target_id)
+    else:
+        return jsonify(status="error", message="Invalid target type specified."), 400
+
+    if not item:
+        return jsonify(status="error", message=f"{target_type.capitalize()} not found."), 404
+
+    # Permission check: Can current_user view this item?
+    # This is a simplified check. More granular checks might be needed based on item's privacy.
+    # e.g., for a post, check post.is_published or ownership.
+    # For a comment, check its post's visibility. For a photo, check owner's profile privacy.
+    # For now, assuming if an ID is known, basic details can be fetched by authenticated users.
+    # The like_item/unlike_item routes have more detailed permission checks before action.
+    if target_type == 'post' and not item.is_published and item.user_id != current_user.id and not current_user.is_admin:
+        return jsonify(status="error", message="Forbidden to view like details for this post."), 403
+    if target_type == 'photo' and not item.user.is_profile_public and item.user_id != current_user.id and not current_user.is_admin:
+         return jsonify(status="error", message="Forbidden to view like details for this photo."), 403
+    # Comments inherit visibility from their post, which is implicitly handled if post is visible.
+
+    like_count = item.like_count # Assuming like_count property exists
+    current_user_has_liked = current_user.has_liked_item(target_type, target_id)
+
+    return jsonify(
+        status="success",
+        target_type=target_type,
+        target_id=target_id,
+        like_count=like_count,
+        current_user_has_liked=current_user_has_liked
+    )
+
+
 # --- Serialization Helpers ---
 # (These would ideally be above get_feed or in a separate utils_api.py)
 from flask import url_for

@@ -197,8 +197,9 @@
             <div class="actions-start">
                 <a href="{{ url_for('profile.view_profile', user_id=current_user.id) }}" class="adw-button flat">Cancel</a>
             </div>
-            <div class="actions-end">
-                <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text if form.submit.label else 'Update Profile' }}</button>
+            <div class="actions-end adw-box adw-box-horizontal adw-box-spacing-s">
+                <button type="submit" class="adw-button suggested-action" id="edit-profile-submit-button">{{ form.submit.label.text if form.submit.label else 'Update Profile' }}</button>,
+                <span class="adw-spinner small" id="edit-profile-spinner" style="display: none;"></span>
             </div>
       </div>
     </form>
@@ -305,6 +306,14 @@
             if(cropHeightField) cropHeightField.value = '';
           }
         } catch (e) { console.error("Error in form submit event for cropper data:", e); }
+
+        // Loading feedback for main profile edit form
+        const submitButton = document.getElementById('edit-profile-submit-button');
+        const spinner = document.getElementById('edit-profile-spinner');
+        if (submitButton && spinner) {
+            submitButton.disabled = true;
+            spinner.style.display = 'inline-block';
+        }
       });
     } else { console.warn("Edit profile form not found."); }
   });

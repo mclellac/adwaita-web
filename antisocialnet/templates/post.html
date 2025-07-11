@@ -198,8 +198,9 @@
                 <span class="adw-label caption" style="display: block; margin-top: var(--spacing-xxs);">Mention users with @FullName.</span> {# Added mention guidance #}
             </div>
 
-            <div class="form-actions-container form-actions-end comment-form-actions" style="margin-top: var(--spacing-m); padding: 0;"> {# Simplified padding as form has it now #}
-                 <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text }}</button>
+            <div class="form-actions-container form-actions-end comment-form-actions adw-box adw-box-horizontal adw-box-spacing-s justify-end" style="margin-top: var(--spacing-m); padding: 0;"> {# Simplified padding as form has it now #}
+                 <button type="submit" class="adw-button suggested-action" id="main-comment-submit-button">{{ form.submit.label.text }}</button>
+                 <span class="adw-spinner small" id="main-comment-spinner" style="display: none;"></span>
             </div>
         </form>
     </section>
@@ -325,6 +326,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     container.style.display = 'none';
                 });
             }
+        });
+    }
+
+    // Main comment form spinner
+    const mainCommentSubmitButtonElement = document.getElementById('main-comment-submit-button');
+    const mainCommentSpinnerElement = document.getElementById('main-comment-spinner');
+
+    if (mainCommentForm && mainCommentSubmitButtonElement && mainCommentSpinnerElement) { // mainCommentForm already defined above
+        mainCommentForm.addEventListener('submit', function() {
+            // Check if the event target is the main form, not a reply form if it got moved.
+            // This is important because the same form element is moved around.
+            // The listener is on mainCommentForm, so it will always fire for this form.
+            mainCommentSubmitButtonElement.disabled = true;
+            mainCommentSpinnerElement.style.display = 'inline-block';
         });
     }
 });

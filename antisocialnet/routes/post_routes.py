@@ -12,6 +12,24 @@ post_bp = Blueprint('post', __name__) # No url_prefix, template_folder defaults 
 
 @post_bp.route('/posts/<int:post_id>', methods=['GET', 'POST'])
 def view_post(post_id):
+    """
+    Displays a single post and handles comment submission for that post.
+
+    On GET: Fetches the post by ID, its author, categories, tags, and comments
+            (including authors of comments and replies). It also finds related posts.
+            Access to unpublished posts is restricted to the author.
+    On POST: Handles submission of the new comment form. Creates a new comment,
+             associates it with the post and current user, creates notifications
+             for the post author and mentioned users, and logs an activity.
+
+    Args:
+        post_id (int): The ID of the post to display.
+
+    Returns:
+        Rendered template 'post.html' with post data, forms, comments, and related posts.
+        Redirects on successful comment submission or if login is required.
+        Aborts with 404 if post not found or access to unpublished post is denied.
+    """
     current_app.logger.debug(f"Accessing /posts/{post_id}, Method: {request.method}")
     # Eager load related data for the main post
     post = Post.query.options(
@@ -178,6 +196,19 @@ def view_post(post_id):
 @post_bp.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_post():
+    """
+    Handles the creation of new posts.
+
+    On GET: Displays the new post form.
+    On POST: Validates the form data. If valid, creates a new Post object,
+             associates it with the current user, categories, and tags.
+             It also handles mentions within the post content to create notifications
+             and logs an activity for the post creation.
+             Redirects to the new post's page on success.
+
+    Requires:
+        User to be logged in.
+    """
     current_app.logger.debug(f"Accessing /create post, Method: {request.method}, User: '{current_user.full_name}' (ID: {current_user.id})")
     form = PostForm(request.form)
     if form.validate_on_submit():
@@ -263,8 +294,23 @@ def create_post():
 @post_bp.route('/posts/<int:post_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_post(post_id):
+    """
+    Handles editing of existing posts.
+
+    On GET: Displays the post edit form, pre-filled with the post's current data.
+    On POST: Validates the form data. If valid, updates the Post object's content,
+             categories, and tags. It also handles mentions in the updated content
+             to create notifications. Redirects to the post's page on success.
+
+    Args:
+        post_id (int): The ID of the post to be edited.
+
+    Requires:
+        User to be logged in and be the author of the post, or an admin.
+        Aborts with 403 if unauthorized, 404 if post not found.
+    """
     current_app.logger.debug(f"Accessing /posts/{post_id}/edit, Method: {request.method}, User: '{current_user.full_name}' (ID: {current_user.id})")
-    post = Post.query.get_or_404(post_id)
+    post = Post.query.get_or_404(post_id) # Querying post without eager loads initially for auth check
     if post.user_id != current_user.id and not current_user.is_admin: # Allow admin to edit
         current_app.logger.warning(f"User '{current_user.full_name}' (ID: {current_user.id}) not authorized to edit post {post_id}.")
         abort(403)
