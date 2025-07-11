@@ -3,20 +3,7 @@ from flask import url_for
 from antisocialnet.models import User, SiteSetting, Post, Comment, CommentFlag
 from antisocialnet import db
 
-# Helper fixture to create and log in an admin user
-@pytest.fixture
-def admin_client(client, app, create_test_user):
-    admin_user = create_test_user(username="admin_user", email="admin@example.com", password="password", is_admin=True, is_approved=True, is_active=True)
-    with app.app_context():
-        from antisocialnet.forms import LoginForm
-        form = LoginForm()
-        token = form.csrf_token.current_token
-    client.post(url_for('auth.login'), data={
-        'username': admin_user.email,
-        'password': 'password',
-        'csrf_token': token
-    }, follow_redirects=True)
-    return client
+# The admin_client fixture is now taken from conftest.py
 
 # --- Admin Access Control Tests (applied to one route, assume decorator handles others) ---
 def test_admin_route_unauthenticated_redirects(client):
@@ -38,8 +25,10 @@ def test_admin_route_unauthenticated_redirects(client):
 
 def test_admin_route_non_admin_authenticated_forbidden(client, logged_in_client):
     """Test non-admin authenticated user gets 403 from an admin route."""
-    # logged_in_client is 'loginuser', who is not an admin by default
-    assert not User.query.filter_by(username="loginuser").first().is_admin
+    # logged_in_client uses "login_fixture_user@example.com"
+    user = User.query.filter_by(username="login_fixture_user@example.com").first()
+    assert user is not None, "Logged in user not found in DB"
+    assert not user.is_admin
     response = logged_in_client.get(url_for('admin.site_settings'))
     assert response.status_code == 403 # Forbidden
 
@@ -156,10 +145,10 @@ def test_pending_users_page_loads_for_admin(admin_client, db, create_test_user):
     assert b"No users are currently pending approval." in response_no_pending.data
 
     # Scenario 2: With pending users
-    pending_user1 = create_test_user(username="pending1", email="p1@example.com", is_approved=False, is_active=False)
-    pending_user2 = create_test_user(username="pending2", email="p2@example.com", is_approved=False, is_active=False)
+    pending_user1 = create_test_user(email_address="p1@example.com", full_name="Pending User 1", is_approved=False, is_active=False)
+    pending_user2 = create_test_user(email_address="p2@example.com", full_name="Pending User 2", is_approved=False, is_active=False)
     # An already approved user should not show up
-    approved_user = create_test_user(username="alreadyapproved", email="aa@example.com", is_approved=True, is_active=True)
+    approved_user = create_test_user(email_address="aa@example.com", full_name="Approved User", is_approved=True, is_active=True)
 
     response_with_pending = admin_client.get(url_for('admin.pending_users'))
     assert response_with_pending.status_code == 200
@@ -178,7 +167,7 @@ def test_pending_users_pagination(admin_client, app, db, create_test_user):
         app.config['POSTS_PER_PAGE'] = 2
 
     for i in range(5):
-        create_test_user(username=f"pending_page_user{i}", email=f"ppu{i}@example.com", is_approved=False, is_active=False)
+        create_test_user(email_address=f"ppu{i}@example.com", full_name=f"Pending Page User{i}", is_approved=False, is_active=False)
 
     response_p1 = admin_client.get(url_for('admin.pending_users', page=1))
     assert response_p1.status_code == 200
@@ -198,7 +187,7 @@ def test_pending_users_pagination(admin_client, app, db, create_test_user):
 # --- Approve/Reject User Route Tests ---
 def test_approve_user_successful(admin_client, app, db, create_test_user):
     """Admin successfully approves a pending user."""
-    pending_user = create_test_user(username="to_approve", email="approveme@example.com", is_approved=False, is_active=False)
+    pending_user = create_test_user(email_address="approveme@example.com", full_name="To Approve", is_approved=False, is_active=False)
     user_id = pending_user.id
     assert not pending_user.is_approved and not pending_user.is_active
 
@@ -219,7 +208,7 @@ def test_approve_user_successful(admin_client, app, db, create_test_user):
 
 def test_reject_user_successful(admin_client, app, db, create_test_user):
     """Admin successfully rejects (deletes) a pending user."""
-    pending_user = create_test_user(username="to_reject", email="rejectme@example.com", is_approved=False)
+    pending_user = create_test_user(email_address="rejectme@example.com", full_name="To Reject", is_approved=False)
     user_id = pending_user.id
     assert User.query.get(user_id) is not None
 
@@ -244,7 +233,7 @@ def test_approve_nonexistent_user(admin_client, app):
 
 def test_approve_user_already_approved(admin_client, app, db, create_test_user):
     """Attempt to approve an already approved user."""
-    approved_user = create_test_user(username="already_ok", email="alreadyok@example.com", is_approved=True, is_active=True)
+    approved_user = create_test_user(email_address="alreadyok@example.com", full_name="Already OK", is_approved=True, is_active=True)
     with app.app_context():
         from flask_wtf import FlaskForm
         form = FlaskForm()
@@ -255,7 +244,7 @@ def test_approve_user_already_approved(admin_client, app, db, create_test_user):
 
 def test_approve_user_csrf_missing(admin_client, create_test_user):
     """Test approve user POST with missing CSRF token."""
-    pending_user = create_test_user(username="approve_csrf", email="approvecsrf@example.com", is_approved=False)
+    pending_user = create_test_user(email_address="approvecsrf@example.com", full_name="Approve CSRF", is_approved=False)
     response = admin_client.post(url_for('admin.approve_user', user_id=pending_user.id), data={})
     assert response.status_code == 400 # Direct CSRF failure
 
@@ -269,9 +258,9 @@ def test_view_flags_page_loads_for_admin(admin_client, db, create_test_user, cre
     assert b"No active flags to review at this time." in response_no_flags.data
 
     # Scenario 2: With active flags
-    post_author = create_test_user(username="flag_post_auth", email="fpa@example.com")
-    comment_author = create_test_user(username="flag_comment_auth", email="fca@example.com")
-    flagger_user = create_test_user(username="flagger007", email="f007@example.com")
+    post_author = create_test_user(email_address="fpa@example.com", full_name="Flag Post Author")
+    comment_author = create_test_user(email_address="fca@example.com", full_name="Flag Comment Author")
+    flagger_user = create_test_user(email_address="f007@example.com", full_name="Flagger007")
 
     test_post = create_test_post(author=post_author, content="A post with a comment to be flagged.")
     comment_to_flag = Comment(text="This is a flaggable comment.", user_id=comment_author.id, post_id=test_post.id)
@@ -301,9 +290,9 @@ def test_view_flags_pagination(admin_client, app, db, create_test_user, create_t
         original_ppp = app.config.get('POSTS_PER_PAGE', 10) # Route uses POSTS_PER_PAGE for pagination
         app.config['POSTS_PER_PAGE'] = 1 # 1 flag per page for testing
 
-    post_author = create_test_user(username="flag_pag_post_auth", email="fppa@example.com")
-    comment_author = create_test_user(username="flag_pag_comment_auth", email="fpca@example.com")
-    flagger = create_test_user(username="flag_pag_flagger", email="fpf@example.com")
+    post_author = create_test_user(email_address="fppa@example.com", full_name="Flag Pag Post Author")
+    comment_author = create_test_user(email_address="fpca@example.com", full_name="Flag Pag Comment Author")
+    flagger = create_test_user(email_address="fpf@example.com", full_name="Flag Pag Flagger")
     test_post = create_test_post(author=post_author, content="Post for flag pagination.")
 
     for i in range(3): # Create 3 active flags
@@ -330,8 +319,8 @@ def test_view_flags_pagination(admin_client, app, db, create_test_user, create_t
 # --- Resolve Flag Route Tests ---
 def test_resolve_flag_successful(admin_client, app, db, create_test_user, create_test_post):
     """Admin successfully resolves an active flag."""
-    flagger = create_test_user(username="flag_resolver_flagger", email="frf@example.com")
-    comment_author = create_test_user(username="flag_resolver_cauth", email="frca@example.com")
+    flagger = create_test_user(email_address="frf@example.com", full_name="Flag Resolver Flagger")
+    comment_author = create_test_user(email_address="frca@example.com", full_name="Flag Resolver CAuth")
     post = create_test_post(author=comment_author, content="Post for flag resolution.")
     comment = Comment(text="Comment to be resolved", user_id=comment_author.id, post_id=post.id)
     db.session.add(comment); db.session.commit()
@@ -353,7 +342,10 @@ def test_resolve_flag_successful(admin_client, app, db, create_test_user, create
 
     resolved_flag = CommentFlag.query.get(flag_id)
     assert resolved_flag.is_resolved
-    assert resolved_flag.resolver_user_id == User.query.filter_by(username="admin_user").first().id # From admin_client
+    # admin_client fixture in conftest.py uses "admin_fixture_user@example.com"
+    admin_user_for_check = User.query.filter_by(username="admin_fixture_user@example.com").first()
+    assert admin_user_for_check is not None
+    assert resolved_flag.resolver_user_id == admin_user_for_check.id
     assert resolved_flag.resolved_at is not None
 
 def test_resolve_flag_nonexistent(admin_client, app):
@@ -367,8 +359,8 @@ def test_resolve_flag_nonexistent(admin_client, app):
 
 def test_resolve_flag_already_resolved(admin_client, app, db, create_test_user, create_test_post):
     """Attempt to resolve an already resolved flag."""
-    flagger = create_test_user(username="flag_alreadyres_flagger", email="farf@example.com")
-    admin_user_obj = User.query.filter_by(username="admin_user").first()
+    flagger = create_test_user(email_address="farf@example.com", full_name="Flag AlreadyRes Flagger")
+    admin_user_obj = User.query.filter_by(username="admin@example.com").first() # admin_client uses admin@example.com
     comment = Comment(text="Comment for already resolved flag", user_id=flagger.id, post_id=create_test_post().id)
     db.session.add(comment); db.session.commit()
     resolved_flag = CommentFlag(comment_id=comment.id, flagger_user_id=flagger.id, is_resolved=True, resolver_user_id=admin_user_obj.id)
@@ -384,7 +376,7 @@ def test_resolve_flag_already_resolved(admin_client, app, db, create_test_user, 
 
 def test_resolve_flag_csrf_missing(admin_client, db, create_test_user, create_test_post):
     """Test resolve flag POST with missing CSRF token."""
-    flagger = create_test_user(username="flag_csrf_flagger", email="fcsrf@example.com")
+    flagger = create_test_user(email_address="fcsrf@example.com", full_name="Flag CSRF Flagger")
     comment = Comment(text="Comment for CSRF resolve test", user_id=flagger.id, post_id=create_test_post().id)
     db.session.add(comment); db.session.commit()
     active_flag = CommentFlag(comment_id=comment.id, flagger_user_id=flagger.id, is_resolved=False)

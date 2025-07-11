@@ -124,7 +124,7 @@
                         {% else %}
                             <a href="{{ url_for('notification.list_notifications', page=page_num) }}" class="adw-button">{{ page_num }}</a>
                         {% endif %}
-                    {% elif loop.index != 1 and loop.index != pagination.pages + pagination.iter_pages()|length %}
+                    {% else %}
                         <button class="adw-button flat" disabled>…</button>
                     {% endif %}
                 {% endfor %}
