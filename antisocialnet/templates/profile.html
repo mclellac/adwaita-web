@@ -242,7 +242,7 @@
                         </footer>
                         <div class="adw-card__actions card-secondary-actions">
                             {% from "_macros.html" import like_button_and_count %}
-                            {{ like_button_and_count(post, current_user) }}
+                            {{ like_button_and_count(post, 'post', current_user) }}
                         </div>
                     </article>
                     {% endfor %}

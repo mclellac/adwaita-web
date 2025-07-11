@@ -9,12 +9,10 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_TIME_LIMIT = 14400 # 4 hours, for diagnosing "CSRF token invalid" errors
-    UPLOAD_FOLDER = 'static/uploads/profile_pics' # Relative to app root (antisocialnet/).
-                                                  # Will be made absolute in __init__.py to antisocialnet/static/uploads/profile_pics
+    UPLOAD_FOLDER = 'uploads/profile_pics' # Relative to app.static_folder
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     MAX_PROFILE_PHOTO_SIZE_BYTES = 2 * 1024 * 1024  # 2MB
-    GALLERY_UPLOAD_FOLDER = 'static/uploads/gallery_pics' # Relative to app root (antisocialnet/)
-                                                       # Will be made absolute in __init__.py
+    GALLERY_UPLOAD_FOLDER = 'uploads/gallery_pics' # Relative to app.static_folder
     MAX_GALLERY_PHOTO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # Max overall request size 10MB (increased for gallery)
     POSTS_PER_PAGE = 10 # Default, can be overridden by SiteSetting
