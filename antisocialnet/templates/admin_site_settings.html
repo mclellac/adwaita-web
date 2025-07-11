@@ -2,7 +2,7 @@
 
 {% block title %}Admin - Site Settings{% endblock %}
 
-{% block header_title %}Site Settings{% endblock %}
+{% block header_title %}Site Settings (Admin){% endblock %}
 
 {% block content %}
 <div class="adw-preferences-page">
@@ -51,7 +51,7 @@
                 {# Allow New User Registrations #}
                 <div class="adw-switch-row {{ 'has-error' if form.allow_registrations.errors else '' }}">
                      <div class="adw-action-row__text">
-                        <label for="{{ form.allow_registrations.id or 'allow_registrations_input' }}" class="adw-action-row__title">{{ form.allow_registrations.label.text }}</label>
+                        <label for="allow_registrations_input" class="adw-action-row__title">{{ form.allow_registrations.label.text }}</label>
                         <span class="adw-action-row__subtitle">Enable or disable new user sign-ups.</span>
                         {% if form.allow_registrations.errors %}
                             <span class="adw-label caption error-text">{{ form.allow_registrations.errors|join(' ') }}</span>
@@ -62,7 +62,7 @@
                         <label class="adw-switch">
                             <input type="checkbox"
                                    name="{{ form.allow_registrations.name }}"
-                                   id="{{ form.allow_registrations.id or 'allow_registrations_input' }}"
+                                   id="allow_registrations_input"
                                    {% if form.allow_registrations.data %}checked{% endif %}
                                    >
                             <span class="adw-switch-slider"></span>

@@ -59,7 +59,7 @@ def resolve_flag(flag_id):
         db.session.add(flag)
         db.session.commit()
         current_app.logger.info(f"Admin {current_user.username} resolved flag ID {flag_id} for comment ID {flag.comment_id}.")
-        flash(f'Flag for comment "{flag.comment.text[:30]}..." resolved.', 'toast_success')
+        flash('Flag marked as resolved.', 'toast_success')
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error resolving flag {flag_id} by admin {current_user.username}: {e}", exc_info=True)
@@ -85,9 +85,9 @@ def site_settings():
                     current_app.config['POSTS_PER_PAGE'] = ppp_val
                     current_app.logger.info(f"App config POSTS_PER_PAGE updated to: {ppp_val}")
             except ValueError:
-                flash("Invalid value for Posts Per Page. Must be an integer.", "danger")
+                flash("Posts per page must be a number.", "danger")
             SiteSetting.set('allow_registrations', form.allow_registrations.data, 'bool')
-            flash('Site settings updated successfully!', 'toast_success')
+            flash('Site settings updated successfully.', 'toast_success')
             current_app.logger.info(f"Site settings updated by admin {current_user.username}.")
             return redirect(url_for('admin.site_settings'))
         except Exception as e:
@@ -111,9 +111,11 @@ def pending_users():
     per_page = current_app.config.get('ADMIN_USERS_PER_PAGE', 15)
     users_query = User.query.filter_by(is_approved=False, is_active=False)\
                             .order_by(User.id.asc())
+    # Log the count *before* pagination
+    current_app.logger.debug(f"Total pending users found by query: {users_query.count()}")
     user_pagination = users_query.paginate(page=page, per_page=per_page, error_out=False)
     pending_users_list = user_pagination.items
-    current_app.logger.info(f"Admin {current_user.username} viewing pending users page {page}. Found {len(pending_users_list)} pending users.")
+    current_app.logger.info(f"Admin {current_user.username} viewing pending users page {page}. Found {len(pending_users_list)} pending users on this page. Per_page setting: {per_page}. Total items by paginator: {user_pagination.total}")
     return render_template('admin_pending_users.html', pending_users=pending_users_list, user_pagination=user_pagination)
 
 @admin_bp.route('/users/<int:user_id>/approve', methods=['POST'])
@@ -122,7 +124,7 @@ def approve_user(user_id):
     current_app.logger.debug(f"Admin {current_user.username} attempting to approve user ID {user_id}")
     user_to_approve = User.query.get_or_404(user_id)
     if user_to_approve.is_approved and user_to_approve.is_active:
-        flash(f'User {user_to_approve.username} is already approved and active.', 'info')
+        flash('User is already approved.', 'info')
         return redirect(url_for('admin.pending_users'))
     try:
         user_to_approve.is_approved = True
@@ -130,7 +132,7 @@ def approve_user(user_id):
         db.session.add(user_to_approve)
         db.session.commit()
         current_app.logger.info(f"Admin {current_user.username} approved user ID {user_id} ({user_to_approve.username}).")
-        flash(f'User {user_to_approve.username} has been approved and activated.', 'toast_success')
+        flash(f'User {user_to_approve.username} approved successfully.', 'toast_success')
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error approving user {user_id} by admin {current_user.username}: {e}", exc_info=True)
@@ -153,7 +155,7 @@ def reject_user(user_id):
         db.session.delete(user_to_reject)
         db.session.commit()
         current_app.logger.info(f"Admin {current_user.username} rejected and deleted user ID {user_id} (Username: {username_rejected}).")
-        flash(f'User {username_rejected} has been rejected and deleted.', 'toast_success')
+        flash(f'User {username_rejected} rejected and deleted.', 'toast_success')
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error rejecting user {user_id} by admin {current_user.username}: {e}", exc_info=True)

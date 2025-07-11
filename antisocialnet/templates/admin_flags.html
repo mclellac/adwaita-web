@@ -7,7 +7,7 @@
 {% block content %}
 <div class="adw-preferences-page">
     <header class="adw-preferences-page__header">
-        <h1 class="adw-preferences-page__title">Review Flagged Comments</h1>
+        <h1 class="adw-preferences-page__title">Review Content Flags</h1>
         <p class="adw-preferences-page__description">
             Manage comments that have been flagged by users.
         </p>
@@ -53,10 +53,10 @@
         <div class="adw-toggle-group">
             {% if flag_pagination.has_prev %}
                 <a href="{{ url_for('admin.view_flags', page=flag_pagination.prev_num) }}" class="adw-button">
-                    <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                    <span class="adw-icon icon-actions-go-previous-symbolic"></span> Previous
                 </a>
             {% else %}
-                <button class="adw-button" disabled><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
+                <button class="adw-button" disabled><span class="adw-icon icon-actions-go-previous-symbolic"></span> Previous</button>
             {% endif %}
 
             {% for page_num in flag_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
@@ -73,10 +73,10 @@
 
             {% if flag_pagination.has_next %}
                 <a href="{{ url_for('admin.view_flags', page=flag_pagination.next_num) }}" class="adw-button">
-                    <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                    Next <span class="adw-icon icon-actions-go-next-symbolic"></span>
                 </a>
             {% else %}
-                <button class="adw-button" disabled><span class="adw-icon icon-actions-go-next-symbolic"></span></button>
+                <button class="adw-button" disabled>Next <span class="adw-icon icon-actions-go-next-symbolic"></span></button>
             {% endif %}
         </div>
     </nav>
@@ -86,7 +86,7 @@
     <div class="adw-status-page">
         <span class="adw-icon icon-content-info-symbolic adw-status-page-icon"></span>
         <h2 class="adw-status-page-title">No Active Flags</h2>
-        <p class="adw-status-page-description">There are currently no comments flagged for review.</p>
+        <p class="adw-status-page-description">No active flags to review at this time.</p>
     </div>
     {% endif %}
 </div>

@@ -209,28 +209,35 @@ def create_test_user(db): # db fixture provides transactional session
                      full_name=None, is_admin=False, is_approved=True, is_active=True,
                      profile_info=None, website_url=None, is_profile_public=True):
 
-        # Try to fetch existing user first to make fixture idempotent for fixed users
         user = User.query.filter_by(username=email_address).first()
         if user:
-            # Optionally update attributes if needed, or just return
-            # For simplicity here, we'll just return the existing user
-            # Potentially, one might want to ensure other flags like is_admin are set correctly.
-            # For now, this primarily solves the UNIQUE constraint for username.
-            return user
+            # If user exists, update their state based on parameters for this call
+            user.is_admin = is_admin
+            user.is_approved = is_approved
+            user.is_active = is_active
+            user.full_name = full_name if full_name else email_address.split('@')[0].capitalize()
+            user.profile_info = profile_info
+            user.website_url = website_url
+            user.is_profile_public = is_profile_public
+            # Optionally, update password if a new one is provided and different,
+            # but typically test users have fixed passwords.
+            # if password and not user.check_password(password):
+            #     user.set_password(password)
+        else:
+            user = User()
+            user.username = email_address # User model's username is the email
+            user.set_password(password)
+            user.full_name = full_name if full_name else email_address.split('@')[0].capitalize()
+            user.is_admin = is_admin
+            user.is_approved = is_approved
+            user.is_active = is_active
+            user.profile_info = profile_info
+            user.website_url = website_url
+            user.is_profile_public = is_profile_public
+            db.session.add(user)
 
-        user = User()
-        user.username = email_address # User model's username is the email
-        user.set_password(password)
-        user.full_name = full_name if full_name else email_address.split('@')[0].capitalize()
-        user.is_admin = is_admin
-        user.is_approved = is_approved
-        user.is_active = is_active
-        user.profile_info = profile_info
-        user.website_url = website_url
-        user.is_profile_public = is_profile_public
-
-        db.session.add(user)
-        db.session.commit() # Commit is necessary here for other fixtures to see this user
+        # Commit any changes (new user or updates to existing user)
+        db.session.commit()
         return user
     return _create_user
 

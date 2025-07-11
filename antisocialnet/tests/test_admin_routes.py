@@ -16,7 +16,7 @@ def test_admin_route_unauthenticated_redirects(client):
     response = client.get(url_to_access, follow_redirects=True)
     assert response.status_code == 200 # Due to redirect
     assert b"Please log in to access this page." in response.data # Flash message
-    assert b"Log In" in response.data # Should be on the login page
+    assert b"Login" in response.data # Should be on the login page
 
     # response.request.path is the path of the final page after redirects.
     # Compare the path component of the URL.
@@ -48,8 +48,37 @@ def test_site_settings_page_loads_for_admin(admin_client):
     assert b"Initial Test Title" in response.data
     assert b'value="15"' in response.data # For posts_per_page
     # For boolean 'allow_registrations' False, checkbox should not be checked
-    assert b'<input type="checkbox" name="allow_registrations" id="allow_registrations_input_admin">' in response.data
-    assert b'checked' not in response.data.split(b'name="allow_registrations"')[1].split(b'>')[0]
+    # Check for essential parts of the checkbox, as exact HTML string can be fragile
+    assert b'name="allow_registrations"' in response.data
+    assert b'id="allow_registrations_input"' in response.data
+    assert b'type="checkbox"' in response.data
+    # Ensure it's not checked (this part was working and is important)
+    # Extract the relevant part of HTML for the checkbox to check its state
+    checkbox_html_segment = response.data.split(b'id="allow_registrations_input"')[0]
+    relevant_segment_for_checked = checkbox_html_segment.split(b'<input')[-1]
+    assert b'checked' not in relevant_segment_for_checked
+
+    # Old assertion for checked status, which is more robust if the exact input tag changes:
+    # assert b'checked' not in response.data.split(b'name="allow_registrations"')[1].split(b'>')[0]
+    # Re-evaluating the checked assertion: the original split was likely better if name attribute is stable.
+    # The id="allow_registrations_input" is within the <input ...> tag.
+    # We need to find the input tag associated with name="allow_registrations"
+    # and check if 'checked' attribute is present for that specific tag.
+
+    # A more robust way to check if a specific checkbox is not checked:
+    # 1. Find the input tag.
+    # 2. Check its attributes.
+    # For now, let's assume the original split for 'checked' was good if the name is unique enough.
+    # The id "allow_registrations_input" is what we hardcoded in the template.
+    # The most reliable part of the original test for the 'checked' status was:
+    input_tag_parts = response.data.split(b'name="allow_registrations"')
+    if len(input_tag_parts) > 1:
+        # Check the part of the string that immediately follows name="allow_registrations"
+        # up to the closing '>' of that input tag.
+        following_html = input_tag_parts[1].split(b'>')[0]
+        assert b'checked' not in following_html
+    else:
+        assert False, "Checkbox with name='allow_registrations' not found"
 
 
 def test_site_settings_update_successful(admin_client, app, db):
@@ -153,36 +182,44 @@ def test_pending_users_page_loads_for_admin(admin_client, db, create_test_user):
     response_with_pending = admin_client.get(url_for('admin.pending_users'))
     assert response_with_pending.status_code == 200
     assert b"Pending User Approvals" in response_with_pending.data
-    assert bytes(pending_user1.email, 'utf-8') in response_with_pending.data
-    assert bytes(pending_user2.email, 'utf-8') in response_with_pending.data
-    assert bytes(approved_user.email, 'utf-8') not in response_with_pending.data
+    assert bytes(pending_user1.username, 'utf-8') in response_with_pending.data
+    assert bytes(pending_user2.username, 'utf-8') in response_with_pending.data
+    assert bytes(approved_user.username, 'utf-8') not in response_with_pending.data
     assert b"No users are currently pending approval." not in response_with_pending.data
     # Check for approve/reject buttons (e.g., by form action URL part)
-    assert bytes(url_for('admin.approve_user', user_id=pending_user1.id), 'utf-8') in response_with_pending.data
+    # Use relative path for assertion as url_for in tests can sometimes produce absolute paths
+    # depending on SERVER_NAME config, while templates typically render relative ones.
+    approve_url_path = f'/admin/users/{pending_user1.id}/approve'
+    assert bytes(approve_url_path, 'utf-8') in response_with_pending.data
 
 def test_pending_users_pagination(admin_client, app, db, create_test_user):
     """Test pagination for /admin/pending_users."""
     with app.app_context(): # To modify config for test
-        original_ppp = app.config.get('POSTS_PER_PAGE', 10) # Route uses POSTS_PER_PAGE
-        app.config['POSTS_PER_PAGE'] = 2
+        # Clean up any pre-existing pending users to ensure test isolation for counts
+        User.query.filter_by(is_approved=False, is_active=False).delete()
+        db.session.commit()
 
-    for i in range(5):
+        original_admin_users_ppp = app.config.get('ADMIN_USERS_PER_PAGE', 15) # Default from route
+        app.config['ADMIN_USERS_PER_PAGE'] = 2 # For testing
+
+    # User creation and subsequent calls should be at the same indent level as the 'with' block above.
+    for i in range(5): # Create exactly 5 pending users for this test
         create_test_user(email_address=f"ppu{i}@example.com", full_name=f"Pending Page User{i}", is_approved=False, is_active=False)
 
     response_p1 = admin_client.get(url_for('admin.pending_users', page=1))
     assert response_p1.status_code == 200
     # Check for 2 users (e.g. by counting "Approve" buttons or email)
     # This is brittle. Better to check if pagination controls are present.
-    assert response_p1.data.count(b"Approve User") == 2 # Assuming each user has one such button text
+    assert response_p1.data.count(b"Approve") == 2 # Assuming each user has one such button text
     assert b"Next" in response_p1.data
 
     response_p3 = admin_client.get(url_for('admin.pending_users', page=3))
     assert response_p3.status_code == 200
-    assert response_p3.data.count(b"Approve User") == 1 # Last page has 1 user
+    assert response_p3.data.count(b"Approve") == 1 # Last page has 1 user
     assert b"Previous" in response_p3.data
 
-    with app.app_context():
-        app.config['POSTS_PER_PAGE'] = original_ppp # Reset
+    with app.app_context(): # This with block should also be at the same indent level
+        app.config['ADMIN_USERS_PER_PAGE'] = original_admin_users_ppp # Reset
 
 # --- Approve/Reject User Route Tests ---
 def test_approve_user_successful(admin_client, app, db, create_test_user):
@@ -208,7 +245,8 @@ def test_approve_user_successful(admin_client, app, db, create_test_user):
 
 def test_reject_user_successful(admin_client, app, db, create_test_user):
     """Admin successfully rejects (deletes) a pending user."""
-    pending_user = create_test_user(email_address="rejectme@example.com", full_name="To Reject", is_approved=False)
+    # Ensure user is both not approved and not active to be rejectable by this logic
+    pending_user = create_test_user(email_address="rejectme@example.com", full_name="To Reject", is_approved=False, is_active=False)
     user_id = pending_user.id
     assert User.query.get(user_id) is not None
 
@@ -218,7 +256,11 @@ def test_reject_user_successful(admin_client, app, db, create_test_user):
         token = form.csrf_token.current_token
     response = admin_client.post(url_for('admin.reject_user', user_id=user_id), data={'csrf_token':token}, follow_redirects=True)
     assert response.status_code == 200
-    assert b"User rejectme@example.com rejected and deleted." in response.data
+    expected_flash_message = b"User rejectme@example.com rejected and deleted."
+    if expected_flash_message not in response.data:
+        print("DEBUG: Flash message for reject_user not found. Response data:")
+        print(response.data.decode('utf-8', errors='replace')) # Print decoded HTML
+    assert expected_flash_message in response.data
     assert b"Pending User Approvals" in response.data
     assert User.query.get(user_id) is None # User should be deleted
 
@@ -287,8 +329,8 @@ def test_view_flags_page_loads_for_admin(admin_client, db, create_test_user, cre
 def test_view_flags_pagination(admin_client, app, db, create_test_user, create_test_post):
     """Test pagination for /admin/flags."""
     with app.app_context():
-        original_ppp = app.config.get('POSTS_PER_PAGE', 10) # Route uses POSTS_PER_PAGE for pagination
-        app.config['POSTS_PER_PAGE'] = 1 # 1 flag per page for testing
+            original_admin_flags_ppp = app.config.get('ADMIN_FLAGS_PER_PAGE', 15) # Default from route
+            app.config['ADMIN_FLAGS_PER_PAGE'] = 1 # 1 flag per page for testing
 
     post_author = create_test_user(email_address="fppa@example.com", full_name="Flag Pag Post Author")
     comment_author = create_test_user(email_address="fpca@example.com", full_name="Flag Pag Comment Author")
@@ -314,7 +356,7 @@ def test_view_flags_pagination(admin_client, app, db, create_test_user, create_t
     assert b"Previous" in response_p3.data
 
     with app.app_context():
-        app.config['POSTS_PER_PAGE'] = original_ppp # Reset
+        app.config['ADMIN_FLAGS_PER_PAGE'] = original_admin_flags_ppp # Reset
 
 # --- Resolve Flag Route Tests ---
 def test_resolve_flag_successful(admin_client, app, db, create_test_user, create_test_post):
