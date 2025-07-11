@@ -706,3 +706,22 @@ $app-sidebar-breakpoint: 768px;
   // Ensure it doesn't inherit unwanted styles from generic .adw-button if they conflict
   text-decoration: none; // Links shouldn't be underlined if they are buttons
 }
+
+// Styles for the full-page gallery grid (gallery_full.html)
+.full-page-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); // Larger min size for items
+  gap: var(--spacing-l);
+  // padding-top and padding-bottom are applied inline in the template, which is fine.
+
+  .gallery-photo-card {
+    // Inherits .adw-card styles
+    // Specific overrides for cards within this full-page grid can go here if needed.
+    .gallery-photo-image {
+      width: 100%;
+      height: 220px; // Larger height for images in the full gallery
+      object-fit: cover;
+      border-bottom: 1px solid var(--border-color); // Consistent with profile preview
+    }
+  }
+}

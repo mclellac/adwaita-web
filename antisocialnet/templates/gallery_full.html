@@ -13,13 +13,12 @@
 {% block content %}
 <div class="adw-clamp adw-clamp-xl">
     {% if gallery_photos %}
-        <div class="profile-gallery-grid" style="padding-top: var(--spacing-l); padding-bottom: var(--spacing-l);"> {# Re-use existing grid style #}
+        <div class="full-page-gallery-grid" style="padding-top: var(--spacing-l); padding-bottom: var(--spacing-l);"> {# Use new class #}
             {% for photo in gallery_photos %}
             <div class="adw-card gallery-photo-card">
-                <img src="{{ url_for('static', filename='uploads/gallery_pics/' + photo.image_filename) }}"
+                <img src="{{ url_for('static', filename=photo.image_filename) }}"
                      alt="{{ photo.caption or 'Gallery image by ' ~ user_profile.username }}"
-                     class="gallery-photo-image"
-                     style="height: 200px;"> {# Adjust height as needed for a larger grid #}
+                     class="gallery-photo-image"> {# Remove inline style #}
                 {% if photo.caption %}
                 <div class="adw-card__content gallery-photo-caption">
                     <p class="adw-label body-2">{{ photo.caption }}</p>
