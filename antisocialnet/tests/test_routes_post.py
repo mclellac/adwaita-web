@@ -22,7 +22,7 @@ def test_like_item_route_for_post_authenticated(client, app, db, create_test_use
     initial_notifications = Notification.query.filter_by(user_id=post_author.id, type='new_like', target_type='post', target_id=test_post.id).count()
     initial_activities = Activity.query.filter_by(user_id=liking_user.id, type='liked_item', target_type='post', target_id=test_post.id).count() # Updated type
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         form = LikeForm()
         token = form.csrf_token.current_token
         url = url_for('like.like_item_route', target_type='post', target_id=test_post.id) # Updated route
@@ -57,7 +57,7 @@ def test_unlike_item_route_for_post_authenticated(client, app, db, create_test_u
     assert liking_user.has_liked_item('post', test_post.id) # Updated method
     initial_like_count = test_post.like_count
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         form = UnlikeForm()
         token = form.csrf_token.current_token
         url = url_for('like.unlike_item_route', target_type='post', target_id=test_post.id) # Updated route
@@ -93,7 +93,7 @@ def test_like_already_liked_item_route_for_post(client, app, db, create_test_pos
     db.session.commit()
 
     initial_like_count = test_post.like_count
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         form = LikeForm()
         token = form.csrf_token.current_token
         url = url_for('like.like_item_route', target_type='post', target_id=test_post.id) # Updated route
@@ -110,7 +110,7 @@ def test_unlike_not_liked_item_route_for_post(client, app, create_test_post, log
     test_post = create_test_post(content="Post not liked for unlike test")
     initial_like_count = test_post.like_count
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         form = UnlikeForm()
         token = form.csrf_token.current_token
         url = url_for('like.unlike_item_route', target_type='post', target_id=test_post.id) # Updated route
@@ -133,7 +133,7 @@ def test_like_item_route_for_nonexistent_post(client, logged_in_client, app): # 
     # The new route validates CSRF then target_type then fetches item.
     # For a truly non-existent item, it will 404 after CSRF and target_type check.
     # We need a CSRF token.
-    with app.app_context():
+    with logged_in_client.application.test_request_context():
         form = LikeForm()
         token = form.csrf_token.current_token
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=False)
@@ -150,7 +150,7 @@ def test_like_item_route_for_unpublished_post(client, app, db, create_test_user,
     like_url = None
     logout_url = None
     login_url = None
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         form = LikeForm()
         token_for_loginuser = form.csrf_token.current_token
         like_url = url_for('like.like_item_route', target_type='post', target_id=unpublished_post.id) # Updated route
@@ -178,7 +178,7 @@ def test_like_item_route_for_unpublished_post(client, app, db, create_test_user,
     # After this, 'client' is now authenticated as post_author
 
     token_for_author_like = None
-    with app.app_context(): # New app context to get token for the new session (author's session)
+    with client.application.test_request_context(): # Use client's context for new session
         form_author_like = LikeForm()
         token_for_author_like = form_author_like.csrf_token.current_token
         # like_url was defined above and is still correct
@@ -234,7 +234,7 @@ def test_unlike_item_csrf_missing_token_for_post(client, app, db, create_test_po
     liking_user = User.query.filter_by(username="login_fixture_user@example.com").first()
 
     # First, like the post legitimately
-    with app.app_context():
+    with logged_in_client.application.test_request_context():
         form = LikeForm()
         token = form.csrf_token.current_token
         like_url = url_for('like.like_item_route', target_type='post', target_id=test_post.id) # Updated route
@@ -257,7 +257,7 @@ def test_unlike_item_csrf_invalid_token_for_post(client, app, db, create_test_po
     # liking_user = User.query.filter_by(username="login_fixture_user@example.com").first() # Not strictly needed for this test path
 
     # First, like the post legitimately
-    with app.app_context():
+    with logged_in_client.application.test_request_context():
         form = LikeForm()
         token = form.csrf_token.current_token
         like_url = url_for('like.like_item_route', target_type='post', target_id=test_post.id)
@@ -296,7 +296,7 @@ def test_like_item_route_for_comment_authenticated(client, app, db, create_test_
     initial_notifications = Notification.query.filter_by(user_id=comment_author.id, type='new_like', target_type='comment', target_id=test_comment.id).count()
     initial_activities = Activity.query.filter_by(user_id=liking_user.id, type='liked_item', target_type='comment', target_id=test_comment.id).count()
 
-    with app.app_context():
+    with logged_in_client.application.test_request_context():
         form = LikeForm()
         token = form.csrf_token.current_token
         url = url_for('like.like_item_route', target_type='comment', target_id=test_comment.id)
@@ -339,7 +339,7 @@ def test_unlike_item_route_for_comment_authenticated(client, app, db, create_tes
     initial_like_count = test_comment.like_count
     assert initial_like_count > 0 # Ensure it was actually liked
 
-    with app.app_context():
+    with logged_in_client.application.test_request_context():
         form = UnlikeForm()
         token = form.csrf_token.current_token
         url = url_for('like.unlike_item_route', target_type='comment', target_id=test_comment.id)

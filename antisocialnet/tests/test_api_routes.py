@@ -15,8 +15,8 @@ def create_api_test_photo(db_session, user, filename_suffix="photo.jpg", caption
         caption=caption,
         uploaded_at=ts
     )
-    db_session.add(photo)
-    db_session.commit()
+    db_session.session.add(photo)
+    db_session.session.commit()
     return photo
 
 # Helper to create posts for API tests
@@ -29,8 +29,8 @@ def create_api_test_post(db_session, user, content="API Test Post Content", days
         published_at=ts if is_published else None,
         is_published=is_published
     )
-    db_session.add(post)
-    db_session.commit()
+    db_session.session.add(post)
+    db_session.session.commit()
     return post
 
 # --- API Feed Route (/api/v1/feed) Tests ---

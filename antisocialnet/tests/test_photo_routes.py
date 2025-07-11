@@ -1,6 +1,7 @@
 import pytest
-from flask import url_for
-from antisocialnet.models import User, UserPhoto, PhotoComment, SiteSetting
+from flask import url_for, current_app # Added current_app
+from antisocialnet.models import User, UserPhoto, PhotoComment, SiteSetting, Like, Notification, Activity # Added Like, Notification, Activity
+from antisocialnet.forms import LikeForm, UnlikeForm # Added form imports
 from antisocialnet import db
 from io import BytesIO
 import os # For checking file existence if needed, though tricky in tests

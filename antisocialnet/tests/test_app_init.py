@@ -18,7 +18,7 @@ def test_create_app_default_development_config():
     app = create_app()
     # Instead of isinstance, check characteristic values
     assert app.config['DEBUG'] is True
-    assert app.env == 'development'
+    assert app.config['ENV'] == 'development'
     # Optionally, check a value specific to DevelopmentConfig if it exists
     # Example: assert app.config.get('DEVELOPMENT_SPECIFIC_KEY') == 'expected_dev_value'
 
@@ -32,7 +32,7 @@ def test_create_app_production_config():
     app = create_app(config_name='production')
     # Instead of isinstance, check characteristic values
     assert app.config['DEBUG'] is False
-    assert app.env == 'production' # Production config should set this
+    assert app.config['ENV'] == 'production' # Production config should set this
     # Optionally: assert app.config.get('PRODUCTION_SPECIFIC_KEY') == 'expected_prod_value'
 
 
@@ -122,7 +122,7 @@ def test_upload_folders_are_absolute(app): # Uses the app fixture from conftest
 # User Loader test (partially covered by auth tests, but direct test is good)
 def test_user_loader(app, db, create_test_user):
     """Test the user_loader callback for Flask-Login."""
-    user = create_test_user(username="loaderuser", email="loader@example.com")
+    user = create_test_user(email_address="loaderuser@example.com", full_name="Loader User") # Use email_address
     user_id_str = str(user.id)
 
     with app.app_context():
