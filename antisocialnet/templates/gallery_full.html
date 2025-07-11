@@ -133,7 +133,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const authorProfileUrl = comment.author.profile_url;
             const authorAvatarAlt = comment.author.full_name;
 
-            // Re-typed syntax markers for the template literal below
             commentDiv.innerHTML = \`
                 <span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">
                     <img src="\${comment.author.profile_photo_url}" alt="\${authorAvatarAlt} avatar">
@@ -199,7 +198,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const contextPrefix = likeSectionContainer.id.startsWith('dialog-') ? 'dialog-' : '';
 
         let formHtml;
-        // Re-typed syntax markers for the template literal below
         if (userHasLiked) {
             formHtml = \`
                 <form action="/like/unlike/\${itemType}/\${itemId}" method="POST" style="display: inline;" class="like-form">
@@ -211,7 +209,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 </form>
             \`;
         } else {
-            // Re-typed syntax markers for the template literal below
             formHtml = \`
                 <form action="/like/\${itemType}/\${itemId}" method="POST" style="display: inline;" class="like-form">
                     <input type="hidden" name="csrf_token" value="\${csrfTokenVal}">
@@ -222,7 +219,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 </form>
             \`;
         }
-        // Re-typed syntax markers for the template literal part below
         likeSectionContainer.innerHTML = formHtml + \`<span class="adw-label caption like-count" id="\${contextPrefix}like-count-\${itemType}-\${itemId}">\${newLikeCount}</span>\`;
     }
 

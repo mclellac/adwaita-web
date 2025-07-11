@@ -211,10 +211,10 @@
                         <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
                             document.addEventListener('DOMContentLoaded', function() {
                                 if (window.Adw && window.Adw.createToast) {
-                                    window.Adw.createToast("{{ message|escapejs }}");
+                                    window.Adw.createToast("Test message");
                                 } else {
                                     // Fallback if Adw.createToast is not available for some reason
-                                    console.warn("Adw.createToast not found, falling back for message: {{ message|escapejs }}");
+                                    console.warn("Adw.createToast not found, falling back for message: Test message");
                                     // Optional: could add a simple alert or console log as fallback
                                 }
                             });
