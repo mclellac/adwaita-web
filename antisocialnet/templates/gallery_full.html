@@ -95,36 +95,36 @@
 {{ super() }}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const galleryPhotoDialog = document.getElementById('gallery-photo-dialog');
-    const fullGalleryPhotoImg = document.getElementById('full-gallery-photo-img');
-    const fullGalleryPhotoCaption = document.getElementById('full-gallery-photo-caption');
-    const galleryPhotoCommentsList = document.getElementById('gallery-photo-comments-list');
-    const galleryPhotoDialogLikeSection = document.getElementById('gallery-photo-dialog-like-section');
-    const newGalleryCommentForm = document.getElementById('new-gallery-comment-form');
-    const galleryCommentText = document.getElementById('gallery-comment-text');
-    const galleryCommentPhotoIdInput = document.getElementById('gallery-comment-photo-id');
-    const galleryCommentError = document.getElementById('gallery-comment-error');
-    const placeholderComment = galleryPhotoCommentsList ? galleryPhotoCommentsList.querySelector('.placeholder-comment') : null;
-    const clickableGalleryPhotos = document.querySelectorAll('.clickable-gallery-photo');
+    const galleryPhotoDialog = document.getElementById(\`gallery-photo-dialog\`);
+    const fullGalleryPhotoImg = document.getElementById(\`full-gallery-photo-img\`);
+    const fullGalleryPhotoCaption = document.getElementById(\`full-gallery-photo-caption\`);
+    const galleryPhotoCommentsList = document.getElementById(\`gallery-photo-comments-list\`);
+    const galleryPhotoDialogLikeSection = document.getElementById(\`gallery-photo-dialog-like-section\`);
+    const newGalleryCommentForm = document.getElementById(\`new-gallery-comment-form\`);
+    const galleryCommentText = document.getElementById(\`gallery-comment-text\`);
+    const galleryCommentPhotoIdInput = document.getElementById(\`gallery-comment-photo-id\`);
+    const galleryCommentError = document.getElementById(\`gallery-comment-error\`);
+    const placeholderComment = galleryPhotoCommentsList ? galleryPhotoCommentsList.querySelector(\`.placeholder-comment\`) : null;
+    const clickableGalleryPhotos = document.querySelectorAll(\`.clickable-gallery-photo\`);
 
     function formatCommentDate(isoString) {
         const date = new Date(isoString);
-        return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) + ' ' +
-               date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleDateString(undefined, { year: \`numeric\`, month: \`long\`, day: \`numeric\` }) + \` \` +
+               date.toLocaleTimeString(undefined, { hour: \`2-digit\`, minute: \`2-digit\` });
     }
 
     function displayGalleryComments(comments) {
         if (!galleryPhotoCommentsList) return;
-        galleryPhotoCommentsList.innerHTML = '';
+        galleryPhotoCommentsList.innerHTML = \`\`;
         if (!comments || comments.length === 0) {
             if(placeholderComment) {
-                placeholderComment.style.display = '';
-                placeholderComment.querySelector('.adw-action-row-subtitle').textContent = 'No comments yet.';
+                placeholderComment.style.display = \`\`;
+                placeholderComment.querySelector(\`.adw-action-row-subtitle\`).textContent = \`No comments yet.\`;
                 galleryPhotoCommentsList.appendChild(placeholderComment);
             }
             return;
         }
-        if(placeholderComment) placeholderComment.style.display = 'none';
+        if(placeholderComment) placeholderComment.style.display = \`none\`;
 
         comments.forEach(comment => {
             const commentDiv = document.createElement('div');
@@ -133,36 +133,28 @@ document.addEventListener('DOMContentLoaded', function () {
             const authorProfileUrl = comment.author.profile_url;
             const authorAvatarAlt = comment.author.full_name;
 
-            let htmlContent =
-                '<span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">' +
-                    '<img src="' + comment.author.profile_photo_url + '" alt="' + authorAvatarAlt + ' avatar">' +
-                '</span>' +
-                '<span class="adw-action-row-text-content">';
-
-            if (authorProfileUrl) {
-                htmlContent += '<a href="' + authorProfileUrl + '" class="adw-link adw-action-row-title">' + authorDisplayName + '</a>';
-            } else {
-                htmlContent += '<span class="adw-action-row-title">' + authorDisplayName + '</span>';
-            }
-
-            htmlContent +=
-                    '<span class="adw-action-row-subtitle">' + comment.text + '</span>' +
-                    '<small class="adw-label caption">' + formatCommentDate(comment.created_at) + '</small>' +
-                '</span>';
-
-            commentDiv.innerHTML = htmlContent;
+            commentDiv.innerHTML = \`
+                <span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">
+                    <img src="\${comment.author.profile_photo_url}" alt="\${authorAvatarAlt} avatar">
+                </span>
+                <span class="adw-action-row-text-content">
+                    \${authorProfileUrl ? \`<a href="\${authorProfileUrl}" class="adw-link adw-action-row-title">\${authorDisplayName}</a>\` : \`<span class="adw-action-row-title">\${authorDisplayName}</span>\`}
+                    <span class="adw-action-row-subtitle">\${comment.text}</span>
+                    <small class="adw-label caption">\${formatCommentDate(comment.created_at)}</small>
+                </span>
+            \`;
             galleryPhotoCommentsList.appendChild(commentDiv);
         });
     }
 
     async function fetchGalleryComments(photoId) {
         if (!galleryPhotoCommentsList) {
-            if(placeholderComment) placeholderComment.style.display = 'none';
+            if(placeholderComment) placeholderComment.style.display = \`none\`;
             return;
         }
         if(placeholderComment) {
-            placeholderComment.style.display = '';
-            placeholderComment.querySelector('.adw-action-row-subtitle').textContent = 'Loading comments...';
+            placeholderComment.style.display = \`\`;
+            placeholderComment.querySelector(\`.adw-action-row-subtitle\`).textContent = \`Loading comments...\`;
             if (galleryPhotoCommentsList.childElementCount === 0) {
                  galleryPhotoCommentsList.appendChild(placeholderComment);
             }
@@ -170,16 +162,16 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch(\`/photo/api/photos/\${photoId}/comments\`);
             if (!response.ok) {
-                throw new Error(\`HTTP error! status: ${response.status}\`); // Corrected
+                throw new Error(\`HTTP error! status: \${response.status}\`); // Corrected
             }
             const comments = await response.json();
             displayGalleryComments(comments);
         } catch (error) {
-            console.error('Error fetching gallery comments:', error);
+            console.error(\`Error fetching gallery comments:\`, error);
             if(placeholderComment && galleryPhotoCommentsList.contains(placeholderComment)) {
-                 placeholderComment.querySelector('.adw-action-row-subtitle').textContent = 'Could not load comments.';
+                 placeholderComment.querySelector(\`.adw-action-row-subtitle\`).textContent = \`Could not load comments.\`;
             } else if (placeholderComment && galleryPhotoCommentsList) {
-                 placeholderComment.querySelector('.adw-action-row-subtitle').textContent = 'Could not load comments.';
+                 placeholderComment.querySelector(\`.adw-action-row-subtitle\`).textContent = \`Could not load comments.\`;
                  galleryPhotoCommentsList.appendChild(placeholderComment);
             }
         }
@@ -187,23 +179,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function renderLikeButtonForDialog(photoId, likeSectionElement) {
         if (!likeSectionElement) return;
-        likeSectionElement.innerHTML = '';
+        likeSectionElement.innerHTML = \`\`;
         try {
              const photoData = await fetchPhotoData(photoId);
              if (photoData.error) {
-                 likeSectionElement.innerHTML = "<p class='adw-label caption error-text'>" + (photoData.message || 'Could not load like actions.') +"</p>";
+                 likeSectionElement.innerHTML = \`<p class='adw-label caption error-text'>\${photoData.message || 'Could not load like actions.'}</p>\`;
                  return;
              }
-             updateLikeSectionUI(likeSectionElement, photoId, 'photo', photoData.like_count, photoData.user_has_liked);
+             updateLikeSectionUI(likeSectionElement, photoId, \`photo\`, photoData.like_count, photoData.user_has_liked);
         } catch (error) {
-            console.error("Error preparing like button for dialog:", error);
-            likeSectionElement.innerHTML = "<p class='adw-label caption error-text'>Could not load like actions (exception).</p>";
+            console.error(\`Error preparing like button for dialog:\`, error);
+            likeSectionElement.innerHTML = \`<p class='adw-label caption error-text'>Could not load like actions (exception).</p>\`;
         }
     }
 
     function updateLikeSectionUI(likeSectionContainer, itemId, itemType, newLikeCount, userHasLiked) {
-        const csrfTokenVal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const contextPrefix = likeSectionContainer.id.startsWith('dialog-') ? 'dialog-' : '';
+        const csrfTokenVal = document.querySelector(\`meta[name="csrf-token"]\`).getAttribute(\`content\`);
+        const contextPrefix = likeSectionContainer.id.startsWith(\`dialog-\`) ? \`dialog-\` : \`\`;
 
         let formHtml;
         if (userHasLiked) {
@@ -232,76 +224,76 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function handleLikeUnlike(event) {
         event.preventDefault();
-        const form = event.target.closest('.like-form');
+        const form = event.target.closest(\`.like-form\`);
         if (!form) return;
 
-        const likeSection = form.closest('.like-section');
+        const likeSection = form.closest(\`.like-section\`);
         if(!likeSection) {
-            console.error("Could not find parent .like-section for the form.");
+            console.error(\`Could not find parent .like-section for the form.\`);
             return;
         }
 
         const itemType = likeSection.dataset.itemType;
         const itemId = likeSection.dataset.itemId;
         if (!itemType || !itemId) {
-            console.error("Missing data-item-type or data-item-id on .like-section");
+            console.error(\`Missing data-item-type or data-item-id on .like-section\`);
             return;
         }
 
         const actionUrl = form.action;
-        const csrfToken = form.querySelector('input[name="csrf_token"]').value;
-        const actionType = form.querySelector('input[name="action_type"]').value;
+        const csrfToken = form.querySelector(\`input[name="csrf_token"]\`).value;
+        const actionType = form.querySelector(\`input[name="action_type"]\`).value;
 
         try {
             const response = await fetch(actionUrl, {
-                method: 'POST',
+                method: \`POST\`,
                 headers: {
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'X-CSRFToken': csrfToken, // Headers often use specific casing, keep as is or verify
+                    'Content-Type': \`application/x-www-form-urlencoded\`
                 },
-                body: new URLSearchParams({ csrf_token: csrfToken })
+                body: new URLSearchParams({ csrf_token: csrfToken }) // Keep as is, URLSearchParams handles encoding
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: 'Unknown error during like/unlike.' }));
-                throw new Error(errorData.message || \`HTTP error! status: ${response.status}\`); // Corrected
+                const errorData = await response.json().catch(() => ({ message: \`Unknown error during like/unlike.\` }));
+                throw new Error(errorData.message || \`HTTP error! status: \${response.status}\`); // Corrected
             }
 
             const data = await response.json();
 
-            if (data.status === 'success') {
-                const likeSectionContainer = form.closest('.like-section');
+            if (data.status === \`success\`) {
+                const likeSectionContainer = form.closest(\`.like-section\`);
                 updateLikeSectionUI(likeSectionContainer, itemId, itemType, data.new_like_count, data.user_has_liked);
                 const dialogPhotoId = galleryCommentPhotoIdInput.value;
-                if (galleryPhotoDialog.isOpen && typeof galleryPhotoDialog.isOpen === 'function' && galleryPhotoDialog.isOpen() &&
+                if (galleryPhotoDialog.isOpen && typeof galleryPhotoDialog.isOpen === \`function\` && galleryPhotoDialog.isOpen() &&
                     dialogPhotoId === itemId &&
                     likeSection !== galleryPhotoDialogLikeSection) { // Check it's not the dialog's own like section
                     updateLikeSectionUI(galleryPhotoDialogLikeSection, itemId, itemType, data.new_like_count, data.user_has_liked);
                 }
             } else {
-                throw new Error(data.message || 'Like/unlike action failed.');
+                throw new Error(data.message || \`Like/unlike action failed.\`);
             }
         } catch (error) {
-            console.error('Error handling like/unlike:', error);
+            console.error(\`Error handling like/unlike:\`, error);
             if (window.Adw && Adw.createToast) {
-                Adw.createToast(error.message || 'Could not perform like/unlike action.', { type: 'error' });
+                Adw.createToast(error.message || \`Could not perform like/unlike action.\`, { type: \`error\` });
             } else {
-                alert(error.message || 'Could not perform like/unlike action.');
+                alert(error.message || \`Could not perform like/unlike action.\`);
             }
         }
     }
 
-    const contentArea = document.querySelector('.adw-clamp.adw-clamp-xl');
+    const contentArea = document.querySelector(\`.adw-clamp.adw-clamp-xl\`);
     if (contentArea) {
-        contentArea.addEventListener('submit', function(event) {
-            if (event.target.matches('.like-form')) {
+        contentArea.addEventListener(\`submit\`, function(event) {
+            if (event.target.matches(\`.like-form\`)) {
                 handleLikeUnlike(event);
             }
         });
     }
      if (galleryPhotoDialogLikeSection) {
-        galleryPhotoDialogLikeSection.addEventListener('submit', function(event) {
-            if (event.target.matches('.like-form')) {
+        galleryPhotoDialogLikeSection.addEventListener(\`submit\`, function(event) {
+            if (event.target.matches(\`.like-form\`)) {
                 handleLikeUnlike(event);
             }
         });
@@ -311,12 +303,12 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch(\`/photo/api/photos/\${photoId}/details\`);
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                console.error(\`Error fetching photo details for \${photoId}: \${response.status}\`, errorData.message || 'Server returned an error');
-                return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: errorData.message || 'Could not load photo details.' };
+                const errorData = await response.json().catch(() => ({})); // Ensure errorData is always an object
+                console.error(\`Error fetching photo details for \${photoId}: \${response.status}\`, errorData.message || \`Server returned an error\`);
+                return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: errorData.message || \`Could not load photo details.\` };
             }
             const data = await response.json();
-            if (data.status === 'success') {
+            if (data.status === \`success\`) {
                 return {
                     id: data.id,
                     like_count: data.like_count,
@@ -325,27 +317,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
             } else {
                 console.error(\`API error fetching photo details for \${photoId}:\`, data.message);
-                return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: data.message || 'Failed to get photo details.'};
+                return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: data.message || \`Failed to get photo details.\`};
             }
         } catch (error) {
-            console.error('Network or JavaScript error fetching photo details:', error);
-            return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: 'Network error or invalid response.' };
+            console.error(\`Network or JavaScript error fetching photo details:\`, error);
+            return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: \`Network error or invalid response.\` };
         }
     }
 
     if (galleryPhotoDialog && fullGalleryPhotoImg && fullGalleryPhotoCaption && galleryPhotoCommentsList) {
-        customElements.whenDefined('adw-dialog').then(() => {
+        customElements.whenDefined(\`adw-dialog\`).then(() => {
             clickableGalleryPhotos.forEach((thumb, index) => {
-                thumb.addEventListener('click', () => {
+                thumb.addEventListener(\`click\`, () => {
                     const photoId = thumb.dataset.photoid;
                     const photoUrl = thumb.dataset.fullsrc;
                     const caption = thumb.dataset.caption;
 
                     if (photoUrl && photoId) {
                         fullGalleryPhotoImg.src = photoUrl;
-                        fullGalleryPhotoImg.alt = caption || "Full-size gallery photo";
+                        fullGalleryPhotoImg.alt = caption || \`Full-size gallery photo\`;
                         if (fullGalleryPhotoCaption) {
-                             fullGalleryPhotoCaption.textContent = caption || '';
+                             fullGalleryPhotoCaption.textContent = caption || \`\`;
                         }
                         if (galleryCommentPhotoIdInput) {
                             galleryCommentPhotoIdInput.value = photoId;
@@ -361,31 +353,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
         }).catch(error => {
-            console.error("gallery_full.html: Error with adw-dialog definition or listener attachment:", error);
+            console.error(\`gallery_full.html: Error with adw-dialog definition or listener attachment:\`, error);
         });
     } else {
-        console.warn("gallery_full.html: One or more critical elements for dialog functionality were not found. Aborting dialog setup.");
+        console.warn(\`gallery_full.html: One or more critical elements for dialog functionality were not found. Aborting dialog setup.\`);
     }
 
     if (newGalleryCommentForm && galleryCommentText && galleryCommentPhotoIdInput && galleryCommentError) {
-        newGalleryCommentForm.addEventListener('submit', async function(event) {
+        newGalleryCommentForm.addEventListener(\`submit\`, async function(event) {
             event.preventDefault();
             const photoId = galleryCommentPhotoIdInput.value;
             const commentText = galleryCommentText.value.trim();
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfToken = document.querySelector(\`meta[name="csrf-token"]\`).getAttribute(\`content\`);
 
             if (!commentText) {
-                galleryCommentError.textContent = "Comment cannot be empty.";
-                galleryCommentError.style.display = 'block';
+                galleryCommentError.textContent = \`Comment cannot be empty.\`;
+                galleryCommentError.style.display = \`block\`;
                 return;
             }
-            galleryCommentError.style.display = 'none';
+            galleryCommentError.style.display = \`none\`;
 
             try {
                 const response = await fetch(\`/photo/api/photos/\${photoId}/comments\`, {
-                    method: 'POST',
+                    method: \`POST\`,
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': \`application/json\`,
                         'X-CSRFToken': csrfToken
                     },
                     body: JSON.stringify({ text: commentText })
@@ -393,14 +385,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.errors ? JSON.stringify(errorData.errors) : \`HTTP error! status: ${response.status}\`); // Corrected
+                    throw new Error(errorData.errors ? JSON.stringify(errorData.errors) : \`HTTP error! status: \${response.status}\`); // Corrected
                 }
-                galleryCommentText.value = '';
+                galleryCommentText.value = \`\`;
                 fetchGalleryComments(photoId);
             } catch (error) {
-                console.error('Error posting comment:', error);
-                galleryCommentError.textContent = "Could not post comment: " + error.message;
-                galleryCommentError.style.display = 'block';
+                console.error(\`Error posting comment:\`, error);
+                galleryCommentError.textContent = \`Could not post comment: \` + error.message;
+                galleryCommentError.style.display = \`block\`;
             }
         });
     }
