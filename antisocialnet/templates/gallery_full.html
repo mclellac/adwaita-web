@@ -8,6 +8,228 @@
     <a href="{{ url_for('profile.view_profile', user_id=user_profile.id) }}" class="adw-button">
         <span class="adw-icon icon-actions-go-previous-symbolic"></span> Back to Profile
     </a>
+
+{# Dialog for Full-Size Gallery Photo (copied from profile.html) #}
+<adw-dialog id="gallery-photo-dialog" title="Gallery Photo">
+    <div slot="content" class="dialog-image-content" style="text-align: center; padding: var(--spacing-m);">
+        <img id="full-gallery-photo-img" src="" alt="Full-size gallery photo" style="max-width: 100%; max-height: 70vh; display: block; margin: auto;">
+        <p id="full-gallery-photo-caption" class="adw-label body-1" style="margin-top: var(--spacing-s);"></p>
+
+        <div id="gallery-photo-dialog-like-section" class="adw-box justify-center" style="margin-bottom: var(--spacing-m);">
+            {# Placeholder for JS to fill #}
+        </div>
+
+        <hr style="margin: var(--spacing-m) 0;">
+
+        <div class="photo-comments-area" style="max-height: 30vh; overflow-y: auto; text-align: left; margin-bottom: var(--spacing-m);">
+            <h3 class="adw-title-4" style="margin-bottom: var(--spacing-s);">Comments</h3>
+            <div id="gallery-photo-comments-list" class="adw-list-box flat compact">
+                <div class="adw-action-row placeholder-comment" style="display: none;">
+                     <span class="adw-action-row-subtitle">No comments yet, or loading...</span>
+                </div>
+            </div>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <form id="new-gallery-comment-form" class="stacked-form" style="text-align: left;">
+            <input type="hidden" id="gallery-comment-photo-id" name="photo_id" value="">
+            <div class="adw-action-row column-layout">
+                 <label for="gallery-comment-text" class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">Your Comment</label>
+                <textarea id="gallery-comment-text" name="text" class="adw-entry" rows="2" placeholder="Write a comment..." required style="width: 100%; min-height: 60px; box-sizing: border-box;"></textarea>
+                <div id="gallery-comment-error" class="error-text adw-label caption" style="display:none; margin-top: var(--spacing-xs);"></div>
+            </div>
+            <div class="form-actions-end" style="margin-top: var(--spacing-s);">
+                <button type="submit" class="adw-button suggested-action">Post Comment</button>
+            </div>
+        </form>
+        {% else %}
+        <p class="adw-label body-1"><a href="{{ url_for('auth.login', next=request.url) }}" class="adw-link">Login</a> to comment.</p>
+        {% endif %}
+    </div>
+</adw-dialog>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Full-size gallery photo dialog logic (adapted from profile.html)
+    const galleryPhotoDialog = document.getElementById('gallery-photo-dialog');
+    const fullGalleryPhotoImg = document.getElementById('full-gallery-photo-img');
+    const fullGalleryPhotoCaption = document.getElementById('full-gallery-photo-caption');
+    const galleryPhotoCommentsList = document.getElementById('gallery-photo-comments-list');
+    const galleryPhotoDialogLikeSection = document.getElementById('gallery-photo-dialog-like-section');
+    const newGalleryCommentForm = document.getElementById('new-gallery-comment-form');
+    const galleryCommentText = document.getElementById('gallery-comment-text');
+    const galleryCommentPhotoIdInput = document.getElementById('gallery-comment-photo-id');
+    const galleryCommentError = document.getElementById('gallery-comment-error');
+    const placeholderComment = galleryPhotoCommentsList ? galleryPhotoCommentsList.querySelector('.placeholder-comment') : null;
+
+    // Selector for clickable photos will be '.clickable-gallery-photo' which needs to be added to images
+    const clickableGalleryPhotos = document.querySelectorAll('.clickable-gallery-photo');
+
+    function formatCommentDate(isoString) {
+        const date = new Date(isoString);
+        return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) + ' ' +
+               date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function displayGalleryComments(comments) {
+        if (!galleryPhotoCommentsList) return;
+        galleryPhotoCommentsList.innerHTML = '';
+        if (!comments || comments.length === 0) {
+            if(placeholderComment) {
+                placeholderComment.style.display = '';
+                placeholderComment.querySelector('.adw-action-row-subtitle').textContent = 'No comments yet.';
+                galleryPhotoCommentsList.appendChild(placeholderComment);
+            }
+            return;
+        }
+        if(placeholderComment) placeholderComment.style.display = 'none';
+
+        comments.forEach(comment => {
+            const commentDiv = document.createElement('div');
+            commentDiv.classList.add('adw-action-row');
+            const authorDisplayName = comment.author.full_name;
+            const authorProfileUrl = comment.author.profile_url;
+            const authorAvatarAlt = comment.author.full_name;
+
+            commentDiv.innerHTML = `
+                <span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">
+                    <img src="${comment.author.profile_photo_url}" alt="${authorAvatarAlt} avatar">
+                </span>
+                <span class="adw-action-row-text-content">
+                    ${authorProfileUrl ? `<a href="${authorProfileUrl}" class="adw-link adw-action-row-title">${authorDisplayName}</a>` : `<span class="adw-action-row-title">${authorDisplayName}</span>`}
+                    <span class="adw-action-row-subtitle">${comment.text}</span>
+                    <small class="adw-label caption">${formatCommentDate(comment.created_at)}</small>
+                </span>
+            `;
+            galleryPhotoCommentsList.appendChild(commentDiv);
+        });
+    }
+
+    async function fetchGalleryComments(photoId) {
+        if (!galleryPhotoCommentsList) {
+            if(placeholderComment) placeholderComment.style.display = 'none';
+            return;
+        }
+        if(placeholderComment) {
+            placeholderComment.style.display = '';
+            placeholderComment.querySelector('.adw-action-row-subtitle').textContent = 'Loading comments...';
+            if (galleryPhotoCommentsList.childElementCount === 0) {
+                 galleryPhotoCommentsList.appendChild(placeholderComment);
+            }
+        }
+        try {
+            const response = await fetch(\`/photo/api/photos/\${photoId}/comments\`);
+            if (!response.ok) {
+                throw new Error(\`HTTP error! status: \${response.status}\`);
+            }
+            const comments = await response.json();
+            displayGalleryComments(comments);
+        } catch (error) {
+            console.error('Error fetching gallery comments:', error);
+            if(placeholderComment && galleryPhotoCommentsList.contains(placeholderComment)) {
+                 placeholderComment.querySelector('.adw-action-row-subtitle').textContent = 'Could not load comments.';
+            } else if (placeholderComment && galleryPhotoCommentsList) {
+                 placeholderComment.querySelector('.adw-action-row-subtitle').textContent = 'Could not load comments.';
+                 galleryPhotoCommentsList.appendChild(placeholderComment);
+            }
+        }
+    }
+
+    async function renderLikeButtonForDialog(photoId, likeSectionElement) {
+        if (!likeSectionElement) return;
+        const csrfTokenVal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        likeSectionElement.innerHTML = \`
+            <form action="/like/photo/\${photoId}" method="POST" style="display: inline-block; margin-right: 5px;">
+                <input type="hidden" name="csrf_token" value="\${csrfTokenVal}">
+                <button type="submit" class="adw-button small flat suggested-action" aria-label="Like photo">
+                    <span class="adw-icon icon-actions-star-symbolic"></span> Like
+                </button>
+            </form>
+            <form action="/like/unlike/photo/\${photoId}" method="POST" style="display: inline-block;">
+                <input type="hidden" name="csrf_token" value="\${csrfTokenVal}">
+                <button type="submit" class="adw-button small flat" aria-label="Unlike photo">
+                    <span class="adw-icon icon-actions-starred-symbolic"></span> Unlike
+                </button>
+            </form>
+        \`;
+    }
+
+    if (galleryPhotoDialog && fullGalleryPhotoImg && fullGalleryPhotoCaption && galleryPhotoCommentsList) {
+        customElements.whenDefined('adw-dialog').then(() => {
+            clickableGalleryPhotos.forEach(thumb => {
+                thumb.addEventListener('click', () => {
+                    const photoUrl = thumb.dataset.fullsrc;
+                    const caption = thumb.dataset.caption;
+                    const photoId = thumb.dataset.photoid;
+
+                    if (photoUrl && photoId) {
+                        fullGalleryPhotoImg.src = photoUrl;
+                        fullGalleryPhotoImg.alt = caption || "Full-size gallery photo";
+                        if (fullGalleryPhotoCaption) {
+                             fullGalleryPhotoCaption.textContent = caption || '';
+                        }
+                        if (galleryCommentPhotoIdInput) {
+                            galleryCommentPhotoIdInput.value = photoId;
+                        }
+                        fetchGalleryComments(photoId);
+                        if (galleryPhotoDialogLikeSection) {
+                            renderLikeButtonForDialog(photoId, galleryPhotoDialogLikeSection);
+                        }
+                        galleryPhotoDialog.open();
+                    }
+                });
+            });
+        }).catch(error => {
+            console.error("gallery_full.html: Failed to initialize gallery photo dialog; adw-dialog definition not found.", error);
+        });
+    } else {
+        if (!galleryPhotoDialog) console.warn("gallery_full.html: Gallery photo dialog element not found (expected in this page if script is to work).");
+        if (!clickableGalleryPhotos || clickableGalleryPhotos.length === 0) console.warn("gallery_full.html: No clickable gallery photos found. Ensure images have '.clickable-gallery-photo' class and data attributes.");
+    }
+
+    if (newGalleryCommentForm && galleryCommentText && galleryCommentPhotoIdInput && galleryCommentError) {
+        newGalleryCommentForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const photoId = galleryCommentPhotoIdInput.value;
+            const commentText = galleryCommentText.value.trim();
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            if (!commentText) {
+                galleryCommentError.textContent = "Comment cannot be empty.";
+                galleryCommentError.style.display = 'block';
+                return;
+            }
+            galleryCommentError.style.display = 'none';
+
+            try {
+                const response = await fetch(\`/photo/api/photos/\${photoId}/comments\`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ text: commentText })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.errors ? JSON.stringify(errorData.errors) : \`HTTP error! status: \${response.status}\`);
+                }
+                galleryCommentText.value = '';
+                fetchGalleryComments(photoId);
+            } catch (error) {
+                console.error('Error posting comment:', error);
+                galleryCommentError.textContent = "Could not post comment: " + error.message;
+                galleryCommentError.style.display = 'block';
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
 
 {% block content %}
@@ -18,7 +240,10 @@
             <div class="adw-card gallery-photo-card">
                 <img src="{{ url_for('static', filename=photo.image_filename) }}"
                      alt="{{ photo.caption or 'Gallery image by ' ~ user_profile.username }}"
-                     class="gallery-photo-image"> {# Remove inline style #}
+                     class="gallery-photo-image clickable-gallery-photo" {# Added clickable class #}
+                     data-fullsrc="{{ url_for('static', filename=photo.image_filename) }}"
+                     data-caption="{{ photo.caption or '' }}"
+                     data-photoid="{{ photo.id }}">
                 {% if photo.caption %}
                 <div class="adw-card__content gallery-photo-caption">
                     <p class="adw-label body-2">{{ photo.caption }}</p>
