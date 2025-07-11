@@ -35,16 +35,17 @@ $accent-yellow-fg: rgba(0, 0, 0, 0.8); // Yellow is an exception, matches docs @
 
 // Standalone colors (meant for text on neutral backgrounds)
 // These are updated to match the Libadwaita 1.5 docs for @accent_color, @destructive_color etc.
+// Further updated to align more closely with Libadwaita main spec for accent shades.
 $accent-standalone-colors: (
-  "blue":   (light: #1c71d8, dark: #78aeed), // From @accent_color
-  "teal":   (light: #007184, dark: #7bdff4), // Kept from previous, good standalone teal
-  "green":  (light: #1b8553, dark: #8ff0a4), // From @success_color
-  "yellow": (light: #9c6e03, dark: #f8e45c), // From @warning_color
-  "orange": (light: #b62200, dark: #ff9c5b), // Kept from previous, good standalone orange
-  "red":    (light: #c01c28, dark: #ff7b63), // From @destructive_color / @error_color
-  "pink":   (light: #a2326c, dark: #ffa0d8), // Kept from previous, good standalone pink
-  "purple": (light: #813d9c, dark: #c061cb), // Using purple-4 and purple-2 for better contrast than original
-  "slate":  (light: #526678, dark: #bbd1e5)  // Kept from previous, good standalone slate
+  "blue":   (light: #1c71d8, dark: #78aeed), // Libadwaita: @accent_color light @blue_4, dark a lighter blue
+  "teal":   (light: #007184, dark: #63d2e7), // Libadwaita: light @teal_4, dark @teal_2
+  "green":  (light: #26a269, dark: #8ff0a4), // Libadwaita @success_color: light @green_5, dark @green_1
+  "yellow": (light: #9c6e03, dark: #f8e45c), // Libadwaita @warning_color: light desaturated @yellow_5, dark @yellow_2
+  "orange": (light: #e66100, dark: #ffa348), // Libadwaita: light @orange_4, dark @orange_2
+  "red":    (light: #c01c28, dark: #ff7b63), // Libadwaita @destructive_color: light @red_4, dark adjusted @red_1
+  "pink":   (light: #a2326c, dark: #ffa0d8), // Custom accent, kept as is
+  "purple": (light: #813d9c, dark: #c061cb), // Libadwaita: light @purple_4, dark @purple_2
+  "slate":  (light: #526678, dark: #bbd1e5)  // Custom accent, kept as is
 );
 
 
@@ -84,8 +85,8 @@ $view-bg-color-dark: #1e1e1e;
 $headerbar-bg-color-dark: #303030;
 $headerbar-shade-color-dark: rgba(0, 0, 0, 0.36);
 $headerbar-darker-shade-color-dark: rgba(0, 0, 0, 0.9);
-$sidebar-bg-color-dark: #303030;
-$sidebar-backdrop-color-dark: #2a2a2a;
+$sidebar-bg-color-dark: #282828; // Updated to match official Adwaita
+$sidebar-backdrop-color-dark: #222222; // Updated to match official Adwaita for unfocused sidebar
 $sidebar-border-color-dark: rgba(0, 0, 0, 0.36);
 $sidebar-shade-color-dark: rgba(0, 0, 0, 0.25);
 $card-bg-color-dark: rgba(255, 255, 255, 0.08);

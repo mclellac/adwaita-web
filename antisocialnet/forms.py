@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import (
     BooleanField,
-    FileField,
+    MultipleFileField,
     PasswordField,
     StringField,
     SubmitField,
@@ -123,18 +123,19 @@ class SiteSettingsForm(FlaskForm):
     submit = SubmitField('Save Settings')
 
 class GalleryPhotoUploadForm(FlaskForm):
-    photo = FileField(
-        'Photo (Max 5MB)',
+    photos = MultipleFileField(  # Changed from photo to photos and FileField to MultipleFileField
+        'Photos (Max 5MB each)',  # Updated label
         validators=[
-            DataRequired(message="Please select a photo to upload."),
-            # FileAllowed will be added dynamically in the route using current_app.config
+            DataRequired(message="Please select one or more photos to upload."),
+            # FileAllowed will be added dynamically in the route for each file.
+            # Consider adding a validator for the number of files if needed, e.g., Length(min=1, max=10)
         ]
     )
-    caption = TextAreaField(
-        'Caption (Optional)',
+    caption = TextAreaField(  # Caption will apply to all photos in this batch, or adjust logic in route
+        'Caption (Optional, applies to all uploaded photos)',
         validators=[Optional(), Length(max=500)]
     )
-    submit = SubmitField('Upload Photo')
+    submit = SubmitField('Upload Photos') # Updated label
 
 class PhotoCommentForm(FlaskForm):
     text = TextAreaField(
