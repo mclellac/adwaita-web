@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, request, flash, current_app, abort, url_for
+from flask import Blueprint, redirect, request, flash, current_app, abort, url_for, jsonify
 from flask_login import current_user, login_required
 
 from .. import db
@@ -12,134 +12,149 @@ like_bp = Blueprint('like', __name__, url_prefix='/like')
 def like_item_route(target_type, target_id):
     form = LikeForm() # For CSRF validation
     if not form.validate_on_submit():
+        # For AJAX, returning JSON error is better than redirect
+        if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+            return jsonify(status="error", message="Invalid request or session expired."), 400
         flash('Invalid request or session expired. Could not like item.', 'danger')
         return redirect(request.referrer or url_for('general.index'))
 
-    # Validate target_type
     if target_type not in ['post', 'comment', 'photo']:
-        current_app.logger.warning(f"User {current_user.username} attempt to like invalid target_type: {target_type}")
+        current_app.logger.warning(f"User {current_user.id} attempt to like invalid target_type: {target_type}")
+        if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+            return jsonify(status="error", message="Invalid item type."), 404
         abort(404)
 
-    # Fetch the target item
     target_item = None
     item_author = None
-
     if target_type == 'post':
         target_item = db.session.get(Post, target_id)
         if target_item:
             if not target_item.is_published and target_item.user_id != current_user.id:
-                current_app.logger.warning(f"User {current_user.username} attempt to like non-published post {target_id} they don't own.")
-                abort(404) # Or 403
+                current_app.logger.warning(f"User {current_user.id} attempt to like non-published post {target_id} they don't own.")
+                if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+                    return jsonify(status="error", message="Cannot like this item."), 403
+                abort(403)
             item_author = target_item.author
     elif target_type == 'comment':
         target_item = db.session.get(Comment, target_id)
-        if target_item:
-            # Potentially add checks here, e.g., if the comment's post is accessible
-            item_author = target_item.author
+        if target_item: item_author = target_item.author
     elif target_type == 'photo':
         target_item = db.session.get(UserPhoto, target_id)
-        if target_item:
-            # Potentially add checks here, e.g., if the photo's gallery/profile is public
-            item_author = target_item.user # UserPhoto.user is the author
+        if target_item: item_author = target_item.user
 
     if not target_item:
-        current_app.logger.warning(f"User {current_user.username} attempt to like non-existent {target_type} with id {target_id}")
+        current_app.logger.warning(f"User {current_user.id} attempt to like non-existent {target_type} with id {target_id}")
+        if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+            return jsonify(status="error", message=f"{target_type.capitalize()} not found."), 404
         abort(404)
 
+    message = ""
+    success = False
     if current_user.has_liked_item(target_type, target_id):
-        flash('You have already liked this item.', 'info')
+        message = 'You have already liked this item.'
+        success = True # Or consider this a non-change, but still success for UI update
     else:
         try:
             if current_user.like_item(target_type, target_id):
-                # Create notification for the item's author, if not self-like and author exists
-                if item_author and item_author != current_user:
-                    notification = Notification(
-                        user_id=item_author.id,
-                        actor_id=current_user.id,
-                        type='new_like', # Generic type, could be 'new_post_like', 'new_comment_like' if needed
-                        target_type=target_type,
-                        target_id=target_id
-                    )
+                if item_author and item_author.id != current_user.id: # Check author ID
+                    notification = Notification(user_id=item_author.id, actor_id=current_user.id, type='new_like', target_type=target_type, target_id=target_id)
                     db.session.add(notification)
-                    current_app.logger.info(f"Notification created for user {item_author.username} about new like on {target_type} {target_id} by {current_user.username}.")
-
-                # Create Activity entry for new like
-                activity = Activity(
-                    user_id=current_user.id, # The user who liked the item
-                    type='liked_item', # Generic type, could be 'liked_post_item', etc.
-                    target_type=target_type,
-                    target_id=target_id
-                )
+                activity = Activity(user_id=current_user.id, type='liked_item', target_type=target_type, target_id=target_id)
                 db.session.add(activity)
-                current_app.logger.info(f"Activity 'liked_item' logged for user {current_user.username} on {target_type} {target_id}.")
-
                 db.session.commit()
-                flash(f"{target_type.capitalize()} liked!", 'toast_success')
-                current_app.logger.info(f"User {current_user.username} liked {target_type} {target_id}.")
+                message = f"{target_type.capitalize()} liked!"
+                success = True
+                current_app.logger.info(f"User {current_user.id} liked {target_type} {target_id}.")
             else:
-                # This branch might be redundant if like_item always returns True or raises
-                flash(f'Could not like {target_type}. An unexpected error occurred.', 'danger')
+                message = f'Could not like {target_type}. An unexpected error occurred.'
                 db.session.rollback()
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error during like operation for {target_type} {target_id} by user {current_user.username}: {e}", exc_info=True)
-            flash(f'An error occurred while trying to like the {target_type}. Please try again.', 'danger')
+            current_app.logger.error(f"Error during like op for {target_type} {target_id} by user {current_user.id}: {e}", exc_info=True)
+            message = f'An error occurred while trying to like the {target_type}.'
 
+    # Refresh target_item for accurate like_count if it was changed
+    db.session.refresh(target_item)
+
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return jsonify(
+            status="success" if success else "error",
+            message=message,
+            new_like_count=target_item.like_count if target_item else 0,
+            user_has_liked=current_user.has_liked_item(target_type, target_id)
+        ), 200 if success else 400 # Or 500 for server errors
+
+    if success and message == f"{target_type.capitalize()} liked!":
+         flash(message, 'toast_success')
+    elif message:
+         flash(message, 'info' if success else 'danger') # Use info for "already liked"
     return redirect(request.referrer or url_for('general.index'))
 
 @like_bp.route('/unlike/<string:target_type>/<int:target_id>', methods=['POST'])
 @login_required
 def unlike_item_route(target_type, target_id):
-    form = UnlikeForm() # For CSRF validation
+    form = UnlikeForm()
     if not form.validate_on_submit():
+        if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+            return jsonify(status="error", message="Invalid request or session expired."), 400
         flash('Invalid request or session expired. Could not unlike item.', 'danger')
         return redirect(request.referrer or url_for('general.index'))
 
-    # Validate target_type
     if target_type not in ['post', 'comment', 'photo']:
-        current_app.logger.warning(f"User {current_user.username} attempt to unlike invalid target_type: {target_type}")
+        current_app.logger.warning(f"User {current_user.id} attempt to unlike invalid target_type: {target_type}")
+        if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+            return jsonify(status="error", message="Invalid item type."), 404
         abort(404)
 
-    # Fetch the target item to ensure it exists, though not strictly needed for unlike by ID
+    # Fetch item primarily to get its current like_count if needed, and for consistency
     target_item = None
-    if target_type == 'post':
-        target_item = db.session.get(Post, target_id)
-    elif target_type == 'comment':
-        target_item = db.session.get(Comment, target_id)
-    elif target_type == 'photo':
-        target_item = db.session.get(UserPhoto, target_id)
+    if target_type == 'post': target_item = db.session.get(Post, target_id)
+    elif target_type == 'comment': target_item = db.session.get(Comment, target_id)
+    elif target_type == 'photo': target_item = db.session.get(UserPhoto, target_id)
 
-    if not target_item: # Check if item existed, even if we only need type/id for the Like record
-        current_app.logger.warning(f"User {current_user.username} attempt to unlike non-existent {target_type} with id {target_id} (or it was deleted).")
-        # Depending on desired behavior, could proceed to try unliking anyway,
-        # or abort(404) if item must exist to be unliked.
-        # For robustness, let's allow unliking even if the item was deleted,
-        # as the Like record might still exist.
+    # It's okay if target_item is None here if it was deleted but Like record still exists
+    # The unlike_item method handles non-existent Like records gracefully.
 
+    message = ""
+    success = False
     if not current_user.has_liked_item(target_type, target_id):
-        flash('You have not liked this item yet.', 'info')
+        message = 'You have not liked this item.'
+        success = True # Or consider this a non-change
     else:
         try:
             if current_user.unlike_item(target_type, target_id):
-                # Optionally: Delete associated 'liked_item' activity.
-                # For now, we'll leave the original "liked_item" activity as a historical record.
-                # If cleanup is desired:
-                # Activity.query.filter_by(
-                #     user_id=current_user.id,
-                #     type='liked_item',
-                #     target_type=target_type,
-                #     target_id=target_id
-                # ).delete()
-
                 db.session.commit()
-                flash(f'{target_type.capitalize()} unliked.', 'toast_success')
-                current_app.logger.info(f"User {current_user.username} unliked {target_type} {target_id}.")
+                message = f'{target_type.capitalize()} unliked.'
+                success = True
+                current_app.logger.info(f"User {current_user.id} unliked {target_type} {target_id}.")
             else:
-                flash(f'Could not unlike {target_type}. An unexpected error occurred.', 'danger')
+                message = f'Could not unlike {target_type}. An unexpected error occurred.'
                 db.session.rollback()
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error during unlike operation for {target_type} {target_id} by user {current_user.username}: {e}", exc_info=True)
-            flash(f'An error occurred while trying to unlike the {target_type}. Please try again.', 'danger')
+            current_app.logger.error(f"Error during unlike op for {target_type} {target_id} by user {current_user.id}: {e}", exc_info=True)
+            message = f'An error occurred while trying to unlike the {target_type}.'
 
+    # Refresh target_item for accurate like_count if it exists and was changed
+    if target_item:
+        db.session.refresh(target_item)
+
+    final_like_count = target_item.like_count if target_item else 0
+    # If item was deleted, we can't get its like count.
+    # We might need to query Like table directly if this becomes an issue,
+    # but for now, client-side might just show count based on its last known state.
+    # However, UserPhoto, Post, Comment models have like_count attribute.
+
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return jsonify(
+            status="success" if success else "error",
+            message=message,
+            new_like_count=final_like_count,
+            user_has_liked=current_user.has_liked_item(target_type, target_id) # Should be false after successful unlike
+        ), 200 if success else 400
+
+    if success and message == f"{target_type.capitalize()} unliked.":
+        flash(message, 'toast_success')
+    elif message:
+        flash(message, 'info' if success else 'danger')
     return redirect(request.referrer or url_for('general.index'))

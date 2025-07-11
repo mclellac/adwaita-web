@@ -208,9 +208,19 @@ Located at `antisocialnet/setup_db.py`, run from project root (e.g., `python ant
 
 *   **Authentication (`auth_routes.py`):** Registration (with admin approval via `is_approved`), Login, Logout, Password Change/Reset.
 *   **General (`general_routes.py`):** Index page (public posts / redirects to feed), Activity Feed (`/feed`), Dashboard, Settings (theme/accent, links to admin site settings), Search.
-*   **User Profiles (`profile_routes.py`):** View profiles (`/profile/<user_id>`), Edit Profile (bio, photo with crop, privacy), Photo Gallery (upload, view, delete, comments), Follow/Unfollow, Followers/Following lists.
+*   **User Profiles (`profile_routes.py`):** View profiles (`/profile/<user_id>`), Edit Profile (bio, photo with crop, privacy), Photo Gallery, Follow/Unfollow, Followers/Following lists.
+    *   **Photo Gallery (`gallery_full.html`, uses `profile_routes.py` and `photo_routes.py` for backend):**
+        *   Users can upload photos to their gallery (via profile page).
+        *   The main gallery view (`/profile/<user_id>/gallery`) displays thumbnails of the user's photos.
+        *   **Interactive Liking (Grid):** Liking/unliking a photo directly from the gallery grid view must occur without a page reload. JavaScript should handle the form submission asynchronously and update the like count/button state dynamically.
+        *   **Full-Size Photo Dialog:**
+            *   Clicking a photo thumbnail in the gallery grid must open a dialog/modal view (e.g., using `<adw-dialog>`).
+            *   This dialog must display the full-size photo and its caption.
+            *   **Interactive Liking (Dialog):** The dialog must contain like/unlike buttons for the photo. These interactions must also occur without a page reload, updating UI elements within the dialog.
+            *   **Comments (Dialog):** The dialog must display existing comments for the photo and allow authenticated users to post new comments. Posting and displaying new comments must happen asynchronously without a page reload.
+            *   The backend API for likes and comments should return JSON responses suitable for client-side updates (e.g., new like count, liked status, new comment data).
 *   **Posts (`post_routes.py`):** Create (Markdown, categories/tags, immediate publish), View (Markdown rendered, author bio, related posts), Edit, Delete. Comments on posts (threaded, Markdown, delete, flag). Posts by Category/Tag.
-*   **Likes (`like_routes.py`):** Polymorphic like/unlike for posts, comments, photos.
+*   **Likes (`like_routes.py`):** Polymorphic like/unlike for posts, comments, photos. Ensure endpoints used by client-side JS for photo likes return appropriate JSON (e.g., `{status: 'success', new_like_count: 10, user_has_liked: true}`).
 *   **Notifications (`notification_routes.py`):** List user notifications (auto-mark-as-read), types for follows, likes, comments, mentions. Unread count badge.
 *   **Admin (`admin_routes.py`):** Comment Flag review, Site Settings management (title, posts per page, registration toggle), Pending User approval.
 *   **API (`api_routes.py`):** `/api/v1/feed` (paginated, combined posts/photos for client-side feeds), theme/accent saving endpoints.
