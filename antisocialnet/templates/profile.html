@@ -376,12 +376,12 @@
                 </div>
                 <form method="POST" action="{{ url_for('profile.upload_gallery_photo') }}" enctype="multipart/form-data" class="gallery-upload-form">
                     {{ gallery_upload_form.hidden_tag() if gallery_upload_form else '' }} {# CSRF token #}
-                    <div class="adw-entry-row {{ 'has-error' if gallery_upload_form and gallery_upload_form.photo.errors else '' }}">
+                    <div class="adw-entry-row {{ 'has-error' if gallery_upload_form and gallery_upload_form.photos.errors else '' }}">
                         <div class="adw-entry-row-text-content">
-                            <label for="{{ gallery_upload_form.photo.id if gallery_upload_form else 'gallery_photo_input' }}" class="adw-entry-row-title">{{ gallery_upload_form.photo.label.text if gallery_upload_form else 'Photo File' }}</label>
-                            {% if gallery_upload_form and gallery_upload_form.photo.errors %}<span class="adw-entry-row-subtitle error-text">{{ gallery_upload_form.photo.errors|join(' ') }}</span>{% endif %}
+                            <label for="{{ gallery_upload_form.photos.id if gallery_upload_form else 'gallery_photos_input' }}" class="adw-entry-row-title">{{ gallery_upload_form.photos.label.text if gallery_upload_form else 'Photo Files' }}</label>
+                            {% if gallery_upload_form and gallery_upload_form.photos.errors %}<span class="adw-entry-row-subtitle error-text">{{ gallery_upload_form.photos.errors|join(' ') }}</span>{% endif %}
                         </div>
-                        {{ gallery_upload_form.photo(class="adw-entry adw-entry-row-entry") if gallery_upload_form }}
+                        {{ gallery_upload_form.photos(class="adw-entry adw-entry-row-entry") if gallery_upload_form }}
                     </div>
                     {# Caption Textarea - Revised Structure #}
                     <div class="form-field-container {{ 'has-error' if gallery_upload_form and gallery_upload_form.caption.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);">

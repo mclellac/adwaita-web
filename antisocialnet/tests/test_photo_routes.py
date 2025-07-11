@@ -33,10 +33,12 @@ def test_upload_photo_successful(client, app, logged_in_client, db):
         url = url_for('profile.upload_gallery_photo') # Corrected endpoint
 
     image_data = (BytesIO(b"fake_image_bytes_content_for_upload_test"), 'test_upload.jpg')
+    # For MultipleFileField, the field expects a list of FileStorage objects.
+    # In a test, this means the data for the 'photos' key should be a list of these tuples.
     caption_text = "My awesome test upload."
 
     form_data = {
-        'photo': image_data,
+        'photos': [image_data], # Field name changed to 'photos' and expects a list
         'caption': caption_text,
         'csrf_token': token
     }
@@ -83,12 +85,16 @@ def test_upload_photo_no_file_selected(client, app, logged_in_client):
     response = logged_in_client.post(
         url,
         data=form_data,
-        content_type='multipart/form-data', # Still multipart even if file is missing
+        content_type='multipart/form-data', # Still multipart
         follow_redirects=True
     )
-    assert response.status_code == 200 # Stays on upload page due to form error
-    assert b"Please select a photo to upload." in response.data # From DataRequired on photo field
-    assert b"Upload New Photo" in response.data
+    assert response.status_code == 200
+    # The route's initial check `if not photo_files or all(not f.filename for f in photo_files):`
+    # should flash "No photo files selected..."
+    # If that passes, then the form's DataRequired on `photos` should kick in.
+    # The form's DataRequired message is "Please select one or more photos to upload."
+    assert b"No photo files selected" in response.data or b"Please select one or more photos to upload." in response.data
+    assert b"Upload New Photo to Gallery" in response.data # Check we are on the profile page with the upload form
 
 def test_upload_photo_invalid_file_type(client, app, logged_in_client):
     """Test photo upload with an invalid file type (e.g., .txt)."""
@@ -98,7 +104,8 @@ def test_upload_photo_invalid_file_type(client, app, logged_in_client):
         url = url_for('profile.upload_gallery_photo') # Corrected endpoint
 
     invalid_file_data = (BytesIO(b"this is a text file, not an image."), 'invalid_file.txt')
-    form_data = {'photo': invalid_file_data, 'csrf_token': token}
+    # For MultipleFileField, send as a list
+    form_data = {'photos': [invalid_file_data], 'csrf_token': token}
 
     response = logged_in_client.post(
         url,
@@ -107,15 +114,15 @@ def test_upload_photo_invalid_file_type(client, app, logged_in_client):
         follow_redirects=True
     )
     assert response.status_code == 200
-    # The FileAllowed validator message is "File does not have an approved extension: ..."
-    # Or a custom message if provided. The route adds this validator dynamically.
-    assert b"File type not allowed." in response.data or b"File does not have an approved extension" in response.data
-    assert b"Upload New Photo" in response.data
+    # The save_uploaded_file utility flashes "File type not allowed."
+    assert b"File type not allowed." in response.data
+    # It might also redirect to the profile page, where the form is rendered again.
+    assert b"Upload New Photo to Gallery" in response.data # Check we are on the profile page with the upload form
 
 def test_upload_photo_csrf_missing(client, logged_in_client):
     """Test photo upload POST with missing CSRF token."""
     image_data = (BytesIO(b"csrf_test_image"), 'csrf_test.jpg')
-    form_data = {'photo': image_data, 'caption': 'CSRF test'}
+    form_data = {'photos': [image_data], 'caption': 'CSRF test'} # Use 'photos'
 
     with logged_in_client.application.test_request_context():
         url = url_for('profile.upload_gallery_photo') # Corrected endpoint

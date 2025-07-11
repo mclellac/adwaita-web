@@ -5,7 +5,7 @@
 {% block header_title %}{{ user_profile.username }}'s Photo Gallery{% endblock %}
 
 {% block header_actions_start %}
-    <a href="{{ url_for('profile.view_profile', username=user_profile.username) }}" class="adw-button">
+    <a href="{{ url_for('profile.view_profile', user_id=user_profile.id) }}" class="adw-button">
         <span class="adw-icon icon-actions-go-previous-symbolic"></span> Back to Profile
     </a>
 {% endblock %}
@@ -43,7 +43,7 @@
                 <p class="adw-status-page-description">Check back later!</p>
             {% endif %}
             <div class="adw-status-page-actions">
-                <a href="{{ url_for('profile.view_profile', username=user_profile.username) }}" class="adw-button">Back to Profile</a>
+                <a href="{{ url_for('profile.view_profile', user_id=user_profile.id) }}" class="adw-button">Back to Profile</a>
             </div>
         </div>
     {% endif %}

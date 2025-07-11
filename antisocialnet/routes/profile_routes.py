@@ -217,47 +217,88 @@ def edit_profile():
 @login_required
 def upload_gallery_photo():
     form = GalleryPhotoUploadForm()
-    # FileAllowed validator is good, but save_uploaded_file will also check extensions based on config.
-    # form.photo.validators.append(FileAllowed(current_app.config['ALLOWED_EXTENSIONS'], 'Images only!')) # This can be kept or removed if redundant
+    # FileAllowed validator can be added to the form itself or checked here per file
     if form.validate_on_submit():
-        photo_file = form.photo.data
+        photo_files = form.photos.data  # Access the list of files
         caption = form.caption.data
+        uploaded_count = 0
+        error_count = 0
 
-        if not photo_file or not photo_file.filename: # Should be caught by form's FileRequired if used.
-            flash("No photo file selected for gallery upload.", "warning")
-            return redirect(url_for('profile.view_profile', user_id=current_user.id)) # Use user_id
+        if not photo_files or all(not f.filename for f in photo_files):
+            flash("No photo files selected for gallery upload.", "warning")
+            return redirect(url_for('profile.view_profile', user_id=current_user.id))
 
-        saved_db_path = save_uploaded_file(
-            file_storage_object=photo_file,
-            upload_type="gallery_photo",
-            base_upload_path_config_key="GALLERY_UPLOAD_FOLDER", # Relative to static
-            max_size_bytes_config_key="MAX_GALLERY_PHOTO_SIZE_BYTES",
-            current_user_id=current_user.id # For user-specific subfolder
-            # No crop_coords or thumbnail_size for gallery photos by default
-        )
+        for photo_file in photo_files:
+            if photo_file and photo_file.filename:
+                # Optionally, add individual file validation here if not handled by form globally
+                # e.g., using FileAllowed from flask_wtf.file
+                # if not FileAllowed(current_app.config['ALLOWED_EXTENSIONS']).validate(photo_file):
+                #     flash(f"File type not allowed for {secure_filename(photo_file.filename)}.", "danger")
+                #     error_count += 1
+                #     continue
 
-        if saved_db_path:
-            try:
-                new_photo = UserPhoto(
-                    user_id=current_user.id,
-                    image_filename=saved_db_path, # This path is relative to static folder
-                    caption=caption
+                saved_db_path = save_uploaded_file(
+                    file_storage_object=photo_file,
+                    upload_type="gallery_photo",
+                    base_upload_path_config_key="GALLERY_UPLOAD_FOLDER", # Relative to static
+                    max_size_bytes_config_key="MAX_GALLERY_PHOTO_SIZE_BYTES",
+                    current_user_id=current_user.id # For user-specific subfolder
+                    # No crop_coords or thumbnail_size for gallery photos by default
                 )
-                db.session.add(new_photo)
+
+                if saved_db_path:
+                    try:
+                        new_photo = UserPhoto(
+                            user_id=current_user.id,
+                            image_filename=saved_db_path, # This path is relative to static folder
+                            caption=caption # Same caption for all photos in this batch
+                        )
+                        db.session.add(new_photo)
+                        uploaded_count += 1
+                    except Exception as e_db_loop:
+                        # Log specific error for this file, but try to continue with others
+                        current_app.logger.error(f"Error preparing photo record for {secure_filename(photo_file.filename)} to DB: {e_db_loop}", exc_info=True)
+                        error_count += 1
+                        # No rollback here yet, do it once after the loop if any errors occurred
+                else:
+                    # save_uploaded_file should flash its own error
+                    error_count += 1
+            elif photo_file and not photo_file.filename and len(photo_files) == 1:
+                # This case handles if a single empty file field was submitted,
+                # which might not be caught by DataRequired on MultipleFileField
+                # if the field itself exists but is empty.
+                flash("No photo file selected for gallery upload.", "warning")
+                return redirect(url_for('profile.view_profile', user_id=current_user.id))
+
+
+        if uploaded_count > 0 and error_count == 0:
+            try:
                 db.session.commit()
-                flash('Photo uploaded to gallery successfully!', 'toast_success')
-            except Exception as e_db:
+                flash(f'{uploaded_count} photo(s) uploaded to gallery successfully!', 'toast_success')
+            except Exception as e_commit:
                 db.session.rollback()
-                current_app.logger.error(f"Error saving gallery photo record to DB: {e_db}", exc_info=True)
-                flash('Error saving photo details to database.', 'danger')
-                # Potentially delete the orphaned file from disk if DB save fails
-                # full_orphan_path = os.path.join(current_app.static_folder, saved_db_path)
-                # if os.path.exists(full_orphan_path): os.remove(full_orphan_path)
-        # else: Error flash handled by save_uploaded_file utility
+                current_app.logger.error(f"Error committing gallery photos to DB: {e_commit}", exc_info=True)
+                flash('Error saving photo details to database after processing files.', 'danger')
+                # Consider deleting successfully uploaded files if the final commit fails
+        elif uploaded_count > 0 and error_count > 0:
+            try:
+                db.session.commit() # Commit successfully processed files
+                flash(f'{uploaded_count} photo(s) uploaded. {error_count} photo(s) failed.', 'warning')
+            except Exception as e_commit_partial:
+                db.session.rollback()
+                current_app.logger.error(f"Error committing partially successful gallery photos to DB: {e_commit_partial}", exc_info=True)
+                flash('Error saving some photo details to database. Some uploads may not have been saved.', 'danger')
+        elif error_count > 0 and uploaded_count == 0:
+            # No need to commit if nothing was successfully processed for DB add
+            # save_uploaded_file or other checks should have flashed individual errors
+            flash('All photo uploads failed. Please check errors above.', 'danger')
+        # If uploaded_count is 0 and error_count is 0, it means no files were actually processed,
+        # which should have been caught by the initial "No photo files selected" check.
+
     else:
-        # flash_form_errors_util already uses 'danger'
-        flash_form_errors_util(form)
-    return redirect(url_for('profile.view_profile', user_id=current_user.id)) # Use user_id
+        flash_form_errors_util(form) # Handles form-level validation errors
+
+    return redirect(url_for('profile.view_profile', user_id=current_user.id))
 
 
 @profile_bp.route('/gallery/delete/<int:photo_id>', methods=['POST'])
