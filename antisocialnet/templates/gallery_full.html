@@ -109,6 +109,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Selector for clickable photos will be '.clickable-gallery-photo' which needs to be added to images
     const clickableGalleryPhotos = document.querySelectorAll('.clickable-gallery-photo');
+    // console.log('Found clickableGalleryPhotos count:', clickableGalleryPhotos.length);
+
+    // Log if main dialog elements are found
+    // if (!galleryPhotoDialog) console.error('galleryPhotoDialog element not found!');
+    // if (!fullGalleryPhotoImg) console.error('fullGalleryPhotoImg element not found!');
+    // if (!fullGalleryPhotoCaption) console.error('fullGalleryPhotoCaption element not found!');
+    // if (!galleryPhotoCommentsList) console.error('galleryPhotoCommentsList element not found!');
+    // if (!galleryPhotoDialogLikeSection) console.error('galleryPhotoDialogLikeSection element not found!');
+
 
     function formatCommentDate(isoString) {
         const date = new Date(isoString);
@@ -341,14 +350,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     if (galleryPhotoDialog && fullGalleryPhotoImg && fullGalleryPhotoCaption && galleryPhotoCommentsList) {
+        // console.log('Main dialog elements found. Waiting for adw-dialog definition...');
         customElements.whenDefined('adw-dialog').then(() => {
-            clickableGalleryPhotos.forEach(thumb => {
+            // console.log('adw-dialog defined. Attaching listeners to clickable photos.');
+            // if (clickableGalleryPhotos.length === 0) {
+                // console.warn('No elements found with class .clickable-gallery-photo to attach listeners to.');
+            // }
+            clickableGalleryPhotos.forEach((thumb, index) => {
+                // console.log(`Attaching click listener to thumb ${index}:`, thumb);
                 thumb.addEventListener('click', () => {
+                    const photoId = thumb.dataset.photoid;
+                    // console.log(`Thumbnail clicked! Photo ID: ${photoId}`, thumb);
+
                     const photoUrl = thumb.dataset.fullsrc;
                     const caption = thumb.dataset.caption;
-                    const photoId = thumb.dataset.photoid;
+                    // console.log(`Photo URL: ${photoUrl}, Caption: ${caption}`);
 
                     if (photoUrl && photoId) {
+                        // console.log('Setting dialog content...');
                         fullGalleryPhotoImg.src = photoUrl;
                         fullGalleryPhotoImg.alt = caption || "Full-size gallery photo";
                         if (fullGalleryPhotoCaption) {
@@ -357,20 +376,26 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (galleryCommentPhotoIdInput) {
                             galleryCommentPhotoIdInput.value = photoId;
                         }
+                        // console.log('Fetching comments and like button state...');
                         fetchGalleryComments(photoId);
                         if (galleryPhotoDialogLikeSection) {
                             renderLikeButtonForDialog(photoId, galleryPhotoDialogLikeSection);
                         }
+                        // console.log('Attempting to open galleryPhotoDialog...');
                         galleryPhotoDialog.open();
+                        // console.log('galleryPhotoDialog.open() called.');
+                    } else {
+                        // console.error('Missing photoUrl or photoId for clicked thumbnail.', thumb.dataset);
                     }
                 });
             });
         }).catch(error => {
-            console.error("gallery_full.html: Failed to initialize gallery photo dialog; adw-dialog definition not found.", error);
+            // console.error("gallery_full.html: Error with adw-dialog definition or listener attachment:", error);
         });
     } else {
-        if (!galleryPhotoDialog) console.warn("gallery_full.html: Gallery photo dialog element not found (expected in this page if script is to work).");
-        if (!clickableGalleryPhotos || clickableGalleryPhotos.length === 0) console.warn("gallery_full.html: No clickable gallery photos found. Ensure images have '.clickable-gallery-photo' class and data attributes.");
+        // console.warn("gallery_full.html: One or more critical elements for dialog functionality were not found. Aborting dialog setup.");
+        // if (!galleryPhotoDialog) console.warn("Specifically, galleryPhotoDialog element not found.");
+        // if (!clickableGalleryPhotos || clickableGalleryPhotos.length === 0) console.warn("Specifically, no clickable gallery photos found or collection is empty.");
     }
 
     if (newGalleryCommentForm && galleryCommentText && galleryCommentPhotoIdInput && galleryCommentError) {
