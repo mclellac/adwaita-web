@@ -109,15 +109,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Selector for clickable photos will be '.clickable-gallery-photo' which needs to be added to images
     const clickableGalleryPhotos = document.querySelectorAll('.clickable-gallery-photo');
-    // console.log('Found clickableGalleryPhotos count:', clickableGalleryPhotos.length);
-
-    // Log if main dialog elements are found
-    // if (!galleryPhotoDialog) console.error('galleryPhotoDialog element not found!');
-    // if (!fullGalleryPhotoImg) console.error('fullGalleryPhotoImg element not found!');
-    // if (!fullGalleryPhotoCaption) console.error('fullGalleryPhotoCaption element not found!');
-    // if (!galleryPhotoCommentsList) console.error('galleryPhotoCommentsList element not found!');
-    // if (!galleryPhotoDialogLikeSection) console.error('galleryPhotoDialogLikeSection element not found!');
-
 
     function formatCommentDate(isoString) {
         const date = new Date(isoString);
@@ -220,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to update the like section UI (used for both grid and dialog)
     function updateLikeSectionUI(likeSectionContainer, itemId, itemType, newLikeCount, userHasLiked) {
         const csrfTokenVal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const contextPrefix = likeSectionContainer.id.startsWith('dialog-') ? 'dialog-' : '';
+        const contextPrefix = likeSectionContainer.id.startsWith('dialog-') ? 'dialog-' : ''; // Keep for potential future use with IDs
 
         let formHtml;
         if (userHasLiked) {
@@ -244,6 +235,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 </form>
             \`;
         }
+        // The macro generates ID: id="\${contextPrefix}like-count-\${itemType}-\${itemId}"
+        // For simplicity and consistency, let's ensure our JS-generated count span also has it,
+        // though current logic might not strictly need it if it re-renders the whole container.
         likeSectionContainer.innerHTML = formHtml + \`<span class="adw-label caption like-count" id="\${contextPrefix}like-count-\${itemType}-\${itemId}">\${newLikeCount}</span>\`;
     }
 
@@ -253,11 +247,22 @@ document.addEventListener('DOMContentLoaded', function () {
         const form = event.target.closest('.like-form');
         if (!form) return;
 
-        const itemType = form.closest('.like-section').dataset.itemType;
-        const itemId = form.closest('.like-section').dataset.itemId;
+        const likeSection = form.closest('.like-section');
+        if(!likeSection) {
+            console.error("Could not find parent .like-section for the form."); // Re-add console.error for this specific case
+            return;
+        }
+
+        const itemType = likeSection.dataset.itemType;
+        const itemId = likeSection.dataset.itemId;
+        if (!itemType || !itemId) {
+            console.error("Missing data-item-type or data-item-id on .like-section"); // Re-add
+            return;
+        }
+
         const actionUrl = form.action;
         const csrfToken = form.querySelector('input[name="csrf_token"]').value;
-        const actionType = form.querySelector('input[name="action_type"]').value; // 'like' or 'unlike'
+        const actionType = form.querySelector('input[name="action_type"]').value;
 
         // Optimistic UI update can be added here if desired (e.g., change button state immediately)
 
@@ -350,24 +355,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     if (galleryPhotoDialog && fullGalleryPhotoImg && fullGalleryPhotoCaption && galleryPhotoCommentsList) {
-        // console.log('Main dialog elements found. Waiting for adw-dialog definition...');
         customElements.whenDefined('adw-dialog').then(() => {
-            // console.log('adw-dialog defined. Attaching listeners to clickable photos.');
-            // if (clickableGalleryPhotos.length === 0) {
-                // console.warn('No elements found with class .clickable-gallery-photo to attach listeners to.');
-            // }
             clickableGalleryPhotos.forEach((thumb, index) => {
-                // console.log(`Attaching click listener to thumb ${index}:`, thumb);
                 thumb.addEventListener('click', () => {
                     const photoId = thumb.dataset.photoid;
-                    // console.log(`Thumbnail clicked! Photo ID: ${photoId}`, thumb);
-
                     const photoUrl = thumb.dataset.fullsrc;
                     const caption = thumb.dataset.caption;
-                    // console.log(`Photo URL: ${photoUrl}, Caption: ${caption}`);
 
                     if (photoUrl && photoId) {
-                        // console.log('Setting dialog content...');
                         fullGalleryPhotoImg.src = photoUrl;
                         fullGalleryPhotoImg.alt = caption || "Full-size gallery photo";
                         if (fullGalleryPhotoCaption) {
@@ -376,26 +371,21 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (galleryCommentPhotoIdInput) {
                             galleryCommentPhotoIdInput.value = photoId;
                         }
-                        // console.log('Fetching comments and like button state...');
                         fetchGalleryComments(photoId);
                         if (galleryPhotoDialogLikeSection) {
                             renderLikeButtonForDialog(photoId, galleryPhotoDialogLikeSection);
                         }
-                        // console.log('Attempting to open galleryPhotoDialog...');
                         galleryPhotoDialog.open();
-                        // console.log('galleryPhotoDialog.open() called.');
-                    } else {
-                        // console.error('Missing photoUrl or photoId for clicked thumbnail.', thumb.dataset);
                     }
                 });
             });
         }).catch(error => {
-            // console.error("gallery_full.html: Error with adw-dialog definition or listener attachment:", error);
+            // Intentionally kept console.error for this critical part if adw-dialog fails
+            console.error("gallery_full.html: Error with adw-dialog definition or listener attachment:", error);
         });
     } else {
-        // console.warn("gallery_full.html: One or more critical elements for dialog functionality were not found. Aborting dialog setup.");
-        // if (!galleryPhotoDialog) console.warn("Specifically, galleryPhotoDialog element not found.");
-        // if (!clickableGalleryPhotos || clickableGalleryPhotos.length === 0) console.warn("Specifically, no clickable gallery photos found or collection is empty.");
+        // Intentionally kept console.warn for this critical part
+        console.warn("gallery_full.html: One or more critical elements for dialog functionality were not found. Aborting dialog setup.");
     }
 
     if (newGalleryCommentForm && galleryCommentText && galleryCommentPhotoIdInput && galleryCommentError) {
