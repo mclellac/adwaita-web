@@ -1,252 +1,216 @@
 # Agent Instructions for Adwaita Web Demo Repository
 
-This repository contains two main projects:
+This repository contains two main projects: `adwaita-web/` (a UI library) and `antisocialnet/` (a Flask demo application using the library). This document provides guidance for AI agents working with this repository.
 
-1. **`adwaita-web/`**:
+## General Workflow & Build Process
 
-   - This directory houses a web UI library aiming to provide components and styling that mimic the GTK Adwaita theme for web applications.
-   - It includes JavaScript modules for web components (custom elements), SCSS for styling, and associated assets like icons and fonts.
-   - This library is intended to be somewhat standalone, though in this repository, it's primarily used by `antisocialnet/`.
-   - For more specific instructions on working with the `adwaita-web` library itself, see the `adwaita-web/AGENTS.md` file.
+1.  **Source Asset Location:**
+    *   All source frontend assets for the `adwaita-web` UI library (SCSS, JavaScript components, icons, fonts) **must** reside within the `adwaita-web/` directory structure (e.g., `adwaita-web/scss/`, `adwaita-web/js/`).
+    *   The `antisocialnet/static/` directory is primarily for housing **built/compiled assets** and user-uploaded content.
+2.  **Making Changes:**
+    *   Changes to the UI library (`adwaita-web/`) or `antisocialnet`-specific styles (`adwaita-web/scss/_antisocialnet-specific.scss`) should be made in their respective source files within the `adwaita-web/` directory.
+    *   **Do not manually add or modify source SCSS or JavaScript files directly in `antisocialnet/static/`.** These changes will be ignored by `.gitignore` or overwritten by the build script.
+3.  **Building Assets:**
+    *   After making changes to `adwaita-web/` sources, run the `./build-adwaita-web.sh` script from the repository root.
+    *   This script compiles SCSS, prepares assets (JS, fonts, icons), and copies them to the appropriate locations in `antisocialnet/static/`.
+4.  **Testing:**
+    *   The `antisocialnet/` application can then be run to test the library changes in a real-world context.
 
-2. **`antisocialnet/`**:
-   - This directory contains a Flask-based demonstration application (a social network).
-   - It utilizes the `adwaita-web` library to style its user interface.
-   - The application is structured using a Flask application factory (`create_app` located in `antisocialnet/__init__.py`) and is run using the `flask run` command (after setting `FLASK_APP=antisocialnet`).
-   - Currently, `antisocialnet` uses a manually included (or to-be-built and copied) version of the `adwaita-web` library's assets (CSS, JS, icons, fonts). Refer to `build-adwaita-web.sh` for an example of how these might be prepared and copied into `antisocialnet/static/`.
-   - For specific instructions related to the `antisocialnet` application (e.g., running the Flask app, database setup using `antisocialnet/setup_db.py`, testing), please refer to the `antisocialnet/AGENTS.md` file.
+## Adwaita-Web UI Library (`adwaita-web/`)
 
-**General Workflow:**
+This section details working with the `adwaita-web` UI library, which aims to implement the Adwaita design language for web applications. Its source is in `adwaita-web/`.
 
-- **Asset Management:**
-  - All source frontend assets for the `adwaita-web` library (SCSS, JavaScript, icons, fonts) **must** reside within the `adwaita-web/` directory structure (e.g., `adwaita-web/scss/`, `adwaita-web/js/`).
-  - The `antisocialnet/static/` directory is primarily for housing **built/compiled assets**. These are generated and copied from `adwaita-web/` by the `build-adwaita-web.sh` script.
-  - User-uploaded content for `antisocialnet` (e.g., profile pictures) also resides in `antisocialnet/static/uploads/`.
-  - **Do not manually add or modify source SCSS or JavaScript files directly in `antisocialnet/static/`.** These changes will be ignored by `.gitignore` or overwritten by the build script.
-- Changes to the UI library (`adwaita-web/`) or `antisocialnet`-specific styles (`adwaita-web/scss/_antisocialnet-specific.scss`) should be made in their respective source files within the `adwaita-web/` directory.
-- After making changes, run the `./build-adwaita-web.sh` script. This compiles SCSS, prepares assets, and copies them to the appropriate locations in `antisocialnet/static/`.
-- The `antisocialnet/` application can then be run to test the library changes in a real-world context.
+**Directory Structure & Asset Placement:**
+*   **SCSS:** All SASS source files are in `adwaita-web/scss/`. The main file `adwaita-skin.scss` is compiled into `adwaita-web/css/adwaita-skin.css` (and then copied by the build script).
+*   **JavaScript:** Library-specific JavaScript (e.g., for interactive components like `app-layout.js`, `banner.js`, `toast.js`, or web components like `<adw-dialog>`) resides in `adwaita-web/js/`.
+*   **Static Assets:** Icons, fonts, etc., are in `adwaita-web/data/` and `adwaita-web/fonts/`.
 
-**Styling Guidelines:**
+**Key Principles:**
 
-- **Core Widget Styles:** Modifications to the default appearance or behavior of base Adwaita widgets (e.g., how all `.adw-button` or `.adw-entry` elements look and feel) should be made directly in their respective SCSS partials within `adwaita-web/scss/` (e.g., `_button.scss`, `_entry.scss`).
-- **`antisocialnet`-Specific Styles:** The file `adwaita-web/scss/_antisocialnet-specific.scss` is intended for:
-  - Styling unique layout structures of `antisocialnet` (e.g., the main sidebar layout, specific page containers).
-  - Styling compositions of `adwaita-web` widgets that are unique to `antisocialnet`.
-  - Minor, one-off presentational tweaks for `antisocialnet` that do not represent a change to the core widget's default behavior.
-  - It should **not** be used for globally overriding the base styles of core `adwaita-web` widgets.
-- **CSS and JavaScript Interaction**:
-  - Avoid direct manipulation of CSS styles (e.g., `element.style.property = 'value'`) from JavaScript for UI/UX, animations, or core styling.
-  - All fundamental UI/UX appearances, animations, and styles should be defined in the Adwaita-Web UI SCSS files (`adwaita-web/scss/`).
-  - JavaScript should primarily interact with styles by toggling classes, setting attributes (which CSS can select on), or using CSS Custom Properties.
-  - For web components with Shadow DOM, if internal styles need access to asset paths (like icons), prefer using CSS Custom Properties defined in global SCSS to pass these paths rather than hardcoding them in JS or inline styles within the component.
+1.  **CSS-First Styling:** The primary method for Adwaita styling is CSS classes (e.g., `.adw-button`, `.adw-entry`) on standard HTML. All visual styling should be CSS-achievable.
+2.  **JavaScript for Behavior, Not Styling:**
+    *   JS should not directly manipulate CSS styles for appearance (e.g., `element.style.color = 'red'`).
+    *   Its role is interactivity, behavior, or defining web components.
+    *   JS should primarily interact with styles by toggling classes, setting attributes (which CSS can select on), or using CSS Custom Properties.
+3.  **Web Components:** Complex interactive components (e.g., Dialogs) are implemented as Custom Elements. Simpler ones (e.g., Spinners) are CSS-only.
+4.  **Flexible HTML Structure:** Styles should be flexible, avoiding overly specific selectors unless essential for the component's design.
+5.  **CSS Custom Properties & Libadwaita Alignment:** Extensively use CSS custom properties (variables) for theming. Strive to align variable names and theming concepts with those found in the native Libadwaita GTK library.
+    *   Global variables are defined in `scss/_variables.scss` on the `:root` element and overridden by `.theme-dark` and accent classes.
+    *   For web components with Shadow DOM, if internal styles need access to asset paths (like icons), prefer using CSS Custom Properties defined in global SCSS to pass these paths rather than hardcoding them in JS or inline styles within the component.
+6.  **SCSS Usage:** The library uses SCSS, organized into partials (e.g., `_button.scss`) imported into `adwaita-skin.scss`. Utilize SASS features (variables, mixins, nesting).
+7.  **Accessibility (A11y):** Styles and components must support accessibility best practices (focus indicators, contrast, ARIA, `prefers-reduced-motion`).
 
-Please consult the respective `AGENTS.md` files in each subdirectory for more detailed, context-specific instructions.
+**Development Workflow (within `adwaita-web/`):**
 
-**PII (Personally Identifiable Information) and User Display Guidelines (IMPORTANT for `antisocialnet/`):**
+1.  **Modify SCSS/JS:** Edit files in `adwaita-web/scss/` or `adwaita-web/js/`.
+2.  **Compile SCSS (Manual):** To test `adwaita-web` examples directly, you might compile SCSS using a SASS compiler:
+    ```bash
+    # From within adwaita-web/ directory
+    sass scss/adwaita-skin.scss css/adwaita-skin.css
+    ```
+    (Ensure SASS compiler is installed, e.g., `npm install -g sass`).
+    **Note:** The main build is done by `../build-adwaita-web.sh` from the repo root for `antisocialnet`.
+3.  **Test:** View changes using `adwaita-web/examples/` or by running the full build script and then `antisocialnet`.
 
-- **User Identifiers:** The `antisocialnet.models.User` model has the following key fields for identification:
+**Iconography:**
+*   Icons are applied via CSS (SVG masks or background images). Current `index.html` (likely refers to an example) uses `-webkit-mask-image` with SVGs from `adwaita-web/data/icons/`.
 
-  - `username`: Stores the user's email address. **This field MUST ONLY be used for login, password reset, and internal account management. It MUST NOT be used for public display, in user-facing URLs, or for @mention style identifiers.**
-  - `full_name`: Stores the user's chosen display name (e.g., "Jane Doe"). This is the **primary name to be displayed** in most UI contexts (e.g., author of a post, user lists).
+**HTML Structure Expectations:**
+*   Refer to existing SCSS and examples for expected HTML markup for components (e.g., `<button class="adw-button">`, `<input type="text" class="adw-entry">`).
 
-- **Displaying Users:**
+**Dark Mode:**
+*   Handled by a class (e.g., `theme-dark`) on a high-level element. CSS variables in `_variables.scss` change based on this class.
 
-  - When displaying a user's name, always prefer `user.full_name`.
-  - For `@mention` style text or as a secondary identifier (like under `full_name` on a profile card), use `'@Full Name` ie: @Jane Doe.
-  - **Under no circumstances should `user.username` (the email address) be displayed directly to other users or used as a fallback display name if `full_name` or `handle` are missing.**
+**User Notifications (Banners, Toasts - Component Guidelines):**
+*   All transient notifications (`.adw-banner`, `.adw-toast`) **must** include a clearly visible, user-operable dismiss mechanism.
+    *   **Banners:** Should include a text button (e.g., "Dismiss"). `banner.js` looks for `.adw-banner-dismiss-button` or `.adwaita-banner-dismiss`.
+    *   **Toasts:** Should include a circular 'X' icon button. `toast.js` adds this.
+*   Dismiss mechanisms must be functional and accessible.
 
-- **Avatar Alt Text & Fallbacks:**
+## AntiSocialNet Application (`antisocialnet/`)
 
-  - Avatar `alt` attributes should use `user.full_name` or `'@' + user.handle`.
-  - Text-based avatar fallbacks (e.g., initials) should be derived from `user.full_name` or `user.handle`, not `user.username` (email).
+This section provides an overview of the `antisocialnet` Flask application, its structure, features, and conventions. It is based on an audit and aims to assist AI agents.
 
-- **Profile URLs:** All links to user profiles must be generated using the `user.handle` (e.g., `url_for('profile.view_profile', handle=user.handle)`).
+### 1. Core Application Structure
 
-- **Logging:** While User ID is preferred for logging, if user-facing identifiers are logged for context, prefer `handle`. Log `username` (email) only when essential for debugging authentication or account-specific issues, and be mindful of PII in logs.
+*   **Application Factory:** Uses `create_app` in `antisocialnet/__init__.py`.
+*   **Key Directories:**
+    *   `antisocialnet/`: Core code.
+        *   `__init__.py`: Factory, blueprint registration, context processors, error handlers.
+        *   `models.py`: SQLAlchemy models.
+        *   `forms.py`: WTForms.
+        *   `routes/`: Blueprints (e.g., `auth_routes.py`).
+        *   `static/`: **Built** static assets (CSS, JS from `adwaita-web`), user uploads.
+        *   `templates/`: Jinja2 templates.
+        *   `config.py`: Configuration classes.
+        *   `config.yaml` (and `.example`): YAML config overrides.
+    *   `adwaita-web/`: Source for the UI library (see previous section).
+    *   `build-adwaita-web.sh` (root dir): Builds `adwaita-web` assets into `antisocialnet/static/`.
+*   **Configuration:** Hierarchical: `config.py` defaults -> Environment Vars -> `config.yaml` -> `create_app` args.
+*   **Dependencies:** Python deps in `antisocialnet/requirements.txt`. `adwaita-web` needs a SASS compiler for its build.
 
-# Agent Instructions for adwaita-web/antisocialnet
+### 2. Database Models (`antisocialnet/models.py`)
 
-This document provides guidance for AI agents working with the `antisocialnet` portion of the `adwaita-web` project.
+SQLAlchemy models define the database structure. Key models include:
 
-## Database Setup and Management (`setup_db.py`)
+*   **`User(UserMixin, db.Model)`:** Registered users.
+    *   `id`, `username` (email, for login, **NOT public display**), `password_hash`, `full_name` (**primary public display name**), `profile_info` (bio), `profile_photo_url`, `is_admin`, `is_approved`, `is_active`, theme/accent preferences, etc.
+    *   Relationships: `posts`, `comments`, `likes`, `notifications`, `followers`/`followed`.
+*   **`FollowerLink(db.Model)`:** Many-to-many follow relationship.
+*   **`Category(db.Model)` & `Tag(db.Model)`:** For posts.
+*   **`Post(db.Model)`:** User-created articles.
+    *   `content` (Markdown), `user_id`, `created_at`, `is_published`.
+    *   Relationships: `author`, `categories`, `tags`, `comments`, `likes`.
+*   **`Comment(db.Model)`:** Comments on posts (threaded).
+    *   `text` (Markdown), `user_id`, `post_id`, `parent_id`.
+    *   Relationships: `author`, `post`, `replies`, `flags`, `likes`.
+*   **`UserPhoto(db.Model)`:** User gallery photos.
+    *   Relationships: `user`, `comments` (PhotoComment), `likes`.
+*   **`PhotoComment(db.Model)`:** Comments on gallery photos.
+*   **`CommentFlag(db.Model)`:** Flags on comments.
+*   **`Like(db.Model)`:** Polymorphic likes (posts, comments, photos).
+*   **`Notification(db.Model)`:** Polymorphic user notifications.
+*   **`Activity(db.Model)`:** Polymorphic user activity logging.
+*   **`SiteSetting(db.Model)`:** Global key-value site settings.
 
-The `antisocialnet/setup_db.py` script is crucial for initializing and managing the application's PostgreSQL database schema and initial data. It should be run from the project root directory (e.g., `python antisocialnet/setup_db.py`).
+**IMPORTANT: Database Model Changes & `setup_db.py`**
+*   After any changes to `antisocialnet/models.py` (adding/removing/altering tables or columns), the `antisocialnet/setup_db.py` script **MUST** be updated accordingly.
+*   This script initializes the schema. Failure to update it will cause errors.
+*   Test `setup_db.py` (e.g., `python antisocialnet/setup_db.py --config your_config.yaml --deletedb`) after model changes.
 
-**Core Functionalities:**
+### 3. `setup_db.py` Script
 
-*   **Table Creation:** Ensures all database tables defined in `antisocialnet/models.py` are created if they don't already exist. This is done by calling `db.create_all()`.
-*   **Initial Admin User:** Can create or update an initial administrative user. This can be done interactively (prompting for username/password) or non-interactively via command-line arguments.
-*   **Database Deletion (`--deletedb`):** Provides an option to completely wipe and recreate the database schema.
-
-**Key Command-Line Arguments:**
-
-*   `--deletedb`:
-    *   **WARNING: This is a destructive operation.**
-    *   When used, the script will execute `DROP SCHEMA public CASCADE;` followed by `CREATE SCHEMA public;` (for PostgreSQL). This effectively deletes all tables, data, sequences, and other objects within the `public` schema and then recreates an empty schema.
-    *   After this, `db.create_all()` is called to recreate the tables based on the current models.
-    *   Confirmation is required in interactive mode. Can be run non-interactively if admin user arguments are also provided.
-*   `--skipuser`: Skips the initial admin user setup/update process.
-*   `--admin-user <username>`: Sets the admin username non-interactively.
-*   `--admin-pass <password>`: Sets the admin password non-interactively. Requires `--admin-user`.
-*   `--admin-fullname <fullname>`: Sets the admin display name non-interactively.
-*   `--admin-bio <bio>`: Sets the admin bio non-interactively.
-*   `--config <filepath>`:
-    *   Allows overriding configuration settings for the script's execution by providing a path to a YAML configuration file.
-    *   Settings in this YAML file will take precedence over those defined in `antisocialnet/config.py` or environment variables.
-    *   Flask configuration keys are typically uppercase (e.g., `SQLALCHEMY_DATABASE_URI`).
-    *   This file can also be used to define a list of users for batch creation/update using the `USERS` key.
-    *   Example `config.yaml` structure:
+Located at `antisocialnet/setup_db.py`, run from project root (e.g., `python antisocialnet/setup_db.py`).
+*   **Functionalities:** Table creation (`db.create_all()`), initial admin user setup (interactive/CLI/YAML), database deletion.
+*   **Key Command-Line Arguments:**
+    *   `--deletedb`: **Destructive.** Wipes and recreates the public schema. Requires confirmation or non-interactive admin args.
+    *   `--skipuser`: Skips initial admin user setup.
+    *   `--admin-user <username>`, `--admin-pass <password>`, `--admin-fullname <fullname>`, `--admin-bio <bio>`: Non-interactive admin user creation.
+    *   `--config <filepath>`: Path to YAML config file. Overrides `config.py`/env vars. Can define a `USERS` list for batch creation/update (requires `PyYAML`).
         ```yaml
-        SQLALCHEMY_DATABASE_URI: "postgresql://script_user:script_pass@localhost/script_db"
-        SECRET_KEY: "custom_script_secret"
-
+        # Example config.yaml for USERS:
         USERS:
           - username: "admin@example.com"
             password: "securepassword1"
             full_name: "Administrator"
             bio: "Site admin."
             is_admin: true
-            is_approved: true # Optional, defaults to true for YAML users
-            is_active: true   # Optional, defaults to true for YAML users
-          - username: "editor@example.com"
-            password: "anotherpassword"
-            full_name: "Editor User"
-            bio: "Content editor."
-            is_admin: false
-            # is_approved and is_active will default to true
-          - username: "existinguser@example.com" # If this user exists
-            password: "newpassword"             # Their password and other details will be updated
-            full_name: "Existing User Updated Name"
-            bio: "Updated bio."
-            is_admin: false # Ensure all fields are specified if updating
+            is_approved: true
+            is_active: true
+          # ... more users
         ```
-    *   **Supported fields for each user in the `USERS` list:** `username` (required), `password` (required), `full_name` (required), `bio` (optional), `is_admin` (optional, defaults to `False`), `is_approved` (optional, defaults to `True`), `is_active` (optional, defaults to `True`).
-    *   **Dependency:** This feature requires the `PyYAML` library. If not installed, the script will print an error. Install it via `pip install PyYAML`.
+*   **User Creation Precedence:** `--skipuser` -> `USERS` in YAML -> CLI admin args -> Interactive mode.
+*   **Database Connection:** Relies on env vars (`POSTGRES_USER`, `POSTGRES_PASSWORD`, etc.) or `DATABASE_URL` if not overridden by `--config`.
+*   **Error: `Ident authentication failed...`**: Check PostgreSQL auth method (`pg_hba.conf`) and ensure env vars are correct.
 
-**User Creation Precedence:**
+### 4. Running the `antisocialnet` Application
 
-The script determines how to handle user creation/setup based on the following order:
-1.  **`--skipuser`**: If this flag is present, all user setup is skipped.
-2.  **`USERS` list in YAML (`--config <filepath>`):** If `--config` is used, a `USERS` list is present in the YAML file, and `--skipuser` is NOT used, the script will non-interactively create or update users based on this list. This takes precedence over CLI arguments for single admin user creation and interactive mode.
-3.  **Command-Line Admin Arguments (`--admin-user`, `--admin-pass`):** If `--skipuser` is not used and no users were processed from a YAML `USERS` list, the script checks for `--admin-user` and `--admin-pass` arguments. If provided, it will non-interactively create or update a single admin user with these details.
-4.  **Interactive Mode:** If none of the above conditions are met (not skipping, no YAML users, no CLI admin arguments), the script will fall back to prompting interactively for the details of a single initial admin user.
-
-**Important Considerations:**
-
-*   **Environment Variables for Database Connection:** The script (and the main application) relies on environment variables for database connection parameters if not overridden by a `--config` file. These include:
-    *   `POSTGRES_USER` (defaults to `postgres`)
-    *   `POSTGRES_PASSWORD` (defaults to empty if not set)
-    *   `POSTGRES_HOST` (defaults to `localhost`)
-    *   `POSTGRES_DB` (defaults to `appdb`)
-    *   Alternatively, `DATABASE_URL` can be set to the full connection string (e.g., `postgresql://user:pass@host:port/dbname`).
-*   **Error: `FATAL: Ident authentication failed...` or `FATAL: password authentication failed...`**: This means the script could not authenticate with PostgreSQL. Ensure your environment variables (`POSTGRES_USER`, `POSTGRES_PASSWORD`, etc.) are correctly set for your PostgreSQL server's authentication method (see `pg_hba.conf`).
-*   **Synchronization with Models:**
-    *   **CRITICAL WARNING:** This script directly manipulates the database schema. Any changes to SQLAlchemy models in `antisocialnet/models.py` (e.g., adding/removing tables or columns, altering relationships) require careful consideration of `setup_db.py`'s logic.
-    *   The `db.create_all()` command will attempt to create tables according to the current models.
-    *   The `--deletedb` option completely rebuilds the schema. Ensure this behavior is understood, especially in environments with existing data.
-    *   For more complex schema changes (migrations) in a production-like environment, a proper migration tool like Alembic (Flask-Migrate) would typically be used, but `setup_db.py` is suitable for initial setup and development/testing resets.
-
-**Running the Application (Post-Refactor):**
-
-After the refactor to use an application factory (`create_app` in `antisocialnet/__init__.py`), the application is run using the `flask` command-line interface. Ensure you are in the `antisocialnet` directory.
-
-1.  Set `FLASK_APP`:
+1.  Set `FLASK_APP` (from project root):
     ```bash
     export FLASK_APP=antisocialnet
     ```
-    (The `antisocialnet` here refers to the directory `antisocialnet/` which is treated as a package, and `flask` will look for `create_app` or `make_app` within its `__init__.py`).
-
-2.  Set `FLASK_ENV` (optional, recommended for development):
+2.  Set `FLASK_ENV` (optional, for development):
     ```bash
     export FLASK_ENV=development
     ```
-    This enables debug mode and auto-reloading.
-
-3.  Run the application:
+3.  Run:
     ```bash
     flask run
     ```
 
-**Why the "Ident authentication failed" error happens:**
+### 5. Personally Identifiable Information (PII) and User Display Guidelines (CRITICAL)
 
-PostgreSQL uses a file named `pg_hba.conf` to control client authentication.
-*   If this file is configured to use `ident` or `peer` authentication for local connections, PostgreSQL tries to verify that your operating system username matches the database username you're trying to connect as. If they don't match, or `ident` services aren't correctly configured, authentication fails.
-*   If `pg_hba.conf` is configured to use `md5` or `scram-sha-256` (which are common for password authentication), then a password must be supplied in the connection string. If `POSTGRES_PASSWORD` is not set, the application attempts to connect without a password, leading to failure.
+*   **User Identifiers in `User` model:**
+    *   `username`: Stores user's email. **MUST ONLY be used for login, password reset, and internal account management. MUST NOT be used for public display, in user-facing URLs, or for @mention style identifiers.**
+    *   `full_name`: User's chosen display name. **Primary name for display** in UI contexts.
+*   **Displaying Users:**
+    *   Prefer `user.full_name`.
+    *   For `@mention` style text or secondary identifier: Use `'@' + user.full_name` (e.g., `@Jane Doe`).
+    *   **Under no circumstances display `user.username` (email) to other users.**
+*   **Avatar Alt Text & Fallbacks:** Derive from `user.full_name`.
+*   **Profile URLs:** Use user ID (e.g., `url_for('profile.view_profile', user_id=user.id)`). *Note: An older AGENTS.md mentioned `user.handle` which is not the current model.*
+*   **Logging:** Prefer User ID. If user-facing identifiers are logged, prefer `full_name` or an ID. Log `username` (email) only when essential for debugging auth/account issues, mindful of PII.
 
-**To resolve:** Ensure you have set `POSTGRES_PASSWORD` (and other variables as needed) correctly for your PostgreSQL setup. Modifying `pg_hba.conf` on your PostgreSQL server to allow the connection type the application is attempting is an alternative solution but is outside the scope of what this application's code can control.
+### 6. UI Components and Styling (Usage in `antisocialnet`)
 
-## Static Assets (CSS, JS)
+`antisocialnet` uses `adwaita-web` for its Adwaita/GTK look and feel.
+*   **Build Process:** `build-adwaita-web.sh` compiles `adwaita-web` assets into `antisocialnet/static/`.
+*   **Usage in Templates:**
+    *   **CSS Classes:** Apply Adwaita classes (e.g., `.adw-button`, `.adw-card`) to HTML in Jinja templates.
+    *   **Web Components:** Use `<adw-dialog>`, `<adw-about-dialog>`, etc.
+    *   **JS Utilities:** Use `Adw.createToast()`, `banner.js`, `app-layout.js` for dynamic UI.
+*   **Key UI Patterns:**
+    *   `base.html`: Defines main layout (header bar, responsive sidebar, content area, footer).
+    *   Flash messages use banners or toasts.
+    *   Cards (`.adw-card`), Lists (`.adw-list-box`, `.adw-action-row`), Adwaita-styled forms.
+    *   Dialogs for confirmations and "About" info.
+    *   Theme/Accent colors applied via classes on `<html>` from user preferences.
+*   **`adwaita-web/scss/_antisocialnet-specific.scss`:**
+    *   For styles unique to `antisocialnet`'s layout or specific compositions.
+    *   **Must not** override fundamental appearance of core Adwaita widgets.
 
-The `antisocialnet` application sources its primary CSS (`adwaita-skin.css`) and core JavaScript components from the `adwaita-web` library. These assets are:
-1.  Developed and stored within the `adwaita-web/scss/` and `adwaita-web/js/` directories, respectively.
-2.  Compiled and/or copied into `antisocialnet/static/` by the `../build-adwaita-web.sh` script.
+### 7. Adwaita Styling and Color Compliance (for `antisocialnet`)
 
-Key JavaScript files from `adwaita-web/js/` used by `antisocialnet` include:
-*   `app-layout.js`: For managing the responsive sidebar and overall page layout.
-*   `banner.js`: For handling dismissible banner notifications.
-*   `toast.js`: For managing toast notifications.
+1.  **Use Adwaita Named Colors/CSS Variables:**
+    *   Strictly use Adwaita named colors (SASS vars in `adwaita-web/scss/_variables.scss`, e.g., `$adw-blue-3`) or, preferably, Adwaita CSS custom properties (e.g., `var(--accent-bg-color)`).
+    *   No hardcoded hex values unless derived from Adwaita palette.
+2.  **Critical: Do Not Override Core Widget Aesthetics:**
+    *   **Do not** use `_antisocialnet-specific.scss` to override fundamental visual appearance of standard Adwaita widgets (e.g., background of `.adw-card`, text colors of `.adw-button.suggested-action`). These must come from Adwaita's CSS variables.
+    *   Custom SCSS is for layout, new components, or minor complementary thematic alterations.
+    *   If a widget's default Adwaita style seems incorrect, investigate core Adwaita SCSS, not patch in app-specific overrides.
+3.  **Adherence to HIG for Widget Choice & Structure:**
+    *   Choose Adwaita widgets semantically (per GNOME HIG).
+    *   **Toggle Switches vs. Checkboxes:** For boolean settings, Adwaita Switch (e.g., `<input type='checkbox' class='adw-switch'>` styled by CSS) is **always** preferred over simple checkboxes. Ensure HTML structure matches CSS expectations (see `adwaita-web/scss/_switch.scss`).
 
-These are typically included in `antisocialnet/templates/base.html`.
+### 8. Application Features Overview (from `AntiDesign.md`)
 
-**Do not directly place or modify source SCSS or JavaScript files in `antisocialnet/static/css/` or `antisocialnet/static/js/`.** Such changes will be ignored by `.gitignore` or overwritten by the build process. All styling and JavaScript development should occur within the `adwaita-web` directory.
+(This provides a high-level map, refer to `antisocialnet/routes/` and `antisocialnet/templates/` for details)
 
-Refer to the root `AGENTS.md` and `adwaita-web/AGENTS.md` for more details on asset management and the role of `adwaita-web/scss/_antisocialnet-specific.scss` for styles unique to this application's layout.
-
-## Navigation and Core UI
-
-*   **Main Navigation:** The primary navigation is located in the collapsible sidebar (`app-sidebar` in `base.html`).
-*   **Header Bar Menu:** A main application menu is available in the header bar (typically triggered by a "view-more" icon). This menu provides access to application-level actions like the "About" dialog.
-*   **"About" Dialog:** Information about the application is presented in an Adwaita-styled dialog, triggered from the header bar menu. The `general.about_page` route and `about.html` template are no longer used for a separate page.
-*   **"Contact" Page:** The "Contact" page has been removed from the primary navigation.
-*   **Home Page / Feed:** For logged-in users, the "Home" link in the sidebar (endpoint `general.activity_feed`) directs to a page displaying a chronological feed of all published posts. For anonymous users, the main index page (`/`) shows public posts.
-
-## User Notifications and Confirmations
-
-*   **Toasts:** Used for brief success messages (e.g., after creating a post). Implemented via `adwaita-web/js/toast.js` and triggered by flashing messages with the `toast_success` category. Toasts include an 'x' icon for dismissal.
-*   **Banners:** Used for more prominent information or errors. Implemented via `adwaita-web/js/banner.js` and triggered by flashed messages with categories like `danger`, `warning`, `info`. Banners include a "Dismiss" text button.
-*   **Confirmation Dialogs:** Actions requiring user confirmation (e.g., deleting posts or comments) now use Adwaita-styled dialogs (`<adw-dialog>` custom elements) declared directly in the relevant templates (e.g., `post.html`). These replace native browser `confirm()` dialogs. Their activation and interaction logic (opening, closing, handling cancel/confirm button clicks that lead to form submissions) is primarily managed by global JavaScript in `adwaita-web/js/app-layout.js`.
-
-## Adwaita Styling and Color Compliance
-
-**1. Use Adwaita Named Colors and CSS Variables:**
-Please ensure that all UI elements strictly use Adwaita named colors (defined as SASS variables in `adwaita-web/scss/_variables.scss` like `$adw-blue-3`) or, preferably, the Adwaita CSS custom properties (e.g., `var(--accent-bg-color)`, `var(--window-bg-color)`). Do not use hardcoded hex values or other color names unless they are directly derived from or map to these Adwaita named colors/variables. This applies to SCSS files, HTML templates, and any JavaScript that might manipulate styles. For official Adwaita color palette reference, see the [GNOME HIG](https://developer.gnome.org/hig/reference/palette.html) (though our variable names might differ slightly, the principle is to use the defined set).
-
-**2. Critical Styling Guideline: Do Not Override Core Widget Aesthetics:**
-To maintain UI consistency and adherence to Adwaita principles, **do not** use custom SCSS in `_antisocialnet-specific.scss` to override the fundamental visual appearance of standard Adwaita widgets when such appearance is governed by Adwaita's own CSS variables and component styles. This includes, but is not limited to:
-    *   Background colors of elements like `.adw-card`, `.adw-list-box`, `.adw-action-row`. These should use variables like `var(--card-bg-color)`, `var(--view-bg-color)`, `var(--list-row-bg-color)`.
-    *   Text colors of standard buttons (e.g., `.adw-button.suggested-action` text should come from `var(--accent-fg-color)`).
-    *   Default border colors or shadows of widgets.
-
-Always rely on the core Adwaita CSS variables and the cascade for such properties. Custom SCSS in `_antisocialnet-specific.scss` should be reserved for:
-    *   Layout adjustments specific to `antisocialnet`'s structure.
-    *   Styling entirely new components not provided by Adwaita.
-    *   Minor thematic alterations that *complement* Adwaita, not fight its base design (e.g., a specific border on a custom element, not changing all card backgrounds).
-
-Overriding core widget aesthetics leads to inconsistencies, breaks theme adaptability (light/dark/HC), and defeats the purpose of using a consistent design system like Adwaita. If a widget's default Adwaita style seems incorrect, the issue might be in the core Adwaita SCSS for that widget or its variables, which should be investigated there rather than patching with app-specific overrides.
-
-**3. Adherence to HIG for Widget Choice and Structure:**
-When implementing UI elements, choose the Adwaita widget that semantically and visually corresponds to the function, as per the GNOME Human Interface Guidelines (HIG).
-
-*   **Toggle Switches vs. Checkboxes**: For boolean settings (on/off, enable/disable), an Adwaita Switch (visual toggle switch) should **always** be preferred over a simple checkbox. Adwaita's implementation typically involves an `<input type='checkbox' class='adw-switch'>` styled accordingly, wrapped in a `<label class='adw-switch'>` with a sibling `<span class='adw-switch-slider'>`. Ensure the HTML structure matches what the Adwaita CSS expects for that widget, as detailed in the component's SCSS file (e.g., `adwaita-web/scss/_switch.scss` requires a specific structure for `.adw-switch` to render correctly). Simple checkboxes (`<input type="checkbox">` without switch styling) should generally be avoided for settings.
-
-Ensure the HTML structure matches what the Adwaita CSS expects for that widget, as detailed in the component's SCSS file.
-
----
-
-## Database Model Changes (NEW SECTION)
-
-**IMPORTANT**: After any changes to database models in `antisocialnet/models.py` (e.g., adding, removing, or altering tables or columns), you **MUST** also update the `antisocialnet/setup_db.py` script accordingly.
-
-This script is responsible for initializing the database schema. If it's not kept in sync with the models, errors will occur during database setup or application runtime.
-
-**Procedure:**
-1.  Modify `antisocialnet/models.py`.
-2.  Carefully review `antisocialnet/setup_db.py` and make any necessary adjustments to reflect the model changes. This might involve:
-    *   Ensuring `db.create_all()` correctly creates the new schema.
-    *   Updating any initial data seeding logic if model structures have changed.
-    *   Modifying how tables are dropped or created if specific logic beyond `db.create_all()` is used.
-    *   If new tables or columns are added, ensure they are correctly initialized or populated if `setup_db.py` handles initial data.
-3.  Test `antisocialnet/setup_db.py` (e.g., by running `python antisocialnet/setup_db.py --config your_config.yaml --deletedb`) to confirm it works with the updated models.
-
-Failure to update `setup_db.py` is a common source of errors and will likely be caught by the user. Always remember this step.
+*   **Authentication (`auth_routes.py`):** Registration (with admin approval via `is_approved`), Login, Logout, Password Change/Reset.
+*   **General (`general_routes.py`):** Index page (public posts / redirects to feed), Activity Feed (`/feed`), Dashboard, Settings (theme/accent, links to admin site settings), Search.
+*   **User Profiles (`profile_routes.py`):** View profiles (`/profile/<user_id>`), Edit Profile (bio, photo with crop, privacy), Photo Gallery (upload, view, delete, comments), Follow/Unfollow, Followers/Following lists.
+*   **Posts (`post_routes.py`):** Create (Markdown, categories/tags, immediate publish), View (Markdown rendered, author bio, related posts), Edit, Delete. Comments on posts (threaded, Markdown, delete, flag). Posts by Category/Tag.
+*   **Likes (`like_routes.py`):** Polymorphic like/unlike for posts, comments, photos.
+*   **Notifications (`notification_routes.py`):** List user notifications (auto-mark-as-read), types for follows, likes, comments, mentions. Unread count badge.
+*   **Admin (`admin_routes.py`):** Comment Flag review, Site Settings management (title, posts per page, registration toggle), Pending User approval.
+*   **API (`api_routes.py`):** `/api/v1/feed` (paginated, combined posts/photos for client-side feeds), theme/accent saving endpoints.
