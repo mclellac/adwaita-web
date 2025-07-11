@@ -402,8 +402,9 @@
                         {% endif %}
                         {{ gallery_upload_form.caption(class="adw-entry", rows="2", placeholder="Optional caption...", style="width: 100%; min-height: 60px; box-sizing: border-box;") if gallery_upload_form }}
                     </div>
-                   <div class="form-actions-end" style="padding: 0 var(--spacing-m) var(--spacing-m) var(--spacing-m);">
-                       {{ gallery_upload_form.submit(class="adw-button suggested-action") if gallery_upload_form }}
+                   <div class="form-actions-end adw-box adw-box-horizontal adw-box-spacing-s justify-end" style="padding: 0 var(--spacing-m) var(--spacing-m) var(--spacing-m);">
+                       {{ gallery_upload_form.submit(class="adw-button suggested-action", id="gallery-upload-submit-button") if gallery_upload_form }}
+                       <span class="adw-spinner small" id="gallery-upload-spinner" style="display: none;"></span>
                    </div>
                 </form>
             </div>
@@ -585,77 +586,83 @@ document.addEventListener('DOMContentLoaded', function () {
     // However, for now, we construct it.
     async function renderLikeButtonForDialog(photoId, likeSectionElement) {
         if (!likeSectionElement) return;
-
-        // Fetch current like status and count (this would ideally be an API endpoint)
-        // For now, we'll assume we need to know if the current user has liked it and the total count.
-        // This part is tricky without a dedicated API endpoint for "get like status of item X for current user".
-        // The User.has_liked_item and item.like_count are server-side.
-        // For the demo, we'll make the like button always appear as "Like" and show a placeholder count,
-        // as dynamically getting this info without a new API endpoint is complex.
-        // A better approach: fetch the photo details including like count and if user liked it.
-        // Let's assume `photoData` is fetched that includes `photoData.like_count` and `photoData.user_has_liked`.
-        // Since we don't have that endpoint, we'll create a generic structure.
-        // The forms will still work correctly due to server-side checks.
-
-        // Simplified: Get the photo object again to access its like_count and user's like status.
-        // This is inefficient. An API endpoint for this would be much better.
-        // We can't directly call Python methods like current_user.has_liked_item from JS.
-        // So, the button will be functional but might not reflect the immediate state correctly without a page reload after like/unlike.
-        // The macro in Jinja has this context. JS here does not directly.
-
-        // To make this *actually* reflect state, the /like and /unlike routes would need to return JSON
-        // with the new like count and liked status, and JS would update the button.
-        // Or, a separate GET API endpoint: /api/item/<type>/<id>/like_status
-
-        // For now, let's just build the form structure that points to the right place.
-        // The visual state (starred icon, "Liked" text) won't be dynamic here without more API work.
-        // We will rely on the server to handle the actual like/unlike action.
-
-        // Fetching the photo again to get its like_count. This is a workaround.
-        // In a real app, this data might come with the initial photo data for the dialog
-        // or be fetched from a dedicated API endpoint.
-        let likeCount = 0;
-        let userHasLiked = false;
-        // This is a placeholder. We cannot truly get this dynamic data here without an API call.
-        // The photo object available in JS from `thumb.dataset` doesn't have like_count or user_has_liked.
-
-        // Constructing a simplified like button.
-        // It won't show "Liked" state correctly without an API call for that state.
-        // The action (like/unlike) will be determined by the server when the form is submitted.
-        // This is a limitation of not having a dedicated API for like status.
-        // We will render both forms and let the server-side logic in routes handle it.
-        // This is not ideal UX but makes it work without new API endpoints for now.
+        likeSectionElement.innerHTML = '<span class="adw-label caption">Loading like status...</span>'; // Placeholder
 
         const csrfTokenVal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // We need the actual item to get its like_count. We don't have it directly here.
-        // The `photo` object in the template context isn't directly available in this JS scope.
-        // This is a significant simplification. The like count will be missing or static.
-        // The `like_button_and_count` macro logic is more complex.
+        try {
+            const response = await fetch(`/api/v1/item/photo/${photoId}/like_details`);
+            if (!response.ok) {
+                console.error("Failed to fetch like details:", response.status, await response.text());
+                likeSectionElement.innerHTML = '<span class="adw-label caption error-text">Could not load like status.</span>';
+                return;
+            }
+            const data = await response.json();
 
-        // Due to the complexity of replicating the macro and its server-side data dependencies (current_user.has_liked_item, item.like_count)
-        // in JavaScript without new API endpoints, the like button in the dialog will be simplified:
-        // It will show a "Like" and "Unlike" button. The server will handle the logic.
-        // The count display here will be omitted for simplicity as it's hard to get accurately.
+            if (data.status === 'success') {
+                let likeButtonHtml = '';
+                if (data.current_user_has_liked) {
+                    likeButtonHtml = `
+                        <form action="/like/unlike/photo/${photoId}" method="POST" class="dialog-like-form" data-action="unlike" data-photoid="${photoId}" style="display: inline-block;">
+                            <input type="hidden" name="csrf_token" value="${csrfTokenVal}">
+                            <button type="submit" class="adw-button small flat" aria-label="Unlike photo">
+                                <span class="adw-icon icon-actions-starred-symbolic"></span> Unlike
+                            </button>
+                        </form>`;
+                } else {
+                    likeButtonHtml = `
+                        <form action="/like/photo/${photoId}" method="POST" class="dialog-like-form" data-action="like" data-photoid="${photoId}" style="display: inline-block;">
+                            <input type="hidden" name="csrf_token" value="${csrfTokenVal}">
+                            <button type="submit" class="adw-button small flat suggested-action" aria-label="Like photo">
+                                <span class="adw-icon icon-actions-star-symbolic"></span> Like
+                            </button>
+                        </form>`;
+                }
+                likeSectionElement.innerHTML = `
+                    ${likeButtonHtml}
+                    <span class="adw-label caption like-count" style="margin-left: var(--spacing-xs);">${data.like_count}</span>
+                `;
 
-        likeSectionElement.innerHTML = `
-            <form action="/like/photo/${photoId}" method="POST" style="display: inline-block; margin-right: 5px;">
-                <input type="hidden" name="csrf_token" value="${csrfTokenVal}">
-                <button type="submit" class="adw-button small flat suggested-action" aria-label="Like photo">
-                    <span class="adw-icon icon-actions-star-symbolic"></span> Like
-                </button>
-            </form>
-            <form action="/like/unlike/photo/${photoId}" method="POST" style="display: inline-block;">
-                <input type="hidden" name="csrf_token" value="${csrfTokenVal}">
-                <button type="submit" class="adw-button small flat" aria-label="Unlike photo">
-                    <span class="adw-icon icon-actions-starred-symbolic"></span> Unlike
-                </button>
-            </form>
-            <!-- Like count would ideally be here, fetched dynamically -->
-        `;
-        // The above is a simplified approach. The best way is an API that returns like status and count.
-        // Then JS can build the button correctly.
-        // For now, this provides the *functionality* but not perfect UI feedback without reload.
+                // Add event listeners to newly created forms for dynamic updates
+                likeSectionElement.querySelectorAll('.dialog-like-form').forEach(form => {
+                    form.addEventListener('submit', async function(event) {
+                        event.preventDefault();
+                        const currentForm = event.target;
+                        const action = currentForm.dataset.action;
+                        const photoIdForAction = currentForm.dataset.photoid;
+
+                        try {
+                            const likeUnlikeResponse = await fetch(currentForm.action, {
+                                method: 'POST',
+                                body: new FormData(currentForm) // FormData handles CSRF token
+                            });
+
+                            if (likeUnlikeResponse.ok) {
+                                // Instead of parsing HTML, just re-fetch and re-render the like button section
+                                renderLikeButtonForDialog(photoIdForAction, likeSectionElement);
+                            } else {
+                                console.error(`Failed to ${action} photo:`, likeUnlikeResponse.status);
+                                // Optionally show an error toast or message
+                                if (window.Adw && Adw.createToast) {
+                                    Adw.createToast(`Failed to ${action} photo.`, { type: 'error' });
+                                }
+                            }
+                        } catch (error) {
+                            console.error(`Error during ${action} action:`, error);
+                            if (window.Adw && Adw.createToast) {
+                                Adw.createToast(`Error during ${action} action.`, { type: 'error' });
+                            }
+                        }
+                    });
+                });
+
+            } else {
+                likeSectionElement.innerHTML = `<span class="adw-label caption error-text">${data.message || 'Error loading like status.'}</span>`;
+            }
+        } catch (error) {
+            console.error('Error in renderLikeButtonForDialog:', error);
+            likeSectionElement.innerHTML = '<span class="adw-label caption error-text">Could not load like status due to a network or script error.</span>';
+        }
     }
 
 
@@ -767,6 +774,20 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 fileNamesSpan.textContent = 'No files selected';
             }
+        });
+    }
+
+    // Gallery upload form spinner
+    const galleryUploadForm = document.querySelector('form.gallery-upload-form');
+    const gallerySubmitButton = document.getElementById('gallery-upload-submit-button');
+    const gallerySpinner = document.getElementById('gallery-upload-spinner');
+
+    if (galleryUploadForm && gallerySubmitButton && gallerySpinner) {
+        galleryUploadForm.addEventListener('submit', function() {
+            gallerySubmitButton.disabled = true;
+            gallerySpinner.style.display = 'inline-block';
+            // Note: For file uploads, success/failure redirect will negate the need
+            // to re-enable the button or hide spinner here, unless it's an AJAX upload.
         });
     }
 });

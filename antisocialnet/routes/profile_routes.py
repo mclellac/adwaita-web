@@ -20,6 +20,22 @@ profile_bp = Blueprint('profile', __name__, url_prefix='/profile')
 @profile_bp.route('/<int:user_id>') # Changed to use user_id
 @login_required
 def view_profile(user_id): # Changed to use user_id
+    """
+    Displays a user's profile page.
+
+    Shows user information, their posts (paginated), and their comments (paginated).
+    Access to private profiles is restricted to the owner.
+    Eager loads related data for posts (categories, tags) and comments (post author)
+    to optimize database queries.
+
+    Args:
+        user_id (int): The ID of the user whose profile is to be viewed.
+
+    Returns:
+        Rendered template 'profile.html' with user profile data, posts, and comments.
+        Aborts with 404 if user not found, or 403 if profile is private and
+        accessed by an unauthorized user.
+    """
     # Ensure datetime is available; moved back to top-level import.
     current_app.logger.debug(f"Accessing profile for user_id {user_id}, requested by User ID: {current_user.id}")
     user_profile = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
@@ -104,6 +120,18 @@ def view_profile(user_id): # Changed to use user_id
 @profile_bp.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
+    """
+    Handles editing of the currently logged-in user's profile.
+
+    On GET: Displays the profile edit form, pre-filled with the current user's data.
+    On POST: Validates form data. If valid, updates the user's profile information,
+             including text fields, privacy settings, and optionally a new profile photo.
+             Handles profile photo upload, cropping (if specified), and thumbnailing.
+             Redirects to the user's profile page on successful update.
+
+    Requires:
+        User to be logged in.
+    """
     current_app.logger.debug(f"Accessing /profile/edit, Method: {request.method}, User ID: {current_user.id}")
     form = ProfileEditForm(obj=current_user)
 
