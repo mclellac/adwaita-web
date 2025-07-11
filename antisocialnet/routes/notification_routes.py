@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, current_app, flash, redirect, url_for, request
 from flask_login import current_user, login_required
+from sqlalchemy.orm import joinedload # Added for eager loading
 from ..models import Notification # Only Notification model is directly used here for queries/updates
 from .. import db
 from flask_wtf import FlaskForm # For CSRF protection on POST routes
@@ -15,9 +16,16 @@ def list_notifications():
 
     try:
         notifications_query = Notification.query.filter_by(user_id=current_user.id)\
+                                            .options(joinedload(Notification.actor))\
                                             .order_by(Notification.timestamp.desc())
         pagination = notifications_query.paginate(page=page, per_page=per_page, error_out=False)
         notifications_list = pagination.items
+        # The Notification.get_target_object() method is called in the template.
+        # This will still cause individual queries per notification if the target object isn't already loaded
+        # or if it involves complex fetching. For common targets like Post or User, consider adding
+        # options(joinedload(Notification.target_post)) etc. if performance is critical here,
+        # but this requires knowing the target types in advance or more complex dynamic loading.
+        # For now, loading Notification.actor is the primary N+1 fix from the audit.
 
         ids_to_mark_read = [n.id for n in notifications_list if not n.is_read]
         if ids_to_mark_read:

@@ -8,6 +8,7 @@ from flask_wtf.file import FileAllowed
 import bleach
 from datetime import datetime
 
+from sqlalchemy.orm import selectinload # Added for eager loading
 from ..models import User, Post, Comment, UserPhoto, SiteSetting # Added SiteSetting
 from ..forms import ProfileEditForm, GalleryPhotoUploadForm, SiteSettingsForm # Added SiteSettingsForm
 from .. import db
@@ -38,16 +39,24 @@ def view_profile(user_id): # Changed to use user_id
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 10)
 
-    posts_query = Post.query.filter_by(user_id=user_profile.id)
+    # Base query for posts by the user_profile
+    posts_query_base = Post.query.filter_by(user_id=user_profile.id)\
+                               .options(selectinload(Post.categories), selectinload(Post.tags))
+                               # Author is user_profile, so no need to load Post.author explicitly here
+
     if current_user == user_profile:
         current_app.logger.debug(f"Fetching all posts for own profile User ID: {user_profile.id}, page {page}.")
-        posts_query = posts_query.order_by(Post.updated_at.desc())
+        # For own profile, show all posts (published and drafts), ordered by most recently updated
+        posts_query = posts_query_base.order_by(Post.updated_at.desc())
     else:
         current_app.logger.debug(f"Fetching published posts for profile User ID: {user_profile.id}, page {page}.")
-        posts_query = posts_query.filter_by(is_published=True).order_by(Post.published_at.desc(), Post.created_at.desc())
+        # For other profiles, only show published posts, ordered by published date
+        posts_query = posts_query_base.filter_by(is_published=True)\
+                                      .order_by(Post.published_at.desc(), Post.created_at.desc())
 
     try:
         posts_pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
+        # posts_pagination.items will have posts with categories and tags preloaded
         current_app.logger.debug(f"Found {len(posts_pagination.items)} posts for User ID: {user_profile.id}, page {page} (total: {posts_pagination.total}).")
     except Exception as e:
         current_app.logger.error(f"Error fetching posts for profile User ID: {user_profile.id}: {e}", exc_info=True)
@@ -55,10 +64,13 @@ def view_profile(user_id): # Changed to use user_id
         posts_pagination = None
 
     comments_page = request.args.get('comments_page', 1, type=int)
-    comments_per_page = 5
-    comments_query = Comment.query.filter_by(user_id=user_profile.id).order_by(Comment.created_at.desc())
+    comments_per_page = 5 # Consider making this configurable
+    comments_query = Comment.query.filter_by(user_id=user_profile.id)\
+                                  .options(selectinload(Comment.post).selectinload(Post.author))\
+                                  .order_by(Comment.created_at.desc())
     try:
         comments_pagination = comments_query.paginate(page=comments_page, per_page=comments_per_page, error_out=False)
+        # comments_pagination.items will have comments with .post and .post.author preloaded
         current_app.logger.debug(f"Found {len(comments_pagination.items)} comments by User ID: {user_profile.id} for comments_page {comments_page} (total: {comments_pagination.total}).")
     except Exception as e:
         current_app.logger.error(f"Error fetching comments for profile User ID: {user_profile.id}: {e}", exc_info=True)
