@@ -542,8 +542,5 @@ class SiteSetting(db.Model):
         else:
             setting.value = str(value)
         setting.value_type = value_type
-        # db.session.commit() # Commit should be handled by the caller/route
-                            # to allow for multiple settings in one transaction.
-                            # However, original app.py committed here.
-                            # For now, let's keep original app.py behavior.
+
         db.session.commit()
