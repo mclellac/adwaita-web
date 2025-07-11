@@ -207,13 +207,24 @@ def test_reset_password_with_token_csrf_invalid(client, app, auth_test_user):
     assert response.status_code == 400
 
 # --- Test Registration Route ---
-def test_register_page_loads(client):
-    with client.application.test_request_context():
+def test_register_page_loads(client, app, db): # Added app and db fixtures
+    with app.app_context():
+        SiteSetting.set('allow_registrations', True, 'bool')
+        # SiteSetting.set commits itself.
+
+    with client.application.test_request_context(): # Context for url_for
         response = client.get(url_for('auth.register'))
+
     assert response.status_code == 200
-    assert b"Create a New Account" in response.data
+    assert b"Create a New Account" in response.data # Check for a prominent title
     assert b"Email (Username)" in response.data
     assert b"Password" in response.data
+
+    # Optional: Clean up the setting if it could interfere with other tests,
+    # though typically test isolation should handle this or tests should be robust to it.
+    # with app.app_context():
+    #     SiteSetting.query.filter_by(key='allow_registrations').delete()
+    #     db.session.commit()
 
 def test_register_authenticated_user_redirects(logged_in_client):
     with logged_in_client.application.test_request_context():
@@ -223,6 +234,9 @@ def test_register_authenticated_user_redirects(logged_in_client):
     assert b"Home" in response.data
 
 def test_register_successful(client, app, db):
+    with app.app_context(): # Ensure registrations are allowed for this test
+        SiteSetting.set('allow_registrations', True, 'bool')
+
     with client.application.test_request_context():
         url = url_for('auth.register')
         get_response = client.get(url)
@@ -246,7 +260,10 @@ def test_register_successful(client, app, db):
     assert not user.is_approved
     assert not user.is_active
 
-def test_register_email_exists(client, app, auth_test_user):
+def test_register_email_exists(client, app, db, auth_test_user): # Added db
+    with app.app_context(): # Ensure registrations are allowed for this test
+        SiteSetting.set('allow_registrations', True, 'bool')
+
     with client.application.test_request_context():
         url = url_for('auth.register')
         get_response = client.get(url)
@@ -265,7 +282,10 @@ def test_register_email_exists(client, app, auth_test_user):
     assert b"An account with this email address already exists." in response.data
     assert b"Create a New Account" in response.data
 
-def test_register_mismatched_passwords(client, app):
+def test_register_mismatched_passwords(client, app, db): # Added db
+    with app.app_context(): # Ensure registrations are allowed for this test
+        SiteSetting.set('allow_registrations', True, 'bool')
+
     with client.application.test_request_context():
         url = url_for('auth.register')
         get_response = client.get(url)
@@ -284,7 +304,10 @@ def test_register_mismatched_passwords(client, app):
     assert b"Passwords must match." in response.data
     assert b"Create a New Account" in response.data
 
-def test_register_short_password(client, app):
+def test_register_short_password(client, app, db): # Added db
+    with app.app_context(): # Ensure registrations are allowed for this test
+        SiteSetting.set('allow_registrations', True, 'bool')
+
     with client.application.test_request_context():
         url = url_for('auth.register')
         get_response = client.get(url)
@@ -480,7 +503,8 @@ def test_login_nonexistent_user(client, app):
     assert b"Login" in response.data
 
 def test_login_user_not_approved(client, app, create_test_user, db):
-    unapproved_user = create_test_user(email_address="unapproved@example.com", password="password123", full_name="unapproved", is_approved=False, is_active=False)
+    # User should be active but not approved to test this specific message
+    unapproved_user = create_test_user(email_address="unapproved@example.com", password="password123", full_name="unapproved", is_approved=False, is_active=True)
     with client.application.test_request_context():
         url = url_for('auth.login')
         get_response = client.get(url)
@@ -492,10 +516,15 @@ def test_login_user_not_approved(client, app, create_test_user, db):
         'password': 'password123',
         'csrf_token': token
     }
-    response = client.post(url, data=form_data, follow_redirects=False) # Check direct response
-    assert response.status_code == 200
-    assert b"Your account is pending admin approval." in response.data
-    assert b"Login" in response.data
+    response_direct = client.post(url, data=form_data, follow_redirects=False)
+    assert response_direct.status_code == 302 # Should redirect to login
+    with client.application.test_request_context(): # For url_for in assertion
+      assert response_direct.location == url_for('auth.login')
+
+    response_followed = client.post(url, data=form_data, follow_redirects=True)
+    assert response_followed.status_code == 200
+    assert b"Your account is pending admin approval." in response_followed.data
+    assert b"Login" in response_followed.data # Should be back on the login page
 
 def test_login_user_not_active(client, app, create_test_user, db):
     inactive_user = create_test_user(email_address="inactive@example.com", password="password123", full_name="inactive", is_approved=True, is_active=False)

@@ -9,7 +9,7 @@ def test_view_profile_exists_public(client, create_test_user):
     """Test viewing an existing public profile."""
     profile_user = create_test_user(email_address="profile@example.com", full_name="Profile Owner Name", profile_info="Public bio.", is_profile_public=True)
     with client.application.test_request_context():
-        response = client.get(url_for('profile.view_profile', username=profile_user.username))
+        response = client.get(url_for('profile.view_profile', user_id=profile_user.id))
     assert response.status_code == 200
     assert b"Profile Owner Name" in response.data
     assert b"Public bio." in response.data
@@ -21,7 +21,7 @@ def test_view_profile_exists_private_anonymous(client, create_test_user):
     # Let's test the template behavior.
     private_user = create_test_user(email_address="private@example.com", full_name="Private User", is_profile_public=False)
     with client.application.test_request_context():
-        response = client.get(url_for('profile.view_profile', username=private_user.username))
+        response = client.get(url_for('profile.view_profile', user_id=private_user.id))
     assert response.status_code == 200 # Page loads, but content should be restricted
     assert b"Private User" in response.data # Name might still be visible
     assert b"This profile is private." in response.data # Expected message from template
@@ -35,7 +35,7 @@ def test_view_own_profile_authenticated(client, logged_in_client):
     db.session.commit()
 
     with logged_in_client.application.test_request_context():
-        response = logged_in_client.get(url_for('profile.view_profile', username=login_user.username))
+        response = logged_in_client.get(url_for('profile.view_profile', user_id=login_user.id))
     assert response.status_code == 200
     assert bytes(login_user.full_name, 'utf-8') in response.data
     assert b"My own detailed bio." in response.data
@@ -46,7 +46,7 @@ def test_view_other_private_profile_authenticated(client, logged_in_client, crea
     """Test authenticated user viewing another user's private profile."""
     private_user = create_test_user(email_address="op@example.com", full_name="Other Private User", is_profile_public=False)
     with logged_in_client.application.test_request_context():
-        response = logged_in_client.get(url_for('profile.view_profile', username=private_user.username))
+        response = logged_in_client.get(url_for('profile.view_profile', user_id=private_user.id))
     assert response.status_code == 200
     assert b"Other Private User" in response.data
     assert b"This profile is private." in response.data
@@ -55,7 +55,7 @@ def test_view_other_private_profile_authenticated(client, logged_in_client, crea
 def test_view_profile_nonexistent(client):
     """Test viewing a non-existent profile returns 404."""
     with client.application.test_request_context():
-        response = client.get(url_for('profile.view_profile', username="nosuchuseraroundhere"))
+        response = client.get(url_for('profile.view_profile', user_id=999999)) # Use a non-existent ID
     assert response.status_code == 404
 
 def test_view_profile_shows_user_posts(client, create_test_user, create_test_post):
@@ -65,7 +65,7 @@ def test_view_profile_shows_user_posts(client, create_test_user, create_test_pos
     post2 = create_test_post(author=profile_user, content="Profile Post Beta (Unpublished)", is_published=False)
 
     with client.application.test_request_context():
-        response = client.get(url_for('profile.view_profile', username=profile_user.username))
+        response = client.get(url_for('profile.view_profile', user_id=profile_user.id))
     assert response.status_code == 200
     assert b"Profile Post Alpha" in response.data
     assert b"Profile Post Beta (Unpublished)" not in response.data # Only own unpublished visible if logged in as author
@@ -91,7 +91,8 @@ def test_edit_profile_page_unauthenticated(client):
         response = client.get(url_for('profile.edit_profile'), follow_redirects=True)
     assert response.status_code == 200
     assert b"Please log in to access this page." in response.data
-    assert b"Log In" in response.data
+    assert b"<title>Login</title>" in response.data # Check for the page title
+    assert b'<h1 class="adw-title-1 form-page-header">Login</h1>' in response.data # Check for the main header
 
 # --- Edit Profile Route Tests (POST) ---
 def test_edit_profile_post_successful_update(client, app, logged_in_client, db):
@@ -100,7 +101,7 @@ def test_edit_profile_post_successful_update(client, app, logged_in_client, db):
     original_full_name = user.full_name
     original_website = user.website_url
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.app_context(): # Use client's context
         from antisocialnet.forms import ProfileEditForm
         form = ProfileEditForm()
         token = form.csrf_token.current_token
@@ -145,7 +146,7 @@ def test_edit_profile_post_successful_update(client, app, logged_in_client, db):
 
 def test_edit_profile_post_validation_error(client, app, logged_in_client):
     """Test profile update with a validation error (e.g., full_name empty)."""
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.app_context(): # Use client's context
         from antisocialnet.forms import ProfileEditForm
         form = ProfileEditForm()
         token = form.csrf_token.current_token
@@ -166,7 +167,7 @@ def test_edit_profile_post_photo_upload(client, app, logged_in_client, db):
     user = User.query.filter_by(username="login_fixture_user@example.com").first()
     original_photo_url = user.profile_photo_url
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.app_context(): # Use client's context
         from antisocialnet.forms import ProfileEditForm
         form = ProfileEditForm()
         token = form.csrf_token.current_token
@@ -224,11 +225,11 @@ def test_follow_user_successful(client, app, logged_in_client, create_test_user,
     initial_follower_count = followed_user.followers.count()
     initial_following_count_self = follower.followed.count()
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.app_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm() # For token generation
         token = form.csrf_token.current_token
-        url = url_for('profile.follow_user', username=followed_user.username)
+        url = url_for('profile.follow_user', user_id=followed_user.id)
 
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
@@ -252,11 +253,11 @@ def test_unfollow_user_successful(client, app, logged_in_client, create_test_use
     initial_follower_count = followed_user.followers.count() # Should be 1
     initial_following_count_self = follower.followed.count() # Should be 1
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.app_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm()
         token = form.csrf_token.current_token
-        url = url_for('profile.unfollow_user', username=followed_user.username)
+        url = url_for('profile.unfollow_user', user_id=followed_user.id)
 
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
@@ -271,11 +272,11 @@ def test_unfollow_user_successful(client, app, logged_in_client, create_test_use
 def test_follow_user_self_fails(client, app, logged_in_client, db):
     """User cannot follow themselves."""
     user_self = User.query.filter_by(username="login_fixture_user@example.com").first()
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.app_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm()
         token = form.csrf_token.current_token
-        url = url_for('profile.follow_user', username=user_self.username)
+        url = url_for('profile.follow_user', user_id=user_self.id)
 
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200 # Or specific error code if route handles it differently
@@ -289,11 +290,11 @@ def test_follow_user_already_following(client, app, logged_in_client, create_tes
     follower.follow(followed_user); db.session.commit()
     assert follower.is_following(followed_user)
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.app_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm()
         token = form.csrf_token.current_token
-        url = url_for('profile.follow_user', username=followed_user.username)
+        url = url_for('profile.follow_user', user_id=followed_user.id)
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b"You are already following this user." in response.data
@@ -304,11 +305,11 @@ def test_unfollow_user_not_following(client, app, logged_in_client, create_test_
     not_followed_user = create_test_user(email_address="notf@example.com", full_name="notfollowed")
     assert not follower.is_following(not_followed_user)
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.app_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm()
         token = form.csrf_token.current_token
-        url = url_for('profile.unfollow_user', username=not_followed_user.username)
+        url = url_for('profile.unfollow_user', user_id=not_followed_user.id)
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b"You are not following this user." in response.data
@@ -317,18 +318,18 @@ def test_follow_unauthenticated(client, create_test_user):
     """Unauthenticated user attempts to follow."""
     user_to_follow = create_test_user(email_address="tf@example.com", full_name="targetfollow")
     with client.application.test_request_context():
-        url = url_for('profile.follow_user', username=user_to_follow.username)
+        url = url_for('profile.follow_user', user_id=user_to_follow.id)
     response = client.post(url, data={'csrf_token':'dummy'}, follow_redirects=True)
     assert response.status_code == 200
     assert b"Please log in to access this page." in response.data
 
 def test_follow_nonexistent_user(client, app, logged_in_client):
     """Attempt to follow a non-existent user."""
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.app_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm()
         token = form.csrf_token.current_token
-        url = url_for('profile.follow_user', username="ghostuser")
+        url = url_for('profile.follow_user', user_id=999999) # Use a non-existent ID
     response = logged_in_client.post(url, data={'csrf_token': token})
     assert response.status_code == 404
 
@@ -336,7 +337,7 @@ def test_follow_user_csrf_missing(client, logged_in_client, create_test_user):
     """CSRF token missing for follow action."""
     user_to_follow = create_test_user(email_address="fcsrf@example.com", full_name="followcsrf")
     with logged_in_client.application.test_request_context():
-        url = url_for('profile.follow_user', username=user_to_follow.username)
+        url = url_for('profile.follow_user', user_id=user_to_follow.id)
     response = logged_in_client.post(url, data={})
     assert response.status_code == 400 # Direct CSRF failure from Flask-WTF
 
@@ -347,7 +348,7 @@ def test_unfollow_user_csrf_missing(client, logged_in_client, create_test_user, 
     follower.follow(user_to_unfollow); db.session.commit() # Must be following first
 
     with logged_in_client.application.test_request_context():
-        url = url_for('profile.unfollow_user', username=user_to_unfollow.username)
+        url = url_for('profile.unfollow_user', user_id=user_to_unfollow.id)
     response = logged_in_client.post(url, data={})
     assert response.status_code == 400
 
@@ -367,7 +368,7 @@ def test_followers_list_loads_with_followers(client, app, db, create_test_user):
     db.session.commit()
 
     with client.application.test_request_context():
-        response = client.get(url_for('profile.followers_list', username=profile_user.username))
+        response = client.get(url_for('profile.followers_list', user_id=profile_user.id))
     assert response.status_code == 200
     assert b"Followers of followedone" in response.data # Check title/header
     assert b"Follower Uno" in response.data
@@ -378,7 +379,7 @@ def test_followers_list_empty(client, create_test_user):
     """Test viewing followers list for a user with no followers."""
     profile_user = create_test_user(email_address="nof@example.com", full_name="nofollowers")
     with client.application.test_request_context():
-        response = client.get(url_for('profile.followers_list', username=profile_user.username))
+        response = client.get(url_for('profile.followers_list', user_id=profile_user.id))
     assert response.status_code == 200
     assert b"Followers of nofollowers" in response.data
     assert b"has no followers yet." in response.data # Check for empty message
@@ -386,7 +387,7 @@ def test_followers_list_empty(client, create_test_user):
 def test_followers_list_nonexistent_user(client):
     """Test 404 for followers list of a non-existent user."""
     with client.application.test_request_context():
-        response = client.get(url_for('profile.followers_list', username="ghost_user_followers"))
+        response = client.get(url_for('profile.followers_list', user_id=999999)) # Use non-existent ID
     assert response.status_code == 404
 
 def test_following_list_loads_with_followed(client, app, db, create_test_user):
@@ -400,7 +401,7 @@ def test_following_list_loads_with_followed(client, app, db, create_test_user):
     db.session.commit()
 
     with client.application.test_request_context():
-        response = client.get(url_for('profile.following_list', username=main_user.username))
+        response = client.get(url_for('profile.following_list', user_id=main_user.id))
     assert response.status_code == 200
     assert b"Users followed by Main User Follows" in response.data
     assert b"Followed Alpha" in response.data
@@ -411,7 +412,7 @@ def test_following_list_empty(client, create_test_user):
     """Test viewing following list for a user who follows no one."""
     profile_user = create_test_user(email_address="fnone@example.com", full_name="followsnone")
     with client.application.test_request_context():
-        response = client.get(url_for('profile.following_list', username=profile_user.username))
+        response = client.get(url_for('profile.following_list', user_id=profile_user.id))
     assert response.status_code == 200
     assert b"Users followed by followsnone" in response.data
     assert b"is not following anyone yet." in response.data
@@ -419,7 +420,7 @@ def test_following_list_empty(client, create_test_user):
 def test_following_list_nonexistent_user(client):
     """Test 404 for following list of a non-existent user."""
     with client.application.test_request_context():
-        response = client.get(url_for('profile.following_list', username="ghost_user_following"))
+        response = client.get(url_for('profile.following_list', user_id=999999)) # Use non-existent ID
     assert response.status_code == 404
 
 
@@ -428,7 +429,7 @@ def test_view_gallery_empty(client, create_test_user):
     """Test viewing an empty gallery for a user."""
     gallery_user = create_test_user(email_address="ge@example.com", full_name="Gallery User Empty")
     with client.application.test_request_context():
-        response = client.get(url_for('profile.view_gallery', username=gallery_user.username))
+        response = client.get(url_for('profile.view_gallery', user_id=gallery_user.id))
     assert response.status_code == 200
     assert b"Gallery - Gallery User Empty" in response.data
     assert b"has not uploaded any photos yet." in response.data # Check for empty message
@@ -436,7 +437,7 @@ def test_view_gallery_empty(client, create_test_user):
 def test_view_gallery_nonexistent_user(client):
     """Test 404 for gallery of a non-existent user."""
     with client.application.test_request_context():
-        response = client.get(url_for('profile.view_gallery', username="ghost_user_gallery"))
+        response = client.get(url_for('profile.view_gallery', user_id=999999)) # Use non-existent ID
     assert response.status_code == 404
 
 # Note: Tests for gallery with photos will depend on UserPhoto model and photo upload functionality,

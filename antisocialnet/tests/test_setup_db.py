@@ -194,7 +194,7 @@ def test_setup_db_yaml_user_creation(setup_db_env_vars, temp_sqlite_db_file, tem
         assert user2 is not None
         assert user2.full_name == 'YAML User Two'
         assert not user2.is_admin # Default is_admin is False
-        assert user2.bio == 'Test bio'
+        assert user2.profile_info == 'Test bio' # Corrected attribute name
 
 # Further tests could include:
 # - YAML updating existing user

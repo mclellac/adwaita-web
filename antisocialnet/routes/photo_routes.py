@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort, url_for, current_app # Added current_app
+from flask import Blueprint, jsonify, request, abort, url_for, current_app, render_template # Added render_template
 from flask_login import current_user, login_required
 import bleach # Import bleach
 from .. import db
@@ -69,7 +69,9 @@ def post_photo_comment(photo_id):
          # This could be expanded (e.g. followers can comment).
         abort(403) # Forbidden
 
-    form = PhotoCommentForm(data=request.json) # Pass request.json to the form
+    # Ensure request.json is not None before attempting to spread it
+    json_data = request.json if request.is_json else {}
+    form = PhotoCommentForm(formdata=None, **json_data)
 
     if form.validate(): # Use validate() for JSON data if meta is not configured for CSRF
         # Sanitize the comment text using bleach, stripping all HTML tags

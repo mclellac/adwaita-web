@@ -169,11 +169,9 @@ def test_search_results_no_query(client):
     with client.application.test_request_context():
         response = client.get(url_for('general.search_results'))
     assert response.status_code == 200
-    print(f"DEBUG: test_search_results_no_query response data for title: {response.data.decode()[:500]}") # Debug print
-    # More basic check for title tag presence and then specific content
-    assert b"<title>" in response.data
-    # Account for newlines and spacing revealed by debug print
-    assert b"Search\n - Test Site</title>" in response.data
+    # Assuming default site title "Adwaita Social Demo" if not overridden by SiteSetting in test setup
+    expected_title = b"<title>Search - Adwaita Social Demo</title>"
+    assert expected_title in response.data
     # Check H2 header on the page for no query
     assert b"Search Content and Users" in response.data
     # Check specific message for no query
@@ -219,10 +217,10 @@ def test_search_results_no_matches(client):
     with client.application.test_request_context():
         response = client.get(url_for('general.search_results', q="qwertyuiopasdfghjkl"))
     assert response.status_code == 200
-    print(f"DEBUG: test_search_results_no_matches response data for title: {response.data.decode()[:500]}") # Debug print
-    # Check page title - focusing on the unique part from page_title block
-    assert b"<title>Search Results for 'qwertyuiopasdfghjkl'" in response.data # Check start
-    assert b"Search Results for 'qwertyuiopasdfghjkl'</title>" in response.data # Check it ends properly if no site title
+    query_term = "qwertyuiopasdfghjkl"
+    # Assuming default site title "Adwaita Social Demo"
+    expected_title = f"<title>Search Results for '{query_term}' - Adwaita Social Demo</title>"
+    assert expected_title.encode('utf-8') in response.data
     # Check header title on page
     assert b"Results for 'qwertyuiopasdfghjkl'" in response.data
     # Check for specific messages

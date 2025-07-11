@@ -543,7 +543,7 @@ def posts_by_tag(tag_slug): # Renamed
         current_app.logger.error(f"Error fetching posts for tag {tag_slug}: {e}", exc_info=True)
         flash(f"Error loading posts for tag {tag.name}.", "danger")
         posts, pagination = [], None
-    return render_template('posts_by_tag.html', tag=tag, posts=posts, pagination=pagination)
+    return render_template('posts_by_tag.html', tag=tag, posts=posts, pagination=pagination, current_user=current_user)
 
 # Old like_post_route and unlike_post_route removed.
 # Generic versions are now in like_routes.py
