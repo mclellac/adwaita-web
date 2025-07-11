@@ -50,7 +50,9 @@
     </script>
 </head>
 <body>
+{% block dialog_mode %}{% endblock %} {# Define dialog_mode block #}
 
+{% if not dialog_mode %} {# Conditionally render header #}
 <header class="adw-header-bar">
     <div class="adw-header-bar__start">
         <button class="adw-button flat circular app-sidebar-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="app-sidebar">
@@ -86,20 +88,36 @@
                     <button class="adw-action-row activatable" id="about-dialog-trigger" role="menuitem">
                         <span class="adw-action-row-title">About</span>
                     </button>
-                    {# Add other menu items here if needed in the future #}
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('general.settings_page') }}" class="adw-action-row activatable" role="menuitem">
+                        <span class="adw-action-row-title">Settings</span>
+                    </a>
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin.site_settings') }}" class="adw-action-row activatable" role="menuitem">
+                        <span class="adw-action-row-title">Site Settings</span>
+                    </a>
+                    <a href="{{ url_for('admin.view_flags') }}" class="adw-action-row activatable" role="menuitem">
+                        <span class="adw-action-row-title">Review Flags</span>
+                    </a>
+                    <a href="{{ url_for('admin.pending_users') }}" class="adw-action-row activatable" role="menuitem">
+                        <span class="adw-action-row-title">Pending Users</span>
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}" class="adw-action-row activatable" role="menuitem">
+                        <span class="adw-action-row-title">Logout</span>
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        {# Settings, Login/Logout #}
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('general.settings_page') }}" class="adw-button flat" title="Settings">Settings</a>
-            <a href="{{ url_for('auth.logout') }}" class="adw-button flat">Logout</a>
-        {% else %}
+        {# Login button if not authenticated, otherwise this area is empty as items are in menu #}
+        {% if not current_user.is_authenticated %}
             <a href="{{ url_for('auth.login') }}" class="adw-button">Login</a>
         {% endif %}
     </div>
 </header>
+{% endif %} {# End conditional rendering of header #}
 
 {# Adwaita About Dialog Web Component #}
 <adw-about-dialog id="app-about-dialog"

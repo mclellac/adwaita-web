@@ -16,18 +16,22 @@
         /* Default Adwaita variables should be available here */
         color: var(--dialog-fg-color, inherit);
       }
-      .adw-header-bar {
+      .adw-header-bar { /* This is the header for adw-about-dialog */
         display: flex;
-        justify-content: space-between;
+        /* justify-content: space-between; */ /* Will be handled by button order/margin */
         align-items: center;
-        padding: var(--spacing-s) var(--spacing-m); /* Adjusted for potentially smaller header */
-        border-bottom: 1px solid var(--border-color);
+        padding: var(--spacing-xs); /* Minimal padding */
+        border-bottom: none; /* Remove border */
+        background-color: transparent; /* Remove background */
+        height: auto; /* Minimal height */
         flex-shrink: 0;
       }
       .adw-header-bar__title {
-        font-size: var(--title-4-font-size); /* Smaller title for about dialog header */
-        font-weight: bold;
-        margin: 0; /* Remove default h2 margin */
+        display: none; /* Hide title */
+      }
+      .adw-dialog-close-button { /* This is the close button inside the header */
+        order: -1; /* Move to start of flex container */
+        margin-right: auto; /* Push other items (none visible) to the right */
       }
       /* Close button styling relies on global .adw-button, .circular, .flat, .adw-icon, .icon-window-close-symbolic */
       /* Ensure these classes are effective or provide minimal overrides if needed for shadow DOM context */
