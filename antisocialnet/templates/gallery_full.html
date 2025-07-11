@@ -95,7 +95,6 @@
 {{ super() }}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Full-size gallery photo dialog logic (adapted from profile.html)
     const galleryPhotoDialog = document.getElementById('gallery-photo-dialog');
     const fullGalleryPhotoImg = document.getElementById('full-gallery-photo-img');
     const fullGalleryPhotoCaption = document.getElementById('full-gallery-photo-caption');
@@ -106,8 +105,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const galleryCommentPhotoIdInput = document.getElementById('gallery-comment-photo-id');
     const galleryCommentError = document.getElementById('gallery-comment-error');
     const placeholderComment = galleryPhotoCommentsList ? galleryPhotoCommentsList.querySelector('.placeholder-comment') : null;
-
-    // Selector for clickable photos will be '.clickable-gallery-photo' which needs to be added to images
     const clickableGalleryPhotos = document.querySelectorAll('.clickable-gallery-photo');
 
     function formatCommentDate(isoString) {
@@ -136,16 +133,16 @@ document.addEventListener('DOMContentLoaded', function () {
             const authorProfileUrl = comment.author.profile_url;
             const authorAvatarAlt = comment.author.full_name;
 
-            commentDiv.innerHTML = `
+            commentDiv.innerHTML = \`
                 <span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">
-                    <img src="${comment.author.profile_photo_url}" alt="${authorAvatarAlt} avatar">
+                    <img src="\${comment.author.profile_photo_url}" alt="\${authorAvatarAlt} avatar">
                 </span>
                 <span class="adw-action-row-text-content">
-                    ${authorProfileUrl ? `<a href="${authorProfileUrl}" class="adw-link adw-action-row-title">${authorDisplayName}</a>` : `<span class="adw-action-row-title">${authorDisplayName}</span>`}
-                    <span class="adw-action-row-subtitle">${comment.text}</span>
-                    <small class="adw-label caption">${formatCommentDate(comment.created_at)}</small>
+                    \${authorProfileUrl ? \`<a href="\${authorProfileUrl}" class="adw-link adw-action-row-title">\${authorDisplayName}</a>\` : \`<span class="adw-action-row-title">\${authorDisplayName}</span>\`}
+                    <span class="adw-action-row-subtitle">\${comment.text}</span>
+                    <small class="adw-label caption">\${formatCommentDate(comment.created_at)}</small>
                 </span>
-            `;
+            \`;
             galleryPhotoCommentsList.appendChild(commentDiv);
         });
     }
@@ -165,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch(\`/photo/api/photos/\${photoId}/comments\`);
             if (!response.ok) {
-                throw new Error(\`HTTP error! status: \${response.status}\`);
+                throw new Error(\`HTTP error! status: ${response.status}\`); // Corrected
             }
             const comments = await response.json();
             displayGalleryComments(comments);
@@ -181,37 +178,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function renderLikeButtonForDialog(photoId, likeSectionElement) {
-        // This function will now fetch the rendered macro content from the backend
-        // or be replaced by a more direct JS DOM manipulation approach after like/unlike.
-        // For now, we'll adjust it to handle dynamic updates.
         if (!likeSectionElement) return;
-        likeSectionElement.innerHTML = ''; // Clear previous buttons
-
+        likeSectionElement.innerHTML = '';
         try {
-            // We need to know if the current user has liked this photo to render the correct initial button.
-            // This ideally comes from an API endpoint or was part of the photo data.
-            // For now, let's assume we might need to fetch this status or the rendered macro.
-            // This is a placeholder - the actual like button rendering will be part of handleLikeSuccess.
-            // The initial state will be set when the dialog opens, perhaps by fetching item details including like status.
-            // For simplicity in this step, the dynamic rendering will be handled by handleLikeUnlike's success path.
-            // We'll call a function that generates the appropriate form based on an assumed 'userHasLiked' status.
-            // This part will be more fleshed out when we integrate the actual like status.
-            // For now, let's assume the initial state is fetched or known when dialog opens.
-            // The actual forms will be added by handleLikeSuccess or an equivalent function.
-            // We'll set up a placeholder that gets replaced.
-             const photoData = await fetchPhotoData(photoId); // Assume this fetches { ..., like_count: X, user_has_liked: Y }
+             const photoData = await fetchPhotoData(photoId);
+             if (photoData.error) {
+                 likeSectionElement.innerHTML = "<p class='adw-label caption error-text'>" + (photoData.message || 'Could not load like actions.') +"</p>";
+                 return;
+             }
              updateLikeSectionUI(likeSectionElement, photoId, 'photo', photoData.like_count, photoData.user_has_liked);
-
         } catch (error) {
             console.error("Error preparing like button for dialog:", error);
-            likeSectionElement.innerHTML = "<p class='adw-label caption error-text'>Could not load like actions.</p>";
+            likeSectionElement.innerHTML = "<p class='adw-label caption error-text'>Could not load like actions (exception).</p>";
         }
     }
 
-    // Function to update the like section UI (used for both grid and dialog)
     function updateLikeSectionUI(likeSectionContainer, itemId, itemType, newLikeCount, userHasLiked) {
         const csrfTokenVal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const contextPrefix = likeSectionContainer.id.startsWith('dialog-') ? 'dialog-' : ''; // Keep for potential future use with IDs
+        const contextPrefix = likeSectionContainer.id.startsWith('dialog-') ? 'dialog-' : '';
 
         let formHtml;
         if (userHasLiked) {
@@ -235,12 +219,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 </form>
             \`;
         }
-        // The macro generates ID: id="\${contextPrefix}like-count-\${itemType}-\${itemId}"
-        // For simplicity and consistency, let's ensure our JS-generated count span also has it,
-        // though current logic might not strictly need it if it re-renders the whole container.
         likeSectionContainer.innerHTML = formHtml + \`<span class="adw-label caption like-count" id="\${contextPrefix}like-count-\${itemType}-\${itemId}">\${newLikeCount}</span>\`;
     }
-
 
     async function handleLikeUnlike(event) {
         event.preventDefault();
@@ -249,14 +229,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const likeSection = form.closest('.like-section');
         if(!likeSection) {
-            console.error("Could not find parent .like-section for the form."); // Re-add console.error for this specific case
+            console.error("Could not find parent .like-section for the form.");
             return;
         }
 
         const itemType = likeSection.dataset.itemType;
         const itemId = likeSection.dataset.itemId;
         if (!itemType || !itemId) {
-            console.error("Missing data-item-type or data-item-id on .like-section"); // Re-add
+            console.error("Missing data-item-type or data-item-id on .like-section");
             return;
         }
 
@@ -264,21 +244,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const csrfToken = form.querySelector('input[name="csrf_token"]').value;
         const actionType = form.querySelector('input[name="action_type"]').value;
 
-        // Optimistic UI update can be added here if desired (e.g., change button state immediately)
-
         try {
             const response = await fetch(actionUrl, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/x-www-form-urlencoded' // Flask forms expect this by default
+                    'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: new URLSearchParams({ csrf_token: csrfToken }) // Send CSRF in body too if needed by Flask-WTF
+                body: new URLSearchParams({ csrf_token: csrfToken })
             });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ message: 'Unknown error during like/unlike.' }));
-                throw new Error(errorData.message || \`HTTP error! status: \${response.status}\`);
+                throw new Error(errorData.message || \`HTTP error! status: ${response.status}\`); // Corrected
             }
 
             const data = await response.json();
@@ -286,12 +264,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (data.status === 'success') {
                 const likeSectionContainer = form.closest('.like-section');
                 updateLikeSectionUI(likeSectionContainer, itemId, itemType, data.new_like_count, data.user_has_liked);
-                 // If inside dialog, ensure the dialog's like section is also updated if it's a different element
-                if (galleryPhotoDialog.isOpen() && galleryPhotoDialogLikeSection.dataset.currentPhotoId === itemId) {
+                const dialogPhotoId = galleryCommentPhotoIdInput.value;
+                if (galleryPhotoDialog.isOpen && typeof galleryPhotoDialog.isOpen === 'function' && galleryPhotoDialog.isOpen() &&
+                    dialogPhotoId === itemId &&
+                    likeSection !== galleryPhotoDialogLikeSection) { // Check it's not the dialog's own like section
                     updateLikeSectionUI(galleryPhotoDialogLikeSection, itemId, itemType, data.new_like_count, data.user_has_liked);
                 }
-
-
             } else {
                 throw new Error(data.message || 'Like/unlike action failed.');
             }
@@ -302,13 +280,10 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 alert(error.message || 'Could not perform like/unlike action.');
             }
-            // Optionally, revert optimistic UI update here
         }
     }
 
-    // Event listener for like/unlike forms in the main grid and dialog
-    // Using event delegation on a static parent
-    const contentArea = document.querySelector('.adw-clamp.adw-clamp-xl'); // Main content area
+    const contentArea = document.querySelector('.adw-clamp.adw-clamp-xl');
     if (contentArea) {
         contentArea.addEventListener('submit', function(event) {
             if (event.target.matches('.like-form')) {
@@ -316,7 +291,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-    // Also for dialog, as it's outside the adw-clamp when active
      if (galleryPhotoDialogLikeSection) {
         galleryPhotoDialogLikeSection.addEventListener('submit', function(event) {
             if (event.target.matches('.like-form')) {
@@ -325,14 +299,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-
-    // Helper to fetch initial photo data for dialog, including like status
     async function fetchPhotoData(photoId) {
         try {
-            const response = await fetch(`/photo/api/photos/\${photoId}/details`);
+            const response = await fetch(\`/photo/api/photos/\${photoId}/details\`);
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({})); // Try to parse JSON error, fallback to empty obj
-                console.error(`Error fetching photo details for \${photoId}: \${response.status}`, errorData.message || 'Server returned an error');
+                const errorData = await response.json().catch(() => ({}));
+                console.error(\`Error fetching photo details for \${photoId}: \${response.status}\`, errorData.message || 'Server returned an error');
                 return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: errorData.message || 'Could not load photo details.' };
             }
             const data = await response.json();
@@ -343,16 +315,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     user_has_liked: data.user_has_liked,
                     error: false
                 };
-            } else { // API returned success HTTP code but status field in JSON is 'error'
-                console.error(`API error fetching photo details for \${photoId}:`, data.message);
+            } else {
+                console.error(\`API error fetching photo details for \${photoId}:\`, data.message);
                 return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: data.message || 'Failed to get photo details.'};
             }
-        } catch (error) { // Network error or JSON parsing error
+        } catch (error) {
             console.error('Network or JavaScript error fetching photo details:', error);
             return { id: photoId, like_count: 0, user_has_liked: false, error: true, message: 'Network error or invalid response.' };
         }
     }
-
 
     if (galleryPhotoDialog && fullGalleryPhotoImg && fullGalleryPhotoCaption && galleryPhotoCommentsList) {
         customElements.whenDefined('adw-dialog').then(() => {
@@ -373,6 +344,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                         fetchGalleryComments(photoId);
                         if (galleryPhotoDialogLikeSection) {
+                            // Also set a data attribute on the dialog's like section for the current photo ID
+                            galleryPhotoDialogLikeSection.dataset.currentPhotoId = photoId;
                             renderLikeButtonForDialog(photoId, galleryPhotoDialogLikeSection);
                         }
                         galleryPhotoDialog.open();
@@ -380,11 +353,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
         }).catch(error => {
-            // Intentionally kept console.error for this critical part if adw-dialog fails
             console.error("gallery_full.html: Error with adw-dialog definition or listener attachment:", error);
         });
     } else {
-        // Intentionally kept console.warn for this critical part
         console.warn("gallery_full.html: One or more critical elements for dialog functionality were not found. Aborting dialog setup.");
     }
 
@@ -414,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.errors ? JSON.stringify(errorData.errors) : \`HTTP error! status: \${response.status}\`);
+                    throw new Error(errorData.errors ? JSON.stringify(errorData.errors) : \`HTTP error! status: ${response.status}\`); // Corrected
                 }
                 galleryCommentText.value = '';
                 fetchGalleryComments(photoId);
