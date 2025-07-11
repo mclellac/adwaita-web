@@ -36,12 +36,14 @@
                 <select name="accent_color" class="adw-combo-row-select">
                     {% set current_accent = current_user.accent_color or 'default' %}
                     <option value="default" {% if current_accent == 'default' %}selected{% endif %}>Default (Blue)</option>
+                    <option value="teal" {% if current_accent == 'teal' %}selected{% endif %}>Teal</option>
                     <option value="green" {% if current_accent == 'green' %}selected{% endif %}>Green</option>
-                    <option value="orange" {% if current_accent == 'orange' %}selected{% endif %}>Orange</option>
-                    <option value="purple" {% if current_accent == 'purple' %}selected{% endif %}>Purple</option>
-                    <option value="red" {% if current_accent == 'red' %}selected{% endif %}>Red</option>
                     <option value="yellow" {% if current_accent == 'yellow' %}selected{% endif %}>Yellow</option>
+                    <option value="orange" {% if current_accent == 'orange' %}selected{% endif %}>Orange</option>
+                    <option value="red" {% if current_accent == 'red' %}selected{% endif %}>Red</option>
                     <option value="pink" {% if current_accent == 'pink' %}selected{% endif %}>Pink</option>
+                    <option value="purple" {% if current_accent == 'purple' %}selected{% endif %}>Purple</option>
+                    <option value="slate" {% if current_accent == 'slate' %}selected{% endif %}>Slate</option>
                 </select>
             </div>
         </div>
