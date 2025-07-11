@@ -197,7 +197,8 @@ def extract_mentions(text):
     # It stops if there are multiple spaces or other punctuation (except apostrophe within words).
     # To align with test_extract_mentions which expects single-token mentions for "@world and" -> "world"
     # the regex should only capture the first word-like token.
-    mention_regex = r'@([A-Za-z0-9_\']+)' # Simplified to capture single tokens
+    # Updated regex to match linkify_mentions for full name support:
+    mention_regex = r'@([A-Za-z0-9_\']+(?:\s[A-Za-z0-9_\']+)*)'
     mentions = re.findall(mention_regex, text)
     # Strip trailing spaces from extracted mentions, just in case regex captures it with lookaheads/behinds (though current one shouldn't)
     # Also, normalize multiple spaces within a name to a single space if the regex were more lenient.

@@ -203,5 +203,17 @@ def create_app(config_name=None, yaml_config_override=None):
         #        pass # Avoid errors during error handling
         return render_template('500.html'), 500
 
+    @app.after_request
+    def add_security_headers(response):
+        # Add X-Frame-Options to help prevent clickjacking
+        # DENY: Prevents the page from being displayed in a frame, regardless of the site attempting to do so.
+        # SAMEORIGIN: Allows the page to be displayed in a frame on the same origin as the page itself.
+        # ALLOW-FROM uri: Allows the page to be displayed in a frame only on the specified origin uri. (Obsolete in modern browsers)
+        if not isinstance(app.config, TestConfig): # Don't add for tests if it interferes
+             response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        # Other headers like Content-Security-Policy (CSP) could also be added here
+        # response.headers['Content-Security-Policy'] = "default-src 'self'"
+        return response
+
     app.logger.info("Flask application instance created and configured.")
     return app

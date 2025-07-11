@@ -62,12 +62,17 @@ class User(UserMixin, db.Model):
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-        print(f"DEBUG MODEL User {self.username}: set_password called. password_hash: {self.password_hash[:20]}...", flush=True)
+        # Replaced print with logger.debug
+        current_app.logger.debug(f"User {self.username}: set_password called.")
 
     def check_password(self, password):
-        print(f"DEBUG MODEL User {self.username}: check_password called. Stored hash: {self.password_hash[:20]}..., Password to check: {password}", flush=True)
+        # Replaced print with logger.debug
+        # Note: Logging the password itself, even at debug, can be risky if logs are not properly secured.
+        # Consider logging only the fact of the check or the username.
+        # For now, keeping it similar to original intent but with logger.
+        current_app.logger.debug(f"User {self.username}: check_password called for password verification.")
         is_correct = check_password_hash(self.password_hash, password)
-        print(f"DEBUG MODEL User {self.username}: check_password result: {is_correct}", flush=True)
+        current_app.logger.debug(f"User {self.username}: check_password result: {is_correct}")
         return is_correct
 
     def get_id(self): # Already in UserMixin but can be explicit

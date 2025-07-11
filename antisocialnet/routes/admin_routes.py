@@ -3,6 +3,7 @@ from flask_login import current_user, login_required
 from datetime import datetime, timezone
 import functools # For wraps in admin_required decorator
 
+from sqlalchemy.orm import joinedload # Added for eager loading
 # Corrected imports:
 from antisocialnet.models import User, CommentFlag, SiteSetting, Comment
 from antisocialnet.forms import SiteSettingsForm, DeleteCommentForm
@@ -30,6 +31,10 @@ def view_flags():
     per_page = current_app.config.get('ADMIN_FLAGS_PER_PAGE', 15)
 
     flags_query = CommentFlag.query.filter_by(is_resolved=False)\
+                                   .options(
+                                       joinedload(CommentFlag.comment).joinedload(Comment.author),
+                                       joinedload(CommentFlag.flagger)
+                                   )\
                                    .order_by(CommentFlag.created_at.desc())
     flag_pagination = flags_query.paginate(page=page, per_page=per_page, error_out=False)
     active_flags_raw = flag_pagination.items

@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort
 from flask_login import current_user, login_required
 from datetime import datetime, timezone
+from sqlalchemy.orm import selectinload, joinedload # Added for eager loading
 
 from ..models import Post, Category, Tag, Comment, CommentFlag, Notification, Activity # Added Notification, Activity
 from ..forms import PostForm, CommentForm, DeleteCommentForm, DeletePostForm, FlagCommentForm, LikeForm, UnlikeForm
@@ -12,7 +13,14 @@ post_bp = Blueprint('post', __name__) # No url_prefix, template_folder defaults 
 @post_bp.route('/posts/<int:post_id>', methods=['GET', 'POST'])
 def view_post(post_id):
     current_app.logger.debug(f"Accessing /posts/{post_id}, Method: {request.method}")
-    post = Post.query.get_or_404(post_id)
+    # Eager load related data for the main post
+    post = Post.query.options(
+        selectinload(Post.author),
+        selectinload(Post.categories),
+        selectinload(Post.tags),
+        selectinload(Post.comments).selectinload(Comment.author), # Load authors for top-level comments
+        selectinload(Post.comments).selectinload(Comment.replies).selectinload(Comment.author) # Load authors for replies
+    ).get_or_404(post_id)
 
     if not post.is_published:
         if not current_user.is_authenticated or current_user.id != post.user_id:
@@ -517,6 +525,7 @@ def posts_by_category(category_slug): # Renamed
         # query = Post.query.with_parent(category) # This is for relationship loading, not filtering.
         # For filtering by many-to-many relationship:
         query = Post.query.filter(Post.categories.contains(category), Post.is_published==True)\
+                          .options(selectinload(Post.author), selectinload(Post.tags), selectinload(Post.categories))\
                           .order_by(Post.published_at.desc(), Post.created_at.desc())
         pagination = query.paginate(page=page, per_page=per_page, error_out=False)
         posts = pagination.items
@@ -535,6 +544,7 @@ def posts_by_tag(tag_slug): # Renamed
     per_page = current_app.config.get('POSTS_PER_PAGE', 10)
     try:
         query = Post.query.filter(Post.tags.contains(tag), Post.is_published==True)\
+                          .options(selectinload(Post.author), selectinload(Post.tags), selectinload(Post.categories))\
                           .order_by(Post.published_at.desc(), Post.created_at.desc())
         pagination = query.paginate(page=page, per_page=per_page, error_out=False)
         posts = pagination.items

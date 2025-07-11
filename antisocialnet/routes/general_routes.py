@@ -3,6 +3,7 @@ from flask_login import current_user, login_required
 from flask_wtf.csrf import generate_csrf # Import generate_csrf
 from datetime import datetime, timezone
 from sqlalchemy import or_ # For search query
+from sqlalchemy.orm import selectinload # Added for eager loading
 
 from ..models import Post, User, SiteSetting # User for current_user context if needed, Post for queries, SiteSetting for admin
 from ..forms import DeletePostForm, SiteSettingsForm # For dashboard delete buttons, SiteSettingsForm for admin
@@ -24,10 +25,12 @@ def index():
     current_app.logger.debug(f"Fetching published posts for index page {page}, {per_page} posts per page.")
 
     try:
-        query = Post.query.filter_by(is_published=True).order_by(Post.published_at.desc(), Post.created_at.desc())
+        query = Post.query.filter_by(is_published=True)\
+            .options(selectinload(Post.categories), selectinload(Post.tags), selectinload(Post.author))\
+            .order_by(Post.published_at.desc(), Post.created_at.desc())
         pagination = query.paginate(page=page, per_page=per_page, error_out=False)
         posts = pagination.items
-        current_app.logger.debug(f"Found {len(posts)} published posts for page {page}. Total: {pagination.total}")
+        current_app.logger.debug(f"Found {len(posts)} published posts for index page {page}. Total: {pagination.total}")
     except Exception as e:
         current_app.logger.error(f"Error fetching posts for index page: {e}", exc_info=True)
         flash("Error loading posts. Please try again later.", "danger")
@@ -40,8 +43,11 @@ def index():
 def dashboard():
     current_app.logger.debug(f"Accessing dashboard, User: {current_user.username}")
     # Fetch all posts by the current user (published and drafts)
-    user_posts = Post.query.filter_by(user_id=current_user.id)\
-                           .order_by(Post.updated_at.desc()).all()
+    # Eager load categories and tags as they might be displayed in the dashboard template
+    user_posts_query = Post.query.filter_by(user_id=current_user.id)\
+                                 .options(selectinload(Post.categories), selectinload(Post.tags))\
+                                 .order_by(Post.updated_at.desc())
+    user_posts = user_posts_query.all() # .all() is used here, pagination might be better if list is long
 
     # Create delete forms for each post
     delete_forms = {
@@ -89,7 +95,8 @@ def search_results():
             posts_query = Post.query.filter(
                 Post.is_published==True,
                 Post.content.ilike(search_term)
-            ).order_by(Post.published_at.desc(), Post.created_at.desc())
+            ).options(selectinload(Post.categories), selectinload(Post.tags), selectinload(Post.author))\
+             .order_by(Post.published_at.desc(), Post.created_at.desc())
             posts_pagination = posts_query.paginate(page=page, per_page=posts_per_page, error_out=False)
             posts_results = posts_pagination.items
             current_app.logger.debug(f"Search for '{query_param}' found {len(posts_results)} posts on page {page}. Total: {posts_pagination.total}")
@@ -157,6 +164,7 @@ def activity_feed(): # Rename to home_feed or similar if preferred, but endpoint
     try:
         # Fetch all published posts, newest first.
         posts_query = Post.query.filter(Post.is_published == True)\
+                                .options(selectinload(Post.categories), selectinload(Post.tags), selectinload(Post.author))\
                                 .order_by(Post.published_at.desc(), Post.created_at.desc())
 
         pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
