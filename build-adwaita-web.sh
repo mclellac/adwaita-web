@@ -81,12 +81,11 @@ else
     echo "Compiled CSS file '${COMPILED_CSS_FILE_PATH}' exists."
 fi
 
-
 # Copy JavaScript files directly to ANTISOCIALNET_JS_DIR and also to BUILD_JS_DIR for consistency if build dir is used later
 echo "--- Copying JavaScript Files ---"
 # Debug lines removed
 mkdir -p "${ANTISOCIALNET_JS_DIR}" # Ensure target directory exists
-mkdir -p "${BUILD_JS_DIR}"    # Ensure build directory exists
+mkdir -p "${BUILD_JS_DIR}"         # Ensure build directory exists
 
 if [ -f "${JS_INPUT_DIR}/components.js" ]; then
     cp "${JS_INPUT_DIR}/components.js" "${BUILD_JS_DIR}/components.js"
@@ -212,7 +211,6 @@ if [ -f "${COMPILED_CSS_FILE_PATH}" ]; then
 else
     echo "WARNING: Compiled CSS file '${COMPILED_CSS_FILE_PATH}' not found. Skipping copy to antisocialnet."
 fi
-
 
 echo "--- Copying Other Built Assets to antisocialnet/static ---"
 # Definitions for ANTISOCIALNET_JS_DIR, ANTISOCIALNET_DATA_DIR, ANTISOCIALNET_FONTS_DIR moved to the top.
