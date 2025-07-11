@@ -1,5 +1,5 @@
 import pytest
-from antisocialnet.models import User, Post, PostLike, Notification, Activity
+from antisocialnet.models import User, Post, Like, Notification, Activity
 from antisocialnet import db # db fixture from conftest.py
 
 def test_like_post(db, create_test_user, create_test_post):
@@ -8,26 +8,29 @@ def test_like_post(db, create_test_user, create_test_post):
     post_author = create_test_user(email_address="postauthor@example.com", full_name="postauthor")
     post1 = create_test_post(author=post_author, content="A post to be liked")
 
-    assert user1.has_liked_post(post1) == False
+    assert user1.has_liked_item(target_type='post', target_id=post1.id) == False
     assert post1.like_count == 0
 
     # User1 likes Post1
-    result = user1.like_post(post1)
+    result = user1.like_item(target_type='post', target_id=post1.id)
     db.session.commit()
 
     assert result == True
-    assert user1.has_liked_post(post1) == True
+    assert user1.has_liked_item(target_type='post', target_id=post1.id) == True
     assert post1.like_count == 1
 
     # Check if PostLike record was created
-    like_record = PostLike.query.filter_by(user_id=user1.id, post_id=post1.id).first()
+    like_record = Like.query.filter_by(user_id=user1.id, target_type='post', target_id=post1.id).first()
     assert like_record is not None
     assert like_record.user == user1
-    assert like_record.post == post1
+    # assert like_record.post == post1 # 'post' attribute no longer directly on Like model
 
     # Check relationships
-    assert post1 in [pl.post for pl in user1.post_likes] # User.post_likes relationship
-    assert user1 in [pl.user for pl in post1.likes]      # Post.likes relationship
+    # User.likes is now a generic list, filter for post likes
+    user_post_likes = [like for like in user1.likes if like.target_type == 'post' and like.target_id == post1.id]
+    assert len(user_post_likes) == 1
+    # Post.likes relationship should still work and point to Like objects
+    assert user1 in [like.user for like in post1.likes]
 
 def test_unlike_post(db, create_test_user, create_test_post):
     """Test unliking a post."""
@@ -35,20 +38,20 @@ def test_unlike_post(db, create_test_user, create_test_post):
     post1 = create_test_post(content="A post to be unliked")
 
     # First, like the post
-    user1.like_post(post1)
+    user1.like_item(target_type='post', target_id=post1.id)
     db.session.commit()
-    assert user1.has_liked_post(post1) == True
+    assert user1.has_liked_item(target_type='post', target_id=post1.id) == True
     assert post1.like_count == 1
 
     # Then, unlike the post
-    result = user1.unlike_post(post1)
+    result = user1.unlike_item(target_type='post', target_id=post1.id)
     db.session.commit()
 
     assert result == True
-    assert user1.has_liked_post(post1) == False
+    assert user1.has_liked_item(target_type='post', target_id=post1.id) == False
     assert post1.like_count == 0
 
-    like_record = PostLike.query.filter_by(user_id=user1.id, post_id=post1.id).first()
+    like_record = Like.query.filter_by(user_id=user1.id, target_type='post', target_id=post1.id).first()
     assert like_record is None
 
 def test_like_own_post(db, create_test_user, create_test_post):
@@ -56,11 +59,11 @@ def test_like_own_post(db, create_test_user, create_test_post):
     user1 = create_test_user(email_address="selfliker@example.com", full_name="selfliker")
     post1 = create_test_post(author=user1, content="My own post")
 
-    result = user1.like_post(post1)
+    result = user1.like_item(target_type='post', target_id=post1.id)
     db.session.commit()
 
     assert result == True
-    assert user1.has_liked_post(post1) == True
+    assert user1.has_liked_item(target_type='post', target_id=post1.id) == True
     assert post1.like_count == 1
 
 def test_multiple_likes_same_user(db, create_test_user, create_test_post):
@@ -68,12 +71,12 @@ def test_multiple_likes_same_user(db, create_test_user, create_test_post):
     user1 = create_test_user(email_address="multiliker@example.com", full_name="multiliker")
     post1 = create_test_post(content="Post for multi-like test")
 
-    user1.like_post(post1)
+    user1.like_item(target_type='post', target_id=post1.id)
     db.session.commit()
     assert post1.like_count == 1
 
     # Attempt to like again
-    result = user1.like_post(post1) # This should return False as per User.like_post logic
+    result = user1.like_item(target_type='post', target_id=post1.id) # This should return False as per User.like_item logic
     db.session.commit() # Commit to see if DB constraint also catches it (it should due to UniqueConstraint)
 
     assert result == False
@@ -85,23 +88,23 @@ def test_multiple_users_like_post(db, create_test_user, create_test_post):
     user2 = create_test_user(email_address="usertwo@example.com", full_name="usertwo")
     post1 = create_test_post(content="Popular post")
 
-    user1.like_post(post1)
+    user1.like_item(target_type='post', target_id=post1.id)
     db.session.commit()
     assert post1.like_count == 1
 
-    user2.like_post(post1)
+    user2.like_item(target_type='post', target_id=post1.id)
     db.session.commit()
     assert post1.like_count == 2
 
-    assert user1.has_liked_post(post1) == True
-    assert user2.has_liked_post(post1) == True
+    assert user1.has_liked_item(target_type='post', target_id=post1.id) == True
+    assert user2.has_liked_item(target_type='post', target_id=post1.id) == True
 
 def test_unlike_not_liked_post(db, create_test_user, create_test_post):
     """Test unliking a post that was not liked by the user."""
     user1 = create_test_user(email_address="cautious@example.com", full_name="cautiousunliker")
     post1 = create_test_post(content="A post never liked")
 
-    result = user1.unlike_post(post1) # Should return False
+    result = user1.unlike_item(target_type='post', target_id=post1.id) # Should return False
     db.session.commit()
 
     assert result == False
@@ -113,47 +116,47 @@ def test_post_like_cascade_delete_on_user_delete(db, create_test_user, create_te
     post1 = create_test_post(content="Post liked by user_to_delete")
     post2 = create_test_post(content="Another post liked by user_to_delete")
 
-    user_to_delete.like_post(post1)
-    user_to_delete.like_post(post2)
+    user_to_delete.like_item(target_type='post', target_id=post1.id)
+    user_to_delete.like_item(target_type='post', target_id=post2.id)
     db.session.commit()
 
-    assert PostLike.query.filter_by(user_id=user_to_delete.id).count() == 2
+    assert Like.query.filter_by(user_id=user_to_delete.id, target_type='post').count() == 2
 
     user_id = user_to_delete.id
     db.session.delete(user_to_delete)
     db.session.commit()
 
     assert User.query.get(user_id) is None
-    assert PostLike.query.filter_by(user_id=user_id).count() == 0
+    assert Like.query.filter_by(user_id=user_id, target_type='post').count() == 0
     assert post1.like_count == 0 # Assuming only this user liked it
     assert post2.like_count == 0
 
 
 def test_post_like_cascade_delete_on_post_delete(db, create_test_user, create_test_post):
-    """Test that PostLike records are deleted when a post is deleted."""
+    """Test that Like records are deleted when a post is deleted."""
     user1 = create_test_user(email_address="u1@example.com", full_name="user1fordelpost")
     user2 = create_test_user(email_address="u2@example.com", full_name="user2fordelpost")
     post_to_delete = create_test_post(content="Post to be deleted")
 
-    user1.like_post(post_to_delete)
-    user2.like_post(post_to_delete)
+    user1.like_item(target_type='post', target_id=post_to_delete.id)
+    user2.like_item(target_type='post', target_id=post_to_delete.id)
     db.session.commit()
 
-    assert PostLike.query.filter_by(post_id=post_to_delete.id).count() == 2
+    assert Like.query.filter_by(target_type='post', target_id=post_to_delete.id).count() == 2
     assert post_to_delete.like_count == 2
 
     post_id = post_to_delete.id
-    db.session.delete(post_to_delete) # This should trigger cascade delete for PostLikes
+    db.session.delete(post_to_delete) # This should trigger cascade delete for Likes
     db.session.commit()
 
     assert Post.query.get(post_id) is None
-    assert PostLike.query.filter_by(post_id=post_id).count() == 0
-    # Check if user's liked_posts relationship is also updated (it should be empty for this post)
-    assert not user1.has_liked_post(post_to_delete) # post_to_delete is now detached
-    # A more direct check would be to query PostLike via user1.post_likes after post deletion
-    # but since the post is gone, PostLike records are also gone.
-    assert PostLike.query.filter_by(user_id=user1.id, post_id=post_id).first() is None
-    assert PostLike.query.filter_by(user_id=user2.id, post_id=post_id).first() is None
+    assert Like.query.filter_by(target_type='post', target_id=post_id).count() == 0
+    # Check if user's liked_items relationship is also updated (it should be empty for this post)
+    assert not user1.has_liked_item(target_type='post', target_id=post_id) # post_to_delete is now detached
+    # A more direct check would be to query Like via user1.likes after post deletion
+    # but since the post is gone, Like records are also gone.
+    assert Like.query.filter_by(user_id=user1.id, target_type='post', target_id=post_id).first() is None
+    assert Like.query.filter_by(user_id=user2.id, target_type='post', target_id=post_id).first() is None
 
 # Placeholder for testing notifications/activity logs related to likes in model interactions
 # These might be better in route tests where the full context is available.

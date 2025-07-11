@@ -40,7 +40,7 @@ def test_reset_password_request_valid_email(mock_send_email, client, db, auth_te
         token = form.csrf_token.current_token
         url = url_for('auth.reset_password_request')
 
-    form_data = {'email': auth_test_user.email, 'csrf_token': token}
+    form_data = {'email': auth_test_user.username, 'csrf_token': token}
     response = client.post(url, data=form_data, follow_redirects=True)
     assert response.status_code == 200 # Redirects to login
     assert b"An email has been sent with instructions to reset your password." in response.data
@@ -95,12 +95,12 @@ def test_reset_password_request_csrf_missing(client, auth_test_user):
     with client.application.test_request_context():
         url = url_for('auth.reset_password_request')
     # Test without follow_redirects for CSRF errors to see the direct 400
-    response_no_redirect = client.post(url, data={'email': auth_test_user.email})
+    response_no_redirect = client.post(url, data={'email': auth_test_user.username})
     assert response_no_redirect.status_code == 400 # Expecting direct 400 from Flask-WTF
 
 def test_reset_password_request_csrf_invalid(client, auth_test_user):
     """Test POST /auth/reset_password_request with invalid CSRF token."""
-    form_data = {'email': auth_test_user.email, 'csrf_token': 'invalidtoken'}
+    form_data = {'email': auth_test_user.username, 'csrf_token': 'invalidtoken'}
     with client.application.test_request_context():
         url = url_for('auth.reset_password_request')
     response = client.post(url, data=form_data)
@@ -297,7 +297,7 @@ def test_register_email_exists(client, app, auth_test_user): # auth_test_user is
 
     form_data = {
         'full_name': 'Another User',
-        'email': auth_test_user.email, # Existing email
+        'email': auth_test_user.username, # Existing email
         'password': 'password123',
         'confirm_password': 'password123',
         'csrf_token': token
@@ -424,7 +424,7 @@ def test_login_successful(client, app, auth_test_user): # auth_test_user: email=
         url = url_for('auth.login')
 
     form_data = {
-        'username': auth_test_user.email, # Login form uses 'username' field for email
+        'username': auth_test_user.username, # Login form uses 'username' field for email
         'password': 'password123',
         'csrf_token': token
     }
@@ -445,7 +445,7 @@ def test_login_incorrect_password(client, app, auth_test_user):
         url = url_for('auth.login')
 
     form_data = {
-        'username': auth_test_user.email,
+        'username': auth_test_user.username,
         'password': 'wrongpassword',
         'csrf_token': token
     }
@@ -483,7 +483,7 @@ def test_login_user_not_approved(client, app, create_test_user, db):
         url = url_for('auth.login')
 
     form_data = {
-        'username': unapproved_user.email,
+        'username': unapproved_user.username,
         'password': 'password123',
         'csrf_token': token
     }
@@ -505,7 +505,7 @@ def test_login_user_not_active(client, app, create_test_user, db):
         url = url_for('auth.login')
 
     form_data = {
-        'username': inactive_user.email,
+        'username': inactive_user.username,
         'password': 'password123',
         'csrf_token': token
     }
@@ -530,7 +530,7 @@ def test_login_empty_credentials(client, app):
 
 def test_login_csrf_missing(client, app, auth_test_user):
     """Test login POST with missing CSRF token."""
-    form_data = {'username': auth_test_user.email, 'password': 'password123'}
+    form_data = {'username': auth_test_user.username, 'password': 'password123'}
     with client.application.test_request_context():
         url = url_for('auth.login')
     response = client.post(url, data=form_data)
@@ -539,7 +539,7 @@ def test_login_csrf_missing(client, app, auth_test_user):
 def test_login_csrf_invalid(client, app, auth_test_user):
     """Test login POST with invalid CSRF token."""
     form_data = {
-        'username': auth_test_user.email,
+            'username': auth_test_user.username,
         'password': 'password123',
         'csrf_token': 'totallybreakscsrf'
     }
@@ -607,8 +607,8 @@ def test_change_password_unauthenticated_redirects(client):
 
 def test_change_password_successful(client, app, logged_in_client, db):
     """Test successful password change."""
-    # logged_in_client is 'loginuser' with password 'password'
-    login_user = User.query.filter_by(email="login@example.com").first() # from logged_in_client fixture
+    # logged_in_client is 'login_fixture_user@example.com' with password 'password'
+    login_user = User.query.filter_by(username="login_fixture_user@example.com").first() # from logged_in_client fixture
     assert login_user is not None
     original_hash = login_user.password_hash
     new_password_val = "newStrongPassword123"
@@ -644,14 +644,14 @@ def test_change_password_successful(client, app, logged_in_client, db):
     logged_in_client.get(url_for('auth.logout_route')) # Logout
     with app.app_context(): from antisocialnet.forms import LoginForm; form = LoginForm(); token = form.csrf_token.current_token
     login_attempt_old_pass = logged_in_client.post(url_for('auth.login'), data={
-        'username': login_user.email, 'password': 'password', 'csrf_token': token
+        'username': login_user.username, 'password': 'password', 'csrf_token': token
     }, follow_redirects=True)
     assert b"Invalid username or password." in login_attempt_old_pass.data
 
     # Verify new password works
     with app.app_context(): from antisocialnet.forms import LoginForm; form = LoginForm(); token = form.csrf_token.current_token
     login_attempt_new_pass = logged_in_client.post(url_for('auth.login'), data={
-        'username': login_user.email, 'password': new_password_val, 'csrf_token': token
+        'username': login_user.username, 'password': new_password_val, 'csrf_token': token
     }, follow_redirects=True)
     assert b"Logged in successfully!" in login_attempt_new_pass.data
 

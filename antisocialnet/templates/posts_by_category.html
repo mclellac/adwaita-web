@@ -80,7 +80,7 @@
                             {% else %}
                                 <adw-button text="{{ page_num }}" href="{{ url_for('post.posts_by_category', category_slug=category.slug, page=page_num) }}"></adw-button>
                             {% endif %}
-                        {% elif loop.index != 1 and loop.index != pagination.pages + 2 %}
+                        {% else %}
                             <adw-button text="…" flat disabled style="pointer-events: none;"></adw-button>
                         {% endif %}
                     {% endfor %}

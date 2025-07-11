@@ -84,7 +84,7 @@
                 {% else %}
                     <a href="{{ url_for('general.index', page=page_num) }}" class="adw-button">{{ page_num }}</a>
                 {% endif %}
-            {% elif loop.index != 1 and loop.index != pagination.pages + 2 %}
+            {% else %}
                  <button class="adw-button flat" disabled style="pointer-events: none;">&hellip;</button>
             {% endif %}
         {% endfor %}

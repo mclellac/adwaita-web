@@ -91,7 +91,8 @@
                         {% else %}
                             <a href="{{ url_for('general.activity_feed', page=page_num) }}" class="adw-button">{{ page_num }}</a>
                         {% endif %}
-                    {% elif loop.index != 1 and loop.index != pagination.pages + pagination.iter_pages()|length %}
+                    {% else %}
+                        {# If page_num is None, iter_pages wants an ellipsis here #}
                         <button class="adw-button flat" disabled>…</button>
                     {% endif %}
                 {% endfor %}

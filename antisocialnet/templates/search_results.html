@@ -67,7 +67,7 @@
                                 {% else %}
                                     <a href="{{ url_for('general.search_results', q=query, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
-                            {% elif loop.index != 1 and loop.index != users_pagination.pages + 2 %}
+                            {% else %}
                                  <button class="adw-button flat" disabled style="pointer-events: none;">&hellip;</button>
                             {% endif %}
                         {% endfor %}
@@ -155,7 +155,7 @@
                                 {% else %}
                                     <a href="{{ url_for('general.search_results', q=query, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
-                            {% elif loop.index != 1 and loop.index != posts_pagination.pages + 2 %}
+                            {% else %}
                                  <button class="adw-button flat" disabled style="pointer-events: none;">&hellip;</button>
                             {% endif %}
                         {% endfor %}

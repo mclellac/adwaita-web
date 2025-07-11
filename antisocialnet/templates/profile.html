@@ -269,7 +269,7 @@
                                 {% else %}
                                     <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
-                            {% elif loop.index != 1 and loop.index != posts_pagination.pages + posts_pagination.iter_pages()|length %}
+                            {% else %}
                                 <button class="adw-button flat" disabled>…</button>
                             {% endif %}
                         {% endfor %}
@@ -337,7 +337,7 @@
                                 {% else %}
                                     <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=page_num) }}" class="adw-button">{{ page_num }}</a>
                                 {% endif %}
-                            {% elif loop.index != 1 and loop.index != comments_pagination.pages + comments_pagination.iter_pages()|length %}
+                            {% else %}
                                 <button class="adw-button flat" disabled>…</button>
                             {% endif %}
                         {% endfor %}
