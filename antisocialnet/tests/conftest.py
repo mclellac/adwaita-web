@@ -22,6 +22,7 @@ def app():
         # For example, a default 'admin' role or essential SiteSettings
         SiteSetting.set('allow_registrations', True, 'bool')
         SiteSetting.set('auto_approve_users', True, 'bool')
+        SiteSetting.set('site_title', 'Test Site', 'string')
 
 
     yield app_instance
@@ -219,10 +220,13 @@ def create_test_user(db): # db fixture provides transactional session
             user.profile_info = profile_info
             user.website_url = website_url
             user.is_profile_public = is_profile_public
-            # Optionally, update password if a new one is provided and different,
-            # but typically test users have fixed passwords.
-            # if password and not user.check_password(password):
-            #     user.set_password(password)
+            # Ensure password is what's expected for this call, even if user exists
+            if password and not user.check_password(password):
+                print(f"DEBUG CONTEST: Updating password for existing user {user.username} because it did not match.", flush=True)
+                user.set_password(password)
+            elif not user.password_hash and password: # User exists but somehow has no password hash
+                print(f"DEBUG CONTEST: Setting password for existing user {user.username} who had no hash.", flush=True)
+                user.set_password(password)
         else:
             user = User()
             user.username = email_address # User model's username is the email
@@ -291,7 +295,9 @@ def logged_in_client(client, app, create_test_user, db): # Added db to ensure us
     }, follow_redirects=True)
 
     assert response.status_code == 200, f"Login failed: {response.data.decode()}"
-    assert b"Logout" in response.data, "Logout link not found, login might have failed."
+    # Check for the direct success flash message, as layout might change.
+    assert b"Logged in successfully." in response.data, "Login success message not found. Response: " + response.data.decode(errors='replace')
+
 
     return client
 
@@ -319,7 +325,7 @@ def admin_client(client, app, create_test_user, db): # Added db
     }, follow_redirects=True)
 
     assert response.status_code == 200, f"Admin login failed: {response.data.decode()}"
-    assert b"Logout" in response.data, "Logout link not found, admin login might have failed."
+    assert b"Logged in successfully." in response.data, "Admin login success message not found. Response: " + response.data.decode(errors='replace')
     # Add a check specific to admin users, e.g., visibility of an "Admin" link or section
     # This depends on your application's templates.
     # For example, if admins see an "Admin Dashboard" link:

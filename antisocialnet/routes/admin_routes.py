@@ -47,7 +47,9 @@ def view_flags():
 @admin_required
 def resolve_flag(flag_id):
     current_app.logger.debug(f"Admin {current_user.username} attempting to resolve flag ID {flag_id}")
-    flag = CommentFlag.query.get_or_404(flag_id)
+    flag = db.session.get(CommentFlag, flag_id)
+    if flag is None:
+        abort(404)
     if flag.is_resolved:
         flash('This flag has already been resolved.', 'info')
         return redirect(url_for('admin.view_flags'))
@@ -122,7 +124,9 @@ def pending_users():
 @admin_required
 def approve_user(user_id):
     current_app.logger.debug(f"Admin {current_user.username} attempting to approve user ID {user_id}")
-    user_to_approve = User.query.get_or_404(user_id)
+    user_to_approve = db.session.get(User, user_id)
+    if user_to_approve is None:
+        abort(404)
     if user_to_approve.is_approved and user_to_approve.is_active:
         flash('User is already approved.', 'info')
         return redirect(url_for('admin.pending_users'))
@@ -143,7 +147,9 @@ def approve_user(user_id):
 @admin_required
 def reject_user(user_id):
     current_app.logger.debug(f"Admin {current_user.username} attempting to reject user ID {user_id}")
-    user_to_reject = User.query.get_or_404(user_id)
+    user_to_reject = db.session.get(User, user_id)
+    if user_to_reject is None:
+        abort(404)
     if user_to_reject.is_approved or user_to_reject.is_active:
         flash(f'User {user_to_reject.username} is already active or approved and cannot be rejected from this interface.', 'warning')
         return redirect(url_for('admin.pending_users'))

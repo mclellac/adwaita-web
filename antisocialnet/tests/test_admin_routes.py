@@ -239,7 +239,7 @@ def test_approve_user_successful(admin_client, app, db, create_test_user):
     # Should redirect to pending_users page
     assert b"Pending User Approvals" in response.data
 
-    approved_user = User.query.get(user_id)
+    approved_user = db.session.get(User, user_id)
     assert approved_user.is_approved
     assert approved_user.is_active # Route sets is_active=True on approval
 
@@ -248,7 +248,7 @@ def test_reject_user_successful(admin_client, app, db, create_test_user):
     # Ensure user is both not approved and not active to be rejectable by this logic
     pending_user = create_test_user(email_address="rejectme@example.com", full_name="To Reject", is_approved=False, is_active=False)
     user_id = pending_user.id
-    assert User.query.get(user_id) is not None
+    assert db.session.get(User, user_id) is not None
 
     with admin_client.application.test_request_context(): # For CSRF token
         from flask_wtf import FlaskForm
@@ -262,7 +262,7 @@ def test_reject_user_successful(admin_client, app, db, create_test_user):
         print(response.data.decode('utf-8', errors='replace')) # Print decoded HTML
     assert expected_flash_message in response.data
     assert b"Pending User Approvals" in response.data
-    assert User.query.get(user_id) is None # User should be deleted
+    assert db.session.get(User, user_id) is None # User should be deleted
 
 def test_approve_nonexistent_user(admin_client, app):
     """Attempt to approve a non-existent user returns 404."""
@@ -382,7 +382,7 @@ def test_resolve_flag_successful(admin_client, app, db, create_test_user, create
     # Should redirect to view_flags page
     assert b"Review Content Flags" in response.data
 
-    resolved_flag = CommentFlag.query.get(flag_id)
+    resolved_flag = db.session.get(CommentFlag, flag_id)
     assert resolved_flag.is_resolved
     # admin_client fixture in conftest.py uses "admin_fixture_user@example.com"
     admin_user_for_check = User.query.filter_by(username="admin_fixture_user@example.com").first()

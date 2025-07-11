@@ -12,10 +12,10 @@ def send_password_reset_email(user):
     # For now, email content will be basic. Could use templates later.
     subject = "Password Reset Request for Your App"
     sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'noreply@example.com')
-    recipients = [user.email] # Assuming user model has an 'email' field
+    recipients = [user.username] # User's email is stored in the username field
 
     # Simple text body, consider HTML template for richer emails
-    text_body = f"""Dear {user.username or 'User'},
+    text_body = f"""Dear {user.full_name or user.username or 'User'},
 
 To reset your password, please visit the following link:
 {reset_url}
@@ -35,15 +35,15 @@ The Your App Team
 
     try:
         if current_app.config.get('MAIL_SUPPRESS_SEND', False):
-            current_app.logger.info(f"Email sending suppressed. Would send to: {user.email}")
+            current_app.logger.info(f"Email sending suppressed. Would send to: {user.username}") # Changed to username
             current_app.logger.info(f"Email subject: {subject}")
             current_app.logger.info(f"Email body:\n{text_body}")
             current_app.logger.info(f"Reset URL would be: {reset_url}") # Log the URL for testing
         else:
             mail.send(msg)
-            current_app.logger.info(f"Password reset email sent to {user.email}")
+            current_app.logger.info(f"Password reset email sent to {user.username}") # Changed to username
     except Exception as e:
-        current_app.logger.error(f"Failed to send password reset email to {user.email}: {e}", exc_info=True)
+        current_app.logger.error(f"Failed to send password reset email to {user.username}: {e}", exc_info=True) # Changed to username
         # Depending on app's needs, you might re-raise or handle silently
         # For now, log and continue. The user won't get the email if this fails.
         # Consider a fallback or user notification if email system is critical and fails.

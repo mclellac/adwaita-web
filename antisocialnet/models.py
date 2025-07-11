@@ -62,9 +62,13 @@ class User(UserMixin, db.Model):
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
+        print(f"DEBUG MODEL User {self.username}: set_password called. password_hash: {self.password_hash[:20]}...", flush=True)
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        print(f"DEBUG MODEL User {self.username}: check_password called. Stored hash: {self.password_hash[:20]}..., Password to check: {password}", flush=True)
+        is_correct = check_password_hash(self.password_hash, password)
+        print(f"DEBUG MODEL User {self.username}: check_password result: {is_correct}", flush=True)
+        return is_correct
 
     def get_id(self): # Already in UserMixin but can be explicit
         return str(self.id)
@@ -274,7 +278,8 @@ class Comment(db.Model):
     likes = db.relationship('Like',
                             primaryjoin="and_(Like.target_type=='comment', foreign(Like.target_id)==Comment.id)",
                             lazy='dynamic',
-                            cascade='all, delete-orphan')
+                            cascade='all, delete-orphan',
+                            overlaps="likes") # Overlaps Post.likes
 
     @property
     def like_count(self):
@@ -305,7 +310,8 @@ class UserPhoto(db.Model):
     likes = db.relationship('Like',
                             primaryjoin="and_(Like.target_type=='photo', foreign(Like.target_id)==UserPhoto.id)",
                             lazy='dynamic',
-                            cascade='all, delete-orphan')
+                            cascade='all, delete-orphan',
+                            overlaps="likes,likes") # Overlaps Post.likes and Comment.likes
 
     @property
     def like_count(self):

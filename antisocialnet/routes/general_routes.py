@@ -132,6 +132,14 @@ def contact_page():
     current_app.logger.debug("Displaying Contact page.")
     return render_template('contact.html')
 
+@general_bp.route('/robots.txt')
+def robots_txt():
+    return current_app.send_static_file('robots.txt')
+
+@general_bp.route('/favicon.ico')
+def favicon():
+    return current_app.send_static_file('favicon.ico')
+
 @general_bp.route('/feed') # This is the "Home" page for logged-in users
 @login_required
 def activity_feed(): # Rename to home_feed or similar if preferred, but endpoint name stays for now

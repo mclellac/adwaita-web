@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /profile/edit
+Disallow: /settings
+Disallow: /post/create
+Disallow: /post/edit/
+Disallow: /api/
+# Add sitemap if available, e.g.
+# Sitemap: {{ url_for('general.sitemap', _external=True) }}
