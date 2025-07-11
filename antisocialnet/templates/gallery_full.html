@@ -133,15 +133,24 @@ document.addEventListener('DOMContentLoaded', function () {
             const authorProfileUrl = comment.author.profile_url;
             const authorAvatarAlt = comment.author.full_name;
 
-            commentDiv.innerHTML = \`                <span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">
-                    <img src="\${comment.author.profile_photo_url}" alt="\${authorAvatarAlt} avatar">
-                </span>
-                <span class="adw-action-row-text-content">
-                    \${authorProfileUrl ? \`<a href="\${authorProfileUrl}" class="adw-link adw-action-row-title">\${authorDisplayName}</a>\` : \`<span class="adw-action-row-title">\${authorDisplayName}</span>\`}
-                    <span class="adw-action-row-subtitle">\${comment.text}</span>
-                    <small class="adw-label caption">\${formatCommentDate(comment.created_at)}</small>
-                </span>
-            \`;
+            let htmlContent =
+                '<span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">' +
+                    '<img src="' + comment.author.profile_photo_url + '" alt="' + authorAvatarAlt + ' avatar">' +
+                '</span>' +
+                '<span class="adw-action-row-text-content">';
+
+            if (authorProfileUrl) {
+                htmlContent += '<a href="' + authorProfileUrl + '" class="adw-link adw-action-row-title">' + authorDisplayName + '</a>';
+            } else {
+                htmlContent += '<span class="adw-action-row-title">' + authorDisplayName + '</span>';
+            }
+
+            htmlContent +=
+                    '<span class="adw-action-row-subtitle">' + comment.text + '</span>' +
+                    '<small class="adw-label caption">' + formatCommentDate(comment.created_at) + '</small>' +
+                '</span>';
+
+            commentDiv.innerHTML = htmlContent;
             galleryPhotoCommentsList.appendChild(commentDiv);
         });
     }
@@ -198,7 +207,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let formHtml;
         if (userHasLiked) {
-            formHtml = \`                <form action="/like/unlike/\${itemType}/\${itemId}" method="POST" style="display: inline;" class="like-form">
+            formHtml = \`
+                <form action="/like/unlike/\${itemType}/\${itemId}" method="POST" style="display: inline;" class="like-form">
                     <input type="hidden" name="csrf_token" value="\${csrfTokenVal}">
                     <input type="hidden" name="action_type" value="unlike">
                     <button type="submit" class="adw-button small flat unlike-button" aria-label="Unlike \${itemType}">
@@ -207,7 +217,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 </form>
             \`;
         } else {
-            formHtml = \`                <form action="/like/\${itemType}/\${itemId}" method="POST" style="display: inline;" class="like-form">
+            formHtml = \`
+                <form action="/like/\${itemType}/\${itemId}" method="POST" style="display: inline;" class="like-form">
                     <input type="hidden" name="csrf_token" value="\${csrfTokenVal}">
                     <input type="hidden" name="action_type" value="like">
                     <button type="submit" class="adw-button small flat suggested-action like-button" aria-label="Like \${itemType}">
