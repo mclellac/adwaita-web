@@ -31,13 +31,12 @@ def view_post(post_id):
         Aborts with 404 if post not found or access to unpublished post is denied.
     """
     current_app.logger.debug(f"Accessing /posts/{post_id}, Method: {request.method}")
-    # Eager load related data for the main post
+    # Eager load related data for the main post, but not comments directly on this query
+    # because Post.comments is lazy='dynamic'
     post = Post.query.options(
         selectinload(Post.author),
         selectinload(Post.categories),
-        selectinload(Post.tags),
-        selectinload(Post.comments).selectinload(Comment.author), # Load authors for top-level comments
-        selectinload(Post.comments).selectinload(Comment.replies).selectinload(Comment.author) # Load authors for replies
+        selectinload(Post.tags)
     ).get_or_404(post_id)
 
     if not post.is_published:
@@ -172,7 +171,12 @@ def view_post(post_id):
         flash_form_errors_util(form)
 
     # Fetch comments (top-level only for the main list)
-    comments = post.comments.all() # Uses the relationship defined on Post model
+    # Apply eager loading options to the dynamic query for comments
+    comments_query = post.comments.options(
+        selectinload(Comment.author), # Eager load author for each comment
+        selectinload(Comment.replies).selectinload(Comment.author) # Eager load replies and their authors
+    )
+    comments = comments_query.all()
     current_app.logger.debug(f"Fetched {len(comments)} top-level comments for post {post_id}.")
 
     related_posts = []
