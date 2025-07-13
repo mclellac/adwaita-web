@@ -7,6 +7,7 @@
     <title>{% block page_title %}{% endblock %}{% if self.page_title() %} - {% endif %}{{ site_settings.get('site_title', 'Adwaita Social Demo') }}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-skin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
       (function() {
         const theme = {{ (current_user.theme if current_user and current_user.is_authenticated and current_user.theme else "system")|tojson|safe }};
@@ -150,43 +151,34 @@
         </div>
         {% endif %}
         <div class="adw-list-box flat sidebar-nav" aria-label="Main Navigation">
-            {% block sidebar_nav %}
+            <div class="nav-category">
+                <span class="nav-category-title">Places</span>
+                 <div class="nav-item {{ 'selected' if request.endpoint == 'general.activity_feed' or request.endpoint == 'general.index' }}">
+                    <a href="{{ url_for('general.activity_feed') }}" class="adw-link-overlay"></a>
+                    <span class="adw-action-row-icon icon-actions-go-home-symbolic"></span>
+                    <span class="adw-action-row-title">Home</span> {# "Home" now points to feed for logged-in users #}
+                </div>
                 {% if current_user.is_authenticated %}
-                    <div class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.activity_feed' or request.endpoint == 'general.index' }}">
-                        <a href="{{ url_for('general.activity_feed') }}" class="adw-link-overlay"></a>
-                        <span class="adw-action-row-icon icon-actions-go-home-symbolic"></span>
-                        <span class="adw-action-row-title">Home</span> {# "Home" now points to feed for logged-in users #}
+                    <div class="nav-item {{ 'selected' if request.blueprint == 'notification' }}">
+                        <a href="{{ url_for('notification.list_notifications') }}" class="adw-link-overlay"></a>
+                        <span class="adw-action-row-icon icon-objects-alarm-symbolic"></span>
+                        <span class="adw-action-row-title">Notifications</span>
+                        {% if unread_notifications_count > 0 %}
+                            <span class="adw-badge suggested-action" title="{{ unread_notifications_count }} unread notifications">{{ unread_notifications_count }}</span>
+                        {% endif %}
                     </div>
-                {% else %}
-                    <div class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.index' }}">
-                        <a href="{{ url_for('general.index') }}" class="adw-link-overlay"></a>
-                        <span class="adw-action-row-icon icon-actions-go-home-symbolic"></span>
-                        <span class="adw-action-row-title">Home</span>
+                    <div class="nav-item {{ 'selected' if request.endpoint == 'post.create_post' }}">
+                        <a href="{{ url_for('post.create_post') }}" class="adw-link-overlay"></a>
+                        <span class="adw-action-row-icon icon-actions-document-new-symbolic"></span>
+                        <span class="adw-action-row-title">New Post</span>
+                    </div>
+                    <div class="nav-item {{ 'selected' if request.endpoint == 'general.dashboard' }}">
+                        <a href="{{ url_for('general.dashboard') }}" class="adw-link-overlay"></a>
+                        <span class="adw-action-row-icon icon-apps-dashboard-symbolic"></span> {# Or a more generic icon #}
+                        <span class="adw-action-row-title">Dashboard</span>
                     </div>
                 {% endif %}
-            {% if current_user.is_authenticated %}
-                {# The "Feed" link is removed as "Home" now serves this purpose for logged-in users #}
-                {# "Find Users" link removed as search is now unified in the header #}
-                <div class="adw-action-row activatable {{ 'selected' if request.blueprint == 'notification' }}">
-                    <a href="{{ url_for('notification.list_notifications') }}" class="adw-link-overlay"></a>
-                    <span class="adw-action-row-icon icon-objects-alarm-symbolic"></span>
-                    <span class="adw-action-row-title">Notifications</span>
-                    {% if unread_notifications_count > 0 %}
-                        <span class="adw-badge suggested-action" title="{{ unread_notifications_count }} unread notifications">{{ unread_notifications_count }}</span>
-                    {% endif %}
-                </div>
-                <div class="adw-action-row activatable {{ 'selected' if request.endpoint == 'post.create_post' }}">
-                    <a href="{{ url_for('post.create_post') }}" class="adw-link-overlay"></a>
-                    <span class="adw-action-row-icon icon-actions-document-new-symbolic"></span>
-                    <span class="adw-action-row-title">New Post</span>
-                </div>
-                <div class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.dashboard' }}">
-                    <a href="{{ url_for('general.dashboard') }}" class="adw-link-overlay"></a>
-                    <span class="adw-action-row-icon icon-apps-dashboard-symbolic"></span> {# Or a more generic icon #}
-                    <span class="adw-action-row-title">Dashboard</span>
-                </div>
-            {% endif %}
-            {% endblock sidebar_nav %}
+            </div>
         </div>
         {# "More" section with About/Contact removed from sidebar #}
     </aside>
