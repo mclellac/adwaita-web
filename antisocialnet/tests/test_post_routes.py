@@ -369,11 +369,11 @@ def test_like_already_liked_item_route_for_comment(client, app, db, create_test_
     db.session.refresh(test_comment)
     initial_like_count = test_comment.like_count
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = LikeForm()
         token = form.csrf_token.current_token
         url = url_for('like.like_item_route', target_type='comment', target_id=test_comment.id)
-    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
+        response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
 
     assert response.status_code == 200
     assert b'You have already liked this item.' in response.data
@@ -389,11 +389,11 @@ def test_unlike_not_liked_item_route_for_comment(client, app, db, create_test_us
     db.session.commit()
     initial_like_count = test_comment.like_count # Should be 0
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = UnlikeForm()
         token = form.csrf_token.current_token
         url = url_for('like.unlike_item_route', target_type='comment', target_id=test_comment.id)
-    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
+        response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
 
     assert response.status_code == 200
     assert b'You have not liked this item yet.' in response.data
@@ -429,11 +429,11 @@ def test_create_comment_successful(client, app, logged_in_client, create_test_po
     initial_comment_count = Comment.query.filter_by(post_id=post_id).count()
     initial_activity_count = Activity.query.filter_by(user_id=user.id, type='commented_on_post').count()
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = CommentForm(); token = form.csrf_token.current_token
         url = url_for('post.view_post', post_id=post_id)
 
-    comment_text = "This is a new comment."
+        comment_text = "This is a new comment."
     form_data = {'text': comment_text, 'csrf_token': token}
 
     response = logged_in_client.post(url, data=form_data, follow_redirects=True)
@@ -462,11 +462,11 @@ def test_create_comment_reply_successful(client, app, logged_in_client, create_t
 
     replying_user = User.query.filter_by(username="login_fixture_user@example.com").first()
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = CommentForm(); token = form.csrf_token.current_token
         url = url_for('post.view_post', post_id=test_post.id)
 
-    reply_text = "This is a reply."
+        reply_text = "This is a reply."
     form_data = {'text': reply_text, 'parent_id': parent_comment_id, 'csrf_token': token}
 
     response = logged_in_client.post(url, data=form_data, follow_redirects=True)
@@ -493,11 +493,11 @@ def test_create_comment_unauthenticated(client, create_test_post):
 def test_create_comment_empty_text_validation(client, app, logged_in_client, create_test_post):
     """Test comment creation with empty text."""
     test_post = create_test_post(content="Post for empty comment test.")
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = CommentForm(); token = form.csrf_token.current_token
         url = url_for('post.view_post', post_id=test_post.id)
 
-    form_data = {'text': '', 'csrf_token': token}
+        form_data = {'text': '', 'csrf_token': token}
     response = logged_in_client.post(url, data=form_data, follow_redirects=True)
     assert response.status_code == 200 # Stays on post view page
     assert b"This field is required." in response.data # From CommentForm validator
@@ -536,11 +536,11 @@ def test_delete_comment_author_self(client, app, logged_in_client, create_test_p
     comment_id = comment_to_delete.id
     assert Comment.query.get(comment_id) is not None
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = DeleteCommentForm(); token = form.csrf_token.current_token
         url = url_for('post.delete_comment', comment_id=comment_id)
 
-    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
+        response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Comment deleted.' in response.data
     assert Comment.query.get(comment_id) is None
@@ -557,11 +557,11 @@ def test_delete_comment_post_author_deletes_other(client, app, logged_in_client,
     comment_id = comment_to_delete.id
     assert Comment.query.get(comment_id) is not None
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = DeleteCommentForm(); token = form.csrf_token.current_token
         url = url_for('post.delete_comment', comment_id=comment_id)
 
-    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
+        response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Comment deleted.' in response.data
     assert Comment.query.get(comment_id) is None
@@ -583,20 +583,20 @@ def test_delete_comment_admin_deletes_any(client, app, db, create_test_user, cre
     csrf_delete_token = None
 
     # Login admin
-    with client.application.app_context(): # Context for login CSRF
+    with client.application.test_request_context(): # Context for login CSRF
         from antisocialnet.forms import LoginForm # Ensure LoginForm is imported if not already
         login_form = LoginForm()
         csrf_login_token = login_form.csrf_token.current_token
         login_url_val = url_for('auth.login')
-    client.post(login_url_val, data={'username': admin.email, 'password': 'password', 'csrf_token': csrf_login_token})
+        client.post(login_url_val, data={'username': admin.email, 'password': 'password', 'csrf_token': csrf_login_token})
 
     # Perform action as admin
-    with client.application.app_context(): # Context for action CSRF, using the logged-in client's context
+    with client.application.test_request_context(): # Context for action CSRF, using the logged-in client's context
         # DeleteCommentForm is already imported at the top of the file
         delete_form = DeleteCommentForm()
         csrf_delete_token = delete_form.csrf_token.current_token
         delete_url_val = url_for('post.delete_comment', comment_id=comment_id)
-    response = client.post(delete_url_val, data={'csrf_token': csrf_delete_token}, follow_redirects=True)
+        response = client.post(delete_url_val, data={'csrf_token': csrf_delete_token}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Comment deleted.' in response.data
     assert Comment.query.get(comment_id) is None
@@ -614,10 +614,10 @@ def test_delete_comment_unauthorized(client, app, logged_in_client, create_test_
     # logged_in_client is 'login_fixture_user@example.com', who is none of the above.
     assert User.query.filter_by(username="login_fixture_user@example.com").first().id not in [post_owner.id, comment_owner.id]
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form=DeleteCommentForm(); token=form.csrf_token.current_token
         url = url_for('post.delete_comment', comment_id=comment_id)
-    response = logged_in_client.post(url, data={'csrf_token': token})
+        response = logged_in_client.post(url, data={'csrf_token': token})
     assert response.status_code == 403
     assert Comment.query.get(comment_id) is not None
 
@@ -653,10 +653,10 @@ def test_flag_comment_successful(client, app, logged_in_client, create_test_post
 
     initial_flag_count = CommentFlag.query.filter_by(comment_id=comment_id).count()
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form=FlagCommentForm(); token=form.csrf_token.current_token
         url = url_for('post.flag_comment', comment_id=comment_id)
-    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
+        response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
 
     assert response.status_code == 200
     assert b'Comment flagged for review.' in response.data
@@ -673,10 +673,10 @@ def test_flag_comment_own_comment_fails(client, app, logged_in_client, create_te
     db.session.add(own_comment); db.session.commit()
     comment_id = own_comment.id
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form=FlagCommentForm(); token=form.csrf_token.current_token
         url = url_for('post.flag_comment', comment_id=comment_id)
-    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
+        response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b"You cannot flag your own comment." in response.data
     assert CommentFlag.query.filter_by(comment_id=comment_id).count() == 0
@@ -694,10 +694,10 @@ def test_flag_comment_already_flagged_by_user(client, app, logged_in_client, cre
     db.session.add(existing_flag); db.session.commit()
     initial_flag_count = CommentFlag.query.filter_by(comment_id=comment_id).count() # Should be 1
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form=FlagCommentForm(); token=form.csrf_token.current_token
         url = url_for('post.flag_comment', comment_id=comment_id)
-    response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
+        response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b'You have already flagged this comment.' in response.data
     assert CommentFlag.query.filter_by(comment_id=comment_id).count() == initial_flag_count # Count should not change
@@ -855,16 +855,16 @@ def test_posts_by_category_pagination(client, app, db, create_test_user, create_
     # Check for the presence of the "go-next-symbolic" icon within an href link to page 2
     assert b'<adw-button icon-name="go-next-symbolic" href="' + expected_next_page_url_part.encode() + b'">' in response_p1.data
 
-        # Page 2
-        response_p2 = client.get(url_for('post.posts_by_category', category_slug=cat_paged.slug, page=2))
-        assert response_p2.status_code == 200
-        assert b"Paged Cat Post 2" in response_p2.data
-        assert b"Paged Cat Post 1" in response_p2.data
-        assert b"Paged Cat Post 3" not in response_p2.data
-        assert b"Previous" in response_p2.data
+    # Page 2
+    response_p2 = client.get(url_for('post.posts_by_category', category_slug=cat_paged.slug, page=2))
+    assert response_p2.status_code == 200
+    assert b"Paged Cat Post 2" in response_p2.data
+    assert b"Paged Cat Post 1" in response_p2.data
+    assert b"Paged Cat Post 3" not in response_p2.data
+    assert b"Previous" in response_p2.data
 
-        # Page beyond limit (empty)
-        response_p3 = client.get(url_for('post.posts_by_category', category_slug=cat_paged.slug, page=3))
+    # Page beyond limit (empty)
+    response_p3 = client.get(url_for('post.posts_by_category', category_slug=cat_paged.slug, page=3))
     assert response_p3.status_code == 200 # Should not be 404 for valid page number even if empty
     assert b"Paged Cat Post" not in response_p3.data # No posts
     # Check for "No posts found" or similar if template handles empty page after first.
@@ -899,10 +899,10 @@ def test_create_post_successful_simple(client, app, logged_in_client, db):
     initial_post_count = Post.query.count()
     initial_activity_count = Activity.query.filter_by(user_id=user.id, type='created_post').count()
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = PostForm()
         token = form.csrf_token.current_token
-        url = url_for('post.create_post')
+    url = url_for('post.create_post')
 
     post_content = "This is a simple test post."
     form_data = {
@@ -933,10 +933,10 @@ def test_create_post_successful_with_new_tags(client, app, logged_in_client, db)
     user = User.query.filter_by(username="login_fixture_user@example.com").first()
     initial_tag_count = db.session.query(db.func.count(Tag.id)).scalar() # Corrected to count Tag.id
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = PostForm()
         token = form.csrf_token.current_token
-        url = url_for('post.create_post')
+    url = url_for('post.create_post')
 
     post_content = "Post with new tags"
     tags_input = "  newtag1, another new tag, NewTag1  " # Test trimming and case
@@ -976,10 +976,10 @@ def test_create_post_successful_with_existing_and_new_tags(client, app, logged_i
 
     initial_tag_count_db = Tag.query.count()
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = PostForm()
         token = form.csrf_token.current_token
-        url = url_for('post.create_post')
+    url = url_for('post.create_post')
 
     post_content = "Post with mixed tags"
     tags_input = f"{existing_tag_name}, brandnewtag, {existing_tag_name.upper()}" # Test existing, new, and case-insensitivity for existing
@@ -1013,10 +1013,10 @@ def test_create_post_successful_with_categories(client, app, logged_in_client, d
     if not cat2: cat2 = Category(name="Travel"); db.session.add(cat2)
     db.session.commit()
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = PostForm() # For CSRF token
         token = form.csrf_token.current_token
-        url = url_for('post.create_post')
+    url = url_for('post.create_post')
 
     post_content = "Post with categories"
     form_data = {
@@ -1037,10 +1037,10 @@ def test_create_post_successful_with_categories(client, app, logged_in_client, d
 
 def test_create_post_content_missing_validation(client, app, logged_in_client):
     """Test form validation when post content is missing."""
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = PostForm()
         token = form.csrf_token.current_token
-        url = url_for('post.create_post')
+    url = url_for('post.create_post')
 
     form_data = {
         'content': '', # Empty content
@@ -1135,11 +1135,11 @@ def test_edit_post_admin_can_access(client, app, db, create_test_user, create_te
     csrf_login_token = None
 
     # Login admin
-    with client.application.app_context(): # Context for login CSRF
+    with client.application.test_request_context(): # Context for login CSRF
         from antisocialnet.forms import LoginForm # Ensure LoginForm is imported
         login_form = LoginForm()
         csrf_login_token = login_form.csrf_token.current_token
-        login_url_val = url_for('auth.login')
+    login_url_val = url_for('auth.login')
     client.post(login_url_val, data={
         'username': admin_user.username, # User model uses email as username
         'password': 'password',
@@ -1160,10 +1160,10 @@ def test_edit_post_successful_content_change(client, app, logged_in_client, crea
     test_post = create_test_post(author=user, content="Original content.")
     original_updated_at = test_post.updated_at
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = PostForm() # For CSRF
         token = form.csrf_token.current_token
-        url = url_for('post.edit_post', post_id=test_post.id)
+    url = url_for('post.edit_post', post_id=test_post.id)
 
     new_content = "Updated content here."
     form_data = {
@@ -1193,9 +1193,9 @@ def test_edit_post_successful_tags_change(client, app, logged_in_client, create_
     db.session.commit()
     assert "beforeedit" in [t.name for t in test_post.tags]
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = PostForm(); token = form.csrf_token.current_token
-        url = url_for('post.edit_post', post_id=test_post.id)
+    url = url_for('post.edit_post', post_id=test_post.id)
 
     new_tags_string = "afteredit, anothertag"
     form_data = {
@@ -1227,9 +1227,9 @@ def test_edit_post_successful_categories_change(client, app, logged_in_client, c
     db.session.commit()
     assert "CatBefore" in [c.name for c in test_post.categories]
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = PostForm(); token = form.csrf_token.current_token
-        url = url_for('post.edit_post', post_id=test_post.id)
+    url = url_for('post.edit_post', post_id=test_post.id)
 
     form_data = {
         'content': test_post.content,
@@ -1250,9 +1250,9 @@ def test_edit_post_empty_content_validation(client, app, logged_in_client, creat
     user = User.query.filter_by(username="login_fixture_user@example.com").first()
     test_post = create_test_post(author=user, content="Some content.")
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = PostForm(); token = form.csrf_token.current_token
-        url = url_for('post.edit_post', post_id=test_post.id)
+    url = url_for('post.edit_post', post_id=test_post.id)
 
     form_data = {'content': '', 'csrf_token': token}
     response = logged_in_client.post(url, data=form_data, follow_redirects=True)
@@ -1288,10 +1288,10 @@ def test_edit_post_nonexistent_post_get(client, logged_in_client):
 
 def test_edit_post_nonexistent_post_post(client, app, logged_in_client):
     """Test POST edit for a non-existent post."""
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from antisocialnet.forms import PostForm # Corrected import
         form = PostForm(); token = form.csrf_token.current_token
-        url = url_for('post.edit_post', post_id=99999)
+    url = url_for('post.edit_post', post_id=99999)
     form_data = {'content': 'some content', 'csrf_token': token}
     response = logged_in_client.post(url, data=form_data)
     assert response.status_code == 404
@@ -1306,9 +1306,9 @@ def test_delete_post_successful_author(client, app, logged_in_client, create_tes
     post_id = test_post.id
     assert Post.query.get(post_id) is not None
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         form = DeletePostForm(); token = form.csrf_token.current_token
-        url = url_for('post.delete_post', post_id=post_id)
+    url = url_for('post.delete_post', post_id=post_id)
 
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
@@ -1332,11 +1332,11 @@ def test_delete_post_successful_admin(client, app, db, create_test_user, create_
     csrf_delete_token = None
 
     # Login admin
-    with client.application.app_context(): # Context for login CSRF
+    with client.application.test_request_context(): # Context for login CSRF
         from antisocialnet.forms import LoginForm
         login_form = LoginForm()
         csrf_login_token = login_form.csrf_token.current_token
-        login_url_val = url_for('auth.login')
+    login_url_val = url_for('auth.login')
     login_response = client.post(login_url_val, data={
         'username': admin_user.username,
         'password': 'password',
@@ -1364,11 +1364,11 @@ def test_delete_post_unauthorized_user(client, app, logged_in_client, create_tes
 
     url_val = None
     token_val = None
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from antisocialnet.forms import DeletePostForm
         form = DeletePostForm()
         token_val = form.csrf_token.current_token
-        url_val = url_for('post.delete_post', post_id=post_id)
+    url_val = url_for('post.delete_post', post_id=post_id)
 
     response = logged_in_client.post(url_val, data={'csrf_token': token_val})
     assert response.status_code == 403 # Forbidden
@@ -1421,10 +1421,10 @@ def test_delete_post_csrf_invalid(client, app, logged_in_client, create_test_pos
 
 def test_delete_post_nonexistent_post(client, app, logged_in_client):
     """Test POST delete for a non-existent post."""
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from antisocialnet.forms import DeletePostForm # Ensure DeletePostForm is imported
         form = DeletePostForm(); token = form.csrf_token.current_token
-        url = url_for('post.delete_post', post_id=99999) # Define URL inside context
+    url = url_for('post.delete_post', post_id=99999) # Define URL inside context
     # This should result in a 404 because Post.query.get_or_404(post_id) is called first.
     response = logged_in_client.post(url, data={'csrf_token': token})
     assert response.status_code == 404
@@ -1487,11 +1487,11 @@ def test_delete_post_deletes_associated_data(client, app, logged_in_client, db, 
     # Now, delete the post
     delete_url_val = None
     token = None
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from antisocialnet.forms import DeletePostForm # Ensure DeletePostForm is imported
         form = DeletePostForm()
         token = form.csrf_token.current_token
-        delete_url_val = url_for('post.delete_post', post_id=post_id)
+    delete_url_val = url_for('post.delete_post', post_id=post_id)
 
     logged_in_client.post(delete_url_val, data={'csrf_token': token}, follow_redirects=True)
 
@@ -1517,12 +1517,12 @@ def test_unlike_post_csrf_invalid_token(client, app, db, create_test_post, logge
     valid_token_val = None
 
     # Like the post legitimately
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from antisocialnet.forms import LikeForm
         form = LikeForm()
         valid_token_val = form.csrf_token.current_token
-        like_url_val = url_for('post.like_post_route', post_id=test_post.id) # This endpoint seems to be old, like.like_item_route is the new one
-        unlike_url_val = url_for('post.unlike_post_route', post_id=test_post.id) # This endpoint seems to be old, like.unlike_item_route is the new one
+        like_url_val = url_for('like.like_item_route', target_type='post', target_id=test_post.id) # This endpoint seems to be old, like.like_item_route is the new one
+        unlike_url_val = url_for('like.unlike_item_route', target_type='post', target_id=test_post.id) # This endpoint seems to be old, like.unlike_item_route is the new one
 
     # Use logged_in_client to like, as it has the session
     logged_in_client.post(like_url_val, data={'csrf_token': valid_token_val}, follow_redirects=True)

@@ -41,7 +41,8 @@ def test_create_app_production_secret_key_warning(caplog):
             del os.environ['FLASK_SECRET_KEY']
 
         with caplog.at_level(logging.CRITICAL, logger='antisocialnet'):
-            fresh_app = create_app(config_name='production')
+            # Pass a config override to ensure the default secret key is used
+            fresh_app = create_app(config_name='production', yaml_config_override={'SECRET_KEY': 'a_default_very_secret_key_for_development_only_CHANGE_ME'})
 
         # Assuming the __init__.py logic for SECRET_KEY warning is correct and reachable
         found_warning = False

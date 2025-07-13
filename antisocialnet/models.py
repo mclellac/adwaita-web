@@ -43,7 +43,7 @@ class User(UserMixin, db.Model):
     comments = db.relationship('Comment', backref='author', lazy='dynamic') # Added from app.py's Comment.author relationship
     gallery_photos = db.relationship(
         'UserPhoto',
-        backref='user', # Changed from 'author' to 'user' to match UserPhoto.user relationship
+        back_populates='author',
         lazy='dynamic',
         cascade='all, delete-orphan',
         order_by=lambda: desc(UserPhoto.uploaded_at) # Use lambda for UserPhoto ref
@@ -299,7 +299,7 @@ class Comment(db.Model):
     replies = db.relationship(
         'Comment',
         backref=db.backref('parent', remote_side=[id]),
-        lazy='dynamic',
+        lazy='select',
         order_by=lambda: desc(Comment.created_at) # Sort replies newest first
     )
     # is_flagged_active property will be defined after CommentFlag model
@@ -323,6 +323,8 @@ class UserPhoto(db.Model):
     image_filename = db.Column(db.String(255), nullable=False)
     caption = db.Column(db.Text, nullable=True)
     uploaded_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    author = db.relationship('User', back_populates='gallery_photos')
+
 
     def __repr__(self):
         return f'<UserPhoto {self.image_filename} user_id={self.user_id}>'

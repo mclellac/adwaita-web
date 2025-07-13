@@ -143,11 +143,9 @@ class PhotoCommentForm(FlaskForm):
         'Comment',
         validators=[DataRequired(), Length(min=1, max=2000)]
     )
+    parent_id = HiddenField(validators=[Optional()])
     # photo_id and user_id will be handled by the route
     submit = SubmitField('Post Comment')
-
-    class Meta:
-        csrf = False # Disable CSRF for this API-specific form
 
 # Empty forms for CSRF-protected actions like Like/Unlike
 class LikeForm(FlaskForm):

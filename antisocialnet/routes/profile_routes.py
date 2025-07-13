@@ -359,7 +359,7 @@ def delete_gallery_photo(photo_id):
         db.session.rollback()
         current_app.logger.error(f"Error deleting gallery photo ID {photo_id}: {e}", exc_info=True)
         flash(f'Error deleting photo: {str(e)}', 'danger')
-    user_id_for_redirect = photo.user.id if photo.user else current_user.id
+    user_id_for_redirect = photo.author.id if photo.author else current_user.id
     return redirect(url_for('profile.view_profile', user_id=user_id_for_redirect)) # Use user_id
 
 
