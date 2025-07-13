@@ -28,7 +28,7 @@
 {% endmacro %}
 
 {# Macro to render a single comment and its replies recursively #}
-{% macro render_comment_with_replies(comment, post, delete_comment_form, current_user, form, is_reply=false) %}
+{% macro render_comment_with_replies(comment, post, delete_comment_form, flag_comment_form, current_user, form, is_reply=false) %}
 <div class="comment-item {% if is_reply %}comment-reply-item{% else %}comment-top-level-item{% endif %}"
      id="comment-{{ comment.id }}"
      {% if is_reply %}style="margin-left: 30px; margin-top: var(--spacing-s); padding-top: var(--spacing-s); border-top: 1px dashed var(--divider-color);"{% endif %}>
@@ -78,7 +78,7 @@
     {% if comment.replies | length > 0 %}
         <div class="comment-replies-container" style="margin-top: var(--spacing-s);">
             {% for reply_comment in comment.replies %}
-                {{ render_comment_with_replies(reply_comment, post, delete_comment_form, current_user, form, is_reply=true) }}
+                {{ render_comment_with_replies(reply_comment, post, delete_comment_form, flag_comment_form, current_user, form, is_reply=true) }}
             {% endfor %}
         </div>
     {% endif %}

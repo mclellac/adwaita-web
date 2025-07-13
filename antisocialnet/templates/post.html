@@ -117,7 +117,7 @@
             <div class="adw-list-box comments-list flat">
                 {% for comment in post.comments %} {# Iterates over top-level comments #}
                     <article class="adw-card comment-card" id="comment-card-for-{{ comment.id }}"> {# Each top-level comment is a card #}
-                        {{ render_comment_with_replies(comment, post, delete_comment_form, current_user, form, is_reply=false) }}
+                        {{ render_comment_with_replies(comment, post, delete_comment_form, flag_comment_form, current_user, form, is_reply=false) }}
                     </article>
                 {% endfor %}
             </div>

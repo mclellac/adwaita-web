@@ -115,6 +115,7 @@ class User(UserMixin, db.Model):
                 item_author = UserPhoto.query.get(target_id).author
 
             if item_author and item_author.id != self.id:
+                current_app.logger.info(f"Creating notification for like on {target_type} {target_id}")
                 notification = Notification(user_id=item_author.id, actor_id=self.id, type='new_like', target_type=target_type, target_id=target_id)
                 db.session.add(notification)
 
