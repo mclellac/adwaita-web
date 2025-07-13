@@ -8,25 +8,19 @@ import sys
 import argparse
 import getpass  # For hidden password input
 
-# Adjust sys.path to allow imports from the antisocialnet package
-# when running this script directly.
-# This adds the parent directory of the script's directory (antisocialnet) to sys.path,
-# which is the project root.
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 import importlib
-import yaml # For loading config from YAML file
+import yaml
 
-# Import create_app and necessary models/db instance
-# from the 'antisocialnet' package.
 app_module = importlib.import_module("antisocialnet")
 create_app = app_module.create_app
 db = app_module.db
 User = app_module.models.User
-SiteSetting = app_module.models.SiteSetting # Import SiteSetting
+SiteSetting = app_module.models.SiteSetting
 
 
 def create_or_update_user(flask_app, username, password, full_name, profile_info=None,
@@ -80,7 +74,6 @@ def create_or_update_user(flask_app, username, password, full_name, profile_info
                             print("Passwords do not match. Aborting password update.")
                             return False
                         existing_user.set_password(new_password)
-                        # Update other details as well
                         existing_user.full_name = full_name
                         if profile_info is not None:
                             existing_user.profile_info = profile_info
@@ -92,8 +85,6 @@ def create_or_update_user(flask_app, username, password, full_name, profile_info
                         return True
                     else:
                         print(f"Password for user '{username}' not updated interactively.")
-                        # Optionally update other details even if password isn't
-                        # For now, if password update is declined, we don't update other things.
                         return False
                 except EOFError:
                     print("Skipping interactive password update for existing user in non-interactive environment.")
@@ -111,7 +102,6 @@ def create_or_update_user(flask_app, username, password, full_name, profile_info
                 print(f"User '{username}' updated non-interactively.")
                 return True
         else:
-            # Create new user
             print(f"Creating new user: '{username}' with full name '{full_name}'.")
             new_user = User(
                 username=username,
@@ -126,15 +116,10 @@ def create_or_update_user(flask_app, username, password, full_name, profile_info
             db.session.commit()
             print(f"User '{username}' created successfully. Admin: {is_admin}, Approved: {is_approved}, Active: {is_active}.")
 
-            # Special handling for the very first admin user created non-interactively by CLI args
-            # to set initial site settings. This is a bit of a kludge.
-            # We assume if is_admin is True and interactive_password_update is False, it MIGHT be this case.
-            # A better way would be a specific flag or ensuring this only happens once.
             script_args = flask_app.config.get('SETUP_DB_SCRIPT_ARGS')
             is_cli_admin_creation = script_args and script_args.admin_user == username and not interactive_password_update
 
             if is_admin and is_cli_admin_creation:
-                 # Check if this is the only admin or first user to set defaults
                 if User.query.count() == 1 and User.query.filter_by(is_admin=True).count() == 1:
                     print(f"DEBUG: Setting initial site settings as '{username}' is the first admin user.")
                     SiteSetting.set('site_title', 'Adwaita Social Demo', 'string')
@@ -152,7 +137,6 @@ def delete_database_tables(flask_app, script_args):
     """
     is_non_interactive_delete = script_args.deletedb and script_args.admin_user and script_args.admin_pass
 
-    # Import text for raw SQL
     from sqlalchemy import text
 
     if is_non_interactive_delete:
@@ -160,19 +144,16 @@ def delete_database_tables(flask_app, script_args):
         with flask_app.app_context():
             print("Dropping all tables...")
             db.drop_all()
-            # db.create_all() # Tables will be recreated later by the main script logic
-            # No explicit commit needed for DDL usually, but good practice with session scope
             db.session.commit()
         print("All tables dropped non-interactively.")
         return True
-    elif script_args.deletedb: # Interactive deletion
+    elif script_args.deletedb:
         try:
             confirm = input("Are you sure you want to delete all database tables? This cannot be undone. (yes/no): ").lower()
             if confirm == 'yes':
                 print("Deleting all database tables...")
                 with flask_app.app_context():
                     db.drop_all()
-                    # db.create_all() # Tables will be recreated later
                     db.session.commit()
                 print("All tables deleted.")
                 return True
@@ -199,15 +180,9 @@ if __name__ == "__main__":
     )
     parser.add_argument('--admin-user', help='Set initial admin username non-interactively.')
     parser.add_argument('--admin-pass', help='Set initial admin password non-interactively.')
-    # --admin-bio is less relevant now full_name is mandatory. Let's use admin-user for full_name if not specified.
-    # For more control, a dedicated --admin-fullname could be added.
-    # For now, will default full_name to admin_user for non-interactive.
     parser.add_argument('--admin-fullname', help='Set initial admin display name (full_name) non-interactively (optional, defaults to admin-user).')
     parser.add_argument('--admin-bio', help='Set initial admin bio non-interactively (optional).')
     parser.add_argument('--config', help='Path to a YAML configuration file to override default settings.')
-
-    # --skiptables is implicitly handled: if --deletedb is not followed by explicit creation, tables remain deleted.
-    # The create_all() call below will ensure tables are present unless deleted and not recreated.
 
     args = parser.parse_args()
 
@@ -225,15 +200,12 @@ if __name__ == "__main__":
                 loaded_yaml_config = yaml.safe_load(f)
             if loaded_yaml_config:
                 print(f"Successfully loaded configuration from {args.config} for pre-app override.")
-                # Debug: Print loaded YAML for verification
-                # for key, value in loaded_yaml_config.items():
-                #     print(f"DEBUG YAML Load: {key.upper()} = {value}")
             else:
                 print(f"Warning: Config file {args.config} is empty or not valid YAML. No overrides will be passed to create_app.")
-                loaded_yaml_config = None # Ensure it's None if empty
+                loaded_yaml_config = None
         except FileNotFoundError:
             print(f"Error: Config file {args.config} not found. Cannot pass overrides to create_app.")
-            loaded_yaml_config = None # Ensure it's None if not found
+            loaded_yaml_config = None
         except yaml.YAMLError as e:
             print(f"Error parsing YAML config file {args.config}: {e}. Cannot pass overrides to create_app.")
             loaded_yaml_config = None
@@ -241,14 +213,11 @@ if __name__ == "__main__":
             print(f"An unexpected error occurred while loading config from {args.config}: {e}. Cannot pass overrides to create_app.")
             loaded_yaml_config = None
 
-    # Instantiate the app using the factory, passing the loaded YAML config
     print("DEBUG: About to call create_app()")
     app = create_app(yaml_config_override=loaded_yaml_config)
     print("DEBUG: create_app() returned")
 
-    # The YAML config is now applied within create_app, so the manual override loop below is no longer needed.
-    # However, we still want to store the script arguments.
-    app.config['SETUP_DB_SCRIPT_ARGS'] = args # Pass script args to app config
+    app.config['SETUP_DB_SCRIPT_ARGS'] = args
     print(f"DEBUG: Script args set in app.config: {args}")
 
     if args.deletedb:
@@ -257,9 +226,6 @@ if __name__ == "__main__":
         print("DEBUG: delete_database_tables() returned")
 
 
-    # Always ensure tables exist by this point, creating them if necessary.
-    # This will create tables if they don't exist, or do nothing if they do.
-    # If --deletedb was used and tables were dropped, this will recreate them.
     print("DEBUG: About to enter app_context for db.create_all()")
     with app.app_context():
         print("DEBUG: Entered app_context. Calling db.create_all()...")
@@ -267,9 +233,6 @@ if __name__ == "__main__":
         print("DEBUG: db.create_all() returned.")
     print("DEBUG: Exited app_context for db.create_all()")
 
-    # Initialize default site settings if they don't exist
-    # This is done here so that if the first admin user is created via YAML,
-    # these settings are already in place.
     with app.app_context():
         print("DEBUG: Checking/Initializing default site settings (if not set by first admin creation)...")
         if SiteSetting.query.filter_by(key='site_title').first() is None:
@@ -281,7 +244,6 @@ if __name__ == "__main__":
         if SiteSetting.query.filter_by(key='allow_registrations').first() is None:
             SiteSetting.set('allow_registrations', True, 'bool')
             print("DEBUG: Default 'allow_registrations' set to True as it was missing.")
-        # db.session.commit() # SiteSetting.set commits itself
 
     users_processed_from_yaml = False
     if not args.skipuser:
@@ -292,9 +254,8 @@ if __name__ == "__main__":
                 username = user_data.get('username')
                 password = user_data.get('password')
                 full_name = user_data.get('full_name')
-                profile_info = user_data.get('bio') # Match example: bio
+                profile_info = user_data.get('bio')
                 is_admin = user_data.get('is_admin', False)
-                # Default is_approved and is_active to True for YAML users, allow override
                 is_approved = user_data.get('is_approved', True)
                 is_active = user_data.get('is_active', True)
 
@@ -312,15 +273,14 @@ if __name__ == "__main__":
                     is_admin=is_admin,
                     is_approved=is_approved,
                     is_active=is_active,
-                    update_if_exists=True, # Default to update if user exists
-                    interactive_password_update=False # Never interactive for YAML users
+                    update_if_exists=True,
+                    interactive_password_update=False
                 )
             users_processed_from_yaml = True
             print("Finished processing users from YAML configuration.")
         else:
             print("DEBUG: No 'USERS' list found in app.config or list is empty.")
 
-        # Fallback to CLI args or interactive mode if not skipped and not processed from YAML
         if not users_processed_from_yaml:
             if args.admin_user and args.admin_pass:
                 print(f"\nCreating/updating admin user '{args.admin_user}' from command-line arguments...")
@@ -330,14 +290,13 @@ if __name__ == "__main__":
                     password=args.admin_pass,
                     full_name=args.admin_fullname if args.admin_fullname else args.admin_user,
                     profile_info=args.admin_bio,
-                    is_admin=True, # CLI admin is always admin
+                    is_admin=True,
                     is_approved=True,
                     is_active=True,
                     update_if_exists=True,
-                    interactive_password_update=False # Non-interactive for CLI args
+                    interactive_password_update=False
                 )
             else:
-                # Interactive mode for a single admin user
                 print("\nStarting interactive initial user setup...")
                 default_username = "admin"
                 try:

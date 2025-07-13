@@ -25,24 +25,22 @@ def register():
 
     form = RegistrationForm(request.form)
     if request.method == 'POST':
-        # Email is core to registration, so logging it here is acceptable for tracking attempts.
         current_app.logger.debug(f"Registration form submitted. Email: '{form.email.data}' for Full Name: '{form.full_name.data}'")
 
     if form.validate_on_submit():
         existing_user = User.query.filter_by(username=form.email.data).first()
         if existing_user:
-            # Log email as it's key to identifying the conflict.
             current_app.logger.warning(f"Registration attempt with existing email: '{form.email.data}'.")
             flash('An account with this email address already exists. Please log in or use a different email.', 'danger')
-            return render_template('register.html', form=form) # Show form again with error
+            return render_template('register.html', form=form)
 
         try:
             new_user = User(
                 username=form.email.data,
-                full_name=form.full_name.data, # Added full_name
+                full_name=form.full_name.data,
                 is_approved=False,
                 is_active=False,
-                is_admin=False # Explicitly false for new registrations
+                is_admin=False
             )
             new_user.set_password(form.password.data)
             db.session.add(new_user)
@@ -52,15 +50,11 @@ def register():
             return redirect(url_for('auth.login'))
         except Exception as e:
             db.session.rollback()
-            # Log email as it's part of the failed registration attempt context.
             current_app.logger.error(f"Error during new user registration for email '{form.email.data}': {e}", exc_info=True)
             flash('An unexpected error occurred during registration. Please try again later.', 'danger')
-            # It's important to render the template again here, not redirect,
-            # so the user doesn't lose their input if it was a transient error.
             return render_template('register.html', form=form)
 
-    elif request.method == 'POST': # Catches validation failures on POST
-        # Log email as it's part of the failed form submission context.
+    elif request.method == 'POST':
         current_app.logger.warning(f"Registration form validation failed for email: '{form.email.data}'. Errors: {form.errors}")
         flash_form_errors_util(form)
 
@@ -76,62 +70,45 @@ def login():
 
     form = LoginForm(request.form)
     if request.method == 'POST':
-        # Username (email) is key for login attempt, so logging it is acceptable.
         current_app.logger.debug(f"Login form submitted. Username/Email: '{form.username.data}'")
 
-    if form.validate_on_submit(): # validate_on_submit checks method and validates
+    if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data):
             if not user.is_active:
-                # Log email as it's relevant to a specific account status issue.
                 current_app.logger.warning(f"Login attempt by inactive user: '{user.username}' (ID: {user.id}).")
                 flash('Your account is not active. Please contact an administrator.', 'danger')
-                return redirect(url_for('auth.login')) # Stay on login page
+                return redirect(url_for('auth.login'))
             elif not user.is_approved:
-                # Log email as it's relevant to a specific account status issue.
                 current_app.logger.warning(f"Login attempt by unapproved user: '{user.username}' (ID: {user.id}).")
                 flash('Your account is pending admin approval.', 'danger')
-                return redirect(url_for('auth.login')) # Stay on login page
-            else: # User is active and approved
+                return redirect(url_for('auth.login'))
+            else:
                 login_user(user)
                 current_app.logger.info(f"User '{user.full_name}' (ID: {user.id}, Username/Email: {user.username}) logged in successfully.")
                 current_app.logger.debug(f"Session after login for user '{user.full_name}' (ID: {user.id}): {dict(session)}")
-                flash('Logged in successfully.', 'toast_success') # Flash success only on actual login
+                flash('Logged in successfully.', 'toast_success')
 
-            # This block should only be reached if login_user() was called.
-            # The redirects for inactive/unapproved users prevent reaching here.
             next_page = request.args.get('next')
-            # More robust security check for next_page
             if next_page:
                 from urllib.parse import urlsplit
                 url_next = urlsplit(next_page)
-                # Allow only relative paths or paths on the same host
                 if url_next.netloc and url_next.netloc != request.host:
                     current_app.logger.warning(f"Invalid next URL (external redirect attempt): {next_page}")
                     next_page = None
-                elif not url_next.path.startswith(request.script_root + '/'): # Check if path is within app
-                    # This check might be too strict if script_root is involved in complex ways,
-                    # but generally ensures it's an app path.
-                    # A simpler check is if it starts with '/' (relative to host)
+                elif not url_next.path.startswith(request.script_root + '/'):
                     if not url_next.path.startswith('/'):
                          current_app.logger.warning(f"Potentially unsafe next URL path: {next_page}")
-                         next_page = None # Or just ensure it's a path within the app
+                         next_page = None
 
             current_app.logger.debug(f"Login next page: '{next_page}', redirecting for user '{user.full_name}' (ID: {user.id}).")
             return redirect(next_page or url_for('general.index'))
         else:
-            # Log email as it's part of the failed login attempt.
             current_app.logger.warning(f"Invalid login attempt for username/email: '{form.username.data}'. User exists: {user is not None}.")
             flash('Invalid username or password.', 'danger')
-    elif request.method == 'POST': # Catches validation failures on POST
-        # Log email as it's part of the failed form submission.
+    elif request.method == 'POST':
         current_app.logger.warning(f"Login form validation failed for username/email: '{form.username.data}'. Errors: {form.errors}")
         flash_form_errors_util(form)
-        # The original code had an additional flash if form.errors was empty,
-        # but validate_on_submit failing usually means form.errors is populated.
-        # If it's truly empty and validation failed, WTForms might have an issue,
-        # or it's a CSRF failure which flask-wtf handles by aborting (default) or custom error.
-        # For now, relying on flash_form_errors_util.
 
     current_app.logger.debug(f"Rendering login template for {request.path}")
     return render_template('login.html', form=form)
@@ -141,7 +118,6 @@ def login():
 def logout():
     user_full_name_before_logout = current_user.full_name
     user_id_before_logout = current_user.id
-    # Storing username (email) for auth-specific log context is fine.
     username_email_before_logout = current_user.username
     current_app.logger.debug(f"Accessing /auth/logout, User: '{user_full_name_before_logout}' (ID: {user_id_before_logout}, Username/Email: {username_email_before_logout})")
 
@@ -149,11 +125,11 @@ def logout():
 
     current_app.logger.info(f"User '{user_full_name_before_logout}' (ID: {user_id_before_logout}, Username/Email: {username_email_before_logout}) logged out successfully.")
     current_app.logger.debug(f"Session after logout: {dict(session)}")
-    flash('Logged out successfully.', 'toast_success') # Changed to toast_success
+    flash('Logged out successfully.', 'toast_success')
     return redirect(url_for('general.index'))
 
 
-@auth_bp.route('/change-password', methods=['GET', 'POST']) # Removed /settings prefix, part of /auth now
+@auth_bp.route('/change-password', methods=['GET', 'POST'])
 @login_required
 def change_password_page():
     current_app.logger.debug(f"Accessing /auth/change-password, Method: {request.method}, User: '{current_user.full_name}' (ID: {current_user.id})")
@@ -166,11 +142,10 @@ def change_password_page():
         if current_user.check_password(form.current_password.data):
             try:
                 current_user.set_password(form.new_password.data)
-                db.session.add(current_user) # Add to session before commit if changed
+                db.session.add(current_user)
                 db.session.commit()
                 current_app.logger.info(f"Password changed for user '{current_user.full_name}' (ID: {current_user.id}).")
                 flash('Your password has been updated successfully!', 'toast_success')
-                # Redirect to a general settings page or profile page
                 return redirect(url_for('general.settings_page'))
             except Exception as e:
                 db.session.rollback()
@@ -179,7 +154,7 @@ def change_password_page():
         else:
             current_app.logger.warning(f"Invalid current password by user '{current_user.full_name}' (ID: {current_user.id}) during password change.")
             flash('Invalid current password.', 'danger')
-    elif request.method == 'POST': # Catches validation failures on POST
+    elif request.method == 'POST':
         current_app.logger.warning(f"Change password form validation failed for user '{current_user.full_name}' (ID: {current_user.id}). Errors: {form.errors}")
         flash_form_errors_util(form)
 
@@ -193,8 +168,7 @@ def reset_password_request():
         return redirect(url_for('general.index'))
     form = RequestPasswordResetForm()
     if form.validate_on_submit():
-        # Email is intrinsic to password reset functionality. Logging it here is acceptable.
-        user = User.query.filter_by(username=form.email.data).first() # Query by username (which is email)
+        user = User.query.filter_by(username=form.email.data).first()
         if user:
             try:
                 send_password_reset_email(user)
@@ -204,7 +178,6 @@ def reset_password_request():
                 current_app.logger.error(f"Failed to send password reset email for {form.email.data} (User ID: {user.id if user else 'N/A'}): {e}", exc_info=True)
                 flash('Sorry, there was an error sending the password reset email. Please try again later.', 'danger')
         else:
-            # Don't reveal if email exists or not for security, same message.
             current_app.logger.info(f"Password reset request for non-existent or unconfirmed email: {form.email.data}.")
             flash('An email has been sent with instructions to reset your password.', 'info')
         return redirect(url_for('auth.login'))
@@ -232,8 +205,6 @@ def reset_password_with_token(token):
             db.session.commit()
             current_app.logger.info(f"Password has been reset for user '{user.full_name}' (ID: {user.id}, Email: {user.username}).")
             flash('Your password has been reset successfully! You can now log in.', 'success')
-            # Optional: Log the user in automatically
-            # login_user(user)
             return redirect(url_for('auth.login'))
         except Exception as e:
             db.session.rollback()

@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from sqlalchemy import or_ # For search query
 from sqlalchemy.orm import selectinload # Added for eager loading
 
-from ..models import Post, User, SiteSetting # User for current_user context if needed, Post for queries, SiteSetting for admin
-from ..forms import DeletePostForm, SiteSettingsForm # For dashboard delete buttons, SiteSettingsForm for admin
+from ..models import Post, User, SiteSetting, Repost
+from ..forms import DeletePostForm, SiteSettingsForm
 from .. import db
 
 general_bp = Blueprint('general', __name__) # template_folder defaults to app's
@@ -18,7 +18,6 @@ def index():
         current_app.logger.info(f"User {current_user.username} is authenticated, redirecting to activity feed.")
         return redirect(url_for('general.activity_feed'))
 
-    # For anonymous users, show the public posts page
     current_app.logger.info(f"Anonymous user accessing index page, showing public posts.")
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 10)
@@ -42,14 +41,11 @@ def index():
 @login_required
 def dashboard():
     current_app.logger.debug(f"Accessing dashboard, User: {current_user.username}")
-    # Fetch all posts by the current user (published and drafts)
-    # Eager load categories and tags as they might be displayed in the dashboard template
     user_posts_query = Post.query.filter_by(user_id=current_user.id)\
                                  .options(selectinload(Post.categories), selectinload(Post.tags))\
                                  .order_by(Post.updated_at.desc())
-    user_posts = user_posts_query.all() # .all() is used here, pagination might be better if list is long
+    user_posts = user_posts_query.all()
 
-    # Create delete forms for each post
     delete_forms = {
         post.id: DeletePostForm(prefix=f"del-post-{post.id}-") for post in user_posts
     }
@@ -62,13 +58,7 @@ def settings_page():
     current_app.logger.debug(f"Displaying settings page for user {current_user.username}.")
     site_settings_form = None
     if current_user.is_admin:
-        # Instantiate the form. Population for GET will happen here.
-        # The form submission will still go to admin.site_settings endpoint.
         site_settings_form = SiteSettingsForm()
-        # Populate for GET request. If it's a POST request that failed validation on admin.site_settings
-        # and redirected here, the form object might already have data.
-        # However, admin.site_settings redirects to itself on successful POST or renders its own template on GET/failed POST.
-        # So, this route will always be a GET for the site_settings_form part.
         site_settings_form.site_title.data = SiteSetting.get('site_title', current_app.config.get('SITE_TITLE', 'Adwaita Social Demo'))
         site_settings_form.posts_per_page.data = str(SiteSetting.get('posts_per_page', current_app.config.get('POSTS_PER_PAGE', 10)))
         site_settings_form.allow_registrations.data = SiteSetting.get('allow_registrations', False)
@@ -91,7 +81,6 @@ def search_results():
     if query_param:
         search_term = f"%{query_param}%"
         try:
-            # Post search
             posts_query = Post.query.filter(
                 Post.is_published==True,
                 Post.content.ilike(search_term)
@@ -101,7 +90,6 @@ def search_results():
             posts_results = posts_pagination.items
             current_app.logger.debug(f"Search for '{query_param}' found {len(posts_results)} posts on page {page}. Total: {posts_pagination.total}")
 
-            # User search (excluding current user if logged in)
             user_query_base = User.query.filter(
                 or_(
                     User.username.ilike(search_term),
@@ -147,44 +135,69 @@ def robots_txt():
 def favicon():
     return current_app.send_static_file('favicon.ico')
 
-@general_bp.route('/feed') # This is the "Home" page for logged-in users
+@general_bp.route('/feed')
 @login_required
-def activity_feed(): # Rename to home_feed or similar if preferred, but endpoint name stays for now
-    current_app.logger.info(f"Accessing main feed (posts) for user {current_user.username}.")
+def activity_feed():
+    current_app.logger.info(f"Accessing main feed (posts and reposts) for user {current_user.username}.")
     page = request.args.get('page', 1, type=int)
-    per_page = current_app.config.get('POSTS_PER_PAGE', 10) # Use POSTS_PER_PAGE
-
-    posts_list, pagination = [], None
-
-    # For the main feed, show posts from users the current user is following, plus their own posts.
-    # Alternatively, show all public posts if that's the desired global feed behavior.
-    # For now, let's implement a feed of all public posts, similar to the anonymous index.
-    # A more advanced feed would involve `followed_users_posts`.
+    per_page = current_app.config.get('POSTS_PER_PAGE', 10)
 
     try:
-        # Fetch all published posts, newest first.
-        posts_query = Post.query.filter(Post.is_published == True)\
-                                .options(selectinload(Post.categories), selectinload(Post.tags), selectinload(Post.author))\
-                                .order_by(Post.published_at.desc(), Post.created_at.desc())
+        # Get IDs of users the current user is following
+        followed_user_ids = [user.id for user in current_user.followed]
 
-        pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
-        posts_list = pagination.items
-        current_app.logger.debug(f"Found {len(posts_list)} posts for main feed page {page}. Total: {pagination.total}")
+        # Include current user's own ID for their posts and reposts
+        relevant_user_ids = followed_user_ids + [current_user.id]
+
+        # Union of posts and reposts
+        posts_query = db.session.query(
+            Post.id.label('id'),
+            Post.user_id.label('user_id'),
+            Post.published_at.label('timestamp'),
+            db.literal('post').label('type')
+        ).filter(
+            Post.user_id.in_(relevant_user_ids),
+            Post.is_published == True
+        )
+
+        reposts_query = db.session.query(
+            Repost.id.label('id'),
+            Repost.user_id.label('user_id'),
+            Repost.timestamp.label('timestamp'),
+            db.literal('repost').label('type')
+        ).filter(
+            Repost.user_id.in_(relevant_user_ids)
+        )
+
+        feed_query = posts_query.union_all(reposts_query).order_by(db.desc('timestamp'))
+
+        pagination = feed_query.paginate(page=page, per_page=per_page, error_out=False)
+
+        feed_items_paginated = pagination.items
+
+        # Now fetch the full objects
+        post_ids = [item.id for item in feed_items_paginated if item.type == 'post']
+        repost_ids = [item.id for item in feed_items_paginated if item.type == 'repost']
+
+        posts = Post.query.filter(Post.id.in_(post_ids)).all() if post_ids else []
+        reposts = Repost.query.filter(Repost.id.in_(repost_ids)).all() if repost_ids else []
+
+        # Combine and sort again to maintain order
+        feed_items = sorted(
+            posts + reposts,
+            key=lambda x: x.published_at if isinstance(x, Post) else x.timestamp,
+            reverse=True
+        )
+
     except Exception as e:
-        current_app.logger.error(f"Error fetching posts for main feed for user {current_user.username}: {e}", exc_info=True)
+        current_app.logger.error(f"Error fetching feed for user {current_user.username}: {e}", exc_info=True)
         flash("Error loading the feed. Please try again later.", "danger")
-        # posts_list and pagination will remain empty or None
+        feed_items = []
+        pagination = None
 
-    # The template 'feed.html' will need to be adjusted to render posts instead of activities.
-    # Or, we can point to 'index.html' if it's suitable for rendering a list of posts with pagination.
-    # Let's assume 'feed.html' will be adapted.
-    # csrf_token() is globally available in templates if CSRFProtect is setup, no need to pass it explicitly as a string.
-    return render_template('feed.html', posts=posts_list, pagination=pagination, current_user=current_user)
+    return render_template('feed.html', feed_items=feed_items, pagination=pagination, current_user=current_user)
 
 
-# The '/users/find' route is now removed as search is unified.
-
-# API routes for theme/accent settings
 @general_bp.route('/api/settings/theme', methods=['POST'])
 @login_required
 def save_theme_preference():

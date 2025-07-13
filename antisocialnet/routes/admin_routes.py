@@ -118,7 +118,6 @@ def pending_users():
     per_page = current_app.config.get('ADMIN_USERS_PER_PAGE', 15)
     users_query = User.query.filter_by(is_approved=False, is_active=False)\
                             .order_by(User.id.asc())
-    # Log the count *before* pagination
     current_app.logger.debug(f"Total pending users found by query: {users_query.count()}")
     user_pagination = users_query.paginate(page=page, per_page=per_page, error_out=False)
     pending_users_list = user_pagination.items

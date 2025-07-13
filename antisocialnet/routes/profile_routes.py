@@ -36,9 +36,8 @@ def view_profile(user_id): # Changed to use user_id
         Aborts with 404 if user not found, or 403 if profile is private and
         accessed by an unauthorized user.
     """
-    # Ensure datetime is available; moved back to top-level import.
     current_app.logger.debug(f"Accessing profile for user_id {user_id}, requested by User ID: {current_user.id}")
-    user_profile = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
+    user_profile = User.query.get_or_404(user_id)
     current_app.logger.debug(f"Displaying profile for User ID: {user_profile.id} (Username: {user_profile.username}).")
 
     calculated_age = None
@@ -55,24 +54,19 @@ def view_profile(user_id): # Changed to use user_id
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 10)
 
-    # Base query for posts by the user_profile
     posts_query_base = Post.query.filter_by(user_id=user_profile.id)\
                                .options(selectinload(Post.categories), selectinload(Post.tags))
-                               # Author is user_profile, so no need to load Post.author explicitly here
 
     if current_user == user_profile:
         current_app.logger.debug(f"Fetching all posts for own profile User ID: {user_profile.id}, page {page}.")
-        # For own profile, show all posts (published and drafts), ordered by most recently updated
         posts_query = posts_query_base.order_by(Post.updated_at.desc())
     else:
         current_app.logger.debug(f"Fetching published posts for profile User ID: {user_profile.id}, page {page}.")
-        # For other profiles, only show published posts, ordered by published date
         posts_query = posts_query_base.filter_by(is_published=True)\
                                       .order_by(Post.published_at.desc(), Post.created_at.desc())
 
     try:
         posts_pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
-        # posts_pagination.items will have posts with categories and tags preloaded
         current_app.logger.debug(f"Found {len(posts_pagination.items)} posts for User ID: {user_profile.id}, page {page} (total: {posts_pagination.total}).")
     except Exception as e:
         current_app.logger.error(f"Error fetching posts for profile User ID: {user_profile.id}: {e}", exc_info=True)
@@ -80,13 +74,12 @@ def view_profile(user_id): # Changed to use user_id
         posts_pagination = None
 
     comments_page = request.args.get('comments_page', 1, type=int)
-    comments_per_page = 5 # Consider making this configurable
+    comments_per_page = 5
     comments_query = Comment.query.filter_by(user_id=user_profile.id)\
                                   .options(selectinload(Comment.post).selectinload(Post.author))\
                                   .order_by(Comment.created_at.desc())
     try:
         comments_pagination = comments_query.paginate(page=comments_page, per_page=comments_per_page, error_out=False)
-        # comments_pagination.items will have comments with .post and .post.author preloaded
         current_app.logger.debug(f"Found {len(comments_pagination.items)} comments by User ID: {user_profile.id} for comments_page {comments_page} (total: {comments_pagination.total}).")
     except Exception as e:
         current_app.logger.error(f"Error fetching comments for profile User ID: {user_profile.id}: {e}", exc_info=True)
@@ -158,7 +151,7 @@ def edit_profile():
 
         file = form.profile_photo.data
         photo_file = form.profile_photo.data
-        photo_updated_or_attempted = False # Flag to know if we should adjust flash message
+        photo_updated_or_attempted = False
 
         if photo_file and photo_file.filename:
             photo_updated_or_attempted = True
@@ -180,19 +173,15 @@ def edit_profile():
                     }
                     if not (crop_params['width'] > 0 and crop_params['height'] > 0):
                         flash("Invalid crop dimensions. Photo processed without custom cropping.", 'warning')
-                        crop_params = None # Reset if invalid
+                        crop_params = None
                 except ValueError:
                     flash("Invalid crop coordinate values. Photo processed without custom cropping.", 'warning')
                     crop_params = None
-            # photo_updated_or_attempted = bool(photo_file and photo_file.filename) # Moved definition earlier
-            # new_photo_db_path = None # Initialize to None
-
-            # Corrected structure:
             photo_upload_attempted = bool(photo_file and photo_file.filename)
             new_photo_db_path = None
 
             if photo_upload_attempted:
-                current_app.logger.debug(f"Profile photo update attempt by User ID: {current_user.id}. Filename: {photo_file.filename}") # Repeated log
+                current_app.logger.debug(f"Profile photo update attempt by User ID: {current_user.id}. Filename: {photo_file.filename}")
 
                 crop_params = None
                 crop_x_str = request.form.get('crop_x')
@@ -215,7 +204,7 @@ def edit_profile():
                         flash("Invalid crop coordinate values. Photo processed without custom cropping.", 'warning')
                         crop_params = None
 
-                new_photo_db_path = save_uploaded_file( # Assign to new_photo_db_path
+                new_photo_db_path = save_uploaded_file(
                     file_storage_object=photo_file,
                     upload_type="profile_photo",
                     base_upload_path_config_key="UPLOAD_FOLDER",
@@ -227,7 +216,6 @@ def edit_profile():
 
                 if new_photo_db_path:
                     current_user.profile_photo_url = new_photo_db_path
-                # else: Error flash handled by save_uploaded_file utility
 
         try:
             db.session.add(current_user)
@@ -257,9 +245,8 @@ def edit_profile():
 @login_required
 def upload_gallery_photo():
     form = GalleryPhotoUploadForm()
-    # FileAllowed validator can be added to the form itself or checked here per file
     if form.validate_on_submit():
-        photo_files = form.photos.data  # Access the list of files
+        photo_files = form.photos.data
         caption = form.caption.data
         uploaded_count = 0
         error_count = 0
@@ -270,43 +257,29 @@ def upload_gallery_photo():
 
         for photo_file in photo_files:
             if photo_file and photo_file.filename:
-                # Optionally, add individual file validation here if not handled by form globally
-                # e.g., using FileAllowed from flask_wtf.file
-                # if not FileAllowed(current_app.config['ALLOWED_EXTENSIONS']).validate(photo_file):
-                #     flash(f"File type not allowed for {secure_filename(photo_file.filename)}.", "danger")
-                #     error_count += 1
-                #     continue
-
                 saved_db_path = save_uploaded_file(
                     file_storage_object=photo_file,
                     upload_type="gallery_photo",
-                    base_upload_path_config_key="GALLERY_UPLOAD_FOLDER", # Relative to static
+                    base_upload_path_config_key="GALLERY_UPLOAD_FOLDER",
                     max_size_bytes_config_key="MAX_GALLERY_PHOTO_SIZE_BYTES",
-                    current_user_id=current_user.id # For user-specific subfolder
-                    # No crop_coords or thumbnail_size for gallery photos by default
+                    current_user_id=current_user.id
                 )
 
                 if saved_db_path:
                     try:
                         new_photo = UserPhoto(
                             user_id=current_user.id,
-                            image_filename=saved_db_path, # This path is relative to static folder
-                            caption=caption # Same caption for all photos in this batch
+                            image_filename=saved_db_path,
+                            caption=caption
                         )
                         db.session.add(new_photo)
                         uploaded_count += 1
                     except Exception as e_db_loop:
-                        # Log specific error for this file, but try to continue with others
                         current_app.logger.error(f"Error preparing photo record for {secure_filename(photo_file.filename)} to DB: {e_db_loop}", exc_info=True)
                         error_count += 1
-                        # No rollback here yet, do it once after the loop if any errors occurred
                 else:
-                    # save_uploaded_file should flash its own error
                     error_count += 1
             elif photo_file and not photo_file.filename and len(photo_files) == 1:
-                # This case handles if a single empty file field was submitted,
-                # which might not be caught by DataRequired on MultipleFileField
-                # if the field itself exists but is empty.
                 flash("No photo file selected for gallery upload.", "warning")
                 return redirect(url_for('profile.view_profile', user_id=current_user.id))
 
@@ -319,24 +292,19 @@ def upload_gallery_photo():
                 db.session.rollback()
                 current_app.logger.error(f"Error committing gallery photos to DB: {e_commit}", exc_info=True)
                 flash('Error saving photo details to database after processing files.', 'danger')
-                # Consider deleting successfully uploaded files if the final commit fails
         elif uploaded_count > 0 and error_count > 0:
             try:
-                db.session.commit() # Commit successfully processed files
+                db.session.commit()
                 flash(f'{uploaded_count} photo(s) uploaded. {error_count} photo(s) failed.', 'warning')
             except Exception as e_commit_partial:
                 db.session.rollback()
                 current_app.logger.error(f"Error committing partially successful gallery photos to DB: {e_commit_partial}", exc_info=True)
                 flash('Error saving some photo details to database. Some uploads may not have been saved.', 'danger')
         elif error_count > 0 and uploaded_count == 0:
-            # No need to commit if nothing was successfully processed for DB add
-            # save_uploaded_file or other checks should have flashed individual errors
             flash('All photo uploads failed. Please check errors above.', 'danger')
-        # If uploaded_count is 0 and error_count is 0, it means no files were actually processed,
-        # which should have been caught by the initial "No photo files selected" check.
 
     else:
-        flash_form_errors_util(form) # Handles form-level validation errors
+        flash_form_errors_util(form)
 
     return redirect(url_for('profile.view_profile', user_id=current_user.id))
 
@@ -374,72 +342,71 @@ def view_gallery(user_id): # Changed to user_id
     return render_template('gallery_full.html', user_profile=user_profile, gallery_photos=gallery_photos)
 
 
-@profile_bp.route('/follow/<int:user_id>', methods=['POST']) # Changed to user_id
+@profile_bp.route('/follow/<int:user_id>', methods=['POST'])
 @login_required
-def follow_user(user_id): # Changed to user_id
-    user_to_follow = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
+def follow_user(user_id):
+    user_to_follow = User.query.get_or_404(user_id)
     if user_to_follow == current_user:
         flash("You cannot follow yourself.", "warning")
-        return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
+        return redirect(url_for('profile.view_profile', user_id=user_id))
     if current_user.is_following(user_to_follow):
-        flash(f"You are already following {user_to_follow.full_name or ('@' + user_to_follow.username)}.", "info") # Display full_name or username (email)
+        flash(f"You are already following {user_to_follow.full_name or ('@' + user_to_follow.username)}.", "info")
     else:
         if current_user.follow(user_to_follow):
-            from ..models import Notification # Local import
+            from ..models import Notification
             notification = Notification(
                 user_id=user_to_follow.id,
                 actor_id=current_user.id,
                 type='new_follower',
-                target_type='user', # The target of the notification is the user who was followed (actor_id)
-                target_id=current_user.id # The actor is the target of this notification
+                target_type='user',
+                target_id=current_user.id
             )
             db.session.add(notification)
-            from ..models import Activity # Local import
+            from ..models import Activity
             activity = Activity(
-                user_id=current_user.id, # User performing the action
+                user_id=current_user.id,
                 type='started_following',
-                # target_user_id=user_to_follow.id # Old field
-                target_type='user',             # New field: the user being followed
-                target_id=user_to_follow.id     # New field
+                target_type='user',
+                target_id=user_to_follow.id
             )
             db.session.add(activity)
             db.session.commit()
-            flash(f"You are now following {user_to_follow.full_name or ('@' + user_to_follow.username)}.", "toast_success") # Display full_name or username
+            flash(f"You are now following {user_to_follow.full_name or ('@' + user_to_follow.username)}.", "toast_success")
         else:
-            flash(f"Could not follow {user_to_follow.full_name or ('@' + user_to_follow.username)}. An unexpected error occurred or it was a self-follow.", "danger") # Display full_name or username
+            flash(f"Could not follow {user_to_follow.full_name or ('@' + user_to_follow.username)}. An unexpected error occurred or it was a self-follow.", "danger")
             db.session.rollback()
-    return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
+    return redirect(url_for('profile.view_profile', user_id=user_id))
 
 
-@profile_bp.route('/unfollow/<int:user_id>', methods=['POST']) # Changed to user_id
+@profile_bp.route('/unfollow/<int:user_id>', methods=['POST'])
 @login_required
-def unfollow_user(user_id): # Changed to user_id
-    user_to_unfollow = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
+def unfollow_user(user_id):
+    user_to_unfollow = User.query.get_or_404(user_id)
     if user_to_unfollow == current_user:
         flash("You cannot unfollow yourself.", "warning")
-        return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
+        return redirect(url_for('profile.view_profile', user_id=user_id))
     if not current_user.is_following(user_to_unfollow):
-        flash(f"You are not currently following {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}.", "info") # Display full_name or username
+        flash(f"You are not currently following {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}.", "info")
     else:
         if current_user.unfollow(user_to_unfollow):
             db.session.commit()
-            flash(f"You have unfollowed {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}.", "toast_success") # Display full_name or username
+            flash(f"You have unfollowed {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}.", "toast_success")
         else:
-            flash(f"Could not unfollow {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}. An unexpected error occurred.", "danger") # Display full_name or username
+            flash(f"Could not unfollow {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}. An unexpected error occurred.", "danger")
             db.session.rollback()
-    return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
+    return redirect(url_for('profile.view_profile', user_id=user_id))
 
 
-@profile_bp.route('/<int:user_id>/followers') # Changed to user_id
+@profile_bp.route('/<int:user_id>/followers')
 @login_required
-def followers_list(user_id): # Changed to user_id
-    user = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
+def followers_list(user_id):
+    user = User.query.get_or_404(user_id)
     if not user.is_profile_public and user != current_user:
         flash("This user's connections are private.", "danger")
-        return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
+        return redirect(url_for('profile.view_profile', user_id=user_id))
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 15)
-    followers_query = user.followers.order_by(User.full_name.asc()) # Order by full_name
+    followers_query = user.followers.order_by(User.full_name.asc())
     try:
         pagination = followers_query.paginate(page=page, per_page=per_page, error_out=False)
         users_list = pagination.items
@@ -450,16 +417,16 @@ def followers_list(user_id): # Changed to user_id
     return render_template('followers_list.html', user_profile=user, users_list=users_list, pagination=pagination, list_type="Followers")
 
 
-@profile_bp.route('/<int:user_id>/following') # Changed to user_id
+@profile_bp.route('/<int:user_id>/following')
 @login_required
-def following_list(user_id): # Changed to user_id
-    user = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
+def following_list(user_id):
+    user = User.query.get_or_404(user_id)
     if not user.is_profile_public and user != current_user:
         flash("This user's connections are private.", "danger")
-        return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
+        return redirect(url_for('profile.view_profile', user_id=user_id))
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('POSTS_PER_PAGE', 15)
-    following_query = user.followed.order_by(User.full_name.asc()) # Order by full_name
+    following_query = user.followed.order_by(User.full_name.asc())
     try:
         pagination = following_query.paginate(page=page, per_page=per_page, error_out=False)
         users_list = pagination.items

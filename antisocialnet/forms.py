@@ -84,9 +84,6 @@ class ProfileEditForm(FlaskForm):
     profile_photo = FileField('Profile Photo (Max 2MB)', validators=[Optional()])
     website_url = StringField('Website URL', validators=[Optional(), Length(max=200)])
 
-    # New fields for enhanced profile
-    # address = TextAreaField('Address', validators=[Optional(), Length(max=255)]) # Removed
-    # phone_number = StringField('Phone Number', validators=[Optional(), Length(max=50)]) # Removed
     street_address = StringField('Street Address', validators=[Optional(), Length(max=255)])
     city = StringField('City', validators=[Optional(), Length(max=100)])
     state_province = StringField('State/Province/Region', validators=[Optional(), Length(max=100)])
@@ -118,7 +115,6 @@ class FlagCommentForm(FlaskForm):
 
 class SiteSettingsForm(FlaskForm):
     site_title = StringField('Site Title', validators=[DataRequired(), Length(min=1, max=120)])
-    # Validated as int in route, StringField is fine here
     posts_per_page = StringField('Posts Per Page', validators=[DataRequired()])
     allow_registrations = BooleanField('Allow New User Registrations')
     submit = SubmitField('Save Settings')
@@ -128,11 +124,9 @@ class GalleryPhotoUploadForm(FlaskForm):
         'Photos (Max 5MB each)',  # Updated label
         validators=[
             DataRequired(message="Please select one or more photos to upload."),
-            # FileAllowed will be added dynamically in the route for each file.
-            # Consider adding a validator for the number of files if needed, e.g., Length(min=1, max=10)
         ]
     )
-    caption = TextAreaField(  # Caption will apply to all photos in this batch, or adjust logic in route
+    caption = TextAreaField(
         'Caption (Optional, applies to all uploaded photos)',
         validators=[Optional(), Length(max=500)]
     )
@@ -144,17 +138,14 @@ class PhotoCommentForm(FlaskForm):
         validators=[DataRequired(), Length(min=1, max=2000)]
     )
     parent_id = HiddenField(validators=[Optional()])
-    # photo_id and user_id will be handled by the route
     submit = SubmitField('Post Comment')
 
-# Empty forms for CSRF-protected actions like Like/Unlike
 class LikeForm(FlaskForm):
-    submit = SubmitField('Like') # Text can be changed in template if needed for context
+    submit = SubmitField('Like')
 
 class UnlikeForm(FlaskForm):
-    submit = SubmitField('Unlike') # Text can be changed in template if needed for context
+    submit = SubmitField('Unlike')
 
-# Password Reset Request Form
 class RequestPasswordResetForm(FlaskForm):
     email = StringField(
         'Your Email Address',

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_macros.html" import like_button_and_count %}
 
 {% block title %}Home Feed{% endblock %}
 
@@ -6,11 +7,17 @@
 
 {% block content %}
 <div class="adw-clamp adw-clamp-xl">
-    {% from "_macros.html" import like_button_and_count %}
-
-    {% if posts and posts|length > 0 %}
-        <div class="blog-posts-container" style="margin-top: var(--spacing-l);"> {# Using grid like index.html #}
-            {% for post_item in posts %}
+    {% if feed_items and feed_items|length > 0 %}
+        <div class="blog-posts-container" style="margin-top: var(--spacing-l);">
+            {% for item in feed_items %}
+                {% if item.__class__.__name__ == 'Repost' %}
+                    {% set post_item = item.post %}
+                    <div class="repost-indicator">
+                        <span class="adw-icon icon-actions-find-and-replace-symbolic"></span> Reposted by <a href="{{ url_for('profile.view_profile', user_id=item.user.id) }}" class="adw-link">{{ item.user.full_name }}</a>
+                    </div>
+                {% else %}
+                    {% set post_item = item %}
+                {% endif %}
                 <article class="adw-card blog-post-item-card">
                     <header class="blog-post-card__header">
                         <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
@@ -65,7 +72,7 @@
                         </a>
                     </footer>
                     <div class="adw-card__actions card-secondary-actions">
-                        {{ like_button_and_count(post_item, 'post', current_user) }} {# Use csrf_token from context #}
+                        {{ like_button_and_count(post_item, 'post', current_user) }}
                     </div>
                 </article>
             {% endfor %}
@@ -92,7 +99,6 @@
                             <a href="{{ url_for('general.activity_feed', page=page_num) }}" class="adw-button">{{ page_num }}</a>
                         {% endif %}
                     {% else %}
-                        {# If page_num is None, iter_pages wants an ellipsis here #}
                         <button class="adw-button flat" disabled>…</button>
                     {% endif %}
                 {% endfor %}
