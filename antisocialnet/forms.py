@@ -115,7 +115,13 @@ class FlagCommentForm(FlaskForm):
 
 class SiteSettingsForm(FlaskForm):
     site_title = StringField('Site Title', validators=[DataRequired(), Length(min=1, max=120)])
-    posts_per_page = StringField('Posts Per Page', validators=[DataRequired()])
+    posts_per_page = IntegerField(
+        'Posts Per Page',
+        validators=[
+            DataRequired(message="Posts per page is required."),
+            NumberRange(min=1, max=100, message="Posts per page must be between 1 and 100.")
+        ]
+    )
     allow_registrations = BooleanField('Allow New User Registrations')
     submit = SubmitField('Save Settings')
 

@@ -83,22 +83,19 @@ def site_settings():
         current_app.logger.info(f"Admin {current_user.username} updating site settings.")
         try:
             SiteSetting.set('site_title', form.site_title.data, 'string')
-            try:
-                ppp_val = int(form.posts_per_page.data)
-                if ppp_val <= 0:
-                    flash("Posts Per Page must be a positive integer.", "danger")
-                else:
-                    SiteSetting.set('posts_per_page', ppp_val, 'int')
-                    current_app.config['POSTS_PER_PAGE'] = ppp_val
-                    current_app.logger.info(f"App config POSTS_PER_PAGE updated to: {ppp_val}")
-            except ValueError:
-                flash("Posts per page must be a number.", "danger")
+            SiteSetting.set('posts_per_page', form.posts_per_page.data, 'int')
             SiteSetting.set('allow_registrations', form.allow_registrations.data, 'bool')
+
+            # Update app config in real-time
+            current_app.config['POSTS_PER_PAGE'] = form.posts_per_page.data
+            current_app.logger.info(f"App config POSTS_PER_PAGE updated to: {form.posts_per_page.data}")
+
             flash('Site settings updated successfully.', 'toast_success')
             current_app.logger.info(f"Site settings updated by admin {current_user.username}.")
+            # It's good practice to redirect after a successful POST to prevent re-submission.
             return redirect(url_for('admin.site_settings'))
         except Exception as e:
-            current_app.logger.error(f"Error updating site settings: {e}", exc_info=True)
+            current_app.logger.error(f"Error updating site settings by {current_user.username}: {e}", exc_info=True)
             flash('An unexpected error occurred while saving settings.', 'danger')
     elif request.method == 'POST':
         flash_form_errors_util(form)

@@ -155,7 +155,7 @@ def test_site_settings_update_invalid_ppp(admin_client, app):
     }
     response = admin_client.post(url_for('admin.site_settings'), data=form_data, follow_redirects=True)
     assert response.status_code == 200
-    assert b"Posts per page must be a number." in response.data # Custom error from route
+    assert b"Error in Posts Per Page: Posts per page is required." in response.data
     assert b"Site Settings (Admin)" in response.data
 
 def test_site_settings_csrf_missing(admin_client):
