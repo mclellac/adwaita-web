@@ -39,10 +39,10 @@ def test_upload_photo_successful(client, app, logged_in_client, db):
     user = User.query.filter_by(username="login_fixture_user@example.com").first() # Corrected username
     initial_photo_count = UserPhoto.query.filter_by(user_id=user.id).count()
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         from antisocialnet.forms import GalleryPhotoUploadForm # For CSRF
         form = GalleryPhotoUploadForm(); token = form.csrf_token.current_token
-        url = url_for('profile.upload_gallery_photo') # Corrected endpoint
+    url = url_for('profile.upload_gallery_photo') # Corrected endpoint
 
     image_data = (BytesIO(b"fake_image_bytes_content_for_upload_test"), 'test_upload.jpg')
     # For MultipleFileField, the field expects a list of FileStorage objects.
@@ -88,10 +88,10 @@ def test_upload_photo_successful(client, app, logged_in_client, db):
 
 def test_upload_photo_no_file_selected(client, app, logged_in_client):
     """Test photo upload attempt with no file selected."""
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         from antisocialnet.forms import GalleryPhotoUploadForm
         form = GalleryPhotoUploadForm(); token = form.csrf_token.current_token
-        url = url_for('profile.upload_gallery_photo') # Corrected endpoint
+    url = url_for('profile.upload_gallery_photo')
 
     form_data = {'caption': 'Caption without photo', 'csrf_token': token}
     response = logged_in_client.post(
@@ -110,10 +110,10 @@ def test_upload_photo_no_file_selected(client, app, logged_in_client):
 
 def test_upload_photo_invalid_file_type(client, app, logged_in_client):
     """Test photo upload with an invalid file type (e.g., .txt)."""
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         from antisocialnet.forms import GalleryPhotoUploadForm
         form = GalleryPhotoUploadForm(); token = form.csrf_token.current_token
-        url = url_for('profile.upload_gallery_photo') # Corrected endpoint
+    url = url_for('profile.upload_gallery_photo')
 
     invalid_file_data = (BytesIO(b"this is a text file, not an image."), 'invalid_file.txt')
     # For MultipleFileField, send as a list
@@ -208,10 +208,10 @@ def test_add_photo_comment_successful(client, app, logged_in_client, db, create_
 
     initial_comment_count = PhotoComment.query.filter_by(photo_id=test_photo.id).count()
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         from antisocialnet.forms import PhotoCommentForm # For CSRF
         form = PhotoCommentForm(); token = form.csrf_token.current_token
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+    url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
 
     comment_text = "A brand new photo comment!"
     form_data = {'text': comment_text, 'csrf_token': token}
@@ -237,11 +237,10 @@ def test_add_photo_comment_unauthenticated(client, db, create_test_user):
 
     form_data = {'text': 'Unauth comment', 'csrf_token': 'dummy'} # CSRF won't matter due to @login_required
     with client.application.test_request_context():
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+            url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
     response = client.post(
         url,
-        data=form_data,
-        follow_redirects=True
+        data=form_data
     )
     assert response.status_code == 200
     assert b"Please log in to access this page." in response.data
@@ -251,10 +250,10 @@ def test_add_photo_comment_empty_text(client, app, logged_in_client, db, create_
     photo_uploader = create_test_user(email_address="pu5@example.com", full_name="photouploader5")
     test_photo = create_photo_for_testing(db, photo_uploader)
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         from antisocialnet.forms import PhotoCommentForm
         form = PhotoCommentForm(); token = form.csrf_token.current_token
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+    url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
 
     form_data = {'text': '', 'csrf_token': token}
     response = logged_in_client.post(
@@ -273,7 +272,7 @@ def test_add_photo_comment_csrf_missing(client, logged_in_client, db, create_tes
     form_data = {'text': 'CSRF missing comment'}
 
     with logged_in_client.application.test_request_context():
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+        url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
     response = logged_in_client.post(
         url,
         data=form_data
@@ -293,10 +292,10 @@ def test_delete_photo_comment_author_self(client, app, logged_in_client, db, cre
     comment_id = comment_to_delete.id
     assert PhotoComment.query.get(comment_id) is not None
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         from antisocialnet.forms import DeleteCommentForm # Generic form, can be reused if empty
         form = DeleteCommentForm(); token = form.csrf_token.current_token
-        url = url_for('photo.delete_photo_comment', comment_id=comment_id)
+    url = url_for('photo.delete_photo_comment', comment_id=comment_id)
 
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
@@ -314,10 +313,10 @@ def test_delete_photo_comment_photo_owner(client, app, logged_in_client, db, cre
     comment_id = comment_to_delete.id
     assert PhotoComment.query.get(comment_id) is not None
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         from antisocialnet.forms import DeleteCommentForm
         form = DeleteCommentForm(); token = form.csrf_token.current_token
-        url = url_for('photo.delete_photo_comment', comment_id=comment_id)
+    url = url_for('photo.delete_photo_comment', comment_id=comment_id)
 
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
@@ -340,14 +339,14 @@ def test_delete_photo_comment_admin(client, app, db, create_test_user):
     csrf_login_token = None
     csrf_delete_token = None
 
-    with app.app_context():
+    with client.application.test_request_context():
         from antisocialnet.forms import LoginForm, DeleteCommentForm
         login_form = LoginForm(); csrf_login_token = login_form.csrf_token.current_token
         delete_form = DeleteCommentForm(); csrf_delete_token = delete_form.csrf_token.current_token
-        login_url_val = url_for('auth.login')
-        delete_url_val = url_for('photo.delete_photo_comment', comment_id=comment_id)
+    login_url_val = url_for('auth.login')
+    delete_url_val = url_for('photo.delete_photo_comment', comment_id=comment_id)
 
-    client.post(login_url_val, data={'username': admin.email, 'password': 'password', 'csrf_token': csrf_login_token})
+    client.post(login_url_val, data={'username': admin.username, 'password': 'password', 'csrf_token': csrf_login_token}, follow_redirects=True)
 
     response = client.post(delete_url_val, data={'csrf_token': csrf_delete_token}, follow_redirects=True)
     assert response.status_code == 200
@@ -366,10 +365,10 @@ def test_delete_photo_comment_unauthorized(client, app, logged_in_client, db, cr
     # logged_in_client is 'login_fixture_user@example.com', who is none of the above.
     assert User.query.filter_by(username="login_fixture_user@example.com").first().id not in [photo_owner_user.id, comment_author_user.id]
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         from antisocialnet.forms import DeleteCommentForm
         form=DeleteCommentForm(); token=form.csrf_token.current_token
-        url = url_for('photo.delete_photo_comment', comment_id=comment_id)
+    url = url_for('photo.delete_photo_comment', comment_id=comment_id)
     response = logged_in_client.post(url, data={'csrf_token': token})
     assert response.status_code == 403
     assert PhotoComment.query.get(comment_id) is not None
@@ -403,10 +402,10 @@ def test_delete_photo_owner_successful(client, app, logged_in_client, db):
     assert UserPhoto.query.get(photo_id) is not None
     assert PhotoComment.query.filter_by(photo_id=photo_id).count() == 1
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         from antisocialnet.forms import DeletePostForm # Can reuse if empty, or make specific DeletePhotoForm
         form = DeletePostForm(); token = form.csrf_token.current_token # Assuming generic delete form for CSRF
-        url = url_for('profile.delete_gallery_photo', photo_id=photo_id) # Corrected endpoint
+    url = url_for('profile.delete_gallery_photo', photo_id=photo_id) # Corrected endpoint
 
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
@@ -435,14 +434,14 @@ def test_delete_photo_admin_successful(client, app, db, create_test_user):
     csrf_login_token = None
     csrf_delete_token = None
 
-    with app.app_context():
+    with client.application.test_request_context():
         from antisocialnet.forms import LoginForm, DeletePostForm
         login_form = LoginForm(); csrf_login_token = login_form.csrf_token.current_token
         delete_form = DeletePostForm(); csrf_delete_token = delete_form.csrf_token.current_token
-        login_url_val = url_for('auth.login')
-        delete_url_val = url_for('profile.delete_gallery_photo', photo_id=photo_id) # Corrected endpoint
+    login_url_val = url_for('auth.login')
+    delete_url_val = url_for('profile.delete_gallery_photo', photo_id=photo_id) # Corrected endpoint
 
-    client.post(login_url_val, data={'username': admin.email, 'password': 'password', 'csrf_token': csrf_login_token})
+    client.post(login_url_val, data={'username': admin.username, 'password': 'password', 'csrf_token': csrf_login_token})
 
     response = client.post(delete_url_val, data={'csrf_token': csrf_delete_token}, follow_redirects=True)
 
@@ -461,10 +460,10 @@ def test_delete_photo_unauthorized(client, app, logged_in_client, db, create_tes
     assert User.query.filter_by(username="login_fixture_user@example.com").first().id != photo_owner.id
     assert not User.query.filter_by(username="login_fixture_user@example.com").first().is_admin
 
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         from antisocialnet.forms import DeletePostForm
         form=DeletePostForm(); token=form.csrf_token.current_token
-        url = url_for('profile.delete_gallery_photo', photo_id=photo_id) # Corrected endpoint
+    url = url_for('profile.delete_gallery_photo', photo_id=photo_id) # Corrected endpoint
     response = logged_in_client.post(url, data={'csrf_token': token})
     assert response.status_code == 403 # Forbidden
     assert UserPhoto.query.get(photo_id) is not None # Photo should still exist
@@ -483,10 +482,10 @@ def test_delete_photo_csrf_missing(client, logged_in_client, db):
 
 def test_delete_photo_nonexistent(client, app, logged_in_client):
     """Test attempting to delete a non-existent photo."""
-    with app.app_context(): # For CSRF and url_for
+    with logged_in_client.application.test_request_context(): # For CSRF and url_for
         from antisocialnet.forms import DeletePostForm
         form=DeletePostForm(); token=form.csrf_token.current_token
-        url = url_for('profile.delete_gallery_photo', photo_id=888777) # Corrected endpoint
+    url = url_for('profile.delete_gallery_photo', photo_id=888777) # Corrected endpoint
     response = logged_in_client.post(url, data={'csrf_token': token})
     assert response.status_code == 404
 
@@ -650,7 +649,7 @@ def test_like_item_route_for_photo_authenticated(client, app, db, create_test_us
     initial_notifications = Notification.query.filter_by(user_id=photo_owner.id, type='new_like', target_type='photo', target_id=test_photo.id).count()
     initial_activities = Activity.query.filter_by(user_id=liking_user.id, type='liked_item', target_type='photo', target_id=test_photo.id).count()
 
-    with app.app_context():
+    with logged_in_client.application.test_request_context():
         form = LikeForm()
         token = form.csrf_token.current_token
         url = url_for('like.like_item_route', target_type='photo', target_id=test_photo.id)
@@ -685,7 +684,7 @@ def test_unlike_item_route_for_photo_authenticated(client, app, db, create_test_
     initial_like_count = test_photo.like_count
     assert initial_like_count > 0
 
-    with app.app_context():
+    with logged_in_client.application.test_request_context():
         form = UnlikeForm()
         token = form.csrf_token.current_token
         url = url_for('like.unlike_item_route', target_type='photo', target_id=test_photo.id)
@@ -713,7 +712,7 @@ def test_like_already_liked_item_route_for_photo(client, app, db, create_test_us
     db.session.refresh(test_photo)
     initial_like_count = test_photo.like_count
 
-    with app.app_context():
+    with logged_in_client.application.test_request_context():
         form = LikeForm(); token = form.csrf_token.current_token
         url = url_for('like.like_item_route', target_type='photo', target_id=test_photo.id)
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
@@ -730,7 +729,7 @@ def test_unlike_not_liked_item_route_for_photo(client, app, db, create_test_user
     db.session.add(test_photo); db.session.commit()
     initial_like_count = test_photo.like_count # Should be 0
 
-    with app.app_context():
+    with logged_in_client.application.test_request_context():
         form = UnlikeForm(); token = form.csrf_token.current_token
         url = url_for('like.unlike_item_route', target_type='photo', target_id=test_photo.id)
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
@@ -746,7 +745,7 @@ def test_like_item_csrf_missing_token_for_photo(client, app, db, create_test_use
     test_photo = UserPhoto(user_id=photo_owner.id, image_filename="csrf_p.jpg")
     db.session.add(test_photo); db.session.commit()
 
-    with app.app_context():
+    with logged_in_client.application.test_request_context():
         url = url_for('like.like_item_route', target_type='photo', target_id=test_photo.id)
     # Post without CSRF token, do not follow redirects to see the direct 400
     response = logged_in_client.post(url, data={})

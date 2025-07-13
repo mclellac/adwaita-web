@@ -154,7 +154,7 @@
         </div>
 
         {# Recursively render replies within this comment's div #}
-        {% if comment.replies.count() > 0 %}
+        {% if comment.replies | length > 0 %}
             <div class="comment-replies-container" style="margin-top: var(--spacing-s);">
                 {% for reply_comment in comment.replies %}
                     {{ render_comment_with_replies(reply_comment, post, delete_comment_form, current_user, form, is_reply=true) }}

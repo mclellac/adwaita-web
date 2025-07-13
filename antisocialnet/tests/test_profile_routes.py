@@ -101,7 +101,7 @@ def test_edit_profile_post_successful_update(client, app, logged_in_client, db):
     original_full_name = user.full_name
     original_website = user.website_url
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from antisocialnet.forms import ProfileEditForm
         form = ProfileEditForm()
         token = form.csrf_token.current_token
@@ -146,7 +146,7 @@ def test_edit_profile_post_successful_update(client, app, logged_in_client, db):
 
 def test_edit_profile_post_validation_error(client, app, logged_in_client):
     """Test profile update with a validation error (e.g., full_name empty)."""
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from antisocialnet.forms import ProfileEditForm
         form = ProfileEditForm()
         token = form.csrf_token.current_token
@@ -167,7 +167,7 @@ def test_edit_profile_post_photo_upload(client, app, logged_in_client, db):
     user = User.query.filter_by(username="login_fixture_user@example.com").first()
     original_photo_url = user.profile_photo_url
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from antisocialnet.forms import ProfileEditForm
         form = ProfileEditForm()
         token = form.csrf_token.current_token
@@ -225,7 +225,7 @@ def test_follow_user_successful(client, app, logged_in_client, create_test_user,
     initial_follower_count = followed_user.followers.count()
     initial_following_count_self = follower.followed.count()
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm() # For token generation
         token = form.csrf_token.current_token
@@ -253,7 +253,7 @@ def test_unfollow_user_successful(client, app, logged_in_client, create_test_use
     initial_follower_count = followed_user.followers.count() # Should be 1
     initial_following_count_self = follower.followed.count() # Should be 1
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm()
         token = form.csrf_token.current_token
@@ -272,7 +272,7 @@ def test_unfollow_user_successful(client, app, logged_in_client, create_test_use
 def test_follow_user_self_fails(client, app, logged_in_client, db):
     """User cannot follow themselves."""
     user_self = User.query.filter_by(username="login_fixture_user@example.com").first()
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm()
         token = form.csrf_token.current_token
@@ -290,7 +290,7 @@ def test_follow_user_already_following(client, app, logged_in_client, create_tes
     follower.follow(followed_user); db.session.commit()
     assert follower.is_following(followed_user)
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm()
         token = form.csrf_token.current_token
@@ -305,7 +305,7 @@ def test_unfollow_user_not_following(client, app, logged_in_client, create_test_
     not_followed_user = create_test_user(email_address="notf@example.com", full_name="notfollowed")
     assert not follower.is_following(not_followed_user)
 
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm()
         token = form.csrf_token.current_token
@@ -325,11 +325,11 @@ def test_follow_unauthenticated(client, create_test_user):
 
 def test_follow_nonexistent_user(client, app, logged_in_client):
     """Attempt to follow a non-existent user."""
-    with logged_in_client.application.app_context(): # Use client's context
+    with logged_in_client.application.test_request_context(): # Use client's context
         from flask_wtf import FlaskForm
         form = FlaskForm()
         token = form.csrf_token.current_token
-        url = url_for('profile.follow_user', user_id=999999) # Use a non-existent ID
+        url = url_for('profile.follow_user', user_id=999999)
     response = logged_in_client.post(url, data={'csrf_token': token})
     assert response.status_code == 404
 

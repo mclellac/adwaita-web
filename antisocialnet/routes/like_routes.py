@@ -40,7 +40,8 @@ def like_item_route(target_type, target_id):
         if target_item: item_author = target_item.author
     elif target_type == 'photo':
         target_item = db.session.get(UserPhoto, target_id)
-        if target_item: item_author = target_item.user
+        if target_item:
+            item_author = target_item.author
 
     if not target_item:
         current_app.logger.warning(f"User {current_user.id} attempt to like non-existent {target_type} with id {target_id}")

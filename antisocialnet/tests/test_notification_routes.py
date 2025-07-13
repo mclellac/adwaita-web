@@ -86,7 +86,7 @@ def test_list_notifications_pagination(client, logged_in_client, app, db, create
     actor = create_test_user(email_address="anp@example.com", full_name="actor_notif_pager")
     post_target = create_test_post(author=actor, content="Post for paginated notifications")
 
-    with app.app_context():
+    with logged_in_client.application.test_request_context():
         # Notification route uses 'POSTS_PER_PAGE' from config for pagination size
         original_ppp = app.config.get('POSTS_PER_PAGE', 10)
         app.config['POSTS_PER_PAGE'] = 2 # 2 notifications per page

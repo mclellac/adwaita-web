@@ -1,9 +1,9 @@
-from flask import Blueprint, jsonify, request, abort, url_for, current_app, render_template # Added render_template
+from flask import Blueprint, jsonify, request, abort, url_for, current_app, render_template, flash, redirect # Added render_template
 from flask_login import current_user, login_required
 import bleach # Import bleach
 from .. import db
 from ..models import UserPhoto, PhotoComment, User, Notification # Added Notification
-from ..forms import PhotoCommentForm
+from ..forms import PhotoCommentForm, DeleteCommentForm
 from ..utils import extract_mentions # Added extract_mentions
 
 photo_bp = Blueprint('photo', __name__, url_prefix='/photo')
@@ -21,7 +21,7 @@ def get_photo_comments(photo_id):
     # Or, if the gallery page itself has its own privacy, that should be checked.
     # For now, assume if one can see the photo (e.g. on a public profile), they can see comments.
     # More granular checks can be added if UserPhoto gets its own privacy flag or inherits from profile.
-    if not photo.user.is_profile_public and (not current_user.is_authenticated or current_user.id != photo.user_id):
+    if not photo.author.is_profile_public and (not current_user.is_authenticated or current_user.id != photo.user_id):
         # This is a basic check, might need refinement based on overall gallery privacy rules
         # Allowing admin to bypass could also be an option: and not current_user.is_admin
         abort(403) # Forbidden
@@ -47,14 +47,15 @@ def get_photo_comments(photo_id):
 def view_photo_detail(photo_id):
     photo = UserPhoto.query.get_or_404(photo_id)
     # Permission check (basic: public profile or owner/admin for private)
-    if not photo.user.is_profile_public and (not current_user.is_authenticated or (current_user.id != photo.user.id and not current_user.is_admin)):
+    if not photo.author.is_profile_public and (not current_user.is_authenticated or (current_user.id != photo.author.id and not current_user.is_admin)):
         current_app.logger.warning(f"User (ID: {current_user.id if current_user.is_authenticated else 'Anonymous'}) "
-                                   f"attempted to view photo {photo_id} from private profile of user {photo.user.id}")
+                                   f"attempted to view photo {photo_id} from private profile of user {photo.author.id}")
         abort(403)
 
     comment_form = PhotoCommentForm() if current_user.is_authenticated else None
+    delete_comment_form = DeleteCommentForm() if current_user.is_authenticated else None
     # Likes and other details can be accessed directly from photo object in template
-    return render_template('photo_detail.html', photo=photo, comment_form=comment_form)
+    return render_template('photo_detail.html', photo=photo, comment_form=comment_form, delete_comment_form=delete_comment_form)
 
 @photo_bp.route('/api/photos/<int:photo_id>/details', methods=['GET'])
 def get_photo_details_api(photo_id):
@@ -64,7 +65,7 @@ def get_photo_details_api(photo_id):
 
     # Basic permission check (similar to get_photo_comments)
     # Adjust as per actual privacy model for photos/galleries
-    if not photo.user.is_profile_public and (not current_user.is_authenticated or current_user.id != photo.user.id):
+    if not photo.author.is_profile_public and (not current_user.is_authenticated or current_user.id != photo.author.id):
         # Could also add admin bypass here: and not current_user.is_admin
         return jsonify(status="error", message="Forbidden"), 403
 
@@ -88,7 +89,7 @@ def post_photo_comment(photo_id):
 
     # Permission check: can the current user comment on this photo?
     # Example: if photo owner's profile is private, only owner or followed users? Or simply being logged in is enough for public profiles.
-    if not photo.user.is_profile_public and (current_user.id != photo.user_id and not current_user.is_admin):
+    if not photo.author.is_profile_public and (current_user.id != photo.author.id and not current_user.is_admin):
          # Simplified: if profile is private, only owner or admin can comment.
          # This could be expanded (e.g. followers can comment).
         abort(403) # Forbidden
@@ -163,3 +164,25 @@ def post_photo_comment(photo_id):
         # Collect form errors
         errors = {field: error[0] for field, error in form.errors.items()}
         return jsonify({'errors': errors}), 400
+
+@photo_bp.route('/comment/delete/<int:comment_id>', methods=['POST'])
+@login_required
+def delete_photo_comment(comment_id):
+    comment = PhotoComment.query.get_or_404(comment_id)
+    photo = comment.photo # Get the photo to redirect back to
+
+    # Authorization: must be comment author, photo owner, or admin
+    if not (current_user.id == comment.user_id or current_user.id == photo.user_id or current_user.is_admin):
+        flash("You are not authorized to delete this comment.", "danger")
+        abort(403)
+
+    try:
+        db.session.delete(comment)
+        db.session.commit()
+        flash("Comment deleted successfully.", "toast_success")
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error deleting photo comment ID {comment_id}: {e}", exc_info=True)
+        flash(f"Error deleting comment: {str(e)}", "danger")
+
+    return redirect(url_for('photo.view_photo_detail', photo_id=photo.id))
