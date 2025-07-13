@@ -121,6 +121,16 @@ def create_app(config_name=None, yaml_config_override=None):
         text_with_mention_links = linkify_mentions_util(text)
         return markdown_to_html_and_sanitize_util(text_with_mention_links)
 
+    @app.template_filter('human_readable_date')
+    def human_readable_date_filter(dt, include_time=True):
+        """Formats a datetime object into a human-readable string."""
+        if not dt:
+            return "No date"
+        if include_time:
+            return dt.strftime("%B %d, %Y %H:%M")
+        else:
+            return dt.strftime("%B %d, %Y")
+
     @app.context_processor
     def inject_global_template_variables():
         unread_notifications_count = 0

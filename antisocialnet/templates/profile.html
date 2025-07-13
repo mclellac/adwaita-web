@@ -227,18 +227,20 @@
                             {# Post title removed, content will be linked in footer or by making card clickable if desired #}
                             <div class="blog-post-card__meta adw-label caption">
                                 {%- if post.published_at -%}
-                                    Published: <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                                    Published: <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at | human_readable_date }} UTC</time>
                                 {%- else -%} {# Should ideally not happen for new posts, but fallback for old data #}
-                                    Created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                                    Created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at | human_readable_date }} UTC</time>
                                 {%- endif -%}
                             </div>
                         </header>
-                        {# No excerpt shown on profile post list for brevity, or could add a short one #}
+                        <div class="adw-card__content styled-text-content">
+                            {{ post.content | truncate(300, True, '...') | markdown }}
+                        </div>
                         <footer class="blog-post-card__footer">
                              <div class="blog-post-card__terms">
                                 {# Terms (categories/tags) could be added here if desired #}
                             </div>
-                            <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat read-more-link">View Post <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
+                            <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat read-more-link">View Post & Comments <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
                         </footer>
                         <div class="adw-card__actions card-secondary-actions">
                             {% from "_macros.html" import like_button_and_count %}
@@ -308,7 +310,7 @@
                             <span class="adw-action-row__title">Comment on post by {{ comment.post.author.full_name or ('User ' ~ comment.post.author.id) }}</span>
                             <span class="adw-action-row__subtitle">"{{ comment.text | truncate(100, True) }}"</span>
                             <small class="adw-label caption">
-                                <time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                                <time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at | human_readable_date }} UTC</time>
                             </small>
                         </div>
                         <span class="adw-action-row__chevron"></span>
