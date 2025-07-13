@@ -117,6 +117,10 @@ class User(UserMixin, db.Model):
             if item_author and item_author.id != self.id:
                 current_app.logger.info(f"Creating notification for like on {target_type} {target_id}")
                 notification = Notification(user_id=item_author.id, actor_id=self.id, type='new_like', target_type=target_type, target_id=target_id)
+                if target_type == 'comment':
+                    # Assuming item_author is a Comment object, which it is not.
+                    comment = Comment.query.get(target_id)
+                    notification.related_post_id = comment.post_id
                 db.session.add(notification)
 
             activity = Activity(user_id=self.id, type='liked_item', target_type=target_type, target_id=target_id)
@@ -501,6 +505,7 @@ class Notification(db.Model):
     # New polymorphic target fields
     target_type = db.Column(db.String(50), nullable=True) # e.g., 'post', 'comment', 'user_photo', 'user'
     target_id = db.Column(db.Integer, nullable=True)
+    related_post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
 
     # Remove ForeignKeyConstraints for old columns from __table_args__
     __table_args__ = (db.Index('ix_notification_target', 'target_type', 'target_id'),)
