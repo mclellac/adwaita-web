@@ -27,7 +27,7 @@
                     "{{ flag.comment.text | truncate(150, True) }}"
                 </blockquote>
                 <small class="adw-label caption">
-                    Flagged by: {{ flag.flagger.full_name or "Unnamed User" }} ({{ flag.flagger.username }}) on {{ flag.created_at.strftime('%Y-%m-%d %H:%M') }} UTC
+                    Flagged by: {{ flag.flagger.full_name or "Unnamed User" }} ({{ flag.flagger.username }}) on {{ flag.created_at | human_readable_date }} UTC
                     {% if flag.reason %}(Reason: {{ flag.reason }}){% endif %}
                 </small>
             </div>

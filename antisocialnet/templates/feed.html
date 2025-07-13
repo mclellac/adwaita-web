@@ -39,9 +39,9 @@
                         </div>
                         <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
                             {% if post_item.published_at %}
-                                Published: <time datetime="{{ post_item.published_at.isoformat() }}">{{ post_item.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                                Published: <time datetime="{{ post_item.published_at.isoformat() }}">{{ post_item.published_at | human_readable_date }} UTC</time>
                             {% else %}
-                                Created: <time datetime="{{ post_item.created_at.isoformat() }}">{{ post_item.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                                Created: <time datetime="{{ post_item.created_at.isoformat() }}">{{ post_item.created_at | human_readable_date }} UTC</time>
                             {% endif %}
                         </div>
                     </header>
