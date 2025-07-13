@@ -20,12 +20,6 @@ def list_notifications():
                                             .order_by(Notification.timestamp.desc())
         pagination = notifications_query.paginate(page=page, per_page=per_page, error_out=False)
         notifications_list = pagination.items
-        # The Notification.get_target_object() method is called in the template.
-        # This will still cause individual queries per notification if the target object isn't already loaded
-        # or if it involves complex fetching. For common targets like Post or User, consider adding
-        # options(joinedload(Notification.target_post)) etc. if performance is critical here,
-        # but this requires knowing the target types in advance or more complex dynamic loading.
-        # For now, loading Notification.actor is the primary N+1 fix from the audit.
 
         ids_to_mark_read = [n.id for n in notifications_list if not n.is_read]
         if ids_to_mark_read:

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import like_button_and_count %}
+{% from "_macros.html" import like_button_and_count, render_comment_with_replies %}
 
 {% block page_title %}Post by {{ post.author.full_name or ('User ' ~ post.author.id) }}{% endblock %}
 
@@ -48,11 +48,15 @@
             {{ post.content | markdown }}
         </div>
 
-        {# Likes and Actions Section - Placed before Author Bio for prominence #}
         <footer class="adw-card__actions post-interaction-footer" style="padding-top: var(--spacing-m); margin-top: var(--spacing-m); border-top: 1px solid var(--border-color);">
-            {# Use the generic like_button_and_count macro #}
             {{ like_button_and_count(post, 'post', current_user) }}
-            {# Space for other actions like share, if not in a separate section #}
+
+            <form method="POST" action="{{ url_for('repost.repost_post_route', post_id=post.id) }}" style="display: inline;">
+                <button type="submit" class="adw-button flat compact">
+                    <span class="adw-icon icon-actions-find-and-replace-symbolic"></span>
+                    <span class="adw-label caption">{{ post.repost_count }}</span>
+                </button>
+            </form>
         </footer>
 
         {% if post.author %}
@@ -106,63 +110,6 @@
 
     <hr class="section-divider">
 
-    {# Macro to render a single comment and its replies recursively #}
-    {% macro render_comment_with_replies(comment, post, delete_comment_form, current_user, form, is_reply=false) %}
-    <div class="comment-item {% if is_reply %}comment-reply-item{% else %}comment-top-level-item{% endif %}"
-         id="comment-{{ comment.id }}"
-         {% if is_reply %}style="margin-left: 30px; margin-top: var(--spacing-s); padding-top: var(--spacing-s); border-top: 1px dashed var(--divider-color);"{% endif %}>
-
-        <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
-            <span class="adw-avatar size-medium">
-               {% set comment_avatar = url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else default_avatar_url %}
-               <img src="{{ comment_avatar }}" alt="{{ comment.author.full_name or ('User ' ~ comment.author.id) }} avatar" class="adw-avatar__image">
-            </span>
-            <div class="comment-author-meta">
-                 <a href="{{ url_for('profile.view_profile', user_id=comment.author.id) }}" class="adw-link comment-author-link-strong">{{ comment.author.full_name or ('User ' ~ comment.author.id) }}</a>
-                <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at | human_readable_date }}</time></small>
-            </div>
-        </header>
-        <div class="comment-text styled-text-content">{{ comment.text | markdown }}</div>
-
-        <div class="comment-actions adw-box adw-box-horizontal adw-box-spacing-s align-center">
-            {% if current_user.is_authenticated %}
-            <button class="adw-button flat compact reply-button" data-comment-id="{{ comment.id }}" data-comment-author="{{ (comment.author.full_name or ('User ' ~ comment.author.id)) | e }}">Reply</button>
-            {% endif %}
-            {# Add like button for comment here #}
-            {{ like_button_and_count(comment, 'comment', current_user) }}
-
-            {% if current_user.is_authenticated and comment.author != current_user %}
-                {% if comment.is_flagged_active %}
-                    <button class="adw-button flat compact" disabled title="This comment has been flagged">Flagged</button>
-                {% else %}
-                    <form method="POST" action="{{ url_for('post.flag_comment', comment_id=comment.id) }}" style="display: inline;">
-                        {{ flag_comment_form.hidden_tag() }} {# Use the correct form instance #}
-                        <button type="submit" class="adw-button flat compact" title="Flag this comment for review">Flag</button>
-                    </form>
-                {% endif %}
-            {% endif %}
-            {% if current_user.is_authenticated and (comment.author == current_user or post.author == current_user or current_user.is_admin) %}
-            {# Modified for Adwaita dialog: button type is 'button', not 'submit'. JS will handle form submission. #}
-            <form method="POST" action="{{ url_for('post.delete_comment', comment_id=comment.id) }}" style="display: inline;" class="comment-delete-form" id="delete-comment-form-{{ comment.id }}">
-                {{ delete_comment_form.hidden_tag() }}
-                <button type="button" class="adw-button destructive-action compact comment-delete-button" data-form-id="delete-comment-form-{{ comment.id }}" data-comment-id="{{ comment.id }}">Delete</button>
-            </form>
-            {% endif %}
-        </div>
-        <div class="reply-form-container" id="reply-form-for-{{ comment.id }}" style="display: none; margin-top: var(--spacing-s);">
-            {# Reply form will be injected here by JS #}
-        </div>
-
-        {# Recursively render replies within this comment's div #}
-        {% if comment.replies | length > 0 %}
-            <div class="comment-replies-container" style="margin-top: var(--spacing-s);">
-                {% for reply_comment in comment.replies %}
-                    {{ render_comment_with_replies(reply_comment, post, delete_comment_form, current_user, form, is_reply=true) }}
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
-    {% endmacro %}
 
     <section class="comments-section" aria-labelledby="comments-heading">
         <h2 id="comments-heading" class="adw-title-2">Comments ({{ post.comments.count() }})</h2>

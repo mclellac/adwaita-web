@@ -33,7 +33,6 @@ def create_app(config_name=None, yaml_config_override=None):
         for key, value in yaml_config_override.items():
             app.config[key.upper()] = value
 
-    # Setup logging (MUST be before any app.logger calls for warnings etc.)
     if not app.debug and not app.testing: # pragma: no cover
         stream_handler = logging.StreamHandler()
         stream_handler.setLevel(logging.INFO)
@@ -157,6 +156,8 @@ def create_app(config_name=None, yaml_config_override=None):
     app.register_blueprint(api_bp)
     from .routes.like_routes import like_bp
     app.register_blueprint(like_bp)
+    from .routes.repost_routes import repost_bp
+    app.register_blueprint(repost_bp)
 
     from sqlalchemy.exc import SQLAlchemyError
 
@@ -193,26 +194,12 @@ def create_app(config_name=None, yaml_config_override=None):
     def server_error_page(error): # pragma: no cover
         user_info = f"User: {current_user.username}" if current_user.is_authenticated else "User: Anonymous"
         app.logger.error(f"[ERROR_HANDLER] 500 Server Error - Path: {request.path}, IP: {request.remote_addr}, {user_info}, Error: {error}", exc_info=True)
-        # Avoid rollback if it's already handled by a more specific handler like SQLAlchemyError
-        # This basic 500 handler should not assume the error is DB related if not SQLAlchemyError
-        # if not isinstance(error.original_exception, SQLAlchemyError): # Check original exception if available
-        #    try:
-        #        if db.session.is_active: # Check if there's an active session that might need rollback
-        #            db.session.rollback()
-        #    except Exception: # pragma: no cover
-        #        pass # Avoid errors during error handling
         return render_template('500.html'), 500
 
     @app.after_request
     def add_security_headers(response):
-        # Add X-Frame-Options to help prevent clickjacking
-        # DENY: Prevents the page from being displayed in a frame, regardless of the site attempting to do so.
-        # SAMEORIGIN: Allows the page to be displayed in a frame on the same origin as the page itself.
-        # ALLOW-FROM uri: Allows the page to be displayed in a frame only on the specified origin uri. (Obsolete in modern browsers)
-        if not current_app.testing: # Use current_app.testing to check if in testing mode
+        if not current_app.testing:
              response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-        # Other headers like Content-Security-Policy (CSP) could also be added here
-        # response.headers['Content-Security-Policy'] = "default-src 'self'"
         return response
 
     app.logger.info("Flask application instance created and configured.")

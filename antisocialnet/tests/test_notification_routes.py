@@ -19,8 +19,8 @@ def create_test_notification(db_session, user_recipient, actor_user, type="new_l
             notif.target_type = 'post'
             notif.target_id = target_object.id
         # Add other target types if needed (Comment, UserPhoto, etc.)
-    db_session.add(notif)
-    db_session.commit()
+    db.session.add(notif)
+    db.session.commit()
     return notif
 
 # --- List Notifications Route Tests (/notifications/) ---

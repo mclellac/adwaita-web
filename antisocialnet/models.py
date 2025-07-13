@@ -66,10 +66,6 @@ class User(UserMixin, db.Model):
         current_app.logger.debug(f"User {self.username}: set_password called.")
 
     def check_password(self, password):
-        # Replaced print with logger.debug
-        # Note: Logging the password itself, even at debug, can be risky if logs are not properly secured.
-        # Consider logging only the fact of the check or the username.
-        # For now, keeping it similar to original intent but with logger.
         current_app.logger.debug(f"User {self.username}: check_password called for password verification.")
         is_correct = check_password_hash(self.password_hash, password)
         current_app.logger.debug(f"User {self.username}: check_password result: {is_correct}")
@@ -107,25 +103,72 @@ class User(UserMixin, db.Model):
 
     def like_item(self, target_type: str, target_id: int):
         if not self.has_liked_item(target_type, target_id):
-            # Ensure the Like model is correctly referenced here
             like = Like(user_id=self.id, target_type=target_type, target_id=target_id)
             db.session.add(like)
+
+            item_author = None
+            if target_type == 'post':
+                item_author = Post.query.get(target_id).author
+            elif target_type == 'comment':
+                item_author = Comment.query.get(target_id).author
+            elif target_type == 'photo':
+                item_author = UserPhoto.query.get(target_id).author
+
+            if item_author and item_author.id != self.id:
+                notification = Notification(user_id=item_author.id, actor_id=self.id, type='new_like', target_type=target_type, target_id=target_id)
+                db.session.add(notification)
+
+            activity = Activity(user_id=self.id, type='liked_item', target_type=target_type, target_id=target_id)
+            db.session.add(activity)
+
             return True
         return False
 
     def unlike_item(self, target_type: str, target_id: int):
-        # Ensure the Like model is correctly referenced here
         like = Like.query.filter_by(user_id=self.id, target_type=target_type, target_id=target_id).first()
         if like:
             db.session.delete(like)
+
+            # Remove the corresponding notification
+            Notification.query.filter_by(
+                actor_id=self.id,
+                type='new_like',
+                target_type=target_type,
+                target_id=target_id
+            ).delete()
+
+            # Remove the corresponding activity
+            Activity.query.filter_by(
+                user_id=self.id,
+                type='liked_item',
+                target_type=target_type,
+                target_id=target_id
+            ).delete()
+
             return True
         return False
 
     def has_liked_item(self, target_type: str, target_id: int):
-        # Ensure the Like model is correctly referenced here
         return Like.query.filter_by(user_id=self.id, target_type=target_type, target_id=target_id).count() > 0
 
-    def get_reset_password_token(self, expires_in_seconds=1800): # Default 30 minutes
+    def repost_post(self, post):
+        if not self.has_reposted_post(post):
+            repost = Repost(user_id=self.id, post_id=post.id)
+            db.session.add(repost)
+            return True
+        return False
+
+    def unrepost_post(self, post):
+        repost = Repost.query.filter_by(user_id=self.id, post_id=post.id).first()
+        if repost:
+            db.session.delete(repost)
+            return True
+        return False
+
+    def has_reposted_post(self, post):
+        return Repost.query.filter_by(user_id=self.id, post_id=post.id).count() > 0
+
+    def get_reset_password_token(self, expires_in_seconds=1800):
         """
         Generates a secure, timed token for password reset.
 
@@ -237,6 +280,18 @@ class Category(db.Model):
     def __repr__(self):
         return f'<Category {self.name}>'
 
+class Repost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    user = db.relationship('User', backref=db.backref('reposts', lazy='dynamic'))
+    post = db.relationship('Post', backref=db.backref('reposts', lazy='dynamic'))
+
+    def __repr__(self):
+        return f'<Repost user_id={self.user_id} post_id={self.post_id}>'
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
@@ -284,7 +339,12 @@ class Post(db.Model):
     @property
     def like_count(self):
         """Returns the number of likes for this post."""
-        return self.likes.count() # Efficient way to count related items
+        return self.likes.count()
+
+    @property
+    def repost_count(self):
+        """Returns the number of reposts for this post."""
+        return self.reposts.count()
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
