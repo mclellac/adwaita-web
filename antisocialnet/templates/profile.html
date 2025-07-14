@@ -1,795 +1,168 @@
 {% extends "base.html" %}
 
-{% block title %}Profile: {{ user_profile.full_name or ('User ' ~ user_profile.id) }}{% endblock %}
+{% block title %}Profile{% endblock %}
 
-{% block header_title %}{{ user_profile.full_name or ('User ' ~ user_profile.id) }}'s Profile{% endblock %}
-
-{% block header_actions_start %}
-    {% if current_user == user_profile %}
-        <a href="{{ url_for('profile.edit_profile') }}" class="adw-button suggested-action">Edit Profile</a>
-    {% elif current_user.is_authenticated %} {# Only show follow/unfollow if logged in and not viewing own profile #}
-        {% if current_user.is_following(user_profile) %}
-            <form action="{{ url_for('profile.unfollow_user', user_id=user_profile.id) }}" method="POST" style="display: inline;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="adw-button">Unfollow</button>
-            </form>
-        {% else %}
-            <form action="{{ url_for('profile.follow_user', user_id=user_profile.id) }}" method="POST" style="display: inline;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="adw-button suggested-action">Follow</button>
-            </form>
-        {% endif %}
-    {% endif %}
-{% endblock %}
+{% block header_title %}Profile{% endblock %}
 
 {% block content %}
-
-{# Dialog for Full-Size Profile Photo #}
-<adw-dialog id="profile-photo-dialog" title="Profile Photo">
-    <div slot="content" class="dialog-image-content" style="text-align: center; padding: var(--spacing-m);">
-        <img id="full-profile-photo-img" src="" alt="Full-size profile photo" style="max-width: 100%; max-height: 80vh; display: block; margin: auto;">
-    </div>
-    {# No explicit buttons needed, header close button is sufficient #}
-</adw-dialog>
-
-{# Dialog for Full-Size Gallery Photo #}
-<adw-dialog id="gallery-photo-dialog" title="Gallery Photo">
-    <div slot="content" class="dialog-image-content" style="text-align: center; padding: var(--spacing-m);">
-        <img id="full-gallery-photo-img" src="" alt="Full-size gallery photo" style="max-width: 100%; max-height: 70vh; display: block; margin: auto;"> {# Reduced max-height for comment space #}
-        <p id="full-gallery-photo-caption" class="adw-label body-1" style="margin-top: var(--spacing-s);"></p> {# Removed margin-bottom #}
-
-        {# Like button for the photo itself in the dialog - Will need JS to update this dynamically #}
-        <div id="gallery-photo-dialog-like-section" class="adw-box justify-center" style="margin-bottom: var(--spacing-m);">
-            {# This section will be populated by JS with the like_button_and_count macro output or similar structure #}
-            {# Placeholder for JS to fill based on current photo's like status and count #}
-        </div>
-
-        <hr style="margin: var(--spacing-m) 0;">
-
-        <div class="photo-comments-area" style="max-height: 30vh; overflow-y: auto; text-align: left; margin-bottom: var(--spacing-m);">
-            <h3 class="adw-title-4" style="margin-bottom: var(--spacing-s);">Comments</h3>
-            <div id="gallery-photo-comments-list" class="adw-list-box flat compact">
-                {# Comments will be loaded here by JS #}
-                <div class="adw-action-row placeholder-comment" style="display: none;">
-                     <span class="adw-action-row-subtitle">No comments yet, or loading...</span>
-                </div>
-            </div>
-        </div>
-
-        {% if current_user.is_authenticated %}
-        <form id="new-gallery-comment-form" class="stacked-form" style="text-align: left;">
-            <input type="hidden" id="gallery-comment-photo-id" name="photo_id" value="">
-            <div class="adw-action-row column-layout">
-                 <label for="gallery-comment-text" class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">Your Comment</label>
-                <textarea id="gallery-comment-text" name="text" class="adw-entry" rows="2" placeholder="Write a comment..." required style="width: 100%; min-height: 60px; box-sizing: border-box;"></textarea>
-                <div id="gallery-comment-error" class="error-text adw-label caption" style="display:none; margin-top: var(--spacing-xs);"></div>
-            </div>
-            <div class="form-actions-end" style="margin-top: var(--spacing-s);">
-                <button type="submit" class="adw-button suggested-action">Post Comment</button>
-            </div>
-        </form>
-        {% else %}
-        <p class="adw-label body-1"><a href="{{ url_for('auth.login', next=request.url) }}" class="adw-link">Login</a> to comment.</p>
-        {% endif %}
-    </div>
-</adw-dialog>
-
 <div class="adw-clamp adw-clamp-xl">
-    <div class="adw-box adw-box-vertical adw-box-spacing-l profile-page-main-box">
-
-        {# User Header Info #}
-        <div class="adw-box adw-box-spacing-xl align-center"> {# Horizontal by default #}
-            <div class="adw-avatar size-huge" id="profile-page-avatar-container" style="cursor: pointer;" title="View full-size photo"> {# size-huge for 96px, added ID and style #}
-                {% if user_profile.profile_photo_url %}
-                <img id="profile-page-avatar-img" src="{{ url_for('static', filename=user_profile.profile_photo_url) }}" alt="{{ user_profile.full_name or ('User ' ~ user_profile.id) }} avatar">
-                {% else %}
-                <img id="profile-page-avatar-img" src="{{ default_avatar_url }}" alt="{{ user_profile.full_name or ('User ' ~ user_profile.id) }} default avatar">
-                {% endif %}
-            </div>
-            <div class="adw-box adw-box-vertical adw-box-spacing-xs">
-                <h1 class="adw-label title-1">{{ user_profile.full_name or ('User ' ~ user_profile.id) }}</h1>
-                {# The @mention style display based on full_name will be tricky here if full_name has spaces.
-                   For now, let's use full_name directly if it exists, or a generic user ID as a placeholder.
-                   A proper @mention token might need to be a separate field or derived carefully.
-                   The AGENTS.md now specifies @Full Name.
-                #}
-                {% if user_profile.full_name %}
-                <div><span class="adw-label adw-caption">@{{ user_profile.full_name }}</span></div>
-                {% else %}
-                <div><span class="adw-label adw-caption">User ID: {{ user_profile.id }}</span></div>
-                {% endif %}
-                <div class="adw-box adw-box-horizontal adw-box-spacing-s profile-follow-stats">
-                    <a href="{{ url_for('profile.followers_list', user_id=user_profile.id) }}" class="adw-link">
-                        <span class="adw-label body-2"><strong>{{ user_profile.followers.count() }}</strong> Followers</span>
-                    </a>
-                    <a href="{{ url_for('profile.following_list', user_id=user_profile.id) }}" class="adw-link">
-                        <span class="adw-label body-2"><strong>{{ user_profile.followed.count() }}</strong> Following</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        {# Profile Details Group #}
-        <div class="adw-preferences-group" role="group" aria-labelledby="profile-details-title-{{user_profile.id}}">
-             <div class="adw-preferences-group__title-container">
-                <h2 class="adw-preferences-group__title title-2" id="profile-details-title-{{user_profile.id}}">About {{ user_profile.full_name or ('User ' ~ user_profile.id) }}</h2>
-            </div>
-            <div class="adw-list-box">
-                {% if user_profile.profile_info %}
-                <div class="adw-expander-row profile-bio-expander"> {# Use div structure, add custom class for JS hook if needed #}
-                    <div class="adw-action-row activatable" role="button" tabindex="0" aria-expanded="false" aria-controls="profile-bio-content-{{user_profile.id}}">
-                        <span class="adw-action-row-text-content">
-                            <span class="adw-action-row-title">Biography</span>
-                            {# Subtitle can be removed or changed, e.g., to show a preview if desired later #}
-                        </span>
-                        <span class="adw-expander-row-icon"></span> {# Standard chevron element #}
-                    </div>
-                    <div class="adw-expander-row-content" id="profile-bio-content-{{user_profile.id}}" style="padding: var(--spacing-s) var(--spacing-m);">
-                        <div class="styled-text-content"> {# Wrap bio in styled-text-content for prose styling #}
-                             {{ user_profile.profile_info | safe }}
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                <div class="adw-action-row">
-                    <span class="adw-action-row__title">Biography</span>
-                    <span class="adw-action-row__subtitle">No bio provided.</span>
-                </div>
-                {% endif %}
-
-                {% if calculated_age is not none %} {# Use calculated_age passed from route #}
-                <div class="adw-action-row">
-                    <span class="adw-action-row__title">Age</span>
-                    <span class="adw-action-row__subtitle">{{ calculated_age }}</span>
-                </div>
-                {% endif %}
-
-                {# Detailed Address Fields #}
-                {% if user_profile.street_address %}
-                <div class="adw-action-row">
-                    <span class="adw-action-row__title">Street Address</span>
-                    <span class="adw-action-row__subtitle">{{ user_profile.street_address }}</span>
-                </div>
-                {% endif %}
-                {% if user_profile.city %}
-                <div class="adw-action-row">
-                    <span class="adw-action-row__title">City</span>
-                    <span class="adw-action-row__subtitle">{{ user_profile.city }}</span>
-                </div>
-                {% endif %}
-                {% if user_profile.state_province %}
-                <div class="adw-action-row">
-                    <span class="adw-action-row__title">State/Province</span>
-                    <span class="adw-action-row__subtitle">{{ user_profile.state_province }}</span>
-                </div>
-                {% endif %}
-                {% if user_profile.postal_code %}
-                <div class="adw-action-row">
-                    <span class="adw-action-row__title">Postal/Zip Code</span>
-                    <span class="adw-action-row__subtitle">{{ user_profile.postal_code }}</span>
-                </div>
-                {% endif %}
-                {% if user_profile.country %}
-                <div class="adw-action-row">
-                    <span class="adw-action-row__title">Country</span>
-                    <span class="adw-action-row__subtitle">{{ user_profile.country }}</span>
-                </div>
-                {% endif %}
-
-                {# Detailed Phone Fields #}
-                {% if user_profile.home_phone %}
-                <div class="adw-action-row">
-                    <span class="adw-action-row__title">Home Phone</span>
-                    <span class="adw-action-row__subtitle">{{ user_profile.home_phone }}</span>
-                </div>
-                {% endif %}
-                {% if user_profile.mobile_phone %}
-                <div class="adw-action-row">
-                    <span class="adw-action-row__title">Mobile Phone</span>
-                    <span class="adw-action-row__subtitle">{{ user_profile.mobile_phone }}</span>
-                </div>
-                {% endif %}
-
-                {% if user_profile.website_url %}
-                    {% if user_profile.website_url.startswith('http://') or user_profile.website_url.startswith('https://') %}
-                    <a href="{{ user_profile.website_url }}" target="_blank" class="adw-action-row activatable">
-                        <span class="adw-action-row__title">Website</span>
-                        <span class="adw-action-row__subtitle">{{ user_profile.website_url }}</span>
-                        <span class="adw-action-row__chevron"></span>
-                    </a>
-                    {% else %}
-                    <div class="adw-action-row">
-                        <span class="adw-action-row__title">Website</span>
-                        <span class="adw-action-row__subtitle">{{ user_profile.website_url }} (Not a valid link)</span>
-                    </div>
-                    {% endif %}
-                {% endif %}
-
-                {% if current_user == user_profile %}
-                <div class="adw-action-row">
-                    <span class="adw-action-row__title">Profile Privacy</span>
-                    <span class="adw-action-row__subtitle">{{ 'Public' if user_profile.is_profile_public else 'Private (Only you can see full details)' }}</span>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        {# User Posts Section #}
-        <div class="adw-preferences-group" role="group" aria-labelledby="user-posts-title-{{user_profile.id}}">
-            <div class="adw-preferences-group__title-container">
-                <h2 class="adw-preferences-group__title title-2" id="user-posts-title-{{user_profile.id}}">Posts by {{ user_profile.full_name or ('User ' ~ user_profile.id) }}</h2>
-            </div>
-            {% if posts_pagination and posts_pagination.items %}
-                <div class="blog-posts-container"> {# Use new card container #}
-                    {% for post in posts_pagination.items %}
-                    <article class="adw-card blog-post-item-card">
-                        <header class="blog-post-card__header">
-                            {# Post title removed, content will be linked in footer or by making card clickable if desired #}
-                            <div class="blog-post-card__meta adw-label caption">
-                                {%- if post.published_at -%}
-                                    Published: <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                                {%- else -%} {# Should ideally not happen for new posts, but fallback for old data #}
-                                    Created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                                {%- endif -%}
-                            </div>
-                        </header>
-                        {# No excerpt shown on profile post list for brevity, or could add a short one #}
-                        <footer class="blog-post-card__footer">
-                             <div class="blog-post-card__terms">
-                                {# Terms (categories/tags) could be added here if desired #}
-                            </div>
-                            <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat read-more-link">View Post <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
-                        </footer>
-                        <div class="adw-card__actions card-secondary-actions">
-                            {% from "_macros.html" import like_button_and_count %}
-                            {{ like_button_and_count(post, 'post', current_user) }}
-                        </div>
-                    </article>
-                    {% endfor %}
-                </div>
-
-                {# Pagination Controls - Using Adwaita ToggleGroup for a more native feel #}
-                {% if posts_pagination.pages > 1 %}
-                <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
-                    <div class="adw-toggle-group">
-                        {% if posts_pagination.has_prev %}
-                            <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=posts_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
-                                <span class="adw-icon icon-actions-go-previous-symbolic"></span>
-                            </a>
-                        {% else %}
-                            <button class="adw-button icon-only" disabled aria-label="Previous page">
-                                <span class="adw-icon icon-actions-go-previous-symbolic"></span>
-                            </button>
-                        {% endif %}
-
-                        {% for page_num in posts_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-                            {% if page_num %}
-                                {% if page_num == posts_pagination.page %}
-                                    <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
-                                {% else %}
-                                    <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=page_num) }}" class="adw-button">{{ page_num }}</a>
-                                {% endif %}
-                            {% else %}
-                                <button class="adw-button flat" disabled>…</button>
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if posts_pagination.has_next %}
-                             <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=posts_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
-                                <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                            </a>
-                        {% else %}
-                            <button class="adw-button icon-only" disabled aria-label="Next page">
-                                <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                            </button>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
-            {% else %}
-                <div class="adw-status-page">
-                    <span class="adw-icon icon-content-document-new-symbolic adw-status-page-icon app-status-page-icon"></span>
-                    <h3 class="adw-status-page-title">No Posts Yet</h3>
-                    <p class="adw-status-page-description">{{ user_profile.full_name or ('User ' ~ user_profile.id) }} has not made any posts.</p>
-                </div>
-            {% endif %}
-        </div>
-
-        {# User Comments Section #}
-        <div class="adw-preferences-group" role="group" aria-labelledby="user-comments-title-{{user_profile.id}}">
-            <div class="adw-preferences-group__title-container">
-                <h2 class="adw-preferences-group__title title-2" id="user-comments-title-{{user_profile.id}}">Comments by {{ user_profile.full_name or ('User ' ~ user_profile.id) }}</h2>
-            </div>
-            {% if comments_pagination and comments_pagination.items %}
-                <div class="adw-list-box">
-                    {% for comment in comments_pagination.items %}
-                    <a href="{{ url_for('post.view_post', post_id=comment.post_id, _anchor='comment-' ~ comment.id) }}" class="adw-action-row activatable">
-                        <div class="adw-action-row__text">
-                            <span class="adw-action-row__title">Comment on post by {{ comment.post.author.full_name or ('User ' ~ comment.post.author.id) }}</span>
-                            <span class="adw-action-row__subtitle">"{{ comment.text | truncate(100, True) }}"</span>
-                            <small class="adw-label caption">
-                                <time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                            </small>
-                        </div>
-                        <span class="adw-action-row__chevron"></span>
-                    </a>
-                    {% endfor %}
-                </div>
-
-                {# Pagination Controls for Comments #}
-                {% if comments_pagination.pages > 1 %}
-                <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
-                    <div class="adw-toggle-group">
-                        {% if comments_pagination.has_prev %}
-                            <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=comments_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous comments page">
-                                <span class="adw-icon icon-actions-go-previous-symbolic"></span>
-                            </a>
-                        {% else %}
-                            <button class="adw-button icon-only" disabled aria-label="Previous comments page">
-                                <span class="adw-icon icon-actions-go-previous-symbolic"></span>
-                            </button>
-                        {% endif %}
-
-                        {% for page_num in comments_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-                            {% if page_num %}
-                                {% if page_num == comments_pagination.page %}
-                                    <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
-                                {% else %}
-                                    <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=page_num) }}" class="adw-button">{{ page_num }}</a>
-                                {% endif %}
-                            {% else %}
-                                <button class="adw-button flat" disabled>…</button>
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if comments_pagination.has_next %}
-                             <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, comments_page=comments_pagination.next_num) }}" class="adw-button icon-only" aria-label="Next comments page">
-                                <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                            </a>
-                        {% else %}
-                            <button class="adw-button icon-only" disabled aria-label="Next comments page">
-                                <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                            </button>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
-            {% else %}
-                <div class="adw-status-page">
-                    <span class="adw-icon icon-content-message-symbolic adw-status-page-icon app-status-page-icon"></span>
-                    <h3 class="adw-status-page-title">No Comments Yet</h3>
-                    <p class="adw-status-page-description">{{ user_profile.full_name or ('User ' ~ user_profile.id) }} has not made any comments.</p>
-                </div>
-            {% endif %}
-        </div>
-
-        {# User Photo Gallery Section #}
-        <div class="adw-preferences-group" role="group" aria-labelledby="user-gallery-title-{{user_profile.id}}">
-            <div class="adw-preferences-group__title-container">
-                <h2 class="adw-preferences-group__title title-2" id="user-gallery-title-{{user_profile.id}}">Photo Gallery</h2>
-            </div>
-
-            {% if current_user == user_profile %}
-            <div class="adw-list-box profile-gallery-upload-box">
-                <div class="adw-action-row">
-                    <h3 class="adw-action-row__title">Upload New Photo to Gallery</h3>
-                </div>
-                <form method="POST" action="{{ url_for('profile.upload_gallery_photo') }}" enctype="multipart/form-data" class="gallery-upload-form">
-                    {{ gallery_upload_form.hidden_tag() if gallery_upload_form else '' }} {# CSRF token #}
-
-                    {# File Input - Custom Styling Approach #}
-                    <div class="form-field-container {{ 'has-error' if gallery_upload_form and gallery_upload_form.photos.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-s) var(--spacing-m);">
-                        <label class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.photos.label.text if gallery_upload_form else 'Photo Files' }}</label>
-                        {% if gallery_upload_form and gallery_upload_form.photos.errors %}
-                            <p class="adw-label caption error-text" style="margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.photos.errors|join(' ') }}</p>
-                        {% endif %}
-                        <div class="adw-box adw-box-horizontal adw-box-spacing-s align-center">
-                            {# Visually hidden actual file input #}
-                            {{ gallery_upload_form.photos(style="display:none;", id="gallery_photos_input_actual") if gallery_upload_form }}
-                            {# Styled label acting as a button #}
-                            <label for="gallery_photos_input_actual" class="adw-button">
-                                <span class="adw-icon icon-actions-document-open-symbolic"></span> Choose Files
-                            </label>
-                            <span id="gallery-photo-filenames" class="adw-label caption" style="margin-left: var(--spacing-s);">No files selected</span>
-                        </div>
-                    </div>
-
-                    {# Caption Textarea - Revised Structure #}
-                    <div class="form-field-container {{ 'has-error' if gallery_upload_form and gallery_upload_form.caption.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);">
-                        <label for="{{ gallery_upload_form.caption.id if gallery_upload_form else 'gallery_caption_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.caption.label.text if gallery_upload_form else 'Caption' }}</label>
-                        {% if gallery_upload_form and gallery_upload_form.caption.errors %}
-                            <p class="adw-label caption error-text" style="margin-bottom: var(--spacing-xs);">{{ gallery_upload_form.caption.errors|join(' ') }}</p>
-                        {% endif %}
-                        {{ gallery_upload_form.caption(class="adw-entry", rows="2", placeholder="Optional caption...", style="width: 100%; min-height: 60px; box-sizing: border-box;") if gallery_upload_form }}
-                    </div>
-                   <div class="form-actions-end adw-box adw-box-horizontal adw-box-spacing-s justify-end" style="padding: 0 var(--spacing-m) var(--spacing-m) var(--spacing-m);">
-                       {{ gallery_upload_form.submit(class="adw-button suggested-action", id="gallery-upload-submit-button") if gallery_upload_form }}
-                       <span class="adw-spinner small" id="gallery-upload-spinner" style="display: none;"></span>
-                   </div>
-                </form>
-            </div>
-            {% endif %}
-
-            {% set gallery_photos_preview = user_profile.gallery_photos.order_by(UserPhoto.uploaded_at.desc()).limit(6).all() %}
-            {% set total_gallery_photos = user_profile.gallery_photos.count() %}
-
-            {% if gallery_photos_preview %}
-                <div class="profile-gallery-grid">
-                    {% for photo in gallery_photos_preview %}
-                    <div class="adw-card gallery-photo-card">
-                        <img src="{{ url_for('static', filename=photo.image_filename) }}"
-                             alt="{{ photo.caption or ('Gallery image by ' ~ (user_profile.full_name or ('User ' ~ user_profile.id))) }}"
-                             class="gallery-photo-image clickable-gallery-photo"
-                             data-fullsrc="{{ url_for('static', filename=photo.image_filename) }}"
-                             data-caption="{{ photo.caption or '' }}"
-                              data-photoid="{{ photo.id }}" {# Added photo ID #}
-                             style="cursor: pointer;"
-                             title="View full-size photo">
-
-                        <div class="adw-card__content gallery-photo-caption-and-likes">
-                            {% if photo.caption %}
-                                <p class="adw-label body-2" style="margin-bottom: var(--spacing-xs);">{{ photo.caption }}</p>
-                            {% endif %}
-                            {# Add like button for photo preview card #}
-                            {% from "_macros.html" import like_button_and_count %}
-                            <div class="profile-gallery-preview-like-section">
-                                {{ like_button_and_count(photo, 'photo', current_user) }}
-                            </div>
-                        </div>
-
-                        {% if current_user == user_profile or current_user.is_admin %}
-                        <div class="adw-card__actions gallery-photo-actions">
-                             <form method="POST" action="{{ url_for('profile.delete_gallery_photo', photo_id=photo.id) }}" style="display: inline;">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="adw-button destructive-action flat small" onclick="return confirm('Are you sure you want to delete this photo?');">
-                                    <span class="adw-icon icon-actions-edit-delete-symbolic"></span> Delete
-                                </button>
-                            </form>
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-                {% if total_gallery_photos > 0 %} {# Show view all button if there's at least one photo #}
-                <div class="adw-box justify-center" style="margin-top: var(--spacing-m);">
-                    <a href="{{ url_for('profile.view_gallery', user_id=user_profile.id) }}" class="adw-button">
-                        View All Photos ({{ total_gallery_photos }}) <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                    </a>
-                </div>
-                {% endif %}
-            {% else %}
-                <div class="adw-status-page">
-                    <span class="adw-icon icon-media-image-symbolic adw-status-page-icon app-status-page-icon"></span>
-                    <h3 class="adw-status-page-title">Empty Gallery</h3>
-                    <p class="adw-status-page-description">{{ user_profile.full_name or ('User ' ~ user_profile.id) }} has not uploaded any photos to their gallery yet.</p>
-                    {% if current_user != user_profile %}
-                    <p class="adw-status-page-description">Check back later!</p>
-                    {% endif %}
-                </div>
-            {% endif %}
-        </div>
-
+    <div id="profile-container"></div>
+    <div id="posts-container"></div>
+    <div id="photos-container"></div>
+    <div id="loading-indicator" class="adw-status-page">
+        <adw-spinner size="l" active></adw-spinner>
+        <h3 class="adw-status-page-title">Loading...</h3>
     </div>
 </div>
 
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Full-size profile photo dialog logic
-    const avatarContainer = document.getElementById('profile-page-avatar-container');
-    const fullSizePhotoDialog = document.getElementById('profile-photo-dialog');
-    const fullSizePhotoImg = document.getElementById('full-profile-photo-img');
-    const profileAvatarImg = document.getElementById('profile-page-avatar-img');
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileContainer = document.getElementById('profile-container');
+        const postsContainer = document.getElementById('posts-container');
+        const photosContainer = document.getElementById('photos-container');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const userId = window.location.pathname.split('/').pop();
 
-    if (avatarContainer && fullSizePhotoDialog && fullSizePhotoImg && profileAvatarImg) {
-        customElements.whenDefined('adw-dialog').then(() => {
-            avatarContainer.addEventListener('click', () => {
-                const photoUrl = profileAvatarImg.src; // Get the src from the visible avatar
-                if (photoUrl) {
-                    fullSizePhotoImg.src = photoUrl;
-                    fullSizePhotoDialog.open();
-                }
-            });
-        }).catch(error => {
-            console.error("profile.html: Failed to initialize full-size photo dialog; adw-dialog definition not found.", error);
-        });
-    } else {
-        if (!avatarContainer) console.warn("profile.html: Avatar container not found.");
-        if (!fullSizePhotoDialog) console.warn("profile.html: Full-size photo dialog element not found.");
-        if (!fullSizePhotoImg) console.warn("profile.html: Full-size photo img element not found.");
-        if (!profileAvatarImg) console.warn("profile.html: Profile avatar img element not found.");
-    }
-
-    // Full-size gallery photo dialog logic
-    const galleryPhotoDialog = document.getElementById('gallery-photo-dialog');
-    const fullGalleryPhotoImg = document.getElementById('full-gallery-photo-img');
-    const fullGalleryPhotoCaption = document.getElementById('full-gallery-photo-caption');
-    const galleryPhotoCommentsList = document.getElementById('gallery-photo-comments-list');
-    const galleryPhotoDialogLikeSection = document.getElementById('gallery-photo-dialog-like-section');
-    const newGalleryCommentForm = document.getElementById('new-gallery-comment-form');
-    const galleryCommentText = document.getElementById('gallery-comment-text');
-    const galleryCommentPhotoIdInput = document.getElementById('gallery-comment-photo-id');
-    const galleryCommentError = document.getElementById('gallery-comment-error');
-    const placeholderComment = galleryPhotoCommentsList ? galleryPhotoCommentsList.querySelector('.placeholder-comment') : null;
-    const clickableGalleryPhotos = document.querySelectorAll('.clickable-gallery-photo');
-
-    // Helper function to format date (basic, can be improved)
-    function formatCommentDate(isoString) {
-        const date = new Date(isoString);
-        return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) + ' ' +
-               date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-    }
-
-    function displayGalleryComments(comments) {
-        galleryPhotoCommentsList.innerHTML = ''; // Clear existing
-        if (!comments || comments.length === 0) {
-            if(placeholderComment) {
-                placeholderComment.style.display = ''; // Show placeholder
-                placeholderComment.querySelector('.adw-action-row-subtitle').textContent = 'No comments yet.';
-                galleryPhotoCommentsList.appendChild(placeholderComment);
-            }
-            return;
-        }
-        if(placeholderComment) placeholderComment.style.display = 'none';
-
-        comments.forEach(comment => {
-            const commentDiv = document.createElement('div');
-            commentDiv.classList.add('adw-action-row'); // Use Adwaita styling for list items
-            // API now provides full_name (with 'User ID' fallback) and correct profile_url (ID-based)
-            const authorDisplayName = comment.author.full_name;
-            const authorProfileUrl = comment.author.profile_url;
-            const authorAvatarAlt = comment.author.full_name;
-
-            commentDiv.innerHTML = `
-                <span class="adw-avatar size-small" style="margin-right: var(--spacing-s);">
-                    <img src="${comment.author.profile_photo_url}" alt="${authorAvatarAlt} avatar">
-                </span>
-                <span class="adw-action-row-text-content">
-                    ${authorProfileUrl ? `<a href="${authorProfileUrl}" class="adw-link adw-action-row-title">${authorDisplayName}</a>` : `<span class="adw-action-row-title">${authorDisplayName}</span>`}
-                    <span class="adw-action-row-subtitle">${comment.text}</span>
-                    <small class="adw-label caption">${formatCommentDate(comment.created_at)}</small>
-                </span>
-            `;
-            galleryPhotoCommentsList.appendChild(commentDiv);
-        });
-    }
-
-    async function fetchGalleryComments(photoId) {
-        if(placeholderComment) {
-            placeholderComment.style.display = '';
-            placeholderComment.querySelector('.adw-action-row-subtitle').textContent = 'Loading comments...';
-            if (galleryPhotoCommentsList.childElementCount === 0) {
-                 galleryPhotoCommentsList.appendChild(placeholderComment);
-            }
-        }
-        try {
-            const response = await fetch(`/photo/api/photos/${photoId}/comments`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const comments = await response.json();
-            displayGalleryComments(comments);
-        } catch (error) {
-            console.error('Error fetching gallery comments:', error);
-            if(placeholderComment) placeholderComment.querySelector('.adw-action-row-subtitle').textContent = 'Could not load comments.';
-        }
-    }
-
-    // Function to render like button (simplified, assumes current_user context is available or not needed for display)
-    // This is a simplified version. A full Jinja macro render via JS is more complex.
-    // We'll create the HTML structure directly. This assumes `csrf_token()` is globally available or fetched.
-    // For a more robust solution, an API endpoint returning the like status and count would be better
-    // than trying to replicate the macro's HTML generation perfectly in JS.
-    // However, for now, we construct it.
-    async function renderLikeButtonForDialog(photoId, likeSectionElement) {
-        if (!likeSectionElement) return;
-        likeSectionElement.innerHTML = '<span class="adw-label caption">Loading like status...</span>'; // Placeholder
-
-        const csrfTokenVal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        try {
-            const response = await fetch(`/api/v1/item/photo/${photoId}/like_details`);
-            if (!response.ok) {
-                console.error("Failed to fetch like details:", response.status, await response.text());
-                likeSectionElement.innerHTML = '<span class="adw-label caption error-text">Could not load like status.</span>';
-                return;
-            }
-            const data = await response.json();
-
-            if (data.status === 'success') {
-                let likeButtonHtml = '';
-                if (data.current_user_has_liked) {
-                    likeButtonHtml = `
-                        <form action="/like/unlike/photo/${photoId}" method="POST" class="dialog-like-form" data-action="unlike" data-photoid="${photoId}" style="display: inline-block;">
-                            <input type="hidden" name="csrf_token" value="${csrfTokenVal}">
-                            <button type="submit" class="adw-button small flat" aria-label="Unlike photo">
-                                <span class="adw-icon icon-actions-starred-symbolic"></span> Unlike
-                            </button>
-                        </form>`;
-                } else {
-                    likeButtonHtml = `
-                        <form action="/like/photo/${photoId}" method="POST" class="dialog-like-form" data-action="like" data-photoid="${photoId}" style="display: inline-block;">
-                            <input type="hidden" name="csrf_token" value="${csrfTokenVal}">
-                            <button type="submit" class="adw-button small flat suggested-action" aria-label="Like photo">
-                                <span class="adw-icon icon-actions-star-symbolic"></span> Like
-                            </button>
-                        </form>`;
-                }
-                likeSectionElement.innerHTML = `
-                    ${likeButtonHtml}
-                    <span class="adw-label caption like-count" style="margin-left: var(--spacing-xs);">${data.like_count}</span>
-                `;
-
-                // Add event listeners to newly created forms for dynamic updates
-                likeSectionElement.querySelectorAll('.dialog-like-form').forEach(form => {
-                    form.addEventListener('submit', async function(event) {
-                        event.preventDefault();
-                        const currentForm = event.target;
-                        const action = currentForm.dataset.action;
-                        const photoIdForAction = currentForm.dataset.photoid;
-
-                        try {
-                            const likeUnlikeResponse = await fetch(currentForm.action, {
-                                method: 'POST',
-                                body: new FormData(currentForm) // FormData handles CSRF token
-                            });
-
-                            if (likeUnlikeResponse.ok) {
-                                // Instead of parsing HTML, just re-fetch and re-render the like button section
-                                renderLikeButtonForDialog(photoIdForAction, likeSectionElement);
-                            } else {
-                                console.error(`Failed to ${action} photo:`, likeUnlikeResponse.status);
-                                // Optionally show an error toast or message
-                                if (window.Adw && Adw.createToast) {
-                                    Adw.createToast(`Failed to ${action} photo.`, { type: 'error' });
-                                }
-                            }
-                        } catch (error) {
-                            console.error(`Error during ${action} action:`, error);
-                            if (window.Adw && Adw.createToast) {
-                                Adw.createToast(`Error during ${action} action.`, { type: 'error' });
-                            }
-                        }
-                    });
-                });
-
-            } else {
-                likeSectionElement.innerHTML = `<span class="adw-label caption error-text">${data.message || 'Error loading like status.'}</span>`;
-            }
-        } catch (error) {
-            console.error('Error in renderLikeButtonForDialog:', error);
-            likeSectionElement.innerHTML = '<span class="adw-label caption error-text">Could not load like status due to a network or script error.</span>';
-        }
-    }
-
-
-    if (galleryPhotoDialog && fullGalleryPhotoImg && fullGalleryPhotoCaption && galleryPhotoCommentsList && clickableGalleryPhotos.length > 0) {
-        customElements.whenDefined('adw-dialog').then(() => {
-            clickableGalleryPhotos.forEach(thumb => {
-                thumb.addEventListener('click', () => {
-                    const photoUrl = thumb.dataset.fullsrc;
-                    const caption = thumb.dataset.caption;
-                    const photoId = thumb.dataset.photoid;
-
-                    if (photoUrl && photoId) {
-                        fullGalleryPhotoImg.src = photoUrl;
-                        fullGalleryPhotoImg.alt = caption || "Full-size gallery photo";
-                        if (fullGalleryPhotoCaption) {
-                             fullGalleryPhotoCaption.textContent = caption || '';
-                        }
-                        if (galleryCommentPhotoIdInput) {
-                            galleryCommentPhotoIdInput.value = photoId;
-                        }
-                        fetchGalleryComments(photoId);
-                        if (galleryPhotoDialogLikeSection) { // Ensure like section exists
-                            renderLikeButtonForDialog(photoId, galleryPhotoDialogLikeSection);
-                        }
-                        galleryPhotoDialog.open();
-                    }
-                });
-            });
-        }).catch(error => {
-            console.error("profile.html: Failed to initialize gallery photo dialog; adw-dialog definition not found.", error);
-        });
-    } else {
-        // Warnings for missing elements
-        if (!galleryPhotoDialog) console.warn("profile.html: Gallery photo dialog element not found.");
-        // ... other warnings
-    }
-
-    if (newGalleryCommentForm && galleryCommentText && galleryCommentPhotoIdInput && galleryCommentError) {
-        newGalleryCommentForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const photoId = galleryCommentPhotoIdInput.value;
-            const commentText = galleryCommentText.value.trim();
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-
-            if (!commentText) {
-                galleryCommentError.textContent = "Comment cannot be empty.";
-                galleryCommentError.style.display = 'block';
-                return;
-            }
-            galleryCommentError.style.display = 'none';
+        async function fetchProfileData() {
+            loadingIndicator.style.display = 'block';
+            profileContainer.innerHTML = '';
+            postsContainer.innerHTML = '';
+            photosContainer.innerHTML = '';
 
             try {
-                const response = await fetch(`/photo/api/photos/${photoId}/comments`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify({ text: commentText })
-                });
+                // Fetch user data, posts, and photos in parallel
+                const [userResponse, postsResponse, photosResponse] = await Promise.all([
+                    fetch(`/api/v1/user/${userId}`),
+                    fetch(`/api/v1/user/${userId}/posts`),
+                    fetch(`/api/v1/user/${userId}/photos`)
+                ]);
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.errors ? JSON.stringify(errorData.errors) : `HTTP error! status: ${response.status}`);
-                }
+                if (!userResponse.ok) throw new Error('Failed to fetch user data');
+                const userData = await userResponse.json();
+                renderProfile(userData);
 
-                // const newComment = await response.json(); // Not strictly needed if refetching
-                galleryCommentText.value = ''; // Clear textarea
-                fetchGalleryComments(photoId); // Refresh comments list
+                if (!postsResponse.ok) throw new Error('Failed to fetch posts');
+                const postsData = await postsResponse.json();
+                renderPosts(postsData.items);
+
+                if (!photosResponse.ok) throw new Error('Failed to fetch photos');
+                const photosData = await photosResponse.json();
+                renderPhotos(photosData.items);
+
             } catch (error) {
-                console.error('Error posting comment:', error);
-                galleryCommentError.textContent = "Could not post comment: " + error.message;
-                galleryCommentError.style.display = 'block';
+                console.error('Error fetching profile data:', error);
+                profileContainer.innerHTML = '<p>Error loading profile. Please try again later.</p>';
+            } finally {
+                loadingIndicator.style.display = 'none';
             }
-        });
-    }
-
-
-    // Script for profile bio expander
-    const profileBioExpander = document.querySelector('.profile-bio-expander');
-    if (profileBioExpander) {
-        const header = profileBioExpander.querySelector('.adw-action-row.activatable');
-        const content = profileBioExpander.querySelector('.adw-expander-row-content');
-        const icon = profileBioExpander.querySelector('.adw-expander-row-icon');
-
-        if (header && content && icon) {
-            header.addEventListener('click', () => {
-                const isExpanded = header.getAttribute('aria-expanded') === 'true';
-                header.setAttribute('aria-expanded', !isExpanded);
-                content.classList.toggle('expanded', !isExpanded);
-                profileBioExpander.classList.toggle('expanded', !isExpanded); // For icon rotation
-            });
         }
-    }
 
-    // JavaScript for styled file input
-    const actualFileInput = document.getElementById('gallery_photos_input_actual');
-    const fileNamesSpan = document.getElementById('gallery-photo-filenames');
+        function renderProfile(user) {
+            const profileHeader = `
+                <div class="adw-box adw-box-spacing-xl align-center">
+                    <div class="adw-avatar size-huge">
+                        <img src="${user.profile_photo_url}" alt="${user.full_name} avatar">
+                    </div>
+                    <div class="adw-box adw-box-vertical adw-box-spacing-xs">
+                        <h1 class="adw-label title-1">${user.full_name}</h1>
+                        <div><span class="adw-label adw-caption">@${user.username}</span></div>
+                        <div class="adw-box adw-box-horizontal adw-box-spacing-s profile-follow-stats">
+                            <a href="/user/${user.id}/followers" class="adw-link">
+                                <span class="adw-label body-2"><strong>${user.followers_count}</strong> Followers</span>
+                            </a>
+                            <a href="/user/${user.id}/following" class="adw-link">
+                                <span class="adw-label body-2"><strong>${user.following_count}</strong> Following</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="adw-preferences-group" role="group">
+                    <div class="adw-preferences-group__title-container">
+                        <h2 class="adw-preferences-group__title title-2">About ${user.full_name}</h2>
+                    </div>
+                    <div class="adw-list-box">
+                        ${user.profile_info ? `
+                        <div class="adw-expander-row profile-bio-expander">
+                            <div class="adw-action-row activatable" role="button" tabindex="0" aria-expanded="false">
+                                <span class="adw-action-row-text-content">
+                                    <span class="adw-action-row-title">Biography</span>
+                                </span>
+                                <span class="adw-expander-row-icon"></span>
+                            </div>
+                            <div class="adw-expander-row-content" style="padding: var(--spacing-s) var(--spacing-m);">
+                                <div class="styled-text-content">
+                                     ${user.profile_info}
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+                        ${user.website_url ? `
+                        <a href="${user.website_url}" target="_blank" class="adw-action-row activatable">
+                            <span class="adw-action-row__title">Website</span>
+                            <span class="adw-action-row__subtitle">${user.website_url}</span>
+                            <span class="adw-action-row__chevron"></span>
+                        </a>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            profileContainer.innerHTML = profileHeader;
+        }
 
-    if (actualFileInput && fileNamesSpan) {
-        actualFileInput.addEventListener('change', function() {
-            if (this.files && this.files.length > 0) {
-                if (this.files.length === 1) {
-                    fileNamesSpan.textContent = this.files[0].name;
-                } else {
-                    fileNamesSpan.textContent = `${this.files.length} files selected`;
-                }
-            } else {
-                fileNamesSpan.textContent = 'No files selected';
+        function renderPosts(posts) {
+            if (posts.length === 0) {
+                postsContainer.innerHTML = '<div class="adw-status-page"><h3 class="adw-status-page-title">No Posts Yet</h3></div>';
+                return;
             }
-        });
-    }
 
-    // Gallery upload form spinner
-    const galleryUploadForm = document.querySelector('form.gallery-upload-form');
-    const gallerySubmitButton = document.getElementById('gallery-upload-submit-button');
-    const gallerySpinner = document.getElementById('gallery-upload-spinner');
+            let postsHtml = '<div class="adw-preferences-group" role="group"><h2 class="adw-preferences-group__title title-2">Posts</h2><div class="blog-posts-container">';
+            posts.forEach(post => {
+                postsHtml += `
+                    <article class="adw-card blog-post-item-card">
+                        <header class="blog-post-card__header">
+                            <div class="blog-post-card__meta adw-label caption">
+                                Published: <time datetime="${post.timestamp}">${new Date(post.timestamp).toLocaleString()}</time>
+                            </div>
+                        </header>
+                        <div class="adw-card__content styled-text-content">
+                            ${post.data.content_html_preview}
+                        </div>
+                        <footer class="blog-post-card__footer">
+                            <a href="${post.data.url}" class="adw-button flat read-more-link">View Post <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
+                        </footer>
+                        <div class="adw-card__actions card-secondary-actions">
+                            <adw-like-button item-id="${post.data.post_id}" item-type="post" initial-liked="${post.data.is_liked_by_current_user}" initial-like-count="${post.data.like_count}"></adw-like-button>
+                        </div>
+                    </article>
+                `;
+            });
+            postsHtml += '</div></div>';
+            postsContainer.innerHTML = postsHtml;
+        }
 
-    if (galleryUploadForm && gallerySubmitButton && gallerySpinner) {
-        galleryUploadForm.addEventListener('submit', function() {
-            gallerySubmitButton.disabled = true;
-            gallerySpinner.style.display = 'inline-block';
-            // Note: For file uploads, success/failure redirect will negate the need
-            // to re-enable the button or hide spinner here, unless it's an AJAX upload.
-        });
-    }
-});
+        function renderPhotos(photos) {
+            if (photos.length === 0) {
+                photosContainer.innerHTML = '<div class="adw-status-page"><h3 class="adw-status-page-title">No Photos Yet</h3></div>';
+                return;
+            }
+
+            let photosHtml = '<div class="adw-preferences-group" role="group"><h2 class="adw-preferences-group__title title-2">Photos</h2><div class="profile-gallery-grid">';
+            photos.forEach(photo => {
+                photosHtml += `
+                    <div class="adw-card gallery-photo-card">
+                        <img src="${photo.data.image_url_large}" alt="${photo.data.caption_html || 'Gallery image'}" class="gallery-photo-image">
+                        <div class="adw-card__content gallery-photo-caption-and-likes">
+                            ${photo.data.caption_html ? `<p class="adw-label body-2">${photo.data.caption_html}</p>` : ''}
+                            <adw-like-button item-id="${photo.data.photo_id}" item-type="userphoto" initial-liked="${photo.data.is_liked_by_current_user}" initial-like-count="${photo.data.like_count}"></adw-like-button>
+                        </div>
+                    </div>
+                `;
+            });
+            photosHtml += '</div></div>';
+            photosContainer.innerHTML = photosHtml;
+        }
+
+        fetchProfileData();
+    });
 </script>
 {% endblock %}

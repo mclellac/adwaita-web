@@ -855,16 +855,16 @@ def test_posts_by_category_pagination(client, app, db, create_test_user, create_
     # Check for the presence of the "go-next-symbolic" icon within an href link to page 2
     assert b'<adw-button icon-name="go-next-symbolic" href="' + expected_next_page_url_part.encode() + b'">' in response_p1.data
 
-        # Page 2
-        response_p2 = client.get(url_for('post.posts_by_category', category_slug=cat_paged.slug, page=2))
-        assert response_p2.status_code == 200
-        assert b"Paged Cat Post 2" in response_p2.data
-        assert b"Paged Cat Post 1" in response_p2.data
-        assert b"Paged Cat Post 3" not in response_p2.data
-        assert b"Previous" in response_p2.data
+    # Page 2
+    response_p2 = client.get(url_for('post.posts_by_category', category_slug=cat_paged.slug, page=2))
+    assert response_p2.status_code == 200
+    assert b"Paged Cat Post 2" in response_p2.data
+    assert b"Paged Cat Post 1" in response_p2.data
+    assert b"Paged Cat Post 3" not in response_p2.data
+    assert b"Previous" in response_p2.data
 
-        # Page beyond limit (empty)
-        response_p3 = client.get(url_for('post.posts_by_category', category_slug=cat_paged.slug, page=3))
+    # Page beyond limit (empty)
+    response_p3 = client.get(url_for('post.posts_by_category', category_slug=cat_paged.slug, page=3))
     assert response_p3.status_code == 200 # Should not be 404 for valid page number even if empty
     assert b"Paged Cat Post" not in response_p3.data # No posts
     # Check for "No posts found" or similar if template handles empty page after first.

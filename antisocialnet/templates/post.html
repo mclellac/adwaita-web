@@ -1,347 +1,122 @@
 {% extends "base.html" %}
-{% from "_macros.html" import like_button_and_count %}
 
-{% block page_title %}Post by {{ post.author.full_name or ('User ' ~ post.author.id) }}{% endblock %}
+{% block title %}Post{% endblock %}
 
-{% block header_title %}Post by {{ post.author.full_name or ('User ' ~ post.author.id) }}{% endblock %}
+{% block header_title %}Post{% endblock %}
 
 {% block content %}
-<div class="post-view"> {# Removed adw-clamp content-clamp as base.html provides clamp #}
-    <article class="post-article adw-card blog-content-card"> {# Added adw-card and specific class #}
-        <header class="post-header">
-            {# Title h1 removed #}
-            <div class="post-meta-detail">
-                <p class="adw-label body">
-                    By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-link">{{ post.author.full_name or ('User ' ~ post.author.id) if post.author else 'Unknown Author' }}</a>&nbsp;
-                    {%- if post.published_at -%}
-                        on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at | human_readable_date }}</time>
-                    {%- else -%} {# Should not happen for new posts, fallback for old data or if published_at was somehow not set #}
-                        on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at | human_readable_date }}</time>
-                    {%- endif -%}
-                </p>
-                {% set created_datetime = post.published_at or post.created_at %}
-                {% if post.updated_at and created_datetime and (post.updated_at.timestamp() - created_datetime.timestamp()) > 60 %}
-                    <p class="adw-label caption last-updated">(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at | human_readable_date }}</time>)</p>
-                {% endif %}
-            </div>
-
-            {% if post.categories %}
-            <div class="post-terms post-categories">
-                <strong class="adw-label caption post-meta-terms-label">Categories:</strong>
-                {% for category in post.categories %}
-                    <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact">{{ category.name }}</a>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            {% if post.tags %}
-            <div class="post-terms post-tags">
-                <strong class="adw-label caption post-meta-terms-label">Tags:</strong>
-                {% for tag in post.tags %}
-                  <a href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact tag-pill">{{ tag.name }}</a>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </header>
-
-        <div class="post-content styled-text-content"> {# Added styled-text-content for prose styling #}
-            {{ post.content | markdown }}
-        </div>
-
-        {# Likes and Actions Section - Placed before Author Bio for prominence #}
-        <footer class="adw-card__actions post-interaction-footer" style="padding-top: var(--spacing-m); margin-top: var(--spacing-m); border-top: 1px solid var(--border-color);">
-            {# Use the generic like_button_and_count macro #}
-            {{ like_button_and_count(post, 'post', current_user) }}
-            {# Space for other actions like share, if not in a separate section #}
-        </footer>
-
-        {% if post.author %}
-        <section class="author-bio-section adw-card">
-            <h3 class="adw-title-3">About {{ post.author.full_name or ('User ' ~ post.author.id) }}</h3>
-            <div class="adw-box adw-box-spacing-m author-bio-content">
-                <span class="adw-avatar size-large">
-                     {% set author_avatar = url_for('static', filename=post.author.profile_photo_url) if post.author.profile_photo_url else default_avatar_url %}
-                     <img src="{{ author_avatar }}" alt="{{ post.author.full_name or ('User ' ~ post.author.id) }} avatar" class="adw-avatar__image">
-                </span>
-                <div class="author-bio-text-content">
-                    {% if post.author.profile_info %}
-                    <p class="adw-label body author-bio-text">
-                        {{ post.author.profile_info | safe }}
-                    </p>
-                    {% else %}
-                    <p class="adw-label body author-bio-text-placeholder">This author has not provided a bio yet.</p>
-                    {% endif %}
-                    <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-button flat view-profile-button">View Profile of {{ post.author.full_name or ('User ' ~ post.author.id) }}</a>
-                </div>
-            </div>
-        </section>
-        {% endif %}
-
-        {% if post.author == current_user %}
-        <div class="post-actions-container adw-box adw-box-spacing-s">
-            <a href="{{ url_for('post.edit_post', post_id=post.id) }}" class="adw-button">Edit Post</a>
-            <button id="open-delete-dialog-btn" class="adw-button destructive-action">Delete Post</button>
-        </div>
-
-    <adw-dialog id="delete-confirm-dialog" title="Confirm Deletion">
-        {# Default header with title is handled by the web component based on 'title' attribute #}
-        {# Or, we can provide a custom header slot if needed:
-        <header slot="header" class="adw-header-bar adw-dialog__header">
-             <h2 class="adw-header-bar__title">Confirm Deletion</h2>
-            </header>
-        #}
-        <div slot="content" class="adw-dialog-content">
-                <p class="adw-label body">Are you sure you want to delete this post? This action cannot be undone.</p>
-            </div>
-        <div slot="buttons" class="adw-dialog-footer">
-                <button id="cancel-delete-btn" class="adw-button flat">Cancel</button>
-                <form method="POST" action="{{ url_for('post.delete_post', post_id=post.id) }}" id="delete-post-form" class="delete-post-form-inline">
-                    {{ delete_post_form.hidden_tag() }} {# Use form instance for CSRF #}
-                    <button id="confirm-delete-btn" type="submit" class="adw-button destructive-action">Delete</button>
-                </form>
-        </div>
-    </adw-dialog>
-        {% endif %}
-    </article>
-
-    <hr class="section-divider">
-
-    {# Macro to render a single comment and its replies recursively #}
-    {% macro render_comment_with_replies(comment, post, delete_comment_form, current_user, form, is_reply=false) %}
-    <div class="comment-item {% if is_reply %}comment-reply-item{% else %}comment-top-level-item{% endif %}"
-         id="comment-{{ comment.id }}"
-         {% if is_reply %}style="margin-left: 30px; margin-top: var(--spacing-s); padding-top: var(--spacing-s); border-top: 1px dashed var(--divider-color);"{% endif %}>
-
-        <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
-            <span class="adw-avatar size-medium">
-               {% set comment_avatar = url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else default_avatar_url %}
-               <img src="{{ comment_avatar }}" alt="{{ comment.author.full_name or ('User ' ~ comment.author.id) }} avatar" class="adw-avatar__image">
-            </span>
-            <div class="comment-author-meta">
-                 <a href="{{ url_for('profile.view_profile', user_id=comment.author.id) }}" class="adw-link comment-author-link-strong">{{ comment.author.full_name or ('User ' ~ comment.author.id) }}</a>
-                <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at | human_readable_date }}</time></small>
-            </div>
-        </header>
-        <div class="comment-text styled-text-content">{{ comment.text | markdown }}</div>
-
-        <div class="comment-actions adw-box adw-box-horizontal adw-box-spacing-s align-center">
-            {% if current_user.is_authenticated %}
-            <button class="adw-button flat compact reply-button" data-comment-id="{{ comment.id }}" data-comment-author="{{ (comment.author.full_name or ('User ' ~ comment.author.id)) | e }}">Reply</button>
-            {% endif %}
-            {# Add like button for comment here #}
-            {{ like_button_and_count(comment, 'comment', current_user) }}
-
-            {% if current_user.is_authenticated and comment.author != current_user %}
-                {% if comment.is_flagged_active %}
-                    <button class="adw-button flat compact" disabled title="This comment has been flagged">Flagged</button>
-                {% else %}
-                    <form method="POST" action="{{ url_for('post.flag_comment', comment_id=comment.id) }}" style="display: inline;">
-                        {{ flag_comment_form.hidden_tag() }} {# Use the correct form instance #}
-                        <button type="submit" class="adw-button flat compact" title="Flag this comment for review">Flag</button>
-                    </form>
-                {% endif %}
-            {% endif %}
-            {% if current_user.is_authenticated and (comment.author == current_user or post.author == current_user or current_user.is_admin) %}
-            {# Modified for Adwaita dialog: button type is 'button', not 'submit'. JS will handle form submission. #}
-            <form method="POST" action="{{ url_for('post.delete_comment', comment_id=comment.id) }}" style="display: inline;" class="comment-delete-form" id="delete-comment-form-{{ comment.id }}">
-                {{ delete_comment_form.hidden_tag() }}
-                <button type="button" class="adw-button destructive-action compact comment-delete-button" data-form-id="delete-comment-form-{{ comment.id }}" data-comment-id="{{ comment.id }}">Delete</button>
-            </form>
-            {% endif %}
-        </div>
-        <div class="reply-form-container" id="reply-form-for-{{ comment.id }}" style="display: none; margin-top: var(--spacing-s);">
-            {# Reply form will be injected here by JS #}
-        </div>
-
-        {# Recursively render replies within this comment's div #}
-        {% if comment.replies.count() > 0 %}
-            <div class="comment-replies-container" style="margin-top: var(--spacing-s);">
-                {% for reply_comment in comment.replies %}
-                    {{ render_comment_with_replies(reply_comment, post, delete_comment_form, current_user, form, is_reply=true) }}
-                {% endfor %}
-            </div>
-        {% endif %}
+<div class="post-view">
+    <div id="post-container"></div>
+    <div id="comments-container" class="comments-section" aria-labelledby="comments-heading">
+        <h2 id="comments-heading" class="adw-title-2">Comments</h2>
+        <div id="comments-list" class="adw-list-box comments-list flat"></div>
     </div>
-    {% endmacro %}
-
-    <section class="comments-section" aria-labelledby="comments-heading">
-        <h2 id="comments-heading" class="adw-title-2">Comments ({{ post.comments.count() }})</h2>
-        {% if post.comments.first() %}
-            <div class="adw-list-box comments-list flat">
-                {% for comment in post.comments %} {# Iterates over top-level comments #}
-                    <article class="adw-card comment-card" id="comment-card-for-{{ comment.id }}"> {# Each top-level comment is a card #}
-                        {{ render_comment_with_replies(comment, post, delete_comment_form, current_user, form, is_reply=false) }}
-                    </article>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="adw-label body">No comments yet.</p>
-        {% endif %}
-    </section>
-
-    {% if current_user.is_authenticated %}
-    <section class="comment-form-section adw-list-box form-section" aria-labelledby="leave-comment-heading" style="margin-top: var(--spacing-l);">
-         <header class="adw-list-box-header">
-            <h3 id="leave-comment-heading" class="adw-title-3">Leave a Comment</h3>
-        </header>
-        <form method="POST" action="{{ url_for('post.view_post', post_id=post.id) }}" class="stacked-form" id="main-comment-form" style="padding: var(--spacing-m);">
-            {{ form.hidden_tag() }} {# Flask-WTF CSRF token #}
-            {{ form.parent_id(id="main_parent_id_input", type="hidden") }} {# Hidden field for parent_id #}
-
-            {# Using a structure similar to create_post for consistency #}
-            <div class="adw-action-row column-layout {{ 'has-error' if form.text.errors else '' }}">
-                <label for="{{ form.text.id or 'comment_text_input' }}" class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">{{ form.text.label.text }}</label>
-                {% if form.text.errors %}
-                    <span class="adw-action-row-subtitle error-text" style="margin-bottom: var(--spacing-xs);">{{form.text.errors|join(' ')}}</span>
-                {% endif %}
-                <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry" rows="4" style="width: 100%; min-height: 80px; box-sizing: border-box;" placeholder="Enter your comment here...">{{ form.text.data or ''}}</textarea>
-                <span class="adw-label caption" style="display: block; margin-top: var(--spacing-xxs);">Mention users with @FullName.</span> {# Added mention guidance #}
-            </div>
-
-            <div class="form-actions-container form-actions-end comment-form-actions adw-box adw-box-horizontal adw-box-spacing-s justify-end" style="margin-top: var(--spacing-m); padding: 0;"> {# Simplified padding as form has it now #}
-                 <button type="submit" class="adw-button suggested-action" id="main-comment-submit-button">{{ form.submit.label.text }}</button>
-                 <span class="adw-spinner small" id="main-comment-spinner" style="display: none;"></span>
-            </div>
-        </form>
-    </section>
-    {% else %}
-    <div class="login-prompt-comment">
-        <p class="adw-label body"><a href="{{ url_for('auth.login', next=request.url) }}" class="adw-link">Login</a> to leave a comment.</p>
+    <div id="loading-indicator" class="adw-status-page">
+        <adw-spinner size="l" active></adw-spinner>
+        <h3 class="adw-status-page-title">Loading...</h3>
     </div>
-    {% endif %}
-
-    {% if related_posts %}
-    <section class="related-posts-section related-posts-container" aria-labelledby="related-posts-heading">
-        <h2 id="related-posts-heading" class="adw-title-2">Related Posts</h2>
-        <div class="adw-list-box">
-            {% for related_post in related_posts %}
-            <a href="{{ url_for('post.view_post', post_id=related_post.id) }}" class="adw-action-row activatable">
-                <div class="adw-action-row-content">
-                    <span class="adw-action-row-title">Post by {{ related_post.author.full_name or ('User ' ~ related_post.author.id) }}</span>
-                    {% if related_post.content %}
-                    <span class="adw-action-row-subtitle">{{ related_post.content | striptags | truncate(80) }}</span>
-                    {% endif %}
-                </div>
-                <span class="adw-action-row__chevron"></span>
-            </a>
-            {% endfor %}
-        </div>
-    </section>
-    {% endif %}
-
-    <div class="adw-box adw-box-spacing-s back-to-posts-container">
-         <a href="{{ url_for('general.index') }}" class="adw-button"><span class="adw-icon icon-actions-go-previous-symbolic"></span> Back to Posts</a>
-    </div>
-
-    {# Dialog for confirming comment deletion - now using <adw-dialog> #}
-    <adw-dialog id="delete-comment-confirm-dialog" title="Confirm Comment Deletion">
-        <div slot="content" class="adw-dialog-content">
-            <p class="adw-label body">Are you sure you want to delete this comment? This action cannot be undone.</p>
-        </div>
-        <div slot="buttons" class="adw-dialog-footer">
-            <button id="cancel-comment-delete-btn" class="adw-button flat">Cancel</button>
-            <form method="POST" action="" id="confirm-delete-comment-form-actual" style="display: inline;">
-                 {{ delete_comment_form.hidden_tag() }}
-                <button id="confirm-comment-delete-btn" type="submit" class="adw-button destructive-action">Delete Comment</button>
-            </form>
-        </div>
-    </adw-dialog>
 </div>
 
 <script>
-// Threaded comments reply script & post/comment dialog logic is now primarily handled by app-layout.js
-// Any page-specific variations or initializations needed beyond global handlers can go here.
-// For post.html, the dialogs (delete post, delete comment) are expected to be handled by app-layout.js.
+    document.addEventListener('DOMContentLoaded', function() {
+        const postContainer = document.getElementById('post-container');
+        const commentsContainer = document.getElementById('comments-container');
+        const commentsList = document.getElementById('comments-list');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const postId = window.location.pathname.split('/').pop();
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Specific logic for comment deletion dialog on this page, if different from global app-layout.js
-    // This example assumes app-layout.js handles the #delete-comment-confirm-dialog
-    // and its trigger buttons (.comment-delete-button) correctly.
-    // If post.html's comment deletion needs unique handling not covered by app-layout's generic setup, add here.
-    // For now, we assume app-layout.js covers it.
+        async function fetchPostAndComments() {
+            loadingIndicator.style.display = 'block';
+            postContainer.innerHTML = '';
+            commentsList.innerHTML = '';
 
-    // Threaded comments reply script
-    const mainCommentForm = document.getElementById('main-comment-form');
-    if (!mainCommentForm) return; // If no comment form, do nothing
-
-    const mainParentIdInput = document.getElementById('main_parent_id_input');
-    const mainCommentTextArea = mainCommentForm.querySelector('textarea[name="text"]');
-    const mainCommentSubmitButton = mainCommentForm.querySelector('button[type="submit"]');
-    const mainCommentLabel = mainCommentForm.querySelector('label[for="' + (mainCommentTextArea ? mainCommentTextArea.id : '') + '"]');
-    const originalFormContainer = mainCommentForm.parentElement; // Store original parent
-
-    document.querySelectorAll('.reply-button').forEach(button => {
-        button.addEventListener('click', () => {
-            const commentId = button.dataset.commentId;
-            const commentAuthor = button.dataset.commentAuthor || 'user';
-            const replyFormContainer = document.getElementById(`reply-form-for-${commentId}`);
-
-            if (!replyFormContainer) return;
-
-            // Detach form from current parent before appending to new one
-            if (mainCommentForm.parentElement) {
-                mainCommentForm.parentElement.removeChild(mainCommentForm);
-            }
-
-            replyFormContainer.appendChild(mainCommentForm);
-            if(mainParentIdInput) mainParentIdInput.value = commentId;
-            if(mainCommentSubmitButton) mainCommentSubmitButton.textContent = 'Post Reply';
-            if(mainCommentLabel) mainCommentLabel.textContent = `Reply to ${commentAuthor}`;
-            if(mainCommentTextArea) {
-                mainCommentTextArea.placeholder = `Replying to ${commentAuthor}...`;
-                mainCommentTextArea.focus();
-            }
-            replyFormContainer.style.display = 'block';
-
-            // Hide other reply forms that might have been opened
-            document.querySelectorAll('.reply-form-container').forEach(container => {
-                if (container.id !== replyFormContainer.id) {
-                    container.style.display = 'none';
-                    // Do not clear their content if they didn't have the main form
+            try {
+                const postResponse = await fetch(`/api/v1/item/post/${postId}`);
+                if (!postResponse.ok) {
+                    throw new Error('Failed to fetch post');
                 }
-            });
-        });
-    });
+                const postData = await postResponse.json();
+                renderPost(postData);
 
-    // Logic to move the form back if user clicks the main "Leave a Comment" section header
-    const mainCommentSectionHeader = document.getElementById('leave-comment-heading');
-    if(mainCommentSectionHeader && originalFormContainer) {
-        mainCommentSectionHeader.addEventListener('click', (event) => {
-            // Prevent if the click is on the form itself if it's already there
-            if (originalFormContainer.contains(event.target) && event.target !== mainCommentSectionHeader) {
+                const commentsResponse = await fetch(`/api/v1/item/post/${postId}/comments`);
+                if (!commentsResponse.ok) {
+                    throw new Error('Failed to fetch comments');
+                }
+                const commentsData = await commentsResponse.json();
+                renderComments(commentsData.comments);
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                postContainer.innerHTML = '<p>Error loading post. Please try again later.</p>';
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        function renderPost(post) {
+            const article = document.createElement('article');
+            article.className = 'post-article adw-card blog-content-card';
+
+            let content = `
+                <header class="post-header">
+                    <div class="post-meta-detail">
+                        <p class="adw-label body">
+                            By: <a href="/profile/${post.actor.id}" class="adw-link">${post.actor.full_name}</a>
+                            on <time datetime="${post.timestamp}">${new Date(post.timestamp).toLocaleString()}</time>
+                        </p>
+                    </div>
+                    <div class="post-terms post-categories">
+                        <strong class="adw-label caption post-meta-terms-label">Categories:</strong>
+                        ${post.data.categories.map(c => `<a href="/posts/category/${c.slug}" class="adw-button flat compact">${c.name}</a>`).join('')}
+                    </div>
+                    <div class="post-terms post-tags">
+                        <strong class="adw-label caption post-meta-terms-label">Tags:</strong>
+                        ${post.data.tags.map(t => `<a href="/posts/tag/${t.slug}" class="adw-button flat compact tag-pill">${t.name}</a>`).join('')}
+                    </div>
+                </header>
+                <div class="post-content styled-text-content">
+                    ${post.data.content_html_preview}
+                </div>
+                <footer class="adw-card__actions post-interaction-footer" style="padding-top: var(--spacing-m); margin-top: var(--spacing-m); border-top: 1px solid var(--border-color);">
+                    <adw-like-button item-id="${post.data.post_id}" item-type="post" initial-liked="${post.data.is_liked_by_current_user}" initial-like-count="${post.data.like_count}"></adw-like-button>
+                </footer>
+            `;
+            article.innerHTML = content;
+            postContainer.appendChild(article);
+        }
+
+        function renderComments(comments) {
+            if (comments.length === 0) {
+                commentsList.innerHTML = '<p class="adw-label body">No comments yet.</p>';
                 return;
             }
 
-            if (mainCommentForm.parentElement !== originalFormContainer) {
-                if (mainCommentForm.parentElement) { // Detach if attached elsewhere
-                    mainCommentForm.parentElement.removeChild(mainCommentForm);
-                }
-                originalFormContainer.appendChild(mainCommentForm);
-                if(mainParentIdInput) mainParentIdInput.value = '';
-                if(mainCommentSubmitButton) mainCommentSubmitButton.textContent = 'Post Comment';
-                if(mainCommentLabel) mainCommentLabel.textContent = 'Comment';
-                if(mainCommentTextArea) mainCommentTextArea.placeholder = 'Enter your comment here...';
+            comments.forEach(comment => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment-item';
+                commentDiv.id = `comment-${comment.data.comment_id}`;
 
-                document.querySelectorAll('.reply-form-container').forEach(container => {
-                    container.style.display = 'none';
-                });
-            }
-        });
-    }
+                let content = `
+                    <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
+                        <span class="adw-avatar size-medium">
+                           <img src="${comment.actor.profile_photo_url}" alt="${comment.actor.full_name} avatar" class="adw-avatar__image">
+                        </span>
+                        <div class="comment-author-meta">
+                             <a href="/profile/${comment.actor.id}" class="adw-link comment-author-link-strong">${comment.actor.full_name}</a>
+                            <small class="adw-label caption comment-timestamp"><time datetime="${comment.timestamp}">${new Date(comment.timestamp).toLocaleString()}</time></small>
+                        </div>
+                    </header>
+                    <div class="comment-text styled-text-content">${comment.data.text_html}</div>
+                    <div class="comment-actions adw-box adw-box-horizontal adw-box-spacing-s align-center">
+                        <adw-like-button item-id="${comment.data.comment_id}" item-type="comment" initial-liked="${comment.data.is_liked_by_current_user}" initial-like-count="${comment.data.like_count}"></adw-like-button>
+                    </div>
+                `;
+                commentDiv.innerHTML = content;
+                commentsList.appendChild(commentDiv);
+            });
+        }
 
-    // Main comment form spinner
-    const mainCommentSubmitButtonElement = document.getElementById('main-comment-submit-button');
-    const mainCommentSpinnerElement = document.getElementById('main-comment-spinner');
-
-    if (mainCommentForm && mainCommentSubmitButtonElement && mainCommentSpinnerElement) { // mainCommentForm already defined above
-        mainCommentForm.addEventListener('submit', function() {
-            // Check if the event target is the main form, not a reply form if it got moved.
-            // This is important because the same form element is moved around.
-            // The listener is on mainCommentForm, so it will always fire for this form.
-            mainCommentSubmitButtonElement.disabled = true;
-            mainCommentSpinnerElement.style.display = 'inline-block';
-        });
-    }
-});
+        fetchPostAndComments();
+    });
 </script>
 {% endblock %}
