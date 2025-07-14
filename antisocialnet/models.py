@@ -108,18 +108,18 @@ class User(UserMixin, db.Model):
 
             item_author = None
             if target_type == 'post':
-                item_author = Post.query.get(target_id).author
+                item_author = db.session.get(Post, target_id).author
             elif target_type == 'comment':
-                item_author = Comment.query.get(target_id).author
+                item_author = db.session.get(Comment, target_id).author
             elif target_type == 'photo':
-                item_author = UserPhoto.query.get(target_id).author
+                item_author = db.session.get(UserPhoto, target_id).author
 
             if item_author and item_author.id != self.id:
                 current_app.logger.info(f"Creating notification for like on {target_type} {target_id}")
                 notification = Notification(user_id=item_author.id, actor_id=self.id, type='new_like', target_type=target_type, target_id=target_id)
                 if target_type == 'comment':
                     # Assuming item_author is a Comment object, which it is not.
-                    comment = Comment.query.get(target_id)
+                    comment = db.session.get(Comment, target_id)
                     notification.related_post_id = comment.post_id
                 db.session.add(notification)
 
@@ -222,7 +222,7 @@ class User(UserMixin, db.Model):
             user_id = decoded_token.get('reset_password_user_id')
             if user_id is None:
                 return None # Token is invalid or doesn't have the expected payload
-            return User.query.get(user_id)
+            return db.session.get(User, user_id)
         except jwt.ExpiredSignatureError:
             current_app.logger.warning("Password reset token expired.")
             return None # Token has expired
@@ -628,7 +628,7 @@ class SiteSetting(db.Model):
 
     @staticmethod
     def get(key, default=None):
-        setting = SiteSetting.query.filter_by(key=key).first()
+        setting = db.session.get(SiteSetting, key)
         if setting:
             if setting.value_type == 'int':
                 try:
@@ -642,7 +642,7 @@ class SiteSetting(db.Model):
 
     @staticmethod
     def set(key, value, value_type='string'):
-        setting = SiteSetting.query.filter_by(key=key).first()
+        setting = db.session.get(SiteSetting, key)
         if not setting:
             setting = SiteSetting(key=key)
             db.session.add(setting)
