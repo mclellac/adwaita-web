@@ -141,9 +141,9 @@ def test_setup_db_deletedb_and_create_admin(setup_db_env_vars, temp_sqlite_db_fi
         assert admin_user.check_password(admin_pass)
 
         # Check default site settings (setup_db.py initializes them)
-        assert SiteSetting.get('site_title') == "Adwaita Web Demo" # Default from script
-        assert SiteSetting.get('posts_per_page') == 10
-        assert SiteSetting.get('allow_registrations') == True
+        assert main_app_db.session.get(SiteSetting, 'site_title').get_value() == "Adwaita Web Demo" # Default from script
+        assert main_app_db.session.get(SiteSetting, 'posts_per_page').get_value() == 10
+        assert main_app_db.session.get(SiteSetting, 'allow_registrations').get_value() == True
 
 def test_setup_db_skipuser(setup_db_env_vars, temp_sqlite_db_file, temp_db_app_instance):
     """Test --skipuser argument."""

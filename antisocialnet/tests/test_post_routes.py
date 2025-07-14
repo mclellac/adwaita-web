@@ -534,7 +534,7 @@ def test_delete_comment_author_self(client, app, logged_in_client, create_test_p
     db.session.add(comment_to_delete)
     db.session.commit()
     comment_id = comment_to_delete.id
-    assert Comment.query.get(comment_id) is not None
+    assert db.session.get(Comment, comment_id) is not None
 
     with logged_in_client.application.test_request_context(): # Use client's context
         form = DeleteCommentForm(); token = form.csrf_token.current_token
@@ -543,7 +543,7 @@ def test_delete_comment_author_self(client, app, logged_in_client, create_test_p
         response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Comment deleted.' in response.data
-    assert Comment.query.get(comment_id) is None
+    assert db.session.get(Comment, comment_id) is None
 
 def test_delete_comment_post_author_deletes_other(client, app, logged_in_client, create_test_post, db, create_test_user):
     """Post author deletes another user's comment on their post."""
@@ -555,7 +555,7 @@ def test_delete_comment_post_author_deletes_other(client, app, logged_in_client,
     db.session.add(comment_to_delete)
     db.session.commit()
     comment_id = comment_to_delete.id
-    assert Comment.query.get(comment_id) is not None
+    assert db.session.get(Comment, comment_id) is not None
 
     with logged_in_client.application.test_request_context(): # Use client's context
         form = DeleteCommentForm(); token = form.csrf_token.current_token
@@ -564,7 +564,7 @@ def test_delete_comment_post_author_deletes_other(client, app, logged_in_client,
         response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Comment deleted.' in response.data
-    assert Comment.query.get(comment_id) is None
+    assert db.session.get(Comment, comment_id) is None
 
 def test_delete_comment_admin_deletes_any(client, app, db, create_test_user, create_test_post):
     """Admin deletes any comment."""
@@ -599,7 +599,7 @@ def test_delete_comment_admin_deletes_any(client, app, db, create_test_user, cre
         response = client.post(delete_url_val, data={'csrf_token': csrf_delete_token}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Comment deleted.' in response.data
-    assert Comment.query.get(comment_id) is None
+    assert db.session.get(Comment, comment_id) is None
 
 def test_delete_comment_unauthorized(client, app, logged_in_client, create_test_post, db, create_test_user):
     """Unauthorized user (not comment author, not post author, not admin) gets 403."""
@@ -619,7 +619,7 @@ def test_delete_comment_unauthorized(client, app, logged_in_client, create_test_
         url = url_for('post.delete_comment', comment_id=comment_id)
         response = logged_in_client.post(url, data={'csrf_token': token})
     assert response.status_code == 403
-    assert Comment.query.get(comment_id) is not None
+    assert db.session.get(Comment, comment_id) is not None
 
 def test_delete_comment_csrf_failure(client, app, logged_in_client, create_test_post, db):
     """Test CSRF failure (missing token) for comment deletion."""
@@ -634,7 +634,7 @@ def test_delete_comment_csrf_failure(client, app, logged_in_client, create_test_
     response = logged_in_client.post(url, data={}, follow_redirects=False) # Check direct 400
     assert response.status_code == 400
     # assert b'CSRF token missing' in response.data
-    assert Comment.query.get(comment_id) is not None
+    assert db.session.get(Comment, comment_id) is not None
 
 
 # --- Test Flag Comment Route ---
@@ -1304,7 +1304,7 @@ def test_delete_post_successful_author(client, app, logged_in_client, create_tes
     user = User.query.filter_by(username="login_fixture_user@example.com").first()
     test_post = create_test_post(author=user, content="Post to be deleted by author.")
     post_id = test_post.id
-    assert Post.query.get(post_id) is not None
+    assert db.session.get(Post, post_id) is not None
 
     with logged_in_client.application.test_request_context(): # Use client's context
         form = DeletePostForm(); token = form.csrf_token.current_token
@@ -1313,7 +1313,7 @@ def test_delete_post_successful_author(client, app, logged_in_client, create_tes
     response = logged_in_client.post(url, data={'csrf_token': token}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Post deleted successfully!' in response.data
-    assert Post.query.get(post_id) is None
+    assert db.session.get(Post, post_id) is None
 
 def test_delete_post_successful_admin(client, app, db, create_test_user, create_test_post):
     """Admin successfully deletes another user's post."""
@@ -1321,7 +1321,7 @@ def test_delete_post_successful_admin(client, app, db, create_test_user, create_
     regular_user = create_test_user(email_address="posterdel@example.com", full_name="Poster for Delete")
     post_to_delete = create_test_post(author=regular_user, content="Post to be deleted by admin.")
     post_id = post_to_delete.id
-    assert Post.query.get(post_id) is not None
+    assert db.session.get(Post, post_id) is not None
 
     # Create and log in as an admin user
     admin_user = create_test_user(email_address="admindelete@example.com", full_name="Admin Deleter", is_admin=True)
@@ -1353,7 +1353,7 @@ def test_delete_post_successful_admin(client, app, db, create_test_user, create_
     response = client.post(delete_url_val, data={'csrf_token': csrf_delete_token}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Post deleted successfully!' in response.data
-    assert Post.query.get(post_id) is None
+    assert db.session.get(Post, post_id) is None
 
 def test_delete_post_unauthorized_user(client, app, logged_in_client, create_test_post, create_test_user):
     """Non-author/non-admin user gets 403 when attempting to delete."""
@@ -1372,7 +1372,7 @@ def test_delete_post_unauthorized_user(client, app, logged_in_client, create_tes
 
     response = logged_in_client.post(url_val, data={'csrf_token': token_val})
     assert response.status_code == 403 # Forbidden
-    assert Post.query.get(post_id) is not None # Post should still exist
+    assert db.session.get(Post, post_id) is not None # Post should still exist
 
 def test_delete_post_unauthenticated(client, app, create_test_post): # Added app
     """Unauthenticated user is redirected from delete post attempt."""
@@ -1405,7 +1405,7 @@ def test_delete_post_csrf_missing(client, app, logged_in_client, create_test_pos
     response = logged_in_client.post(url_val, data={}, follow_redirects=False) # Check direct 400
     assert response.status_code == 400
     # assert b'CSRF token missing' in response.data
-    assert Post.query.get(test_post.id) is not None # Post should not be deleted
+    assert db.session.get(Post, test_post.id) is not None # Post should not be deleted
 
 def test_delete_post_csrf_invalid(client, app, logged_in_client, create_test_post): # Added app
     """Test delete post POST with invalid CSRF token."""
@@ -1417,7 +1417,7 @@ def test_delete_post_csrf_invalid(client, app, logged_in_client, create_test_pos
     response = logged_in_client.post(url_val, data={'csrf_token': 'baddeleteposttoken'}, follow_redirects=False) # Check direct 400
     assert response.status_code == 400
     # assert b'CSRF token invalid' in response.data
-    assert Post.query.get(test_post.id) is not None # Post should not be deleted
+    assert db.session.get(Post, test_post.id) is not None # Post should not be deleted
 
 def test_delete_post_nonexistent_post(client, app, logged_in_client):
     """Test POST delete for a non-existent post."""
@@ -1482,7 +1482,7 @@ def test_delete_post_deletes_associated_data(client, app, logged_in_client, db, 
     db.session.commit()
 
     assert Activity.query.filter_by(target_type='post', target_id=post_id).count() == 2
-    assert Activity.query.get(activity_other_unrelated.id) is not None # Ensure unrelated activity exists
+    assert db.session.get(Activity, activity_other_unrelated.id) is not None # Ensure unrelated activity exists
 
     # Now, delete the post
     delete_url_val = None
@@ -1496,7 +1496,7 @@ def test_delete_post_deletes_associated_data(client, app, logged_in_client, db, 
     logged_in_client.post(delete_url_val, data={'csrf_token': token}, follow_redirects=True)
 
     # Assertions
-    assert Post.query.get(post_id) is None
+    assert db.session.get(Post, post_id) is None
     assert Like.query.filter_by(target_type='post', target_id=post_id).count() == 0 # Updated query
     assert Comment.query.filter_by(post_id=post_id).count() == 0
     assert CommentFlag.query.filter_by(comment_id=comment1_id).count() == 0 # Flags for comments on this post
@@ -1504,7 +1504,7 @@ def test_delete_post_deletes_associated_data(client, app, logged_in_client, db, 
     # Check that activities related to the post are deleted
     assert Activity.query.filter_by(target_type='post', target_id=post_id).count() == 0
     # Ensure the unrelated activity still exists
-    assert Activity.query.get(activity_other_unrelated.id) is not None
+    assert db.session.get(Activity, activity_other_unrelated.id) is not None
 
 
 def test_unlike_post_csrf_invalid_token(client, app, db, create_test_post, logged_in_client):

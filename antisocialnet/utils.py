@@ -6,7 +6,7 @@ from markupsafe import Markup, escape
 import bleach
 import markdown as md_lib # Use md_lib to avoid conflict with template filter name
 
-def generate_slug_util(text, max_length=255):
+def generate_slug_util(text, max_length=50):
     """
     Generates a URL-friendly slug from a given text string.
 
@@ -20,7 +20,7 @@ def generate_slug_util(text, max_length=255):
 
     Args:
         text (str): The input string to be slugified.
-        max_length (int, optional): The maximum length of the generated slug. Defaults to 255.
+        max_length (int, optional): The maximum length of the generated slug. Defaults to 50.
 
     Returns:
         str: The generated URL-friendly slug. Returns an empty string if input text is None.
@@ -34,9 +34,10 @@ def generate_slug_util(text, max_length=255):
     text = re.sub(r'[\s_]+', '-', text)
     text = re.sub(r'-+', '-', text)
     text = text.strip('-')
-    if max_length > 0:
+    if max_length > 0 and len(text) > max_length:
         text = text[:max_length]
-        text = text.strip('-')
+    # Ensure the slug doesn't end with a hyphen after truncation
+    text = text.rstrip('-')
     return text
 
 def human_readable_date(dt, show_time=True):
@@ -108,13 +109,15 @@ def markdown_to_html_and_sanitize_util(text):
         return ''
     text = str(text)
 
-    text_escaped = escape(text)
-    html_content = md_lib.markdown(text_escaped, extensions=['fenced_code', 'tables', 'extra'])
+    html_content = md_lib.markdown(text, extensions=['fenced_code', 'tables', 'extra'])
+    allowed_tags = list(bleach.sanitizer.ALLOWED_TAGS) + ['p', 'br', 'strong', 'em', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'a', 'img', 'pre', 'code', 'blockquote']
+    allowed_attributes = {**bleach.sanitizer.ALLOWED_ATTRIBUTES, 'a': ['href', 'title'], 'img': ['src', 'alt', 'title']}
     sanitized_html = bleach.clean(
         html_content,
-        tags=ALLOWED_TAGS_CONFIG,
-        attributes=ALLOWED_ATTRIBUTES_CONFIG,
-        strip=True
+        tags=allowed_tags,
+        attributes=allowed_attributes,
+        strip=True,
+        strip_comments=True
     )
 
     return Markup(sanitized_html)
@@ -162,25 +165,23 @@ def allowed_file_util(filename):
 
 def extract_mentions(text):
     """
-    Extracts @FullName mentions from a given text string.
+    Extracts @username mentions from a given text string.
 
-    Uses a regular expression to find patterns like "@John Doe" or "@Jane_Doe".
-    The extracted names are normalized (e.g., extra spaces collapsed) and returned
-    as a list of unique strings, without the leading '@'.
+    Uses a regular expression to find patterns like "@test_user".
+    The extracted names are returned as a list of unique strings, without the leading '@'.
 
     Args:
         text (str): The input text to search for mentions.
 
     Returns:
-        list[str]: A list of unique full names found as mentions.
+        list[str]: A list of unique user names found as mentions.
                    Returns an empty list if the input text is None or no mentions are found.
     """
     if not text:
         return []
-    mention_regex = r'@([A-Za-z0-9_\']+(?:\s[A-Za-z0-9_\']+)*)'
+    mention_regex = r'\B@(\w+)'
     mentions = re.findall(mention_regex, text)
-    processed_mentions = [ ' '.join(m.split()) for m in mentions]
-    return list(set(processed_mentions))
+    return list(set(mentions))
 
 def update_post_relations_util(post, form_data, current_user_id, is_new_post=False):
     """

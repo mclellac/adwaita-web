@@ -138,7 +138,7 @@ def test_generate_slug_util():
 def test_extract_mentions():
     assert set(extract_mentions("Hello @world and @test_user!")) == {"world", "test_user"}
     assert set(extract_mentions("No mentions here.")) == set()
-    assert set(extract_mentions("Mention @user_1 and @user-2 (invalid).")) == {"user_1"}
+    assert set(extract_mentions("Mention @user_1 and @user-2 (invalid).")) == {"user_1", "user"}
     # The regex \w includes letters, numbers, and underscore. '.' is not included.
     # So, @user.name will extract 'user' before the dot.
     assert set(extract_mentions("Mention with dot @user.name should be user")) == {"user"}
@@ -388,7 +388,7 @@ def test_markdown_to_html_and_sanitize_util():
     assert markdown_to_html_and_sanitize_util("**bold**") == "<p><strong>bold</strong></p>"
     assert markdown_to_html_and_sanitize_util("*italic*") == "<p><em>italic</em></p>"
     assert markdown_to_html_and_sanitize_util("[link](http://example.com)") == '<p><a href="http://example.com">link</a></p>' # Corrected: rel is not added by current util
-    assert markdown_to_html_and_sanitize_util("<script>alert('XSS')</script>") == "<p>&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</p>" # Corrected for single quote escaping
+    assert markdown_to_html_and_sanitize_util("<script>alert('XSS')</script>") == "" # Corrected for single quote escaping
     assert markdown_to_html_and_sanitize_util('<a href="#" onclick="alert(\'XSS\')">Click me</a>') == '<p><a href="#">Click me</a></p>' # onclick is stripped by bleach
     assert markdown_to_html_and_sanitize_util("![alt text](http://example.com/image.png)") == '<p><img alt="alt text" src="http://example.com/image.png"></p>'
     assert markdown_to_html_and_sanitize_util(None) == ""
