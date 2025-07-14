@@ -19,6 +19,7 @@
   gap: var(--spacing-s);
   min-height: 48px; // Standard Adwaita headerbar height (can vary slightly)
   position: relative;
+  width: 100%;
 
   // Start (leading) and End (trailing) boxes for items
   .adw-header-bar__start,
