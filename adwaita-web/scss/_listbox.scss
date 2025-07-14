@@ -203,6 +203,11 @@
         opacity: 1;
     }
   }
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+}
 }
 
 
