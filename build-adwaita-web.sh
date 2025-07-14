@@ -54,9 +54,9 @@ mkdir -p "${ADWAITA_WEB_COMPILED_CSS_DIR}"
 echo "--- Compiling SASS to CSS (${SASS_INPUT_FILE} -> ${COMPILED_CSS_FILE_PATH}) ---"
 # Ensure SASS is installed and in PATH (e.g., via `npm install -g sass`)
 # Use SASS from PATH (installed globally via npm)
-SASS_EXEC="sassc"
+SASS_EXEC="sass"
 # Modified to let SASS output directly to stderr for better error visibility with set -e
-$SASS_EXEC -t compressed -m "${SASS_INPUT_FILE}" "${COMPILED_CSS_FILE_PATH}"
+$SASS_EXEC --style=compressed "${SASS_INPUT_FILE}" "${COMPILED_CSS_FILE_PATH}"
 sass_exit_code=$? # This will be 0 if the above command succeeded due to set -e
 
 if [ ${sass_exit_code} -ne 0 ]; then
