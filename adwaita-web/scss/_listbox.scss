@@ -5,6 +5,8 @@
 
 
 .adw-list-box {
+  display: flex;
+  flex-direction: column;
   // Default listbox (not .boxed-list) typically has a view background
   // and simple borders, or might be borderless depending on context.
   // Libadwaita often uses GtkScrolledWindow around lists, which handles borders/shadows.
@@ -203,11 +205,11 @@
         opacity: 1;
     }
   }
+}
 
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-}
 }
 
 
