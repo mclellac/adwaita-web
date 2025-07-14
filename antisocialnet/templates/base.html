@@ -211,8 +211,6 @@
                     </h1>
                 </div>
                 <div class="adw-header-bar__end">
-                    {% block header_actions_start %}{% endblock %} {# For buttons like "Edit Profile", keep this for contextual actions #}
-
                     {# Search #}
                     <form action="{{ url_for('general.search_results') }}" method="GET" class="header-search-form">
                         <input type="search" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}" class="adw-entry">
