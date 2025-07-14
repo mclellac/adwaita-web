@@ -40,7 +40,7 @@
         </span>
         <div class="comment-author-meta">
              <a href="{{ url_for('profile.view_profile', user_id=comment.author.id) }}" class="adw-link comment-author-link-strong">{{ comment.author.full_name or ('User ' ~ comment.author.id) }}</a>
-            <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at | human_readable_date }}</time></small>
+            <small class="adw-label caption comment-timestamp"><span class="adw-calendar"><span class="adw-icon icon-x-office-calendar-symbolic"></span><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at | human_readable_date }}</time></span></small>
         </div>
     </header>
     <div class="comment-text styled-text-content">{{ comment.text | markdown }}</div>

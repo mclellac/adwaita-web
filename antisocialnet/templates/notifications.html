@@ -92,7 +92,7 @@
                         {% endif %}
                     </span>
                     <span class="adw-action-row-subtitle notification-timestamp">
-                        <time datetime="{{ notification.timestamp.isoformat() }}">{{ notification.timestamp | human_readable_date }}</time>
+                        <span class="adw-calendar"><span class="adw-icon icon-x-office-calendar-symbolic"></span><time datetime="{{ notification.timestamp.isoformat() }}">{{ notification.timestamp | human_readable_date }}</time></span>
                         {% if not notification.is_read %}
                             <span class="unread-dot" title="Unread">•</span>
                         {% endif %}

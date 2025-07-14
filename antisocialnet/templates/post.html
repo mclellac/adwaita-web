@@ -14,9 +14,9 @@
                 <p class="adw-label body">
                     By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-link">{{ post.author.full_name or ('User ' ~ post.author.id) if post.author else 'Unknown Author' }}</a>&nbsp;
                     {%- if post.published_at -%}
-                        on <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at | human_readable_date }}</time>
+                        on <span class="adw-calendar"><span class="adw-icon icon-x-office-calendar-symbolic"></span><time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at | human_readable_date }}</time></span>
                     {%- else -%} {# Should not happen for new posts, fallback for old data or if published_at was somehow not set #}
-                        on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at | human_readable_date }}</time>
+                        on <span class="adw-calendar"><span class="adw-icon icon-x-office-calendar-symbolic"></span><time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at | human_readable_date }}</time></span>
                     {%- endif -%}
                 </p>
                 {% set created_datetime = post.published_at or post.created_at %}
@@ -169,7 +169,9 @@
                     <span class="adw-action-row-subtitle">{{ related_post.content | striptags | truncate(80) }}</span>
                     {% endif %}
                 </div>
-                <span class="adw-action-row__chevron"></span>
+                <div class="adw-action-row-suffix">
+                    <span class="adw-icon-navigation-chevron-right-symbolic"></span>
+                </div>
             </a>
             {% endfor %}
         </div>

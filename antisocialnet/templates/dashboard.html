@@ -18,7 +18,7 @@
                 </h3>
                 <div class="adw-action-row-subtitle">
                     {%- if post.published_at -%}
-                        Published: <time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at | human_readable_date }} UTC</time>
+                        Published: <span class="adw-calendar"><span class="adw-icon icon-x-office-calendar-symbolic"></span><time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at | human_readable_date }} UTC</time></span>
                     {%- else -%}
                         Created: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at | human_readable_date }} UTC</time>
                     {%- endif -%}

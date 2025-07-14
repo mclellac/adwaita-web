@@ -12,7 +12,7 @@
             <div class="post-meta-detail">
                 <p class="adw-label body">
                     By: <a href="{{ url_for('profile.view_profile', user_id=photo.author.id) }}" class="adw-link">{{ photo.author.full_name or ('User ' ~ photo.author.id) if photo.author else 'Unknown Author' }}</a>&nbsp;
-                    on <time datetime="{{ photo.uploaded_at.isoformat() }}">{{ photo.uploaded_at | human_readable_date }}</time>
+                    on <span class="adw-calendar"><span class="adw-icon icon-x-office-calendar-symbolic"></span><time datetime="{{ photo.uploaded_at.isoformat() }}">{{ photo.uploaded_at | human_readable_date }}</time></span>
                 </p>
             </div>
         </header>
