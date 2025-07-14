@@ -149,7 +149,7 @@
             <div class="sidebar-profile-name adw-label title-3">{{ current_user.full_name or ('User ' ~ current_user.id) }}</div>
         </div>
         {% endif %}
-        <div class="adw-list-box flat sidebar-nav" aria-label="Main Navigation">
+        <div class="adw-list-box flat sidebar-nav" aria-label="Main Navigation" style="display: block;">
                 <a href="{{ url_for('general.activity_feed') }}" class="nav-item {{ 'selected' if request.endpoint == 'general.activity_feed' or request.endpoint == 'general.index' }}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home adw-action-row-icon"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     <span class="adw-action-row-title">Home</span>

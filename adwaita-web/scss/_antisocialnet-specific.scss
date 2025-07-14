@@ -302,8 +302,6 @@ body { overflow: hidden; }
             padding-bottom: var(--spacing-s);
 
             .adw-action-row {
-                flex-direction: column;
-                align-items: flex-start;
                 // Adjust padding if needed, default is var(--spacing-m)
                 // padding-left: var(--spacing-l); // Example: Increase padding if desired
                 // padding-right: var(--spacing-l);
