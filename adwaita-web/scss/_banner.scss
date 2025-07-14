@@ -1,9 +1,5 @@
 // scss/_banner.scss
 // AdwBanner is an inline notification bar.
-@use 'variables';
-@use 'mixins';
-@use 'button'; // For @extend .adw-button
-@use 'sass:color';
 
 .adw-banner {
   display: flex;

@@ -2,9 +2,6 @@
 // Target: Libadwaita 1.5 Named Colors
 // Reference: https://gnome.pages.gitlab.gnome.org/libadwaita/doc/1.5/named-colors.html
 
-@use "sass:color";
-@use "sass:math";
-@use "sass:map";
 
 // --- 1. SASS Variables for Adwaita Palette (Source: Libadwaita CSS Variables page) ---
 // These are the base palette colors, generally aligned with docs.
@@ -34,19 +31,24 @@ $accent-default-fg: #ffffff;
 $accent-yellow-fg: rgba(0, 0, 0, 0.8); // Yellow is an exception, matches docs @warning_fg_color
 
 // Standalone colors (meant for text on neutral backgrounds)
-// These are updated to match the Libadwaita 1.5 docs for @accent_color, @destructive_color etc.
-// Further updated to align more closely with Libadwaita main spec for accent shades.
-$accent-standalone-colors: (
-  "blue":   (light: #1c71d8, dark: #78aeed), // Libadwaita: @accent_color light @blue_4, dark a lighter blue
-  "teal":   (light: #007184, dark: #63d2e7), // Libadwaita: light @teal_4, dark @teal_2
-  "green":  (light: #26a269, dark: #8ff0a4), // Libadwaita @success_color: light @green_5, dark @green_1
-  "yellow": (light: #9c6e03, dark: #f8e45c), // Libadwaita @warning_color: light desaturated @yellow_5, dark @yellow_2
-  "orange": (light: #e66100, dark: #ffa348), // Libadwaita: light @orange_4, dark @orange_2
-  "red":    (light: #c01c28, dark: #ff7b63), // Libadwaita @destructive_color: light @red_4, dark adjusted @red_1
-  "pink":   (light: #a2326c, dark: #ffa0d8), // Custom accent, kept as is
-  "purple": (light: #813d9c, dark: #c061cb), // Libadwaita: light @purple_4, dark @purple_2
-  "slate":  (light: #526678, dark: #bbd1e5)  // Custom accent, kept as is
-);
+$accent-blue-light: #1c71d8;
+$accent-blue-dark: #78aeed;
+$accent-teal-light: #007184;
+$accent-teal-dark: #63d2e7;
+$accent-green-light: #26a269;
+$accent-green-dark: #8ff0a4;
+$accent-yellow-light: #9c6e03;
+$accent-yellow-dark: #f8e45c;
+$accent-orange-light: #e66100;
+$accent-orange-dark: #ffa348;
+$accent-red-light: #c01c28;
+$accent-red-dark: #ff7b63;
+$accent-pink-light: #a2326c;
+$accent-pink-dark: #ffa0d8;
+$accent-purple-light: #813d9c;
+$accent-purple-dark: #c061cb;
+$accent-slate-light: #526678;
+$accent-slate-dark: #bbd1e5;
 
 
 // --- General SCSS Variables ---
@@ -74,7 +76,7 @@ $card-shade-color-light: rgba(0, 0, 0, 0.07);
 $dialog-bg-color-light: #fafafa;
 $popover-bg-color-light: #ffffff;
 $popover-shade-color-light: rgba(0, 0, 0, 0.07);
-$input-readonly-bg-color-light: color.mix($window-fg-color-light, $view-bg-color-light, 95%);
+$input-readonly-bg-color-light: mix($window-fg-color-light, $view-bg-color-light, 95%);
 
 
 // --- SASS Variables for initial setup of CSS Custom Properties (Dark Theme Defaults) ---
@@ -94,22 +96,8 @@ $card-shade-color-dark: rgba(0, 0, 0, 0.36);
 $dialog-bg-color-dark: #383838;
 $popover-bg-color-dark: #383838;
 $popover-shade-color-dark: rgba(0, 0, 0, 0.25);
-$input-readonly-bg-color-dark: color.mix($window-fg-color-dark, $view-bg-color-dark, 95%);
+$input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 95%);
 
-
-// --- Accent Color Definitions Map (for SCSS loops) ---
-// This map uses the $accent-standalone-colors for --accent-color
-$accent-definitions: (
-  "blue":   (bg: $accent-blue-bg,   fg: $accent-default-fg, standalone-light: map.get(map.get($accent-standalone-colors, "blue"), "light"),   standalone-dark: map.get(map.get($accent-standalone-colors, "blue"), "dark")),
-  "teal":   (bg: $accent-teal-bg,   fg: $accent-default-fg, standalone-light: map.get(map.get($accent-standalone-colors, "teal"), "light"),   standalone-dark: map.get(map.get($accent-standalone-colors, "teal"), "dark")),
-  "green":  (bg: $accent-green-bg,  fg: $accent-default-fg, standalone-light: map.get(map.get($accent-standalone-colors, "green"), "light"),  standalone-dark: map.get(map.get($accent-standalone-colors, "green"), "dark")),
-  "yellow": (bg: $accent-yellow-bg, fg: $accent-yellow-fg,  standalone-light: map.get(map.get($accent-standalone-colors, "yellow"), "light"), standalone-dark: map.get(map.get($accent-standalone-colors, "yellow"), "dark")),
-  "orange": (bg: $accent-orange-bg, fg: $accent-default-fg, standalone-light: map.get(map.get($accent-standalone-colors, "orange"), "light"), standalone-dark: map.get(map.get($accent-standalone-colors, "orange"), "dark")),
-  "red":    (bg: $accent-red-bg,    fg: $accent-default-fg, standalone-light: map.get(map.get($accent-standalone-colors, "red"), "light"),    standalone-dark: map.get(map.get($accent-standalone-colors, "red"), "dark")),
-  "pink":   (bg: $accent-pink-bg,   fg: $accent-default-fg, standalone-light: map.get(map.get($accent-standalone-colors, "pink"), "light"),   standalone-dark: map.get(map.get($accent-standalone-colors, "pink"), "dark")),
-  "purple": (bg: $accent-purple-bg, fg: $accent-default-fg, standalone-light: map.get(map.get($accent-standalone-colors, "purple"), "light"), standalone-dark: map.get(map.get($accent-standalone-colors, "purple"), "dark")),
-  "slate":  (bg: $accent-slate-bg,  fg: $accent-default-fg, standalone-light: map.get(map.get($accent-standalone-colors, "slate"), "light"),  standalone-dark: map.get(map.get($accent-standalone-colors, "slate"), "dark"))
-);
 
 // --- CSS Custom Properties Definitions ---
 :root {
@@ -136,23 +124,21 @@ $accent-definitions: (
   --accent-slate-bg: #{$accent-slate-bg};
 
   // --- Default UI Colors (Light Theme) ---
-  // Updated to use the $accent-standalone-colors map which now holds docs' @..._color values
-  $_default-accent-map: map.get($accent-definitions, "blue");
-  --accent-bg-color: #{map.get($_default-accent-map, "bg")}; // #3584e4
-  --accent-fg-color: #{map.get($_default-accent-map, "fg")}; // #ffffff
-  --accent-color: #{map.get($_default-accent-map, "standalone-light")}; // #1c71d8 (was #0461be)
+  --accent-bg-color: #{$accent-blue-bg};
+  --accent-fg-color: #{$accent-default-fg};
+  --accent-color: #{$accent-blue-light};
 
   --destructive-bg-color: #{$adw-red-3}; // #e01b24 (matches docs @destructive_bg_color light)
   --destructive-fg-color: #{$accent-default-fg}; // #ffffff (matches docs)
-  --destructive-color: #{map.get(map.get($accent-standalone-colors, "red"), "light")}; // #c01c28 (was #c30000)
+  --destructive-color: #{$accent-red-light};
 
   --success-bg-color: #{$adw-green-4}; // #2ec27e (matches docs @success_bg_color light)
   --success-fg-color: #{$accent-default-fg}; // #ffffff (matches docs)
-  --success-color: #{map.get(map.get($accent-standalone-colors, "green"), "light")}; // #1b8553 (was #007c3d)
+  --success-color: #{$accent-green-light};
 
   --warning-bg-color: #{$adw-yellow-5}; // #e5a50a (matches docs @warning_bg_color light)
   --warning-fg-color: #{rgba(0, 0, 0, 0.8)}; // (matches docs)
-  --warning-color: #{map.get(map.get($accent-standalone-colors, "yellow"), "light")}; // #9c6e03 (was #905400)
+  --warning-color: #{$accent-yellow-light};
 
   --error-bg-color: var(--destructive-bg-color); // Alias to destructive
   --error-fg-color: var(--destructive-fg-color); // Alias to destructive
@@ -208,8 +194,8 @@ $accent-definitions: (
   --scrollbar-outline-color: #ffffff; // From docs
 
   --link-color: var(--accent-color); // Use the updated --accent-color for links for consistency
-  --link-hover-color: #{color.mix(black, map.get(map.get($accent-standalone-colors, "blue"), "light"), 20%)}; // Darken accent
-  --link-visited-color: #{map.get(map.get($accent-standalone-colors, "purple"), "light")}; // Use purple standalone
+  --link-hover-color: #{mix(black, $accent-blue-light, 20%)}; // Darken accent
+  --link-visited-color: #{$accent-purple-light}; // Use purple standalone
 
   // ListBox / Row related defaults
   --list-row-selected-bg-color: var(--accent-bg-color);
@@ -237,12 +223,12 @@ $accent-definitions: (
 
   // Basic Sizing and Spacing - these are fine
   --font-size-base: #{$font-size-base-val};
-  --font-size-small: #{math.round($font-size-base-val * 0.875)};
-  --font-size-large: #{math.round($font-size-base-val * 1.125)};
-  --title-4-font-size: #{math.round($font-size-base-val * 1.125)};
-  --title-3-font-size: #{math.round($font-size-base-val * 1.25)};
-  --title-2-font-size: #{math.round($font-size-base-val * 1.5)};
-  --title-1-font-size: #{math.round($font-size-base-val * 1.8)};
+  --font-size-small: #{$font-size-base-val * 0.875};
+  --font-size-large: #{$font-size-base-val * 1.125};
+  --title-4-font-size: #{$font-size-base-val * 1.125};
+  --title-3-font-size: #{$font-size-base-val * 1.25};
+  --title-2-font-size: #{$font-size-base-val * 1.5};
+  --title-1-font-size: #{$font-size-base-val * 1.8};
   --h1-font-size: var(--title-1-font-size);
   --h2-font-size: var(--title-2-font-size);
   --h3-font-size: var(--title-3-font-size);
@@ -259,8 +245,8 @@ $accent-definitions: (
   $_error_fg_color_sass: $accent-default-fg; // Error fg is white
   $_warning_fg_color_sass: $accent-yellow-fg; // Warning fg is dark
   $_success_fg_color_sass: $accent-default-fg; // Success fg is white
-  $_destructive_color_light-sass: map.get(map.get($accent-standalone-colors, "red"), "light"); // #c01c28
-  $_destructive_color_dark-sass: map.get(map.get($accent-standalone-colors, "red"), "dark");   // #ff7b63
+  $_destructive_color_light-sass: $accent-red-light; // #c01c28
+  $_destructive_color_dark-sass: $accent-red-dark;   // #ff7b63
   $_window_fg_color_light_sass: $window-fg-color-light; // rgba(0,0,0,0.8)
   $_window_fg_color_dark_sass: $window-fg-color-dark;   // #ffffff
   // Assuming headerbar, card, sidebar fg colors are same as window_fg_color
@@ -272,38 +258,25 @@ $accent-definitions: (
   $_sidebar_fg_color_dark-sass: $_window_fg_color_dark_sass;
 
 
-  --accent-fg-color-rgb: #{color.channel($_accent-fg-color-sass, "red")}, #{color.channel($_accent-fg-color-sass, "green")}, #{color.channel($_accent-fg-color-sass, "blue")};
-  --error-fg-color-rgb: #{color.channel($_error_fg_color_sass, "red")}, #{color.channel($_error_fg_color_sass, "green")}, #{color.channel($_error_fg_color_sass, "blue")};
-  --warning-fg-color-rgb: #{color.channel($_warning_fg_color_sass, "red")}, #{color.channel($_warning_fg_color_sass, "green")}, #{color.channel($_warning_fg_color_sass, "blue")};
-  --success-fg-color-rgb: #{color.channel($_success_fg_color_sass, "red")}, #{color.channel($_success_fg_color_sass, "green")}, #{color.channel($_success_fg_color_sass, "blue")};
-  --destructive-color-rgb: #{color.channel($_destructive_color_light-sass, "red")}, #{color.channel($_destructive_color_light-sass, "green")}, #{color.channel($_destructive_color_light-sass, "blue")};
-  --window-fg-color-rgb: #{color.channel($_window_fg_color_light-sass, "red")}, #{color.channel($_window_fg_color_light-sass, "green")}, #{color.channel($_window_fg_color_light-sass, "blue")};
-  --headerbar-fg-color-rgb: #{color.channel($_headerbar_fg_color_light-sass, "red")}, #{color.channel($_headerbar_fg_color_light-sass, "green")}, #{color.channel($_headerbar_fg_color_light-sass, "blue")};
-  --headerbar-fg-color-alpha: #{color.alpha($_headerbar_fg_color_light-sass)}; // Will be 0.8 for light
-  --card-fg-color-rgb: #{color.channel($_card_fg_color_light-sass, "red")}, #{color.channel($_card_fg_color_light-sass, "green")}, #{color.channel($_card_fg_color_light-sass, "blue")};
-  --card-fg-color-alpha: #{color.alpha($_card_fg_color_light-sass)}; // Will be 0.8 for light
-  --sidebar-fg-color-rgb: #{color.channel($_sidebar_fg_color_light-sass, "red")}, #{color.channel($_sidebar_fg_color_light-sass, "green")}, #{color.channel($_sidebar_fg_color_light-sass, "blue")};
-  --sidebar-fg-color-alpha: #{color.alpha($_sidebar_fg_color_light-sass)}; // Will be 0.8 for light
 
   // Button State Variables - fine
   --button-bg-color: var(--window-bg-color);
   --button-fg-color: var(--window-fg-color);
   --button-border-color: var(--border-color);
-  --button-hover-bg-color: #{color.mix($window-fg-color-light, $window-bg-color-light, 10%)};
-  --button-active-bg-color: #{color.mix($window-fg-color-light, $window-bg-color-light, 20%)};
+  --button-hover-bg-color: #{mix($window-fg-color-light, $window-bg-color-light, 10%)};
+  --button-active-bg-color: #{mix($window-fg-color-light, $window-bg-color-light, 20%)};
   --button-flat-hover-bg-color: #{rgba($window-fg-color-light, 0.05)}; // Use rgba with black base for consistency
   --button-flat-active-bg-color: #{rgba($window-fg-color-light, 0.1)}; // Use rgba with black base
   --button-disabled-opacity: var(--disabled-opacity);
 
   // Accent button states - fine
-  $_default-accent-bg: map.get(map.get($accent-definitions, "blue"), "bg");
-  --accent-bg-hover-color: #{color.mix(black, $_default-accent-bg, 10%)};
-  --accent-bg-active-color: #{color.mix(black, $_default-accent-bg, 20%)};
+  --accent-bg-hover-color: #{mix(black, $accent-blue-bg, 10%)};
+  --accent-bg-active-color: #{mix(black, $accent-blue-bg, 20%)};
 
   // Destructive button states - fine
   $_destructive-bg-light: $adw-red-3; // This is @destructive_bg_color light
-  --destructive-bg-hover-color: #{color.mix(black, $_destructive-bg-light, 10%)};
-  --destructive-bg-active-color: #{color.mix(black, $_destructive-bg-light, 20%)};
+  --destructive-bg-hover-color: #{mix(black, $_destructive-bg-light, 10%)};
+  --destructive-bg-active-color: #{mix(black, $_destructive-bg-light, 20%)};
 
 
   // Dialog specific variables - fine
@@ -381,7 +354,6 @@ $accent-definitions: (
   --toast-bg-color: #{$adw-dark-3};
   --toast-fg-color: #{$adw-light-1};
   $_toast_fg_color_sass: $adw-light-1;
-  --toast-fg-color-rgb: #{color.channel($_toast_fg_color_sass, "red")}, #{color.channel($_toast_fg_color_sass, "green")}, #{color.channel($_toast_fg_color_sass, "blue")};
   --toast-secondary-fg-color: #{rgba($adw-light-1, 0.7)};
   --toast-accent-color: var(--accent-color);
   --toast-box-shadow: var(--popover-box-shadow-dark);
@@ -405,22 +377,21 @@ $accent-definitions: (
 
   // --- Dark Theme Overrides ---
   &.theme-dark {
-    $_default-accent-map-dark: map.get($accent-definitions, "blue"); // Uses updated $accent-definitions
-    --accent-bg-color: #{map.get($_default-accent-map-dark, "bg")}; // #3584e4
-    --accent-fg-color: #{map.get($_default-accent-map-dark, "fg")}; // #ffffff
-    --accent-color: #{map.get($_default-accent-map-dark, "standalone-dark")}; // #78aeed (was #81d0ff)
+    --accent-bg-color: #{$accent-blue-bg};
+    --accent-fg-color: #{$accent-default-fg};
+    --accent-color: #{$accent-blue-dark};
 
     --destructive-bg-color: #{$adw-red-4}; // #c01c28 (matches docs @destructive_bg_color dark)
     --destructive-fg-color: #{$accent-default-fg}; // #ffffff (matches docs)
-    --destructive-color: #{map.get(map.get($accent-standalone-colors, "red"), "dark")}; // #ff7b63 (was #ff938c)
+    --destructive-color: #{$accent-red-dark};
 
     --success-bg-color: #{$adw-green-5}; // #26a269 (matches docs @success_bg_color dark)
     --success-fg-color: #{$accent-default-fg}; // #ffffff (matches docs)
-    --success-color: #{map.get(map.get($accent-standalone-colors, "green"), "dark")}; // #8ff0a4 (was #78e9ab)
+    --success-color: #{$accent-green-dark};
 
     --warning-bg-color: #cd9309; // (matches docs @warning_bg_color dark)
     --warning-fg-color: #{rgba(0, 0, 0, 0.8)}; // (matches docs)
-    --warning-color: #{map.get(map.get($accent-standalone-colors, "yellow"), "dark")}; // #f8e45c (was #ffc252)
+    --warning-color: #{$accent-yellow-dark};
 
     --error-bg-color: var(--destructive-bg-color);
     --error-fg-color: var(--destructive-fg-color);
@@ -476,8 +447,8 @@ $accent-definitions: (
     --scrollbar-outline-color: #{rgba(0, 0, 0, 0.5)}; // From docs
 
     --link-color: var(--accent-color); // Use dark --accent-color (#78aeed)
-    --link-hover-color: #{color.mix(white, map.get(map.get($accent-standalone-colors, "blue"), "dark"), 20%)}; // Lighten
-    --link-visited-color: #{map.get(map.get($accent-standalone-colors, "purple"), "dark")}; // Use purple standalone dark
+    --link-hover-color: #{mix(white, $accent-blue-dark, 20%)}; // Lighten
+    --link-visited-color: #{$accent-purple-dark}; // Use purple standalone dark
 
     --list-row-hover-bg-color: #{rgba(255, 255, 255, 0.06)}; // White with alpha
     --list-row-active-bg-color: #{rgba(255, 255, 255, 0.10)}; // White with alpha
@@ -499,60 +470,154 @@ $accent-definitions: (
     --input-readonly-bg-color: #{$input-readonly-bg-color-dark};
 
     // Button State Variables for Dark Theme - fine
-    --button-hover-bg-color: #{color.mix($window-fg-color-dark, $window-bg-color-dark, 10%)};
-    --button-active-bg-color: #{color.mix($window-fg-color-dark, $window-bg-color-dark, 20%)};
+    --button-hover-bg-color: #{mix($window-fg-color-dark, $window-bg-color-dark, 10%)};
+    --button-active-bg-color: #{mix($window-fg-color-dark, $window-bg-color-dark, 20%)};
     --button-flat-hover-bg-color: #{rgba($window-fg-color-dark, 0.08)};
     --button-flat-active-bg-color: #{rgba($window-fg-color-dark, 0.12)};
 
     // Accent button states for Dark Theme - fine
-    $_default-accent-bg-dark: map.get(map.get($accent-definitions, "blue"), "bg"); // Still uses the base accent bg
-    --accent-bg-hover-color: #{color.mix(white, $_default-accent-bg-dark, 10%)};
-    --accent-bg-active-color: #{color.mix(white, $_default-accent-bg-dark, 20%)};
+    --accent-bg-hover-color: #{mix(white, $accent-blue-bg, 10%)};
+    --accent-bg-active-color: #{mix(white, $accent-blue-bg, 20%)};
 
     // Destructive button states for Dark Theme - fine
     $_destructive-bg-dark: $adw-red-4; // This is @destructive_bg_color dark
-    --destructive-bg-hover-color: #{color.mix(white, $_destructive-bg-dark, 10%)};
-    --destructive-bg-active-color: #{color.mix(white, $_destructive-bg-dark, 20%)};
+    --destructive-bg-hover-color: #{mix(white, $_destructive-bg-dark, 10%)};
+    --destructive-bg-active-color: #{mix(white, $_destructive-bg-dark, 20%)};
 
     // RGB versions for dark theme
     // These use the SASS variables which have been updated or confirmed.
-    --accent-fg-color-rgb: #{color.channel($_accent-fg-color-sass, "red")}, #{color.channel($_accent-fg-color-sass, "green")}, #{color.channel($_accent-fg-color-sass, "blue")};
-    --error-fg-color-rgb: #{color.channel($_error_fg_color_sass, "red")}, #{color.channel($_error_fg_color_sass, "green")}, #{color.channel($_error_fg_color_sass, "blue")};
-    --warning-fg-color-rgb: #{color.channel($_warning_fg_color_sass, "red")}, #{color.channel($_warning_fg_color_sass, "green")}, #{color.channel($_warning_fg_color_sass, "blue")};
-    --success-fg-color-rgb: #{color.channel($_success_fg_color_sass, "red")}, #{color.channel($_success_fg_color_sass, "green")}, #{color.channel($_success_fg_color_sass, "blue")};
-    --destructive-color-rgb: #{color.channel($_destructive_color_dark-sass, "red")}, #{color.channel($_destructive_color_dark-sass, "green")}, #{color.channel($_destructive_color_dark-sass, "blue")};
-    --window-fg-color-rgb: #{color.channel($_window_fg_color_dark-sass, "red")}, #{color.channel($_window_fg_color_dark-sass, "green")}, #{color.channel($_window_fg_color_dark-sass, "blue")};
-    --headerbar-fg-color-rgb: #{color.channel($_headerbar_fg_color_dark-sass, "red")}, #{color.channel($_headerbar_fg_color_dark-sass, "green")}, #{color.channel($_headerbar_fg_color_dark-sass, "blue")};
-    --headerbar-fg-color-alpha: #{color.alpha($_headerbar_fg_color_dark-sass)}; // Will be 1 for dark
-    --card-fg-color-rgb: #{color.channel($_card_fg_color_dark-sass, "red")}, #{color.channel($_card_fg_color_dark-sass, "green")}, #{color.channel($_card_fg_color_dark-sass, "blue")};
-    --card-fg-color-alpha: #{color.alpha($_card_fg_color_dark-sass)}; // Will be 1 for dark
-    --sidebar-fg-color-rgb: #{color.channel($_sidebar_fg_color_dark-sass, "red")}, #{color.channel($_sidebar_fg_color_dark-sass, "green")}, #{color.channel($_sidebar_fg_color_dark-sass, "blue")};
-    --sidebar-fg-color-alpha: #{color.alpha($_sidebar_fg_color_dark-sass)}; // Will be 1 for dark
-
     // Row specific for dark theme - fine
-    --secondary-fg-color: rgba(var(--window-fg-color-rgb), var(--dim-opacity));
+    --secondary-fg-color: rgba(255, 255, 255, var(--dim-opacity));
 
     // Inline code background for dark theme
     --inline-code-bg-color: #{rgba($adw-light-1, 0.08)};
   }
 
-  // Accent color overrides loop - this logic is fine, uses updated $accent-definitions
-  @each $name, $details in $accent-definitions {
-    &.accent-#{$name} {
-      $_current-accent-bg: map.get($details, "bg");
-      --accent-bg-color: #{$_current-accent-bg};
-      --accent-fg-color: #{map.get($details, "fg")};
-
-      &:not(.theme-dark) {
-        --accent-color: #{map.get($details, "standalone-light")};
-        --accent-bg-hover-color: #{color.mix(black, $_current-accent-bg, 10%)};
-        --accent-bg-active-color: #{color.mix(black, $_current-accent-bg, 20%)};
-      }
-      &.theme-dark {
-        --accent-color: #{map.get($details, "standalone-dark")};
-        --accent-bg-hover-color: #{color.mix(white, $_current-accent-bg, 10%)};
-        --accent-bg-active-color: #{color.mix(white, $_current-accent-bg, 20%)};
-      }
+  // Accent color overrides loop
+  &.accent-blue {
+    --accent-bg-color: #{$accent-blue-bg};
+    --accent-fg-color: #{$accent-default-fg};
+    &:not(.theme-dark) {
+      --accent-color: #{$accent-blue-light};
+      --accent-bg-hover-color: #{mix(black, $accent-blue-bg, 10%)};
+      --accent-bg-active-color: #{mix(black, $accent-blue-bg, 20%)};
+    }
+    &.theme-dark {
+      --accent-color: #{$accent-blue-dark};
+      --accent-bg-hover-color: #{mix(white, $accent-blue-bg, 10%)};
+      --accent-bg-active-color: #{mix(white, $accent-blue-bg, 20%)};
+    }
+  }
+  &.accent-teal {
+    --accent-bg-color: #{$accent-teal-bg};
+    --accent-fg-color: #{$accent-default-fg};
+    &:not(.theme-dark) {
+      --accent-color: #{$accent-teal-light};
+      --accent-bg-hover-color: #{mix(black, $accent-teal-bg, 10%)};
+      --accent-bg-active-color: #{mix(black, $accent-teal-bg, 20%)};
+    }
+    &.theme-dark {
+      --accent-color: #{$accent-teal-dark};
+      --accent-bg-hover-color: #{mix(white, $accent-teal-bg, 10%)};
+      --accent-bg-active-color: #{mix(white, $accent-teal-bg, 20%)};
+    }
+  }
+  &.accent-green {
+    --accent-bg-color: #{$accent-green-bg};
+    --accent-fg-color: #{$accent-default-fg};
+    &:not(.theme-dark) {
+      --accent-color: #{$accent-green-light};
+      --accent-bg-hover-color: #{mix(black, $accent-green-bg, 10%)};
+      --accent-bg-active-color: #{mix(black, $accent-green-bg, 20%)};
+    }
+    &.theme-dark {
+      --accent-color: #{$accent-green-dark};
+      --accent-bg-hover-color: #{mix(white, $accent-green-bg, 10%)};
+      --accent-bg-active-color: #{mix(white, $accent-green-bg, 20%)};
+    }
+  }
+  &.accent-yellow {
+    --accent-bg-color: #{$accent-yellow-bg};
+    --accent-fg-color: #{$accent-yellow-fg};
+    &:not(.theme-dark) {
+      --accent-color: #{$accent-yellow-light};
+      --accent-bg-hover-color: #{mix(black, $accent-yellow-bg, 10%)};
+      --accent-bg-active-color: #{mix(black, $accent-yellow-bg, 20%)};
+    }
+    &.theme-dark {
+      --accent-color: #{$accent-yellow-dark};
+      --accent-bg-hover-color: #{mix(white, $accent-yellow-bg, 10%)};
+      --accent-bg-active-color: #{mix(white, $accent-yellow-bg, 20%)};
+    }
+  }
+  &.accent-orange {
+    --accent-bg-color: #{$accent-orange-bg};
+    --accent-fg-color: #{$accent-default-fg};
+    &:not(.theme-dark) {
+      --accent-color: #{$accent-orange-light};
+      --accent-bg-hover-color: #{mix(black, $accent-orange-bg, 10%)};
+      --accent-bg-active-color: #{mix(black, $accent-orange-bg, 20%)};
+    }
+    &.theme-dark {
+      --accent-color: #{$accent-orange-dark};
+      --accent-bg-hover-color: #{mix(white, $accent-orange-bg, 10%)};
+      --accent-bg-active-color: #{mix(white, $accent-orange-bg, 20%)};
+    }
+  }
+  &.accent-red {
+    --accent-bg-color: #{$accent-red-bg};
+    --accent-fg-color: #{$accent-default-fg};
+    &:not(.theme-dark) {
+      --accent-color: #{$accent-red-light};
+      --accent-bg-hover-color: #{mix(black, $accent-red-bg, 10%)};
+      --accent-bg-active-color: #{mix(black, $accent-red-bg, 20%)};
+    }
+    &.theme-dark {
+      --accent-color: #{$accent-red-dark};
+      --accent-bg-hover-color: #{mix(white, $accent-red-bg, 10%)};
+      --accent-bg-active-color: #{mix(white, $accent-red-bg, 20%)};
+    }
+  }
+  &.accent-pink {
+    --accent-bg-color: #{$accent-pink-bg};
+    --accent-fg-color: #{$accent-default-fg};
+    &:not(.theme-dark) {
+      --accent-color: #{$accent-pink-light};
+      --accent-bg-hover-color: #{mix(black, $accent-pink-bg, 10%)};
+      --accent-bg-active-color: #{mix(black, $accent-pink-bg, 20%)};
+    }
+    &.theme-dark {
+      --accent-color: #{$accent-pink-dark};
+      --accent-bg-hover-color: #{mix(white, $accent-pink-bg, 10%)};
+      --accent-bg-active-color: #{mix(white, $accent-pink-bg, 20%)};
+    }
+  }
+  &.accent-purple {
+    --accent-bg-color: #{$accent-purple-bg};
+    --accent-fg-color: #{$accent-default-fg};
+    &:not(.theme-dark) {
+      --accent-color: #{$accent-purple-light};
+      --accent-bg-hover-color: #{mix(black, $accent-purple-bg, 10%)};
+      --accent-bg-active-color: #{mix(black, $accent-purple-bg, 20%)};
+    }
+    &.theme-dark {
+      --accent-color: #{$accent-purple-dark};
+      --accent-bg-hover-color: #{mix(white, $accent-purple-bg, 10%)};
+      --accent-bg-active-color: #{mix(white, $accent-purple-bg, 20%)};
+    }
+  }
+  &.accent-slate {
+    --accent-bg-color: #{$accent-slate-bg};
+    --accent-fg-color: #{$accent-default-fg};
+    &:not(.theme-dark) {
+      --accent-color: #{$accent-slate-light};
+      --accent-bg-hover-color: #{mix(black, $accent-slate-bg, 10%)};
+      --accent-bg-active-color: #{mix(black, $accent-slate-bg, 20%)};
+    }
+    &.theme-dark {
+      --accent-color: #{$accent-slate-dark};
+      --accent-bg-hover-color: #{mix(white, $accent-slate-bg, 10%)};
+      --accent-bg-active-color: #{mix(white, $accent-slate-bg, 20%)};
     }
   }
 }

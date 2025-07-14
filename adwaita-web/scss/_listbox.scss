@@ -1,9 +1,5 @@
 // scss/_listbox.scss
 
-@use 'variables';
-@use 'mixins'; // For focus-ring if needed, though direct box-shadow is used here
-@use 'card'; // For @extend .adw-card
-@use 'sass:color';
 
 .adw-list-box {
   // Default listbox (not .boxed-list) typically has a view background

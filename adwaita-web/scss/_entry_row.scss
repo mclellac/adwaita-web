@@ -1,6 +1,4 @@
 // scss/_entry_row.scss
-@use 'variables';
-@use 'mixins';
 
 .adw-entry-row {
   @include mixins.row-base; // Applies common row styles
