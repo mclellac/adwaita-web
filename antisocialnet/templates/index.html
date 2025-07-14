@@ -7,52 +7,14 @@
 <h1 class="adw-title-1 page-title-centered">Latest Updates</h1>
 
 {% if posts %}
-    <div class="blog-posts-container"> {# Changed from adw-list-box to a generic container for cards #}
+    <div class="adw-list-box">
         {% for post in posts %}
-        <article class="adw-card blog-post-item-card">
-            <header class="blog-post-card__header">
-                {# Post title removed #}
-                <div class="blog-post-card__meta adw-label caption">
-                    By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-link">{{ post.author.full_name if post.author else 'Unknown Author' }}</a>
-                    on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at | human_readable_date if post.created_at else 'Unknown date' }}</time> {# Show time as well #}
-                </div>
-            </header>
-            <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-link post-content-link"> {# Make content clickable #}
-                {% if post.content %}
-                <div class="blog-post-card__excerpt styled-text-content">
-                    {# Rendered HTML excerpt, truncated by CSS if too long, or use a JS solution for smarter HTML truncation #}
-                    {# For now, rendering a portion of Markdown. This should be improved for proper HTML excerpt. #}
-                    {{ (post.content | truncate(600) | markdown ) if post.content else '' }}
-                </div>
-                {% endif %}
-            </a>
-            <footer class="blog-post-card__footer">
-                <div class="blog-post-card__terms">
-                    {% if post.categories %}
-                    <div class="post-categories-list meta-section">
-                        <strong class="adw-label caption meta-label-strong">Categories:</strong>
-                        {% for category in post.categories %}
-                            <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact">{{ category.name }}</a>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% if post.tags %}
-                    <div class="tags-summary meta-section">
-                        <strong class="adw-label caption meta-label-strong">Tags:</strong>
-                        {% for tag in post.tags %}
-                          <a href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact tag-pill">{{ tag.name }}</a>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                </div>
-                <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat read-more-link">Read More <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
-            </footer>
-                        <div class="adw-card__actions card-secondary-actions"> {# New container for likes etc. #}
-                            {% from "_macros.html" import like_button_and_count %}
-                            {{ like_button_and_count(post, 'post', current_user) }}
-                            {# Add other actions like comments count link here if desired #}
-                        </div>
-        </article>
+        <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-action-row">
+            <div class="adw-action-row-text-content">
+                <span class="adw-action-row-title">{{ post.title }}</span>
+                <span class="adw-action-row-subtitle">{{ post.content|striptags|truncate(200) }}</span>
+            </div>
+        </a>
         {% endfor %}
     </div>
 {% else %}

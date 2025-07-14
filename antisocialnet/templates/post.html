@@ -6,188 +6,112 @@
 {% block header_title %}Post by {{ post.author.full_name or ('User ' ~ post.author.id) }}{% endblock %}
 
 {% block content %}
-<div class="post-view"> {# Removed adw-clamp content-clamp as base.html provides clamp #}
-    <article class="post-article adw-card blog-content-card"> {# Added adw-card and specific class #}
-        <header class="post-header">
-            {# Title h1 removed #}
-            <div class="post-meta-detail">
-                <p class="adw-label body">
-                    By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-link">{{ post.author.full_name or ('User ' ~ post.author.id) if post.author else 'Unknown Author' }}</a>&nbsp;
-                    {%- if post.published_at -%}
-                        on <span class="adw-calendar"><span class="adw-icon icon-x-office-calendar-symbolic"></span><time datetime="{{ post.published_at.isoformat() }}">{{ post.published_at | human_readable_date }}</time></span>
-                    {%- else -%} {# Should not happen for new posts, fallback for old data or if published_at was somehow not set #}
-                        on <span class="adw-calendar"><span class="adw-icon icon-x-office-calendar-symbolic"></span><time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at | human_readable_date }}</time></span>
-                    {%- endif -%}
-                </p>
-                {% set created_datetime = post.published_at or post.created_at %}
-                {% if post.updated_at and created_datetime and (post.updated_at.timestamp() - created_datetime.timestamp()) > 60 %}
-                    <p class="adw-label caption last-updated">(Last updated: <time datetime="{{ post.updated_at.isoformat() }}">{{ post.updated_at | human_readable_date }}</time>)</p>
-                {% endif %}
+<div class="adw-clamp">
+    <div class="adw-card">
+        <div class="adw-card-header">
+            <h1 class="adw-title-1">{{ post.title }}</h1>
+            <div class="adw-subtitle">
+                By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}">{{ post.author.full_name or ('User ' ~ post.author.id) if post.author else 'Unknown Author' }}</a>
+                on {{ post.timestamp.strftime('%B %d, %Y') }}
             </div>
-
-            {% if post.categories %}
-            <div class="post-terms post-categories">
-                <strong class="adw-label caption post-meta-terms-label">Categories:</strong>
-                {% for category in post.categories %}
-                    <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact">{{ category.name }}</a>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            {% if post.tags %}
-            <div class="post-terms post-tags">
-                <strong class="adw-label caption post-meta-terms-label">Tags:</strong>
-                {% for tag in post.tags %}
-                  <a href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact tag-pill">{{ tag.name }}</a>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </header>
-
-        <div class="post-content styled-text-content"> {# Added styled-text-content for prose styling #}
+        </div>
+        <div class="adw-card-content">
             {{ post.content | markdown }}
         </div>
+    </div>
 
-        <footer class="adw-card__actions post-interaction-footer" style="padding-top: var(--spacing-m); margin-top: var(--spacing-m); border-top: 1px solid var(--border-color);">
-            {{ like_button_and_count(post, 'post', current_user) }}
+    <div class="adw-box" style="margin-top: 1rem;">
+        {{ like_button_and_count(post, 'post', current_user) }}
+        <form method="POST" action="{{ url_for('repost.repost_post_route', post_id=post.id) }}" style="display: inline;">
+            <button type="submit" class="adw-button flat compact">
+                <span class="adw-icon icon-actions-find-and-replace-symbolic"></span>
+                <span class="adw-label caption">{{ post.repost_count }}</span>
+            </button>
+        </form>
+    </div>
 
-            <form method="POST" action="{{ url_for('repost.repost_post_route', post_id=post.id) }}" style="display: inline;">
-                <button type="submit" class="adw-button flat compact">
-                    <span class="adw-icon icon-actions-find-and-replace-symbolic"></span>
-                    <span class="adw-label caption">{{ post.repost_count }}</span>
-                </button>
-            </form>
-        </footer>
-
-        {% if post.author %}
-        <section class="author-bio-section adw-card">
-            <h3 class="adw-title-3">About {{ post.author.full_name or ('User ' ~ post.author.id) }}</h3>
-            <div class="adw-box adw-box-spacing-m author-bio-content">
-                <span class="adw-avatar size-large">
-                     {% set author_avatar = url_for('static', filename=post.author.profile_photo_url) if post.author.profile_photo_url else default_avatar_url %}
-                     <img src="{{ author_avatar }}" alt="{{ post.author.full_name or ('User ' ~ post.author.id) }} avatar" class="adw-avatar__image">
-                </span>
-                <div class="author-bio-text-content">
-                    {% if post.author.profile_info %}
-                    <p class="adw-label body author-bio-text">
-                        {{ post.author.profile_info | safe }}
-                    </p>
-                    {% else %}
-                    <p class="adw-label body author-bio-text-placeholder">This author has not provided a bio yet.</p>
-                    {% endif %}
-                    <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-button flat view-profile-button">View Profile of {{ post.author.full_name or ('User ' ~ post.author.id) }}</a>
-                </div>
-            </div>
-        </section>
-        {% endif %}
-
-        {% if post.author == current_user %}
-        <div class="post-actions-container adw-box adw-box-spacing-s">
-            <a href="{{ url_for('post.edit_post', post_id=post.id) }}" class="adw-button">Edit Post</a>
-            <button id="open-delete-dialog-btn" class="adw-button destructive-action">Delete Post</button>
-        </div>
+    {% if post.author == current_user %}
+    <div class="adw-box" style="margin-top: 1rem;">
+        <a href="{{ url_for('post.edit_post', post_id=post.id) }}" class="adw-button">Edit Post</a>
+        <button id="open-delete-dialog-btn" class="adw-button destructive-action">Delete Post</button>
+    </div>
 
     <adw-dialog id="delete-confirm-dialog" title="Confirm Deletion">
-        {# Default header with title is handled by the web component based on 'title' attribute #}
-        {# Or, we can provide a custom header slot if needed:
-        <header slot="header" class="adw-header-bar adw-dialog__header">
-             <h2 class="adw-header-bar__title">Confirm Deletion</h2>
-            </header>
-        #}
-        <div slot="content" class="adw-dialog-content">
-                <p class="adw-label body">Are you sure you want to delete this post? This action cannot be undone.</p>
-            </div>
-        <div slot="buttons" class="adw-dialog-footer">
-                <button id="cancel-delete-btn" class="adw-button flat">Cancel</button>
-                <form method="POST" action="{{ url_for('post.delete_post', post_id=post.id) }}" id="delete-post-form" class="delete-post-form-inline">
-                    {{ delete_post_form.hidden_tag() }} {# Use form instance for CSRF #}
-                    <button id="confirm-delete-btn" type="submit" class="adw-button destructive-action">Delete</button>
-                </form>
+        <div slot="content">
+            <p>Are you sure you want to delete this post? This action cannot be undone.</p>
+        </div>
+        <div slot="footer">
+            <button id="cancel-delete-btn" class="adw-button flat">Cancel</button>
+            <form method="POST" action="{{ url_for('post.delete_post', post_id=post.id) }}" style="display: inline;">
+                {{ delete_post_form.hidden_tag() }}
+                <button type="submit" class="adw-button destructive-action">Delete</button>
+            </form>
         </div>
     </adw-dialog>
-        {% endif %}
-    </article>
+    {% endif %}
 
-    <hr class="section-divider">
+    <hr style="margin: 2rem 0;">
 
-
-    <section class="comments-section" aria-labelledby="comments-heading">
-        <h2 id="comments-heading" class="adw-title-2">Comments ({{ post.comments.count() }})</h2>
-        {% if post.comments.first() %}
-            <div class="adw-list-box comments-list flat">
-                {% for comment in post.comments %} {# Iterates over top-level comments #}
-                    <article class="adw-card comment-card" id="comment-card-for-{{ comment.id }}"> {# Each top-level comment is a card #}
-                        {{ render_comment_with_replies(comment, post, delete_comment_form, flag_comment_form, current_user, form, is_reply=false) }}
-                    </article>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="adw-label body">No comments yet.</p>
-        {% endif %}
-    </section>
+    <h2 class="adw-title-2">Comments ({{ post.comments.count() }})</h2>
+    {% if post.comments.first() %}
+        <div class="adw-list-box">
+            {% for comment in post.comments %}
+                {{ render_comment_with_replies(comment, post, delete_comment_form, flag_comment_form, current_user, form, is_reply=false) }}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No comments yet.</p>
+    {% endif %}
 
     {% if current_user.is_authenticated %}
-    <section class="comment-form-section adw-list-box form-section" aria-labelledby="leave-comment-heading" style="margin-top: var(--spacing-l);">
-         <header class="adw-list-box-header">
-            <h3 id="leave-comment-heading" class="adw-title-3">Leave a Comment</h3>
-        </header>
-        <form method="POST" action="{{ url_for('post.view_post', post_id=post.id) }}" class="stacked-form" id="main-comment-form" style="padding: var(--spacing-m);">
-            {{ form.hidden_tag() }} {# Flask-WTF CSRF token #}
-            {{ form.parent_id(id="main_parent_id_input", type="hidden") }} {# Hidden field for parent_id #}
+    <div class="adw-list-box" style="margin-top: 1rem;">
+        <div class="adw-list-box-header">
+            <h3 class="adw-title-3">Leave a Comment</h3>
+        </div>
+        <form method="POST" action="{{ url_for('post.view_post', post_id=post.id) }}" style="padding: 1rem;">
+            {{ form.hidden_tag() }}
+            {{ form.parent_id(id="main_parent_id_input", type="hidden") }}
 
-            {# Using a structure similar to create_post for consistency #}
-            <div class="adw-action-row column-layout {{ 'has-error' if form.text.errors else '' }}">
-                <label for="{{ form.text.id or 'comment_text_input' }}" class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">{{ form.text.label.text }}</label>
+            <div class="adw-entry-row">
+                {{ form.text.label }}
+                {{ form.text(class="adw-entry", rows="4") }}
                 {% if form.text.errors %}
-                    <span class="adw-action-row-subtitle error-text" style="margin-bottom: var(--spacing-xs);">{{form.text.errors|join(' ')}}</span>
+                    <div class="adw-subtitle" style="color: var(--destructive-color);">{{form.text.errors|join(' ')}}</div>
                 {% endif %}
-                <textarea name="{{ form.text.name }}" id="{{ form.text.id or 'comment_text_input' }}" class="adw-entry" rows="4" style="width: 100%; min-height: 80px; box-sizing: border-box;" placeholder="Enter your comment here...">{{ form.text.data or ''}}</textarea>
-                <span class="adw-label caption" style="display: block; margin-top: var(--spacing-xxs);">Mention users with @FullName.</span> {# Added mention guidance #}
             </div>
 
-            <div class="form-actions-container form-actions-end comment-form-actions adw-box adw-box-horizontal adw-box-spacing-s justify-end" style="margin-top: var(--spacing-m); padding: 0;"> {# Simplified padding as form has it now #}
-                 <button type="submit" class="adw-button suggested-action" id="main-comment-submit-button">{{ form.submit.label.text }}</button>
-                 <span class="adw-spinner small" id="main-comment-spinner" style="display: none;"></span>
+            <div class="adw-box" style="margin-top: 1rem;">
+                 <button type="submit" class="adw-button suggested-action">{{ form.submit.label.text }}</button>
             </div>
         </form>
-    </section>
-    {% else %}
-    <div class="login-prompt-comment">
-        <p class="adw-label body"><a href="{{ url_for('auth.login', next=request.url) }}" class="adw-link">Login</a> to leave a comment.</p>
     </div>
+    {% else %}
+    <p><a href="{{ url_for('auth.login', next=request.url) }}">Login</a> to leave a comment.</p>
     {% endif %}
 
     {% if related_posts %}
-    <section class="related-posts-section related-posts-container" aria-labelledby="related-posts-heading">
-        <h2 id="related-posts-heading" class="adw-title-2">Related Posts</h2>
-        <div class="adw-list-box">
-            {% for related_post in related_posts %}
-            <a href="{{ url_for('post.view_post', post_id=related_post.id) }}" class="adw-action-row activatable">
-                <div class="adw-action-row-content">
-                    <span class="adw-action-row-title">Post by {{ related_post.author.full_name or ('User ' ~ related_post.author.id) }}</span>
-                    {% if related_post.content %}
-                    <span class="adw-action-row-subtitle">{{ related_post.content | striptags | truncate(80) }}</span>
-                    {% endif %}
-                </div>
-                <div class="adw-action-row-suffix">
-                    <span class="adw-icon-navigation-chevron-right-symbolic"></span>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
-    </section>
+    <h2 class="adw-title-2" style="margin-top: 2rem;">Related Posts</h2>
+    <div class="adw-list-box">
+        {% for related_post in related_posts %}
+        <a href="{{ url_for('post.view_post', post_id=related_post.id) }}" class="adw-action-row">
+            <div class="adw-action-row-text-content">
+                <span class="adw-action-row-title">{{ related_post.title }}</span>
+                <span class="adw-action-row-subtitle">{{ related_post.content | striptags | truncate(80) }}</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
     {% endif %}
 
-    <div class="adw-box adw-box-spacing-s back-to-posts-container">
+    <div class="adw-box" style="margin-top: 2rem;">
          <a href="{{ url_for('general.index') }}" class="adw-button"><span class="adw-icon icon-actions-go-previous-symbolic"></span> Back to Posts</a>
     </div>
 
-    {# Dialog for confirming comment deletion - now using <adw-dialog> #}
     <adw-dialog id="delete-comment-confirm-dialog" title="Confirm Comment Deletion">
-        <div slot="content" class="adw-dialog-content">
-            <p class="adw-label body">Are you sure you want to delete this comment? This action cannot be undone.</p>
+        <div slot="content">
+            <p>Are you sure you want to delete this comment? This action cannot be undone.</p>
         </div>
-        <div slot="buttons" class="adw-dialog-footer">
+        <div slot="footer">
             <button id="cancel-comment-delete-btn" class="adw-button flat">Cancel</button>
             <form method="POST" action="" id="confirm-delete-comment-form-actual" style="display: inline;">
                  {{ delete_comment_form.hidden_tag() }}
