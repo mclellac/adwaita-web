@@ -244,6 +244,8 @@
   border: none; // Sidebars typically don't have their own border here; GtkScrolledWindow might.
   border-radius: 0; // Usually part of a larger sidebar structure, no independent radius.
   box-shadow: none;
+  min-width: 200px;
+  max-width: 280px;
 
   > .adw-row {
     background-color: transparent; // Rows are transparent over sidebar-bg

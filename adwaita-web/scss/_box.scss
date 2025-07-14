@@ -2,6 +2,7 @@
 
 .adw-box {
   display: flex;
+  flex-direction: column;
   // Default gap, can be overridden by utility classes or specific component styles
   // gap: var(--spacing-m);
 
