@@ -91,4 +91,26 @@
             font-size: var(--icon-size-large);
         }
     }
+
+  &.tag-pill {
+    border-radius: 999px; // Makes it a pill
+    background-color: rgba(var(--accent-color-rgb, 53,132,228), 0.1); // Default light accent background
+    color: var(--accent-color, #3584e4); // Use main accent color for text (usually darker, good on light bg)
+    border: 1px solid transparent; // Make border transparent by default, or use a very subtle one like rgba(var(--accent-color-rgb), 0.2)
+
+    // Override compact padding to ensure text visibility
+    padding: var(--spacing-xxs) var(--spacing-s); // 3px vertical, 9px horizontal
+    font-size: var(--font-size-small); // Ensure font size is appropriate
+    line-height: 1.4; // Ensure text fits vertically
+    white-space: nowrap; // Prevent text wrapping that might make it look circular
+
+    &:hover, &:focus {
+      color: var(--accent-color, #3584e4); // Keep text color on hover
+      background-color: rgba(var(--accent-color-rgb, 53,132,228), 0.2); // Darker/more opaque accent background on hover
+      border-color: transparent; // Keep border transparent or rgba(var(--accent-color-rgb), 0.3)
+    }
+
+    // Ensure it doesn't inherit unwanted styles from generic .adw-button if they conflict
+    text-decoration: none; // Links shouldn't be underlined if they are buttons
+  }
 }

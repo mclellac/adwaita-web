@@ -1,0 +1,10 @@
+.pagination-controls {
+    margin-top: var(--spacing-l);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-xs);
+
+    .adw-button.active {
+        font-weight: bold;
+    }
+}

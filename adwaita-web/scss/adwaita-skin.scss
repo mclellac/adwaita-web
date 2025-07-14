@@ -11,6 +11,7 @@
 @use 'action_row';
 @use 'avatar';
 @use 'banner';
+@use 'blog';
 @use 'bottom_sheet';
 @use 'box';
 @use 'button';
@@ -20,16 +21,19 @@
 @use 'checkbox';
 @use 'clamp';
 @use 'combo_row';
+@use 'comment';
 @use 'dialog';
 @use 'entry';
 @use 'entry_row';
 @use 'expander_row';
+@use 'gallery';
 @use 'headerbar';
 @use 'icon';
 @use 'inline_view_switcher';
 @use 'label';
 @use 'listbox';
 @use 'popover';
+@use 'pagination';
 @use 'preferences';
 @use 'progressbar';
 @use 'radio';
