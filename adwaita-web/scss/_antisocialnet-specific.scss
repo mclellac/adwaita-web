@@ -74,6 +74,21 @@
     }
 }
 
+// General form field structure if not using adw-entry-row or adw-action-row
+.form-field-row {
+    margin-top: var(--spacing-s); // Default top margin for a form field row
+    &.content-field-row { // Specific for the larger content textarea
+         // margin-top: var(--spacing-s); // Already set by .form-field-row
+    }
+    .form-field-label-block { // For labels that should be block display
+        display: block;
+        margin-bottom: var(--spacing-xs);
+    }
+    .form-field-error-container { // Container for error messages for these rows
+        margin-top: var(--spacing-xs);
+    }
+}
+
 
 // --- Styles from post.html ---
 .post-meta-terms-label { // For "Categories:", "Tags:" labels in post view
@@ -111,8 +126,6 @@
     // margin-top: var(--spacing-xs); // This was too little, form-field-row default is --spacing-s
 }
 .comment-form-actions { // Styles for the container of the submit button in comment form
-    @extend .form-actions-container;
-    @extend .form-actions-end;
     // This specific instance might need to override the background/border from .form-actions-container
     // if it's meant to be transparent within its parent (e.g. a card or listbox).
     // For now, it will inherit the white background from .form-actions-container.
@@ -138,37 +151,6 @@
     margin-bottom: var(--spacing-l);
 }
 
-// General form field structure if not using adw-entry-row or adw-action-row
-.form-field-row {
-    margin-top: var(--spacing-s); // Default top margin for a form field row
-    &.content-field-row { // Specific for the larger content textarea
-         // margin-top: var(--spacing-s); // Already set by .form-field-row
-    }
-    .form-field-label-block { // For labels that should be block display
-        display: block;
-        margin-bottom: var(--spacing-xs);
-    }
-    .form-field-error-container { // Container for error messages for these rows
-        margin-top: var(--spacing-xs);
-    }
-}
-
-.form-actions-container { // General form actions (save, publish, cancel etc.)
-    margin-top: var(--spacing-l);
-    padding: var(--spacing-m);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-s);
-    background-color: var(--list-row-bg-color);
-    border-top: 1px solid var(--border-color);
-
-    &.form-actions-end {
-        justify-content: flex-end;
-    }
-    &.form-actions-space-between {
-        justify-content: space-between;
-    }
-}
 
 // --- Styles from profile.html ---
 .profile-page-main-box {
@@ -248,37 +230,6 @@ hr.section-divider {
     margin: var(--spacing-xl) 0;
 }
 
-// --- New Sidebar Layout Styles ---
-.sidebar-profile-area {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: var(--spacing-l);
-    gap: var(--spacing-s);
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: var(--spacing-s); // Space before nav items
-
-    .sidebar-profile-avatar-link {
-        display: inline-block; // To prevent link taking full width
-        border-radius: 50%; // For focus outline if any
-        &:focus-visible {
-            outline: 2px solid var(--accent-color);
-            outline-offset: 2px;
-        }
-    }
-
-    .adw-avatar.size-large { // Ensure it's sized if not by default via class alone
-        width: 64px;
-        height: 64px;
-        font-size: calc(64px / 2); // Adjust text size for avatar
-    }
-
-    .sidebar-profile-name {
-        font-weight: bold;
-        text-align: center;
-        // title-3 class is already applied, so font size should be correct
-    }
-}
 
 html, body { height: 100%; margin: 0; display: flex; flex-direction: column; }
 body { overflow: hidden; }
@@ -292,54 +243,6 @@ body { overflow: hidden; }
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    .sidebar-nav {
-        // This targets the <nav class="adw-list-box flat sidebar-nav">
-        &.adw-list-box.flat {
-            border: none; // Remove default listbox border
-            border-radius: 0; // Remove default listbox radius
-            background-color: transparent; // Ensure it's transparent
-            padding-top: var(--spacing-s); // Add some padding at the top and bottom of the nav block
-            padding-bottom: var(--spacing-s);
-
-            .adw-action-row {
-                // Adjust padding if needed, default is var(--spacing-m)
-                // padding-left: var(--spacing-l); // Example: Increase padding if desired
-                // padding-right: var(--spacing-l);
-                border-bottom: none; // No separators between nav items
-                border-radius: var(--border-radius-medium); // Rounded corners for each nav item
-                margin: 0 var(--spacing-s) var(--spacing-xs) var(--spacing-s); // Margin around each item
-
-                &:hover {
-                    background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06);
-                }
-                // For selected state
-                &.selected {
-                    background-color: rgba(var(--accent-color-rgb, 53,132,228), 0.15); // Default to blueish accent for example
-                    .adw-action-row-title {
-                        color: var(--accent-color);
-                        font-weight: bold;
-                    }
-                    .adw-action-row-icon { // Ensure icon also gets accent color
-                        color: var(--accent-color);
-                    }
-                }
-                // Ensure default (non-selected) icon and title colors are standard
-                &:not(.selected) {
-                    .adw-action-row-title {
-                        color: var(--text-color);
-                        font-weight: normal; // Ensure non-selected titles are normal weight
-                    }
-                    .adw-action-row-icon {
-                        color: var(--text-color-secondary); // Or var(--text-color) if preferred
-                    }
-                }
-            }
-        }
-        // Remove old ul/li/a styles that are no longer applicable
-        // ul { /* ... */ } (removed)
-        // li { /* ... */ } (removed)
-        // a { /* ... */ } (removed, now covered by .adw-action-row)
-    }
 }
 .app-content-area {
     flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto;
@@ -359,7 +262,6 @@ body { overflow: hidden; }
 }
 .current-photo-display { display: flex; align-items: center; gap: var(--spacing-xs); }
 .edit-profile-form-actions {
-    @extend .form-actions-container;
 }
 
 // --- Responsive Sidebar Styles ---
@@ -593,7 +495,6 @@ $app-sidebar-breakpoint: 768px;
 }
 
 .list-pagination-box { // For pagination on user list pages
-  @extend .profile-pagination-box; // Inherit styles from profile page pagination
 }
 
 // User Search Page
