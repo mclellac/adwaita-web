@@ -138,17 +138,6 @@ class GalleryPhotoUploadForm(FlaskForm):
     )
     submit = SubmitField('Upload Photos') # Updated label
 
-class PhotoCommentForm(FlaskForm):
-    text = TextAreaField(
-        'Comment',
-        validators=[DataRequired(), Length(min=1, max=2000)]
-    )
-    # photo_id and user_id will be handled by the route
-    submit = SubmitField('Post Comment')
-
-    class Meta:
-        csrf = False # Disable CSRF for this API-specific form
-
 # Empty forms for CSRF-protected actions like Like/Unlike
 class LikeForm(FlaskForm):
     submit = SubmitField('Like') # Text can be changed in template if needed for context

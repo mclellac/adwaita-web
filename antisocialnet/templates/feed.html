@@ -6,117 +6,174 @@
 
 {% block content %}
 <div class="adw-clamp adw-clamp-xl">
-    {% from "_macros.html" import like_button_and_count %}
+    <div id="feed-container" class="blog-posts-container" style="margin-top: var(--spacing-l);"></div>
+    <div id="pagination-container" class="adw-box adw-box-horizontal justify-center profile-pagination-box"></div>
+    <div id="loading-indicator" class="adw-status-page">
+        <adw-spinner size="l" active></adw-spinner>
+        <h3 class="adw-status-page-title">Loading...</h3>
+    </div>
+    <div id="empty-feed-message" class="adw-status-page" style="display: none;">
+        <span class="adw-icon icon-content-document-multiple-symbolic adw-status-page-icon app-status-page-icon"></span>
+        <h3 class="adw-status-page-title">No Posts Yet</h3>
+        <p class="adw-status-page-description">There are no posts to display. Why not create one?</p>
+        <a href="{{ url_for('post.create_post') }}" class="adw-button suggested-action" style="margin-top: var(--spacing-m);">Create Post</a>
+    </div>
+</div>
 
-    {% if posts and posts|length > 0 %}
-        <div class="blog-posts-container" style="margin-top: var(--spacing-l);"> {# Using grid like index.html #}
-            {% for post_item in posts %}
-                <article class="adw-card blog-post-item-card">
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const feedContainer = document.getElementById('feed-container');
+        const paginationContainer = document.getElementById('pagination-container');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const emptyFeedMessage = document.getElementById('empty-feed-message');
+
+        async function fetchFeed(page = 1) {
+            loadingIndicator.style.display = 'block';
+            feedContainer.innerHTML = '';
+            paginationContainer.innerHTML = '';
+            emptyFeedMessage.style.display = 'none';
+
+            try {
+                const response = await fetch(`/api/v1/feed?page=${page}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch feed');
+                }
+                const data = await response.json();
+
+                if (data.items.length === 0) {
+                    emptyFeedMessage.style.display = 'block';
+                } else {
+                    data.items.forEach(item => {
+                        const card = createItemCard(item);
+                        feedContainer.appendChild(card);
+                    });
+                    renderPagination(data.pagination);
+                }
+            } catch (error) {
+                console.error('Error fetching feed:', error);
+                feedContainer.innerHTML = '<p>Error loading feed. Please try again later.</p>';
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        function createItemCard(item) {
+            const article = document.createElement('article');
+            article.className = 'adw-card blog-post-item-card';
+
+            let content = '';
+            if (item.type === 'post') {
+                content = `
                     <header class="blog-post-card__header">
                         <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
-                            <a href="{{ url_for('profile.view_profile', user_id=post_item.author.id) }}" class="adw-link">
+                            <a href="/profile/${item.actor.id}" class="adw-link">
                                 <span class="adw-avatar size-m">
-                                    {% if post_item.author.profile_photo_url %}
-                                    <img src="{{ url_for('static', filename=post_item.author.profile_photo_url) }}" alt="{{ post_item.author.full_name or ('User ' ~ post_item.author.id) }} avatar">
-                                    {% else %}
-                                    <img src="{{ default_avatar_url }}" alt="{{ post_item.author.full_name or ('User ' ~ post_item.author.id) }} default avatar">
-                                    {% endif %}
+                                    <img src="${item.actor.profile_photo_url}" alt="${item.actor.full_name} avatar">
                                 </span>
                             </a>
                             <div class="adw-box adw-box-vertical">
-                                <a href="{{ url_for('profile.view_profile', user_id=post_item.author.id) }}" class="adw-link">
-                                    <strong class="adw-label body-1">{{ post_item.author.full_name or ('User ' ~ post_item.author.id) }}</strong>
+                                <a href="/profile/${item.actor.id}" class="adw-link">
+                                    <strong class="adw-label body-1">${item.actor.full_name}</strong>
                                 </a>
-                                 <span class="adw-label caption">@{{ post_item.author.full_name | replace(' ', '') if post_item.author.full_name else ('User' ~ post_item.author.id) }}</span>
+                                 <span class="adw-label caption">@${item.actor.username}</span>
                             </div>
                         </div>
                         <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
-                            {% if post_item.published_at %}
-                                Published: <time datetime="{{ post_item.published_at.isoformat() }}">{{ post_item.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                            {% else %}
-                                Created: <time datetime="{{ post_item.created_at.isoformat() }}">{{ post_item.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
-                            {% endif %}
+                            Published: <time datetime="${item.timestamp}">${new Date(item.timestamp).toLocaleString()}</time>
                         </div>
                     </header>
                     <div class="adw-card__content styled-text-content">
-                        {{ post_item.content | truncate(300, True, '...') | markdown }}
+                        ${item.data.content_html_preview}
                     </div>
                     <footer class="blog-post-card__footer">
                          <div class="blog-post-card__terms">
-                            {% if post_item.categories %}
-                            <div class="meta-section">
-                                <strong class="adw-label caption meta-label-strong">Categories:</strong>
-                                {% for category in post_item.categories %}
-                                    <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact tag-pill">{{ category.name }}</a>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                            {% if post_item.tags %}
-                            <div class="meta-section">
-                                <strong class="adw-label caption meta-label-strong">Tags:</strong>
-                                {% for tag in post_item.tags %}
-                                    <a href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact tag-pill">{{ tag.name }}</a>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
+                            ${item.data.categories.map(c => `<a href="/posts/category/${c.slug}" class="adw-button flat compact tag-pill">${c.name}</a>`).join('')}
+                            ${item.data.tags.map(t => `<a href="/posts/tag/${t.slug}" class="adw-button flat compact tag-pill">${t.name}</a>`).join('')}
                         </div>
-                        <a href="{{ url_for('post.view_post', post_id=post_item.id) }}" class="adw-button flat read-more-link">
+                        <a href="${item.data.url}" class="adw-button flat read-more-link">
                             View Post & Comments <span class="adw-icon icon-actions-go-next-symbolic"></span>
                         </a>
                     </footer>
                     <div class="adw-card__actions card-secondary-actions">
-                        {{ like_button_and_count(post_item, 'post', current_user) }} {# Use csrf_token from context #}
+                        <adw-like-button item-id="${item.data.post_id}" item-type="post" initial-liked="${item.data.is_liked_by_current_user}" initial-like-count="${item.data.like_count}"></adw-like-button>
                     </div>
-                </article>
-            {% endfor %}
-        </div>
+                `;
+            } else if (item.type === 'photo') {
+                content = `
+                    <header class="blog-post-card__header">
+                        <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
+                            <a href="/profile/${item.actor.id}" class="adw-link">
+                                <span class="adw-avatar size-m">
+                                    <img src="${item.actor.profile_photo_url}" alt="${item.actor.full_name} avatar">
+                                </span>
+                            </a>
+                            <div class="adw-box adw-box-vertical">
+                                <a href="/profile/${item.actor.id}" class="adw-link">
+                                    <strong class="adw-label body-1">${item.actor.full_name}</strong>
+                                </a>
+                                 <span class="adw-label caption">@${item.actor.username}</span>
+                            </div>
+                        </div>
+                        <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
+                            Uploaded: <time datetime="${item.timestamp}">${new Date(item.timestamp).toLocaleString()}</time>
+                        </div>
+                    </header>
+                    <div class="adw-card__content">
+                        <img src="${item.data.image_url_large}" alt="User photo" style="width: 100%; height: auto; object-fit: cover;"/>
+                        ${item.data.caption_html ? `<div class="styled-text-content">${item.data.caption_html}</div>` : ''}
+                    </div>
+                    <footer class="blog-post-card__footer">
+                        <a href="${item.data.gallery_url}" class="adw-button flat read-more-link">
+                            View in Gallery <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                        </a>
+                    </footer>
+                    <div class="adw-card__actions card-secondary-actions">
+                        <adw-like-button item-id="${item.data.photo_id}" item-type="userphoto" initial-liked="${item.data.is_liked_by_current_user}" initial-like-count="${item.data.like_count}"></adw-like-button>
+                    </div>
+                `;
+            }
+            article.innerHTML = content;
+            return article;
+        }
 
-        {% if pagination and pagination.pages > 1 %}
-        <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
-            <div class="adw-toggle-group">
-                {% if pagination.has_prev %}
-                    <a href="{{ url_for('general.activity_feed', page=pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
-                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
-                    </a>
-                {% else %}
-                    <button class="adw-button icon-only" disabled aria-label="Previous page">
-                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
-                    </button>
-                {% endif %}
+        function renderPagination(pagination) {
+            const toggleGroup = document.createElement('div');
+            toggleGroup.className = 'adw-toggle-group';
 
-                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-                    {% if page_num %}
-                        {% if page_num == pagination.page %}
-                            <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
-                        {% else %}
-                            <a href="{{ url_for('general.activity_feed', page=page_num) }}" class="adw-button">{{ page_num }}</a>
-                        {% endif %}
-                    {% else %}
-                        {# If page_num is None, iter_pages wants an ellipsis here #}
-                        <button class="adw-button flat" disabled>…</button>
-                    {% endif %}
-                {% endfor %}
+            let content = '';
+            if (pagination.has_prev) {
+                content += `<a href="#" data-page="${pagination.page - 1}" class="adw-button icon-only" aria-label="Previous page"><span class="adw-icon icon-actions-go-previous-symbolic"></span></a>`;
+            } else {
+                content += `<button class="adw-button icon-only" disabled aria-label="Previous page"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>`;
+            }
 
-                {% if pagination.has_next %}
-                     <a href="{{ url_for('general.activity_feed', page=pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
-                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                    </a>
-                {% else %}
-                    <button class="adw-button icon-only" disabled aria-label="Next page">
-                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                    </button>
-                {% endif %}
-            </div>
-        </div>
-        {% endif %}
+            for (let i = 1; i <= pagination.total_pages; i++) {
+                if (i === pagination.page) {
+                    content += `<button class="adw-button suggested" disabled aria-current="page">${i}</button>`;
+                } else {
+                    content += `<a href="#" data-page="${i}" class="adw-button">${i}</a>`;
+                }
+            }
 
-    {% else %}
-        <div class="adw-status-page">
-            <span class="adw-icon icon-content-document-multiple-symbolic adw-status-page-icon app-status-page-icon"></span>
-            <h3 class="adw-status-page-title">No Posts Yet</h3>
-            <p class="adw-status-page-description">There are no posts to display. Why not create one?</p>
-            <a href="{{ url_for('post.create_post') }}" class="adw-button suggested-action" style="margin-top: var(--spacing-m);">Create Post</a>
-        </div>
-    {% endif %}
-</div>
+            if (pagination.has_next) {
+                content += `<a href="#" data-page="${pagination.page + 1}" class="adw-button icon-only" aria-label="Next page"><span class="adw-icon icon-actions-go-next-symbolic"></span></a>`;
+            } else {
+                content += `<button class="adw-button icon-only" disabled aria-label="Next page"><span class="adw-icon icon-actions-go-next-symbolic"></span></button>`;
+            }
+
+            toggleGroup.innerHTML = content;
+            paginationContainer.appendChild(toggleGroup);
+
+            paginationContainer.querySelectorAll('[data-page]').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    fetchFeed(e.currentTarget.dataset.page);
+                });
+            });
+        }
+
+        // Initial fetch
+        fetchFeed();
+    });
+</script>
 {% endblock %}

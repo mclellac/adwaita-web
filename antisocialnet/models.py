@@ -8,6 +8,7 @@ from .utils import generate_slug_util # Import the renamed utility
 import jwt # For token generation
 from flask import current_app # For accessing app config (SECRET_KEY)
 
+
 # Models (Copied from app.py, generate_slug replaced with generate_slug_util)
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -40,7 +41,6 @@ class User(UserMixin, db.Model):
     posts = db.relationship(
         'Post', backref='author', lazy=True, order_by=lambda: desc(Post.created_at) # Use lambda for Post ref
     )
-    comments = db.relationship('Comment', backref='author', lazy='dynamic') # Added from app.py's Comment.author relationship
     gallery_photos = db.relationship(
         'UserPhoto',
         backref='user', # Changed from 'author' to 'user' to match UserPhoto.user relationship
@@ -237,8 +237,11 @@ class Category(db.Model):
     def __repr__(self):
         return f'<Category {self.name}>'
 
-class Post(db.Model):
+
+class Post(db.Model, PolymorphicLikeMixin):
+    __tablename__ = 'post'
     id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(50), default='post')
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(
@@ -266,34 +269,34 @@ class Post(db.Model):
     # The route logic will handle setting published_at.
     is_published = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())
     published_at = db.Column(db.DateTime, nullable=True) # Set at time of creation by route logic
-    # Relationship for top-level comments moved to be defined here
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'post',
+    }
+
     comments = db.relationship(
         'Comment',
-        primaryjoin="and_(Post.id==Comment.post_id, Comment.parent_id==None)",
+        primaryjoin="and_(Post.id==foreign(Comment.target_id), Comment.target_type=='post')",
         backref='post',
         lazy='dynamic',
-        order_by=lambda: desc(Comment.created_at) # Use lambda for Comment ref
+        order_by=lambda: desc(Comment.created_at)
     )
-    # Relationship for likes on this post
-    # Renamed from likers to likes for consistency with PostLike model
     likes = db.relationship('Like',
                             primaryjoin="and_(Like.target_type=='post', foreign(Like.target_id)==Post.id)",
                             lazy='dynamic',
                             cascade='all, delete-orphan')
 
-    @property
-    def like_count(self):
-        """Returns the number of likes for this post."""
-        return self.likes.count() # Efficient way to count related items
-
 class Comment(db.Model):
+    __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(50), default='comment')
     text = db.Column(db.Text, nullable=False)
     created_at = db.Column(
         db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    target_type = db.Column(db.String(50), nullable=False)
+    target_id = db.Column(db.Integer, nullable=False)
     # author relationship defined in User.comments
     parent_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
     replies = db.relationship(
@@ -302,76 +305,66 @@ class Comment(db.Model):
         lazy='dynamic',
         order_by=lambda: desc(Comment.created_at) # Sort replies newest first
     )
-    # is_flagged_active property will be defined after CommentFlag model
 
-    # Generic likes for comments
+    __mapper_args__ = {
+        'polymorphic_identity': 'comment',
+    }
+
     likes = db.relationship('Like',
                             primaryjoin="and_(Like.target_type=='comment', foreign(Like.target_id)==Comment.id)",
                             lazy='dynamic',
-                            cascade='all, delete-orphan',
-                            overlaps="likes") # Overlaps Post.likes
+                            cascade='all, delete-orphan')
 
+class PolymorphicLikeMixin:
+    """Mixin for models that can be liked."""
     @property
     def like_count(self):
-        """Returns the number of likes for this comment."""
         return self.likes.count()
 
-class UserPhoto(db.Model):
+class PolymorphicCommentMixin:
+    """Mixin for models that can be commented on."""
+    @property
+    def comment_count(self):
+        return self.comments.count()
+
+class Postable(db.Model):
+    __tablename__ = 'postable'
     id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(50))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'postable',
+        'polymorphic_on': type
+    }
+
+class UserPhoto(db.Model):
+    __tablename__ = 'user_photo'
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(50), default='userphoto')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     # image_filename stores path relative to GALLERY_UPLOAD_FOLDER, e.g. "user_id/image.jpg"
     image_filename = db.Column(db.String(255), nullable=False)
     caption = db.Column(db.Text, nullable=True)
     uploaded_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'userphoto',
+    }
+
+    comments = db.relationship(
+        'Comment',
+        primaryjoin="and_(UserPhoto.id==foreign(Comment.target_id), Comment.target_type=='userphoto')",
+        backref='user_photo',
+        lazy='dynamic',
+        order_by=lambda: desc(Comment.created_at)
+    )
+    likes = db.relationship('Like',
+                            primaryjoin="and_(Like.target_type=='userphoto', foreign(Like.target_id)==UserPhoto.id)",
+                            lazy='dynamic',
+                            cascade='all, delete-orphan')
+
     def __repr__(self):
         return f'<UserPhoto {self.image_filename} user_id={self.user_id}>'
-
-    # Relationship for comments on this photo
-    comments = db.relationship(
-        'PhotoComment',
-        backref='photo',
-        lazy='dynamic',
-        cascade='all, delete-orphan',
-        order_by=lambda: desc(PhotoComment.created_at) # Use lambda for PhotoComment ref
-    )
-
-    # Generic likes for photos
-    likes = db.relationship('Like',
-                            primaryjoin="and_(Like.target_type=='photo', foreign(Like.target_id)==UserPhoto.id)",
-                            lazy='dynamic',
-                            cascade='all, delete-orphan',
-                            overlaps="likes,likes") # Overlaps Post.likes and Comment.likes
-
-    @property
-    def like_count(self):
-        """Returns the number of likes for this photo."""
-        return self.likes.count()
-
-class PhotoComment(db.Model):
-    __tablename__ = 'photo_comment'
-    id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.Text, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
-    )
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    photo_id = db.Column(db.Integer, db.ForeignKey('user_photo.id'), nullable=False)
-
-    # Relationships
-    author = db.relationship('User', backref=db.backref('photo_comments', lazy='dynamic'))
-    # 'photo' backref is defined in UserPhoto.comments
-
-    # parent_id = db.Column(db.Integer, db.ForeignKey('photo_comment.id'), nullable=True)
-    # replies = db.relationship(
-    #     'PhotoComment',
-    #     backref=db.backref('parent', remote_side=[id]),
-    #     lazy='dynamic',
-    #     order_by=lambda: desc(PhotoComment.created_at) # Sort replies newest first
-    # )
-
-    def __repr__(self):
-        return f'<PhotoComment {self.id} user_id={self.user_id} photo_id={self.photo_id}>'
 
 class CommentFlag(db.Model):
     id = db.Column(db.Integer, primary_key=True)

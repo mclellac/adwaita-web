@@ -161,27 +161,30 @@ The application includes a test suite using `pytest`.
 
 ## Key Features
 
+*   **API-Driven**: All functionality is exposed through a RESTful API.
+*   **Polymorphic Models**: The database schema is designed to be polymorphic, allowing for different types of postable items (e.g., posts, photos, documents) and likeable items.
 *   **User Authentication**: Login, logout, and profile management.
-*   **Post Management**: Create, edit, and delete blog posts.
-*   **Drafts and Publishing**: Save posts as drafts before publishing them. Published posts are visible to everyone, while drafts are only visible to the author.
-*   **Categories and Tags**: Organize posts with categories and tags.
-*   **Comments**: Users can comment on posts.
+*   **Post Management**: Create, edit, and delete posts.
+*   **Photo Management**: Upload and manage photos.
+*   **Comments**: Users can comment on posts and photos.
+*   **Likes**: Users can like posts, photos, and comments.
 *   **Profile Customization**: Users can edit their profile information, including bio and profile photo.
-*   **Theme Customization**: Users can select light/dark mode and accent colors (via Settings API).
-*   **Search**: Basic search functionality for posts.
+*   **Theme Customization**: Users can select light/dark mode and accent colors.
 *   **Adwaita Styling**: UI styled with the `adwaita-web` library.
 
 ## Project Structure
 
-*   `__init__.py`: (Inside `antisocialnet/`) Main application package initializer. Contains the Flask `create_app` factory function and initializes extensions.
-*   `config.py`: Contains application configuration classes (e.g., for development, production).
-*   `models.py`: Defines SQLAlchemy database models.
-*   `forms.py`: Defines WTForms classes for handling web forms.
-*   `routes/`: Directory containing Blueprints for different parts of the application (e.g., auth, posts).
-*   `setup_db.py`: Script for initial database setup (table creation, initial admin user).
+*   `__init__.py`: Main application package initializer.
+*   `api_utils.py`: Utility functions for the API.
+*   `config.py`: Application configuration.
+*   `models.py`: SQLAlchemy database models with a polymorphic design.
+*   `forms.py`: WTForms classes.
+*   `routes/`: Blueprints for different parts of the application.
+    *   `api_routes.py`: Defines the RESTful API endpoints.
+*   `setup_db.py`: Script for initial database setup.
 *   `requirements.txt`: Python dependencies.
-*   `static/`: Contains static assets (CSS, JavaScript, images).
-*   `templates/`: Contains HTML templates for the application.
-*   `utils.py`: Utility functions for the application.
+*   `static/`: Static assets (CSS, JavaScript, images).
+*   `templates/`: HTML templates (primarily for the initial page load, with dynamic content loaded via the API).
+*   `utils.py`: Utility functions.
 
 ```
