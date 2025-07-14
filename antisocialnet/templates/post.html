@@ -12,7 +12,7 @@
             <h1 class="adw-title-1">{{ post.title }}</h1>
             <div class="adw-subtitle">
                 By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}">{{ post.author.full_name or ('User ' ~ post.author.id) if post.author else 'Unknown Author' }}</a>
-                on {{ post.timestamp.strftime('%B %d, %Y') }}
+                on {{ post.created_at.strftime('%B %d, %Y') }}
             </div>
         </div>
         <div class="adw-card-content">

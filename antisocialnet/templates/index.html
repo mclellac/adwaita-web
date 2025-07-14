@@ -3,13 +3,12 @@
 {% block page_title %}Home{% endblock %}
 
 {% block content %}
-{# adw-clamp is already on main in base.html, so content-clamp might be redundant unless for very specific styling #}
-<h1 class="adw-title-1 page-title-centered">Latest Updates</h1>
+<h1 class="adw-title-1 text-center">Latest Updates</h1>
 
 {% if posts %}
     <div class="adw-list-box">
         {% for post in posts %}
-        <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-action-row">
+        <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-action-row activatable">
             <div class="adw-action-row-text-content">
                 <span class="adw-action-row-title">{{ post.title }}</span>
                 <span class="adw-action-row-subtitle">{{ post.content|striptags|truncate(200) }}</span>
@@ -19,10 +18,10 @@
     </div>
 {% else %}
     <div class="adw-status-page">
-        <span class="adw-icon icon-actions-document-new-symbolic adw-status-page-icon app-status-page-icon"></span> {# Replaced textual icon, added app class #}
-        <h2 class="adw-status-page-title">No Posts Yet</h2>
-        <p class="adw-status-page-description">Be the first to create a post and share your thoughts!</p>
-        <div class="adw-status-page-actions">
+        <span class="adw-icon icon-actions-document-new-symbolic adw-status-page__icon"></span>
+        <h2 class="adw-status-page__title">No Posts Yet</h2>
+        <p class="adw-status-page__description">Be the first to create a post and share your thoughts!</p>
+        <div class="adw-status-page__actions">
             <a href="{{ url_for('post.create_post') }}" class="adw-button suggested-action">Create a Post</a>
         </div>
     </div>
@@ -30,7 +29,7 @@
 
 {% if pagination and pagination.pages > 1 %}
 <nav aria-label="Page navigation" class="pagination-controls adw-box horizontal justify-center" style="margin-top: var(--spacing-l);">
-    <div class="adw-toggle-group">
+    <div class="adw-button-row">
         {% if pagination.has_prev %}
             <a href="{{ url_for('general.index', page=pagination.prev_num) }}" class="adw-button">
                 <span class="adw-icon icon-actions-go-previous-symbolic"></span>
@@ -42,7 +41,7 @@
         {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
             {% if page_num %}
                 {% if page_num == pagination.page %}
-                    <button class="adw-button suggested" aria-current="page" disabled>{{ page_num }}</button>
+                    <button class="adw-button suggested-action" aria-current="page" disabled>{{ page_num }}</button>
                 {% else %}
                     <a href="{{ url_for('general.index', page=page_num) }}" class="adw-button">{{ page_num }}</a>
                 {% endif %}

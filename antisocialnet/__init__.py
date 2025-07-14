@@ -48,8 +48,7 @@ def create_app(config_name=None, yaml_config_override=None):
         else:
             app.config['SECRET_KEY'] = default_secret_key_value
 
-    if isinstance(app_config, ProductionConfig) and \
-       app.config.get('SECRET_KEY') == default_secret_key_value:
+    if isinstance(app_config, ProductionConfig) and app.config.get('SECRET_KEY') == default_secret_key_value:
         app.logger.critical(
             "CRITICAL SECURITY WARNING: Running in PRODUCTION mode with the DEFAULT INSECURE SECRET_KEY. "
             "This is highly insecure. Set the FLASK_SECRET_KEY environment variable to a strong, unique random value."

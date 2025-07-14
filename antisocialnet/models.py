@@ -628,7 +628,7 @@ class SiteSetting(db.Model):
 
     @staticmethod
     def get(key, default=None):
-        setting = db.session.get(SiteSetting, key)
+        setting = SiteSetting.query.filter_by(key=key).first()
         if setting:
             if setting.value_type == 'int':
                 try:
@@ -642,7 +642,7 @@ class SiteSetting(db.Model):
 
     @staticmethod
     def set(key, value, value_type='string'):
-        setting = db.session.get(SiteSetting, key)
+        setting = SiteSetting.query.filter_by(key=key).first()
         if not setting:
             setting = SiteSetting(key=key)
             db.session.add(setting)
@@ -650,13 +650,18 @@ class SiteSetting(db.Model):
         if value_type == 'bool':
             setting.value = 'true' if value else 'false'
         elif value_type == 'int':
-            try: # Ensure value can be int
+            try:
                 setting.value = str(int(value))
-            except ValueError:
-                 # Or handle error appropriately, e.g. log, raise, or use default
-                setting.value = '0' if default is None else str(default)
+            except (ValueError, TypeError):
+                setting.value = '0'
         else:
             setting.value = str(value)
         setting.value_type = value_type
 
-        db.session.commit()
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            # Log the error or handle it as needed
+            current_app.logger.error(f"IntegrityError: Could not set SiteSetting for key='{key}'. It might already exist.")
+

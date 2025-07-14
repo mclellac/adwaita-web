@@ -5,55 +5,49 @@
 {% block header_title %}Login{% endblock %}
 
 {% block content %}
-<div class="auth-form-container"> {# Removed adw-clamp content-clamp as base provides clamp #}
-    <h1 class="adw-title-1 form-page-header">Login</h1>
+<div class="auth-form-container">
+    <h1 class="adw-title-1 text-center">Login</h1>
 
     <form method="POST" action="{{ url_for('auth.login') }}" id="login-form" class="stacked-form">
       {{ form.hidden_tag() }} {# CSRF token #}
 
       <div class="adw-list-box" role="group" aria-labelledby="login-group-title">
-        {# Using adw-list-box instead of preferences-group for a slightly simpler feel for a form #}
-        {# If adw-preferences-group is desired, ensure its title styling is correct #}
-        {# <div class="adw-preferences-group__title-container">
-             <h3 class="adw-preferences-group__title title-3" id="login-group-title">Account Credentials</h3>
-        </div> #}
-
         {# Username Field #}
-        <div class="adw-entry-row {{ 'has-error' if form.username.errors else '' }}">
-          <label for="{{ form.username.id or 'username_input' }}" class="adw-entry-row-title">{{ form.username.label.text }}</label>
+        <div class="adw-entry-row {{ 'error' if form.username.errors else '' }}">
+          <label for="{{ form.username.id or 'username_input' }}" class="adw-entry-row__title">{{ form.username.label.text }}</label>
           <input type="text"
                  name="{{ form.username.name }}"
                  id="{{ form.username.id or 'username_input' }}"
-                 class="adw-entry adw-entry-row-entry" {# Added adw-entry-row-entry #}
+                 class="adw-entry adw-entry-row__entry"
                  required
                  placeholder="Enter your username"
                  value="{{ form.username.data or '' }}">
         </div>
         {% if form.username.errors %}
-          <div class="adw-row form-field-error"> {# Display error below the row #}
-            <span class="adw-label caption error-text">{{ form.username.errors|join(' ') }}</span>
+          <div class="adw-row">
+            <span class="adw-caption destructive-text">{{ form.username.errors|join(' ') }}</span>
           </div>
         {% endif %}
 
         {# Password Field #}
-        <div class="adw-entry-row {{ 'has-error' if form.password.errors else '' }}">
-          <label for="{{ form.password.id or 'password_input' }}" class="adw-entry-row-title">{{ form.password.label.text }}</label>
+        <div class="adw-entry-row {{ 'error' if form.password.errors else '' }}">
+          <label for="{{ form.password.id or 'password_input' }}" class="adw-entry-row__title">{{ form.password.label.text }}</label>
           <input type="password"
                  name="{{ form.password.name }}"
                  id="{{ form.password.id or 'password_input' }}"
-                 class="adw-entry adw-entry-row-entry" {# Added adw-entry-row-entry #}
+                 class="adw-entry adw-entry-row__entry"
                  required
                  placeholder="Enter your password">
         </div>
         {% if form.password.errors %}
-          <div class="adw-row form-field-error"> {# Display error below the row #}
-            <span class="adw-label caption error-text">{{ form.password.errors|join(' ') }}</span>
+          <div class="adw-row">
+            <span class="adw-caption destructive-text">{{ form.password.errors|join(' ') }}</span>
           </div>
         {% endif %}
       </div>
 
       <div class="adw-box horizontal justify-end" style="margin-top: var(--spacing-m);">
-        <button type="submit" class="adw-button suggested-action {{ 'full-width-button' if not site_settings.get('allow_registrations') else '' }}">{{ form.submit.label.text }}</button>
+        <button type="submit" class="adw-button suggested-action {{ 'adw-button--full-width' if not site_settings.get('allow_registrations') else '' }}">{{ form.submit.label.text }}</button>
       </div>
 
       {# Default to True if setting not present, so link shows on fresh setup unless explicitly disabled by admin #}
