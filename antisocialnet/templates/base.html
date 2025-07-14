@@ -7,6 +7,7 @@
     <title>{% block page_title %}{% endblock %}{% if self.page_title() %} - {% endif %}{{ site_settings.get('site_title', 'Adwaita Social Demo') }}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adwaita-skin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
       (function() {
         const theme = {{ (current_user.theme if current_user and current_user.is_authenticated and current_user.theme else "system")|tojson|safe }};
@@ -28,7 +29,7 @@
         // For accent colors, Adwaita CSS typically handles this via body classes like accent-blue, accent-green etc.
         // The following is a conceptual way to apply it if the CSS is structured for it.
         // Ensure your adwaita-skin.css has rules for .accent-blue, .accent-red etc. on body or html.
-        const validAccents = ['default', 'blue', 'green', 'yellow', 'orange', 'red', 'purple', 'pink']; // Updated list
+        const validAccents = ['default', 'blue', 'green', 'yellow', 'orange', 'red', 'purple', 'pink', 'slate', 'teal']; // Updated list
         let accentClassFound = false;
         document.documentElement.classList.forEach(cls => {
           if (cls.startsWith('accent-')) {
