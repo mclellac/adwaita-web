@@ -675,6 +675,11 @@ $app-sidebar-breakpoint: 768px;
   }
 }
 
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+}
+
 // Badge in sidebar nav (base.html)
 .app-sidebar .adw-action-row .adw-badge {
   // Default adw-badge styling should be fine.
