@@ -272,17 +272,17 @@ $accent-definitions: (
   $_sidebar_fg_color_dark-sass: $_window_fg_color_dark_sass;
 
 
-  --accent-fg-color-rgb: #{color.red($_accent-fg-color-sass)}, #{color.green($_accent-fg-color-sass)}, #{color.blue($_accent-fg-color-sass)};
-  --error-fg-color-rgb: #{color.red($_error_fg_color_sass)}, #{color.green($_error_fg_color_sass)}, #{color.blue($_error_fg_color_sass)};
-  --warning-fg-color-rgb: #{color.red($_warning_fg_color_sass)}, #{color.green($_warning_fg_color_sass)}, #{color.blue($_warning_fg_color_sass)};
-  --success-fg-color-rgb: #{color.red($_success_fg_color_sass)}, #{color.green($_success_fg_color_sass)}, #{color.blue($_success_fg_color_sass)};
-  --destructive-color-rgb: #{color.red($_destructive_color_light-sass)}, #{color.green($_destructive_color_light-sass)}, #{color.blue($_destructive_color_light-sass)};
-  --window-fg-color-rgb: #{color.red($_window_fg_color_light-sass)}, #{color.green($_window_fg_color_light-sass)}, #{color.blue($_window_fg_color_light-sass)};
-  --headerbar-fg-color-rgb: #{color.red($_headerbar_fg_color_light-sass)}, #{color.green($_headerbar_fg_color_light-sass)}, #{color.blue($_headerbar_fg_color_light-sass)};
+  --accent-fg-color-rgb: #{color.channel($_accent-fg-color-sass, "red")}, #{color.channel($_accent-fg-color-sass, "green")}, #{color.channel($_accent-fg-color-sass, "blue")};
+  --error-fg-color-rgb: #{color.channel($_error_fg_color_sass, "red")}, #{color.channel($_error_fg_color_sass, "green")}, #{color.channel($_error_fg_color_sass, "blue")};
+  --warning-fg-color-rgb: #{color.channel($_warning_fg_color_sass, "red")}, #{color.channel($_warning_fg_color_sass, "green")}, #{color.channel($_warning_fg_color_sass, "blue")};
+  --success-fg-color-rgb: #{color.channel($_success_fg_color_sass, "red")}, #{color.channel($_success_fg_color_sass, "green")}, #{color.channel($_success_fg_color_sass, "blue")};
+  --destructive-color-rgb: #{color.channel($_destructive_color_light-sass, "red")}, #{color.channel($_destructive_color_light-sass, "green")}, #{color.channel($_destructive_color_light-sass, "blue")};
+  --window-fg-color-rgb: #{color.channel($_window_fg_color_light-sass, "red")}, #{color.channel($_window_fg_color_light-sass, "green")}, #{color.channel($_window_fg_color_light-sass, "blue")};
+  --headerbar-fg-color-rgb: #{color.channel($_headerbar_fg_color_light-sass, "red")}, #{color.channel($_headerbar_fg_color_light-sass, "green")}, #{color.channel($_headerbar_fg_color_light-sass, "blue")};
   --headerbar-fg-color-alpha: #{color.alpha($_headerbar_fg_color_light-sass)}; // Will be 0.8 for light
-  --card-fg-color-rgb: #{color.red($_card_fg_color_light-sass)}, #{color.green($_card_fg_color_light-sass)}, #{color.blue($_card_fg_color_light-sass)};
+  --card-fg-color-rgb: #{color.channel($_card_fg_color_light-sass, "red")}, #{color.channel($_card_fg_color_light-sass, "green")}, #{color.channel($_card_fg_color_light-sass, "blue")};
   --card-fg-color-alpha: #{color.alpha($_card_fg_color_light-sass)}; // Will be 0.8 for light
-  --sidebar-fg-color-rgb: #{color.red($_sidebar_fg_color_light-sass)}, #{color.green($_sidebar_fg_color_light-sass)}, #{color.blue($_sidebar_fg_color_light-sass)};
+  --sidebar-fg-color-rgb: #{color.channel($_sidebar_fg_color_light-sass, "red")}, #{color.channel($_sidebar_fg_color_light-sass, "green")}, #{color.channel($_sidebar_fg_color_light-sass, "blue")};
   --sidebar-fg-color-alpha: #{color.alpha($_sidebar_fg_color_light-sass)}; // Will be 0.8 for light
 
   // Button State Variables - fine
@@ -381,7 +381,7 @@ $accent-definitions: (
   --toast-bg-color: #{$adw-dark-3};
   --toast-fg-color: #{$adw-light-1};
   $_toast_fg_color_sass: $adw-light-1;
-  --toast-fg-color-rgb: #{color.red($_toast_fg_color_sass)}, #{color.green($_toast_fg_color_sass)}, #{color.blue($_toast_fg_color_sass)};
+  --toast-fg-color-rgb: #{color.channel($_toast_fg_color_sass, "red")}, #{color.channel($_toast_fg_color_sass, "green")}, #{color.channel($_toast_fg_color_sass, "blue")};
   --toast-secondary-fg-color: #{rgba($adw-light-1, 0.7)};
   --toast-accent-color: var(--accent-color);
   --toast-box-shadow: var(--popover-box-shadow-dark);
@@ -516,17 +516,17 @@ $accent-definitions: (
 
     // RGB versions for dark theme
     // These use the SASS variables which have been updated or confirmed.
-    --accent-fg-color-rgb: #{color.red($_accent-fg-color-sass)}, #{color.green($_accent-fg-color-sass)}, #{color.blue($_accent-fg-color-sass)};
-    --error-fg-color-rgb: #{color.red($_error_fg_color_sass)}, #{color.green($_error_fg_color_sass)}, #{color.blue($_error_fg_color_sass)};
-    --warning-fg-color-rgb: #{color.red($_warning_fg_color_sass)}, #{color.green($_warning_fg_color_sass)}, #{color.blue($_warning_fg_color_sass)};
-    --success-fg-color-rgb: #{color.red($_success_fg_color_sass)}, #{color.green($_success_fg_color_sass)}, #{color.blue($_success_fg_color_sass)};
-    --destructive-color-rgb: #{color.red($_destructive_color_dark-sass)}, #{color.green($_destructive_color_dark-sass)}, #{color.blue($_destructive_color_dark-sass)};
-    --window-fg-color-rgb: #{color.red($_window_fg_color_dark-sass)}, #{color.green($_window_fg_color_dark-sass)}, #{color.blue($_window_fg_color_dark-sass)};
-    --headerbar-fg-color-rgb: #{color.red($_headerbar_fg_color_dark-sass)}, #{color.green($_headerbar_fg_color_dark-sass)}, #{color.blue($_headerbar_fg_color_dark-sass)};
+    --accent-fg-color-rgb: #{color.channel($_accent-fg-color-sass, "red")}, #{color.channel($_accent-fg-color-sass, "green")}, #{color.channel($_accent-fg-color-sass, "blue")};
+    --error-fg-color-rgb: #{color.channel($_error_fg_color_sass, "red")}, #{color.channel($_error_fg_color_sass, "green")}, #{color.channel($_error_fg_color_sass, "blue")};
+    --warning-fg-color-rgb: #{color.channel($_warning_fg_color_sass, "red")}, #{color.channel($_warning_fg_color_sass, "green")}, #{color.channel($_warning_fg_color_sass, "blue")};
+    --success-fg-color-rgb: #{color.channel($_success_fg_color_sass, "red")}, #{color.channel($_success_fg_color_sass, "green")}, #{color.channel($_success_fg_color_sass, "blue")};
+    --destructive-color-rgb: #{color.channel($_destructive_color_dark-sass, "red")}, #{color.channel($_destructive_color_dark-sass, "green")}, #{color.channel($_destructive_color_dark-sass, "blue")};
+    --window-fg-color-rgb: #{color.channel($_window_fg_color_dark-sass, "red")}, #{color.channel($_window_fg_color_dark-sass, "green")}, #{color.channel($_window_fg_color_dark-sass, "blue")};
+    --headerbar-fg-color-rgb: #{color.channel($_headerbar_fg_color_dark-sass, "red")}, #{color.channel($_headerbar_fg_color_dark-sass, "green")}, #{color.channel($_headerbar_fg_color_dark-sass, "blue")};
     --headerbar-fg-color-alpha: #{color.alpha($_headerbar_fg_color_dark-sass)}; // Will be 1 for dark
-    --card-fg-color-rgb: #{color.red($_card_fg_color_dark-sass)}, #{color.green($_card_fg_color_dark-sass)}, #{color.blue($_card_fg_color_dark-sass)};
+    --card-fg-color-rgb: #{color.channel($_card_fg_color_dark-sass, "red")}, #{color.channel($_card_fg_color_dark-sass, "green")}, #{color.channel($_card_fg_color_dark-sass, "blue")};
     --card-fg-color-alpha: #{color.alpha($_card_fg_color_dark-sass)}; // Will be 1 for dark
-    --sidebar-fg-color-rgb: #{color.red($_sidebar_fg_color_dark-sass)}, #{color.green($_sidebar_fg_color_dark-sass)}, #{color.blue($_sidebar_fg_color_dark-sass)};
+    --sidebar-fg-color-rgb: #{color.channel($_sidebar_fg_color_dark-sass, "red")}, #{color.channel($_sidebar_fg_color_dark-sass, "green")}, #{color.channel($_sidebar_fg_color_dark-sass, "blue")};
     --sidebar-fg-color-alpha: #{color.alpha($_sidebar_fg_color_dark-sass)}; // Will be 1 for dark
 
     // Row specific for dark theme - fine
