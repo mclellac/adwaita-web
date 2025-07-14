@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Home Feed{% endblock %}
+
+{% block header_title %}Home{% endblock %}
+
+{% block content %}
+<div class="adw-clamp adw-clamp-xl">
+    {% from "_macros.html" import like_button_and_count %}
+
+    {% if posts and posts|length > 0 %}
+        <div class="blog-posts-container" style="margin-top: var(--spacing-l);"> {# Using grid like index.html #}
+            {% for post_item in posts %}
+                <article class="adw-card blog-post-item-card">
+                    <header class="blog-post-card__header">
+                        <div class="adw-box adw-box-horizontal adw-box-spacing-m align-center blog-post-card-author-info">
+                            <a href="{{ url_for('profile.view_profile', user_id=post_item.author.id) }}" class="adw-link">
+                                <span class="adw-avatar size-m">
+                                    {% if post_item.author.profile_photo_url %}
+                                    <img src="{{ url_for('static', filename=post_item.author.profile_photo_url) }}" alt="{{ post_item.author.full_name or ('User ' ~ post_item.author.id) }} avatar">
+                                    {% else %}
+                                    <img src="{{ default_avatar_url }}" alt="{{ post_item.author.full_name or ('User ' ~ post_item.author.id) }} default avatar">
+                                    {% endif %}
+                                </span>
+                            </a>
+                            <div class="adw-box adw-box-vertical">
+                                <a href="{{ url_for('profile.view_profile', user_id=post_item.author.id) }}" class="adw-link">
+                                    <strong class="adw-label body-1">{{ post_item.author.full_name or ('User ' ~ post_item.author.id) }}</strong>
+                                </a>
+                                 <span class="adw-label caption">@{{ post_item.author.full_name | replace(' ', '') if post_item.author.full_name else ('User' ~ post_item.author.id) }}</span>
+                            </div>
+                        </div>
+                        <div class="blog-post-card__meta adw-label caption" style="margin-top: var(--spacing-xs);">
+                            {% if post_item.published_at %}
+                                Published: <time datetime="{{ post_item.published_at.isoformat() }}">{{ post_item.published_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                            {% else %}
+                                Created: <time datetime="{{ post_item.created_at.isoformat() }}">{{ post_item.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</time>
+                            {% endif %}
+                        </div>
+                    </header>
+                    <div class="adw-card__content styled-text-content">
+                        {{ post_item.content | truncate(300, True, '...') | markdown }}
+                    </div>
+                    <footer class="blog-post-card__footer">
+                         <div class="blog-post-card__terms">
+                            {% if post_item.categories %}
+                            <div class="meta-section">
+                                <strong class="adw-label caption meta-label-strong">Categories:</strong>
+                                {% for category in post_item.categories %}
+                                    <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact tag-pill">{{ category.name }}</a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if post_item.tags %}
+                            <div class="meta-section">
+                                <strong class="adw-label caption meta-label-strong">Tags:</strong>
+                                {% for tag in post_item.tags %}
+                                    <a href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact tag-pill">{{ tag.name }}</a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('post.view_post', post_id=post_item.id) }}" class="adw-button flat read-more-link">
+                            View Post & Comments <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                        </a>
+                    </footer>
+                    <div class="adw-card__actions card-secondary-actions">
+                        {{ like_button_and_count(post_item, 'post', current_user) }} {# Use csrf_token from context #}
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        {% if pagination and pagination.pages > 1 %}
+        <div class="adw-box adw-box-horizontal justify-center profile-pagination-box">
+            <div class="adw-toggle-group">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('general.activity_feed', page=pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
+                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                    </a>
+                {% else %}
+                    <button class="adw-button icon-only" disabled aria-label="Previous page">
+                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                    </button>
+                {% endif %}
+
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == pagination.page %}
+                            <button class="adw-button suggested" disabled aria-current="page">{{ page_num }}</button>
+                        {% else %}
+                            <a href="{{ url_for('general.activity_feed', page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                        {% endif %}
+                    {% else %}
+                        {# If page_num is None, iter_pages wants an ellipsis here #}
+                        <button class="adw-button flat" disabled>…</button>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                     <a href="{{ url_for('general.activity_feed', page=pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
+                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                    </a>
+                {% else %}
+                    <button class="adw-button icon-only" disabled aria-label="Next page">
+                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    {% else %}
+        <div class="adw-status-page">
+            <span class="adw-icon icon-content-document-multiple-symbolic adw-status-page-icon app-status-page-icon"></span>
+            <h3 class="adw-status-page-title">No Posts Yet</h3>
+            <p class="adw-status-page-description">There are no posts to display. Why not create one?</p>
+            <a href="{{ url_for('post.create_post') }}" class="adw-button suggested-action" style="margin-top: var(--spacing-m);">Create Post</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

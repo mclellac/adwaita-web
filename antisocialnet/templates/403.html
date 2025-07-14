@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Forbidden{% endblock %}
+
+{% block header_title %}Forbidden{% endblock %}
+
+{% block content %}
+<div class="adw-status-page" style="padding-top: var(--spacing-xxl); padding-bottom: var(--spacing-xxl);"> {# Added padding for centering effect #}
+    <span class="adw-icon icon-dialog-error-symbolic adw-status-page-icon app-status-page-icon"></span> {# Used app-status-page-icon for potentially larger size #}
+    <h1 class="adw-status-page-title">403 - Forbidden</h1>
+    <p class="adw-status-page-description">Sorry, you don't have permission to access this page.</p>
+    <div class="adw-status-page-actions">
+        <a href="{{ url_for('general.index') }}" class="adw-button suggested-action">Go to Homepage</a>
+    </div>
+</div>
+{% endblock %}

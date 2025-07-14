@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Site Settings{% endblock %}
+
+{% block header_title %}Site Settings (Admin){% endblock %}
+
+{% block content %}
+<div class="adw-preferences-page">
+    <header class="adw-preferences-page__header">
+        <h1 class="adw-preferences-page__title">Manage Site Settings</h1>
+        <p class="adw-preferences-page__description">
+            Configure global settings for the application.
+        </p>
+    </header>
+
+    <form method="POST" action="{{ url_for('admin.site_settings') }}" class="stacked-form">
+        {{ form.hidden_tag() }} {# CSRF token #}
+
+        <section class="adw-preferences-group" aria-labelledby="general-settings-title">
+            <h2 class="adw-preferences-group__title" id="general-settings-title">General Settings</h2>
+            <div class="adw-list-box">
+                {# Site Title #}
+                <div class="adw-entry-row {{ 'has-error' if form.site_title.errors else '' }}">
+                    <label for="{{ form.site_title.id or 'site_title_input' }}" class="adw-entry-row-title">{{ form.site_title.label.text }}</label>
+                    <input type="text" id="{{ form.site_title.id or 'site_title_input' }}" name="{{ form.site_title.name }}" value="{{ form.site_title.data or '' }}" class="adw-entry adw-entry-row-entry" required>
+                    {% if form.site_title.errors %}
+                        <span class="adw-label caption error-text adw-entry-row-subtitle">{{ form.site_title.errors|join(' ') }}</span>
+                    {% endif %}
+                </div>
+
+                {# Posts Per Page #}
+                <adw-spin-row title="{{ form.posts_per_page.label.text }}"
+                              id="{{ form.posts_per_page.id or 'posts_per_page_input' }}"
+                              name="{{ form.posts_per_page.name }}"
+                              value="{{ form.posts_per_page.data or '5' }}"
+                              min="1"
+                              max="100"
+                              step="1"
+                              subtitle="Number of posts to display per page."
+                              class="{{ 'has-error' if form.posts_per_page.errors else '' }}">
+                </adw-spin-row>
+                {% if form.posts_per_page.errors %}
+                {# AdwSpinRow doesn't have a built-in error display slot like adw-entry-row's subtitle typically.
+                   We might need a separate row for errors or rely on flashed messages.
+                   For now, placing it below, though this might not align perfectly with HIG. #}
+                <div class="adw-row form-field-error" style="padding-left: var(--spacing-m);">
+                    <span class="adw-label caption error-text">{{ form.posts_per_page.errors|join(' ') }}</span>
+                </div>
+                {% endif %}
+
+                {# Allow New User Registrations #}
+                <div class="adw-switch-row {{ 'has-error' if form.allow_registrations.errors else '' }}">
+                     <div class="adw-action-row__text">
+                        <label for="allow_registrations_input" class="adw-action-row__title">{{ form.allow_registrations.label.text }}</label>
+                        <span class="adw-action-row__subtitle">Enable or disable new user sign-ups.</span>
+                        {% if form.allow_registrations.errors %}
+                            <span class="adw-label caption error-text">{{ form.allow_registrations.errors|join(' ') }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="adw-switch-row__switch">
+                        {# The adw-switch class is now on the label wrapper for the switch itself #}
+                        <label class="adw-switch">
+                            <input type="checkbox"
+                                   name="{{ form.allow_registrations.name }}"
+                                   id="allow_registrations_input"
+                                   {% if form.allow_registrations.data %}checked{% endif %}
+                                   >
+                            <span class="adw-switch-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="adw-box horizontal justify-end" style="margin-top: var(--spacing-l);">
+            {{ form.submit(class="adw-button suggested-action") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

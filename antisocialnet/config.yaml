@@ -1,0 +1,44 @@
+# Configuration for antisocialnet
+# Values in config.yaml will override environment variables and defaults in config.py.
+
+# Flask App Configuration
+SECRET_KEY: "a_very_secret_key_that_i_just_made_up_for_testing_CHANGE_ME_LATER"
+DEBUG: True
+
+# SQLAlchemy Database Configuration
+SQLALCHEMY_DATABASE_URI: "postgresql://appuser:password@localhost/appdb"
+
+SQLALCHEMY_TRACK_MODIFICATIONS: False
+SQLALCHEMY_ECHO: False # Set to True to see generated SQL queries, useful for debugging
+
+# Application-specific settings
+POSTS_PER_PAGE: 10
+COMMENTS_PER_PAGE: 20
+NOTIFICATIONS_PER_PAGE: 15
+
+# File Upload Configuration
+UPLOAD_FOLDER: "uploads/profile_pics" # Relative to static folder
+GALLERY_UPLOAD_FOLDER: "uploads/gallery_photos" # Relative to static folder
+MAX_PROFILE_PHOTO_SIZE_BYTES: 2097152    # 2MB
+MAX_GALLERY_PHOTO_SIZE_BYTES: 10485760   # 10MB
+ALLOWED_EXTENSIONS: ['png', 'jpg', 'jpeg', 'gif', 'webp']
+
+DEFAULT_AVATAR_PATH: "img/default_avatar.png" # Relative to static folder
+
+# User list for setup_db.py --config
+# These users will be created/updated when setup_db.py is run with this config.
+USERS:
+  - username: "admin"
+    password: "password"
+    full_name: "Admin User"
+    bio: "The administrator of this fine establishment."
+    is_admin: true
+    is_approved: true
+    is_active: true
+  - username: "testuser1"
+    password: "password"
+    full_name: "Test User One"
+    bio: "A regular test user, eager to contribute."
+    is_admin: false
+    is_approved: true
+    is_active: true

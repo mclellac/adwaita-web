@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Your Notifications{% endblock %}
+
+{% block header_title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="adw-clamp adw-clamp-lg">
+    {% if notifications_list and notifications_list|length > 0 %}
+        <div class="adw-list-box notification-list-container">
+            {% for notification in notifications_list %}
+            <div class="adw-action-row notification-item-row {{ 'unread-notification' if not notification.is_read else '' }}">
+                <div class="adw-action-row-start-content">
+                    {# Icon based on notification type #}
+                    {% if notification.type == 'new_follower' %}
+                        <span class="adw-icon icon-status-user-available-symbolic notification-icon"></span>
+                    {% elif notification.type == 'new_like' %}
+                        <span class="adw-icon icon-actions-star-symbolic notification-icon"></span>
+                    {% elif notification.type == 'new_comment' %}
+                        <span class="adw-icon icon-content-message-symbolic notification-icon"></span>
+                    {% elif notification.type == 'mention_in_post' or notification.type == 'mention_in_comment' %}
+                        <span class="adw-icon icon-content-mail-reply-sender-symbolic notification-icon"></span> {# Icon for mention #}
+                    {% else %}
+                        <span class="adw-icon icon-emotes-face-smile-symbolic notification-icon"></span> {# Generic #}
+                    {% endif %}
+                </div>
+                <div class="adw-action-row-text-content">
+                    <span class="adw-action-row-title notification-text">
+                        {% set actor = notification.actor %}
+                        {% set target = notification.get_target_object() %}
+
+                        {% if notification.type == 'new_follower' and actor %}
+                            {# In 'new_follower', the 'target' (if set to actor_id as per previous logic) is the follower. #}
+                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> started following you.
+                        {% elif notification.type == 'new_like' and actor and notification.target_type == 'post' and target %}
+                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> liked your post: <a href="{{ url_for('post.view_post', post_id=target.id) }}" class="adw-link">"{{ target.content | striptags | truncate(50) }}"</a>.
+                        {% elif notification.type == 'new_comment' and actor and notification.target_type == 'comment' and target %}
+                            {% set commented_post = target.post %} {# Comment object should have a .post relationship #}
+                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> commented on your post
+                            {% if commented_post %}
+                                "<a href="{{ url_for('post.view_post', post_id=commented_post.id, _anchor='comment-' ~ target.id) }}" class="adw-link">{{ commented_post.content | striptags | truncate(30) }}</a>".
+                            {% else %}
+                                (on a deleted post).
+                            {% endif %}
+                        {% elif notification.type == 'mention_in_post' and actor and notification.target_type == 'post' and target %}
+                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> mentioned you in the post: <a href="{{ url_for('post.view_post', post_id=target.id) }}" class="adw-link">"{{ target.content | striptags | truncate(50) }}"</a>.
+                        {% elif notification.type == 'mention_in_comment' and actor and notification.target_type == 'comment' and target %}
+                            {% set mentioned_in_post = target.post %} {# Comment object has .post #}
+                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> mentioned you in a
+                            {% if mentioned_in_post %}
+                                <a href="{{ url_for('post.view_post', post_id=mentioned_in_post.id, _anchor='comment-' ~ target.id) }}" class="adw-link">comment</a>: "{{ target.text | striptags | truncate(30) }}" on {{ mentioned_in_post.author.full_name or mentioned_in_post.author.username }}'s post.
+                            {% else %}
+                                comment: "{{ target.text | striptags | truncate(30) }}" (post details unavailable).
+                            {% endif %}
+                        {% elif notification.type == 'photo_like' and actor and notification.target_type == 'photo' and target %}
+                            {# target is a UserPhoto object #}
+                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> liked your photo:
+                            <a href="{{ url_for('profile.view_gallery', username=target.user.username, _anchor='photo-' ~ target.id) }}" class="adw-link">
+                                <img src="{{ url_for('static', filename=target.image_filename) if target.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
+                                {{ target.caption | truncate(30) if target.caption else "Photo" }}
+                            </a>.
+                        {% elif notification.type == 'new_photo_comment' and actor and notification.target_type == 'photo_comment' and target %}
+                            {# target is a PhotoComment object. We need its photo. #}
+                            {% set commented_photo = target.photo %}
+                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> commented on your photo
+                            {% if commented_photo %}
+                            <a href="{{ url_for('profile.view_gallery', username=commented_photo.user.username, _anchor='photo-' ~ commented_photo.id) }}" class="adw-link">
+                                 <img src="{{ url_for('static', filename=commented_photo.image_filename) if commented_photo.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
+                            </a>
+                            {% endif %}
+                            : "{{ target.text | striptags | truncate(30) }}".
+                        {% elif notification.type == 'mention_in_photo_comment' and actor and notification.target_type == 'photo_comment' and target %}
+                            {# target is PhotoComment. We need its photo. #}
+                            {% set mentioned_in_photo = target.photo %}
+                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a>
+                             mentioned you in a comment on
+                            {% if mentioned_in_photo %}
+                            photo <a href="{{ url_for('profile.view_gallery', username=mentioned_in_photo.user.username, _anchor='photo-' ~ mentioned_in_photo.id) }}" class="adw-link">
+                                 <img src="{{ url_for('static', filename=mentioned_in_photo.image_filename) if mentioned_in_photo.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
+                            </a>.
+                            {% else %}
+                            a photo comment (photo details unavailable).
+                            {% endif %}
+                        {% else %}
+                            {{ notification.type | replace('_', ' ') | title }}.
+                            {% if actor %}Action by <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a>.{% endif %}
+                            {% if target %}
+                                (Target: {{ notification.target_type }} ID {{ notification.target_id }})
+                            {% elif notification.target_type and notification.target_id %}
+                                (Target: {{ notification.target_type }} ID {{ notification.target_id }} - object not found)
+                            {% endif %}
+                        {% endif %}
+                    </span>
+                    <span class="adw-action-row-subtitle notification-timestamp">
+                        <time datetime="{{ notification.timestamp.isoformat() }}">{{ notification.timestamp | human_readable_date }}</time>
+                        {% if not notification.is_read %}
+                            <span class="unread-dot" title="Unread">•</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {# No end content needed for now, could be "Mark as read/unread" button later #}
+            </div>
+            {% endfor %}
+        </div>
+
+        {# Pagination Controls #}
+        {% if pagination and pagination.pages > 1 %}
+        <div class="adw-box adw-box-horizontal justify-center list-pagination-box" style="margin-top: var(--spacing-l);">
+            <div class="adw-toggle-group">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('notification.list_notifications', page=pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
+                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                    </a>
+                {% else %}
+                    <button class="adw-button icon-only" disabled aria-label="Previous page">
+                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
+                    </button>
+                {% endif %}
+
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == pagination.page %}
+                            <button class="adw-button suggested-action" disabled aria-current="page">{{ page_num }}</button>
+                        {% else %}
+                            <a href="{{ url_for('notification.list_notifications', page=page_num) }}" class="adw-button">{{ page_num }}</a>
+                        {% endif %}
+                    {% else %}
+                        <button class="adw-button flat" disabled>…</button>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                     <a href="{{ url_for('notification.list_notifications', page=pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
+                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                    </a>
+                {% else %}
+                    <button class="adw-button icon-only" disabled aria-label="Next page">
+                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    {% else %}
+        <div class="adw-status-page">
+            <span class="adw-icon icon-status-weather-clear-night-symbolic adw-status-page-icon app-status-page-icon"></span> {# Example icon #}
+            <h3 class="adw-status-page-title">No Notifications Yet</h3>
+            <p class="adw-status-page-description">You currently have no notifications.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found{% endblock %}
+
+{% block header_title %}Page Not Found{% endblock %}
+
+{% block content %}
+<div class="adw-status-page" style="padding-top: var(--spacing-xxl); padding-bottom: var(--spacing-xxl);">
+    <span class="adw-icon icon-edit-find-symbolic adw-status-page-icon app-status-page-icon"></span>
+    <h1 class="adw-status-page-title">404 - Page Not Found</h1>
+    <p class="adw-status-page-description">Sorry, the page you are looking for doesn't exist.</p>
+    <div class="adw-status-page-actions">
+        <a href="{{ url_for('general.index') }}" class="adw-button suggested-action">Go to Homepage</a>
+    </div>
+</div>
+{% endblock %}

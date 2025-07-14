@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}About Us - {{ super() }}{% endblock %}
+{% block content %}
+<div class="adw-clamp content-clamp about-page-clamp">
+    <div class="adw-box adw-box-vertical adw-box-spacing-l">
+        <h1 class="title-1 centered-title">About This Application</h1>
+
+        <div class="adw-preferences-group" role="group" aria-labelledby="about-purpose-title">
+            <div class="adw-preferences-group__title-container">
+                <h3 class="adw-preferences-group__title title-3" id="about-purpose-title">Information</h3>
+            </div>
+            <div class="adw-list-box">
+                <div class="adw-action-row">
+                    <div class="adw-action-row-text-content">
+                        <span class="adw-action-row__title">Purpose</span>
+                        <span class="adw-action-row__subtitle">This is a demonstration application showcasing the Adwaita-Skin CSS library integration with a Flask backend.</span>
+                    </div>
+                </div>
+                <div class="adw-action-row">
+                    <div class="adw-action-row-text-content">
+                        <span class="adw-action-row__title">Features</span>
+                        <span class="adw-action-row__subtitle">It demonstrates social networking features like user profiles, posts, follows, likes, notifications, and uses Adwaita widgets.</span>
+                    </div>
+                </div>
+                <div class="adw-expander-row" id="tech-stack-expander"> {# Add ID for JS if needed #}
+                    <div class="adw-action-row activatable" role="button" tabindex="0" aria-expanded="false" aria-controls="tech-stack-content">
+                        <div class="adw-action-row-text-content">
+                            <span class="adw-action-row__title">Technology Stack</span>
+                            <span class="adw-action-row__subtitle">Learn more about the tech used.</span>
+                        </div>
+                        <span class="adw-expander-row__chevron"></span>
+                    </div>
+                    <div class="adw-expander-row-content" id="tech-stack-content">
+                        <p><span class="adw-label body"><strong>Frontend:</strong> Adwaita-Skin (Pure CSS/SCSS), Flask Templates (Jinja2)</span></p>
+                        <p><span class="adw-label body"><strong>Backend:</strong> Flask (Python)</span></p>
+                        <p><span class="adw-label body"><strong>Database:</strong> SQLAlchemy with PostgreSQL (default)</span></p>
+                        <p><span class="adw-label body"><strong>UI Library:</strong> Adwaita-Skin (this project)</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="adw-box justify-center" style="margin-top: var(--spacing-l);">
+            <a href="{{ url_for('general.index') }}" class="adw-button">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const expanderHeaders = document.querySelectorAll('.adw-expander-row .adw-action-row.activatable');
+    expanderHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const expanderRow = header.closest('.adw-expander-row');
+            const content = expanderRow.querySelector('.adw-expander-row-content');
+            const isExpanded = header.getAttribute('aria-expanded') === 'true';
+
+            header.setAttribute('aria-expanded', !isExpanded);
+            if (content) {
+                content.classList.toggle('expanded', !isExpanded);
+                // For pure CSS animations, 'expanded' class should trigger visibility/max-height.
+                // If using JS for animation, you'd do it here.
+            }
+            // Toggle chevron class if you have one for rotation
+            const chevron = header.querySelector('.adw-expander-row__chevron');
+            if(chevron) {
+                // Assuming CSS handles rotation based on .expanded on parent or header
+                expanderRow.classList.toggle('expanded', !isExpanded);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+# Example configuration for antisocialnet/setup_db.py and antisocialnet application
+# Copy this file to config.yaml and update with your actual settings.
+# Values in config.yaml will override environment variables and defaults in config.py.
+
+# Flask App Configuration
+SECRET_KEY: "your_very_secret_key_here_CHANGE_ME"  # IMPORTANT: Change this in your actual config.yaml
+DEBUG: True # Set to False in production
+
+# SQLAlchemy Database Configuration
+# Choose one of the following database configurations or add your own.
+
+# Option 1: SQLite (simple, file-based)
+# The path is relative to the instance folder if not absolute.
+# For antisocialnet, if instance_path is 'instance' in project root, this would be 'instance/antisocialnet.db'.
+# If running setup_db.py from project root, 'sqlite:///antisocialnet.db' creates it in project root.
+# For consistency with the app, it's often better to use an absolute path or ensure instance_relative_config.
+SQLALCHEMY_DATABASE_URI: "sqlite:///antisocialnet.db"
+
+# To use SQLite in-memory (for quick tests, data lost on script/app exit):
+# SQLALCHEMY_DATABASE_URI: "sqlite:///:memory:"
+
+# Option 2: PostgreSQL
+# Ensure you have psycopg2-binary installed: pip install psycopg2-binary
+# SQLALCHEMY_DATABASE_URI: "postgresql://username:password@host:port/database_name"
+# Example (ensure these match your PostgreSQL setup and environment variables if used as fallback):
+# SQLALCHEMY_DATABASE_URI: "postgresql://user:secret@localhost:5432/mydatabase"
+
+# Option 3: MySQL / MariaDB
+# Ensure you have PyMySQL installed: pip install PyMySQL
+# SQLALCHEMY_DATABASE_URI: "mysql+pymysql://username:password@host:port/database_name"
+# Example:
+# SQLALCHEMY_DATABASE_URI: "mysql+pymysql://user:secret@localhost:3306/mydatabase"
+
+SQLALCHEMY_TRACK_MODIFICATIONS: False
+SQLALCHEMY_ECHO: False # Set to True to see generated SQL queries, useful for debugging
+
+# Application-specific settings (examples)
+POSTS_PER_PAGE: 10
+COMMENTS_PER_PAGE: 20 # Example for comments pagination
+NOTIFICATIONS_PER_PAGE: 15
+
+# File Upload Configuration
+# Paths should be relative to the 'static' folder.
+UPLOAD_FOLDER: "uploads/profile_pics" # e.g., antisocialnet/static/uploads/profile_pics
+GALLERY_UPLOAD_FOLDER: "uploads/gallery_photos" # e.g., antisocialnet/static/uploads/gallery_photos
+MAX_PROFILE_PHOTO_SIZE_BYTES: 2097152    # 2MB
+MAX_GALLERY_PHOTO_SIZE_BYTES: 10485760   # 10MB
+ALLOWED_EXTENSIONS: ['png', 'jpg', 'jpeg', 'gif', 'webp']
+
+# Site Settings Defaults (if applicable for setup_db.py or initial app run)
+# These are just examples; actual site settings are managed in the DB via SiteSetting model.
+# DEFAULT_SITE_TITLE: "My Awesome Flask App"
+# DEFAULT_MAINTENANCE_MODE: False
+DEFAULT_AVATAR_PATH: "img/default_avatar.png" # Default path for avatars if user has no profile photo
+
+# User list for setup_db.py --config (optional)
+# See antisocialnet/AGENTS.md for details on the USERS structure and setup_db.py user creation.
+# USERS:
+#   - username: "admin@example.com"
+#     password: "securepassword1"
+#     full_name: "Administrator"
+#     bio: "Site admin."
+#     is_admin: true
+#     is_approved: true
+#     is_active: true
+#   - username: "testuser@example.com"
+#     password: "password123"
+#     full_name: "Test User"
+#     bio: "Just a test user."
+#     is_admin: false
+#     is_approved: true
+#     is_active: true

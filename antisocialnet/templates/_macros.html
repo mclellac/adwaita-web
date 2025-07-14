@@ -1,0 +1,28 @@
+{% macro like_button_and_count(item, item_type, current_user, context_prefix='') %}
+<div class="like-section adw-box adw-box-horizontal adw-box-spacing-xs align-center" id="{{ context_prefix }}like-section-{{ item_type }}-{{ item.id }}" data-item-type="{{ item_type }}" data-item-id="{{ item.id }}">
+    {% if current_user.is_authenticated %}
+        {% if current_user.has_liked_item(item_type, item.id) %}
+            <form action="{{ url_for('like.unlike_item_route', target_type=item_type, target_id=item.id) }}" method="POST" style="display: inline;" class="like-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action_type" value="unlike">
+                <button type="submit" class="adw-button small flat unlike-button" aria-label="Unlike {{ item_type }}">
+                    <span class="adw-icon icon-actions-starred-symbolic"></span>
+                </button>
+            </form>
+        {% else %}
+            <form action="{{ url_for('like.like_item_route', target_type=item_type, target_id=item.id) }}" method="POST" style="display: inline;" class="like-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action_type" value="like">
+                <button type="submit" class="adw-button small flat suggested-action like-button" aria-label="Like {{ item_type }}">
+                    <span class="adw-icon icon-actions-star-symbolic"></span>
+                </button>
+            </form>
+        {% endif %}
+    {% else %}
+        <a href="{{ url_for('auth.login', next=request.url) }}" class="adw-button small flat" aria-label="Login to like {{ item_type }}">
+            <span class="adw-icon icon-actions-star-symbolic"></span>
+        </a>
+    {% endif %}
+    <span class="adw-label caption like-count" id="{{ context_prefix }}like-count-{{ item_type }}-{{ item.id }}">{{ item.like_count }}</span>
+</div>
+{% endmacro %}
