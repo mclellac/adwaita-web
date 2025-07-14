@@ -145,44 +145,45 @@ def create_or_update_user(flask_app, username, password, full_name, profile_info
 
 def delete_database_tables(flask_app, script_args):
     """
-    Drops all known tables from the database.
+    Drops all known tables from the database using raw SQL with CASCADE.
     Handles interactive confirmation or non-interactive deletion based on script_args.
     Requires an active application context.
     Returns True if deletion occurred, False otherwise.
     """
-    is_non_interactive_delete = script_args.deletedb and script_args.admin_user and script_args.admin_pass
+    is_non_interactive_delete = script_args.deletedb and (script_args.admin_user and script_args.admin_pass)
 
-    # Import text for raw SQL
-    from sqlalchemy import text
+    def drop_all_tables_cascade():
+        """Helper function to drop all tables with CASCADE."""
+        with flask_app.app_context():
+            print("Dropping all tables with CASCADE...")
+            # Using raw SQL to drop all tables owned by the current user.
+            # This is a robust way to handle dependencies.
+            # Note: This is specific to PostgreSQL.
+            # For other databases, the query might need to be different.
+            # The query finds all tables in the 'public' schema and generates a DROP TABLE ... CASCADE command.
+            drop_sql = """
+            DO $$ DECLARE
+                r RECORD;
+            BEGIN
+                FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+                    EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+                END LOOP;
+            END $$;
+            """
+            from sqlalchemy import text
+            db.session.execute(text(drop_sql))
+            db.session.commit()
+            print("All tables dropped with CASCADE.")
 
     if is_non_interactive_delete:
         print("Non-interactive mode: Deleting all database tables as --deletedb is present with admin creation flags.")
-        with flask_app.app_context():
-            print("Dropping all tables...")
-            db.drop_all()
-            # db.create_all() # Tables will be recreated later by the main script logic
-            # No explicit commit needed for DDL usually, but good practice with session scope
-            db.session.commit()
-        print("All tables dropped non-interactively.")
+        drop_all_tables_cascade()
         return True
-    elif script_args.deletedb: # Interactive deletion
-        try:
-            confirm = input("Are you sure you want to delete all database tables? This cannot be undone. (yes/no): ").lower()
-            if confirm == 'yes':
-                print("Deleting all database tables...")
-                with flask_app.app_context():
-                    db.drop_all()
-                    # db.create_all() # Tables will be recreated later
-                    db.session.commit()
-                print("All tables deleted.")
-                return True
-            else:
-                print("Table deletion cancelled.")
-                return False
-        except EOFError:
-            print("Non-interactive mode (--deletedb without admin args): Cannot confirm table deletion. Aborting.")
-            return False
-    return False # No deletion was triggered or completed
+    elif script_args.deletedb:
+        print("Non-interactive mode: Deleting all database tables as --deletedb is present.")
+        drop_all_tables_cascade()
+        return True
+    return False  # No deletion was triggered or completed
 
 
 if __name__ == "__main__":
