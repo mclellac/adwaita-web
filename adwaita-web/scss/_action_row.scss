@@ -42,11 +42,17 @@
     }
 
     // This is for the little arrow icon
-    &.adw-navigation-row::after {
+    &.adw-navigation-row::after,
+    .adw-action-row-suffix > [class*="adw-icon-navigation-chevron"] {
         @include mixins.navigation-arrow;
     }
 
     &:disabled,
     &[disabled] {
+    }
+
+    &.column-layout {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }

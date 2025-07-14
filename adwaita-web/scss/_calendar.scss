@@ -1,0 +1,31 @@
+@use 'variables';
+@use 'mixins';
+
+.adw-calendar {
+    @include mixins.apply-flat-button-style;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xs) var(--spacing-m);
+    border-radius: var(--button-border-radius);
+    border: 1px solid var(--button-border-color, transparent);
+    background-color: var(--button-bg-color, transparent);
+    color: var(--button-fg-color, inherit);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    transition: background-color 150ms cubic-bezier(0.215, 0.61, 0.355, 1),
+                border-color 150ms cubic-bezier(0.215, 0.61, 0.355, 1),
+                color 150ms cubic-bezier(0.215, 0.61, 0.355, 1);
+
+    .adw-icon {
+        margin-right: var(--spacing-s);
+    }
+
+    &:hover {
+        background-color: var(--button-hover-bg-color);
+    }
+
+    &:active {
+        background-color: var(--button-active-bg-color);
+    }
+}

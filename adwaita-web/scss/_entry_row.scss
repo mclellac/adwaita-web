@@ -11,12 +11,12 @@
   // Layout for the row
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
 
   // The title label for the entry row
   .adw-entry-row-title {
     padding-right: var(--spacing-l); // Space between title and entry
-    // The title itself can be a simple label
+    flex-shrink: 0;
   }
 
   // The entry part of the row
