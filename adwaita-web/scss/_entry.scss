@@ -1,173 +1,117 @@
-// Styles for Adwaita Entries (Input Fields) (Adwaita Skin Version)
+@use 'variables';
+@use 'mixins';
 
-.adw-entry {
-  display: inline-block;
-  width: auto;
-  padding: var(--spacing-s) var(--spacing-m);
-  border-width: var(--border-width);
-  border-style: solid;
-  border-color: var(--border-color); // Use the global --border-color
-  border-radius: var(--border-radius-default);
-  background-color: var(--view-bg-color); // Entries typically use view background
-  color: var(--window-fg-color); // Text color
-  font-family: var(--document-font-family);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
-  // Libadwaita entries have a subtle inset shadow.
-  // This is an approximation, actual values might differ slightly based on theme.
-  box-shadow: inset 0 1px 1px var(--shade-color); // Use --shade-color for a themeable inset
-  transition: border-color 0.1s ease-out, box-shadow 0.1s ease-out, background-color 0.1s ease-out;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+// scss/_entry.scss
 
-  &::placeholder {
-    color: currentColor; // Placeholder color is based on current text color
-    opacity: 0.5;       // Made less prominent by opacity
-  }
+@mixin input-style {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--entry-background-color);
+    color: var(--window-fg-color);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-medium);
+    padding: var(--spacing-s) var(--spacing-m);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    transition: border-color var(--animation-duration-short) var(--animation-ease-out-cubic),
+                box-shadow var(--animation-duration-short) var(--animation-ease-out-cubic);
 
-  &:hover:not(:disabled):not(.disabled):not([readonly]) {
-    // Libadwaita entry hover doesn't usually change border or background much,
-    // focus is the main indicator. We can add a very subtle effect if desired.
-    // border-color: color.mix(var(--window-fg-color), var(--border-color), 80%); // Slightly darker border
-  }
+    &:hover {
+      border-color: var(--accent-color);
+    }
 
-  &:focus,
-  &:focus-visible {
-    outline: none;
-    border-color: var(--accent-color); // Focus border uses accent color
-    // Combine inset shadow with outer focus ring
-    box-shadow: inset 0 1px 1px var(--shade-color), 0 0 0 var(--focus-ring-width) var(--accent-color);
-  }
-
-  &.disabled,
-  &[disabled] {
-    cursor: not-allowed;
-    background-color: var(--view-bg-color); // Background might not change much
-    color: var(--window-fg-color);          // Text color is the same
-    opacity: var(--disabled-opacity);       // But opacity makes it appear disabled
-    box-shadow: inset 0 1px 1px var(--shade-color); // Keep inset shadow, opacity will affect it
-    pointer-events: none;
+    &:focus, &:focus-visible {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 var(--focus-ring-width) rgba(var(--accent-color-rgb), 0.3);
+      outline: none;
+    }
 
     &::placeholder {
-      opacity: calc(0.5 * var(--disabled-opacity)); // Adjust placeholder opacity too
-    }
-  }
-
-  &[readonly] {
-    background-color: var(--input-readonly-bg-color);
-    cursor: default;
-    // No border change on hover/focus for readonly
-    &:hover, &:focus, &:focus-visible {
-      border-color: var(--border-color); // Keep original border color
-      box-shadow: inset 0 1px 1px var(--shade-color); // Keep original inset shadow
-    }
-  }
-
-  // Validation States
-  &.error {
-    border-color: var(--error-color) !important; // Use important to override default
-    &:focus, &:focus-visible {
-      border-color: var(--error-color) !important;
-      box-shadow: inset 0 1px 1px var(--shade-color), 0 0 0 var(--focus-ring-width) var(--error-color);
-    }
-  }
-  &.warning {
-    border-color: var(--warning-color) !important;
-    &:focus, &:focus-visible {
-      border-color: var(--warning-color) !important;
-      box-shadow: inset 0 1px 1px var(--shade-color), 0 0 0 var(--focus-ring-width) var(--warning-color);
-    }
-  }
-  &.success {
-    border-color: var(--success-color) !important;
-    &:focus, &:focus-visible {
-      border-color: var(--success-color) !important;
-      box-shadow: inset 0 1px 1px var(--shade-color), 0 0 0 var(--focus-ring-width) var(--success-color);
-    }
-  }
-}
-
-// Styles for <textarea> elements that should look like Adwaita entries
-.adw-textarea {
-  @extend .adw-entry;
-  resize: vertical;
-  min-height: calc(var(--font-size-base) * #{variables.$line-height-base} * 3 + (var(--spacing-s) * 2) + (var(--border-width) * 2)); // Approx 3 lines
-}
-
-
-// Wrapper for entries with icons (e.g., search icon, clear icon)
-// This structure is a common way to handle icons inside input fields.
-.adw-entry-wrapper {
-  display: inline-flex;
-  align-items: center;
-  position: relative;
-
-  > .adw-entry {
-    // Adjust padding if icons are present. Icons are typically 16px.
-    // Padding needs to accommodate icon width + some spacing.
-    &.with-icon-start {
-      padding-left: calc(var(--spacing-m) + var(--icon-size-base) + var(--spacing-xs));
-    }
-    &.with-icon-end {
-      padding-right: calc(var(--spacing-m) + var(--icon-size-base) + var(--spacing-xs));
-    }
-  }
-
-  .adw-entry-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--window-fg-color); // Icon color matches text
-    opacity: 0.5; // Icons are often dimmed like placeholders
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: var(--icon-size-base);
-    height: var(--icon-size-base);
-    pointer-events: none; // Default: icons are not interactive
-
-    svg {
-      width: 100%;
-      height: 100%;
-      fill: currentColor;
+      color: var(--secondary-fg-color);
+      opacity: 1; // Browsers often have a default opacity
     }
 
-    &.start {
-      left: var(--spacing-m);
-    }
-    &.end {
-      right: var(--spacing-m);
-    }
-
-    &.interactive { // For clickable icons like a clear button
-      pointer-events: auto;
-      cursor: pointer;
-      opacity: 0.7; // Slightly more prominent if interactive
+    // Read-only and disabled states
+    &:read-only {
+      background-color: var(--input-readonly-bg-color);
+      cursor: default;
       &:hover {
-        opacity: 1.0; // Full opacity on hover
+        border-color: var(--border-color); // No hover effect
       }
     }
-  }
+
+    &:disabled {
+      opacity: var(--disabled-opacity);
+      cursor: not-allowed;
+      &:hover {
+        border-color: var(--border-color);
+      }
+    }
 }
 
-// Remove spinner from number inputs for WebKit/Blink (Chrome, Edge, Safari)
-input[type="number"].adw-entry {
-  -webkit-appearance: textfield;
-  -moz-appearance: textfield;
-  appearance: textfield;
-  &::-webkit-inner-spin-button,
-  &::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-}
+// Styling for .adw-entry, a wrapper for <input> elements
+.adw-entry {
+  // Using a variable for the background color of the entry
+  --entry-background-color: var(--view-bg-color);
 
-// Remove clear button from search inputs for WebKit/Blink
-input[type="search"].adw-entry {
-  &::-webkit-search-decoration,
-  &::-webkit-search-cancel-button,
-  &::-webkit-search-results-button,
-  &::-webkit-search-results-decoration {
-    display: none;
+  display: inline-block; // To respect width and height
+  position: relative;
+  width: 100%; // Default to full width, can be overridden by parent container
+
+  input[type="text"],
+  input[type="password"],
+  input[type="search"],
+  input[type="email"],
+  input[type="url"],
+  input[type="tel"],
+  input[type="number"] {
+    @include input-style;
+  }
+
+  // Styles for entries with icons
+  &.with-icon-start,
+  &.with-icon-end {
+    .adw-entry-icon {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--secondary-fg-color);
+      display: flex;
+      align-items: center;
+      pointer-events: none; // Icon is not interactive by default
+    }
+  }
+  &.with-icon-start {
+    input {
+      padding-left: calc(var(--icon-size-base) + var(--spacing-m) * 2);
+    }
+    .adw-entry-icon {
+      left: var(--spacing-m);
+    }
+  }
+  &.with-icon-end {
+    input {
+      padding-right: calc(var(--icon-size-base) + var(--spacing-m) * 2);
+    }
+    .adw-entry-icon {
+      right: var(--spacing-m);
+    }
+  }
+
+  // For multiline entries using <textarea>
+  textarea {
+    @include input-style;
+    resize: vertical; // Allow vertical resizing
+    min-height: calc(var(--font-size-base) * #{variables.$line-height-base} * 3 + (var(--spacing-s) * 2) + (var(--border-width) * 2)); // Approx 3 lines
+  }
+
+  // Error state for validation
+  &.error {
+    input, textarea {
+      border-color: var(--error-color);
+      &:focus, &:focus-visible {
+        box-shadow: 0 0 0 var(--focus-ring-width) rgba(var(--error-color-rgb), 0.3);
+      }
+    }
   }
 }

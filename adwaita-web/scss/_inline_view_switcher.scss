@@ -1,9 +1,55 @@
-// SCSS for Adwaita Inline View Switcher
-// Based on Libadwaita 1.7 AdwInlineViewSwitcher
-// This widget uses an AdwToggleGroup.
+@use 'variables';
+@use 'mixins';
 
+// scss/_inline_view_switcher.scss
+
+// .adw-inline-view-switcher is essentially a styled .adw-toggle-group
 .adw-inline-view-switcher {
-  // AdwInlineViewSwitcher is visually identical to AdwToggleGroup.
-  // It can also have .flat or .round style classes, which are defined in _toggle_group.scss.
-  @extend .adw-toggle-group;
+  display: inline-flex;
+  border-radius: var(--border-radius-default);
+  // The group itself can have a border that encloses all buttons
+  border: var(--border-width) solid var(--border-color);
+  overflow: hidden; // Ensures the child buttons' corners don't stick out
+
+  // Styling for buttons directly inside the toggle group
+  > .adw-button, > .adw-toggle-button {
+    border-radius: 0; // No border-radius for individual buttons
+    border: none; // No individual borders
+    // Add a separator between buttons
+    &:not(:last-child) {
+      border-right: var(--border-width) solid var(--border-color);
+    }
+
+    // First and last buttons get the parent's border-radius
+    &:first-child {
+      border-top-left-radius: var(--border-radius-default);
+      border-bottom-left-radius: var(--border-radius-default);
+    }
+    &:last-child {
+      border-top-right-radius: var(--border-radius-default);
+      border-bottom-right-radius: var(--border-radius-default);
+    }
+
+    // Active/selected state for toggle buttons
+    &.active, &[aria-pressed="true"] {
+      background-color: var(--accent-bg-color);
+      color: var(--accent-fg-color);
+      // Remove separator on the side of an active button to merge it visually
+      & + .adw-button, & + .adw-toggle-button {
+        border-left-color: transparent;
+      }
+      border-right-color: transparent;
+    }
+
+    // Focus state needs to be handled carefully in a group
+    &:focus-visible {
+      z-index: 1; // Bring the focused button to the front
+      // Apply focus ring, but it might look better on the parent .adw-toggle-group
+    }
+  }
+
+  // When the whole group has focus
+  &:focus-within {
+     box-shadow: 0 0 0 var(--focus-ring-width) rgba(var(--accent-color-rgb), 0.3);
+  }
 }

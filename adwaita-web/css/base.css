@@ -1,0 +1,17 @@
+/* Error: Undefined variable.
+ *    ,
+ * 44 |     transition: color variables.$animation-duration-short variables.$animation-ease-out-cubic;
+ *    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ *    '
+ *   adwaita-web/scss/_base.scss 44:23  root stylesheet */
+
+body::before {
+  font-family: "Source Code Pro", "SF Mono", Monaco, Inconsolata, "Fira Mono",
+      "Droid Sans Mono", monospace, monospace;
+  white-space: pre;
+  display: block;
+  padding: 1em;
+  margin-bottom: 1em;
+  border-bottom: 2px solid black;
+  content: "Error: Undefined variable.\a    \2577 \a 44 \2502      transition: color variables.$animation-duration-short variables.$animation-ease-out-cubic;\a    \2502                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\a    \2575 \a   adwaita-web/scss/_base.scss 44:23  root stylesheet";
+}
