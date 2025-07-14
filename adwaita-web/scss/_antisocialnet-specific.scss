@@ -295,6 +295,7 @@ body { overflow: hidden; }
     .sidebar-nav {
         // This targets the <nav class="adw-list-box flat sidebar-nav">
         &.adw-list-box.flat {
+            flex-direction: column;
             border: none; // Remove default listbox border
             border-radius: 0; // Remove default listbox radius
             background-color: transparent; // Ensure it's transparent
@@ -302,8 +303,6 @@ body { overflow: hidden; }
             padding-bottom: var(--spacing-s);
 
             .adw-action-row {
-                display: flex;
-                flex-direction: column;
                 // Adjust padding if needed, default is var(--spacing-m)
                 // padding-left: var(--spacing-l); // Example: Increase padding if desired
                 // padding-right: var(--spacing-l);
