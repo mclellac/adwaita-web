@@ -88,7 +88,7 @@
                 {% for comment in comments_pagination.items %}
                 <a href="{{ url_for('post.view_post', post_id=comment.post_id, _anchor='comment-' ~ comment.id) }}" class="adw-action-row">
                     <div class="adw-action-row-text">
-                        <div class="adw-action-row-title">Comment on post by {{ comment.post.author.full_name or ('User ' ~ comment.post.author.id) }}</div>
+                        <div class="adw-action-row-title">Comment on post by {% if comment.post %}{{ comment.post.author.full_name or ('User ' ~ comment.post.author.id) }}{% else %}an unknown user{% endif %}</div>
                         <div class="adw-action-row-subtitle">"{{ comment.text | truncate(100) }}"</div>
                     </div>
                 </a>
