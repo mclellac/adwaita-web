@@ -238,6 +238,18 @@ class Category(db.Model):
         return f'<Category {self.name}>'
 
 
+class PolymorphicLikeMixin:
+    """Mixin for models that can be liked."""
+    @property
+    def like_count(self):
+        return self.likes.count()
+
+class PolymorphicCommentMixin:
+    """Mixin for models that can be commented on."""
+    @property
+    def comment_count(self):
+        return self.comments.count()
+
 class Post(db.Model, PolymorphicLikeMixin):
     __tablename__ = 'post'
     id = db.Column(db.Integer, primary_key=True)
@@ -314,18 +326,6 @@ class Comment(db.Model):
                             primaryjoin="and_(Like.target_type=='comment', foreign(Like.target_id)==Comment.id)",
                             lazy='dynamic',
                             cascade='all, delete-orphan')
-
-class PolymorphicLikeMixin:
-    """Mixin for models that can be liked."""
-    @property
-    def like_count(self):
-        return self.likes.count()
-
-class PolymorphicCommentMixin:
-    """Mixin for models that can be commented on."""
-    @property
-    def comment_count(self):
-        return self.comments.count()
 
 class Postable(db.Model):
     __tablename__ = 'postable'
