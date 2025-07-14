@@ -152,6 +152,7 @@
         <nav class="adw-list-box flat sidebar-nav" aria-label="Main Navigation">
                 <a href="{{ url_for('general.activity_feed') }}" class="adw-action-row {{ 'selected' if request.endpoint == 'general.activity_feed' or request.endpoint == 'general.index' }}">
                     <span class="adw-action-row-icon icon-content-loading-symbolic"></span>
+
                     <span class="adw-action-row-title">Home</span>
                 </a>
                 {% if current_user.is_authenticated %}
