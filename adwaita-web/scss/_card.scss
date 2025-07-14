@@ -1,87 +1,23 @@
-// adwaita-web/scss/_card.scss
-// Ensure mixins are available if apply-card-style is defined there.
-// However, if apply-card-style is specific to cards, it could also live in this file
-// and not be in _mixins.scss. For now, assuming it's in _mixins.scss as per plan.
+@use 'variables';
 
-// General .card style class from Libadwaita
-// https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html#boxed-lists-cards
-.adw-card, .card { // Allow .card as an alias for consistency with Libadwaita docs
-  @include mixins.apply-card-style;
+.adw-card {
+    background-color: var(--card-bg-color, variables.$card-bg-color-light);
+    color: var(--card-fg-color, variables.$window-fg-color-light);
+    border-radius: var(--border-radius-large, 12px);
+    box-shadow: var(--subtle-box-shadow);
+    padding: var(--spacing-l, 18px);
+    border: 1px solid var(--card-shade-color, rgba(0, 0, 0, 0.07));
+    transition: box-shadow 250ms cubic-bezier(0.215, 0.61, 0.355, 1),
+                transform 250ms cubic-bezier(0.215, 0.61, 0.355, 1);
 
-  // Original properties that are now in the mixin:
-  // background-color: var(--card-bg-color);
-  // color: var(--card-fg-color); // Text color for content within the card
-  // border-radius: var(--border-radius-large); // Libadwaita cards use a larger radius
-  // padding: var(--spacing-m); // Default padding, can be overridden by specific components
-  // box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05);
-  // display: block; // Cards are usually block elements
-
-
-  // Libadwaita cards typically have a subtle outer shadow and an inner "border" created by card-shade-color
-  // The outer shadow is not explicitly defined as a variable in Libadwaita, but is part of the look.
-  // The --card-shade-color is used for internal separators in boxed lists or for an inner border effect.
-  // For a general card, we might apply a subtle shadow.
-  // Box shadow for cards: a subtle outer shadow.
-  // For the inner border effect common in boxed lists, that's usually applied to rows within.
-  // For a standalone card, it might just have the background and shadow.
-  // The actual box-shadow is now applied via the @include mixins.apply-card-style;
-  // box-shadow: var(--stronger-card-box-shadow); // This line is effectively handled by the mixin
-
-  // If a card is meant to look like a boxed list container, it might also have an effective "inner border"
-  // This could be approximated by an inset shadow using --card-shade-color or by styling child elements.
-  // For now, focusing on the standalone card appearance.
-
-  display: block; // Cards are usually block elements
-
-  &.activatable {
-    // From Libadwaita: "If a widget with the .card style class also has the .activatable style class,
-    // it will also have hover and active states similar to an activatable row inside a boxed list."
-    cursor: pointer;
-    transition: background-color 0.1s ease-out;
-
-    &:hover {
-      background-color: rgba(var(--card-fg-color-rgb), 0.05);
+    &.adw-card-flat {
+        box-shadow: none;
+        border: 1px solid var(--card-shade-color, rgba(0, 0, 0, 0.07));
     }
-    &:active {
-      background-color: rgba(var(--card-fg-color-rgb), 0.08);
+
+    &.adw-card-clickable:hover {
+        cursor: pointer;
+        box-shadow: var(--stronger-card-box-shadow);
+        transform: translateY(-2px);
     }
-     &:focus, &:focus-visible {
-        outline: none;
-        // Combine focus ring with the new stronger card shadow
-        box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color), var(--stronger-card-box-shadow);
-    }
-  }
-}
-
-// `.adw-button.card` styling - when a button itself is styled as a card
-// Libadwaita: "If the .card style class is applied to a GtkButton, it will get these states automatically"
-.adw-button.card {
-  // Reset button's own padding, border, default background/color
-  padding: 0; // Card padding will apply
-  border: none;
-  background-color: var(--card-bg-color);
-  color: var(--card-fg-color);
-  border-radius: var(--border-radius-large);
-  box-shadow: var(--stronger-card-box-shadow); // Use the new stronger shadow variable
-  text-align: inherit; // Inherit text align from card content if any
-  display: block; // Make button behave like a block card
-
-  // Apply card's activatable hover/active states
-   &:hover {
-      background-color: rgba(var(--card-fg-color-rgb), 0.05);
-  }
-  &:active {
-      background-color: rgba(var(--card-fg-color-rgb), 0.08);
-  }
-  &:focus, &:focus-visible {
-      outline: none;
-      // Combine focus ring with the new stronger card shadow
-      box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color), var(--stronger-card-box-shadow);
-  }
-
-  // Content inside the button should be padded by the card's padding.
-  // This assumes the button's direct children are the content.
-  > * {
-    padding: var(--spacing-m);
-  }
 }

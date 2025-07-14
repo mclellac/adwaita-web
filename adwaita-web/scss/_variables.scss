@@ -2,6 +2,7 @@
 // Target: Libadwaita 1.5 Named Colors
 // Reference: https://gnome.pages.gitlab.gnome.org/libadwaita/doc/1.5/named-colors.html
 
+@use "sass:color";
 
 // --- 1. SASS Variables for Adwaita Palette (Source: Libadwaita CSS Variables page) ---
 // These are the base palette colors, generally aligned with docs.
@@ -76,7 +77,7 @@ $card-shade-color-light: rgba(0, 0, 0, 0.07);
 $dialog-bg-color-light: #fafafa;
 $popover-bg-color-light: #ffffff;
 $popover-shade-color-light: rgba(0, 0, 0, 0.07);
-$input-readonly-bg-color-light: mix($window-fg-color-light, $view-bg-color-light, 95%);
+$input-readonly-bg-color-light: color.mix($window-fg-color-light, $view-bg-color-light, 95%);
 
 
 // --- SASS Variables for initial setup of CSS Custom Properties (Dark Theme Defaults) ---
@@ -96,7 +97,7 @@ $card-shade-color-dark: rgba(0, 0, 0, 0.36);
 $dialog-bg-color-dark: #383838;
 $popover-bg-color-dark: #383838;
 $popover-shade-color-dark: rgba(0, 0, 0, 0.25);
-$input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 95%);
+$input-readonly-bg-color-dark: color.mix($window-fg-color-dark, $view-bg-color-dark, 95%);
 
 
 // --- CSS Custom Properties Definitions ---
@@ -194,7 +195,7 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
   --scrollbar-outline-color: #ffffff; // From docs
 
   --link-color: var(--accent-color); // Use the updated --accent-color for links for consistency
-  --link-hover-color: #{mix(black, $accent-blue-light, 20%)}; // Darken accent
+  --link-hover-color: #{color.mix(black, $accent-blue-light, 20%)}; // Darken accent
   --link-visited-color: #{$accent-purple-light}; // Use purple standalone
 
   // ListBox / Row related defaults
@@ -263,20 +264,20 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
   --button-bg-color: var(--window-bg-color);
   --button-fg-color: var(--window-fg-color);
   --button-border-color: var(--border-color);
-  --button-hover-bg-color: #{mix($window-fg-color-light, $window-bg-color-light, 10%)};
-  --button-active-bg-color: #{mix($window-fg-color-light, $window-bg-color-light, 20%)};
+  --button-hover-bg-color: #{color.mix($window-fg-color-light, $window-bg-color-light, 10%)};
+  --button-active-bg-color: #{color.mix($window-fg-color-light, $window-bg-color-light, 20%)};
   --button-flat-hover-bg-color: #{rgba($window-fg-color-light, 0.05)}; // Use rgba with black base for consistency
   --button-flat-active-bg-color: #{rgba($window-fg-color-light, 0.1)}; // Use rgba with black base
   --button-disabled-opacity: var(--disabled-opacity);
 
   // Accent button states - fine
-  --accent-bg-hover-color: #{mix(black, $accent-blue-bg, 10%)};
-  --accent-bg-active-color: #{mix(black, $accent-blue-bg, 20%)};
+  --accent-bg-hover-color: #{color.mix(black, $accent-blue-bg, 10%)};
+  --accent-bg-active-color: #{color.mix(black, $accent-blue-bg, 20%)};
 
   // Destructive button states - fine
   $_destructive-bg-light: $adw-red-3; // This is @destructive_bg_color light
-  --destructive-bg-hover-color: #{mix(black, $_destructive-bg-light, 10%)};
-  --destructive-bg-active-color: #{mix(black, $_destructive-bg-light, 20%)};
+  --destructive-bg-hover-color: #{color.mix(black, $_destructive-bg-light, 10%)};
+  --destructive-bg-active-color: #{color.mix(black, $_destructive-bg-light, 20%)};
 
 
   // Dialog specific variables - fine
@@ -447,7 +448,7 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
     --scrollbar-outline-color: #{rgba(0, 0, 0, 0.5)}; // From docs
 
     --link-color: var(--accent-color); // Use dark --accent-color (#78aeed)
-    --link-hover-color: #{mix(white, $accent-blue-dark, 20%)}; // Lighten
+    --link-hover-color: #{color.mix(white, $accent-blue-dark, 20%)}; // Lighten
     --link-visited-color: #{$accent-purple-dark}; // Use purple standalone dark
 
     --list-row-hover-bg-color: #{rgba(255, 255, 255, 0.06)}; // White with alpha
@@ -470,19 +471,19 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
     --input-readonly-bg-color: #{$input-readonly-bg-color-dark};
 
     // Button State Variables for Dark Theme - fine
-    --button-hover-bg-color: #{mix($window-fg-color-dark, $window-bg-color-dark, 10%)};
-    --button-active-bg-color: #{mix($window-fg-color-dark, $window-bg-color-dark, 20%)};
+    --button-hover-bg-color: #{color.mix($window-fg-color-dark, $window-bg-color-dark, 10%)};
+    --button-active-bg-color: #{color.mix($window-fg-color-dark, $window-bg-color-dark, 20%)};
     --button-flat-hover-bg-color: #{rgba($window-fg-color-dark, 0.08)};
     --button-flat-active-bg-color: #{rgba($window-fg-color-dark, 0.12)};
 
     // Accent button states for Dark Theme - fine
-    --accent-bg-hover-color: #{mix(white, $accent-blue-bg, 10%)};
-    --accent-bg-active-color: #{mix(white, $accent-blue-bg, 20%)};
+    --accent-bg-hover-color: #{color.mix(white, $accent-blue-bg, 10%)};
+    --accent-bg-active-color: #{color.mix(white, $accent-blue-bg, 20%)};
 
     // Destructive button states for Dark Theme - fine
     $_destructive-bg-dark: $adw-red-4; // This is @destructive_bg_color dark
-    --destructive-bg-hover-color: #{mix(white, $_destructive-bg-dark, 10%)};
-    --destructive-bg-active-color: #{mix(white, $_destructive-bg-dark, 20%)};
+    --destructive-bg-hover-color: #{color.mix(white, $_destructive-bg-dark, 10%)};
+    --destructive-bg-active-color: #{color.mix(white, $_destructive-bg-dark, 20%)};
 
     // RGB versions for dark theme
     // These use the SASS variables which have been updated or confirmed.
@@ -499,13 +500,13 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
     --accent-fg-color: #{$accent-default-fg};
     &:not(.theme-dark) {
       --accent-color: #{$accent-blue-light};
-      --accent-bg-hover-color: #{mix(black, $accent-blue-bg, 10%)};
-      --accent-bg-active-color: #{mix(black, $accent-blue-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(black, $accent-blue-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(black, $accent-blue-bg, 20%)};
     }
     &.theme-dark {
       --accent-color: #{$accent-blue-dark};
-      --accent-bg-hover-color: #{mix(white, $accent-blue-bg, 10%)};
-      --accent-bg-active-color: #{mix(white, $accent-blue-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(white, $accent-blue-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(white, $accent-blue-bg, 20%)};
     }
   }
   &.accent-teal {
@@ -513,13 +514,13 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
     --accent-fg-color: #{$accent-default-fg};
     &:not(.theme-dark) {
       --accent-color: #{$accent-teal-light};
-      --accent-bg-hover-color: #{mix(black, $accent-teal-bg, 10%)};
-      --accent-bg-active-color: #{mix(black, $accent-teal-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(black, $accent-teal-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(black, $accent-teal-bg, 20%)};
     }
     &.theme-dark {
       --accent-color: #{$accent-teal-dark};
-      --accent-bg-hover-color: #{mix(white, $accent-teal-bg, 10%)};
-      --accent-bg-active-color: #{mix(white, $accent-teal-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(white, $accent-teal-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(white, $accent-teal-bg, 20%)};
     }
   }
   &.accent-green {
@@ -527,13 +528,13 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
     --accent-fg-color: #{$accent-default-fg};
     &:not(.theme-dark) {
       --accent-color: #{$accent-green-light};
-      --accent-bg-hover-color: #{mix(black, $accent-green-bg, 10%)};
-      --accent-bg-active-color: #{mix(black, $accent-green-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(black, $accent-green-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(black, $accent-green-bg, 20%)};
     }
     &.theme-dark {
       --accent-color: #{$accent-green-dark};
-      --accent-bg-hover-color: #{mix(white, $accent-green-bg, 10%)};
-      --accent-bg-active-color: #{mix(white, $accent-green-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(white, $accent-green-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(white, $accent-green-bg, 20%)};
     }
   }
   &.accent-yellow {
@@ -541,13 +542,13 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
     --accent-fg-color: #{$accent-yellow-fg};
     &:not(.theme-dark) {
       --accent-color: #{$accent-yellow-light};
-      --accent-bg-hover-color: #{mix(black, $accent-yellow-bg, 10%)};
-      --accent-bg-active-color: #{mix(black, $accent-yellow-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(black, $accent-yellow-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(black, $accent-yellow-bg, 20%)};
     }
     &.theme-dark {
       --accent-color: #{$accent-yellow-dark};
-      --accent-bg-hover-color: #{mix(white, $accent-yellow-bg, 10%)};
-      --accent-bg-active-color: #{mix(white, $accent-yellow-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(white, $accent-yellow-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(white, $accent-yellow-bg, 20%)};
     }
   }
   &.accent-orange {
@@ -555,13 +556,13 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
     --accent-fg-color: #{$accent-default-fg};
     &:not(.theme-dark) {
       --accent-color: #{$accent-orange-light};
-      --accent-bg-hover-color: #{mix(black, $accent-orange-bg, 10%)};
-      --accent-bg-active-color: #{mix(black, $accent-orange-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(black, $accent-orange-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(black, $accent-orange-bg, 20%)};
     }
     &.theme-dark {
       --accent-color: #{$accent-orange-dark};
-      --accent-bg-hover-color: #{mix(white, $accent-orange-bg, 10%)};
-      --accent-bg-active-color: #{mix(white, $accent-orange-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(white, $accent-orange-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(white, $accent-orange-bg, 20%)};
     }
   }
   &.accent-red {
@@ -569,13 +570,13 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
     --accent-fg-color: #{$accent-default-fg};
     &:not(.theme-dark) {
       --accent-color: #{$accent-red-light};
-      --accent-bg-hover-color: #{mix(black, $accent-red-bg, 10%)};
-      --accent-bg-active-color: #{mix(black, $accent-red-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(black, $accent-red-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(black, $accent-red-bg, 20%)};
     }
     &.theme-dark {
       --accent-color: #{$accent-red-dark};
-      --accent-bg-hover-color: #{mix(white, $accent-red-bg, 10%)};
-      --accent-bg-active-color: #{mix(white, $accent-red-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(white, $accent-red-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(white, $accent-red-bg, 20%)};
     }
   }
   &.accent-pink {
@@ -583,13 +584,13 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
     --accent-fg-color: #{$accent-default-fg};
     &:not(.theme-dark) {
       --accent-color: #{$accent-pink-light};
-      --accent-bg-hover-color: #{mix(black, $accent-pink-bg, 10%)};
-      --accent-bg-active-color: #{mix(black, $accent-pink-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(black, $accent-pink-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(black, $accent-pink-bg, 20%)};
     }
     &.theme-dark {
       --accent-color: #{$accent-pink-dark};
-      --accent-bg-hover-color: #{mix(white, $accent-pink-bg, 10%)};
-      --accent-bg-active-color: #{mix(white, $accent-pink-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(white, $accent-pink-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(white, $accent-pink-bg, 20%)};
     }
   }
   &.accent-purple {
@@ -597,13 +598,13 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
     --accent-fg-color: #{$accent-default-fg};
     &:not(.theme-dark) {
       --accent-color: #{$accent-purple-light};
-      --accent-bg-hover-color: #{mix(black, $accent-purple-bg, 10%)};
-      --accent-bg-active-color: #{mix(black, $accent-purple-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(black, $accent-purple-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(black, $accent-purple-bg, 20%)};
     }
     &.theme-dark {
       --accent-color: #{$accent-purple-dark};
-      --accent-bg-hover-color: #{mix(white, $accent-purple-bg, 10%)};
-      --accent-bg-active-color: #{mix(white, $accent-purple-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(white, $accent-purple-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(white, $accent-purple-bg, 20%)};
     }
   }
   &.accent-slate {
@@ -611,13 +612,13 @@ $input-readonly-bg-color-dark: mix($window-fg-color-dark, $view-bg-color-dark, 9
     --accent-fg-color: #{$accent-default-fg};
     &:not(.theme-dark) {
       --accent-color: #{$accent-slate-light};
-      --accent-bg-hover-color: #{mix(black, $accent-slate-bg, 10%)};
-      --accent-bg-active-color: #{mix(black, $accent-slate-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(black, $accent-slate-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(black, $accent-slate-bg, 20%)};
     }
     &.theme-dark {
       --accent-color: #{$accent-slate-dark};
-      --accent-bg-hover-color: #{mix(white, $accent-slate-bg, 10%)};
-      --accent-bg-active-color: #{mix(white, $accent-slate-bg, 20%)};
+      --accent-bg-hover-color: #{color.mix(white, $accent-slate-bg, 10%)};
+      --accent-bg-active-color: #{color.mix(white, $accent-slate-bg, 20%)};
     }
   }
 }

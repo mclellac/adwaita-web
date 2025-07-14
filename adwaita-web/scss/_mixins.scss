@@ -1,3 +1,5 @@
+@use 'variables';
+
 // SCSS Mixins
 
 // Base styling for list rows / preference rows
@@ -121,4 +123,12 @@
   padding: var(--spacing-m); // Default padding for a card
   box-shadow: var(--stronger-card-box-shadow); // Use the new stronger shadow variable
   display: block; // Cards are typically block elements
+}
+
+@mixin navigation-arrow {
+    content: '›';
+    font-size: 1.5em;
+    font-weight: 200;
+    color: var(--secondary-fg-color);
+    margin-left: var(--spacing-s);
 }

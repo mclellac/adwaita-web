@@ -1,201 +1,91 @@
-// SCSS for Adwaita Toggle Group (Pure CSS Adwaita Skin Version)
-// Based on Libadwaita 1.7 AdwToggleGroup
+@use 'variables';
+@use 'mixins';
 
+// scss/_toggle_group.scss
+
+// .adw-toggle-group is a container for a set of toggle buttons.
+// It often looks like a single, segmented button.
 .adw-toggle-group {
-    display: inline-flex;
-    align-items: center; // Align items vertically
-    // Default appearance is like a set of individual buttons.
-    // If they are standard .adw-button, they will have their own borders.
-    // Gap between them if not linked:
-    gap: var(--spacing-xxs); // Small gap for unlinked toggles
+  display: inline-flex;
+  border-radius: var(--border-radius-default);
+  // The group itself can have a border that encloses all buttons
+  border: var(--border-width) solid var(--border-color);
+  overflow: hidden; // Ensures the child buttons' corners don't stick out
 
-    // Child toggles (assuming .adw-button or a dedicated .adw-toggle class)
-    // The .active class on a child toggle uses specific active-toggle variables.
-    > .adw-button.active, // If using .adw-button as toggles
-    > .adw-toggle.active { // If using a dedicated .adw-toggle class
-        background-color: var(--active-toggle-bg-color);
-        color: var(--active-toggle-fg-color);
-        // Border might also change, or be removed if the background provides enough contrast
-        border-color: var(--active-toggle-bg-color); // Or a slightly darker shade of it
-        box-shadow: none; // Usually no extra shadow for active toggle button itself
+  // Styling for buttons directly inside the toggle group
+  > .adw-button, > .adw-toggle-button {
+    border-radius: 0; // No border-radius for individual buttons
+    border: none; // No individual borders
+    // Add a separator between buttons
+    &:not(:last-child) {
+      border-right: var(--border-width) solid var(--border-color);
     }
 
-    // Linked style (like GtkBox with .linked style class)
-    // Libadwaita AdwToggleGroup does not use .linked itself, but its children can be .linked
-    // This style is for when the group ITSELF should look like one continuous element.
-    // This is more akin to the old Adwaita GtkButton .linked style.
-    &.linked {
-        gap: 0; // No gap for linked items
-        border: var(--border-width) solid var(--border-color);
-        border-radius: var(--border-radius-default);
-        overflow: hidden; // Clip children to the group's border-radius
-
-        > .adw-button, // Target .adw-button or .adw-toggle if that's used
-        > .adw-toggle {
-            border-radius: 0;
-            border-width: 0; // Remove individual borders first
-
-            &:not(:last-child) {
-                border-right-width: var(--border-width);
-                border-right-style: solid;
-                border-right-color: var(--border-color);
-            }
-
-            &:first-child {
-                border-top-left-radius: inherit; // Inherit from parent .linked
-                border-bottom-left-radius: inherit;
-            }
-            &:last-child {
-                border-top-right-radius: inherit;
-                border-bottom-right-radius: inherit;
-            }
-
-            // Active state within a linked group
-            &.active {
-                border-color: var(--active-toggle-bg-color); // Border matches bg
-            }
-             &:focus-visible {
-                position: relative; // Ensure focus ring is drawn correctly over adjacent buttons
-                z-index: 1;
-                // Focus ring handled by .adw-button's default focus
-            }
-        }
+    // First and last buttons get the parent's border-radius
+    &:first-child {
+      border-top-left-radius: var(--border-radius-default);
+      border-bottom-left-radius: var(--border-radius-default);
+    }
+    &:last-child {
+      border-top-right-radius: var(--border-radius-default);
+      border-bottom-right-radius: var(--border-radius-default);
     }
 
-    // Flat style for the Toggle Group (AdwToggleGroup.flat)
-    // "makes the group look like a series of flat buttons"
-    &.flat {
-        gap: 0; // No gap for flat group
-        // The group itself has no border or background.
-        // Buttons inside are styled as flat.
-        > .adw-button,
-        > .adw-toggle {
-            // @extend .adw-button, .flat !optional; // Replaced with mixin
-            @include mixins.apply-flat-button-style; // Assumes base button styles are present or handled by the element itself
-
-            &:not(:last-child) {
-                // Separator for flat linked buttons (subtle)
-                border-right: var(--border-width) solid var(--border-color);
-            }
-
-            &.active {
-                // Active flat toggle still uses active-toggle colors
-                background-color: var(--active-toggle-bg-color);
-                color: var(--active-toggle-fg-color);
-                border-color: transparent; // No border for active flat toggle usually
-            }
-        }
-        // If .flat and .linked are combined, the above .flat > .adw-button rules for separators apply.
-        // The outer .linked border is removed by .flat.
-        &.linked {
-            border: none;
-        }
+    // Active/selected state for toggle buttons
+    &.active, &[aria-pressed="true"] {
+      background-color: var(--accent-bg-color);
+      color: var(--accent-fg-color);
+      // Remove separator on the side of an active button to merge it visually
+      & + .adw-button, & + .adw-toggle-button {
+        border-left-color: transparent;
+      }
+      border-right-color: transparent;
     }
 
-    // Round style for the Toggle Group (AdwToggleGroup.round)
-    // "makes the group, as well as toggles inside it rounded"
-    &.round {
-        border-radius: var(--pill-button-border-radius);
-
-        &:not(.linked) { // If not linked, individual toggles become pills
-            gap: var(--spacing-xxs);
-            > .adw-button,
-            > .adw-toggle {
-                border-radius: var(--pill-button-border-radius);
-            }
-        }
-
-        &.linked { // If linked and round, only ends of group are rounded
-             overflow: hidden; // Ensure children clip to pill shape
-            > .adw-button,
-            > .adw-toggle {
-                border-radius: 0; // Inner buttons are square
-                &:first-child {
-                    border-top-left-radius: var(--pill-button-border-radius);
-                    border-bottom-left-radius: var(--pill-button-border-radius);
-                }
-                &:last-child {
-                    border-top-right-radius: var(--pill-button-border-radius);
-                    border-bottom-right-radius: var(--pill-button-border-radius);
-                }
-            }
-        }
+    // Focus state needs to be handled carefully in a group
+    &:focus-visible {
+      z-index: 1; // Bring the focused button to the front
+      // Apply focus ring, but it might look better on the parent .adw-toggle-group
     }
+  }
 
-    // Vertical orientation
-    &.vertical {
-        flex-direction: column;
-        gap: var(--spacing-xxs); // Default gap for vertical unlinked
+  // When the whole group has focus
+  &:focus-within {
+     box-shadow: 0 0 0 var(--focus-ring-width) rgba(var(--accent-color-rgb), 0.3);
+  }
+}
 
-        &.linked {
-            gap: 0;
-            border-radius: var(--border-radius-default);
-            > .adw-button,
-            > .adw-toggle {
-                border-radius: 0;
-                border-width: 0; // Remove individual borders
-                &:not(:last-child) {
-                    border-bottom-width: var(--border-width);
-                    border-bottom-style: solid;
-                    border-bottom-color: var(--border-color);
-                }
-                 &:first-child {
-                    border-top-left-radius: inherit;
-                    border-top-right-radius: inherit;
-                }
-                &:last-child {
-                    border-bottom-left-radius: inherit;
-                    border-bottom-right-radius: inherit;
-                }
-            }
-        }
+// .adw-toggle-button is a standalone toggle button
+.adw-toggle-button {
+  // It can be styled just like a regular .adw-button
+  @include mixins.apply-flat-button-style;
+  // ... other .adw-button styles ...
 
-        &.flat {
-            gap: 0;
-             > .adw-button,
-             > .adw-toggle {
-                &:not(:last-child) {
-                    border-right-width: 0; // No side borders
-                    border-bottom: var(--border-width) solid var(--border-color);
-                }
-             }
-        }
+  // Active state
+  &.active, &[aria-pressed="true"] {
+    background-color: var(--accent-bg-color);
+    color: var(--accent-fg-color);
+  }
+}
 
-        &.round { // Vertical pill
-             border-radius: var(--pill-button-border-radius);
-            &:not(.linked) { // Individual vertical pills
-                > .adw-button, > .adw-toggle { border-radius: var(--pill-button-border-radius); }
-            }
-            &.linked { // Linked vertical pill
-                > .adw-button, > .adw-toggle {
-                    border-radius: 0;
-                    &:first-child {
-                        border-top-left-radius: var(--pill-button-border-radius);
-                        border-top-right-radius: var(--pill-button-border-radius);
-                    }
-                    &:last-child {
-                        border-bottom-left-radius: var(--pill-button-border-radius);
-                        border-bottom-right-radius: var(--pill-button-border-radius);
-                    }
-                }
-            }
+// A specific style for toggle groups that look like a view switcher
+// This is common in Libadwaita for things like day/week/month views.
+.adw-view-switcher.adw-toggle-group {
+    border: var(--border-width) solid var(--shade-color);
+    border-radius: var(--border-radius-default);
+    padding: var(--spacing-xxs);
+    background-color: var(--button-bg-color);
+    gap: var(--spacing-xxs);
+
+    > .adw-button, > .adw-toggle-button {
+        border: none;
+        border-radius: var(--border-radius-small);
+        @include mixins.apply-flat-button-style; // Assumes base button styles are present or handled by the element itself
+
+        &.active, &[aria-pressed="true"] {
+            background-color: var(--accent-bg-color);
+            color: var(--accent-fg-color);
+            box-shadow: var(--subtle-box-shadow);
         }
     }
 }
-
-// AdwToggle specific styles (if .adw-button is not sufficient)
-// For now, assume .adw-button with .active state is used for toggles.
-// .adw-toggle {
-//   @extend .adw-button; // Inherit base button styles
-//   &.active {
-//     background-color: var(--active-toggle-bg-color);
-//     color: var(--active-toggle-fg-color);
-//     border-color: var(--active-toggle-bg-color); // Or a slightly darker shade
-//   }
-// }
-//
-// // AdwInlineViewSwitcher often uses an AdwToggleGroup.
-// // If .adw-inline-view-switcher is just an alias for .adw-toggle-group styling:
-// .adw-inline-view-switcher {
-//   @extend .adw-toggle-group;
-// }
