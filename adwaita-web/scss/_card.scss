@@ -1,11 +1,7 @@
 // adwaita-web/scss/_card.scss
-@use 'variables';
-@use 'mixins'; // This is the one to keep
-@use 'sass:color';
 // Ensure mixins are available if apply-card-style is defined there.
 // However, if apply-card-style is specific to cards, it could also live in this file
 // and not be in _mixins.scss. For now, assuming it's in _mixins.scss as per plan.
-// @use 'mixins'; // This was the duplicate
 
 // General .card style class from Libadwaita
 // https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html#boxed-lists-cards

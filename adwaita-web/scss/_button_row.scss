@@ -1,9 +1,6 @@
 // SCSS for AdwButtonRow (Pure CSS Adwaita Skin Version)
 // AdwButtonRow is a GtkListBoxRow that looks like a button.
 // Introduced in Libadwaita 1.6.alpha
-@use 'variables';
-@use 'mixins';
-@use 'button'; // To extend .adw-button styles
 
 .adw-button-row {
   // Inherit base row structure and padding behavior from row-base

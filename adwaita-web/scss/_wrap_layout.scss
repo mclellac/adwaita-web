@@ -2,8 +2,6 @@
 // AdwWrapLayout is a layout manager, AdwWrapBox is a widget.
 // These are primarily for .wrap style class on GtkBox or similar containers.
 // Libadwaita 1.7 introduced AdwWrapBox and AdwWrapLayout.
-@use 'variables';
-@use 'mixins';
 
 // If a generic .adw-wrap-layout or .adw-wrap-box class is needed for containers
 // that should behave like AdwWrapBox.

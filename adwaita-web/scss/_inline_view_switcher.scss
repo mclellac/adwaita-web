@@ -1,8 +1,6 @@
 // SCSS for Adwaita Inline View Switcher
 // Based on Libadwaita 1.7 AdwInlineViewSwitcher
 // This widget uses an AdwToggleGroup.
-@use 'variables'; // Not strictly needed if only extending, but good practice
-@use 'toggle_group'; // Import the toggle_group styles to extend from
 
 .adw-inline-view-switcher {
   // AdwInlineViewSwitcher is visually identical to AdwToggleGroup.

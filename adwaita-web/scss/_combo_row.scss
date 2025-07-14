@@ -1,6 +1,5 @@
 // SCSS for Adwaita ComboRow
 // Placeholder styles - to be refined based on official Adwaita design or more detailed specs.
-@use 'action_row'; // Added to allow @extend .adw-action-row
 
 .adw-combo-row {
     @extend .adw-action-row; // ComboRow often behaves like an ActionRow

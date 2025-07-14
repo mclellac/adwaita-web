@@ -1,8 +1,6 @@
 // SCSS for AdwBottomSheet (Pure CSS Adwaita Skin Version)
 // AdwBottomSheet is a container that slides up from the bottom.
 // Introduced in Libadwaita 1.6.alpha
-@use 'variables';
-@use 'mixins';
 
 .adw-bottom-sheet {
   position: fixed;
