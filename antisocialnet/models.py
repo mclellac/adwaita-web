@@ -290,7 +290,6 @@ class Post(db.Model, PolymorphicLikeMixin):
         'Comment',
         primaryjoin="and_(Post.id==foreign(Comment.target_id), Comment.target_type=='post')",
         backref='post',
-        lazy='dynamic',
         order_by=lambda: desc(Comment.created_at)
     )
     likes = db.relationship('Like',
@@ -315,7 +314,6 @@ class Comment(db.Model, PolymorphicLikeMixin):
     replies = db.relationship(
         'Comment',
         backref=db.backref('parent', remote_side=[id]),
-        lazy='dynamic',
         order_by=lambda: desc(Comment.created_at) # Sort replies newest first
     )
 

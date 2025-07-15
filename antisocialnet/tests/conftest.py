@@ -334,3 +334,19 @@ def admin_client(client, app, create_test_user, db): # Added db
     assert b"Admin" in response.data # A simple check, adjust as per your app's admin indicators
 
     return client
+
+@pytest.fixture
+def auth_test_user(db, create_test_user):
+    return create_test_user(email_address="auth@example.com", password="password123", full_name="Auth Test User")
+
+@pytest.fixture
+def test_user_1(db, create_test_user): # db fixture here is the transactional session provider
+    return create_test_user(email_address="liker@example.com", full_name="Liker User")
+
+@pytest.fixture
+def test_user_2(db, create_test_user):
+    return create_test_user(email_address="author@example.com", full_name="Author User")
+
+@pytest.fixture
+def test_post_by_user_2(db, test_user_2, create_test_post):
+    return create_test_post(author=test_user_2, content="A post to be liked.")
