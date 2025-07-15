@@ -447,15 +447,13 @@ def delete_post(post_id): # Renamed from delete_post_route
             abort(403)
 
         try:
-            # Manually delete associated comment flags first
-            flags_to_delete = CommentFlag.query.join(Comment).filter(Comment.post_id == post.id).all()
-            for flag in flags_to_delete:
-                db.session.delete(flag)
-            current_app.logger.debug(f"Deleted {len(flags_to_delete)} flags for post {post_id}.")
-
             # Manually delete associated comments
-            all_comments_on_post = Comment.query.filter_by(post_id=post.id).all()
+            all_comments_on_post = Comment.query.filter_by(target_id=post.id, target_type='post').all()
             for comment in all_comments_on_post:
+                # Manually delete associated comment flags first
+                flags_to_delete = CommentFlag.query.filter_by(comment_id=comment.id).all()
+                for flag in flags_to_delete:
+                    db.session.delete(flag)
                 db.session.delete(comment)
             current_app.logger.debug(f"Deleted {len(all_comments_on_post)} comments for post {post_id}.")
 

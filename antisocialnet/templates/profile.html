@@ -21,7 +21,8 @@
         const postsContainer = document.getElementById('posts-container');
         const photosContainer = document.getElementById('photos-container');
         const loadingIndicator = document.getElementById('loading-indicator');
-        const userId = window.location.pathname.split('/').pop();
+        let pathParts = window.location.pathname.split('/');
+        const userId = pathParts.pop() || pathParts.pop(); // Handles trailing slash
 
         async function fetchProfileData() {
             loadingIndicator.style.display = 'block';
@@ -43,11 +44,11 @@
 
                 if (!postsResponse.ok) throw new Error('Failed to fetch posts');
                 const postsData = await postsResponse.json();
-                renderPosts(postsData.items);
+                renderPosts(postsData.posts);
 
                 if (!photosResponse.ok) throw new Error('Failed to fetch photos');
                 const photosData = await photosResponse.json();
-                renderPhotos(photosData.items);
+                renderPhotos(photosData.photos);
 
             } catch (error) {
                 console.error('Error fetching profile data:', error);

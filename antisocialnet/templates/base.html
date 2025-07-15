@@ -81,7 +81,7 @@
         {# Notifications Link #}
         <a href="{{ url_for('notification.list_notifications') }}" class="adw-button flat circular notification-button" aria-label="Notifications">
             <span class="adw-icon icon-objects-alarm-symbolic"></span>
-            {% if current_user.is_authenticated and unread_notifications_count > 0 %}
+            {% if current_user.is_authenticated and unread_notifications_count and unread_notifications_count > 0 %}
             <span class="notification-dot"></span>
             {% endif %}
         </a>
