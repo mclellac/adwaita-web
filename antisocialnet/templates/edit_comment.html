@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Comment{% endblock %}
+
+{% block header_title %}Edit Comment{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('post.edit_comment', comment_id=comment.id) }}">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.text(class="adw-textarea", rows="4") }}
+    </div>
+    <button type="submit" class="adw-button suggested-action">Update Comment</button>
+</form>
+{% endblock %}

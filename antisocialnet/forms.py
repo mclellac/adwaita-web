@@ -116,6 +116,10 @@ class DeletePostForm(FlaskForm):
 class FlagCommentForm(FlaskForm):
     submit = SubmitField('Flag Comment')
 
+class EditCommentForm(FlaskForm):
+    text = TextAreaField('Comment', validators=[DataRequired()])
+    submit = SubmitField('Update Comment')
+
 class SiteSettingsForm(FlaskForm):
     site_title = StringField('Site Title', validators=[DataRequired(), Length(min=1, max=120)])
     # Validated as int in route, StringField is fine here

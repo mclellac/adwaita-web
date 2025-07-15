@@ -39,7 +39,7 @@ class User(UserMixin, db.Model):
     is_approved = db.Column(db.Boolean, default=False, nullable=False)
     is_active = db.Column(db.Boolean, default=False, nullable=False)
     posts = db.relationship(
-        'Post', backref='author', lazy=True, order_by=lambda: desc(Post.created_at) # Use lambda for Post ref
+        'Post', backref='author', lazy='dynamic', order_by=lambda: desc(Post.created_at) # Use lambda for Post ref
     )
     gallery_photos = db.relationship(
         'UserPhoto',
@@ -358,7 +358,7 @@ class UserPhoto(db.Model, PolymorphicLikeMixin):
         backref='user_photo',
         lazy='dynamic',
         order_by=lambda: desc(Comment.created_at),
-        overlaps="comments,post,user_photo"
+        overlaps="comments,post"
     )
     likes = db.relationship('Like',
                             primaryjoin="and_(Like.target_type=='userphoto', foreign(Like.target_id)==UserPhoto.id)",
