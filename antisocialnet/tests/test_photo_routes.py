@@ -211,7 +211,7 @@ def test_add_photo_comment_successful(client, app, logged_in_client, db, create_
     with app.app_context(): # For CSRF and url_for
         from antisocialnet.forms import CommentForm # For CSRF
         form = CommentForm(); token = form.csrf_token.current_token
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+        url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
 
     comment_text = "A brand new photo comment!"
     form_data = {'text': comment_text, 'csrf_token': token}
@@ -237,7 +237,7 @@ def test_add_photo_comment_unauthenticated(client, db, create_test_user):
 
     form_data = {'text': 'Unauth comment', 'csrf_token': 'dummy'} # CSRF won't matter due to @login_required
     with client.application.test_request_context():
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+        url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
     response = client.post(
         url,
         data=form_data,
@@ -254,7 +254,7 @@ def test_add_photo_comment_empty_text(client, app, logged_in_client, db, create_
     with app.app_context(): # For CSRF and url_for
         from antisocialnet.forms import PhotoCommentForm
         form = PhotoCommentForm(); token = form.csrf_token.current_token
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+        url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
 
     form_data = {'text': '', 'csrf_token': token}
     response = logged_in_client.post(
@@ -273,7 +273,7 @@ def test_add_photo_comment_csrf_missing(client, logged_in_client, db, create_tes
     form_data = {'text': 'CSRF missing comment'}
 
     with logged_in_client.application.test_request_context():
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+        url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
     response = logged_in_client.post(
         url,
         data=form_data
@@ -288,7 +288,7 @@ def test_delete_photo_comment_author_self(client, app, logged_in_client, db, cre
     test_photo = create_photo_for_testing(db, photo_owner, caption="Photo for comment deletion.")
 
     commenting_user = User.query.filter_by(username="login_fixture_user@example.com").first() # This is logged_in_client
-        comment_to_delete = Comment(text="My comment to delete", user_id=commenting_user.id, target_id=test_photo.id, target_type='userphoto')
+    comment_to_delete = Comment(text="My comment to delete", user_id=commenting_user.id, target_id=test_photo.id, target_type='userphoto')
     db.session.add(comment_to_delete); db.session.commit()
     comment_id = comment_to_delete.id
     assert Comment.query.get(comment_id) is not None
@@ -309,7 +309,7 @@ def test_delete_photo_comment_photo_owner(client, app, logged_in_client, db, cre
     test_photo = create_photo_for_testing(db, photo_owner, caption="My photo, I delete comments.")
 
     other_commenter = create_test_user(email_address="ocp@example.com", full_name="othercommenter_photo")
-        comment_to_delete = Comment(text="A comment on owner's photo", user_id=other_commenter.id, target_id=test_photo.id, target_type='userphoto')
+    comment_to_delete = Comment(text="A comment on owner's photo", user_id=other_commenter.id, target_id=test_photo.id, target_type='userphoto')
     db.session.add(comment_to_delete); db.session.commit()
     comment_id = comment_to_delete.id
     assert Comment.query.get(comment_id) is not None
@@ -329,7 +329,7 @@ def test_delete_photo_comment_admin(client, app, db, create_test_user):
     uploader = create_test_user(email_address="ufadp@example.com", full_name="uploader_for_admin_del_pc")
     commenter = create_test_user(email_address="cfadp@example.com", full_name="commenter_for_admin_del_pc")
     test_photo = create_photo_for_testing(db, uploader)
-        comment_to_delete = Comment(text="Comment targeted by admin", user_id=commenter.id, target_id=test_photo.id, target_type='userphoto')
+    comment_to_delete = Comment(text="Comment targeted by admin", user_id=commenter.id, target_id=test_photo.id, target_type='userphoto')
     db.session.add(comment_to_delete); db.session.commit()
     comment_id = comment_to_delete.id
 
@@ -359,7 +359,7 @@ def test_delete_photo_comment_unauthorized(client, app, logged_in_client, db, cr
     photo_owner_user = create_test_user(email_address="poud@example.com", full_name="powner_unauth_del")
     comment_author_user = create_test_user(email_address="caud@example.com", full_name="cauthor_unauth_del")
     test_photo = create_photo_for_testing(db, photo_owner_user)
-        comment_on_photo = Comment(text="A comment for unauth delete test", user_id=comment_author_user.id, target_id=test_photo.id, target_type='userphoto')
+    comment_on_photo = Comment(text="A comment for unauth delete test", user_id=comment_author_user.id, target_id=test_photo.id, target_type='userphoto')
     db.session.add(comment_on_photo); db.session.commit()
     comment_id = comment_on_photo.id
 
@@ -378,7 +378,7 @@ def test_delete_photo_comment_csrf_missing(client, app, logged_in_client, db, cr
     """Test CSRF failure for photo comment deletion."""
     commenting_user = User.query.filter_by(username="login_fixture_user@example.com").first()
     test_photo = create_photo_for_testing(db, commenting_user) # User owns photo for simplicity of permission
-        comment = Comment(text="CSRF delete photo comment", user_id=commenting_user.id, target_id=test_photo.id, target_type='userphoto')
+    comment = Comment(text="CSRF delete photo comment", user_id=commenting_user.id, target_id=test_photo.id, target_type='userphoto')
     db.session.add(comment); db.session.commit()
     comment_id = comment.id
 
@@ -397,7 +397,7 @@ def test_delete_photo_owner_successful(client, app, logged_in_client, db):
     photo_id = test_photo.id
 
     # Add a comment to ensure it's deleted too
-        comment = Comment(text="A comment on photo to be deleted", user_id=user.id, target_id=photo_id, target_type='userphoto')
+    comment = Comment(text="A comment on photo to be deleted", user_id=user.id, target_id=photo_id, target_type='userphoto')
     db.session.add(comment)
     db.session.commit()
     assert UserPhoto.query.get(photo_id) is not None
@@ -424,7 +424,7 @@ def test_delete_photo_admin_successful(client, app, db, create_test_user):
     photo_owner = create_test_user(email_address="po_admindel@example.com", full_name="photoowner_for_admin_del")
     test_photo = create_photo_for_testing(db, photo_owner, filename="admin_del_photo.jpg")
     photo_id = test_photo.id
-        comment = Comment(text="Comment on admin-deleted photo", user_id=photo_owner.id, target_id=photo_id, target_type='userphoto')
+    comment = Comment(text="Comment on admin-deleted photo", user_id=photo_owner.id, target_id=photo_id, target_type='userphoto')
     db.session.add(comment)
     db.session.commit()
 
@@ -578,7 +578,7 @@ def test_api_get_photo_comments_unauthorized_private_profile(client, app, db, cr
     private_user = create_test_user(email_address="api_private@example.com", full_name="API Private User", is_profile_public=False)
     test_photo = create_photo_for_testing(db, private_user)
     # Add a comment so there's something to fetch
-        comment = Comment(text="A private comment", user_id=private_user.id, target_id=test_photo.id, target_type='userphoto')
+    comment = Comment(text="A private comment", user_id=private_user.id, target_id=test_photo.id, target_type='userphoto')
     db.session.add(comment)
     db.session.commit()
 
