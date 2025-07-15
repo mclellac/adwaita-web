@@ -1,0 +1,14 @@
+<article class="adw-card blog-post-item-card">
+    <header class="blog-post-card__header">
+        <div class="blog-post-card__meta adw-label caption">
+            Published: <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') }}</time>
+        </div>
+    </header>
+    <div class="adw-card__content styled-text-content">
+        <h3 class="adw-label title-3"><a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-link">{{ post.title }}</a></h3>
+        <p>{{ post.content | truncate(200) }}</p>
+    </div>
+    <footer class="blog-post-card__footer">
+        <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat read-more-link">View Post <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
+    </footer>
+</article>

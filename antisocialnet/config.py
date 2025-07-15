@@ -21,7 +21,7 @@ class Config:
 
     # Database URI
     DB_USER = os.environ.get('POSTGRES_USER', 'postgres')
-    DB_PASS = os.environ.get('POSTGRES_PASSWORD')
+    DB_PASS = os.environ.get('POSTGRES_PASSWORD', 'postgres')
     DB_HOST = os.environ.get('POSTGRES_HOST', 'localhost')
     DB_NAME = os.environ.get('POSTGRES_DB', 'appdb')
 

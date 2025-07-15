@@ -185,9 +185,9 @@ def view_post(post_id):
         current_app.logger.warning(f"Comment form validation failed for post {post_id}. Errors: {form.errors}")
         flash_form_errors_util(form)
 
-    # Fetch comments (top-level only for the main list)
-    comments = post.comments # Uses the relationship defined on Post model
-    current_app.logger.debug(f"Fetched {comments.count()} top-level comments for post {post_id}.")
+    # Fetch top-level comments for the main list. Replies are handled by the template.
+    comments = post.comments.filter_by(parent_id=None).order_by(Comment.created_at.asc()).all()
+    current_app.logger.debug(f"Fetched {len(comments)} top-level comments for post {post_id}.")
 
     related_posts = []
     if post.is_published and post.tags:
@@ -512,35 +512,32 @@ def delete_comment(comment_id): # Renamed
             current_app.logger.warning(f"User '{current_user.full_name}' (ID: {current_user.id}) not authorized to delete comment {comment_id}.")
             abort(403)
         try:
-            # Manually delete flags associated with this comment
-            CommentFlag.query.filter_by(comment_id=comment.id).delete(synchronize_session=False)
-            current_app.logger.debug(f"Deleted flags for comment ID: {comment_id}.")
+            def delete_comment_recursive(comment_to_delete):
+                # Recursively delete replies first
+                for reply in comment_to_delete.replies:
+                    delete_comment_recursive(reply)
 
-            # Manually delete notifications associated with this comment
-            # Also consider notifications where this comment was the target_id and target_type='comment'
-            Notification.query.filter(
-                (Notification.related_comment_id == comment.id) |
-                ((Notification.target_type == 'comment') & (Notification.target_id == comment.id))
-            ).delete(synchronize_session=False)
-            current_app.logger.debug(f"Deleted notifications for comment ID: {comment_id}.")
+                # Now delete the comment and its associated data
+                CommentFlag.query.filter_by(comment_id=comment_to_delete.id).delete(synchronize_session=False)
+                Notification.query.filter(
+                    (Notification.related_comment_id == comment_to_delete.id) |
+                    ((Notification.target_type == 'comment') & (Notification.target_id == comment_to_delete.id))
+                ).delete(synchronize_session=False)
+                Activity.query.filter(
+                    (Activity.target_comment_id == comment_to_delete.id) |
+                    ((Activity.target_type == 'comment') & (Activity.target_id == comment_to_delete.id))
+                ).delete(synchronize_session=False)
+                db.session.delete(comment_to_delete)
 
-            # Manually delete activities associated with this comment
-            # Also consider activities where this comment was the target_id and target_type='comment'
-            Activity.query.filter(
-                (Activity.target_comment_id == comment.id) |
-                ((Activity.target_type == 'comment') & (Activity.target_id == comment.id))
-            ).delete(synchronize_session=False)
-            current_app.logger.debug(f"Deleted activities for comment ID: {comment_id}.")
-
-            db.session.delete(comment)
+            delete_comment_recursive(comment)
             db.session.commit()
-            flash('Comment deleted.', 'toast_success')
-            current_app.logger.info(f"Comment ID: {comment_id} successfully deleted by '{current_user.full_name}' (ID: {current_user.id}).")
+            flash('Comment and all replies deleted.', 'toast_success')
+            current_app.logger.info(f"Comment ID: {comment_id} and its replies successfully deleted by '{current_user.full_name}' (ID: {current_user.id}).")
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error deleting comment ID: {comment_id} by user '{current_user.full_name}' (ID: {current_user.id}): {e}", exc_info=True)
             flash('Error deleting comment. Please try again.', 'danger')
-        return redirect(url_for('post.view_post', post_id=post_id, _anchor=f"post-comments-area")) # Redirect to general comments area
+        return redirect(url_for('post.view_post', post_id=post_id, _anchor=f"post-comments-area"))
     else: # CSRF validation failed or other form error (if any were added)
         current_app.logger.warning(f"Delete comment form validation failed for comment ID: {comment_id}. Errors: {delete_form.errors}")
         flash('Failed to delete comment. Invalid request or session expired.', 'danger')
