@@ -35,9 +35,7 @@ def view_post(post_id):
     post = Post.query.options(
         selectinload(Post.author),
         selectinload(Post.categories),
-        selectinload(Post.tags),
-        selectinload(Post.comments).selectinload(Comment.author), # Load authors for top-level comments
-        selectinload(Post.comments).selectinload(Comment.replies).selectinload(Comment.author) # Load authors for replies
+        selectinload(Post.tags)
     ).get_or_404(post_id)
 
     if not post.is_published:
@@ -172,7 +170,7 @@ def view_post(post_id):
         flash_form_errors_util(form)
 
     # Fetch comments (top-level only for the main list)
-    comments = post.comments.all() # Uses the relationship defined on Post model
+    comments = post.comments # Uses the relationship defined on Post model
     current_app.logger.debug(f"Fetched {len(comments)} top-level comments for post {post_id}.")
 
     related_posts = []
