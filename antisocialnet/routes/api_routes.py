@@ -154,6 +154,59 @@ def get_item_comments(target_type, target_id):
     return jsonify(comments=serialized_comments)
 
 
-from ..api_utils import serialize_post_item, serialize_photo_item, serialize_comment_item
+from ..api_utils import serialize_post_item, serialize_photo_item, serialize_comment_item, serialize_user_profile
+from ..models import User
+
+@api_bp.route('/user/<int:user_id>', methods=['GET'])
+@login_required
+def get_user_details(user_id):
+    """
+    API endpoint to retrieve user profile details.
+    """
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify(status="error", message="User not found."), 404
+
+    # Privacy check
+    if not user.is_profile_public and user.id != current_user.id:
+        return jsonify(status="error", message="This profile is private."), 403
+
+    return jsonify(serialize_user_profile(user))
+
+@api_bp.route('/user/<int:user_id>/posts', methods=['GET'])
+@login_required
+def get_user_posts(user_id):
+    """
+    API endpoint to retrieve a user's posts.
+    """
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify(status="error", message="User not found."), 404
+
+    # Privacy check
+    if not user.is_profile_public and user.id != current_user.id:
+        return jsonify(status="error", message="This profile is private."), 403
+
+    posts = Post.query.filter_by(user_id=user_id, is_published=True).order_by(Post.published_at.desc()).all()
+    serialized_posts = [serialize_post_item(post) for post in posts]
+    return jsonify(posts=serialized_posts)
+
+@api_bp.route('/user/<int:user_id>/photos', methods=['GET'])
+@login_required
+def get_user_photos(user_id):
+    """
+    API endpoint to retrieve a user's photos.
+    """
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify(status="error", message="User not found."), 404
+
+    # Privacy check
+    if not user.is_profile_public and user.id != current_user.id:
+        return jsonify(status="error", message="This profile is private."), 403
+
+    photos = UserPhoto.query.filter_by(user_id=user_id).order_by(UserPhoto.uploaded_at.desc()).all()
+    serialized_photos = [serialize_photo_item(photo) for photo in photos]
+    return jsonify(photos=serialized_photos)
 
 # Add other API routes here in the future

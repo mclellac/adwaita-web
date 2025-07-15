@@ -89,3 +89,27 @@ def serialize_comment_item(comment):
             "target_id": comment.target_id
         }
     }
+
+def serialize_user_profile(user):
+    """
+    Serializes a user's public profile information.
+    """
+    profile_photo_url = None
+    if user.profile_photo_url:
+        profile_photo_url = url_for('static', filename=user.profile_photo_url, _external=True)
+    else:
+        profile_photo_url = url_for('static', filename='img/default_avatar.png', _external=True)
+
+    return {
+        "id": user.id,
+        "username": user.username,
+        "full_name": user.full_name,
+        "profile_photo_url": profile_photo_url,
+        "profile_info": user.profile_info,
+        "website_url": user.website_url,
+        "is_profile_public": user.is_profile_public,
+        "follower_count": user.followers.count(),
+        "following_count": user.followed.count(),
+        "post_count": user.posts.filter_by(is_published=True).count(),
+        "photo_count": user.gallery_photos.count()
+    }
