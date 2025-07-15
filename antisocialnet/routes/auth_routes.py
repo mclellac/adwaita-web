@@ -23,11 +23,7 @@ def register():
         flash('User registration is currently disabled.', 'info')
         return redirect(url_for('auth.login'))
 
-    form = RegistrationForm(request.form)
-    if request.method == 'POST':
-        # Email is core to registration, so logging it here is acceptable for tracking attempts.
-        current_app.logger.debug(f"Registration form submitted. Email: '{form.email.data}' for Full Name: '{form.full_name.data}'")
-
+    form = RegistrationForm()
     if form.validate_on_submit():
         existing_user = User.query.filter_by(username=form.email.data).first()
         if existing_user:
