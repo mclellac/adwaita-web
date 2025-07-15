@@ -65,7 +65,7 @@
     </div>
     <div class="adw-header-bar__center adw-header-bar-center-box"> {# Added adw-header-bar-center-box class #}
         <h1 class="adw-header-bar__title">
-            {% block header_title %}{{ site_settings.get('site_title', 'Social Demo') }}{% endblock %}
+            {{ site_settings.get('site_title', 'Social Demo') }}
         </h1>
     </div>
     <div class="adw-header-bar__end">
@@ -181,21 +181,6 @@
                     <span class="adw-action-row-icon icon-apps-dashboard-symbolic"></span> {# Or a more generic icon #}
                     <span class="adw-action-row-title">Dashboard</span>
                 </a>
-            {% if current_user.is_admin %}
-                <a href="{{ url_for('admin.view_flags') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'admin.view_flags' }}">
-                    <span class="adw-action-row-icon icon-status-flag-symbolic"></span>
-                    <span class="adw-action-row-title">Review Flags</span>
-                </a>
-                <a href="{{ url_for('admin.site_settings') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'admin.site_settings' }}">
-                    <span class="adw-action-row-icon icon-actions-document-properties-symbolic"></span>
-                    <span class="adw-action-row-title">Site Settings</span>
-                </a>
-                <a href="{{ url_for('admin.pending_users') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'admin.pending_users' }}">
-                    <span class="adw-action-row-icon icon-community-users-symbolic"></span> {# Or similar relevant icon #}
-                    <span class="adw-action-row-title">Pending Users</span>
-                    {# Optionally, add a badge for count of pending users if available in context #}
-                </a>
-            {% endif %}
             {% endif %}
             {% endblock sidebar_nav %}
         </nav>
@@ -242,6 +227,7 @@
             {% endwith %}
 
             <main class="adw-clamp main-content"> {# Use adw-clamp for content width control #}
+                <h1 class="adw-title-1">{% block header_title %}{% endblock %}</h1>
                 {% block content %}{% endblock %}
             </main>
         </div>

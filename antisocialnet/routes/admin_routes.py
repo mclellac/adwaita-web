@@ -94,6 +94,10 @@ def site_settings():
             except ValueError:
                 flash("Posts per page must be a number.", "danger")
             SiteSetting.set('allow_registrations', form.allow_registrations.data, 'bool')
+            current_app.config.update(
+                POSTS_PER_PAGE=SiteSetting.get('posts_per_page', 10),
+                SITE_TITLE=SiteSetting.get('site_title', 'Adwaita Social Demo')
+            )
             flash('Site settings updated successfully.', 'toast_success')
             current_app.logger.info(f"Site settings updated by admin {current_user.username}.")
             return redirect(url_for('admin.site_settings'))
