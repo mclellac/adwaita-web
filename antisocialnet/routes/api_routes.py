@@ -148,7 +148,7 @@ def get_item_comments(target_type, target_id):
     if hasattr(item, 'user') and hasattr(item.user, 'is_profile_public') and not item.user.is_profile_public and item.user_id != current_user.id and not current_user.is_admin:
             return jsonify(status="error", message="Forbidden to view comments for this item."), 403
 
-    comments = item.comments.order_by(Comment.created_at.desc()).all()
+    comments = sorted(item.comments, key=lambda c: c.created_at, reverse=True)
     serialized_comments = [serialize_comment_item(comment) for comment in comments]
 
     return jsonify(comments=serialized_comments)
