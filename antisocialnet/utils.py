@@ -131,13 +131,9 @@ def markdown_to_html_and_sanitize_util(text):
         return ''
     text = str(text)
 
-    # First, escape any raw HTML in the input text to prevent it from being processed as HTML by markdown
-    # and to ensure it's treated as literal text.
-    text_escaped = escape(text)
-
     # Convert markdown to HTML
     # Using extensions like 'fenced_code' for code blocks, 'tables' for tables
-    html_content = md_lib.markdown(text_escaped, extensions=['fenced_code', 'tables', 'extra'])
+    html_content = md_lib.markdown(text, extensions=['fenced_code', 'tables', 'extra'])
 
     # Old comments regarding basic sanitization or bleach not being assumed have been removed,
     # as bleach is now actively used.

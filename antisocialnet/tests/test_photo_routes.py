@@ -211,7 +211,7 @@ def test_add_photo_comment_successful(client, app, logged_in_client, db, create_
     with app.app_context(): # For CSRF and url_for
         from antisocialnet.forms import CommentForm # For CSRF
         form = CommentForm(); token = form.csrf_token.current_token
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+        url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
 
     comment_text = "A brand new photo comment!"
     form_data = {'text': comment_text, 'csrf_token': token}
@@ -237,7 +237,7 @@ def test_add_photo_comment_unauthenticated(client, db, create_test_user):
 
     form_data = {'text': 'Unauth comment', 'csrf_token': 'dummy'} # CSRF won't matter due to @login_required
     with client.application.test_request_context():
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+        url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
     response = client.post(
         url,
         data=form_data,
@@ -254,7 +254,7 @@ def test_add_photo_comment_empty_text(client, app, logged_in_client, db, create_
     with app.app_context(): # For CSRF and url_for
         from antisocialnet.forms import PhotoCommentForm
         form = PhotoCommentForm(); token = form.csrf_token.current_token
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+        url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
 
     form_data = {'text': '', 'csrf_token': token}
     response = logged_in_client.post(
@@ -273,7 +273,7 @@ def test_add_photo_comment_csrf_missing(client, logged_in_client, db, create_tes
     form_data = {'text': 'CSRF missing comment'}
 
     with logged_in_client.application.test_request_context():
-        url = url_for('photo.handle_photo_comment', photo_id=test_photo.id)
+        url = url_for('photo.post_photo_comment', photo_id=test_photo.id)
     response = logged_in_client.post(
         url,
         data=form_data

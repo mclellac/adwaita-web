@@ -34,8 +34,14 @@
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> started following you.
                         {% elif notification.type == 'new_like' and actor and notification.target_type == 'post' and target %}
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> liked your post: <a href="{{ url_for('post.view_post', post_id=target.id) }}" class="adw-link">"{{ target.content | striptags | truncate(50) }}"</a>.
-                        {% elif notification.type == 'new_comment' and actor and notification.target_type == 'post' and target %}
-                            <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> commented on your post: <a href="{{ url_for('post.view_post', post_id=target.id) }}" class="adw-link">"{{ target.content | striptags | truncate(50) }}"</a>.
+                        {% elif notification.type == 'new_comment' and actor and notification.target_type == 'comment' and target %}
+                            {% set commented_post = target.post %} {# Comment object should have a .post relationship #}
+                            <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> commented on your post
+                            {% if commented_post %}
+                                "<a href="{{ url_for('post.view_post', post_id=commented_post.id, _anchor='comment-' ~ target.id) }}" class="adw-link">{{ commented_post.content | striptags | truncate(30) }}</a>".
+                            {% else %}
+                                (on a deleted post).
+                            {% endif %}
                         {% elif notification.type == 'mention_in_post' and actor and notification.target_type == 'post' and target %}
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> mentioned you in the post: <a href="{{ url_for('post.view_post', post_id=target.id) }}" class="adw-link">"{{ target.content | striptags | truncate(50) }}"</a>.
                         {% elif notification.type == 'mention_in_comment' and actor and notification.target_type == 'comment' and target %}
@@ -49,7 +55,7 @@
                         {% elif notification.type == 'photo_like' and actor and notification.target_type == 'photo' and target %}
                             {# target is a UserPhoto object #}
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> liked your photo:
-                            <a href="{{ url_for('photo.view_photo_detail', photo_id=target.id) }}" class="adw-link">
+                            <a href="{{ url_for('profile.view_gallery', user_id=target.user.id, _anchor='photo-' ~ target.id) }}" class="adw-link">
                                 <img src="{{ url_for('static', filename=target.image_filename) if target.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
                                 {{ target.caption | truncate(30) if target.caption else "Photo" }}
                             </a>.
@@ -58,7 +64,7 @@
                             {% set commented_photo = target.photo %}
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> commented on your photo
                             {% if commented_photo %}
-                            <a href="{{ url_for('photo.view_photo_detail', photo_id=commented_photo.id) }}" class="adw-link">
+                            <a href="{{ url_for('profile.view_gallery', user_id=commented_photo.user.id, _anchor='photo-' ~ commented_photo.id) }}" class="adw-link">
                                  <img src="{{ url_for('static', filename=commented_photo.image_filename) if commented_photo.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
                             </a>
                             {% endif %}
@@ -69,34 +75,34 @@
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a>
                              mentioned you in a comment on
                             {% if mentioned_in_photo %}
-                            photo <a href="{{ url_for('photo.view_photo_detail', photo_id=mentioned_in_photo.id) }}" class="adw-link">
+                            photo <a href="{{ url_for('profile.view_gallery', user_id=mentioned_in_photo.user.id, _anchor='photo-' ~ mentioned_in_photo.id) }}" class="adw-link">
                                  <img src="{{ url_for('static', filename=mentioned_in_photo.image_filename) if mentioned_in_photo.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
                             </a>.
                             {% else %}
                             a photo comment (photo details unavailable).
                             {% endif %}
                         {% elif notification.type == 'new_post_by_followed_user' and actor and notification.target_type == 'post' and target %}
-                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> created a new post: <a href="{{ url_for('post.view_post', post_id=target.id) }}" class="adw-link">"{{ target.content | striptags | truncate(50) }}"</a>.
+                            <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> created a new post: <a href="{{ url_for('post.view_post', post_id=target.id) }}" class="adw-link">"{{ target.content | striptags | truncate(50) }}"</a>.
                         {% elif notification.type == 'new_comment_by_followed_user' and actor and notification.target_type == 'comment' and target %}
                             {% set commented_post = target.post %} {# Comment object should have a .post relationship #}
-                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> commented on a post
+                            <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> commented on a post
                             {% if commented_post %}
                                 "<a href="{{ url_for('post.view_post', post_id=commented_post.id, _anchor='comment-' ~ target.id) }}" class="adw-link">{{ commented_post.content | striptags | truncate(30) }}</a>".
                             {% else %}
                                 (on a deleted post).
                             {% endif %}
                         {% elif notification.type == 'new_photo_by_followed_user' and actor and notification.target_type == 'userphoto' and target %}
-                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> uploaded a new photo:
-                            <a href="{{ url_for('profile.view_gallery', username=target.user.username, _anchor='photo-' ~ target.id) }}" class="adw-link">
+                            <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> uploaded a new photo:
+                            <a href="{{ url_for('profile.view_gallery', user_id=target.user.id, _anchor='photo-' ~ target.id) }}" class="adw-link">
                                 <img src="{{ url_for('static', filename=target.image_filename) if target.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
                                 {{ target.caption | truncate(30) if target.caption else "Photo" }}
                             </a>.
                         {% elif notification.type == 'pending_user_approval' and target and notification.target_type == 'user' %}
-                            A new user is awaiting approval: <a href="{{ url_for('profile.view_profile', username=target.username) }}" class="adw-link">{{ target.full_name or target.username }}</a>.
+                            A new user is awaiting approval: <a href="{{ url_for('profile.view_profile', user_id=target.id) }}" class="adw-link">{{ target.full_name or target.username }}</a>.
                         {% elif notification.type == 'user_approved' and actor and target and notification.target_type == 'user' %}
-                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> approved a new user: <a href="{{ url_for('profile.view_profile', username=target.username) }}" class="adw-link">{{ target.full_name or target.username }}</a>.
+                            <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> approved a new user: <a href="{{ url_for('profile.view_profile', user_id=target.id) }}" class="adw-link">{{ target.full_name or target.username }}</a>.
                         {% elif notification.type == 'site_setting_changed' and actor %}
-                            <a href="{{ url_for('profile.view_profile', username=actor.username) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> changed the site settings.
+                            <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> changed the site settings.
                         {% else %}
                             {{ notification.type | replace('_', ' ') | title }}.
                             {% if actor %}Action by <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a>.{% endif %}

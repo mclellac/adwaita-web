@@ -358,7 +358,7 @@ class UserPhoto(db.Model, PolymorphicLikeMixin):
         backref='user_photo',
         lazy='dynamic',
         order_by=lambda: desc(Comment.created_at),
-        overlaps="comments,post"
+        overlaps="comments,post,user_photo"
     )
     likes = db.relationship('Like',
                             primaryjoin="and_(Like.target_type=='userphoto', foreign(Like.target_id)==UserPhoto.id)",

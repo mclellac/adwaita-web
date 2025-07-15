@@ -15,6 +15,16 @@
         <adw-spinner size="l" active></adw-spinner>
         <h3 class="adw-status-page-title">Loading...</h3>
     </div>
+    <div id="comment-form-container" class="comment-form-section">
+        <h2 class="adw-title-2">Leave a Comment</h2>
+        <form id="comment-form" method="POST" action="{{ url_for('post.view_post', post_id=post.id) }}">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.text(class="adw-textarea", rows="4") }}
+            </div>
+            <button type="submit" class="adw-button suggested-action">Submit</button>
+        </form>
+    </div>
 </div>
 
 <script>
