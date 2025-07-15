@@ -1,0 +1,36 @@
+<div class="comment-item" id="comment-{{ comment.id }}">
+    <header class="comment-header adw-box adw-box-spacing-s comment-header-box">
+        <span class="adw-avatar size-medium">
+           <img src="{{ url_for('static', filename=comment.author.profile_photo_url) if comment.author.profile_photo_url else url_for('static', filename='img/default_avatar.png') }}" alt="{{ comment.author.full_name }} avatar" class="adw-avatar__image">
+        </span>
+        <div class="comment-author-meta">
+             <a href="{{ url_for('profile.view_profile', user_id=comment.author.id) }}" class="adw-link comment-author-link-strong">{{ comment.author.full_name }}</a>
+            <small class="adw-label caption comment-timestamp"><time datetime="{{ comment.created_at.isoformat() }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</time></small>
+        </div>
+    </header>
+    <div class="comment-text styled-text-content">{{ comment.text_html | safe }}</div>
+    <div class="comment-actions adw-box adw-box-horizontal adw-box-spacing-s align-center">
+        <button class="adw-button flat circular reply-button" data-comment-id="{{ comment.id }}" data-username="{{ comment.author.username }}">
+            <span class="adw-icon icon-actions-mail-reply-sender-symbolic"></span>
+        </button>
+        {% if current_user == comment.author or current_user.is_admin %}
+        <a href="{{ url_for('post.edit_comment', comment_id=comment.id) }}" class="adw-button flat circular edit-comment-button" data-comment-id="{{ comment.id }}">
+            <span class="adw-icon icon-actions-document-edit-symbolic"></span>
+        </a>
+        <form action="{{ url_for('post.delete_comment', comment_id=comment.id) }}" method="post" style="display: inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="adw-button flat circular" onclick="return confirm('Are you sure you want to delete this comment?');">
+                <span class="adw-icon icon-actions-edit-delete-symbolic"></span>
+            </button>
+        </form>
+        {% endif %}
+        <adw-like-button item-id="{{ comment.id }}" item-type="comment" initial-liked="{{ current_user.has_liked_item('comment', comment.id) }}" initial-like-count="{{ comment.likes.count() }}"></adw-like-button>
+    </div>
+    <div class="reply-form-container" id="reply-form-container-{{ comment.id }}" style="display: none; margin-top: 10px;"></div>
+
+    <div class="comment-replies">
+        {% for reply in comment.replies | sort(attribute='created_at') %}
+            {% include '_comment.html' with context %}
+        {% endfor %}
+    </div>
+</div>

@@ -1,169 +1,130 @@
 {% extends "base.html" %}
 
-{% block title %}Profile{% endblock %}
+{% block title %}Profile of {{ user_profile.full_name }}{% endblock %}
 
 {% block header_title %}Profile{% endblock %}
 
 {% block content %}
 <div class="adw-clamp adw-clamp-xl">
-    <div id="profile-container"></div>
-    <div id="posts-container"></div>
-    <div id="photos-container"></div>
-    <div id="loading-indicator" class="adw-status-page">
-        <adw-spinner size="l" active></adw-spinner>
-        <h3 class="adw-status-page-title">Loading...</h3>
+    <div class="profile-header adw-box adw-box-spacing-xl align-center">
+        <div class="adw-avatar size-huge">
+            <img src="{{ url_for('static', filename=user_profile.profile_photo_url) if user_profile.profile_photo_url else url_for('static', filename='img/default_avatar.png') }}" alt="{{ user_profile.full_name }} avatar">
+        </div>
+        <div class="adw-box adw-box-vertical adw-box-spacing-xs">
+            <h1 class="adw-label title-1">{{ user_profile.full_name }}</h1>
+            <div><span class="adw-label adw-caption">@{{ user_profile.username }}</span></div>
+            <div class="adw-box adw-box-horizontal adw-box-spacing-s profile-follow-stats">
+                <a href="{{ url_for('profile.followers_list', user_id=user_profile.id) }}" class="adw-link">
+                    <span class="adw-label body-2"><strong>{{ user_profile.followers.count() }}</strong> Followers</span>
+                </a>
+                <a href="{{ url_for('profile.following_list', user_id=user_profile.id) }}" class="adw-link">
+                    <span class="adw-label body-2"><strong>{{ user_profile.followed.count() }}</strong> Following</span>
+                </a>
+            </div>
+            {% if current_user != user_profile %}
+                <div class="profile-follow-actions">
+                    {% if current_user.is_following(user_profile) %}
+                        <form action="{{ url_for('profile.unfollow_user', user_id=user_profile.id) }}" method="POST">
+                            <button type="submit" class="adw-button">Unfollow</button>
+                        </form>
+                    {% else %}
+                        <form action="{{ url_for('profile.follow_user', user_id=user_profile.id) }}" method="POST">
+                            <button type="submit" class="adw-button suggested-action">Follow</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="profile-edit-actions">
+                    <a href="{{ url_for('profile.edit_profile') }}" class="adw-button">Edit Profile</a>
+                </div>
+            {% endif %}
+        </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const profileContainer = document.getElementById('profile-container');
-        const postsContainer = document.getElementById('posts-container');
-        const photosContainer = document.getElementById('photos-container');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        let pathParts = window.location.pathname.split('/');
-        const userId = pathParts.pop() || pathParts.pop(); // Handles trailing slash
-
-        async function fetchProfileData() {
-            loadingIndicator.style.display = 'block';
-            profileContainer.innerHTML = '';
-            postsContainer.innerHTML = '';
-            photosContainer.innerHTML = '';
-
-            try {
-                // Fetch user data, posts, and photos in parallel
-                const [userResponse, postsResponse, photosResponse] = await Promise.all([
-                    fetch(`/api/v1/user/${userId}`),
-                    fetch(`/api/v1/user/${userId}/posts`),
-                    fetch(`/api/v1/user/${userId}/photos`)
-                ]);
-
-                if (!userResponse.ok) throw new Error('Failed to fetch user data');
-                const userData = await userResponse.json();
-                renderProfile(userData);
-
-                if (!postsResponse.ok) throw new Error('Failed to fetch posts');
-                const postsData = await postsResponse.json();
-                renderPosts(postsData.posts);
-
-                if (!photosResponse.ok) throw new Error('Failed to fetch photos');
-                const photosData = await photosResponse.json();
-                renderPhotos(photosData.photos);
-
-            } catch (error) {
-                console.error('Error fetching profile data:', error);
-                profileContainer.innerHTML = '<p>Error loading profile. Please try again later.</p>';
-            } finally {
-                loadingIndicator.style.display = 'none';
-            }
-        }
-
-        function renderProfile(user) {
-            const profileHeader = `
-                <div class="adw-box adw-box-spacing-xl align-center">
-                    <div class="adw-avatar size-huge">
-                        <img src="${user.profile_photo_url}" alt="${user.full_name} avatar">
-                    </div>
-                    <div class="adw-box adw-box-vertical adw-box-spacing-xs">
-                        <h1 class="adw-label title-1">${user.full_name}</h1>
-                        <div><span class="adw-label adw-caption">@${user.full_name}</span></div>
-                        <div class="adw-box adw-box-horizontal adw-box-spacing-s profile-follow-stats">
-                            <a href="/user/${user.id}/followers" class="adw-link">
-                                <span class="adw-label body-2"><strong>${user.followers_count}</strong> Followers</span>
-                            </a>
-                            <a href="/user/${user.id}/following" class="adw-link">
-                                <span class="adw-label body-2"><strong>${user.following_count}</strong> Following</span>
-                            </a>
-                        </div>
+    <div class="adw-preferences-group" role="group">
+        <div class="adw-preferences-group__title-container">
+            <h2 class="adw-preferences-group__title title-2">About {{ user_profile.full_name }}</h2>
+        </div>
+        <div class="adw-list-box">
+            {% if user_profile.profile_info %}
+            <div class="adw-expander-row profile-bio-expander">
+                <div class="adw-action-row activatable" role="button" tabindex="0" aria-expanded="false">
+                    <span class="adw-action-row-text-content">
+                        <span class="adw-action-row-title">Biography</span>
+                    </span>
+                    <span class="adw-expander-row-icon"></span>
+                </div>
+                <div class="adw-expander-row-content" style="padding: var(--spacing-s) var(--spacing-m);">
+                    <div class="styled-text-content">
+                         {{ user_profile.profile_info|safe }}
                     </div>
                 </div>
-                <div class="adw-preferences-group" role="group">
-                    <div class="adw-preferences-group__title-container">
-                        <h2 class="adw-preferences-group__title title-2">About ${user.full_name}</h2>
-                    </div>
-                    <div class="adw-list-box">
-                        ${user.profile_info ? `
-                        <div class="adw-expander-row profile-bio-expander">
-                            <div class="adw-action-row activatable" role="button" tabindex="0" aria-expanded="false">
-                                <span class="adw-action-row-text-content">
-                                    <span class="adw-action-row-title">Biography</span>
-                                </span>
-                                <span class="adw-expander-row-icon"></span>
-                            </div>
-                            <div class="adw-expander-row-content" style="padding: var(--spacing-s) var(--spacing-m);">
-                                <div class="styled-text-content">
-                                     ${user.profile_info}
-                                </div>
-                            </div>
-                        </div>
-                        ` : ''}
-                        ${user.website_url ? `
-                        <a href="${user.website_url}" target="_blank" class="adw-action-row activatable">
-                            <span class="adw-action-row__title">Website</span>
-                            <span class="adw-action-row__subtitle">${user.website_url}</span>
-                            <span class="adw-action-row__chevron"></span>
-                        </a>
-                        ` : ''}
-                    </div>
+            </div>
+            {% endif %}
+            {% if user_profile.website_url %}
+            <a href="{{ user_profile.website_url }}" target="_blank" class="adw-action-row activatable">
+                <span class="adw-action-row__title">Website</span>
+                <span class="adw-action-row__subtitle">{{ user_profile.website_url }}</span>
+                <span class="adw-action-row__chevron"></span>
+            </a>
+            {% endif %}
+             {% if user_profile.city and user_profile.country %}
+                <div class="adw-action-row">
+                    <span class="adw-action-row__title">Location</span>
+                    <span class="adw-action-row__subtitle">{{ user_profile.city }}, {{ user_profile.country }}</span>
                 </div>
-            `;
-            profileContainer.innerHTML = profileHeader;
-        }
+            {% endif %}
+            {% if calculated_age %}
+                 <div class="adw-action-row">
+                    <span class="adw-action-row__title">Age</span>
+                    <span class="adw-action-row__subtitle">{{ calculated_age }}</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 
-        function renderPosts(posts) {
-            if (posts.length === 0) {
-                postsContainer.innerHTML = '<div class="adw-status-page"><h3 class="adw-status-page-title">No Posts Yet</h3></div>';
-                return;
-            }
+    <div class="adw-preferences-group" role="group">
+        <h2 class="adw-preferences-group__title title-2">Posts</h2>
+        <div class="blog-posts-container">
+            {% if posts_pagination and posts_pagination.items %}
+                {% for post in posts_pagination.items %}
+                    {% include '_post_summary.html' %}
+                {% endfor %}
+            {% else %}
+                <div class="adw-status-page"><h3 class="adw-status-page-title">No Posts Yet</h3></div>
+            {% endif %}
+        </div>
+        {% if posts_pagination and posts_pagination.pages > 1 %}
+        <div class="pagination">
+            {% if posts_pagination.has_prev %}
+                <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=posts_pagination.prev_num) }}" class="adw-button">Previous</a>
+            {% endif %}
+            {% if posts_pagination.has_next %}
+                <a href="{{ url_for('profile.view_profile', user_id=user_profile.id, page=posts_pagination.next_num) }}" class="adw-button">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
 
-            let postsHtml = '<div class="adw-preferences-group" role="group"><h2 class="adw-preferences-group__title title-2">Posts</h2><div class="blog-posts-container">';
-            posts.forEach(post => {
-                postsHtml += `
-                    <article class="adw-card blog-post-item-card">
-                        <header class="blog-post-card__header">
-                            <div class="blog-post-card__meta adw-label caption">
-                                Published: <time datetime="${post.timestamp}">${new Date(post.timestamp).toLocaleString()}</time>
-                            </div>
-                        </header>
-                        <div class="adw-card__content styled-text-content">
-                            ${post.data.content_html_preview}
-                        </div>
-                        <footer class="blog-post-card__footer">
-                            <a href="${post.data.url}" class="adw-button flat read-more-link">View Post <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
-                        </footer>
-                        <div class="adw-card__actions card-secondary-actions">
-                            <adw-like-button item-id="${post.data.post_id}" item-type="post" initial-liked="${post.data.is_liked_by_current_user}" initial-like-count="${post.data.like_count}"></adw-like-button>
-                        </div>
-                    </article>
-                `;
-            });
-            postsHtml += '</div></div>';
-            postsContainer.innerHTML = postsHtml;
-        }
-
-        function renderPhotos(photos) {
-            if (photos.length === 0) {
-                photosContainer.innerHTML = '<div class="adw-status-page"><h3 class="adw-status-page-title">No Photos Yet</h3></div>';
-                return;
-            }
-
-            let photosHtml = '<div class="adw-preferences-group" role="group"><h2 class="adw-preferences-group__title title-2">Photos</h2><div class="profile-gallery-grid">';
-            photos.forEach(photo => {
-                photosHtml += `
+    <div class="adw-preferences-group" role="group">
+        <h2 class="adw-preferences-group__title title-2">Photos</h2>
+        <div class="profile-gallery-grid">
+            {% if user_profile.gallery_photos.count() > 0 %}
+                 {% for photo in user_profile.gallery_photos.limit(6) %}
                     <div class="adw-card gallery-photo-card">
-                        <img src="${photo.data.image_url_large}" alt="${photo.data.caption_html || 'Gallery image'}" class="gallery-photo-image">
-                        <div class="adw-card__content gallery-photo-caption-and-likes">
-                            ${photo.data.caption_html ? `<p class="adw-label body-2">${photo.data.caption_html}</p>` : ''}
-                            <adw-like-button item-id="${photo.data.photo_id}" item-type="userphoto" initial-liked="${photo.data.is_liked_by_current_user}" initial-like-count="${photo.data.like_count}"></adw-like-button>
-                        </div>
+                        <img src="{{ url_for('static', filename=photo.image_filename) }}" alt="{{ photo.caption or 'Gallery image' }}" class="gallery-photo-image">
                     </div>
-                `;
-            });
-            photosHtml += '</div></div>';
-            photosContainer.innerHTML = photosHtml;
-        }
+                {% endfor %}
+            {% else %}
+                <div class="adw-status-page"><h3 class="adw-status-page-title">No Photos Yet</h3></div>
+            {% endif %}
+        </div>
+         {% if user_profile.gallery_photos.count() > 0 %}
+            <div class="view-full-gallery-action">
+                <a href="{{ url_for('profile.view_gallery', user_id=user_profile.id) }}" class="adw-button">View Full Gallery</a>
+            </div>
+        {% endif %}
+    </div>
 
-        fetchProfileData();
-    });
-</script>
+</div>
 {% endblock %}
