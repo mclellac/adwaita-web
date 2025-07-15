@@ -55,7 +55,7 @@
                         {% elif notification.type == 'photo_like' and actor and notification.target_type == 'photo' and target %}
                             {# target is a UserPhoto object #}
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> liked your photo:
-                            <a href="{{ url_for('profile.view_gallery', user_id=target.user.id, _anchor='photo-' ~ target.id) }}" class="adw-link">
+                            <a href="{{ url_for('profile.view_gallery', user_id=target.user.id) }}" class="adw-link">
                                 <img src="{{ url_for('static', filename=target.image_filename) if target.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
                                 {{ target.caption | truncate(30) if target.caption else "Photo" }}
                             </a>.
@@ -64,7 +64,7 @@
                             {% set commented_photo = target.photo %}
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> commented on your photo
                             {% if commented_photo %}
-                            <a href="{{ url_for('profile.view_gallery', user_id=commented_photo.user.id, _anchor='photo-' ~ commented_photo.id) }}" class="adw-link">
+                            <a href="{{ url_for('profile.view_gallery', user_id=commented_photo.user.id) }}" class="adw-link">
                                  <img src="{{ url_for('static', filename=commented_photo.image_filename) if commented_photo.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
                             </a>
                             {% endif %}
@@ -75,7 +75,7 @@
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a>
                              mentioned you in a comment on
                             {% if mentioned_in_photo %}
-                            photo <a href="{{ url_for('profile.view_gallery', user_id=mentioned_in_photo.user.id, _anchor='photo-' ~ mentioned_in_photo.id) }}" class="adw-link">
+                            photo <a href="{{ url_for('profile.view_gallery', user_id=mentioned_in_photo.user.id) }}" class="adw-link">
                                  <img src="{{ url_for('static', filename=mentioned_in_photo.image_filename) if mentioned_in_photo.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
                             </a>.
                             {% else %}
@@ -93,7 +93,7 @@
                             {% endif %}
                         {% elif notification.type == 'new_photo_by_followed_user' and actor and notification.target_type == 'userphoto' and target %}
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> uploaded a new photo:
-                            <a href="{{ url_for('profile.view_gallery', user_id=target.user.id, _anchor='photo-' ~ target.id) }}" class="adw-link">
+                            <a href="{{ url_for('profile.view_gallery', user_id=target.user.id) }}" class="adw-link">
                                 <img src="{{ url_for('static', filename=target.image_filename) if target.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
                                 {{ target.caption | truncate(30) if target.caption else "Photo" }}
                             </a>.
