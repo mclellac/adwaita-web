@@ -530,7 +530,7 @@ def test_delete_comment_author_self(client, app, logged_in_client, create_test_p
     """Author deletes their own comment."""
     user = User.query.filter_by(username="login_fixture_user@example.com").first()
     test_post = create_test_post(author=user, content="Post for comment deletion by author.")
-    comment_to_delete = Comment(text="Comment by author", user_id=user.id, post_id=test_post.id)
+    comment_to_delete = Comment(text="Comment by author", user_id=user.id, target_id=test_post.id, target_type='post')
     db.session.add(comment_to_delete)
     db.session.commit()
     comment_id = comment_to_delete.id
@@ -551,7 +551,7 @@ def test_delete_comment_post_author_deletes_other(client, app, logged_in_client,
     test_post = create_test_post(author=post_author, content="Post for comment deletion by post author.")
 
     commenter = create_test_user(email_address="cv@example.com", full_name="commenter_victim")
-    comment_to_delete = Comment(text="Comment by other user", user_id=commenter.id, post_id=test_post.id)
+    comment_to_delete = Comment(text="Comment by other user", user_id=commenter.id, target_id=test_post.id, target_type='post')
     db.session.add(comment_to_delete)
     db.session.commit()
     comment_id = comment_to_delete.id
@@ -570,7 +570,7 @@ def test_delete_comment_admin_deletes_any(client, app, db, create_test_user, cre
     """Admin deletes any comment."""
     comment_author = create_test_user(email_address="cadmin@example.com", full_name="comment_author_admin_del")
     post_for_comment = create_test_post(author=comment_author, content="Post for admin comment deletion test.")
-    comment_to_delete = Comment(text="A comment to be admin-deleted", user_id=comment_author.id, post_id=post_for_comment.id)
+    comment_to_delete = Comment(text="A comment to be admin-deleted", user_id=comment_author.id, target_id=post_for_comment.id, target_type='post')
     db.session.add(comment_to_delete)
     db.session.commit()
     comment_id = comment_to_delete.id
@@ -606,7 +606,7 @@ def test_delete_comment_unauthorized(client, app, logged_in_client, create_test_
     post_owner = create_test_user(email_address="dpo@example.com", full_name="del_post_owner")
     comment_owner = create_test_user(email_address="dco@example.com", full_name="del_comment_owner")
     test_post = create_test_post(author=post_owner, content="Post for unauthorized comment delete test.")
-    comment_on_post = Comment(text="A comment", user_id=comment_owner.id, post_id=test_post.id)
+    comment_on_post = Comment(text="A comment", user_id=comment_owner.id, target_id=test_post.id, target_type='post')
     db.session.add(comment_on_post)
     db.session.commit()
     comment_id = comment_on_post.id
@@ -626,8 +626,8 @@ def test_delete_comment_csrf_failure(client, app, logged_in_client, create_test_
     user = User.query.filter_by(username="login_fixture_user@example.com").first()
     test_post = create_test_post(author=user, content="Post for CSRF comment delete.")
         test_comment = Comment(text="CSRF like comment", user_id=comment_author.id, target_id=test_post.id, target_type='post')
-    db.session.add(comment); db.session.commit()
-    comment_id = comment.id
+     db.session.add(test_comment); db.session.commit()
+     comment_id = test_comment.id
 
     with logged_in_client.application.test_request_context(): # For url_for
         url = url_for('post.delete_comment', comment_id=comment_id)
@@ -644,7 +644,7 @@ def test_flag_comment_successful(client, app, logged_in_client, create_test_post
     post_owner = create_test_user(email_address="fpo@example.com", full_name="flag_post_owner")
     comment_author = create_test_user(email_address="fca@example.com", full_name="flag_comment_author")
     test_post = create_test_post(author=post_owner, content="Post for comment flagging.")
-    comment_to_flag = Comment(text="This comment will be flagged.", user_id=comment_author.id, post_id=test_post.id)
+    comment_to_flag = Comment(text="This comment will be flagged.", user_id=comment_author.id, target_id=test_post.id, target_type='post')
     db.session.add(comment_to_flag); db.session.commit()
     comment_id = comment_to_flag.id
 
@@ -669,7 +669,7 @@ def test_flag_comment_own_comment_fails(client, app, logged_in_client, create_te
     """User cannot flag their own comment."""
     user = User.query.filter_by(username="login_fixture_user@example.com").first()
     test_post = create_test_post(author=user, content="Post for self-flag test.")
-    own_comment = Comment(text="My own comment, can't flag.", user_id=user.id, post_id=test_post.id)
+    own_comment = Comment(text="My own comment, can't flag.", user_id=user.id, target_id=test_post.id, target_type='post')
     db.session.add(own_comment); db.session.commit()
     comment_id = own_comment.id
 
@@ -685,7 +685,7 @@ def test_flag_comment_already_flagged_by_user(client, app, logged_in_client, cre
     """User cannot flag a comment they already actively flagged."""
     comment_author = create_test_user(email_address="cadf@example.com", full_name="c_author_double_flag")
     test_post = create_test_post(author=comment_author, content="Post for double flag test.")
-    comment_to_flag = Comment(text="Flag me once.", user_id=comment_author.id, post_id=test_post.id)
+    comment_to_flag = Comment(text="Flag me once.", user_id=comment_author.id, target_id=test_post.id, target_type='post')
     db.session.add(comment_to_flag); db.session.commit()
     comment_id = comment_to_flag.id
 
@@ -706,7 +706,7 @@ def test_flag_comment_csrf_failure(client, app, logged_in_client, create_test_po
     """Test CSRF failure for flagging a comment."""
     comment_author = create_test_user(email_address="cacsf@example.com", full_name="c_author_csrf_flag")
     test_post = create_test_post(author=comment_author, content="Post for CSRF flag test.")
-    comment_to_flag = Comment(text="CSRF Flag me.", user_id=comment_author.id, post_id=test_post.id)
+    comment_to_flag = Comment(text="CSRF Flag me.", user_id=comment_author.id, target_id=test_post.id, target_type='post')
     db.session.add(comment_to_flag); db.session.commit()
     comment_id = comment_to_flag.id
 
@@ -1454,12 +1454,12 @@ def test_delete_post_deletes_associated_data(client, app, logged_in_client, db, 
 
     # 3. Add comments to the post
     from antisocialnet.models import Comment, CommentFlag # Ensure models are imported
-    comment1 = Comment(text="Test comment 1", user_id=other_user.id, post_id=post_id)
-    comment2 = Comment(text="Test comment 2 by author", user_id=user.id, post_id=post_id)
+    comment1 = Comment(text="Test comment 1", user_id=other_user.id, target_id=post_id, target_type='post')
+    comment2 = Comment(text="Test comment 2 by author", user_id=user.id, target_id=post_id, target_type='post')
     db.session.add_all([comment1, comment2])
     db.session.commit()
     comment1_id = comment1.id
-    assert Comment.query.filter_by(post_id=post_id).count() == 2
+    assert Comment.query.filter_by(target_id=post_id, target_type='post').count() == 2
 
     # 4. Add flags to a comment
     flag1 = CommentFlag(comment_id=comment1_id, flagger_user_id=user.id)
@@ -1498,7 +1498,7 @@ def test_delete_post_deletes_associated_data(client, app, logged_in_client, db, 
     # Assertions
     assert Post.query.get(post_id) is None
     assert Like.query.filter_by(target_type='post', target_id=post_id).count() == 0 # Updated query
-    assert Comment.query.filter_by(post_id=post_id).count() == 0
+    assert Comment.query.filter_by(target_id=post_id, target_type='post').count() == 0
     assert CommentFlag.query.filter_by(comment_id=comment1_id).count() == 0 # Flags for comments on this post
 
     # Check that activities related to the post are deleted
