@@ -1,0 +1,152 @@
+// scss/_banner.scss
+// AdwBanner is an inline notification bar.
+@use 'variables';
+@use 'mixins';
+@use 'button'; // For @extend .adw-button
+@use 'sass:color';
+
+.adw-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-s) var(--spacing-m);
+  box-sizing: border-box;
+  gap: var(--spacing-m);
+
+  // Default banner appearance (informational, often uses accent color)
+  background-color: var(--accent-bg-color); // Default to accent background
+  color: var(--accent-fg-color);             // Default to accent foreground
+  // Banners typically don't have side borders if they span width, but might have top/bottom.
+  // If inline, they might have a full border.
+  border: var(--border-width) solid var(--shade-color); // Use a subtle shade for border
+
+  .adw-banner-title {
+    flex-grow: 1;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-normal); // Libadwaita banner titles are normal weight
+    text-align: left; // Usually left-aligned
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // Buttons in banner (e.g., an action button or a close button)
+  // AdwBanner typically has one GtkButton.
+  // If it's a text button, it's flat with specific styling.
+  // If it's an icon button (close), it's also flat.
+  .adw-button {
+    // Make buttons flat and adapt to banner's coloring
+    // @extend .adw-button, .flat !optional; // Replaced with mixin
+    @include mixins.apply-flat-button-style;       // This applies transparent bg/border and flat hover/active
+    // background-color: transparent; // Ensured by mixin
+    color: inherit; // Inherit banner's text color - IMPORTANT for banner context
+    // border-color: transparent; // Ensured by mixin
+    padding: var(--spacing-xs) var(--spacing-s); // Specific padding for banner buttons
+
+    // Override mixin hover/active if banner-specific behavior is needed,
+    // or ensure mixin variables like --button-flat-hover-bg-color are contextually defined.
+    // The mixin uses --button-flat-hover-bg-color. Banner buttons have specific hover:
+    &:hover {
+      // Hover on banner button: subtle background using banner's fg color at low alpha
+      background-color: rgba(var(--_banner-current-fg-color-rgb, 255,255,255), 0.1);
+    }
+    &:active {
+      background-color: rgba(var(--_banner-current-fg-color-rgb, 255,255,255), 0.15);
+    }
+    // For focus, use a visible ring against the banner's background
+     &:focus-visible {
+        outline-offset: -3px; // Inset focus slightly
+        outline-color: var(--_banner-current-fg-color, currentColor); // Use current text color for focus ring
+    }
+
+    // Specific for icon-only buttons (like a close button)
+    &.circular, &.icon-only {
+      padding: var(--spacing-xs);
+      opacity: 0.7; // Dimmed by default
+      &:hover {
+        opacity: 1.0;
+        background-color: rgba(var(--_banner-current-fg-color-rgb, 255,255,255), 0.1);
+      }
+      .adw-icon, svg {
+        font-size: 16px; // Standard icon size
+      }
+    }
+  }
+
+  // Semantic states for banner (using global semantic colors)
+  // These classes would be added to .adw-banner
+  &.error {
+    background-color: var(--error-bg-color);
+    color: var(--error-fg-color);
+    border-color: var(--shade-color); // Use a consistent subtle shade for border
+    --_banner-current-fg-color-rgb: var(--error-fg-color-rgb, 255,255,255); // Assuming error-fg is light
+    --_banner-current-fg-color: var(--error-fg-color);
+  }
+  &.warning {
+    background-color: var(--warning-bg-color);
+    color: var(--warning-fg-color);
+    border-color: var(--shade-color); // Use a consistent subtle shade for border
+    --_banner-current-fg-color-rgb: var(--warning-fg-color-rgb, 0,0,0); // Assuming warning-fg is dark
+    --_banner-current-fg-color: var(--warning-fg-color);
+  }
+  &.success {
+    background-color: var(--success-bg-color);
+    color: var(--success-fg-color);
+    border-color: var(--shade-color); // Use a consistent subtle shade for border
+    --_banner-current-fg-color-rgb: var(--success-fg-color-rgb, 255,255,255);
+    --_banner-current-fg-color: var(--success-fg-color);
+  }
+  // Default/Info uses accent colors, already set.
+  // We need to ensure --accent-fg-color-rgb is available for the button hover.
+  &:not(.error):not(.warning):not(.success) {
+     --_banner-current-fg-color-rgb: var(--accent-fg-color-rgb, 255,255,255);
+     --_banner-current-fg-color: var(--accent-fg-color);
+  }
+
+
+  // --- Fixed Top Banner Modifier ---
+  &.fixed-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-index-banner);
+    border-radius: 0; // No radius for full-width fixed banner
+    border-left: none;
+    border-right: none;
+    // Keep top/bottom border or remove if it should float
+    // border-top: none;
+    // border-bottom: var(--border-width) solid var(--border-color); // Or a specific shadow
+
+    // Animation for fixed banner
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: opacity 0.2s var(--animation-ease-out-cubic),
+                transform 0.2s var(--animation-ease-out-cubic),
+                visibility 0s linear 0.2s;
+    visibility: hidden;
+    pointer-events: none;
+
+    &.visible {
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+      pointer-events: auto;
+      transition-delay: 0s;
+    }
+  }
+}
+
+// Ensure RGB versions of semantic foreground colors are available in _variables.scss
+// e.g. --error-fg-color-rgb, --warning-fg-color-rgb, --success-fg-color-rgb, --accent-fg-color-rgb
+// These are needed for the rgba() background on button hover.
+// Example for _variables.scss:
+// :root {
+//   --accent-fg-color-rgb: #{red(variables.$accent-default-fg)}, #{green(variables.$accent-default-fg)}, #{blue(variables.$accent-default-fg)};
+//   --error-fg-color-rgb: #{red(variables.$accent-default-fg)}, #{green(variables.$accent-default-fg)}, #{blue(variables.$accent-default-fg)}; // Assuming error fg is also white
+//   --warning-fg-color-rgb: #{red(variables.$accent-yellow-fg)}, #{green(variables.$accent-yellow-fg)}, #{blue(variables.$accent-yellow-fg)}; // Assuming warning fg is dark
+//   --success-fg-color-rgb: #{red(variables.$accent-default-fg)}, #{green(variables.$accent-default-fg)}, #{blue(variables.$accent-default-fg)};
+// }
+// .theme-dark would need to update these if the fg colors change.
+// For now, assuming a simple mapping.

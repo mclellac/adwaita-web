@@ -1,0 +1,70 @@
+// SCSS for custom @font-face declarations for Adwaita Web
+
+// AdwaitaSans (Cantarell equivalent for web)
+@font-face {
+  font-family: 'Adwaita Sans'; // Using a distinct name for the web font
+  src: url('../fonts/sans/AdwaitaSans-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Adwaita Sans';
+  src: url('../fonts/sans/AdwaitaSans-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+// Add Bold and BoldItalic if they exist and are needed, for example:
+// @font-face {
+//   font-family: 'Adwaita Sans';
+//   src: url('../fonts/sans/AdwaitaSans-Bold.ttf') format('truetype');
+//   font-weight: bold;
+//   font-style: normal;
+// }
+// @font-face {
+//   font-family: 'Adwaita Sans';
+//   src: url('../fonts/sans/AdwaitaSans-BoldItalic.ttf') format('truetype');
+//   font-weight: bold;
+//   font-style: italic;
+// }
+
+
+// AdwaitaMono
+@font-face {
+  font-family: 'Adwaita Mono'; // Distinct name
+  src: url('../fonts/mono/AdwaitaMono-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Adwaita Mono';
+  src: url('../fonts/mono/AdwaitaMono-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Adwaita Mono';
+  src: url('../fonts/mono/AdwaitaMono-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Adwaita Mono';
+  src: url('../fonts/mono/AdwaitaMono-BoldItalic.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+}
+
+// Note: The actual font files available are:
+// adwaita-web/fonts/mono/AdwaitaMono-Bold.ttf
+// adwaita-web/fonts/mono/AdwaitaMono-BoldItalic.ttf
+// adwaita-web/fonts/mono/AdwaitaMono-Italic.ttf
+// adwaita-web/fonts/mono/AdwaitaMono-Regular.ttf
+// adwaita-web/fonts/sans/AdwaitaSans-Italic.ttf
+// adwaita-web/fonts/sans/AdwaitaSans-Regular.ttf
+// The sans serif bold versions are commented out as they are not in the source directory.
+// If they were, they should be uncommented.Tool output for `create_file_with_block`:

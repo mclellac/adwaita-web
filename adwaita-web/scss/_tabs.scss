@@ -1,0 +1,206 @@
+// scss/_tabs.scss
+@use 'variables';
+@use 'mixins';
+@use 'button'; // For @extend .adw-button
+@use 'sass:color';
+
+// --- AdwTabButton ---
+// (Used within AdwaitaTabBar)
+.adw-tab-button {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-s) var(--spacing-m);
+  border: var(--border-width) solid transparent;
+  // Top corners rounded, bottom flat to merge with tab bar border or content area
+  border-radius: var(--border-radius-default) var(--border-radius-default) 0 0;
+  cursor: pointer;
+  user-select: none;
+  background-color: transparent; // Inactive tabs are transparent over tab bar background
+  color: var(--headerbar-fg-color); // Use header bar text color
+  opacity: 0.7; // Inactive tabs are dimmed
+  margin-right: var(--spacing-xxs);
+  margin-bottom: calc(var(--border-width) * -1); // Overlap AdwTabBar's bottom border
+  position: relative;
+  max-width: 200px;
+  transition: background-color 0.1s ease-out, color 0.1s ease-out, opacity 0.1s ease-out, border-color 0.1s ease-out;
+
+  &:hover {
+    opacity: 1.0;
+    // Subtle background on hover for inactive tabs
+    background-color: rgba(var(--headerbar-fg-color-rgb), 0.05);
+  }
+
+  &.active {
+    background-color: var(--view-bg-color); // Active tab matches content area (view) background
+    color: var(--accent-color);             // Active tab text uses accent color
+    font-weight: var(--font-weight-bold);
+    opacity: 1.0;
+    // Border to make it look like it's part of the content pane
+    border-color: var(--headerbar-border-color); // Uses headerbar's border color for sides and top
+    border-bottom-color: var(--view-bg-color); // Bottom border blends with content
+    z-index: 1;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 var(--focus-ring-width) var(--accent-color); // Inset focus ring
+    z-index: 2;
+  }
+
+  .adw-tab-button-content-wrapper { /* Assuming this class exists for content */
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    overflow: hidden;
+  }
+  .adw-tab-button-icon { /* Assuming this class for icon */
+    flex-shrink: 0;
+    svg { width: 1em; height: 1em; fill: currentColor; }
+  }
+  .adw-tab-button-label { /* Assuming this class for label */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .adw-tab-button-close { /* Assuming this class for close button */
+    // This should be an .adw-button in HTML, e.g., <button class="adw-button adw-tab-button-close">
+    // @extend .adw-button, .flat !optional; // Replaced with mixin for flat style
+    @include mixins.apply-flat-button-style;
+    padding: var(--spacing-xxs) !important; // Specific padding override
+    margin-left: var(--spacing-xs);
+    opacity: 0.7;
+    &:hover { opacity: 1; }
+    .adw-icon svg, svg { width: 12px; height: 12px; } // Smaller 'x'
+  }
+}
+
+// --- AdwTabBar ---
+.adw-tab-bar {
+  display: flex;
+  align-items: flex-end;
+  background-color: var(--headerbar-bg-color);
+  color: var(--headerbar-fg-color);
+  padding: 0 var(--spacing-s); // Horizontal padding for the bar
+  border-bottom: var(--border-width) solid var(--headerbar-border-color);
+  overflow-x: auto;
+  scrollbar-width: thin;
+
+  .adw-tab-bar-button-container { // If there's a specific container for buttons
+    display: flex;
+    align-items: flex-end;
+  }
+
+  // Style for the "new tab" button if it's part of the bar
+  .adw-tab-bar-new-tab-button.adw-button {
+    margin-left: var(--spacing-s);
+    align-self: center; // Vertically center if bar is taller due to tab content
+    // Make it a small, circular, flat icon button
+    // @extend .adw-button, .flat !optional; // Already an .adw-button, apply mixin
+    // @extend .adw-button, .circular !optional; // Already an .adw-button, apply mixin
+    @include mixins.apply-flat-button-style;
+    @include mixins.apply-circular-button-style;
+    // padding: var(--spacing-xxs); // Mixins apply padding, this might override or be redundant. Let's test.
+                                     // apply-circular-button-style sets padding to var(--spacing-xs)
+                                     // If xxs is truly needed, override after include.
+    padding: var(--spacing-xxs); // Explicitly set desired padding after mixins
+    .adw-icon svg, svg { width: 16px; height: 16px; }
+  }
+
+  // Inline style for TabBar
+  // "With the .inline style class they have neutral backgrounds" - Libadwaita Docs
+  &.inline {
+    background-color: transparent; // Or var(--window-bg-color) if on window
+    border-bottom-color: var(--border-color); // Standard border, not headerbar specific
+
+    .adw-tab-button {
+      color: var(--window-fg-color); // Text color matches window text
+      // Active tab in an inline bar might look like an active toggle
+      &.active {
+        background-color: var(--active-toggle-bg-color);
+        color: var(--active-toggle-fg-color);
+        border-color: var(--border-color); // Or var(--active-toggle-bg-color)
+        border-bottom-color: var(--active-toggle-bg-color); // Blend with its own bg
+      }
+      &:hover:not(.active) {
+         background-color: rgba(var(--window-fg-color-rgb), 0.05);
+      }
+    }
+  }
+}
+
+// --- AdwTabPage ---
+// Represents the content area of a single tab.
+.adw-tab-page {
+  display: block; // Handled by JS to show/hide
+  padding: var(--spacing-l);
+  background-color: var(--view-bg-color); // Page content usually on view background
+  color: var(--view-fg-color);
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto; // Page itself can be scrollable
+}
+
+// --- AdwTabView ---
+// The main container for TabBar and TabPages.
+.adw-tab-view {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--window-bg-color); // Overall background
+  // Libadwaita TabView doesn't usually have its own border; it's part of a window structure.
+  // border: var(--border-width) solid var(--border-color);
+  // border-radius: var(--border-radius-default);
+  overflow: hidden;
+
+  > .adw-tab-bar {
+    // TabBar at the top, no special border adjustments needed if TabView itself is borderless
+    // border-bottom-width: 0; // If TabView provides a continuous border below it.
+  }
+
+  > .adw-tab-view-pages-container { // Assuming a container for pages
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden; // Hides non-active pages
+    // Active page is shown by JS by setting display:block or similar
+    > .adw-tab-page {
+      position: absolute; // Allows pages to stack; JS toggles visibility/z-index or display
+      width: 100%;
+      height: 100%;
+      left:0;
+      top:0;
+      visibility: hidden; // Default hidden
+      &.active-page { // JS should add this class to the visible page
+        visibility: visible;
+        z-index: 1;
+      }
+    }
+  }
+}
+
+// --- AdwTabOverview --- (Placeholder styles)
+// Used for showing a grid of tab thumbnails.
+.adw-tab-overview {
+  background-color: var(--overview-bg-color);
+  color: var(--overview-fg-color);
+  padding: var(--spacing-l);
+  display: grid; // Example layout
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-m);
+  overflow: auto;
+
+  .adw-tab-thumbnail { // Placeholder for a single tab thumbnail
+    background-color: var(--thumbnail-bg-color);
+    color: var(--thumbnail-fg-color);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-default);
+    padding: var(--spacing-s);
+    min-height: 150px; // Example
+    // display content (e.g., title, snapshot)
+  }
+}
+
+// Dark theme adjustments are mostly handled by CSS variables.
+// Explicit overrides if needed:
+// .theme-dark {
+//   .adw-tab-button { ... }
+//   .adw-tab-bar { ... }
+// }

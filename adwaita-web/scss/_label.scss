@@ -1,0 +1,69 @@
+// Styles for Adwaita Labels (Adwaita Skin Version)
+
+@use 'variables';
+@use 'mixins';
+
+// Basic .adw-label styling. Specific typography (.title-1, .caption, etc.)
+// are handled by utility classes in _utility_classes.scss
+.adw-label {
+    display: inline;
+    font-family: var(--document-font-family);
+    font-size: var(--font-size-base);
+    font-weight: variables.$font-weight-normal;
+    color: var(--window-fg-color); // Use main foreground color
+    line-height: variables.$line-height-base;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    // margin-bottom: var(--spacing-xs); // Removed default margin, apply as needed or if display: block
+
+    &.selectable {
+        user-select: text;
+        cursor: text;
+    }
+
+    // .adw-label.muted can now be replaced by using the .dimmed utility class
+    // or the .caption utility class if smaller, muted text is desired.
+    // For compatibility, we can style .muted to be like .dimmed.
+    &.muted {
+        opacity: var(--dim-opacity);
+        // font-size: var(--font-size-small); // Optional: if muted also implies smaller
+    }
+
+    &.bold {
+        font-weight: variables.$font-weight-bold;
+    }
+
+    // .title-1, .title-2, .title-3, .title-4 are now global utility classes.
+    // No need to redefine them here.
+    // Ensure any specific margin requirements for labels that are titles are handled
+    // where the label is used, or add specific context styling if needed.
+    // e.g. h1.adw-label, .adw-label.title-1 { margin-bottom: var(--spacing-m); }
+}
+
+// Ensure native <label> elements styled as .adw-label also get default cursor
+label.adw-label {
+    cursor: default;
+}
+
+// Utility to make a label a block element
+.adw-label-block,
+.adw-label.block { // adding .block as a more generic alternative
+    display: block;
+    margin-bottom: var(--spacing-xs); // Add margin back for block labels
+}
+
+
+// .adw-caption is now superseded by the global .caption utility class.
+// This definition can be removed or kept for backward compatibility, pointing to .caption styles.
+// For now, let's comment it out and recommend using .caption directly.
+/*
+.adw-caption {
+    @extend .caption; // Assumes .caption is defined globally
+}
+*/
+
+// If specific margins are needed for titles when applied to .adw-label:
+.adw-label.title-1, :is(h1, h2, h3, h4, h5, h6).title-1 { margin-bottom: var(--spacing-m); }
+.adw-label.title-2, :is(h1, h2, h3, h4, h5, h6).title-2 { margin-bottom: var(--spacing-s); }
+.adw-label.title-3, :is(h1, h2, h3, h4, h5, h6).title-3 { margin-bottom: var(--spacing-xs); }
+.adw-label.title-4, :is(h1, h2, h3, h4, h5, h6).title-4 { margin-bottom: var(--spacing-xs); }

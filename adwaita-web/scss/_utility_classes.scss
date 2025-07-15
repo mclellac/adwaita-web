@@ -1,0 +1,136 @@
+// Utility Style Classes
+// Based on Libadwaita 1.8.beta
+
+@use 'variables'; // For $line-height-base if still used by .caption
+// No other SASS variables should be directly needed here for font-weights as they are CSS vars.
+
+// Typography Styles
+// https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html#typography-styles
+
+.title-1 {
+  font-size: var(--title-1-font-size);
+  font-weight: var(--heading-font-weight);
+  line-height: 1.2;
+}
+
+.title-2 {
+  font-size: var(--title-2-font-size);
+  font-weight: var(--heading-font-weight);
+  line-height: 1.2;
+}
+
+.title-3 {
+  font-size: var(--title-3-font-size);
+  font-weight: var(--heading-font-weight);
+  line-height: 1.3;
+}
+
+.title-4 {
+  font-size: var(--title-4-font-size);
+  font-weight: var(--heading-font-weight);
+  line-height: 1.3;
+}
+
+.heading {
+  font-size: var(--font-size-base);
+  font-weight: var(--heading-font-weight);
+  line-height: 1.3;
+}
+
+.body {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+}
+
+.caption-heading {
+  font-size: var(--font-size-small);
+  font-weight: var(--heading-font-weight); // Still bold for caption headings
+  line-height: 1.3;
+  color: var(--window-fg-color);
+  opacity: var(--dim-opacity);
+}
+
+.caption {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-base);
+  color: var(--window-fg-color);
+  opacity: var(--dim-opacity);
+}
+
+.monospace {
+  font-family: var(--monospace-font-family);
+  font-size: var(--monospace-font-size);
+}
+
+.numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+// Color Classes
+.accent {
+  color: var(--accent-color);
+}
+.success {
+  color: var(--success-color);
+}
+.warning {
+  color: var(--warning-color);
+}
+.error {
+  color: var(--error-color);
+}
+
+// Dimmed Class
+.dimmed {
+  opacity: var(--dim-opacity);
+}
+
+// Background and View classes
+.background {
+  background-color: var(--window-bg-color);
+  color: var(--window-fg-color);
+}
+.view {
+  background-color: var(--view-bg-color);
+  color: var(--view-fg-color);
+}
+
+// Frame class
+.frame {
+  border: var(--border-width) solid var(--border-color);
+}
+
+// Linked Controls Style
+.linked {
+  display: inline-flex;
+  border-spacing: 0;
+  > * {
+    border-radius: 0;
+    margin-inline-start: calc(var(--border-width) * -1);
+    &:first-child {
+      margin-inline-start: 0;
+      border-start-start-radius: var(--border-radius-default);
+      border-end-start-radius: var(--border-radius-default);
+    }
+    &:last-child {
+      border-start-end-radius: var(--border-radius-default);
+      border-end-end-radius: var(--border-radius-default);
+    }
+  }
+}
+
+// Selection Mode (marker class)
+.selection-mode {}
+
+// Development Window (marker class)
+.devel {}
+
+// Undershoot Indicators (marker classes)
+.undershoot-top {}
+.undershoot-bottom {}
+.undershoot-start {}
+.undershoot-end {}
+
+// OSD (marker class)
+.osd {}

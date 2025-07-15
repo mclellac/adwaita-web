@@ -1,0 +1,92 @@
+// scss/_radio.scss
+@use 'variables';
+@use 'mixins';
+
+.adw-radio {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  gap: var(--spacing-s);
+  color: var(--window-fg-color); // Label color
+
+  input[type="radio"] {
+    @include mixins.visually-hidden;
+
+    &:checked + .adw-radio-indicator {
+      border-color: var(--accent-color); // Checked border uses standalone accent color
+
+      &::before { // Inner dot
+        content: "";
+        display: block;
+        // Size relative to indicator, e.g. indicator_size / 2 - border_width
+        width: calc(18px / 2 - 2px); // Example: 18px indicator, 2px border -> 7px dot. Libadwaita is 8px dot for 18px/2px border.
+        height: calc(18px / 2 - 2px);
+        border-radius: 50%;
+        background-color: var(--accent-color); // Dot color is also standalone accent
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    &:focus-visible + .adw-radio-indicator {
+      outline: var(--focus-ring-width) solid var(--accent-color);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      & + .adw-radio-indicator {
+        cursor: not-allowed;
+      }
+      &:focus-visible + .adw-radio-indicator {
+        outline: none;
+      }
+    }
+  }
+
+  .adw-radio-indicator {
+    width: 18px;
+    height: 18px;
+    border-width: 2px; // Libadwaita radio buttons have a 2px border
+    border-style: solid;
+    border-color: var(--border-color); // Default border color
+    border-radius: 50%; // Always round
+    background-color: var(--view-bg-color); // Or transparent if on complex bg
+    position: relative;
+    transition: background-color 0.1s ease-out, border-color 0.1s ease-out;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+
+  .adw-radio-label {
+    line-height: 1.3;
+    // Color inherited
+  }
+
+  &.disabled, &[disabled] {
+    cursor: not-allowed;
+    opacity: var(--disabled-opacity);
+
+    .adw-radio-label {
+      cursor: not-allowed;
+    }
+    .adw-radio-indicator {
+      cursor: not-allowed;
+    }
+  }
+
+  // Selection Mode Style
+  &.selection-mode {
+    .adw-radio-indicator {
+      width: 22px; // Larger
+      height: 22px;
+
+      &::before { // Inner dot for larger indicator
+         width: calc(22px / 2 - 2px); // Scale dot accordingly, e.g. 9px
+         height: calc(22px / 2 - 2px);
+      }
+    }
+  }
+}

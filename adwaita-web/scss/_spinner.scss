@@ -1,0 +1,60 @@
+@use 'variables';
+
+.adw-spinner {
+  display: inline-block;
+  width: 24px;  // Default size
+  height: 24px; // Default size
+  vertical-align: middle;
+  background-color: var(--spinner-color, var(--accent-color)); // Color for the SVG icon
+  -webkit-mask-image: url('../data/icons/symbolic/process-working-symbolic.svg');
+  mask-image: url('../data/icons/symbolic/process-working-symbolic.svg');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain; // Ensure the icon fits
+  mask-size: contain;
+  animation: adw-spinner-spin 0.75s linear infinite;
+
+  // Remove border properties as we are using mask-image now
+  // border-radius: 50%;
+  // border-width: 3px;
+  // border-style: solid;
+  // border-color: var(--spinner-track-color);
+  // border-top-color: var(--spinner-color);
+
+
+  &.small {
+    width: 16px;
+    height: 16px;
+    // border-width: 2px; // Not needed for mask-based
+  }
+
+  &.large {
+    width: 36px;
+    height: 36px;
+    // border-width: 4px; // Not needed for mask-based
+  }
+
+  // Accessibility: Respect prefers-reduced-motion
+  @media (prefers-reduced-motion: reduce) {
+    animation: none; // Stop spinning
+    // For a static representation with mask, it will just show the static SVG.
+    // If process-working-symbolic.svg is a full circle or a non-animated segment,
+    // it will appear static. If it's an animated SVG itself, this might not stop internal SVG animation.
+    // Assuming process-working-symbolic.svg is a static spinner segment graphic.
+  }
+}
+
+@keyframes adw-spinner-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+// Ensure --spinner-color is defined in _variables.scss, e.g.
+// :root { --spinner-color: var(--accent-color); }
+// And potentially --spinner-track-color if a background is desired behind the SVG spinner.
+// For a simple SVG spinner, track color is not directly applicable unless layering.
+}

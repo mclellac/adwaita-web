@@ -1,0 +1,106 @@
+// scss/_toast.scss
+@use 'variables';
+@use 'mixins';
+
+.adw-toast {
+  // Base style for a toast notification.
+  // Toasts are displayed by an AdwToastOverlay. Positioning is handled by the overlay.
+  background-color: var(--toast-bg-color);
+  color: var(--toast-fg-color);
+  padding: var(--spacing-s) var(--spacing-m);
+  border-radius: var(--toast-border-radius);
+  box-shadow: var(--toast-box-shadow);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-s);
+  width: max-content; // Shrink to content size, up to max-width
+  max-width: var(--toast-max-width, 400px);
+  min-height: var(--toast-min-height);
+  // Default state for animation by overlay:
+  opacity: 0;
+  transform: translateY(100%) scale(0.9); // Start off-screen (bottom) and slightly scaled down
+  transition: opacity var(--animation-duration-short) var(--animation-ease-out-cubic),
+              transform var(--animation-duration-short) var(--animation-ease-out-cubic);
+  will-change: transform, opacity;
+
+  // State when visible (class added by AdwToastOverlay)
+  &.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  // State when hiding (class added by AdwToastOverlay before removal)
+  &.hiding {
+    opacity: 0;
+    transform: translateY(100%) scale(0.9); // Animate downwards (same direction as appear) and fade
+    // Transition duration for hiding can be slightly different if needed
+    transition-duration: var(--animation-duration-shortest); // Use a shorter duration for hiding
+    transition-timing-function: var(--animation-ease-in-cubic); // Ease-in for hiding
+  }
+
+  .adw-toast-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0; // For ellipsis on title
+  }
+
+  .adw-toast-title {
+    font-size: var(--font-size-base);
+    font-weight: normal;
+    // Toasts are often single-line, but allow wrapping if content is longer
+    // white-space: nowrap;
+    // overflow: hidden;
+    // text-overflow: ellipsis;
+    // For multi-line:
+    display: -webkit-box;
+    -webkit-line-clamp: 2; // Allow up to 2 lines before ellipsis
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3; // Adjust for multi-line readability
+  }
+
+  // Action button (if present)
+  .adw-toast-action-button.adw-button {
+    flex-shrink: 0;
+    margin-left: var(--spacing-xs);
+    // AdwButton styles (flat, suggested, etc.) will apply.
+    // Ensure good contrast on dark toast background.
+    &.flat {
+      color: var(--toast-accent-color); // Use toast specific accent if defined, else fallback to accent-color
+      &:hover {
+        background-color: rgba(var(--toast-fg-color-rgb, 255,255,255), 0.1); // Standard flat button hover on dark
+      }
+    }
+  }
+
+  // Close button (always present)
+  .adw-toast-close-button.adw-button {
+    flex-shrink: 0;
+    margin-left: var(--spacing-s);
+    color: var(--toast-secondary-fg-color);
+
+    // Target the icon container (span.icon or adw-icon)
+    .adw-icon, .icon {
+        display: inline-flex; // Ensure proper alignment and sizing
+        align-items: center;
+        justify-content: center;
+        width: var(--icon-size-small);
+        height: var(--icon-size-small);
+    }
+
+    // Target the SVG element itself within the icon container
+    .adw-icon svg, .icon svg {
+        width: 100%; // Fill the container
+        height: 100%; // Fill the container
+    }
+
+    &:hover {
+        color: var(--toast-fg-color);
+        background-color: rgba(var(--toast-fg-color-rgb, 255,255,255), 0.1);
+    }
+  }
+}

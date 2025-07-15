@@ -1,0 +1,47 @@
+# -------------------
+# Database Configuration
+# -------------------
+# Defines the connection string for the database.
+database:
+  uri: "postgresql://postgres@localhost/appdb"
+
+# -------------------
+# Site Settings
+# -------------------
+# These settings control the overall behavior of the site.
+site_settings:
+  site_title:
+    value: "My Awesome Social App"
+    type: "string"
+  posts_per_page:
+    value: 15
+    type: "int"
+  allow_registrations:
+    value: True
+    type: "bool"
+
+# -------------------
+# User Configuration
+# -------------------
+# A list of users to create or update in the database.
+# Usernames must be valid email addresses.
+users:
+  - username: "careymclelland@gmail.com"
+    password: "p3rk3late$"
+    full_name: "xorcsm"
+    bio: "Awesome dude, srsly."
+    is_admin: True
+
+  - username: "jane.doe@example.com"
+    password: "secure_password_2"
+    full_name: "Jane Doe"
+    bio: "Content creator and community manager."
+    is_admin: False
+    is_approved: False
+    is_active: False
+
+  - username: "john.smith@example.com"
+    password: "secure_password_3"
+    full_name: "John Smith"
+    bio: "Just a regular user enjoying the platform."
+    is_admin: False

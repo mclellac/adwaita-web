@@ -1,0 +1,147 @@
+// scss/_headerbar.scss
+@use 'variables';
+@use 'sass:color';
+
+// AdwHeaderBar Styling
+// Note: Using .flat on AdwHeaderBar is deprecated in Libadwaita 1.4.
+// AdwToolbarView should be used for flat header-like bars within content.
+// This styling is for the main window header bar.
+
+.adw-header-bar {
+  background-color: var(--headerbar-bg-color);
+  color: var(--headerbar-fg-color);
+  // Default border is a subtle shade.
+  border-bottom: var(--border-width) solid var(--headerbar-shade-color);
+  padding: var(--spacing-xs) var(--spacing-m);
+  display: flex;
+  align-items: center;
+  min-height: 48px; // Standard Adwaita headerbar height (can vary slightly)
+  position: relative;
+
+  // Start (leading) and End (trailing) boxes for items
+  .adw-header-bar-start,
+  .adw-header-bar-end {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: var(--spacing-xs);
+
+    > * {
+      color: inherit; // Children inherit header bar's foreground color
+    }
+
+    // Buttons in header bars are typically flat by default
+    .adw-button:not(.suggested-action):not(.destructive-action):not(.raised) {
+      background-color: transparent;
+      border-color: transparent;
+      box-shadow: none;
+      color: inherit; // Inherit headerbar text color
+
+      &:hover {
+        background-color: rgba(var(--headerbar-fg-color-rgb), 0.05); // Subtle overlay using fg color
+      }
+      &:active, &.active { // .active for toggle buttons
+        background-color: rgba(var(--headerbar-fg-color-rgb), 0.1);  // Slightly more prominent overlay
+      }
+      // Ensure focus ring is visible against headerbar background
+      &:focus-visible {
+         box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+      }
+    }
+    // Raised buttons explicitly keep their frame
+    .adw-button.raised {
+        // Uses default .adw-button styling (which has a background and border)
+        // but ensure colors are adapted for headerbar context if needed,
+        // though typically they stand out with their default window-based colors.
+    }
+  }
+
+  .adw-header-bar-end {
+    margin-left: auto; // Pushes to the right
+  }
+
+  // Centered content (title, subtitle)
+  .adw-header-bar-center-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    flex-shrink: 1; // Allow shrinking
+    min-width: 0;   // Important for text overflow
+    text-align: center;
+    margin: 0 var(--spacing-s); // Reduced margin for tighter packing if needed
+  }
+
+  .adw-header-bar-title {
+    font-size: var(--font-size-base); // Titles in headerbars are often base size but bold
+    font-weight: var(--font-weight-bold);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+
+  .adw-header-bar-subtitle {
+    font-size: var(--font-size-small);
+    color: inherit; // Inherits headerbar fg color
+    opacity: var(--dim-opacity); // Use dim-opacity for subtitles
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    margin-top: 2px; // Minimal space between title and subtitle
+  }
+
+  // Scrolled state (e.g., when content scrolls under a transparent headerbar in AdwToolbarView)
+  // This class is typically applied by AdwToolbarView.
+  // For a standalone AdwHeaderBar, this might indicate a raised border style.
+  &.raised-border, // A more explicit class for this state
+  &.scrolled { // Common class used by AdwToolbarView
+    border-bottom-color: var(--headerbar-darker-shade-color);
+  }
+
+  // Backdrop state (when window is unfocused)
+  // This class is typically applied to the window, affecting child headerbar.
+  // Assuming .window.backdrop .adw-header-bar or .adw-header-bar.backdrop
+  &.backdrop {
+    background-color: var(--headerbar-backdrop-color);
+    // border-bottom-color: var(--headerbar-shade-color); // Shade color might also adapt
+  }
+  :is(.window.backdrop, body.backdrop) & { // If parent window/body has .backdrop
+     background-color: var(--headerbar-backdrop-color);
+     // border-bottom-color: var(--headerbar-shade-color);
+  }
+
+  // Development style for unstable/nightly applications
+  // Applied if headerbar is inside an element with .devel class
+  :is(.devel) & {
+    // Striped background, using a subtle shade of the headerbar-fg-color
+    // Adjust alpha for subtlety. Libadwaita uses 0.05 for dark text on light bg.
+    // For light text on dark bg, it might be similar or slightly higher.
+    $_stripe-color-light: rgba(variables.$adw-dark-5, 0.04);
+    $_stripe-color-dark: rgba(variables.$adw-light-1, 0.05);
+
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 10px,
+      var(--_headerbar-stripe-color, $_stripe-color-light) 10px,
+      var(--_headerbar-stripe-color, $_stripe-color-light) 20px
+    );
+
+    .theme-dark & {
+        --_headerbar-stripe-color: #{$_stripe-color-dark};
+    }
+  }
+
+  // Flat style - DEPRECATED for AdwHeaderBar. Use AdwToolbarView.
+  // Kept for compatibility but should not be promoted.
+  &.flat {
+    // Comment to indicate deprecation and recommend AdwToolbarView
+    // DEPRECATED: Use AdwToolbarView for flat header-like bars.
+    background-color: transparent;
+    border-bottom-color: transparent;
+    box-shadow: none;
+  }
+}

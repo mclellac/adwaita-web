@@ -1,0 +1,294 @@
+// scss/_listbox.scss
+
+@use 'variables';
+@use 'mixins'; // For focus-ring if needed, though direct box-shadow is used here
+@use 'card'; // For @extend .adw-card
+@use 'sass:color';
+
+.adw-list-box {
+  // Default listbox (not .boxed-list) typically has a view background
+  // and simple borders, or might be borderless depending on context.
+  // Libadwaita often uses GtkScrolledWindow around lists, which handles borders/shadows.
+  // For a standalone .adw-list-box, we'll give it a simple view appearance.
+  background-color: var(--view-bg-color);
+  color: var(--view-fg-color);
+  border-radius: var(--border-radius-default); // Standard radius
+  // overflow: hidden; // Keep this to clip rows to the border-radius
+
+  // Default listbox might have a subtle border or rely on context (e.g. inside a card or scrolled window)
+  // For now, let's assume a subtle border similar to other views.
+  border: var(--border-width) solid var(--border-color);
+  // Add the new subtle box shadow for default list boxes
+  &:not(.boxed-list):not(.flat) {
+    box-shadow: var(--subtle-box-shadow);
+  }
+
+
+  // DEPRECATED: .content class was an old alias for .boxed-list.
+  // Use .boxed-list for the card-like appearance.
+  &.content {
+    // This class is deprecated. Use .boxed-list instead.
+  }
+
+  // Boxed List Style (.boxed-list)
+  // https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html#boxed-lists-cards
+  // This makes the ListBox look like a single card with separators.
+  &.boxed-list {
+    background-color: var(--card-bg-color);
+    color: var(--card-fg-color);
+    border-radius: var(--border-radius-large); // Cards have larger radius
+    padding: 0; // Boxed lists usually don't have padding themselves; rows do.
+    border: none; // Boxed lists use shadows, not borders typically
+    // Box shadow for boxed-list is similar to a card, but might emphasize the --card-shade-color for an inner border effect
+    box-shadow: 0 0 0 var(--border-width) var(--card-shade-color), /* inner border effect */
+                0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05); /* outer shadow */
+    overflow: hidden;
+
+
+    > .adw-row {
+      background-color: transparent; // Rows in boxed list are transparent over card-bg
+      color: var(--card-fg-color); // Inherit card text color
+      border-radius: 0; // Individual rows in a boxed list are not rounded
+
+      &:not(:last-child) {
+        border-bottom: var(--border-width) solid var(--card-shade-color); // Separator is card-shade
+      }
+      &:last-child {
+        border-bottom: none;
+      }
+       // First and last rows need to match the parent's large radius if it's a boxed-list
+      &:first-child {
+        border-top-left-radius: var(--border-radius-large);
+        border-top-right-radius: var(--border-radius-large);
+      }
+      &:last-child {
+        border-bottom-left-radius: var(--border-radius-large);
+        border-bottom-right-radius: var(--border-radius-large);
+      }
+
+      // Hover/Active for rows within a .boxed-list
+      &:hover:not(.activated):not(.selected):not(:disabled) {
+         background-color: rgba(var(--card-fg-color-rgb), 0.05); // Subtle hover on card bg
+      }
+      &.activatable:hover:not(.activated):not(.selected):not(:disabled) {
+        background-color: rgba(var(--card-fg-color-rgb), 0.08); // Slightly more prominent for activatable
+      }
+      &.interactive:focus-visible,
+      &.activatable:focus-visible {
+        // Focus ring on rows inside boxed-list should be inset slightly
+        outline: var(--focus-ring-width) solid var(--focus-ring-color);
+        outline-offset: calc(var(--focus-ring-width) * -1 - 1px); // Inset focus ring
+        z-index: 1; // Ensure focus ring is above other elements
+      }
+       &.activated,
+       &.selected {
+        // Selected rows in a boxed list still use the main accent colors
+        background-color: var(--accent-bg-color); // var(--list-row-selected-bg-color)
+        color: var(--accent-fg-color); // var(--list-row-selected-fg-color)
+        .title, .subtitle, .adw-icon, .icon, svg, > * {
+            color: var(--accent-fg-color);
+        }
+      }
+    }
+  }
+
+  // Boxed List Separate Style
+  // https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/style-classes.html#boxed-lists-cards
+  // Each row is a separate card.
+  &.boxed-list-separate {
+    background-color: transparent; // ListBox itself is transparent
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0; // No padding on the listbox itself
+
+    > .adw-row {
+      // Each row becomes a card
+      // @extend .adw-card; // Replaced with mixin
+      @include mixins.apply-card-style;
+      // Override mixin defaults if necessary for this specific context:
+      margin-bottom: var(--spacing-s); // Spacing between card-rows
+      // The mixin already sets border-radius and box-shadow to standard card values.
+      // If these need to be different for rows in boxed-list-separate, they can be overridden here.
+      // For now, assume mixin's values are desired.
+      // border-radius: var(--border-radius-large);
+      // box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+      // Separators are not needed as each row is distinct card
+      border-bottom: none !important;
+    }
+  }
+
+
+  // General Row Styling (applies to rows in default listbox and can be base for boxed-list rows)
+  > .adw-row {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-m);
+    transition: background-color 0.1s ease-out, color 0.1s ease-out;
+    cursor: default;
+    background-color: var(--list-row-bg-color); // Default row bg (transparent if parent is card/boxed-list)
+    color: var(--view-fg-color); // Default row text color (can be overridden by .boxed-list)
+
+    &:not(:last-child) {
+      // Default separator for non-boxed lists
+      border-bottom: var(--border-width) solid var(--list-separator-color);
+    }
+
+    // Rounded corners for first and last rows within a default listbox
+    &:first-child {
+      border-top-left-radius: var(--border-radius-default);
+      border-top-right-radius: var(--border-radius-default);
+    }
+    &:last-child {
+      border-bottom-left-radius: var(--border-radius-default);
+      border-bottom-right-radius: var(--border-radius-default);
+      border-bottom: none;
+    }
+
+    &:hover:not(.activated):not(.selected):not(:disabled) {
+      background-color: var(--list-row-hover-bg-color);
+    }
+
+    &.interactive {
+      cursor: pointer;
+    }
+    &.activatable:hover:not(.activated):not(.selected):not(:disabled) {
+      background-color: var(--list-row-active-bg-color); // More prominent hover for activatable
+    }
+
+    &.interactive:focus-visible,
+    &.activatable:focus-visible {
+      outline: var(--focus-ring-width) solid var(--focus-ring-color);
+      outline-offset: calc(var(--focus-ring-width) * -1); // Slightly inset
+      border-radius: var(--border-radius-small); // Focus ring can have smaller radius
+    }
+
+    &.activated,
+    &.selected {
+      background-color: var(--list-row-selected-bg-color); // Uses accent by default
+      color: var(--list-row-selected-fg-color);
+      .title, .subtitle, .adw-icon, .icon, svg, > * {
+        color: var(--list-row-selected-fg-color);
+      }
+      .subtitle {
+        opacity: 0.85;
+      }
+    }
+
+    &[disabled],
+    &:disabled {
+        opacity: var(--disabled-opacity);
+        cursor: not-allowed;
+        background-color: transparent !important; // Ensure no bg change on hover/active
+        &:hover {
+            background-color: transparent !important;
+        }
+    }
+
+    .title {
+      font-weight: 500;
+      // color is inherited or set by .selected/.activated
+    }
+    .subtitle {
+      font-size: var(--font-size-small);
+      opacity: 0.7; // Default muted subtitle
+      // color is inherited or set by .selected/.activated
+    }
+    // Ensure subtitle opacity is restored on selection
+    &.activated .subtitle,
+    &.selected .subtitle {
+        opacity: 1;
+    }
+  }
+}
+
+
+// Flat style for listbox (no outer border/shadow, often fills a container)
+.adw-list-box.flat {
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  background-color: transparent; // Flat listbox often has no bg of its own
+
+  > .adw-row {
+    background-color: transparent; // Rows are also transparent over what's behind the flat list
+     &:first-child, &:last-child { // No rounded corners for rows in a flat listbox
+        border-radius: 0;
+     }
+  }
+  // If it's flat AND boxed-list, it should still have card separators
+  &.boxed-list > .adw-row:not(:last-child) {
+    border-bottom: var(--border-width) solid var(--card-shade-color);
+  }
+  // If it's flat and NOT boxed-list, separators might be different or absent
+  &:not(.boxed-list) > .adw-row:not(:last-child) {
+     border-bottom: var(--border-width) solid var(--list-separator-color); // Or transparent if truly flat
+  }
+}
+
+// Navigation Sidebar Style
+// Used for lists that act as navigation sidebars.
+.adw-list-box.navigation-sidebar {
+  background-color: var(--sidebar-bg-color);
+  color: var(--sidebar-fg-color);
+  border: none; // Sidebars typically don't have their own border here; GtkScrolledWindow might.
+  border-radius: 0; // Usually part of a larger sidebar structure, no independent radius.
+  box-shadow: none;
+
+  > .adw-row {
+    background-color: transparent; // Rows are transparent over sidebar-bg
+    color: var(--sidebar-fg-color);
+    border-radius: var(--border-radius-small); // Rows in sidebar can have a small radius for selection
+    padding: var(--spacing-s) var(--spacing-m); // Potentially slightly different padding for sidebar rows
+
+    &:not(:last-child) {
+      border-bottom: none; // No separators between rows in a typical sidebar list
+    }
+    &:first-child, &:last-child {
+      border-radius: var(--border-radius-small); // Consistent radius for all rows
+    }
+
+    &:hover:not(.activated):not(.selected):not(:disabled) {
+      background-color: rgba(var(--sidebar-fg-color-rgb, 255,255,255), 0.06); // Subtle hover on sidebar-bg
+    }
+    // For sidebar, selected items often take accent color directly for background
+    // and have more prominent styling.
+    &.activated,
+    &.selected {
+      background-color: var(--accent-bg-color);
+      color: var(--accent-fg-color);
+      .title, .subtitle, .adw-icon, .icon, svg, > * {
+        color: var(--accent-fg-color);
+      }
+      .subtitle {
+        opacity: 0.7; // Subtitles on selected sidebar items are often slightly less prominent
+      }
+    }
+
+    // Focus ring for sidebar rows
+    &.interactive:focus-visible,
+    &.activatable:focus-visible {
+      outline: var(--focus-ring-width) solid var(--focus-ring-color);
+      outline-offset: calc(var(--focus-ring-width) * -1);
+    }
+  }
+}
+
+
+// Header for a list box (if used)
+.adw-list-box-header {
+  padding: var(--spacing-s) var(--spacing-m);
+  border-bottom: var(--border-width) solid var(--border-color); // Standard border
+  background-color: var(--view-bg-color); // Or specific header bg if needed
+  color: var(--view-fg-color);
+
+  > h1, > h2, > h3, > h4, > h5, > h6 { // Standard Libadwaita practice for list headers
+    margin: 0;
+    font-size: var(--font-size-large); // Example size for list headers
+    font-weight: var(--font-weight-bold);
+  }
+}

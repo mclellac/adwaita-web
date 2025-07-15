@@ -1,0 +1,125 @@
+// SCSS Mixins
+@use "variables"; // To access variables if needed within mixins (Reverted for debugging build hang)
+
+// Base styling for list rows / preference rows
+@mixin row-base {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box; // Ensure padding and border are included in width/height
+  padding: var(--row-padding-vertical, var(--row-padding-vertical-default)) var(--row-padding-horizontal, var(--row-padding-horizontal-default));
+  min-height: var(--row-min-height, 48px);
+  background-color: var(--row-bg-color, transparent); // Usually transparent if listbox has bg
+  color: var(--row-fg-color, var(--primary-fg-color));
+  border-width: 0 0 var(--border-width) 0; // Bottom border only by default
+  border-style: solid;
+  border-color: var(--list-separator-color); // Default separator color
+
+  // When inside a listbox, the listbox might control the very last border
+  .adw-list-box > &:last-child, // If this row is a direct child of listbox
+  &:host(.adw-list-box > :last-child) { // If this row is a web component, direct child of listbox
+    border-bottom-width: 0;
+  }
+
+  // For activatable rows, common focus style
+  &.activatable, &[activatable] { // Handle both class and attribute
+    &:focus-visible {
+      outline: 2px solid var(--accent-color);
+      outline-offset: var(--focus-outline-offset, -2px); // Inset outline
+      // Use a variable for row border radius, defaulting if not set
+      border-radius: var(--row-border-radius, var(--border-radius-small));
+    }
+  }
+}
+
+// Mixin to apply separators between direct children of a list-like container
+// $apply-separators: boolean - true to add separators, false to remove them
+// $child-selector: string - selector for children that should get separators (e.g., '.adw-row', 'adw-action-row')
+@mixin apply-list-separators($apply-separators: true, $child-selector: '> *') {
+  #{$child-selector} {
+    &:not(:last-child) {
+      border-bottom-style: if($apply-separators, solid, none);
+      border-bottom-width: if($apply-separators, var(--border-width), 0);
+      border-bottom-color: if($apply-separators, var(--list-separator-color), transparent);
+    }
+    // Ensure last child explicitly has no bottom border if separators are managed this way
+    &:last-child {
+        border-bottom-width: 0;
+    }
+  }
+  // If the container itself has a bottom border (e.g. from .boxed-list style),
+  // and separators are applied, the last child's separator might need to be removed.
+  // However, the above :not(:last-child) handles this for internal separators.
+}
+
+// Example:
+// @mixin common-focus-style {
+//   &:focus-visible {
+//     outline: 2px solid var(--accent-color);
+//     outline-offset: 2px;
+//     border-radius: var(--border-radius-small);
+//   }
+// }
+//
+// Then in a component:
+// .my-interactive-element {
+//   @include common-focus-style;
+// }
+
+// Mixin for clearfix
+// @mixin clearfix {
+//   &::after {
+//     content: "";
+//     display: table;
+//     clear: both;
+//   }
+// }
+
+// Visually hide an element but keep it accessible to screen readers
+@mixin visually-hidden {
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap; // Prevent line breaks from affecting layout
+}
+
+// Mixin to apply the core visual characteristics of a flat button
+@mixin apply-flat-button-style {
+  background-color: transparent;
+  border-color: transparent;
+  // Note: text color should be contextual (e.g., inherit, or var(--accent-color) for suggested-action)
+  // Hover and active states for general flat buttons:
+  &:hover {
+    background-color: var(--button-flat-hover-bg-color);
+  }
+  &:active {
+    background-color: var(--button-flat-active-bg-color);
+  }
+}
+
+// Mixin to apply the core visual characteristics of a circular button
+@mixin apply-circular-button-style {
+  padding: var(--spacing-xs);
+  border-radius: 50%;
+  .adw-icon, .icon, svg { // Styles for an icon directly within the circular button
+    margin: 0; // Remove any default margins if the icon is the sole content
+    width: var(--icon-size-base);
+    height: var(--icon-size-base);
+  }
+  // If a larger icon is typical for circular buttons (like .image-button):
+  // &.image-button .adw-icon, &.image-button .icon, &.image-button svg {
+  //   width: var(--icon-size-large);
+  //   height: var(--icon-size-large);
+  // }
+}
+
+// Mixin to apply the core visual characteristics of an Adwaita card
+@mixin apply-card-style {
+  background-color: var(--card-bg-color);
+  color: var(--card-fg-color);
+  border-radius: var(--border-radius-large); // Libadwaita cards use a larger radius
+  padding: var(--spacing-m); // Default padding for a card
+  box-shadow: var(--stronger-card-box-shadow); // Use the new stronger shadow variable
+  display: block; // Cards are typically block elements
+}

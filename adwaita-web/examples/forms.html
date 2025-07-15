@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adwaita Skin - Forms & Entries</title>
+    <link rel="stylesheet" href="../css/adwaita-skin.css">
+    <style>
+        body { padding: 20px; max-width: 600px; margin: auto; }
+        .example-section { margin-bottom: 30px; }
+        .example-section h2 { margin-top: 0; margin-bottom: 10px; font-size: 1.2em;}
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .adw-entry { width: 100%; /* Make entries take full width of their container */ }
+        textarea.adw-entry { min-height: 80px; }
+    </style>
+</head>
+<body class="theme-light">
+
+    <h1>Adwaita Skin - Form & Entry Examples</h1>
+
+    <form action="#" method="post">
+        <div class="example-section">
+            <h2>Text Inputs</h2>
+            <div class="form-group">
+                <label class="adw-label" for="name">Name:</label>
+                <input type="text" id="name" class="adw-entry" placeholder="Enter your name">
+            </div>
+            <div class="form-group">
+                <label class="adw-label" for="email">Email (Error State):</label>
+                <input type="email" id="email" class="adw-entry error" placeholder="Enter your email" value="invalid-email">
+            </div>
+            <div class="form-group">
+                <label class="adw-label" for="password">Password:</label>
+                <input type="password" id="password" class="adw-entry" placeholder="Enter your password">
+            </div>
+            <div class="form-group">
+                <label class="adw-label" for="search">Search:</label>
+                <input type="search" id="search" class="adw-entry" placeholder="Search...">
+            </div>
+        </div>
+
+        <div class="example-section">
+            <h2>Input States</h2>
+            <div class="form-group">
+                <label class="adw-label" for="disabled-input">Disabled Input:</label>
+                <input type="text" id="disabled-input" class="adw-entry" placeholder="Disabled" disabled>
+            </div>
+            <div class="form-group">
+                <label class="adw-label" for="readonly-input">Readonly Input:</label>
+                <input type="text" id="readonly-input" class="adw-entry" value="This is read-only" readonly>
+            </div>
+             <div class="form-group">
+                <label class="adw-label" for="success-input">Success Input (Optional Styling):</label>
+                <input type="text" id="success-input" class="adw-entry success" value="Looks good!">
+            </div>
+        </div>
+
+        <div class="example-section">
+            <h2>Textarea</h2>
+            <div class="form-group">
+                <label class="adw-label" for="comments">Comments:</label>
+                <textarea id="comments" class="adw-entry textarea" placeholder="Enter your comments"></textarea>
+            </div>
+        </div>
+
+        <div class="example-section">
+            <h2>Input with Icons (Conceptual Example - Requires Wrapper)</h2>
+            <div class="form-group">
+                <label class="adw-label" for="search-icon">Search with Icon:</label>
+                <div class="adw-entry-wrapper">
+                    <span class="adw-entry-icon start" aria-hidden="true">🔎</span>
+                    <input type="search" id="search-icon" class="adw-entry with-icon-start" placeholder="Search...">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="adw-label" for="clearable-input">Clearable (Conceptual):</label>
+                <div class="adw-entry-wrapper">
+                    <input type="text" id="clearable-input" class="adw-entry with-icon-end" placeholder="Type here..." value="Some text">
+                    <span class="adw-entry-icon end interactive" aria-label="Clear input" role="button">✕</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="example-section">
+            <h2>Labels</h2>
+            <p><span class="adw-label">This is a default label.</span></p>
+            <p><span class="adw-label bold">This is a bold label.</span></p>
+            <p><span class="adw-label muted">This is a muted label.</span></p>
+            <p><span class="adw-label title-1">Title 1 Label</span></p>
+            <p><span class="adw-label title-2">Title 2 Label</span></p>
+            <p><span class="adw-label title-3">Title 3 Label</span></p>
+            <p><span class="adw-label title-4">Title 4 Label</span></p>
+        </div>
+
+
+        <div class="form-group">
+            <button type="submit" class="adw-button suggested-action">Submit Form</button>
+            <button type="reset" class="adw-button flat">Reset</button>
+        </div>
+    </form>
+
+    <hr>
+    <button class="adw-button" onclick="toggleTheme()">Toggle Theme (Light/Dark)</button>
+
+    <script>
+        function toggleTheme() {
+            if (document.body.classList.contains('theme-light')) {
+                document.body.classList.remove('theme-light');
+                document.body.classList.add('theme-dark');
+            } else {
+                document.body.classList.remove('theme-dark');
+                document.body.classList.add('theme-light');
+            }
+        }
+
+        // Basic clear button functionality for conceptual example
+        document.querySelectorAll('.adw-entry-icon.interactive').forEach(icon => {
+            icon.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                if (input && input.matches('.adw-entry.with-icon-end')) {
+                    input.value = '';
+                    input.focus();
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,119 @@
+// scss/_entry_row.scss
+@use 'variables';
+@use 'mixins';
+
+.adw-entry-row {
+  @include mixins.row-base; // Applies common row styles
+  gap: var(--spacing-m);
+  // Vertical padding is often smaller for rows with inputs to align text baselines
+  padding-top: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
+
+  .adw-entry-row-text-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-shrink: 0; // Prevent title area from shrinking too much
+    // flex-grow: 0; // Title part usually doesn't grow
+  }
+
+  .adw-entry-row-title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-normal);
+    color: var(--window-fg-color);
+    line-height: 1.3; // Adjusted for better baseline alignment with entry
+  }
+
+  .adw-entry-row-subtitle {
+    font-size: var(--font-size-small);
+    color: var(--window-fg-color);
+    opacity: var(--dim-opacity); // Use dim-opacity for subtitles
+    line-height: 1.3;
+  }
+
+  .adw-entry-row-entry.adw-entry {
+    flex-grow: 1;
+    background-color: transparent;
+    border: none; // No border by default
+    box-shadow: none; // No inset shadow by default
+    padding: var(--spacing-xxs) 0; // Minimal vertical padding, no horizontal
+    line-height: 1.3; // Match title/subtitle line-height
+    min-width: 100px;
+
+    // Underline for focus, common in Adwaita preferences
+    border-bottom: var(--border-width) solid var(--border-color); // Subtle underline by default
+    border-radius: 0; // Ensure no radius from base .adw-entry
+
+    &:focus,
+    &:focus-visible {
+      border-bottom-color: var(--accent-color);
+      border-bottom-width: 2px; // Thicker underline on focus
+      box-shadow: none; // No outer ring for embedded entries
+    }
+
+    &[disabled],
+    &:disabled {
+      border-bottom-color: transparent; // No underline when disabled
+      // Opacity and text color handled by .adw-entry's disabled state
+    }
+  }
+
+  // .property style class
+  // De-emphasizes title, emphasizes value (which might be the entry if not editable, or subtitle)
+  &.property {
+    .adw-entry-row-title {
+      font-size: var(--font-size-small);
+      opacity: var(--dim-opacity);
+    }
+    .adw-entry-row-subtitle, // If subtitle is used as value
+    .adw-entry-row-entry.adw-entry { // If entry is styled as value
+      font-weight: var(--font-weight-bold); // Emphasize value
+      opacity: 1; // Ensure full opacity for value
+    }
+    // If the entry in a property row is meant to look like static text:
+    &.entry-as-value .adw-entry-row-entry.adw-entry {
+        border-bottom-color: transparent; // No underline
+        pointer-events: none; // Not interactive
+        cursor: default;
+        &:focus, &:focus-visible {
+            border-bottom-color: transparent;
+            box-shadow: none;
+        }
+    }
+  }
+
+  // .monospace style class
+  &.monospace {
+    // By default, applies to the entry part
+    .adw-entry-row-entry.adw-entry {
+      font-family: var(--monospace-font-family);
+    }
+    // If it's a property row, .monospace applies to the subtitle (value)
+    // This assumes the entry is hidden or styled as static text in property rows
+    // and the value is in the subtitle.
+    &.property .adw-entry-row-subtitle {
+      font-family: var(--monospace-font-family);
+    }
+    // If the entry itself is the value display in a property row:
+    &.property.entry-as-value .adw-entry-row-entry.adw-entry {
+        font-family: var(--monospace-font-family);
+    }
+  }
+
+
+  &[disabled],
+  &:disabled {
+    .adw-entry-row-title,
+    .adw-entry-row-subtitle {
+      opacity: var(--disabled-opacity); // Global disabled opacity
+      // color will be handled by the .adw-entry's own disabled state if text color needs to change
+    }
+    // .adw-entry-row-entry.adw-entry will handle its own disabled state
+  }
+
+  .adw-entry-row-prefix,
+  .adw-entry-row-suffix {
+    display: flex;
+    align-items: center;
+  }
+}

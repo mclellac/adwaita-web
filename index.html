@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adwaita Skin - CSS Demo</title>
+    <link rel="stylesheet" href="build/css/adwaita-skin.css"> <!-- Changed to load CSS from build directory -->
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: var(--document-font-family);
+            color: var(--text-color);
+            background-color: var(--window-bg-color);
+        }
+        .adw-header-bar { /* Basic headerbar styling, assuming it's not fully self-styled by _headerbar.scss alone */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-s) var(--spacing-m);
+            background-color: var(--headerbar-bg-color);
+            border-bottom: 1px solid var(--headerbar-border-color);
+            box-shadow: var(--headerbar-box-shadow, none); /* In case headerbar gets its own shadow variable */
+        }
+        .adw-header-bar__start, .adw-header-bar__center, .adw-header-bar__end {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-s);
+        }
+        .adw-header-bar__center {
+            flex-grow: 1;
+            justify-content: center;
+            text-align: center;
+        }
+         .adw-header-bar__title {
+            font-size: var(--title-1-font-size); /* Match Adwaita's default headerbar title size */
+            font-weight: var(--font-weight-bold);
+            color: var(--headerbar-fg-color);
+            margin: 0;
+        }
+        .adw-header-bar__subtitle {
+            font-size: var(--font-size-small);
+            font-weight: var(--font-weight-normal);
+            color: var(--secondary-fg-color); /* Use secondary for subtitles */
+            margin: 0;
+            margin-top: var(--spacing-xxs);
+        }
+
+        .main-content-area {
+            padding: var(--spacing-l);
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .widget-showcase {
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-m);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-large);
+            background-color: var(--view-bg-color); /* Give showcases a slight view background */
+        }
+        .widget-showcase > .adw-label.title-1,
+        .widget-showcase > h2.adw-label.title-2 {
+            margin-top: 0;
+            margin-bottom: var(--spacing-m);
+        }
+        .button-group .adw-button,
+        .control-group > * {
+            margin-right: var(--spacing-s);
+            margin-bottom: var(--spacing-s);
+        }
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--spacing-l); /* Increased gap for better spacing */
+            margin-bottom: var(--spacing-m); /* Increased bottom margin */
+        }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-m);
+        }
+        .component-grid > div {
+            padding: var(--spacing-s);
+            /* border: 1px dashed var(--border-color); */ /* Removed dashed border */
+            border-radius: var(--border-radius-medium);
+            margin-bottom: var(--spacing-m); /* Added margin for better separation */
+        }
+        .widget-showcase > h3.adw-label {
+            margin-top: var(--spacing-l);
+            margin-bottom: var(--spacing-m);
+        }
+        /* Ensure details/summary also pick up Adwaita styles if not default */
+        details { margin-top: var(--spacing-s); }
+        summary {
+            cursor: pointer;
+            font-weight: var(--font-weight-bold);
+            padding: var(--spacing-xs);
+            border-radius: var(--border-radius-small);
+        }
+        summary:hover { background-color: var(--button-flat-hover-bg-color); }
+        pre {
+            background-color: var(--shade-color);
+            padding: var(--spacing-s);
+            border-radius: var(--border-radius-small);
+            overflow-x: auto;
+            font-family: var(--monospace-font-family);
+            font-size: var(--font-size-small);
+        }
+        /* Icon placeholder styling (ensure it's robust) */
+        .adw-icon {
+            display: inline-flex; /* Changed to inline-flex for better alignment */
+            align-items: center;
+            justify-content: center;
+            width: var(--icon-size-base, 16px);
+            height: var(--icon-size-base, 16px);
+            background-color: currentColor;
+            -webkit-mask-size: contain;
+            mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-position: center;
+            vertical-align: middle; /* Helps with text alignment */
+        }
+        .adw-icon.size-small { width: var(--icon-size-small, 14px); height: var(--icon-size-small, 14px); }
+        .adw-icon.size-large { width: var(--icon-size-large, 20px); height: var(--icon-size-large, 20px); }
+        .adw-icon.size-xlarge { width: 24px; height: 24px; } /* Example custom size */
+        .adw-icon.size-xxlarge { width: 32px; height: 32px; } /* Example custom size */
+
+        /* Load all icons used in this demo */
+        /* (List of all .icon-*-symbolic classes from previous index.html, plus new ones if needed) */
+        .icon-actions-go-previous-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/go-previous-symbolic.svg"); mask-image: url("build/data/icons/symbolic/go-previous-symbolic.svg"); }
+        .icon-actions-open-menu-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/open-menu-symbolic.svg"); mask-image: url("build/data/icons/symbolic/open-menu-symbolic.svg"); }
+        .icon-actions-document-new-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/document-new-symbolic.svg"); mask-image: url("build/data/icons/symbolic/document-new-symbolic.svg"); }
+        .icon-actions-document-save-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/document-save-symbolic.svg"); mask-image: url("build/data/icons/symbolic/document-save-symbolic.svg"); }
+        .icon-actions-document-open-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/document-open-symbolic.svg"); mask-image: url("build/data/icons/symbolic/document-open-symbolic.svg"); }
+        .icon-actions-edit-delete-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/edit-delete-symbolic.svg"); mask-image: url("build/data/icons/symbolic/edit-delete-symbolic.svg"); }
+        .icon-actions-document-print-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/document-print-symbolic.svg"); mask-image: url("build/data/icons/symbolic/document-print-symbolic.svg"); }
+        .icon-devices-camera-photo-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/camera-photo-symbolic.svg"); mask-image: url("build/data/icons/symbolic/camera-photo-symbolic.svg"); }
+        .icon-actions-call-start-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/call-start-symbolic.svg"); mask-image: url("build/data/icons/symbolic/call-start-symbolic.svg"); }
+        .icon-actions-call-stop-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/call-stop-symbolic.svg"); mask-image: url("build/data/icons/symbolic/call-stop-symbolic.svg"); }
+        .icon-ui-pan-down-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/pan-down-symbolic.svg"); mask-image: url("build/data/icons/symbolic/pan-down-symbolic.svg"); }
+        .icon-actions-application-exit-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/application-exit-symbolic.svg"); mask-image: url("build/data/icons/symbolic/application-exit-symbolic.svg"); }
+        .icon-status-dialog-error-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/dialog-error-symbolic.svg"); mask-image: url("build/data/icons/symbolic/dialog-error-symbolic.svg"); }
+        .icon-ui-pan-up-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/pan-up-symbolic.svg"); mask-image: url("build/data/icons/symbolic/pan-up-symbolic.svg"); }
+        .icon-actions-media-playback-start-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/media-playback-start-symbolic.svg"); mask-image: url("build/data/icons/symbolic/media-playback-start-symbolic.svg"); }
+        .icon-apps-help-contents-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/help-contents-symbolic.svg"); mask-image: url("build/data/icons/symbolic/help-contents-symbolic.svg");}
+        .icon-status-emblem-ok-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/emblem-ok-symbolic.svg"); mask-image: url("build/data/icons/symbolic/emblem-ok-symbolic.svg");}
+        .icon-actions-go-next-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/go-next-symbolic.svg"); mask-image: url("build/data/icons/symbolic/go-next-symbolic.svg");}
+        .icon-status-dialog-information-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/dialog-information-symbolic.svg"); mask-image: url("build/data/icons/symbolic/dialog-information-symbolic.svg");}
+        .icon-status-dialog-warning-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/dialog-warning-symbolic.svg"); mask-image: url("build/data/icons/symbolic/dialog-warning-symbolic.svg");}
+        .icon-actions-go-up-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/go-up-symbolic.svg"); mask-image: url("build/data/icons/symbolic/go-up-symbolic.svg");}
+        .icon-actions-go-down-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/go-down-symbolic.svg"); mask-image: url("build/data/icons/symbolic/go-down-symbolic.svg");}
+        .icon-emoji-face-smile-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/face-smile-symbolic.svg"); mask-image: url("build/data/icons/symbolic/face-smile-symbolic.svg");}
+        .icon-actions-edit-select-all-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/edit-select-all-symbolic.svg"); mask-image: url("build/data/icons/symbolic/edit-select-all-symbolic.svg");}
+        .icon-emoji-face-plain-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/face-plain-symbolic.svg"); mask-image: url("build/data/icons/symbolic/face-plain-symbolic.svg");}
+        .icon-categories-applications-graphics-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/applications-graphics-symbolic.svg"); mask-image: url("build/data/icons/symbolic/applications-graphics-symbolic.svg");}
+        .icon-categories-applications-multimedia-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/applications-multimedia-symbolic.svg"); mask-image: url("build/data/icons/symbolic/applications-multimedia-symbolic.svg");}
+        .icon-categories-applications-utilities-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/applications-utilities-symbolic.svg"); mask-image: url("build/data/icons/symbolic/applications-utilities-symbolic.svg");}
+        .icon-actions-send-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/send-symbolic.svg"); mask-image: url("build/data/icons/symbolic/send-symbolic.svg");}
+        .icon-actions-bookmark-new-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/bookmark-new-symbolic.svg"); mask-image: url("build/data/icons/symbolic/bookmark-new-symbolic.svg");}
+        .icon-actions-system-search-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/system-search-symbolic.svg"); mask-image: url("build/data/icons/symbolic/system-search-symbolic.svg");}
+        .icon-actions-view-refresh-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/view-refresh-symbolic.svg"); mask-image: url("build/data/icons/symbolic/view-refresh-symbolic.svg");}
+        .icon-places-user-home-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/user-home-symbolic.svg"); mask-image: url("build/data/icons/symbolic/user-home-symbolic.svg");}
+        .icon-status-weather-clear-night-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/weather-clear-night-symbolic.svg"); mask-image: url("build/data/icons/symbolic/weather-clear-night-symbolic.svg");}
+        .icon-status-avatar-default-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/avatar-default-symbolic.svg"); mask-image: url("build/data/icons/symbolic/avatar-default-symbolic.svg");}
+        .icon-ui-view-more-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/view-more-symbolic.svg"); mask-image: url("build/data/icons/symbolic/view-more-symbolic.svg");}
+        /* For icons that might be directly in symbolic/ (like pan-up, pan-down, window-close from logs) */
+        .icon-pan-up-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/pan-up-symbolic.svg"); mask-image: url("build/data/icons/symbolic/pan-up-symbolic.svg"); }
+        .icon-pan-down-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/pan-down-symbolic.svg"); mask-image: url("build/data/icons/symbolic/pan-down-symbolic.svg"); }
+        .icon-window-close-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/window-close-symbolic.svg"); mask-image: url("build/data/icons/symbolic/window-close-symbolic.svg"); }
+        .icon-process-working-symbolic { -webkit-mask-image: url("build/data/icons/symbolic/process-working-symbolic.svg"); mask-image: url("build/data/icons/symbolic/process-working-symbolic.svg"); }
+
+
+        /* Helper for static popover */
+        .static-popover-container {
+            position: relative;
+            display: inline-block; /* Or block, depending on context */
+            margin: var(--spacing-xl);
+        }
+    </style>
+</head>
+<body>
+    <header class="adw-header-bar" id="main-header-bar">
+        <div class="adw-header-bar__start">
+            <button class="adw-button icon-only flat" id="header-back-button" aria-label="Back" title="Go Previous (dummy)"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
+        </div>
+        <div class="adw-header-bar__center">
+            <div>
+                <h1 class="adw-header-bar__title">Adwaita Web UI Showcase</h1>
+                <div class="adw-header-bar__subtitle">Comprehensive Component Demo</div>
+            </div>
+        </div>
+        <div class="adw-header-bar__end">
+            <button class="adw-button flat" id="theme-toggle-button">Toggle Theme</button>
+            <button class="adw-button icon-only flat" id="header-menu-button" aria-label="Menu" title="Open Menu (dummy)"><span class="adw-icon icon-actions-open-menu-symbolic"></span></button>
+        </div>
+    </header>
+
+    <div class="main-content-area">
+        <div class="adw-label title-1" style="text-align: center; margin-bottom: var(--spacing-xl);">Adwaita Web Component Showcase</div>
+        <p class="adw-label body" style="text-align: center; max-width: 60ch; margin: 0 auto var(--spacing-xl);">
+            This page demonstrates various HTML elements styled with Adwaita Web CSS.
+            Most components are static representations. Use the "Toggle Theme" button in the header to switch between light and dark modes.
+        </p>
+
+        <!-- Theme Controls (Static) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Theme Controls</h2>
+            <div class="control-group">
+                <span class="adw-label">Accent Color (Examples):</span>
+                <button class="adw-button" onclick="setAccent('default')">Default</button>
+                <button class="adw-button" onclick="setAccent('blue')">Blue</button>
+                <button class="adw-button" onclick="setAccent('green')">Green</button>
+                <button class="adw-button" onclick="setAccent('yellow')">Yellow</button>
+                <button class="adw-button" onclick="setAccent('orange')">Orange</button>
+                <button class="adw-button" onclick="setAccent('red')">Red</button>
+                <button class="adw-button" onclick="setAccent('purple')">Purple</button>
+                 <button class="adw-button" onclick="setAccent('pink')">Pink</button>
+                <button class="adw-button" onclick="setAccent('slate')">Slate</button>
+                <button class="adw-button" onclick="setAccent('teal')">Teal</button>
+            </div>
+        </section>
+
+        <!-- Labels & Text -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Labels & Text Styles</h2>
+            <h1 class="adw-label title-1">Title 1 Label</h1>
+            <h2 class="adw-label title-2">Title 2 Label</h2>
+            <h3 class="adw-label title-3">Title 3 Label</h3>
+            <h4 class="adw-label title-4">Title 4 Label</h4>
+            <p class="adw-label body">Standard body label. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span></p>
+            <p class="adw-label body-large">Large body label (if defined).</span> Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <p><span class="adw-label dim-label">Dim label (if utility class exists or applied by context).</span> Ut enim ad minim veniam.</p>
+            <p><a href="#" class="adw-label link">Link Label (if specific class exists)</a> or just <a href="#">a standard link</a>.</p>
+            <p><label class="adw-label selectable">Selectable text label (if class exists)</label></p>
+            <p class="adw-label">Shortcut: <span class="adw-shortcut-label">Ctrl+S</span></p>
+        </section>
+
+        <!-- Buttons -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Buttons</h2>
+            <h3 class="adw-label title-3">Standard Buttons</h3>
+            <div class="control-group">
+                <button class="adw-button">Regular</button>
+                <button class="adw-button suggested-action">Suggested</button>
+                <button class="adw-button destructive-action">Destructive</button>
+                <button class="adw-button" disabled>Disabled</button>
+            </div>
+            <h3 class="adw-label title-3">Flat Buttons</h3>
+            <div class="control-group">
+                <button class="adw-button flat">Flat Regular</button>
+                <button class="adw-button flat suggested-action">Flat Suggested</button>
+                <button class="adw-button flat destructive-action">Flat Destructive</button>
+                <button class="adw-button flat" disabled>Flat Disabled</button>
+            </div>
+            <h3 class="adw-label title-3">Icon Buttons</h3>
+            <div class="control-group">
+                <button class="adw-button"><span class="adw-icon icon-actions-document-save-symbolic"></span> Save</button>
+                <button class="adw-button suggested-action"><span class="adw-icon icon-actions-document-open-symbolic"></span> Open</button>
+                <button class="adw-button icon-only" aria-label="New"><span class="adw-icon icon-actions-document-new-symbolic"></span></button>
+                <button class="adw-button icon-only flat" aria-label="Print"><span class="adw-icon icon-actions-document-print-symbolic"></span></button>
+                <button class="adw-button icon-only" aria-label="Delete" disabled><span class="adw-icon icon-actions-edit-delete-symbolic"></span></button>
+            </div>
+            <h3 class="adw-label title-3">Circular Buttons</h3>
+            <div class="control-group">
+                <button class="adw-button circular" aria-label="Photo"><span class="adw-icon icon-devices-camera-photo-symbolic"></span></button>
+                <button class="adw-button circular suggested-action" aria-label="Call"><span class="adw-icon icon-actions-call-start-symbolic"></span></button>
+                <button class="adw-button circular destructive-action" aria-label="Stop"><span class="adw-icon icon-actions-call-stop-symbolic"></span></button>
+                <button class="adw-button circular flat" aria-label="More"><span class="adw-icon icon-ui-view-more-symbolic"></span></button>
+                <button class="adw-button circular" disabled aria-label="Exit"><span class="adw-icon icon-actions-application-exit-symbolic"></span></button>
+            </div>
+             <h3 class="adw-label title-3">Pill Buttons (often for Toggles)</h3>
+            <div class="control-group">
+                <button class="adw-button pill">Pill Button 1</button>
+                <button class="adw-button pill active">Pill Active</button>
+                 <button class="adw-button pill" disabled>Pill Disabled</button>
+            </div>
+        </section>
+
+        <!-- Entries & Inputs -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Entries & Inputs</h2>
+            <div class="component-grid">
+                <div>
+                    <label for="entry-default" class="adw-label">Default Entry:</label>
+                    <input type="text" class="adw-entry" id="entry-default" placeholder="Enter text...">
+                </div>
+                <div>
+                    <label for="entry-disabled" class="adw-label">Disabled Entry:</label>
+                    <input type="text" class="adw-entry" id="entry-disabled" placeholder="Disabled" disabled>
+                </div>
+                <div>
+                    <label for="entry-readonly" class="adw-label">Readonly Entry:</label>
+                    <input type="text" class="adw-entry" id="entry-readonly" value="Readonly text" readonly>
+                </div>
+                <div>
+                    <label for="entry-error" class="adw-label">Error State (if styled):</label>
+                    <input type="text" class="adw-entry error" id="entry-error" value="Invalid input">
+                </div>
+                <div>
+                    <label for="entry-icon-before" class="adw-label">With Icon (conceptual):</label>
+                    <div style="position: relative;"> <!-- Example wrapper for icon positioning -->
+                        <span class="adw-icon icon-actions-system-search-symbolic" style="position:absolute; left: 8px; top: 50%; transform: translateY(-50%); opacity: 0.5;"></span>
+                        <input type="text" class="adw-entry" id="entry-icon-before" placeholder="Search..." style="padding-left: 30px;">
+                    </div>
+                </div>
+                 <div>
+                    <label for="entry-password" class="adw-label">Password Entry:</label>
+                    <input type="password" class="adw-entry" id="entry-password" value="password">
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls: Checkbox, Radio, Switch, SpinButton, SplitButton, ToggleGroup -->
+        <section class="widget-showcase" id="controls-showcase">
+            <h2 class="adw-label title-2">Controls</h2>
+            <div class="component-grid">
+                <div style="margin-bottom: var(--spacing-l);"> <!-- Added specific margin for better separation -->
+                    <h3 class="adw-label title-3">Checkboxes</h3>
+                    <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox"> Option 1</label><br>
+                    <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" checked> Option 2 (Checked)</label><br>
+                    <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" disabled> Option 3 (Disabled)</label><br>
+                    <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox" checked disabled> Option 4 (Checked, Disabled)</label>
+                </div>
+                <div style="margin-bottom: var(--spacing-l);"> <!-- Added specific margin for better separation -->
+                    <h3 class="adw-label title-3">Radio Buttons</h3>
+                    <label class="adw-radio-wrapper"><input type="radio" name="radio-group1" class="adw-radio" checked> Choice A</label><br>
+                    <label class="adw-radio-wrapper"><input type="radio" name="radio-group1" class="adw-radio"> Choice B</label><br>
+                    <label class="adw-radio-wrapper"><input type="radio" name="radio-group1" class="adw-radio" disabled> Choice C (Disabled)</label>
+                </div>
+                <div style="margin-bottom: var(--spacing-l);"> <!-- Added specific margin for better separation -->
+                    <h3 class="adw-label title-3">Switches (Toggle Switches)</h3>
+                    <p class="adw-label body-small" style="margin-top: calc(var(--spacing-m) * -1); margin-bottom: var(--spacing-s);">Standalone toggle switches.</p>
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing-s);">
+                        <label class="adw-switch-wrapper" for="switch_x_id">
+                            <span class="adw-switch">
+                                <input type="checkbox" id="switch_x_id">
+                                <span class="adw-switch-slider"></span>
+                            </span>
+                            <span style="margin-left: var(--spacing-s);">Setting X</span>
+                        </label>
+                        <label class="adw-switch-wrapper" for="switch_y_id">
+                            <span class="adw-switch">
+                                <input type="checkbox" id="switch_y_id" checked>
+                                <span class="adw-switch-slider"></span>
+                            </span>
+                            <span style="margin-left: var(--spacing-s);">Setting Y (On)</span>
+                        </label>
+                        <label class="adw-switch-wrapper" for="switch_z_id">
+                            <span class="adw-switch">
+                                <input type="checkbox" id="switch_z_id" disabled>
+                                <span class="adw-switch-slider"></span>
+                            </span>
+                            <span style="margin-left: var(--spacing-s);">Setting Z (Disabled)</span>
+                        </label>
+                        <label class="adw-switch-wrapper" for="switch_w_id">
+                            <span class="adw-switch">
+                                <input type="checkbox" id="switch_w_id" checked disabled>
+                                <span class="adw-switch-slider"></span>
+                            </span>
+                            <span style="margin-left: var(--spacing-s);">Setting W (On, Disabled)</span>
+                        </label>
+                    </div>
+                </div>
+                <div style="margin-bottom: var(--spacing-l);"> <!-- Added specific margin for better separation -->
+                    <h3 class="adw-label title-3">Spin Button</h3>
+                    <div class="adw-spin-button">
+                        <input type="number" class="adw-entry adw-spin-button-entry" value="5" min="0" max="10">
+                        <div class="adw-spin-button-buttons">
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-up" aria-label="Increase"><span class="adw-icon icon-ui-pan-up-symbolic"></span></button>
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-down" aria-label="Decrease"><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
+                        </div>
+                    </div>
+                    <h3 class="adw-label title-3" style="margin-top:var(--spacing-s);">Disabled Spin Button</h3>
+                    <div class="adw-spin-button disabled">
+                        <input type="number" class="adw-entry adw-spin-button-entry" value="3" disabled>
+                         <div class="adw-spin-button-buttons">
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-up" aria-label="Increase" disabled><span class="adw-icon icon-ui-pan-up-symbolic"></span></button>
+                            <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-down" aria-label="Decrease" disabled><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-bottom: var(--spacing-l);"> <!-- Added specific margin for better separation -->
+                    <h3 class="adw-label title-3">Split Button</h3>
+                    <div class="adw-split-button">
+                        <button class="adw-split-button-action">Main Action</button>
+                        <button class="adw-split-button-dropdown" aria-label="More options"><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
+                    </div>
+                    <h3 class="adw-label title-3" style="margin-top:var(--spacing-s);">Suggested Split Button</h3>
+                    <div class="adw-split-button suggested-action">
+                        <button class="adw-split-button-action"><span class="adw-icon icon-actions-document-save-symbolic"></span> Save All</button>
+                        <button class="adw-split-button-dropdown" aria-label="More save options"><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
+                    </div>
+                     <h3 class="adw-label title-3" style="margin-top:var(--spacing-s);">Disabled Split Button</h3>
+                    <div class="adw-split-button disabled">
+                        <button class="adw-split-button-action">Disabled Action</button>
+                        <button class="adw-split-button-dropdown" aria-label="More options" disabled><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
+                    </div>
+                </div>
+                <div style="margin-bottom: var(--spacing-l);"> <!-- Added specific margin for better separation -->
+                    <h3 class="adw-label title-3">Toggle Buttons (Standalone)</h3>
+                    <button class="adw-button toggle">Toggle Me</button> <!-- Add .toggle class if needed, or rely on JS to add .active -->
+                    <button class="adw-button active" aria-pressed="true">Pressed Toggle</button>
+                    <button class="adw-button" disabled>Disabled Toggle</button>
+
+                    <h3 class="adw-label title-3" style="margin-top:var(--spacing-s);">Toggle Group (Linked)</h3>
+                    <div class="adw-toggle-group linked">
+                        <button class="adw-button active" aria-pressed="true">Left</button>
+                        <button class="adw-button">Center</button>
+                        <button class="adw-button">Right</button>
+                    </div>
+                     <h3 class="adw-label title-3" style="margin-top:var(--spacing-s);">Toggle Group (Not Linked)</h3>
+                    <div class="adw-toggle-group">
+                        <button class="adw-button active pill" aria-pressed="true"><span class="adw-icon icon-actions-edit-select-all-symbolic"></span></button>
+                        <button class="adw-button pill"><span class="adw-icon icon-emoji-face-smile-symbolic"></span></button>
+                        <button class="adw-button pill"><span class="adw-icon icon-emoji-face-plain-symbolic"></span></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rows & ListBoxes -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Rows & ListBoxes</h2>
+            <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column for listbox clarity -->
+                <div>
+                    <h3 class="adw-label title-3">Default ListBox</h3>
+                    <div class="adw-list-box">
+                        <div class="adw-list-box-header"><h4 class="adw-label title-4">Section Header</h4></div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-prefix"><span class="adw-icon icon-places-user-home-symbolic"></span></div>
+                            <div class="adw-action-row-content">
+                                <div class="adw-action-row-title">General Settings</div>
+                                <div class="adw-action-row-subtitle">Language, Time, Users</div>
+                            </div>
+                            <div class="adw-action-row-suffix"><span class="adw-icon icon-actions-go-next-symbolic"></span></div>
+                        </div>
+                        <div class="adw-entry-row">
+                            <label class="adw-entry-row-title" for="lb-entry1">Username:</label>
+                            <input type="text" class="adw-entry" id="lb-entry1" placeholder="Enter username">
+                        </div>
+                        <!-- AdwSwitchRow Example -->
+                        <div class="adw-switch-row activatable">
+                             <div class="adw-action-row-content" id="label_for_feature_x_switch">
+                                <div class="adw-action-row-title">Enable Feature X</div>
+                                <div class="adw-action-row-subtitle">This will turn on X</div>
+                            </div>
+                            <div class="adw-switch-wrapper adw-action-row-suffix"> <!-- Using div instead of label if main content is the label -->
+                                <span class="adw-switch">
+                                    <input type="checkbox" id="feature_x_switch" aria-labelledby="label_for_feature_x_switch" checked>
+                                    <span class="adw-switch-slider"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="adw-combo-row">
+                            <label class="adw-combo-row-title" for="lb-combo1">Paper Size:</label>
+                            <select class="adw-entry" id="lb-combo1"> <!-- Reuse .adw-entry for select styling if appropriate -->
+                                <option>A4</option>
+                                <option>Letter</option>
+                                <option>Legal</option>
+                            </select>
+                        </div>
+                        <div class="adw-password-entry-row"> <!-- Conceptual: AdwPasswordEntryRow -->
+                            <label class="adw-entry-row-title" for="lb-password-entry1">Password:</label>
+                            <div style="position:relative; flex-grow: 1; display: flex; align-items: center;">
+                                <input type="password" class="adw-entry" id="lb-password-entry1" value="adwaita" style="flex-grow: 1;">
+                                <button class="adw-button icon-only flat" aria-label="Show password" style="margin-left: var(--spacing-xs);">
+                                    <span class="adw-icon icon-actions-view-reveal-symbolic"></span> <!-- icon-actions-view-conceal-symbolic when hiding -->
+                                </button>
+                            </div>
+                        </div>
+                        <div class="adw-spin-row"> <!-- Conceptual: AdwSpinRow -->
+                            <label class="adw-entry-row-title">Items:</label> <!-- Reusing entry-row-title for consistency -->
+                            <div class="adw-spin-button" style="flex-grow: 1;">
+                                <input type="number" class="adw-entry adw-spin-button-entry" value="3" min="0" max="10">
+                                <div class="adw-spin-button-buttons">
+                                    <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-up" aria-label="Increase"><span class="adw-icon icon-ui-pan-up-symbolic"></span></button>
+                                    <button class="adw-button icon-only flat adw-spin-button-control adw-spin-button-down" aria-label="Decrease"><span class="adw-icon icon-ui-pan-down-symbolic"></span></button>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="adw-expander-row">
+                            <div class="adw-action-row activatable">
+                                <div class="adw-action-row-content">
+                                    <div class="adw-action-row-title">Advanced Options</div>
+                                </div>
+                                <span class="adw-expander-row-chevron adw-icon icon-ui-pan-down-symbolic"></span>
+                            </div>
+                            <div class="adw-expander-row-content" style="padding: var(--spacing-m);"> <!-- Hidden by default via CSS -->
+                                <p class="adw-label body">Here are some advanced settings...</p>
+                                <label class="adw-checkbox-wrapper"><input type="checkbox" class="adw-checkbox"> Enable super mode</label>
+                            </div>
+                        </div>
+                        <div class="adw-action-row destructive-action activatable">
+                            <div class="adw-action-row-content">
+                                <div class="adw-action-row-title">Reset All Settings</div>
+                            </div>
+                        </div>
+                         <div class="adw-action-row property">
+                            <div class="adw-action-row-content">
+                                <div class="adw-action-row-title">Version</div>
+                                <div class="adw-action-row-subtitle">1.2.3</div>
+                            </div>
+                        </div>
+                        <div class="adw-action-row monospace property">
+                            <div class="adw-action-row-content">
+                                <div class="adw-action-row-title">Build ID</div>
+                                <div class="adw-action-row-subtitle">a1b2c3d4e5f6</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Boxed ListBox</h3>
+                    <div class="adw-list-box boxed-list">
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">First Item</div>
+                        </div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">Second Item</div>
+                            <div class="adw-action-row-subtitle">With a subtitle</div>
+                        </div>
+                        <div class="adw-action-row activatable selected">
+                            <div class="adw-action-row-title">Third Item (Selected)</div>
+                        </div>
+                    </div>
+                </div>
+                 <div>
+                    <h3 class="adw-label title-3">Boxed ListBox (Separate)</h3>
+                    <div class="adw-list-box boxed-list-separate">
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">Card Row 1</div>
+                        </div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">Card Row 2</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Flat ListBox</h3>
+                    <div class="adw-list-box flat" style="background-color: var(--shade-color); padding: var(--spacing-xs);"> <!-- Added bg for visibility -->
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">Item A</div>
+                        </div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-title">Item B</div>
+                        </div>
+                    </div>
+                </div>
+                 <div>
+                    <h3 class="adw-label title-3">Navigation Sidebar ListBox</h3>
+                    <div class="adw-list-box navigation-sidebar" style="max-width: 250px;">
+                        <div class="adw-action-row activatable selected">
+                             <div class="adw-action-row-prefix"><span class="adw-icon icon-categories-applications-graphics-symbolic"></span></div>
+                            <div class="adw-action-row-title">Graphics Apps</div>
+                        </div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-prefix"><span class="adw-icon icon-categories-applications-multimedia-symbolic"></span></div>
+                            <div class="adw-action-row-title">Multimedia</div>
+                        </div>
+                        <div class="adw-action-row activatable">
+                            <div class="adw-action-row-prefix"><span class="adw-icon icon-categories-applications-utilities-symbolic"></span></div>
+                            <div class="adw-action-row-title">Utilities</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- This is the end of the "Rows & ListBoxes" component-grid -->
+            </div>
+        </section>
+
+        <!-- Navigation & View Containers (Conceptual Structures) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Navigation & View Containers (Conceptual Structures)</h2>
+            <p class="adw-label body">These are complex containers, often requiring JavaScript for full functionality. Static representations are shown.</p>
+            <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column for these complex items -->
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">Navigation View</h3>
+                    <div class="adw-navigation-view" style="height: 250px; border: 1px solid var(--border-color); display: flex; flex-direction: column;">
+                        <div class="adw-header-bar">
+                            <div class="adw-header-bar__start">
+                                <button class="adw-button icon-only flat"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
+                            </div>
+                            <div class="adw-header-bar__center">
+                                <h1 class="adw-header-bar__title">Page Title</h1>
+                            </div>
+                        </div>
+                        <div style="padding: var(--spacing-m); flex-grow: 1; background-color: var(--view-bg-color);">
+                            <p class="adw-label body">Content of the current page in Navigation View.</p>
+                            <button class="adw-button">Push to next page (conceptual)</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-bottom: var(--spacing-xl);">
+                    <h3 class="adw-label title-3">Flap</h3>
+                    <div class="adw-flap" style="height: 200px; border: 1px solid var(--border-color); display: flex; position: relative; overflow: hidden;">
+                        <div class="adw-flap__flap-area" style="width: 150px; background-color: var(--sidebar-bg-color); padding: var(--spacing-m); position: absolute; height: 100%; left: 0; transform: translateX(0%); transition: transform 0.2s ease-out;">
+                            <p class="adw-label body-small">Flap Content</p>
+                            <button class="adw-button small">Action</button>
+                        </div>
+                        <div class="adw-flap__content-area" style="flex-grow: 1; background-color: var(--view-bg-color); padding: var(--spacing-m); margin-left: 150px; transition: margin-left 0.2s ease-out;">
+                            <p class="adw-label body">Main Content</p>
+                            <p class="adw-label body-small">Flap is currently shown. Click to hide (conceptual).</p>
+                        </div>
+                    </div>
+                    <small class="adw-label caption">Conceptual: Flap shown. Interactive hide/show needs JS.</small>
+                </div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">Navigation Split View</h3>
+                    <div class="adw-navigation-split-view" style="height: 250px; border: 1px solid var(--border-color); display: flex;">
+                        <div class="adw-navigation-split-view__sidebar" style="width: 180px; background-color: var(--sidebar-bg-color); padding: var(--spacing-m); border-right: 1px solid var(--border-color);">
+                            <p class="adw-label title-4">Sidebar</p>
+                            <div class="adw-list-box flat navigation-sidebar">
+                                <div class="adw-action-row activatable selected">Item 1</div>
+                                <div class="adw-action-row activatable">Item 2</div>
+                            </div>
+                        </div>
+                        <div class="adw-navigation-split-view__content" style="flex-grow: 1; background-color: var(--view-bg-color); padding: var(--spacing-m);">
+                            <p class="adw-label title-3">Main Content Area</p>
+                            <p class="adw-label body">Details for selected item.</p>
+                        </div>
+                    </div>
+                    <small class="adw-label caption">Conceptual: Sidebar docked. Responsive collapse/overlay needs JS.</small>
+                </div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">Overlay Split View</h3>
+                    <div class="adw-overlay-split-view" style="height: 250px; border: 1px solid var(--border-color); position: relative; overflow: hidden;">
+                        <div class="adw-overlay-split-view__content" style="background-color: var(--view-bg-color); padding: var(--spacing-m); height: 100%;">
+                            <p class="adw-label title-3">Main Content Area</p>
+                            <button class="adw-button">Show Overlay Sidebar (Conceptual)</button>
+                        </div>
+                        <div class="adw-overlay-split-view__sidebar" style="width: 200px; background-color: var(--popover-bg-color); padding: var(--spacing-m); position: absolute; top: 0; left: 0; height: 100%; transform: translateX(0%); box-shadow: var(--popover-box-shadow); transition: transform 0.2s ease-out;">
+                            <p class="adw-label title-4">Overlay Sidebar</p>
+                            <p class="adw-label body-small">This sidebar overlays the content.</p>
+                            <button class="adw-button small flat">Close</button>
+                        </div>
+                        <!-- <div class="adw-overlay-split-view__backdrop" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.2); display: block;"></div> -->
+                    </div>
+                     <small class="adw-label caption">Conceptual: Overlay sidebar shown. Interactive hide/show needs JS.</small>
+                </div>
+                <div> <!-- BreakpointBin is the last item in this new section's grid -->
+                    <h3 class="adw-label title-3">Breakpoint Bin</h3>
+                    <div class="adw-breakpoint-bin" style="border: 1px solid var(--border-color); padding: var(--spacing-m); min-height: 100px;">
+                        <div data-name="child1" data-condition="0" style="background-color: var(--accent-blue-bg); color: white; padding: var(--spacing-s);">
+                            <p class="adw-label body">Child 1 (Visible by default or on small widths)</p>
+                        </div>
+                        <div data-name="child2" data-condition="600" style="background-color: var(--accent-green-bg); color: white; padding: var(--spacing-s); display: none;">
+                             <p class="adw-label body">Child 2 (Visible on widths >= 600px)</p>
+                        </div>
+                    </div>
+                    <small class="adw-label caption">Conceptual: Shows different children based on width. Resize to see (needs JS).</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- Standalone Rows -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Standalone Rows</h2>
+            <p class="adw-label body">Generic rows, typically used within ListBoxes, but can be standalone.</p>
+            <div class="adw-row" style="background-color: var(--view-bg-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-medium); padding: var(--spacing-m); margin-bottom: var(--spacing-s);">
+                <span class="adw-icon icon-actions-send-symbolic" style="margin-right: var(--spacing-s);"></span>
+                <span class="adw-label">Simple row with text and an icon</span>
+            </div>
+            <div class="adw-row activatable" style="background-color: var(--view-bg-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-medium); padding: var(--spacing-m);">
+                <span class="adw-label">Activatable Row</span>
+                <div style="flex-grow: 1;"></div>
+                <span class="adw-icon icon-actions-go-next-symbolic"></span>
+            </div>
+        </section>
+
+        <!-- Cards -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Cards</h2>
+            <div class="component-grid">
+                <div class="adw-card">
+                    <h3 class="adw-label title-3" style="margin-top:0;">Standard Card</h3>
+                    <p class="adw-label body">This is a standard card. It contains some text content and demonstrates the default card padding and shadow.</p>
+                    <div class="adw-button-row" style="justify-content: flex-end; margin-top: var(--spacing-m);">
+                        <button class="adw-button flat">Action</button>
+                    </div>
+                </div>
+                <div class="adw-card activatable">
+                    <h3 class="adw-label title-3" style="margin-top:0;">Activatable Card</h3>
+                    <p class="adw-label body">This card has hover and active states. Click me!</p>
+                </div>
+                <button class="adw-button card">
+                    <!-- Content for button styled as card -->
+                    <h3 class="adw-label title-3" style="margin-top:0;">Button as Card</h3>
+                    <p class="adw-label body">This is a button that looks like a card. It's fully clickable.</p>
+                </button>
+            </div>
+        </section>
+
+        <!-- Popovers & Dialogs (Static) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Popovers & Dialogs (Static Representations)</h2>
+            <div class="component-grid">
+                <div class="static-popover-container">
+                    <button class="adw-button" id="popoverDemoBtn" aria-haspopup="true" aria-expanded="false">Menu (Popover Below)</button>
+                    <div class="adw-popover" id="popoverDemo" role="menu" style="position: absolute; top: 100%; left: 0; z-index: var(--z-index-popover); margin-top: var(--spacing-xs); width: 200px; display: none;">
+                        <div class="adw-list-box flat"> <!-- Popovers often use flat listboxes -->
+                            <div class="adw-action-row activatable" role="menuitem">
+                                <div class="adw-action-row-title">New File</div>
+                                <div class="adw-action-row-suffix"><span class="adw-shortcut-label">Ctrl+N</span></div>
+                            </div>
+                            <div class="adw-action-row activatable" role="menuitem">
+                                <div class="adw-action-row-title">Open...</div>
+                            </div>
+                            <hr style="margin: var(--spacing-xs) 0; border-color: var(--border-color);">
+                            <div class="adw-action-row destructive-action activatable" role="menuitem">
+                                <div class="adw-action-row-title">Quit</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div> <!-- Wrapper for button and dialog -->
+                    <button class="adw-button" id="openSampleDialogBtn">Open Sample Dialog</button>
+                    <div class="adw-dialog-backdrop" id="sampleDialogBackdrop" style="display: none;"></div>
+                    <div class="adw-dialog" id="sampleDialog" role="dialog" style="position:fixed; display:none; max-width: 350px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050;">
+                        <header class="adw-header-bar">
+                            <h2 class="adw-header-bar__title">Sample Dialog</h2>
+                            <button class="adw-button icon-only flat" aria-label="Close" onclick="closeDialog('sampleDialog')"><span class="adw-icon icon-window-close-symbolic"></span></button>
+                        </header>
+                        <div class="adw-dialog__content">
+                            <p class="adw-label body">This is the content area of the dialog. It can contain any information or controls needed.</p>
+                            <input type="text" class="adw-entry" placeholder="Example field" style="margin-top: var(--spacing-s); width: 100%;">
+                        </div>
+                        <footer class="adw-dialog__actions">
+                            <button class="adw-button" onclick="closeDialog('sampleDialog')">Cancel</button>
+                            <button class="adw-button suggested-action" onclick="closeDialog('sampleDialog')">OK</button>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Indicators & Progress -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Indicators & Progress</h2>
+            <div class="component-grid">
+                <div>
+                    <h3 class="adw-label title-3">Progress Bar</h3>
+                    <div class="adw-progress-bar" style="margin-bottom: var(--spacing-s);"><div style="width: 60%;"></div></div>
+                    <div class="adw-progress-bar indeterminate"><div class="adw-progress-bar__pulse"></div></div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Spinner</h3>
+                    <div class="control-group">
+                        <div class="adw-spinner active size-small"></div>
+                        <div class="adw-spinner active"></div>
+                        <div class="adw-spinner active size-large"></div>
+                        <div class="adw-spinner active size-xlarge"></div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Carousel Indicators (Static)</h3>
+                    <div class="adw-carousel-indicators">
+                        <button class="adw-carousel-indicator active" aria-label="Go to slide 1"></button>
+                        <button class="adw-carousel-indicator" aria-label="Go to slide 2"></button>
+                        <button class="adw-carousel-indicator" aria-label="Go to slide 3"></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Avatars -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Avatars</h2>
+            <div class="control-group">
+                <div class="adw-avatar size-24"><span class="adw-avatar-text">JD</span></div>
+                <div class="adw-avatar size-32"><span class="adw-icon icon-status-avatar-default-symbolic"></span></div>
+                <div class="adw-avatar size-48"><span class="adw-avatar-text">AW</span></div>
+                <div class="adw-avatar size-64" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22 viewBox=%220 0 64 64%22><circle cx=%2232%22 cy=%2232%22 r=%2228%22 fill=%22%2399c1f1%22/></svg>');"></div>
+                <div class="adw-avatar size-large"> <!-- Uses default size-large from avatar.scss -->
+                    <span class="adw-avatar-text">LG</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Banners & Toasts (Static) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Banners & Toasts (Static Representations)</h2>
+             <div class="component-grid">
+                <div>
+                    <h3 class="adw-label title-3">Banner</h3>
+                    <div class="adw-banner" role="status">
+                        <div class="adw-banner__content">
+                            <span class="adw-icon icon-status-dialog-information-symbolic"></span>
+                            <p class="adw-label body">This is an informational banner message.</p>
+                        </div>
+                        <div class="adw-banner__actions">
+                            <button class="adw-button flat">Dismiss</button>
+                        </div>
+                    </div>
+                    <div class="adw-banner warning" role="alert" style="margin-top: var(--spacing-s);">
+                         <div class="adw-banner__content">
+                            <span class="adw-icon icon-status-dialog-warning-symbolic"></span>
+                            <p class="adw-label body">This is a warning banner message.</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Toast</h3>
+                    <div class="adw-toast" role="status" style="position:relative; margin-top: var(--spacing-s);">
+                        <div class="adw-toast__content">
+                            <p class="adw-toast__title">File Saved</p>
+                            <p class="adw-toast__subtitle">Your document was successfully saved.</p>
+                        </div>
+                        <button class="adw-button flat circular adw-toast__dismiss" aria-label="Dismiss"><span class="adw-icon icon-actions-edit-delete-symbolic"></span></button>
+                    </div>
+                     <div class="adw-toast" role="status" style="position:relative; margin-top: var(--spacing-s);">
+                        <div class="adw-toast__content">
+                            <p class="adw-toast__title">Action Required</p>
+                        </div>
+                        <button class="adw-button flat adw-toast__action">Undo</button>
+                    </div>
+                </div>
+             </div>
+             <p class="adw-label body" style="margin-top: var(--spacing-m);">Note: Toast Overlay is a container and not shown visually here.
+                <button class="adw-button" id="showToastBtn" style="margin-left: var(--spacing-m);">Show Demo Toast</button>
+             </p>
+        </section>
+
+        <!-- ViewSwitchers & Tabs (Static) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">ViewSwitchers & Tabs (Static Representations)</h2>
+            <div class="component-grid">
+                <div>
+                    <h3 class="adw-label title-3">Inline View Switcher</h3>
+                    <div class="adw-inline-view-switcher">
+                        <button class="adw-button active" aria-pressed="true">View 1</button>
+                        <button class="adw-button">View 2</button>
+                        <button class="adw-button" disabled>View 3</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Tabs</h3>
+                    <div class="adw-tab-view">
+                        <div class="adw-tab-bar" id="demo-tab-bar">
+                            <button class="adw-tab-button active" aria-pressed="true" data-tab-target="tab-details-content">
+                                <span class="adw-tab-button-label">Details</span>
+                            </button>
+                            <button class="adw-tab-button" data-tab-target="tab-activity-content">
+                                <span class="adw-tab-button-label">Activity</span>
+                                <!-- <span class="adw-tab__indicator"></span> For "needs attention" - styling not in SCSS for adw-tab-button -->
+                            </button>
+                            <button class="adw-tab-button" data-tab-target="tab-settings-content" disabled>
+                                <span class="adw-tab-button-label">Settings</span>
+                            </button>
+                        </div>
+                        <div class="adw-tab-view-pages-container" id="demo-tab-pages" style="border: 1px solid var(--border-color); border-top: none; padding: var(--spacing-m); min-height: 100px; position: relative;">
+                            <div class="adw-tab-page active-page" id="tab-details-content">
+                                <p class="adw-label body">Content for active tab (Details).</p>
+                                <p class="adw-label body-small">This is the first tab's content area.</p>
+                            </div>
+                            <div class="adw-tab-page" id="tab-activity-content" style="display: none;">
+                                <p class="adw-label body">Content for Activity tab.</p>
+                                <p class="adw-label body-small">This tab shows recent activity.</p>
+                            </div>
+                            <div class="adw-tab-page" id="tab-settings-content" style="display: none;">
+                                <p class="adw-label body">Content for Settings tab (this tab button is disabled).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">ViewSwitcher (Conceptual)</h3>
+                    <div class="adw-view-switcher"> <!-- May need specific sub-elements like adw-view-switcher-bar -->
+                        <div class="adw-header-bar"> <!-- Example: A header bar acts as a view switcher bar -->
+                             <div class="adw-header-bar__start">
+                                <button class="adw-button icon-only flat active" aria-label="Home"><span class="adw-icon icon-places-user-home-symbolic"></span></button>
+                            </div>
+                            <div class="adw-header-bar__center adw-view-switcher-title">
+                                <h1 class="adw-header-bar__title">Home View</h1>
+                            </div>
+                             <div class="adw-header-bar__end">
+                                <button class="adw-button icon-only flat" aria-label="Search"><span class="adw-icon icon-actions-system-search-symbolic"></span></button>
+                            </div>
+                        </div>
+                        <div style="padding: var(--spacing-m); border: 1px solid var(--border-color); min-height: 50px;">View Content Area</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation & View Containers (Conceptual Structures) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Navigation & View Containers (Conceptual Structures)</h2>
+            <p class="adw-label body">These are complex containers, often requiring JavaScript for full functionality. Static representations are shown.</p>
+            <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column for these complex items -->
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">Navigation View</h3>
+                    <div class="adw-navigation-view" style="height: 250px; border: 1px solid var(--border-color); display: flex; flex-direction: column;">
+                        <div class="adw-header-bar">
+                            <div class="adw-header-bar__start">
+                                <button class="adw-button icon-only flat"><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
+                            </div>
+                            <div class="adw-header-bar__center">
+                                <h1 class="adw-header-bar__title">Page Title</h1>
+                            </div>
+                        </div>
+                        <div style="padding: var(--spacing-m); flex-grow: 1; background-color: var(--view-bg-color);">
+                            <p class="adw-label body">Content of the current page in Navigation View.</p>
+                            <button class="adw-button">Push to next page (conceptual)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Layouts -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Layout Containers</h2>
+            <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column for these layout examples -->
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">Box (Horizontal)</h3>
+                    <div class="adw-box horizontal spacing-m" style="padding: var(--spacing-s); background-color: var(--shade-color); border-radius: var(--border-radius-medium);">
+                        <button class="adw-button">Child 1</button>
+                        <span class="adw-label">Child 2</span>
+                        <input type="text" class="adw-entry" placeholder="Child 3" style="flex-grow:1;">
+                    </div>
+                    <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Box (Vertical)</h3>
+                    <div class="adw-box vertical spacing-s" style="padding: var(--spacing-s); background-color: var(--shade-color); border-radius: var(--border-radius-medium);">
+                        <button class="adw-button">Child A</button>
+                        <span class="adw-label">Child B</span>
+                        <input type="text" class="adw-entry" placeholder="Child C">
+                    </div>
+                </div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">Button Row</h3>
+                    <div class="adw-button-row" style="padding: var(--spacing-s); background-color: var(--shade-color); border-radius: var(--border-radius-medium);">
+                        <button class="adw-button">Cancel</button>
+                        <div style="flex-grow:1;"></div> <!-- Spacer -->
+                        <button class="adw-button suggested-action">Apply</button>
+                    </div>
+                     <h3 class="adw-label title-3" style="margin-top:var(--spacing-m);">Button Row (Centered)</h3>
+                     <div class="adw-button-row centered" style="padding: var(--spacing-s); background-color: var(--shade-color); border-radius: var(--border-radius-medium);">
+                        <button class="adw-button">Action 1</button>
+                        <button class="adw-button">Action 2</button>
+                    </div>
+                </div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">Clamp</h3>
+                    <div class="adw-clamp" style="padding: var(--spacing-s); max-width: 40ch; background-color: var(--shade-color); border-radius: var(--border-radius-medium);">
+                        <p class="adw-label body">This text is clamped. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Try making it longer to see the clamping effect.</p>
+                    </div>
+                </div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">Bin</h3>
+                    <div class="adw-bin" style="background-color: var(--shade-color); padding: var(--spacing-m); border-radius: var(--border-radius-medium);">
+                        <button class="adw-button suggested-action">Single Child in a Bin</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">WrapBox</h3>
+                    <div class="adw-wrap-box spacing-m align-center" style="/*border:1px dashed var(--border-color);*/ padding: var(--spacing-s); min-height: 80px;">
+                        <button class="adw-button">Item 1</button>
+                        <span class="adw-label">A Longer Item 2</span>
+                        <input type="text" class="adw-entry" placeholder="Item 3" style="width: 100px;">
+                        <button class="adw-button suggested-action">Item 4</button>
+                        <span class="adw-label">Item 5</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preferences Framework (Static) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Preferences Framework (Static Structure)</h2>
+            <div class="adw-preferences-view">
+                <div class="adw-preferences-page">
+                    <h3 class="adw-label title-3">Display Settings</h3>
+                    <div class="adw-preferences-group">
+                        <div class="adw-preferences-group__title">Appearance</div>
+                        <div class="adw-list-box flat"> <!-- Preferences often use flat listboxes within groups -->
+                            <div class="adw-action-row activatable">
+                                <div class="adw-action-row-content">
+                                    <div class="adw-action-row-title">Theme</div>
+                                    <div class="adw-action-row-subtitle">System Default</div>
+                                </div>
+                                <div class="adw-action-row-suffix"><span class="adw-icon icon-actions-go-next-symbolic"></span></div>
+                            </div>
+                            <div class="adw-switch-row activatable">
+                                <div class="adw-action-row-content">
+                                    <div class="adw-action-row-title">Automatic Dark Mode</div>
+                                </div>
+                                <label class="adw-switch-wrapper adw-action-row-suffix"><input type="checkbox" class="adw-switch"> <span class="adw-label visually-hidden">Toggle Automatic Dark Mode</span></label>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="adw-preferences-group">
+                        <div class="adw-preferences-group__title">Notifications</div>
+                         <div class="adw-list-box flat">
+                            <div class="adw-combo-row">
+                                <label class="adw-combo-row-title" for="pref-combo1">Sound Output:</label>
+                                <select class="adw-entry" id="pref-combo1">
+                                    <option>Built-in Audio</option>
+                                    <option>Headphones</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Specialized Dialogs (Static Representations) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Specialized Dialogs (Static Representations)</h2>
+            <div class="component-grid" style="grid-template-columns: 1fr;"> <!-- Force single column -->
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">About Dialog</h3>
+                    <button class="adw-button" id="openAboutDialogBtn">Open About Dialog</button>
+                    <div class="adw-dialog-backdrop" id="aboutDialogBackdrop" style="display: none;"></div>
+                    <div class="adw-dialog adw-about-dialog" id="aboutDialog" role="dialog" style="position:fixed; display:none; max-width: 400px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050;">
+                        <header class="adw-header-bar">
+                            <h2 class="adw-header-bar__title">About My Application</h2>
+                            <button class="adw-button icon-only flat" aria-label="Close" onclick="closeDialogById('aboutDialog')"><span class="adw-icon icon-window-close-symbolic"></span></button>
+                        </header>
+                        <div class="adw-dialog__content adw-about-dialog__content" style="text-align: center;">
+                            <span class="adw-icon icon-categories-applications-utilities-symbolic" style="width: 64px; height: 64px; font-size: 64px; margin-bottom: var(--spacing-m); border-radius: var(--border-radius-medium); background-color: var(--shade-color); padding: var(--spacing-xs); color: var(--accent-bg-color);"></span>
+                            <h3 class="adw-label title-2" style="margin-bottom: var(--spacing-xxs);">My Application</h3>
+                            <p class="adw-label body-small" style="margin-bottom: var(--spacing-s);">Version 1.0.0</p>
+                            <p class="adw-label body">An amazing app that does wonderful things.</p>
+                            <p class="adw-label body-small" style="margin-top: var(--spacing-m);">© 2023 Developer Name</p>
+                        </div>
+                        <footer class="adw-dialog__actions">
+                            <button class="adw-button" onclick="closeDialogById('aboutDialog')">Credits</button> <!-- Made it a close button for demo -->
+                            <div style="flex-grow: 1;"></div>
+                            <button class="adw-button suggested-action" onclick="closeDialogById('aboutDialog')">Close</button>
+                        </footer>
+                    </div>
+                </div>
+                <div style="margin-bottom: var(--spacing-xl);"> <!-- Extra margin for separation -->
+                    <h3 class="adw-label title-3">Preferences Dialog</h3>
+                    <button class="adw-button" id="openPrefsDialogBtn">Open Preferences Dialog</button>
+                    <div class="adw-dialog-backdrop" id="prefsDialogBackdrop" style="display: none;"></div>
+                    <div class="adw-dialog adw-preferences-dialog" id="prefsDialog" role="dialog" style="position:fixed; display:none; max-width: 550px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050;">
+                        <header class="adw-header-bar">
+                            <div class="adw-header-bar__start">
+                                <!-- This would be part of an adw-view-switcher or similar -->
+                                <div class="adw-inline-view-switcher linked">
+                                    <button class="adw-button active">General</button>
+                                    <button class="adw-button">Advanced</button>
+                                </div>
+                            </div>
+                            <div class="adw-header-bar__end">
+                                <button class="adw-button icon-only flat" aria-label="Close" onclick="closeDialogById('prefsDialog')"><span class="adw-icon icon-window-close-symbolic"></span></button>
+                            </div>
+                        </header>
+                        <div class="adw-dialog__content adw-preferences-dialog__content" style="min-height: 200px;">
+                            <!-- Active page content for "General" would be shown here -->
+                            <div class="adw-preferences-page">
+                                <h3 class="adw-label title-3" style="margin-top:0;">General Settings</h3>
+                                <div class="adw-preferences-group">
+                                    <div class="adw-preferences-group__title">Appearance</div>
+                                    <div class="adw-list-box flat">
+                                        <div class="adw-switch-row activatable">
+                                            <div class="adw-action-row-content">
+                                                <div class="adw-action-row-title">Enable Dark Mode</div>
+                                            </div>
+                                            <label class="adw-switch-wrapper adw-action-row-suffix"><input type="checkbox" class="adw-switch"> <span class="adw-label visually-hidden">Toggle Dark Mode</span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- No standard footer for PreferencesDialog, actions are in HeaderBar -->
+                    </div>
+                </div>
+                <div> <!-- Wrapper for button and dialog -->
+                    <h3 class="adw-label title-3">Alert Dialog</h3>
+                    <button class="adw-button" id="openAlertDialogBtn">Open Alert Dialog</button>
+                    <div class="adw-dialog-backdrop" id="alertDialogBackdrop" style="display: none;"></div>
+                    <div class="adw-dialog adw-alert-dialog" id="alertDialog" role="alertdialog" style="position:fixed; display:none; max-width: 380px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050;">
+                        <!-- Alert dialogs often don't have a traditional header bar with a title, the heading is in the content -->
+                        <div class="adw-dialog__content adw-alert-dialog__content" style="padding-top: var(--spacing-xl); text-align: center;">
+                            <h4 class="adw-alert-dialog__heading" style="font-size: var(--title-2-font-size); margin-bottom: var(--spacing-xs);">Action Required</h4>
+                            <p class="adw-alert-dialog__body" style="margin-bottom: var(--spacing-l);">This is an important message that requires your attention. Please choose an option below.</p>
+                        </div>
+                        <footer class="adw-dialog__actions adw-alert-dialog__actions" style="padding-top: 0;">
+                            <button class="adw-button" onclick="closeDialogById('alertDialog')">Cancel</button>
+                            <button class="adw-button destructive-action" onclick="closeDialogById('alertDialog')">Delete</button>
+                            <button class="adw-button suggested-action" onclick="closeDialogById('alertDialog')">Confirm</button>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Other Major Components (Static) -->
+        <section class="widget-showcase">
+            <h2 class="adw-label title-2">Other Major Components (Static Structures)</h2>
+            <div class="component-grid">
+                <div>
+                    <h3 class="adw-label title-3">Status Page</h3>
+                    <div class="adw-status-page">
+                        <span class="adw-icon icon-status-weather-clear-night-symbolic adw-status-page-icon" style="font-size: 4rem;"></span>
+                        <h4 class="adw-label title-1 adw-status-page-title">Good Evening</h4>
+                        <p class="adw-label body adw-status-page-description">The stars are bright tonight.</p>
+                        <div class="adw-status-page-actions">
+                            <button class="adw-button">Make a Wish</button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Bottom Sheet (Conceptual)</h3>
+                    <div class="adw-bottom-sheet" style="position:relative; min-height: 150px; overflow:hidden; background: var(--dialog-bg-color); border-top-left-radius: var(--window-radius); border-top-right-radius: var(--window-radius); box-shadow: var(--dialog-box-shadow); max-width: 400px; margin-left: auto; margin-right: auto;">
+                        <div class="adw-bottom-sheet-drag-handle-area" style="padding:var(--spacing-s); display:flex; justify-content:center;"><div style="width:36px; height:4px; border-radius:2px; background-color: var(--border-color);"></div></div>
+                        <div class="adw-bottom-sheet-content" style="padding:var(--spacing-m); text-align:center;">
+                            <p class="adw-label body">This is where bottom sheet content would go.</p>
+                            <button class="adw-button suggested-action">Confirm Action</button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="adw-label title-3">Toolbar View (Conceptual)</h3>
+                    <div class="adw-toolbar-view" style="border: 1px solid var(--border-color); min-height: 200px; display:flex; flex-direction: column;">
+                        <div class="adw-header-bar"> <!-- Top Bar -->
+                            <div class="adw-header-bar__start"><button class="adw-button icon-only flat"><span class="adw-icon icon-actions-view-refresh-symbolic"></span></button></div>
+                            <div class="adw-header-bar__center"><h2 class="adw-header-bar__title">Toolbar View</h2></div>
+                            <div class="adw-header-bar__end"><button class="adw-button icon-only flat"><span class="adw-icon icon-actions-bookmark-new-symbolic"></span></button></div>
+                        </div>
+                        <div style="flex-grow:1; padding: var(--spacing-m); background: var(--view-bg-color);">Main Content Area</div>
+                        <div class="adw-header-bar"> <!-- Bottom Bar -->
+                             <div class="adw-header-bar__start"><button class="adw-button flat">Filter</button></div>
+                             <div class="adw-header-bar__end"><button class="adw-button suggested-action">Add New</button></div>
+                        </div>
+                    </div>
+                </div>
+                 <div>
+                    <h3 class="adw-label title-3">Window (Conceptual - Body styling)</h3>
+                    <div class="adw-window" style="padding: var(--spacing-m); border: 1px solid var(--border-color); background-color: var(--window-bg-color); min-height: 100px;">
+                        <p class="adw-label body">This div uses <code>.adw-window</code> class. Body element is also styled as a window.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div style="height: 200px;"></div> <!-- Spacer at the bottom -->
+    </div>
+    
+    <script>
+        // Theme Toggle
+        const themeToggleButton = document.getElementById('theme-toggle-button');
+        if (themeToggleButton) {
+            themeToggleButton.addEventListener('click', () => {
+                document.documentElement.classList.toggle('theme-dark');
+            });
+        }
+
+        // Tab View Demo
+        const demoTabBar = document.getElementById('demo-tab-bar');
+        const demoTabPagesContainer = document.getElementById('demo-tab-pages');
+
+        if (demoTabBar && demoTabPagesContainer) {
+            const tabButtons = demoTabBar.querySelectorAll('.adw-tab-button:not([disabled])');
+            const tabPages = demoTabPagesContainer.querySelectorAll('.adw-tab-page');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Deactivate all buttons and pages
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-pressed', 'false');
+                    });
+                    tabPages.forEach(page => {
+                        page.classList.remove('active-page');
+                        page.style.display = 'none';
+                    });
+
+                    // Activate clicked button and corresponding page
+                    button.classList.add('active');
+                    button.setAttribute('aria-pressed', 'true');
+                    const targetPageId = button.dataset.tabTarget;
+                    const targetPage = document.getElementById(targetPageId);
+                    if (targetPage) {
+                        targetPage.classList.add('active-page');
+                        targetPage.style.display = 'block';
+                    }
+                });
+            });
+        }
+
+        // Accent Color Switcher
+        const ACCENT_CLASSES = ['accent-blue', 'accent-green', 'accent-yellow', 'accent-orange', 'accent-red', 'accent-purple', 'accent-pink', 'accent-slate', 'accent-teal'];
+        function setAccent(accentName) {
+            document.documentElement.classList.remove(...ACCENT_CLASSES);
+            if (accentName !== 'default') {
+                document.documentElement.classList.add(`accent-${accentName}`);
+            }
+        }
+
+        // Basic Expander Row Toggle (Example - not full Adwaita behavior)
+        document.querySelectorAll('.adw-expander-row .adw-action-row').forEach(header => {
+            header.addEventListener('click', () => {
+                const expanderRow = header.closest('.adw-expander-row');
+                if (expanderRow) {
+                    const content = expanderRow.querySelector('.adw-expander-row-content');
+                    const chevron = header.querySelector('.adw-expander-row-chevron');
+                    if (content) {
+                        const isExpanded = content.style.display !== 'none';
+                        content.style.display = isExpanded ? 'none' : 'block'; // Or use CSS classes
+                        expanderRow.classList.toggle('expanded', !isExpanded);
+                        if(chevron) {
+                            chevron.classList.toggle('icon-ui-pan-down-symbolic', isExpanded);
+                            chevron.classList.toggle('icon-ui-pan-up-symbolic', !isExpanded);
+                        }
+                    }
+                }
+            });
+        });
+         // Initialize expander chevrons correctly
+        document.querySelectorAll('.adw-expander-row').forEach(expanderRow => {
+            const content = expanderRow.querySelector('.adw-expander-row-content');
+            const chevron = expanderRow.querySelector('.adw-expander-row .adw-expander-row-chevron');
+            if (content && chevron) {
+                 const isExpanded = content.style.display !== 'none' || expanderRow.classList.contains('expanded');
+                 chevron.classList.toggle('icon-ui-pan-down-symbolic', !isExpanded);
+                 chevron.classList.toggle('icon-ui-pan-up-symbolic', isExpanded);
+            }
+        });
+
+        // Dialog handling
+        let currentlyOpenDialogId = null;
+
+        function openDialogById(dialogId) {
+            const dialog = document.getElementById(dialogId);
+            const backdrop = document.getElementById(dialogId + 'Backdrop');
+            if (dialog) {
+                if(currentlyOpenDialogId) { // Close any already open dialog
+                    closeDialogById(currentlyOpenDialogId);
+                }
+                dialog.style.display = 'block'; // Or manage with classes
+                if (backdrop) backdrop.style.display = 'block';
+                currentlyOpenDialogId = dialogId;
+                dialog.focus(); // For accessibility, focus the dialog
+            }
+        }
+
+        function closeDialogById(dialogId) {
+            const dialog = document.getElementById(dialogId);
+            const backdrop = document.getElementById(dialogId + 'Backdrop');
+            if (dialog) {
+                dialog.style.display = 'none'; // Or manage with classes
+                if (backdrop) backdrop.style.display = 'none';
+                if(currentlyOpenDialogId === dialogId) {
+                    currentlyOpenDialogId = null;
+                }
+            }
+        }
+        // Close dialog on Escape key
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && currentlyOpenDialogId) {
+                closeDialogById(currentlyOpenDialogId);
+            }
+        });
+
+        // Sample Dialog
+        const openSampleDialogBtn = document.getElementById('openSampleDialogBtn');
+        if (openSampleDialogBtn) {
+            openSampleDialogBtn.addEventListener('click', () => openDialogById('sampleDialog'));
+        }
+        // The close buttons for sampleDialog now have inline onclick="closeDialogById('sampleDialog')"
+
+        // About Dialog
+        const openAboutDialogBtn = document.getElementById('openAboutDialogBtn');
+        if (openAboutDialogBtn) {
+            openAboutDialogBtn.addEventListener('click', () => openDialogById('aboutDialog'));
+        }
+        // Close buttons for aboutDialog have inline onclick="closeDialogById('aboutDialog')"
+
+        // Preferences Dialog
+        const openPrefsDialogBtn = document.getElementById('openPrefsDialogBtn');
+        if (openPrefsDialogBtn) {
+            openPrefsDialogBtn.addEventListener('click', () => openDialogById('prefsDialog'));
+        }
+        // Close button for prefsDialog has inline onclick
+
+        // Alert Dialog
+        const openAlertDialogBtn = document.getElementById('openAlertDialogBtn');
+        if (openAlertDialogBtn) {
+            openAlertDialogBtn.addEventListener('click', () => openDialogById('alertDialog'));
+        }
+        // Close buttons for alertDialog have inline onclick
+
+
+        // Popover Demo
+        const popoverDemoBtn = document.getElementById('popoverDemoBtn');
+        const popoverDemo = document.getElementById('popoverDemo');
+        let isPopoverDemoOpen = false;
+
+        if (popoverDemoBtn && popoverDemo) {
+            popoverDemoBtn.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent click from immediately closing popover via document listener
+                isPopoverDemoOpen = !isPopoverDemoOpen;
+                popoverDemo.style.display = isPopoverDemoOpen ? 'block' : 'none';
+                popoverDemoBtn.setAttribute('aria-expanded', isPopoverDemoOpen.toString());
+            });
+
+            // Click outside to close
+            document.addEventListener('click', (event) => {
+                if (isPopoverDemoOpen && !popoverDemo.contains(event.target) && event.target !== popoverDemoBtn) {
+                    isPopoverDemoOpen = false;
+                    popoverDemo.style.display = 'none';
+                    popoverDemoBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+             // Close popover on Escape key
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && isPopoverDemoOpen) {
+                    isPopoverDemoOpen = false;
+                    popoverDemo.style.display = 'none';
+                    popoverDemoBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
+
+        // Function to make closeDialogById globally accessible for inline onclick attributes
+        window.closeDialogById = closeDialogById; // Corrected global exposure
+
+        // Toast Demo
+        function ensureToastOverlay() {
+            let overlay = document.getElementById('adw-toast-overlay-main');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'adw-toast-overlay-main';
+                overlay.className = 'adw-toast-overlay'; // This class should provide fixed positioning
+                document.body.appendChild(overlay);
+            }
+            return overlay;
+        }
+
+        function showDemoToast(title, subtitle, actionText, actionCallback) {
+            const overlay = ensureToastOverlay();
+
+            const toast = document.createElement('div');
+            toast.className = 'adw-toast';
+
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'adw-toast__content'; // As per SCSS structure
+
+            const titleEl = document.createElement('p');
+            titleEl.className = 'adw-toast__title';
+            titleEl.textContent = title;
+            contentWrapper.appendChild(titleEl);
+
+            if (subtitle) {
+                const subtitleEl = document.createElement('p');
+                subtitleEl.className = 'adw-toast__subtitle';
+                subtitleEl.textContent = subtitle;
+                contentWrapper.appendChild(subtitleEl);
+            }
+            toast.appendChild(contentWrapper);
+
+            if (actionText) {
+                const actionBtn = document.createElement('button');
+                actionBtn.className = 'adw-button flat adw-toast__action';
+                actionBtn.textContent = actionText;
+                if (actionCallback) {
+                    actionBtn.addEventListener('click', () => {
+                        actionCallback();
+                        // Optionally close toast on action
+                        toast.classList.add('hiding');
+                        setTimeout(() => toast.remove(), 150); // Match animation-duration-shortest
+                    });
+                }
+                toast.appendChild(actionBtn);
+            } else { // Add a dismiss button if no action
+                const dismissBtn = document.createElement('button');
+                dismissBtn.className = 'adw-button flat circular adw-toast__dismiss';
+                dismissBtn.setAttribute('aria-label', 'Dismiss');
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'adw-icon icon-actions-edit-delete-symbolic'; // Using a common icon
+                dismissBtn.appendChild(iconSpan);
+                dismissBtn.addEventListener('click', () => {
+                    toast.classList.add('hiding');
+                    setTimeout(() => toast.remove(), 150);
+                });
+                toast.appendChild(dismissBtn);
+            }
+
+            overlay.appendChild(toast);
+
+            // Animation: make visible, then hide and remove
+            requestAnimationFrame(() => { // Ensure element is in DOM for transition
+                 setTimeout(() => toast.classList.add('visible'), 10); // Small delay for transition to trigger
+            });
+
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => {
+                    toast.remove();
+                }, 150); // Corresponds to --animation-duration-shortest
+            }, 3000); // Auto-dismiss after 3 seconds
+        }
+
+        const showToastBtn = document.getElementById('showToastBtn');
+        if (showToastBtn) {
+            showToastBtn.addEventListener('click', () => {
+                showDemoToast("File Saved", "Your document 'report.docx' was successfully saved.", "Undo", () => {
+                    console.log("Undo action clicked!");
+                    showDemoToast("Previous action undone.", null, null, null);
+                });
+            });
+        }
+
+    </script>
+</body>
+</html>

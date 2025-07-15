@@ -1,0 +1,66 @@
+@use "variables";
+
+.adw-progress-bar {
+  width: 100%;
+  height: 6px; // Libadwaita progress bars are often more slender
+  background-color: var(--progress-bar-track-color, var(--shade-color));
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+
+  .adw-progress-bar-value {
+    height: 100%;
+    background-color: var(--progress-bar-fill-color, var(--accent-bg-color));
+    width: 0%;
+    transition: width 0.15s ease-out;
+    border-radius: 3px;
+  }
+
+  &[disabled] {
+    opacity: var(--disabled-opacity);
+    cursor: not-allowed;
+    // Colors should remain to indicate progress, opacity handles the disabled look
+  }
+
+  &.indeterminate {
+    .adw-progress-bar-value {
+      width: 100% !important;
+      background-color: transparent;
+    }
+    // This is a common pattern in libadwaita
+    &:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 30%;
+        background-color: var(--accent-bg-color);
+        border-radius: 3px;
+        animation: adw-progress-indeterminate 1.5s infinite ease-in-out;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      &:before {
+        animation: none;
+        // Static representation for reduced motion: e.g. full bar or specific portion
+        left: 0;
+        width: 100%; // Or a fixed small portion like 30% without movement
+      }
+    }
+  }
+}
+
+@keyframes adw-progress-indeterminate {
+  0% {
+    left: -35%; // Start off-screen to the left
+    width: 30%;
+  }
+  50% {
+    left: 50%;
+    width: 40%; // Pulse width slightly in the middle
+  }
+  100% {
+    left: 105%; // End off-screen to the right
+    width: 30%;
+  }
+}

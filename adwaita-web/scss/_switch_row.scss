@@ -1,0 +1,70 @@
+// SCSS for Adwaita Switch Row (Pure CSS Adwaita Skin Version)
+@use 'variables';
+@use 'mixins';
+
+.adw-switch-row {
+  @include mixins.row-base; // Includes display: flex, align-items: center, padding, min-height
+  background-color: var(--list-row-bg-color); // Ensure switch rows use the standard row background
+  border-bottom: none; // Ensure no individual border, listbox handles separators if applicable.
+                       // row-base mixin might also handle this, but explicit is fine.
+  justify-content: space-between; // Pushes title/subtitle to start and switch to end
+  gap: var(--spacing-m);
+
+  // Text content part (title and optional subtitle)
+  // Uses similar naming to adw-action-row for consistency if preferred,
+  // or can use .adw-switch-row__text-content.
+  // For now, assuming it might re-use .adw-action-row__text structure for simplicity.
+  .adw-action-row__text { // Or .adw-switch-row__text-content
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden; // For text ellipsis
+  }
+
+  // Title for the switch row
+  .adw-action-row__title { // Or .adw-switch-row__title
+    font-size: var(--font-size-base);
+    font-weight: normal;
+    color: var(--primary-fg-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // Subtitle for the switch row
+  .adw-action-row__subtitle { // Or .adw-switch-row__subtitle
+    font-size: var(--font-size-small);
+    color: var(--secondary-fg-color);
+    // opacity: 0.7; // --secondary-fg-color already includes opacity via --dim-opacity
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // Container for the switch element itself
+  .adw-switch-row__switch {
+    flex-shrink: 0; // Prevent switch from shrinking
+    display: flex;
+    align-items: center;
+    // The .adw-switch class on the input itself will provide its styling from _switch.scss
+  }
+
+  // Disabled state for the entire row
+  &[disabled],
+  &.disabled { // If a class is used
+    .adw-action-row__title,
+    .adw-action-row__subtitle {
+      // color: var(--disabled-fg-color); // Color is usually not changed, only opacity for text
+      opacity: var(--disabled-opacity);
+    }
+    // The .adw-switch input inside .adw-switch-row__switch should handle its own disabled styling.
+  }
+
+  // For error states, typically the subtitle would show the error.
+  // Visual indication on the row itself (e.g., border) is not standard for SwitchRow
+  // unless it's a general .has-error pattern applied to all rows.
+}
+
+// Dark theme adjustments are handled by CSS variables.
+// .theme-dark .adw-switch-row { ... }

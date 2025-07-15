@@ -1,0 +1,80 @@
+@use 'variables';
+
+.adw-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .adw-switch-slider {
+      background-color: var(--accent-bg-color); // Use accent-bg-color for the track's "on" state
+    }
+
+    &:checked + .adw-switch-slider:before {
+      transform: translateX(20px);
+    }
+
+    // Disabled state - OFF
+    &:disabled:not(:checked) + .adw-switch-slider {
+      background-color: var(--switch-slider-disabled-off-bg-color);
+      // opacity: var(--opacity-disabled); // Let's control opacity on knob/slider more directly if needed
+      cursor: not-allowed;
+
+      &:before {
+        background-color: var(--switch-knob-disabled-bg-color);
+        box-shadow: none; // Remove shadow on disabled knob
+        // opacity: 1;
+      }
+    }
+
+    // Disabled state - ON
+    &:disabled:checked + .adw-switch-slider {
+      background-color: var(--accent-bg-color);
+      opacity: var(--disabled-opacity); // Apply opacity to the whole slider for disabled "on" state
+      cursor: not-allowed;
+
+       &:before {
+        background-color: var(--switch-knob-bg-color); // Knob standard color
+        box-shadow: none; // Remove shadow on disabled knob (slider is already opaque)
+        // Opacity is on the parent slider, so knob doesn't need separate opacity here.
+      }
+    }
+
+    &:focus-visible + .adw-switch-slider {
+      outline: 2px solid var(--accent-color); // Focus ring uses the standalone accent color
+      outline-offset: 2px;
+      border-radius: 12px; // Match slider's border-radius for the focus outline
+    }
+  }
+
+  .adw-switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--switch-slider-off-bg-color); // Use new variable for "off" state
+    border-radius: 12px; // Standard Adwaita switch radius
+    transition: background-color 0.15s ease-out, transform 0.15s ease-out, opacity 0.15s ease-out;
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 20px; // Knob size
+      width: 20px;  // Knob size
+      left: 2px;    // Knob padding
+      bottom: 2px;  // Knob padding
+      background-color: var(--switch-knob-bg-color); // Use variable
+      border-radius: 50%; // Circular knob
+      transition: transform 0.15s ease-out, background-color 0.15s ease-out;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2); // Standard knob shadow
+    }
+  }
+}

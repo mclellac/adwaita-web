@@ -1,0 +1,128 @@
+// scss/_dialog.scss
+@use 'variables';
+@use 'mixins';
+
+// Base host styles for all dialog components
+adw-dialog,
+adw-about-dialog {
+  position: fixed;
+  z-index: var(--z-index-dialog, 1050);
+  top: 50%;
+  left: 50%;
+
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.95);
+
+  background-color: var(--dialog-bg-color);
+  color: var(--dialog-fg-color);
+  border-radius: var(--window-radius);
+  box-shadow: var(--dialog-box-shadow);
+
+  width: 90%;
+  max-width: 550px; // Default max-width, can be overridden by specific dialog types
+
+  &:not([open]) {
+    display: none !important;
+    visibility: hidden;
+  }
+
+  &[open] {
+    display: flex !important;
+    flex-direction: column; // Default for slotted content; about-dialog shadow DOM manages its own flow
+    visibility: visible;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    transition: opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease),
+                transform var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease);
+  }
+}
+
+// Specific styles for the generic <adw-dialog> (Light DOM content)
+adw-dialog {
+  > .adw-dialog__header { // Changed selector to match JS (.adw-dialog__header)
+    display: flex;
+    // justify-content: space-between; // Will be handled by button order/margin
+    align-items: center;
+    padding: var(--spacing-xs); // Minimal padding
+    border-bottom: none; // Remove border
+    background-color: transparent; // Remove background
+    height: auto; // Minimal height
+
+    .adw-header-bar__title {
+      display: none; // Hide title
+    }
+
+    .adw-dialog-close-button {
+      // order: -1; // Removed
+      // margin-right: auto; // Removed
+      margin-left: auto; // Pushes button to the far right of the flex container
+      // Ensure it's visible and clickable, additional styling if needed:
+      // e.g., color if it was inheriting from a now-transparent header
+    }
+  }
+
+  > .adw-dialog-content {
+    padding: var(--spacing-l);
+    line-height: 1.6;
+    flex-grow: 1;
+    overflow-y: auto;
+    // Styles for .adw-alert-dialog-heading, .adw-alert-dialog-body, .adw-alert-dialog-responses
+    // should be kept if AdwDialog is used for alerts with these classes.
+    .adw-alert-dialog-heading {
+        font-size: var(--title-2-font-size);
+        font-weight: var(--font-weight-bold);
+        margin-bottom: var(--spacing-xs);
+        text-align: center;
+    }
+    .adw-alert-dialog-body {
+        font-size: var(--font-size-base);
+        text-align: center;
+        opacity: var(--dim-opacity);
+        margin-bottom: var(--spacing-l);
+    }
+     .adw-alert-dialog-responses {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-s);
+        margin-top: var(--spacing-m);
+        .adw-button { width: 100%; }
+        &.horizontal {
+            flex-direction: row;
+            justify-content: flex-end;
+            .adw-button { width: auto; }
+        }
+    }
+  }
+
+  > .adw-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: var(--spacing-m);
+    border-top: 1px solid var(--border-color);
+    gap: var(--spacing-s);
+  }
+}
+
+// Host-specific overrides for adw-about-dialog if needed (e.g., different max-width)
+adw-about-dialog {
+  // max-width: 480px; // Example, if needed
+  // Internal layout is handled by its Shadow DOM styles.
+  // Specific AdwAboutDialog child styles (like .adw-about-dialog-logo) are now in its Shadow DOM.
+}
+
+// Shared backdrop for all dialogs, managed by DialogManager
+.adw-dialog-backdrop {
+  position: fixed;
+  inset: 0; // shorthand for top: 0; right: 0; bottom: 0; left: 0;
+  background-color: var(--dialog-backdrop-color, rgba(0, 0, 0, 0.4)); // Use existing var
+  z-index: var(--z-index-dialog-backdrop, 1040); // Use existing var, ensure it's below dialog
+  opacity: 0;
+  transition: opacity var(--animation-duration-short, 150ms) var(--animation-ease-out-cubic, ease);
+  pointer-events: none; // Initially not interactive
+
+  &.visible { // DialogManager adds/removes this class
+    opacity: 1;
+    pointer-events: auto; // Interactive when visible
+  }
+}
