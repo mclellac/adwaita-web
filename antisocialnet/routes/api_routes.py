@@ -33,7 +33,7 @@ def get_feed():
     serialized_feed_items = []
     for item in feed_pagination.items:
         if item.type == "post":
-            post = Post.query.get(item.id)
+            post = db.session.get(Post, item.id)
             serialized_item = serialize_post_item(post)
             if current_user.is_authenticated:
                 serialized_item["data"]["is_liked_by_current_user"] = current_user.has_liked_item('post', item.id)
@@ -41,7 +41,7 @@ def get_feed():
                 serialized_item["data"]["is_liked_by_current_user"] = False
             serialized_feed_items.append(serialized_item)
         elif item.type == "photo":
-            photo = UserPhoto.query.get(item.id)
+            photo = db.session.get(UserPhoto, item.id)
             serialized_item = serialize_photo_item(photo)
             if current_user.is_authenticated:
                 serialized_item["data"]["is_liked_by_current_user"] = current_user.has_liked_item('photo', item.id)
@@ -71,11 +71,11 @@ def get_item(item_type, item_id):
     """
     item = None
     if item_type == 'post':
-        item = Post.query.get(item_id)
+        item = db.session.get(Post, item_id)
     elif item_type == 'photo':
-        item = UserPhoto.query.get(item_id)
+        item = db.session.get(UserPhoto, item_id)
     elif item_type == 'comment':
-        item = Comment.query.get(item_id)
+        item = db.session.get(Comment, item_id)
     else:
         return jsonify(status="error", message="Invalid item type specified."), 400
 
@@ -102,11 +102,11 @@ def get_item_like_details(target_type, target_id):
     """
     item = None
     if target_type == 'post':
-        item = Post.query.get_or_404(target_id)
+        item = db.session.get(Post, target_id)
     elif target_type == 'comment':
-        item = Comment.query.get_or_404(target_id)
+        item = db.session.get(Comment, target_id)
     elif target_type == 'userphoto':
-        item = UserPhoto.query.get_or_404(target_id)
+        item = db.session.get(UserPhoto, target_id)
     else:
         return jsonify(status="error", message="Invalid target type specified."), 400
 
@@ -136,9 +136,9 @@ def get_item_comments(target_type, target_id):
     """
     item = None
     if target_type == 'post':
-        item = Post.query.get_or_404(target_id)
+        item = db.session.get(Post, target_id)
     elif target_type == 'userphoto':
-        item = UserPhoto.query.get_or_404(target_id)
+        item = db.session.get(UserPhoto, target_id)
     else:
         return jsonify(status="error", message="Invalid target type specified."), 400
 
