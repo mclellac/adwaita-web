@@ -296,9 +296,10 @@ class Post(db.Model, PolymorphicLikeMixin):
     likes = db.relationship('Like',
                             primaryjoin="and_(Like.target_type=='post', foreign(Like.target_id)==Post.id)",
                             lazy='dynamic',
-                            cascade='all, delete-orphan')
+                            cascade='all, delete-orphan',
+                            overlaps="likes,likes,likes")
 
-class Comment(db.Model):
+class Comment(db.Model, PolymorphicLikeMixin):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(50), default='comment')
@@ -309,7 +310,7 @@ class Comment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     target_type = db.Column(db.String(50), nullable=False)
     target_id = db.Column(db.Integer, nullable=False)
-    # author relationship defined in User.comments
+    author = db.relationship('User', backref='comments')
     parent_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
     replies = db.relationship(
         'Comment',
@@ -325,7 +326,8 @@ class Comment(db.Model):
     likes = db.relationship('Like',
                             primaryjoin="and_(Like.target_type=='comment', foreign(Like.target_id)==Comment.id)",
                             lazy='dynamic',
-                            cascade='all, delete-orphan')
+                            cascade='all, delete-orphan',
+                            overlaps="likes,likes")
 
 class Postable(db.Model):
     __tablename__ = 'postable'
@@ -337,7 +339,7 @@ class Postable(db.Model):
         'polymorphic_on': type
     }
 
-class UserPhoto(db.Model):
+class UserPhoto(db.Model, PolymorphicLikeMixin):
     __tablename__ = 'user_photo'
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(50), default='userphoto')
@@ -356,12 +358,14 @@ class UserPhoto(db.Model):
         primaryjoin="and_(UserPhoto.id==foreign(Comment.target_id), Comment.target_type=='userphoto')",
         backref='user_photo',
         lazy='dynamic',
-        order_by=lambda: desc(Comment.created_at)
+        order_by=lambda: desc(Comment.created_at),
+        overlaps="comments,post"
     )
     likes = db.relationship('Like',
                             primaryjoin="and_(Like.target_type=='userphoto', foreign(Like.target_id)==UserPhoto.id)",
                             lazy='dynamic',
-                            cascade='all, delete-orphan')
+                            cascade='all, delete-orphan',
+                            overlaps="likes,likes")
 
     def __repr__(self):
         return f'<UserPhoto {self.image_filename} user_id={self.user_id}>'

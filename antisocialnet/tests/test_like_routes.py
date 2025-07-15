@@ -23,7 +23,7 @@ def test_post_by_user_2(db, test_user_2, create_test_post):
 
 @pytest.fixture
 def test_comment_by_user_2(db, test_user_2, test_post_by_user_2):
-    comment = Comment(text="A comment to be liked", user_id=test_user_2.id, post_id=test_post_by_user_2.id)
+    comment = Comment(text="A comment to be liked", user_id=test_user_2.id, target_id=test_post_by_user_2.id, target_type='post')
     db.session.add(comment)
     db.session.commit()
     return comment
