@@ -71,10 +71,15 @@ def serialize_photo_item(photo):
     }
 
 def serialize_comment_item(comment):
+    from flask_login import current_user
     actor = serialize_actor(comment.author)
 
     from .utils import markdown_to_html_and_sanitize_util # For caption
     text_html = markdown_to_html_and_sanitize_util(comment.text) if comment.text else None
+
+    is_liked_by_current_user = False
+    if current_user.is_authenticated:
+        is_liked_by_current_user = current_user.has_liked_item('comment', comment.id)
 
     return {
         "id": f"comment_{comment.id}",
@@ -86,7 +91,8 @@ def serialize_comment_item(comment):
             "text_html": text_html,
             "like_count": comment.like_count,
             "target_type": comment.target_type,
-            "target_id": comment.target_id
+            "target_id": comment.target_id,
+            "is_liked_by_current_user": is_liked_by_current_user
         }
     }
 

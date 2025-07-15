@@ -171,7 +171,10 @@ def get_user_details(user_id):
     if not user.is_profile_public and user.id != current_user.id:
         return jsonify(status="error", message="This profile is private."), 403
 
-    return jsonify(serialize_user_profile(user))
+    with current_app.test_request_context():
+        serialized_user = serialize_user_profile(user)
+
+    return jsonify(serialized_user)
 
 @api_bp.route('/user/<int:user_id>/posts', methods=['GET'])
 @login_required
