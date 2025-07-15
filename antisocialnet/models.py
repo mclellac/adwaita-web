@@ -290,6 +290,7 @@ class Post(db.Model, PolymorphicLikeMixin):
         'Comment',
         primaryjoin="and_(Post.id==foreign(Comment.target_id), Comment.target_type=='post')",
         backref='post',
+        lazy='dynamic',
         order_by=lambda: desc(Comment.created_at)
     )
     likes = db.relationship('Like',

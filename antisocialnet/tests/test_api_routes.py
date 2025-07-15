@@ -31,8 +31,9 @@ def create_api_test_post(db_session, user, content="API Test Post Content", days
 
 def test_api_feed_unauthenticated(client):
     """Test GET /api/v1/feed when not authenticated."""
-    response = client.get(url_for('api.get_feed'))
-    assert response.status_code == 302
+    with client.application.app_context():
+        response = client.get(url_for('api.get_feed'))
+        assert response.status_code == 302 # Should redirect to login
 
 def test_api_feed_authenticated_empty(logged_in_client):
     """Test authenticated GET /api/v1/feed with no posts or photos."""
@@ -48,7 +49,8 @@ def test_api_feed_with_posts_and_photos(logged_in_client, db, create_test_user):
     post = create_api_test_post(db, user, content="Test Post")
     photo = create_api_test_photo(db, user, caption="Test Photo")
 
-    response = logged_in_client.get(url_for('api.get_feed'))
+    with logged_in_client.application.app_context():
+        response = logged_in_client.get(url_for('api.get_feed'))
     assert response.status_code == 200
     json_data = response.get_json()
     assert len(json_data['items']) == 2
@@ -64,7 +66,8 @@ def test_get_item(logged_in_client, db, create_test_user):
     user = create_test_user(email_address="testuser@example.com", full_name="Test User")
     post = create_api_test_post(db, user, content="Test Post")
 
-    response = logged_in_client.get(url_for('api.get_item', item_type='post', item_id=post.id))
+    with logged_in_client.application.app_context():
+        response = logged_in_client.get(url_for('api.get_item', item_type='post', item_id=post.id))
     assert response.status_code == 200
     json_data = response.get_json()
     assert json_data['id'] == f"post_{post.id}"
@@ -88,7 +91,8 @@ def test_get_item_like_details(logged_in_client, db, create_test_user):
     db.session.add(like)
     db.session.commit()
 
-    response = logged_in_client.get(url_for('api.get_item_like_details', target_type='post', target_id=post.id))
+    with logged_in_client.application.app_context():
+        response = logged_in_client.get(url_for('api.get_item_like_details', target_type='post', target_id=post.id))
     assert response.status_code == 200
     json_data = response.get_json()
     assert json_data['like_count'] == 1
@@ -103,7 +107,8 @@ def test_get_item_comments(logged_in_client, db, create_test_user):
     db.session.add(comment)
     db.session.commit()
 
-    response = logged_in_client.get(url_for('api.get_item_comments', target_type='post', target_id=post.id))
+    with logged_in_client.application.app_context():
+        response = logged_in_client.get(url_for('api.get_item_comments', target_type='post', target_id=post.id))
     assert response.status_code == 200
     json_data = response.get_json()
     assert len(json_data['comments']) == 1
