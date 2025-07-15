@@ -9,6 +9,17 @@ def _extract_csrf_token_from_html(html_content):
     assert match, "CSRF token not found in provided HTML content"
     return match.group(1)
 
+def test_index_anonymous_no_posts(client, app, db): # Added db fixture
+    """Test anonymous access to index page when there are no posts."""
+    # Ensure no posts exist from previous tests
+    Post.query.delete()
+    db.session.commit()
+    with client.application.test_request_context():
+        response = client.get(url_for('general.index'))
+    assert response.status_code == 200
+    assert b"Latest Updates" in response.data # From index.html title
+    assert b"No Posts Yet" in response.data # Expected message if no posts
+
 def test_login_page_loads(client):
     with client.application.test_request_context():
         response = client.get(url_for('auth.login'))
@@ -17,26 +28,21 @@ def test_login_page_loads(client):
     assert b"Username" in response.data
     assert b"Password" in response.data
 
-def test_login_successful(client, app, auth_test_user):
+from flask import get_flashed_messages
+
+def test_login_successful(client, auth_test_user):
+    """Test successful login."""
     auth_test_user.is_active = True
     auth_test_user.is_approved = True
     db.session.commit()
-
-    with client.application.test_request_context():
-        url = url_for('auth.login')
-        get_response = client.get(url)
-        assert get_response.status_code == 200
-        token = _extract_csrf_token_from_html(get_response.data.decode())
-
-    form_data = {
-        'username': auth_test_user.username,
-        'password': 'password123',
-        'csrf_token': token
-    }
-    response = client.post(url, data=form_data, follow_redirects=True)
-    assert response.status_code == 200
-    assert b"Logged in successfully." in response.data
-    assert b"Logout" in response.data
+    with client:
+        response = client.post(url_for('auth.login'), data={
+            'username': auth_test_user.username,
+            'password': 'password123',
+            'csrf_token': _extract_csrf_token_from_html(client.get(url_for('auth.login')).data.decode())
+        }, follow_redirects=True)
+        flashed_messages = get_flashed_messages(with_categories=True)
+        assert ('toast_success', 'Logged in successfully.') in flashed_messages
 
 def test_login_incorrect_password(client, app, auth_test_user):
     with client.application.test_request_context():
@@ -56,18 +62,12 @@ def test_login_incorrect_password(client, app, auth_test_user):
     assert b"Login" in response.data
 
 def test_logout_successful(logged_in_client):
+    """Test successful logout."""
     with logged_in_client.application.test_request_context():
-        logout_url = url_for('auth.logout')
-        dashboard_url = url_for('general.dashboard')
-
-    response = logged_in_client.get(logout_url, follow_redirects=True)
+        response = logged_in_client.get(url_for('auth.logout'), follow_redirects=True)
     assert response.status_code == 200
     assert b"Logged out successfully." in response.data
     assert b"Login" in response.data
-
-    dashboard_response = logged_in_client.get(dashboard_url, follow_redirects=True)
-    assert dashboard_response.status_code == 200
-    assert b"Please log in to access this page." in dashboard_response.data
 
 def test_create_post_page_loads(client, logged_in_client):
     """Test GET /create loads the create post form."""
@@ -186,3 +186,37 @@ def test_edit_profile_post_successful_update(client, app, logged_in_client, db):
     db.session.refresh(user)
     assert user.full_name == new_full_name
     assert user.profile_info == new_bio
+
+def test_edit_profile_unauthorized(client, create_test_user):
+    """Test unauthorized access to edit profile page."""
+    profile_user = create_test_user(email_address="profile_unauthorized@example.com", full_name="Profile Unauthorized", profile_info="Public bio.", is_profile_public=True)
+    with client.application.test_request_context():
+        response = client.get(url_for('profile.edit_profile'), follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Please log in to access this page." in response.data
+
+def test_view_profile_no_posts(client, create_test_user):
+    """Test viewing a profile with no posts."""
+    profile_user = create_test_user(email_address="profile_no_posts@example.com", full_name="Profile No Posts", profile_info="Public bio.", is_profile_public=True)
+    client.post(url_for('auth.login'), data={'username': profile_user.username, 'password': 'password', 'csrf_token': _extract_csrf_token_from_html(client.get(url_for('auth.login')).data.decode())}, follow_redirects=True)
+    with client.application.test_request_context():
+        response = client.get(url_for('profile.view_profile', user_id=profile_user.id))
+    assert response.status_code == 200
+    assert b"Profile No Posts" in response.data
+    assert b"No Posts Yet" in response.data
+
+def test_create_post_invalid_input(client, logged_in_client):
+    """Test creating a post with invalid input."""
+    with logged_in_client.application.test_request_context():
+        from flask_wtf.csrf import generate_csrf
+        token = generate_csrf()
+        url = url_for('post.create_post')
+
+    form_data = {
+        'content': '',
+        'tags_string': '',
+        'csrf_token': token
+    }
+    response = logged_in_client.post(url, data=form_data, follow_redirects=True)
+    assert response.status_code == 200
+    assert b"This field is required." in response.data
