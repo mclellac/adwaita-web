@@ -188,7 +188,7 @@ def test_view_photo_detail_with_comments(client, app, db, create_test_user, logg
 
     commenter = User.query.filter_by(username="login_fixture_user@example.com").first() # logged_in_client
     comment1_text = "This is the first comment on the photo."
-        comment1 = Comment(text=comment1_text, user_id=commenter.id, target_id=test_photo.id, target_type='userphoto')
+    comment1 = Comment(text=comment1_text, user_id=commenter.id, target_id=test_photo.id, target_type='userphoto')
     db.session.add(comment1)
     db.session.commit()
 

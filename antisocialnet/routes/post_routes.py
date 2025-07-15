@@ -155,6 +155,16 @@ def view_post(post_id):
             if new_mentions_created_comment:
                 db.session.commit()
 
+            # Notify followers of the new comment
+            for follower in current_user.followers:
+                create_notification(
+                    user_id=follower.id,
+                    actor_id=current_user.id,
+                    type='new_comment_by_followed_user',
+                    target_type='comment',
+                    target_id=comment.id
+                )
+
             flash('Comment posted successfully!', 'toast_success')
             return redirect(url_for('post.view_post', post_id=post_id, _anchor=f"comment-{comment.id}"))
         except ValueError: # Specific to parent_id conversion
@@ -276,6 +286,16 @@ def create_post():
                                 current_app.logger.info(f"Mention notification created for user '{mentioned_user_obj.full_name}' (ID: {mentioned_user_obj.id}) in post {new_post.id}")
             if new_mentions_created_post:
                 db.session.commit() # Commit any mention notifications
+
+            # Notify followers of the new post
+            for follower in current_user.followers:
+                create_notification(
+                    user_id=follower.id,
+                    actor_id=current_user.id,
+                    type='new_post_by_followed_user',
+                    target_type='post',
+                    target_id=new_post.id
+                )
 
             flash('Post created successfully!', 'toast_success')
             return redirect(url_for('post.view_post', post_id=new_post.id))

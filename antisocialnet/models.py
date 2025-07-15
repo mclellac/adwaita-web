@@ -419,7 +419,7 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Recipient
     actor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True) # User who performed action
-    type = db.Column(db.String(50), nullable=False)  # e.g., 'new_follower', 'new_like', 'new_comment'
+    type = db.Column(db.String(50), nullable=False)  # e.g., 'new_follower', 'new_like', 'new_comment', 'new_post_by_followed_user', 'new_comment_by_followed_user', 'new_photo_by_followed_user', 'pending_user_approval', 'user_approved', 'site_setting_changed'
     # related_post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True) # REMOVED
     # related_comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True) # REMOVED
     is_read = db.Column(db.Boolean, default=False, nullable=False)
@@ -471,6 +471,21 @@ class Notification(db.Model):
 
     def __repr__(self):
         return f'<Notification {self.id} type={self.type} user_id={self.user_id} is_read={self.is_read} target_type={self.target_type} target_id={self.target_id}>'
+
+
+def create_notification(user_id, type, actor_id=None, target_type=None, target_id=None):
+    """
+    Creates and saves a new notification.
+    """
+    notification = Notification(
+        user_id=user_id,
+        type=type,
+        actor_id=actor_id,
+        target_type=target_type,
+        target_id=target_id
+    )
+    db.session.add(notification)
+    db.session.commit()
 
 class Activity(db.Model):
     __tablename__ = 'activity'
