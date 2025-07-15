@@ -283,7 +283,7 @@ def test_like_item_route_for_comment_authenticated(client, app, db, create_test_
     test_post = create_test_post(author=post_author, content="A post with comments to be liked.")
 
     comment_author = create_test_user(email_address="comment_author_lc@example.com", full_name="Comment Author LC")
-    test_comment = Comment(text="A comment to be liked", user_id=comment_author.id, post_id=test_post.id)
+        test_comment = Comment(text="A comment to be liked", user_id=comment_author.id, target_id=test_post.id, target_type='post')
     db.session.add(test_comment)
     db.session.commit()
 
@@ -426,7 +426,7 @@ def test_create_comment_successful(client, app, logged_in_client, create_test_po
     test_post = create_test_post(author=user, content="Post to comment on.") # User can comment on own post
     post_id = test_post.id
 
-    initial_comment_count = Comment.query.filter_by(post_id=post_id).count()
+    initial_comment_count = Comment.query.filter_by(target_id=post_id, target_type='post').count()
     initial_activity_count = Activity.query.filter_by(user_id=user.id, type='commented_on_post').count()
 
     with logged_in_client.application.app_context(): # Use client's context
@@ -441,8 +441,8 @@ def test_create_comment_successful(client, app, logged_in_client, create_test_po
     assert b'Comment posted successfully!' in response.data
     assert bytes(comment_text, 'utf-8') in response.data # Comment should appear on page
 
-    assert Comment.query.filter_by(post_id=post_id).count() == initial_comment_count + 1
-    new_comment = Comment.query.filter_by(text=comment_text, post_id=post_id).first()
+    assert Comment.query.filter_by(target_id=post_id, target_type='post').count() == initial_comment_count + 1
+    new_comment = Comment.query.filter_by(text=comment_text, target_id=post_id, target_type='post').first()
     assert new_comment is not None
     assert new_comment.author == user
 
@@ -455,7 +455,7 @@ def test_create_comment_reply_successful(client, app, logged_in_client, create_t
     test_post = create_test_post(author=post_author, content="Post for replies.")
 
     commenter1 = create_test_user(email_address="c1@example.com", full_name="commenter1")
-    parent_comment = Comment(text="Parent comment", user_id=commenter1.id, post_id=test_post.id)
+    parent_comment = Comment(text="Parent comment", user_id=commenter1.id, target_id=test_post.id, target_type='post')
     db.session.add(parent_comment)
     db.session.commit()
     parent_comment_id = parent_comment.id
@@ -521,7 +521,7 @@ def test_create_comment_csrf_missing(client, logged_in_client, create_test_post)
     assert response.status_code == 400
     # The default CSRF error might not use the flash_form_errors_util path.
     # assert b'CSRF token missing' in response.data # Or similar depending on Flask-WTF
-    assert Comment.query.filter_by(post_id=test_post.id, text='some comment text').count() == 0
+    assert Comment.query.filter_by(target_id=test_post.id, target_type='post', text='some comment text').count() == 0
 
 
 # --- Test Delete Comment Route ---
@@ -625,7 +625,7 @@ def test_delete_comment_csrf_failure(client, app, logged_in_client, create_test_
     """Test CSRF failure (missing token) for comment deletion."""
     user = User.query.filter_by(username="login_fixture_user@example.com").first()
     test_post = create_test_post(author=user, content="Post for CSRF comment delete.")
-    comment = Comment(text="CSRF delete test", user_id=user.id, post_id=test_post.id)
+        test_comment = Comment(text="CSRF like comment", user_id=comment_author.id, target_id=test_post.id, target_type='post')
     db.session.add(comment); db.session.commit()
     comment_id = comment.id
 

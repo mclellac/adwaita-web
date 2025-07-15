@@ -305,13 +305,13 @@ def test_view_flags_page_loads_for_admin(admin_client, db, create_test_user, cre
     flagger_user = create_test_user(email_address="f007@example.com", full_name="Flagger007")
 
     test_post = create_test_post(author=post_author, content="A post with a comment to be flagged.")
-    comment_to_flag = Comment(text="This is a flaggable comment.", user_id=comment_author.id, post_id=test_post.id)
+        comment_to_flag = Comment(text="This is a flaggable comment.", user_id=comment_author.id, target_id=test_post.id, target_type='post')
     db.session.add(comment_to_flag)
     db.session.commit()
 
     flag1 = CommentFlag(comment_id=comment_to_flag.id, flagger_user_id=flagger_user.id, is_resolved=False)
     # Create an already resolved flag - should not show up in "active" list
-    resolved_comment = Comment(text="Another comment", user_id=comment_author.id, post_id=test_post.id)
+    resolved_comment = Comment(text="Another comment", user_id=comment_author.id, target_id=test_post.id, target_type='post')
     db.session.add(resolved_comment); db.session.commit()
     flag2_resolved = CommentFlag(comment_id=resolved_comment.id, flagger_user_id=flagger_user.id, is_resolved=True)
     db.session.add_all([flag1, flag2_resolved])
@@ -338,7 +338,7 @@ def test_view_flags_pagination(admin_client, app, db, create_test_user, create_t
     test_post = create_test_post(author=post_author, content="Post for flag pagination.")
 
     for i in range(3): # Create 3 active flags
-        c = Comment(text=f"Flagged comment {i+1}", user_id=comment_author.id, post_id=test_post.id)
+        c = Comment(text=f"Flagged comment {i+1}", user_id=comment_author.id, target_id=test_post.id, target_type='post')
         db.session.add(c); db.session.commit()
         f = CommentFlag(comment_id=c.id, flagger_user_id=flagger.id, is_resolved=False)
         db.session.add(f); db.session.commit()
@@ -364,7 +364,7 @@ def test_resolve_flag_successful(admin_client, app, db, create_test_user, create
     flagger = create_test_user(email_address="frf@example.com", full_name="Flag Resolver Flagger")
     comment_author = create_test_user(email_address="frca@example.com", full_name="Flag Resolver CAuth")
     post = create_test_post(author=comment_author, content="Post for flag resolution.")
-    comment = Comment(text="Comment to be resolved", user_id=comment_author.id, post_id=post.id)
+    comment = Comment(text="Comment to be resolved", user_id=comment_author.id, target_id=post.id, target_type='post')
     db.session.add(comment); db.session.commit()
     active_flag = CommentFlag(comment_id=comment.id, flagger_user_id=flagger.id, is_resolved=False)
     db.session.add(active_flag); db.session.commit()
@@ -408,7 +408,7 @@ def test_resolve_flag_already_resolved(admin_client, app, db, create_test_user, 
         assert admin_user_for_setup is not None, "Admin user 'admin_fixture_user@example.com' not found for test setup."
 
     comment_post = create_test_post() # Create post in the same session
-    comment = Comment(text="Comment for already resolved flag", user_id=flagger.id, post_id=comment_post.id)
+    comment = Comment(text="Comment for already resolved flag", user_id=flagger.id, target_id=comment_post.id, target_type='post')
     db.session.add(comment); db.session.commit()
     resolved_flag = CommentFlag(comment_id=comment.id, flagger_user_id=flagger.id, is_resolved=True, resolver_user_id=admin_user_for_setup.id)
     db.session.add(resolved_flag); db.session.commit()
@@ -424,7 +424,7 @@ def test_resolve_flag_already_resolved(admin_client, app, db, create_test_user, 
 def test_resolve_flag_csrf_missing(admin_client, db, create_test_user, create_test_post):
     """Test resolve flag POST with missing CSRF token."""
     flagger = create_test_user(email_address="fcsrf@example.com", full_name="Flag CSRF Flagger")
-    comment = Comment(text="Comment for CSRF resolve test", user_id=flagger.id, post_id=create_test_post().id)
+    comment = Comment(text="Comment for CSRF resolve test", user_id=flagger.id, target_id=create_test_post().id, target_type='post')
     db.session.add(comment); db.session.commit()
     active_flag = CommentFlag(comment_id=comment.id, flagger_user_id=flagger.id, is_resolved=False)
     db.session.add(active_flag); db.session.commit()
