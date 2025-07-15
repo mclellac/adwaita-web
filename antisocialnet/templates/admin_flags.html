@@ -19,9 +19,17 @@
         <div class="adw-action-row"> {# Using action row to display each flagged item #}
             <div class="adw-action-row-content" style="display: flex; flex-direction: column; align-items: flex-start;">
                 <h4 class="adw-action-row-title" style="margin-bottom: var(--spacing-xs);">
-                    <a href="{{ url_for('post.view_post', post_id=flag.comment.post_id, _anchor='comment-' ~ flag.comment_id) }}" target="_blank" class="adw-link">
-                        Comment by {{ flag.comment.author.full_name or "Unnamed User" }} ({{ flag.comment.author.username }}) on post "{{ flag.comment.post.title }}"
+                    {% if flag.comment.target_type == 'post' %}
+                    <a href="{{ url_for('post.view_post', post_id=flag.comment.target_id, _anchor='comment-' ~ flag.comment.id) }}" target="_blank" class="adw-link">
+                        Comment by {{ flag.comment.author.full_name or "Unnamed User" }} ({{ flag.comment.author.username }}) on post
                     </a>
+                    {% elif flag.comment.target_type == 'userphoto' %}
+                    <a href="{{ url_for('photo.view_photo_detail', photo_id=flag.comment.target_id, _anchor='comment-' ~ flag.comment.id) }}" target="_blank" class="adw-link">
+                        Comment by {{ flag.comment.author.full_name or "Unnamed User" }} ({{ flag.comment.author.username }}) on a photo
+                    </a>
+                    {% else %}
+                        Comment by {{ flag.comment.author.full_name or "Unnamed User" }} ({{ flag.comment.author.username }}) on a {{ flag.comment.target_type }}
+                    {% endif %}
                 </h4>
                 <blockquote class="flagged-comment-text styled-text-content" style="font-size: var(--font-size-small); color: var(--text-color-secondary); border-left: 3px solid var(--warning-color); padding-left: var(--spacing-s); margin-left: 0; margin-bottom: var(--spacing-xs);">
                     "{{ flag.comment.text | truncate(150, True) }}"
