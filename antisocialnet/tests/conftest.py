@@ -4,7 +4,7 @@ from antisocialnet import create_app, db as _db
 from antisocialnet.models import User, Post, Category, Tag, Like, Notification, Activity, SiteSetting # Changed PostLike to Like
 from antisocialnet.config import TestConfig # Will need to ensure TestConfig exists and is appropriate
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def app():
     """Session-wide test Flask application."""
     # FLASK_ENV is now implicitly handled by passing config_name='testing'

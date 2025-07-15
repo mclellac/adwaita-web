@@ -305,7 +305,7 @@ def test_view_flags_page_loads_for_admin(admin_client, db, create_test_user, cre
     flagger_user = create_test_user(email_address="f007@example.com", full_name="Flagger007")
 
     test_post = create_test_post(author=post_author, content="A post with a comment to be flagged.")
-        comment_to_flag = Comment(text="This is a flaggable comment.", user_id=comment_author.id, target_id=test_post.id, target_type='post')
+    comment_to_flag = Comment(text="This is a flaggable comment.", user_id=comment_author.id, target_id=test_post.id, target_type='post')
     db.session.add(comment_to_flag)
     db.session.commit()
 
