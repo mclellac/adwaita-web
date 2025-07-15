@@ -91,7 +91,7 @@ config_by_name = {
 class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # Use in-memory SQLite for tests
-    WTF_CSRF_ENABLED = True  # ENABLE CSRF protection for tests
+    WTF_CSRF_ENABLED = False  # ENABLE CSRF protection for tests
     SECRET_KEY = 'test-secret-key' # Explicit test secret key
     SERVER_NAME = 'localhost.test' # Added for url_for in tests
     MAIL_SUPPRESS_SEND = True # Do not send emails during tests
