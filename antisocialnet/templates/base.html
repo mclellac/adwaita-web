@@ -79,6 +79,16 @@
             </button>
         </form>
 
+        {# Notifications Link #}
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('notification.list_notifications') }}" class="adw-button flat circular notification-button" aria-label="Notifications">
+            <span class="adw-icon icon-objects-alarm-symbolic"></span>
+            {% if unread_notifications_count > 0 %}
+            <span class="notification-dot"></span>
+            {% endif %}
+        </a>
+        {% endif %}
+
         {# Main App Menu Button (About) - Moved here #}
         <div class="main-app-menu-container" style="position: relative;">
             <button id="main-app-menu-button" class="adw-button circular flat" aria-label="Main menu" aria-haspopup="true" aria-expanded="false">
@@ -166,13 +176,6 @@
             {% if current_user.is_authenticated %}
                 {# The "Feed" link is removed as "Home" now serves this purpose for logged-in users #}
                 {# "Find Users" link removed as search is now unified in the header #}
-                <a href="{{ url_for('notification.list_notifications') }}" class="adw-action-row activatable {{ 'selected' if request.blueprint == 'notification' }}">
-                    <span class="adw-action-row-icon icon-objects-alarm-symbolic"></span>
-                    <span class="adw-action-row-title">Notifications</span>
-                    {% if unread_notifications_count > 0 %}
-                        <span class="adw-badge suggested-action" title="{{ unread_notifications_count }} unread notifications">{{ unread_notifications_count }}</span>
-                    {% endif %}
-                </a>
                 <a href="{{ url_for('post.create_post') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'post.create_post' }}">
                     <span class="adw-action-row-icon icon-actions-document-new-symbolic"></span>
                     <span class="adw-action-row-title">New Post</span>

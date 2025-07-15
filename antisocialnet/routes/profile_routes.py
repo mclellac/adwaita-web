@@ -268,6 +268,7 @@ def upload_gallery_photo():
             flash("No photo files selected for gallery upload.", "warning")
             return redirect(url_for('profile.view_profile', user_id=current_user.id))
 
+        new_photos = []
         for photo_file in photo_files:
             if photo_file and photo_file.filename:
                 # Optionally, add individual file validation here if not handled by form globally
@@ -294,6 +295,7 @@ def upload_gallery_photo():
                             caption=caption # Same caption for all photos in this batch
                         )
                         db.session.add(new_photo)
+                        new_photos.append(new_photo)
                         uploaded_count += 1
                     except Exception as e_db_loop:
                         # Log specific error for this file, but try to continue with others
@@ -314,6 +316,16 @@ def upload_gallery_photo():
         if uploaded_count > 0 and error_count == 0:
             try:
                 db.session.commit()
+                # Notify followers of the new photo
+                for follower in current_user.followers:
+                    for photo in new_photos:
+                        create_notification(
+                            user_id=follower.id,
+                            actor_id=current_user.id,
+                            type='new_photo_by_followed_user',
+                            target_type='userphoto',
+                            target_id=photo.id
+                        )
                 flash(f'{uploaded_count} photo(s) uploaded to gallery successfully!', 'toast_success')
             except Exception as e_commit:
                 db.session.rollback()

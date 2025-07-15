@@ -5,7 +5,7 @@ import functools # For wraps in admin_required decorator
 
 from sqlalchemy.orm import joinedload # Added for eager loading
 # Corrected imports:
-from antisocialnet.models import User, CommentFlag, SiteSetting, Comment
+from antisocialnet.models import User, CommentFlag, SiteSetting, Comment, create_notification
 from antisocialnet.forms import SiteSettingsForm, DeleteCommentForm
 from antisocialnet import db
 from antisocialnet.utils import flash_form_errors_util
@@ -98,6 +98,13 @@ def site_settings():
                 POSTS_PER_PAGE=SiteSetting.get('posts_per_page', 10),
                 SITE_TITLE=SiteSetting.get('site_title', 'Adwaita Social Demo')
             )
+            # Notify all users of the site settings change
+            for user in User.query.all():
+                create_notification(
+                    user_id=user.id,
+                    actor_id=current_user.id,
+                    type='site_setting_changed'
+                )
             flash('Site settings updated successfully.', 'toast_success')
             current_app.logger.info(f"Site settings updated by admin {current_user.username}.")
             return redirect(url_for('admin.site_settings'))
@@ -126,6 +133,15 @@ def pending_users():
     current_app.logger.debug(f"Total pending users found by query: {users_query.count()}")
     user_pagination = users_query.paginate(page=page, per_page=per_page, error_out=False)
     pending_users_list = user_pagination.items
+    # Notify admins of pending users
+    for admin in User.query.filter_by(is_admin=True).all():
+        for user in pending_users_list:
+            create_notification(
+                user_id=admin.id,
+                type='pending_user_approval',
+                target_type='user',
+                target_id=user.id
+            )
     current_app.logger.info(f"Admin {current_user.username} viewing pending users page {page}. Found {len(pending_users_list)} pending users on this page. Per_page setting: {per_page}. Total items by paginator: {user_pagination.total}")
     return render_template('admin_pending_users.html', pending_users=pending_users_list, user_pagination=user_pagination)
 
@@ -144,6 +160,15 @@ def approve_user(user_id):
         user_to_approve.is_active = True
         db.session.add(user_to_approve)
         db.session.commit()
+        # Notify all users of the new user
+        for user in User.query.all():
+            create_notification(
+                user_id=user.id,
+                actor_id=current_user.id,
+                type='user_approved',
+                target_type='user',
+                target_id=user_to_approve.id
+            )
         current_app.logger.info(f"Admin {current_user.username} approved user ID {user_id} ({user_to_approve.username}).")
         flash(f'User {user_to_approve.username} approved successfully.', 'toast_success')
     except Exception as e:

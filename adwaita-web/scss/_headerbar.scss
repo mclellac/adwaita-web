@@ -144,4 +144,19 @@
     border-bottom-color: transparent;
     box-shadow: none;
   }
+
+  .notification-button {
+    position: relative;
+
+    .notification-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--destructive-color);
+      border: 1px solid var(--headerbar-bg-color);
+    }
+  }
 }
