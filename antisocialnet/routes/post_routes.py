@@ -171,7 +171,7 @@ def view_post(post_id):
 
     # Fetch comments (top-level only for the main list)
     comments = post.comments # Uses the relationship defined on Post model
-    current_app.logger.debug(f"Fetched {len(comments)} top-level comments for post {post_id}.")
+    current_app.logger.debug(f"Fetched {comments.count()} top-level comments for post {post_id}.")
 
     related_posts = []
     if post.is_published and post.tags:
