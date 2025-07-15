@@ -42,7 +42,6 @@
                             {% else %}
                                 (on a deleted post).
                             {% endif %}
-
                         {% elif notification.type == 'mention_in_post' and actor and notification.target_type == 'post' and target %}
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> mentioned you in the post: <a href="{{ url_for('post.view_post', post_id=target.id) }}" class="adw-link">"{{ target.content | striptags | truncate(50) }}"</a>.
                         {% elif notification.type == 'mention_in_comment' and actor and notification.target_type == 'comment' and target %}
@@ -57,7 +56,6 @@
                             {# target is a UserPhoto object #}
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> liked your photo:
                             <a href="{{ url_for('profile.view_gallery', user_id=target.user.id, _anchor='photo-' ~ target.id) }}" class="adw-link">
-
                                 <img src="{{ url_for('static', filename=target.image_filename) if target.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
                                 {{ target.caption | truncate(30) if target.caption else "Photo" }}
                             </a>.
@@ -67,7 +65,6 @@
                             <a href="{{ url_for('profile.view_profile', user_id=actor.id) }}" class="adw-link">{{ actor.full_name or actor.username }}</a> commented on your photo
                             {% if commented_photo %}
                             <a href="{{ url_for('profile.view_gallery', user_id=commented_photo.user.id, _anchor='photo-' ~ commented_photo.id) }}" class="adw-link">
-
                                  <img src="{{ url_for('static', filename=commented_photo.image_filename) if commented_photo.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
                             </a>
                             {% endif %}
@@ -79,7 +76,6 @@
                              mentioned you in a comment on
                             {% if mentioned_in_photo %}
                             photo <a href="{{ url_for('profile.view_gallery', user_id=mentioned_in_photo.user.id, _anchor='photo-' ~ mentioned_in_photo.id) }}" class="adw-link">
-
                                  <img src="{{ url_for('static', filename=mentioned_in_photo.image_filename) if mentioned_in_photo.image_filename else url_for('static', filename='img/default_avatar.png') }}" alt="Photo thumbnail" style="width: 30px; height: 30px; object-fit: cover; vertical-align: middle; margin-right: 5px;">
                             </a>.
                             {% else %}
