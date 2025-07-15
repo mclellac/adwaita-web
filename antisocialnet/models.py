@@ -174,7 +174,7 @@ class User(UserMixin, db.Model):
             user_id = decoded_token.get('reset_password_user_id')
             if user_id is None:
                 return None # Token is invalid or doesn't have the expected payload
-            return User.query.get(user_id)
+            return db.session.get(User, user_id)
         except jwt.ExpiredSignatureError:
             current_app.logger.warning("Password reset token expired.")
             return None # Token has expired

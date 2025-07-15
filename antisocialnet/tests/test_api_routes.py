@@ -86,7 +86,7 @@ def test_get_item_like_details(logged_in_client, db, create_test_user):
     assert not json_data['current_user_has_liked']
 
     # Like the post and check again
-    liking_user = User.query.filter_by(username="login_fixture_user@example.com").first()
+    liking_user = db.session.get(User, 1)
     like = Like(user_id=liking_user.id, target_type='post', target_id=post.id)
     db.session.add(like)
     db.session.commit()
