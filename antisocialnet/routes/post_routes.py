@@ -625,5 +625,19 @@ def posts_by_tag(tag_slug): # Renamed
         posts, pagination = [], None
     return render_template('posts_by_tag.html', tag=tag, posts=posts, pagination=pagination, current_user=current_user)
 
+@post_bp.route('/comment/<int:comment_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    if comment.user_id != current_user.id and not current_user.is_admin:
+        abort(403)
+    form = EditCommentForm(obj=comment)
+    if form.validate_on_submit():
+        comment.text = form.text.data
+        db.session.commit()
+        flash('Comment updated successfully!', 'toast_success')
+        return redirect(url_for('post.view_post', post_id=comment.target_id, _anchor=f"comment-{comment.id}"))
+    return render_template('edit_comment.html', form=form, comment=comment)
+
 # Old like_post_route and unlike_post_route removed.
 # Generic versions are now in like_routes.py

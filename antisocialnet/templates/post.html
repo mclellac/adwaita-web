@@ -118,6 +118,12 @@
                     </header>
                     <div class="comment-text styled-text-content">${comment.data.text_html}</div>
                     <div class="comment-actions adw-box adw-box-horizontal adw-box-spacing-s align-center">
+                        <button class="adw-button flat circular reply-button" data-comment-id="${comment.data.comment_id}"><span class="adw-icon icon-actions-mail-reply-sender-symbolic"></span></button>
+                        <button class="adw-button flat circular edit-comment-button" data-comment-id="${comment.data.comment_id}"><span class="adw-icon icon-actions-document-edit-symbolic"></span></button>
+                        <form action="/comment/${comment.data.comment_id}/delete" method="post" style="display: inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="adw-button flat circular" onclick="return confirm('Are you sure you want to delete this comment?');"><span class="adw-icon icon-actions-edit-delete-symbolic"></span></button>
+                        </form>
                         <adw-like-button item-id="${comment.data.comment_id}" item-type="comment" initial-liked="${comment.data.is_liked_by_current_user}" initial-like-count="${comment.data.like_count}"></adw-like-button>
                     </div>
                 `;
