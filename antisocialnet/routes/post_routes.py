@@ -64,7 +64,13 @@ def view_post(post_id):
             parent_id_int = int(parent_id_val) if parent_id_val and parent_id_val.isdigit() else None
             current_app.logger.info(f"User '{current_user.full_name}' (ID: {current_user.id}) submitting comment on post {post_id}. Parent ID: {parent_id_int}.")
 
-            comment = Comment(text=form.text.data, user_id=current_user.id, post_id=post_id, parent_id=parent_id_int)
+            comment = Comment(
+                text=form.text.data,
+                user_id=current_user.id,
+                target_type='post',
+                target_id=post_id,
+                parent_id=parent_id_int
+            )
             db.session.add(comment)
 
             # Notification for new comment
