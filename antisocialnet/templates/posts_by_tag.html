@@ -26,7 +26,7 @@
                             <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-link">{{ post.title }}</a>
                         </h2>
                         <div class="blog-post-card__meta adw-label caption">
-                            By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-link">{{ post.author.username if post.author else 'Unknown Author' }}</a>
+                            By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-link">{{ post.author.full_name if post.author else 'Unknown Author' }}</a>
                             on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'Unknown date' }}</time>
                         </div>
                     </header>
@@ -58,40 +58,16 @@
                     </footer>
                     <div class="adw-card__actions card-secondary-actions">
                         {% from "_macros.html" import like_button_and_count %}
-                        {{ like_button_and_count(post, current_user) }}
+                        {{ like_button_and_count(post, 'post', current_user) }}
                     </div>
                 </article>
                 {% endfor %}
             </div>
 
             {% if pagination and pagination.pages > 1 %}
-            <adw-box orientation="horizontal" justify="center" style="margin-top: var(--spacing-l);">
-                <adw-toggle-group>
-                    {% if pagination.has_prev %}
-                        <adw-button icon-name="go-previous-symbolic" href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug, page=pagination.prev_num) }}"></adw-button>
-                    {% else %}
-                        <adw-button icon-name="go-previous-symbolic" disabled></adw-button>
-                    {% endif %}
-
-                    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-                        {% if page_num %}
-                            {% if page_num == pagination.page %}
-                                <adw-button text="{{ page_num }}" suggested disabled aria-current="page"></adw-button>
-                            {% else %}
-                                <adw-button text="{{ page_num }}" href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug, page=page_num) }}"></adw-button>
-                            {% endif %}
-                        {% else %}
-                            <adw-button text="…" flat disabled style="pointer-events: none;"></adw-button>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if pagination.has_next %}
-                        <adw-button icon-name="go-next-symbolic" href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug, page=pagination.next_num) }}"></adw-button>
-                    {% else %}
-                        <adw-button icon-name="go-next-symbolic" disabled></adw-button>
-                    {% endif %}
-                </adw-toggle-group>
-            </adw-box>
+            <div class="adw-box adw-box-horizontal justify-center" style="margin-top: var(--spacing-l);">
+                {{ render_pagination(pagination, 'post.posts_by_tag', tag_slug=tag.slug) }}
+            </div>
             {% endif %}
         {% else %}
             <adw-status-page icon-name="bookmark-new-symbolic" title="No Posts Found" description="There are no posts with the tag '{{ tag.name }}'.">
