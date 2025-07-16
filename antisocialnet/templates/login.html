@@ -52,13 +52,13 @@
         {% endif %}
       </div>
 
-      <div class="adw-box horizontal justify-end" style="margin-top: var(--spacing-m);">
+      <div class="adw-box horizontal" style="margin-top: var(--spacing-m);">
         <button type="submit" class="adw-button suggested-action {{ 'full-width-button' if not site_settings.get('allow_registrations') else '' }}">{{ form.submit.label.text }}</button>
       </div>
 
       {# Default to True if setting not present, so link shows on fresh setup unless explicitly disabled by admin #}
       {% if site_settings.get('allow_registrations', True) %}
-      <div class="adw-box horizontal justify-center" style="margin-top: var(--spacing-m);">
+      <div class="adw-box horizontal" style="margin-top: var(--spacing-m);">
           <a href="{{ url_for('auth.register') }}" class="adw-link">Don't have an account? Sign up</a>
       </div>
       {% endif %}

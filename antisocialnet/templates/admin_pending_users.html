@@ -43,7 +43,7 @@
     </section>
 
     {% if user_pagination and (user_pagination.has_prev or user_pagination.has_next) %}
-    <nav aria-label="User pagination" class="pagination-nav adw-box horizontal justify-center" style="margin-top: var(--spacing-l);">
+    <nav aria-label="User pagination" class="pagination-nav adw-box horizontal" style="margin-top: var(--spacing-l);">
         {% if user_pagination.has_prev %}
             <a href="{{ url_for('admin.pending_users', page=user_pagination.prev_num) }}" class="adw-button">
                 <span class="adw-icon icon-actions-go-previous-symbolic"></span> Previous

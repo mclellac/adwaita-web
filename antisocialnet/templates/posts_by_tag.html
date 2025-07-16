@@ -65,7 +65,7 @@
             </div>
 
             {% if pagination and pagination.pages > 1 %}
-            <div class="adw-box adw-box-horizontal justify-center" style="margin-top: var(--spacing-l);">
+            <div class="adw-box adw-box-horizontal" style="margin-top: var(--spacing-l);">
                 {{ render_pagination(pagination, 'post.posts_by_tag', tag_slug=tag.slug) }}
             </div>
             {% endif %}

@@ -127,7 +127,7 @@
 
         {# Pagination Controls #}
         {% if pagination and pagination.pages > 1 %}
-        <div class="adw-box adw-box-horizontal justify-center list-pagination-box" style="margin-top: var(--spacing-l);">
+        <div class="adw-box adw-box-horizontal list-pagination-box" style="margin-top: var(--spacing-l);">
             <div class="adw-toggle-group">
                 {% if pagination.has_prev %}
                     <a href="{{ url_for('notification.list_notifications', page=pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
