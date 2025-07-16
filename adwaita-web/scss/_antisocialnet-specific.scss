@@ -281,8 +281,8 @@ hr.section-divider {
     }
 }
 
-html, body { height: 100%; margin: 0; display: flex; flex-direction: column; }
-body { overflow: hidden; }
+html, body { height: 100%; margin: 0; }
+body { display: flex; flex-direction: column; overflow: hidden; }
 .adw-header-bar { flex-shrink: 0; }
 .app-body-container { display: flex; flex-grow: 1; overflow: hidden; }
 .app-sidebar {
@@ -293,61 +293,20 @@ body { overflow: hidden; }
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    .sidebar-nav {
-        // This targets the <nav class="adw-list-box flat sidebar-nav">
-        &.adw-list-box.flat {
-            border: none; // Remove default listbox border
-            border-radius: 0; // Remove default listbox radius
-            background-color: transparent; // Ensure it's transparent
-            padding-top: var(--spacing-s); // Add some padding at the top and bottom of the nav block
-            padding-bottom: var(--spacing-s);
-
-            .adw-action-row {
-                // Adjust padding if needed, default is var(--spacing-m)
-                // padding-left: var(--spacing-l); // Example: Increase padding if desired
-                // padding-right: var(--spacing-l);
-                border-bottom: none; // No separators between nav items
-                border-radius: var(--border-radius-medium); // Rounded corners for each nav item
-                margin: 0 var(--spacing-s) var(--spacing-xs) var(--spacing-s); // Margin around each item
-
-                &:hover {
-                    background-color: rgba(var(--text-color-rgb, 0,0,0), 0.06);
-                }
-                // For selected state
-                &.selected {
-                    background-color: rgba(var(--accent-color-rgb, 53,132,228), 0.15); // Default to blueish accent for example
-                    .adw-action-row-title {
-                        color: var(--accent-color);
-                        font-weight: bold;
-                    }
-                    .adw-action-row-icon { // Ensure icon also gets accent color
-                        color: var(--accent-color);
-                    }
-                }
-                // Ensure default (non-selected) icon and title colors are standard
-                &:not(.selected) {
-                    .adw-action-row-title {
-                        color: var(--text-color);
-                        font-weight: normal; // Ensure non-selected titles are normal weight
-                    }
-                    .adw-action-row-icon {
-                        color: var(--text-color-secondary); // Or var(--text-color) if preferred
-                    }
-                }
-            }
-        }
-        // Remove old ul/li/a styles that are no longer applicable
-        // ul { /* ... */ } (removed)
-        // li { /* ... */ } (removed)
-        // a { /* ... */ } (removed, now covered by .adw-action-row)
-    }
 }
 .app-content-area {
-    flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
     background-color: var(--window-bg-color);
-    .page-content-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
-    .main-content { padding-top: var(--spacing-xl); padding-bottom: var(--spacing-xl); flex-grow: 1; }
-    .app-footer { flex-shrink: 0; }
+}
+.main-content {
+    flex-grow: 1;
+    padding: var(--spacing-xl);
+}
+.app-footer {
+    flex-shrink: 0;
 }
 
 // --- Styles from edit_profile.html ---
