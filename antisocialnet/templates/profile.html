@@ -5,7 +5,7 @@
 {% block header_title %}Profile{% endblock %}
 
 {% block content %}
-<div class="adw-clamp adw-clamp-xl">
+<div class="adw-clamp adw-clamp-xl adw-box adw-box-vertical adw-box-spacing-xl">
     <div class="profile-header adw-box adw-box-spacing-xl align-center">
         <div class="adw-avatar size-huge">
             <img src="{{ url_for('static', filename=user_profile.profile_photo_url) if user_profile.profile_photo_url else url_for('static', filename='img/default_avatar.png') }}" alt="{{ user_profile.full_name }} avatar">
@@ -34,9 +34,9 @@
                     {% endif %}
                 </div>
             {% else %}
-                <div class="profile-edit-actions">
-                    <a href="{{ url_for('profile.edit_profile') }}" class="adw-button">Edit Profile</a>
-                </div>
+            <div class="profile-edit-actions">
+                <a href="{{ url_for('profile.edit_profile') }}" class="adw-button suggested-action">Edit Profile</a>
+            </div>
             {% endif %}
         </div>
     </div>
