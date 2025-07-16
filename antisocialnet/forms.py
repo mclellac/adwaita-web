@@ -146,6 +146,14 @@ class GalleryPhotoUploadForm(FlaskForm):
 class LikeForm(FlaskForm):
     submit = SubmitField('Like') # Text can be changed in template if needed for context
 
+class EditPostForm(FlaskForm):
+    """Form for editing an existing post."""
+    content = TextAreaField('Content', validators=[DataRequired()])
+    tags_string = StringField('Tags (comma-separated)')
+    categories_string = StringField('Categories (comma-separated)')
+    submit = SubmitField('Update Post')
+
+
 class UnlikeForm(FlaskForm):
     submit = SubmitField('Unlike') # Text can be changed in template if needed for context
 

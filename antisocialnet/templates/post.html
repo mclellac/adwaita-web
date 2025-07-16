@@ -103,6 +103,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    document.querySelectorAll('.show-replies-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const commentId = this.dataset.commentId;
+            const repliesContainer = document.getElementById(`replies-for-${commentId}`);
+            if (repliesContainer.style.display === 'none') {
+                repliesContainer.style.display = 'block';
+                this.textContent = 'Hide replies';
+            } else {
+                repliesContainer.style.display = 'none';
+                this.textContent = `Show replies (${repliesContainer.children.length})`;
+            }
+        });
+    });
 });
 </script>
 {% endblock %}

@@ -299,13 +299,21 @@ class Post(db.Model, PolymorphicLikeMixin):
                             cascade='all, delete-orphan',
                             overlaps="likes,likes,likes")
 
+import misaka
 class Comment(db.Model, PolymorphicLikeMixin):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(50), default='comment')
     text = db.Column(db.Text, nullable=False)
+    text_html = db.Column(db.Text, nullable=True) # Added to store rendered HTML
     created_at = db.Column(
         db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at = db.Column(
+    db.DateTime,
+    nullable=False,
+    default=lambda: datetime.now(timezone.utc),
+    onupdate=lambda: datetime.now(timezone.utc)
     )
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     target_type = db.Column(db.String(50), nullable=False)
@@ -327,6 +335,13 @@ class Comment(db.Model, PolymorphicLikeMixin):
                             lazy='dynamic',
                             cascade='all, delete-orphan',
                             overlaps="likes,likes")
+
+# Event listener to render markdown to html before saving
+@db.event.listens_for(Comment, 'before_insert')
+@db.event.listens_for(Comment, 'before_update')
+def on_comment_saving(mapper, connection, target):
+    if target.text:
+        target.text_html = misaka.html(target.text, extensions=('fenced-code', 'tables'))
 
 class Postable(db.Model):
     __tablename__ = 'postable'

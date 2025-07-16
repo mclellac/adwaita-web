@@ -498,6 +498,10 @@ $app-sidebar-breakpoint: 768px;
     }
 }
 
+.comment-item .show-replies-button {
+    margin-top: var(--spacing-s);
+}
+
 // Gallery Specific Styles (from profile.html)
 .profile-gallery-grid {
     display: grid;
