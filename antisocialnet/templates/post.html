@@ -47,7 +47,7 @@
             <div id="comments-list" class="adw-list-box comments-list flat">
                 {% for comment in post.comments | sort(attribute='created_at') %}
                     {% if not comment.parent_id %}
-                        {% include '_comment.html' %}
+                        {% include '_comment.html' with context %}
                     {% endif %}
                 {% endfor %}
             </div>
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 formContainer.style.display = 'block';
                 formContainer.innerHTML = `
                     <form method="POST" action="{{ url_for('post.view_post', post_id=post.id) }}">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="csrf_token" value="${window.csrf_token}">
                         <input type="hidden" name="parent_id" value="${commentId}">
                         <textarea name="text" class="adw-textarea" rows="3">@${username} </textarea>
                         <div class="adw-box adw-box-horizontal adw-box-spacing-s" style="margin-top: 8px;">

@@ -48,6 +48,9 @@
         }
       })();
     </script>
+    <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
+        window.csrf_token = "{{ csrf_token() }}";
+    </script>
 </head>
 <body>
 {% block dialog_mode %}{% endblock %} {# Define dialog_mode block #}
@@ -187,50 +190,46 @@
         {# "More" section with About/Contact removed from sidebar #}
     </aside>
 
-    <div class="app-content-area"> {# NEW: Wrapper for main content + its own potential footer #}
-        <div class="page-content-wrapper"> {# Replaced adw-page for more control #}
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages-container" style="position: sticky; top: 0; z-index: 1050; padding: 0 var(--spacing-m) var(--spacing-s);">
-                {% for category, message in messages %}
-                    {% if category == 'toast_success' %}
-                        <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
-                            document.addEventListener('DOMContentLoaded', function() {
-                                if (window.Adw && window.Adw.createToast) {
-                                    window.Adw.createToast("{{ message|escapejs }}");
-                                } else {
-                                    // Fallback if Adw.createToast is not available for some reason
-                                    console.warn("Adw.createToast not found, falling back for message: {{ message|escapejs }}");
-                                    // Optional: could add a simple alert or console log as fallback
-                                }
-                            });
-                        </script>
-                    {% else %}
-                        {% set banner_class = 'adw-banner' %}
-                        {% if category == 'danger' or category == 'error' %}
-                        {% set banner_class = banner_class ~ ' error' %} {# Use .error class for adw-banner styling #}
-                        {% elif category == 'success' %} {# For regular success banners not converted to toasts #}
-                        {% set banner_class = banner_class ~ ' success' %} {# Use .success class #}
-                        {% elif category == 'warning' %}
-                        {% set banner_class = banner_class ~ ' warning' %} {# Use .warning class #}
-                        {% elif category == 'info' %}
-                        {% set banner_class = banner_class ~ ' info' %} {# Use .info class or default Adwaita banner style #}
-                        {% endif %}
-                        <div class="{{ banner_class }} visible" role="alert" style="position: relative; top: auto; left: auto; right: auto; transform: none; opacity: 1; margin-top: var(--spacing-s);">
-                            <span class="adw-banner-title">{{ message }}</span>
-                            <button class="adw-button flat adw-banner-dismiss-button">Dismiss</button>
-                        </div>
+    <div class="app-content-area">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages-container" style="position: sticky; top: 0; z-index: 1050; padding: 0 var(--spacing-m) var(--spacing-s);">
+            {% for category, message in messages %}
+                {% if category == 'toast_success' %}
+                    <script nonce="{{ csp_nonce() if csp_nonce else '' }}">
+                        document.addEventListener('DOMContentLoaded', function() {
+                            if (window.Adw && window.Adw.createToast) {
+                                window.Adw.createToast("{{ message|escapejs }}");
+                            } else {
+                                console.warn("Adw.createToast not found, falling back for message: {{ message|escapejs }}");
+                            }
+                        });
+                    </script>
+                {% else %}
+                    {% set banner_class = 'adw-banner' %}
+                    {% if category == 'danger' or category == 'error' %}
+                    {% set banner_class = banner_class ~ ' error' %}
+                    {% elif category == 'success' %}
+                    {% set banner_class = banner_class ~ ' success' %}
+                    {% elif category == 'warning' %}
+                    {% set banner_class = banner_class ~ ' warning' %}
+                    {% elif category == 'info' %}
+                    {% set banner_class = banner_class ~ ' info' %}
                     {% endif %}
-                {% endfor %}
-                </div>
-            {% endif %}
-            {% endwith %}
+                    <div class="{{ banner_class }} visible" role="alert" style="position: relative; top: auto; left: auto; right: auto; transform: none; opacity: 1; margin-top: var(--spacing-s);">
+                        <span class="adw-banner-title">{{ message }}</span>
+                        <button class="adw-button flat adw-banner-dismiss-button">Dismiss</button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            </div>
+        {% endif %}
+        {% endwith %}
 
-            <main class="adw-clamp main-content"> {# Use adw-clamp for content width control #}
-                <h1 class="adw-title-1">{% block header_title %}{% endblock %}</h1>
-                {% block content %}{% endblock %}
-            </main>
-        </div>
+        <main class="adw-clamp main-content">
+            <h1 class="adw-title-1">{% block header_title %}{% endblock %}</h1>
+            {% block content %}{% endblock %}
+        </main>
 
         <footer class="app-footer adw-toolbar">
     {# Footer content is now minimal as nav links moved to sidebar #}
