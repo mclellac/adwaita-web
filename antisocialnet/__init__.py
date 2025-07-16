@@ -9,11 +9,13 @@ from flask_wtf import CSRFProtect
 from markupsafe import Markup
 
 from flask_mail import Mail
+from flask_migrate import Migrate
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 mail = Mail()
+migrate = Migrate()
 
 from . import models
 
@@ -89,6 +91,7 @@ def create_app(config_name=None, yaml_config_override=None):
     login_manager.login_message_category = 'info'
     csrf.init_app(app)
     mail.init_app(app)
+    migrate.init_app(app, db)
 
     from . import utils as app_utils
     app_utils.init_app(app)
@@ -217,3 +220,5 @@ def create_app(config_name=None, yaml_config_override=None):
 
     app.logger.info("Flask application instance created and configured.")
     return app
+
+app = create_app()

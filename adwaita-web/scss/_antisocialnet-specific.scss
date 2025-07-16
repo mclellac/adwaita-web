@@ -281,10 +281,37 @@ hr.section-divider {
     }
 }
 
-html, body { height: 100%; margin: 0; }
-body { display: flex; flex-direction: column; overflow: hidden; }
-.adw-header-bar { flex-shrink: 0; }
-.app-body-container { display: flex; flex-grow: 1; overflow: hidden; }
+html, body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.adw-header-bar {
+  flex-shrink: 0;
+}
+
+.app-body-container {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
 .app-sidebar {
     width: 240px;
     flex-shrink: 0;
@@ -294,6 +321,7 @@ body { display: flex; flex-direction: column; overflow: hidden; }
     display: flex;
     flex-direction: column;
 }
+
 .app-content-area {
     flex-grow: 1;
     display: flex;
@@ -301,12 +329,17 @@ body { display: flex; flex-direction: column; overflow: hidden; }
     overflow-y: auto;
     background-color: var(--window-bg-color);
 }
+
 .main-content {
     flex-grow: 1;
     padding: var(--spacing-xl);
 }
+
 .app-footer {
-    flex-shrink: 0;
+  flex-shrink: 0;
+  position: relative;
+  bottom: 0;
+  width: 100%;
 }
 
 // --- Styles from edit_profile.html ---
