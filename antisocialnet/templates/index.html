@@ -67,7 +67,7 @@
 {% endif %}
 
 {% if pagination and pagination.pages > 1 %}
-<nav aria-label="Page navigation" class="pagination-controls adw-box horizontal justify-center" style="margin-top: var(--spacing-l);">
+<nav aria-label="Page navigation" class="pagination-controls adw-box horizontal" style="margin-top: var(--spacing-l);">
     <div class="adw-toggle-group">
         {% if pagination.has_prev %}
             <a href="{{ url_for('general.index', page=pagination.prev_num) }}" class="adw-button">

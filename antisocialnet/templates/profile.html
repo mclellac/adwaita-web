@@ -97,7 +97,7 @@
             {% endif %}
         </div>
         {% if posts_pagination and posts_pagination.pages > 1 %}
-        <div class="adw-box adw-box-horizontal justify-center" style="margin-top: var(--spacing-l);">
+        <div class="adw-box adw-box-horizontal" style="margin-top: var(--spacing-l);">
             {{ render_pagination(posts_pagination, 'profile.view_profile', user_id=user_profile.id) }}
         </div>
         {% endif %}

@@ -48,7 +48,7 @@
 
         {# Pagination Controls #}
         {% if pagination and pagination.pages > 1 %}
-        <div class="adw-box adw-box-horizontal justify-center list-pagination-box">
+        <div class="adw-box adw-box-horizontal list-pagination-box">
             {{ render_pagination(pagination, 'profile.followers_list', user_id=user_profile.id) }}
         </div>
         {% endif %}

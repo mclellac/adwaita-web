@@ -51,7 +51,7 @@
                 </div>
                 {# Pagination for Users #}
                 {% if users_pagination and users_pagination.pages > 1 %}
-                <nav aria-label="User search results navigation" class="pagination-controls adw-box horizontal justify-center" style="margin-top: var(--spacing-m);">
+                <nav aria-label="User search results navigation" class="pagination-controls adw-box horizontal" style="margin-top: var(--spacing-m);">
                     <div class="adw-toggle-group">
                         {% if users_pagination.has_prev %}
                             <a href="{{ url_for('general.search_results', q=query, page=users_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous users page">
@@ -139,7 +139,7 @@
 
                 {# Pagination for Posts #}
                 {% if posts_pagination and posts_pagination.pages > 1 %}
-                <nav aria-label="Post search results navigation" class="pagination-controls adw-box horizontal justify-center" style="margin-top: var(--spacing-m);">
+                <nav aria-label="Post search results navigation" class="pagination-controls adw-box horizontal" style="margin-top: var(--spacing-m);">
                     <div class="adw-toggle-group">
                         {% if posts_pagination.has_prev %}
                              <a href="{{ url_for('general.search_results', q=query, page=posts_pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous posts page">
