@@ -52,7 +52,7 @@
         window.csrf_token = "{{ csrf_token() }}";
     </script>
 </head>
-<body>
+<body class="app-layout">
 {% block dialog_mode %}{% endblock %} {# Define dialog_mode block #}
 
 {% if not dialog_mode %} {# Conditionally render header #}
@@ -243,6 +243,8 @@
             {# About and Contact links removed from here #}
         </div>
     </footer>
+    </div>
+</div>
 
     {% block scripts %}
     {# Theme and accent handling script is above, this is for other scripts #}
