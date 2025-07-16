@@ -6,6 +6,7 @@ email-validator # For WTForms Email validator
 Flask==3.1.1
 Flask-Login==0.6.3
 Flask-Mail # Added for password reset emails
+Flask-Migrate
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.2
 greenlet==3.2.3
