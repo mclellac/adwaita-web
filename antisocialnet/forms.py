@@ -154,6 +154,14 @@ class EditPostForm(FlaskForm):
     submit = SubmitField('Update Post')
 
 
+class FollowForm(FlaskForm):
+    """CSRF-only form for following a user."""
+    submit = SubmitField('Follow')
+
+class UnfollowForm(FlaskForm):
+    """CSRF-only form for unfollowing a user."""
+    submit = SubmitField('Unfollow')
+
 class UnlikeForm(FlaskForm):
     submit = SubmitField('Unlike') # Text can be changed in template if needed for context
 

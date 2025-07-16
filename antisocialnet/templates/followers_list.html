@@ -31,13 +31,13 @@
                     {% if current_user.is_authenticated and current_user != listed_user %}
                         {% if current_user.is_following(listed_user) %}
                             <form action="{{ url_for('profile.unfollow_user', user_id=listed_user.id) }}" method="POST" style="display: inline;">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="adw-button small">Unfollow</button> {# Using .small button variant #}
+                                {{ unfollow_form.hidden_tag() }}
+                                {{ unfollow_form.submit(class="adw-button small") }}
                             </form>
                         {% else %}
                             <form action="{{ url_for('profile.follow_user', user_id=listed_user.id) }}" method="POST" style="display: inline;">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="adw-button small suggested-action">Follow</button>
+                                {{ follow_form.hidden_tag() }}
+                                {{ follow_form.submit(class="adw-button small suggested-action") }}
                             </form>
                         {% endif %}
                     {% endif %}
@@ -49,39 +49,7 @@
         {# Pagination Controls #}
         {% if pagination and pagination.pages > 1 %}
         <div class="adw-box adw-box-horizontal justify-center list-pagination-box">
-            <div class="adw-toggle-group">
-                {% if pagination.has_prev %}
-                    <a href="{{ url_for('profile.followers_list', user_id=user_profile.id, page=pagination.prev_num) }}" class="adw-button icon-only" aria-label="Previous page">
-                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
-                    </a>
-                {% else %}
-                    <button class="adw-button icon-only" disabled aria-label="Previous page">
-                        <span class="adw-icon icon-actions-go-previous-symbolic"></span>
-                    </button>
-                {% endif %}
-
-                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-                    {% if page_num %}
-                        {% if page_num == pagination.page %}
-                            <button class="adw-button suggested-action" disabled aria-current="page">{{ page_num }}</button>
-                        {% else %}
-                            <a href="{{ url_for('profile.followers_list', user_id=user_profile.id, page=page_num) }}" class="adw-button">{{ page_num }}</a>
-                        {% endif %}
-                    {% elif loop.index != 1 and loop.index != pagination.pages + pagination.iter_pages()|length %}
-                        <button class="adw-button flat" disabled>…</button>
-                    {% endif %}
-                {% endfor %}
-
-                {% if pagination.has_next %}
-                     <a href="{{ url_for('profile.followers_list', user_id=user_profile.id, page=pagination.next_num) }}" class="adw-button icon-only" aria-label="Next page">
-                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                    </a>
-                {% else %}
-                    <button class="adw-button icon-only" disabled aria-label="Next page">
-                        <span class="adw-icon icon-actions-go-next-symbolic"></span>
-                    </button>
-                {% endif %}
-            </div>
+            {{ render_pagination(pagination, 'profile.followers_list', user_id=user_profile.id) }}
         </div>
         {% endif %}
 
