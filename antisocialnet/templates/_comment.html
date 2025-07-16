@@ -10,10 +10,10 @@
     </header>
     <div class="comment-text styled-text-content">{{ comment.text_html | safe }}</div>
     <div class="comment-actions adw-box adw-box-horizontal adw-box-spacing-s align-center">
-        <button class="adw-button flat circular reply-button" data-comment-id="{{ comment.id }}" data-username="{{ comment.author.username }}">
+        <button class="adw-button flat circular reply-button" data-comment-id="{{ comment.id }}" data-username="{{ comment.author.full_name }}">
             <span class="adw-icon icon-actions-mail-reply-sender-symbolic"></span>
         </button>
-        {% if current_user == comment.author or current_user.is_admin %}
+        {% if current_user.is_authenticated and (current_user == comment.author or current_user.is_admin) %}
         <a href="{{ url_for('post.edit_comment', comment_id=comment.id) }}" class="adw-button flat circular edit-comment-button" data-comment-id="{{ comment.id }}">
             <span class="adw-icon icon-actions-document-edit-symbolic"></span>
         </a>
@@ -24,13 +24,16 @@
             </button>
         </form>
         {% endif %}
-        <adw-like-button item-id="{{ comment.id }}" item-type="comment" initial-liked="{{ current_user.has_liked_item('comment', comment.id) }}" initial-like-count="{{ comment.likes.count() }}"></adw-like-button>
+        <adw-like-button item-id="{{ comment.id }}" item-type="comment" initial-liked="{{ current_user.has_liked_item('comment', comment.id) if current_user.is_authenticated else false }}" initial-like-count="{{ comment.likes.count() }}"></adw-like-button>
     </div>
     <div class="reply-form-container" id="reply-form-container-{{ comment.id }}" style="display: none; margin-top: 10px;"></div>
 
-    <div class="comment-replies">
+    {% if comment.replies %}
+    <div class="comment-replies" id="replies-for-{{ comment.id }}" style="display: none;">
         {% for reply in comment.replies | sort(attribute='created_at') %}
             {% include '_comment.html' with context %}
         {% endfor %}
     </div>
+    <button class="adw-button flat show-replies-button" data-comment-id="{{ comment.id }}">Show replies ({{ comment.replies | length }})</button>
+    {% endif %}
 </div>

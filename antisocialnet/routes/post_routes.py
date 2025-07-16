@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import selectinload, joinedload # Added for eager loading
 
 from ..models import Post, Category, Tag, Comment, CommentFlag, Notification, Activity # Added Notification, Activity
-from ..forms import PostForm, CommentForm, DeleteCommentForm, DeletePostForm, FlagCommentForm, LikeForm, UnlikeForm
+from ..forms import PostForm, CommentForm, DeleteCommentForm, DeletePostForm, FlagCommentForm, LikeForm, UnlikeForm, EditCommentForm
 from .. import db
 from ..utils import flash_form_errors_util, update_post_relations_util, extract_mentions # Added extract_mentions
 
@@ -629,6 +629,7 @@ def edit_comment(comment_id):
     form = EditCommentForm(obj=comment)
     if form.validate_on_submit():
         comment.text = form.text.data
+        comment.updated_at = datetime.now(timezone.utc)
         db.session.commit()
         flash('Comment updated successfully!', 'toast_success')
         return redirect(url_for('post.view_post', post_id=comment.target_id, _anchor=f"comment-{comment.id}"))
