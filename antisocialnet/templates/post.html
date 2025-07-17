@@ -56,7 +56,7 @@
             <h2 class="adw-preferences-group__title">Leave a Comment</h2>
             <div class="adw-list-box">
                 <div id="comment-form-container" class="comment-form-section">
-                    <form id="comment-form" method="POST" action="{{ url_for('post.view_post', post_id=post.id) }}">
+                    <form id="comment-form" method="POST" action="{{ url_for('api.post_item_comment', target_type='post', target_id=post.id) }}">
                         {{ form.hidden_tag() }}
                         {{ form.parent_id }}
                         <div class="form-group">
@@ -74,6 +74,59 @@
 {{ super() }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const commentForm = document.getElementById('comment-form');
+    commentForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(commentForm);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch(commentForm.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': data.csrf_token
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(newComment => {
+            if (newComment.errors) {
+                for (const error of Object.values(newComment.errors)) {
+                    Adw.createToast(error);
+                }
+                return;
+            }
+
+            const commentsList = document.getElementById('comments-list');
+            const commentElement = document.createElement('div');
+            commentElement.innerHTML = `
+                <div class="adw-action-row">
+                    <div class="adw-action-row-start-content">
+                        <a href="${newComment.author.profile_url}">
+                            <span class="adw-avatar size-m">
+                                <img src="${newComment.author.profile_photo_url}" alt="${newComment.author.full_name} avatar">
+                            </span>
+                        </a>
+                    </div>
+                    <div class="adw-action-row-text-content">
+                        <a href="${newComment.author.profile_url}" class="adw-link">
+                            <span class="adw-action-row-title">${newComment.author.full_name}</span>
+                        </a>
+                        <div class="styled-text-content">
+                            ${newComment.text}
+                        </div>
+                    </div>
+                </div>
+            `;
+            commentsList.appendChild(commentElement);
+            commentForm.reset();
+        })
+        .catch(error => {
+            console.error('Error posting comment:', error);
+            Adw.createToast('Error posting comment. Please try again.');
+        });
+    });
+
     document.querySelectorAll('.reply-button').forEach(button => {
         button.addEventListener('click', function() {
             const commentId = this.dataset.commentId;
@@ -89,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 formContainer.style.display = 'block';
                 formContainer.innerHTML = `
-                    <form method="POST" action="{{ url_for('post.view_post', post_id=post.id) }}">
+                    <form method="POST" action="{{ url_for('api.post_item_comment', target_type='post', target_id=post.id) }}">
                         <input type="hidden" name="csrf_token" value="${window.csrf_token}">
                         <input type="hidden" name="parent_id" value="${commentId}">
                         <textarea name="text" class="adw-textarea" rows="3">@${username} </textarea>

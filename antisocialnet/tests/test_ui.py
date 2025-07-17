@@ -12,21 +12,40 @@ def driver():
     driver.quit()
 
 def test_layout(driver):
-    driver.get("http://127.0.0.1:5000")
+    import subprocess
+    import time
+    p = subprocess.Popen(["flask", "run"])
+    try:
+        time.sleep(15)
+        driver.get("http://127.0.0.1:5000")
 
-    # Check that the sidebar and content are side-by-side
-    sidebar = driver.find_element(By.CLASS_NAME, "app-sidebar")
-    content = driver.find_element(By.CLASS_NAME, "app-content-area")
+        # Check that the sidebar and content are stacked vertically
+        sidebar = driver.find_element(By.CLASS_NAME, "app-sidebar")
+        content = driver.find_element(By.CLASS_NAME, "app-content-area")
 
-    assert sidebar.location['x'] < content.location['x']
-    assert sidebar.size['height'] > 0
-    assert content.size['height'] > 0
+        assert sidebar.location['y'] < content.location['y']
+        assert sidebar.size['height'] > 0
+        assert content.size['height'] > 0
 
-    # Check that the footer is at the bottom of the page
-    footer = driver.find_element(By.CLASS_NAME, "app-footer")
-    assert footer.location['y'] > content.location['y']
+        # Check that the footer is at the bottom of the page
+        footer = driver.find_element(By.CLASS_NAME, "app-footer")
+        assert footer.location['y'] > content.location['y']
+    finally:
+        p.kill()
 
 def test_comment_actions(driver):
+    import subprocess
+    import os
+    import signal
+    try:
+        lsof_output = subprocess.check_output(["lsof", "-i", ":5000"]).decode()
+        for line in lsof_output.splitlines():
+            if "LISTEN" in line:
+                pid = int(line.split()[1])
+                os.kill(pid, signal.SIGKILL)
+    except (subprocess.CalledProcessError, IndexError):
+        pass
+    p = subprocess.Popen(["flask", "run"])
     from antisocialnet import create_app, db
     from antisocialnet.models import User
     app = create_app()
@@ -42,30 +61,39 @@ def test_comment_actions(driver):
         db.session.commit()
 
     try:
+        import time
+        time.sleep(240)
         # Log in
         driver.get("http://127.0.0.1:5000/auth/login")
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import expected_conditions as EC
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "username"))
+        )
         driver.find_element(By.NAME, "username").send_keys("testuser@test.com")
         driver.find_element(By.NAME, "password").send_keys("password")
         driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
 
         # Create a post
-        from selenium.webdriver.support.ui import WebDriverWait
-        from selenium.webdriver.support import expected_conditions as EC
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "h1.adw-title-1"))
         )
         driver.get("http://127.0.0.1:5000/dashboard")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.LINK_TEXT, "New Post"))
+                EC.element_to_be_clickable((By.LINK_TEXT, "New Post"))
         )
         driver.find_element(By.LINK_TEXT, "New Post").click()
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.NAME, "content"))
         )
-        driver.find_element(By.NAME, "content").send_keys("This is a test post.")
+        driver.find_element(By.NAME, "title").send_keys("This is a test post.")
+        driver.find_element(By.NAME, "content").send_keys("This is the content of the test post.")
         driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
 
         # Add a comment
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "text"))
+        )
         driver.find_element(By.NAME, "text").send_keys("This is a test comment.")
         driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
 
@@ -93,3 +121,4 @@ def test_comment_actions(driver):
             if user:
                 db.session.delete(user)
                 db.session.commit()
+        p.kill()

@@ -15,6 +15,17 @@
                 <h2 class="adw-title-2" id="post-details-title">Post Details</h2>
             </header>
 
+            {# Title Input #}
+            <div class="adw-entry-row {{ 'has-error' if form.title.errors else '' }}">
+                <label for="{{ form.title.id or 'title_input' }}" class="adw-entry-row-title">{{ form.title.label.text }}</label>
+                <input type="text" id="{{ form.title.id or 'title_input' }}" name="{{ form.title.name }}" value="{{ form.title.data or '' }}" class="adw-entry adw-entry-row-entry" placeholder="Enter your post title...">
+            </div>
+            {% if form.title.errors %}
+            <div class="adw-row form-field-error">
+                <span class="adw-label caption error-text">{{ form.title.errors|join(' ') }}</span>
+            </div>
+            {% endif %}
+
             {# Content Textarea - Revised Structure #}
             <div class="form-field-container {{ 'has-error' if form.content.errors else '' }}" style="padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);">
                 <label for="{{ form.content.id or 'content_input' }}" class="adw-label" style="display: block; margin-bottom: var(--spacing-xs);">{{ form.content.label.text }} <span class="adw-label caption">(Supports Markdown)</span></label>

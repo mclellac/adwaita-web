@@ -226,11 +226,12 @@ def create_post():
     current_app.logger.debug(f"Accessing /create post, Method: {request.method}, User: '{current_user.full_name}' (ID: {current_user.id})")
     form = PostForm(request.form)
     if form.validate_on_submit():
+        title = form.title.data
         content = form.content.data # Raw Markdown
         current_app.logger.info(f"User '{current_user.full_name}' (ID: {current_user.id}) creating post.")
         try:
             # Posts are now immediately published by default
-            new_post = Post(content=content, user_id=current_user.id,
+            new_post = Post(title=title, content=content, user_id=current_user.id,
                             is_published=True, published_at=datetime.now(timezone.utc))
 
             db.session.add(new_post)
@@ -352,6 +353,7 @@ def edit_post(post_id):
 
     if form.validate_on_submit():
         current_app.logger.info(f"User '{current_user.full_name}' (ID: {current_user.id}) updating post ID: {post_id}.")
+        post.title = form.title.data
         post.content = form.content.data # Raw Markdown
         # is_published and published_at are not changed during an edit
 

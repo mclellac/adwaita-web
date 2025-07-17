@@ -93,6 +93,39 @@ def get_item(item_type, item_id):
 
 from ..models import Comment
 
+@api_bp.route('/item/<string:target_type>/<int:target_id>/like', methods=['POST'])
+@login_required
+def like_item(target_type, target_id):
+    action = request.json.get('action', 'like') # 'like' or 'unlike'
+
+    if target_type not in ['post', 'comment', 'photo']:
+        return jsonify(status="error", message="Invalid item type."), 404
+
+    target_model = None
+    if target_type == 'post':
+        target_model = Post
+    elif target_type == 'comment':
+        target_model = Comment
+    elif target_type == 'photo':
+        target_model = UserPhoto
+
+    target_item = target_model.query.get_or_404(target_id)
+
+    if action == 'like':
+        if not current_user.has_liked_item(target_type, target_item.id):
+            current_user.like_item(target_type, target_item.id)
+            db.session.commit()
+    elif action == 'unlike':
+        if current_user.has_liked_item(target_type, target_item.id):
+            current_user.unlike_item(target_type, target_item.id)
+            db.session.commit()
+
+    return jsonify({
+        'status': 'success',
+        'user_has_liked': current_user.has_liked_item(target_type, target_item.id),
+        'new_like_count': target_item.likes.count()
+    })
+
 @api_bp.route('/item/<string:target_type>/<int:target_id>/like_details', methods=['GET'])
 @login_required
 def get_item_like_details(target_type, target_id):
@@ -126,6 +159,80 @@ def get_item_like_details(target_type, target_id):
         like_count=like_count,
         current_user_has_liked=current_user_has_liked
     )
+
+@api_bp.route('/item/<string:target_type>/<int:target_id>/comments', methods=['POST'])
+@login_required
+def post_item_comment(target_type, target_id):
+    if target_type not in ['post', 'userphoto']:
+        return jsonify(status="error", message="Invalid target type specified."), 400
+
+    target_model = None
+    if target_type == 'post':
+        target_model = Post
+    elif target_type == 'userphoto':
+        target_model = UserPhoto
+
+    target_item = target_model.query.get_or_404(target_id)
+
+    # Permission check: can the current user comment on this item?
+    if hasattr(target_item, 'is_published') and not target_item.is_published and target_item.user_id != current_user.id and not current_user.is_admin:
+        return jsonify(status="error", message="Forbidden to comment on this item."), 403
+    if hasattr(target_item, 'user') and hasattr(target_item.user, 'is_profile_public') and not target_item.user.is_profile_public and target_item.user_id != current_user.id and not current_user.is_admin:
+        return jsonify(status="error", message="Forbidden to comment on this item."), 403
+
+    json_data = request.json if request.is_json else {}
+    form = CommentForm(formdata=None, **json_data)
+
+    if form.validate():
+        sanitized_text = bleach.clean(form.text.data.strip(), tags=[], strip=True)
+        new_comment = Comment(
+            text=sanitized_text,
+            user_id=current_user.id,
+            target_type=target_type,
+            target_id=target_item.id
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        from sqlalchemy import func
+
+        mentioned_full_names = extract_mentions(new_comment.text)
+        new_mentions_created = False
+        if mentioned_full_names:
+            for name_str in mentioned_full_names:
+                mentioned_users = User.query.filter(func.lower(User.full_name) == func.lower(name_str)).all()
+                if len(mentioned_users) == 1:
+                    mentioned_user_obj = mentioned_users[0]
+                    if mentioned_user_obj.id != current_user.id:
+                        existing_notif = Notification.query.filter_by(
+                            user_id=mentioned_user_obj.id,
+                            actor_id=current_user.id,
+                            type='mention_in_comment',
+                            target_type='comment',
+                            target_id=new_comment.id
+                        ).first()
+                        if not existing_notif:
+                            mention_notification = Notification(
+                                user_id=mentioned_user_obj.id,
+                                actor_id=current_user.id,
+                                type='mention_in_comment',
+                                target_type='comment',
+                                target_id=new_comment.id
+                            )
+                            db.session.add(mention_notification)
+                            new_mentions_created = True
+                            current_app.logger.info(f"Mention notification created for user '{mentioned_user_obj.full_name}' (ID: {mentioned_user_obj.id}) in comment {new_comment.id}")
+                elif len(mentioned_users) > 1:
+                    current_app.logger.info(f"Ambiguous mention for '{name_str}' in comment {new_comment.id}: {len(mentioned_users)} users found. No notification sent.")
+                else:
+                    current_app.logger.info(f"Mentioned name '{name_str}' in comment {new_comment.id} does not correspond to any user. No notification sent.")
+
+        if new_mentions_created:
+            db.session.commit()
+
+        return jsonify(serialize_comment_item(new_comment)), 201
+    else:
+        errors = {field: error[0] for field, error in form.errors.items()}
+        return jsonify({'errors': errors}), 400
 
 @api_bp.route('/item/<string:target_type>/<int:target_id>/comments', methods=['GET'])
 @login_required

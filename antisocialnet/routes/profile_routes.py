@@ -391,68 +391,65 @@ def view_gallery(user_id): # Changed to user_id
     return render_template('gallery_full.html', user_profile=user_profile, gallery_photos=gallery_photos)
 
 
-@profile_bp.route('/follow/<int:user_id>', methods=['POST']) # Changed to user_id
+@profile_bp.route('/<string:action>/<int:user_id>', methods=['POST'])
 @login_required
-def follow_user(user_id): # Changed to user_id
-    form = FollowForm()
-    if form.validate_on_submit():
-        user_to_follow = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
-        if user_to_follow == current_user:
-            flash("You cannot follow yourself.", "warning")
-            return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
-        if current_user.is_following(user_to_follow):
-            flash(f"You are already following {user_to_follow.full_name or ('@' + user_to_follow.username)}.", "info") # Display full_name or username (email)
+def follow_unfollow_user(action, user_id):
+    if action == 'follow':
+        form = FollowForm()
+    elif action == 'unfollow':
+        form = UnfollowForm()
+    else:
+        abort(400)
+
+    if not form.validate_on_submit():
+        flash("Invalid request.", "danger")
+        return redirect(request.referrer or url_for('general.index'))
+
+    user = User.query.get_or_404(user_id)
+
+    if user == current_user:
+        flash("You cannot perform this action on yourself.", "warning")
+        return redirect(url_for('profile.view_profile', user_id=user_id))
+
+    if action == 'follow':
+        if current_user.is_following(user):
+            flash(f"You are already following {user.full_name or ('@' + user.username)}.", "info")
         else:
-            if current_user.follow(user_to_follow):
-                from ..models import Notification # Local import
+            if current_user.follow(user):
+                from ..models import Notification
                 notification = Notification(
-                    user_id=user_to_follow.id,
+                    user_id=user.id,
                     actor_id=current_user.id,
                     type='new_follower',
-                    target_type='user', # The target of the notification is the user who was followed (actor_id)
-                    target_id=current_user.id # The actor is the target of this notification
+                    target_type='user',
+                    target_id=current_user.id
                 )
                 db.session.add(notification)
-                from ..models import Activity # Local import
+                from ..models import Activity
                 activity = Activity(
-                    user_id=current_user.id, # User performing the action
+                    user_id=current_user.id,
                     type='started_following',
-                    # target_user_id=user_to_follow.id # Old field
-                    target_type='user',             # New field: the user being followed
-                    target_id=user_to_follow.id     # New field
+                    target_type='user',
+                    target_id=user.id
                 )
                 db.session.add(activity)
                 db.session.commit()
-                flash(f"You are now following {user_to_follow.full_name or ('@' + user_to_follow.username)}.", "toast_success") # Display full_name or username
+                flash(f"You are now following {user.full_name or ('@' + user.username)}.", "toast_success")
             else:
-                flash(f"Could not follow {user_to_follow.full_name or ('@' + user_to_follow.username)}. An unexpected error occurred or it was a self-follow.", "danger") # Display full_name or username
+                flash(f"Could not follow {user.full_name or ('@' + user.username)}. An unexpected error occurred.", "danger")
                 db.session.rollback()
-    else:
-        flash("Invalid request.", "danger")
-    return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
-
-
-@profile_bp.route('/unfollow/<int:user_id>', methods=['POST']) # Changed to user_id
-@login_required
-def unfollow_user(user_id): # Changed to user_id
-    form = UnfollowForm()
-    if form.validate_on_submit():
-        user_to_unfollow = User.query.get_or_404(user_id) # Use get_or_404 for ID lookup
-        if user_to_unfollow == current_user:
-            flash("You cannot unfollow yourself.", "warning")
-            return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
-        if not current_user.is_following(user_to_unfollow):
-            flash(f"You are not currently following {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}.", "info") # Display full_name or username
+    elif action == 'unfollow':
+        if not current_user.is_following(user):
+            flash(f"You are not currently following {user.full_name or ('@' + user.username)}.", "info")
         else:
-            if current_user.unfollow(user_to_unfollow):
+            if current_user.unfollow(user):
                 db.session.commit()
-                flash(f"You have unfollowed {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}.", "toast_success") # Display full_name or username
+                flash(f"You have unfollowed {user.full_name or ('@' + user.username)}.", "toast_success")
             else:
-                flash(f"Could not unfollow {user_to_unfollow.full_name or ('@' + user_to_unfollow.username)}. An unexpected error occurred.", "danger") # Display full_name or username
+                flash(f"Could not unfollow {user.full_name or ('@' + user.username)}. An unexpected error occurred.", "danger")
                 db.session.rollback()
-    else:
-        flash("Invalid request.", "danger")
-    return redirect(url_for('profile.view_profile', user_id=user_id)) # Use user_id
+
+    return redirect(url_for('profile.view_profile', user_id=user_id))
 
 
 @profile_bp.route('/<int:user_id>/followers') # Changed to user_id

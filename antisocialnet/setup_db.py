@@ -152,38 +152,11 @@ def delete_database_tables(flask_app, script_args):
     """
     is_non_interactive_delete = script_args.deletedb and (script_args.admin_user and script_args.admin_pass)
 
-    def drop_all_tables_cascade():
-        """Helper function to drop all tables with CASCADE."""
-        with flask_app.app_context():
-            print("Dropping all tables with CASCADE...")
-            # Using raw SQL to drop all tables owned by the current user.
-            # This is a robust way to handle dependencies.
-            # Note: This is specific to PostgreSQL.
-            # For other databases, the query might need to be different.
-            # The query finds all tables in the 'public' schema and generates a DROP TABLE ... CASCADE command.
-            drop_sql = """
-            DO $$ DECLARE
-                r RECORD;
-            BEGIN
-                FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
-                    EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
-                END LOOP;
-            END $$;
-            """
-            from sqlalchemy import text
-            db.session.execute(text(drop_sql))
-            db.session.commit()
-            print("All tables dropped with CASCADE.")
-
-    if is_non_interactive_delete:
-        print("Non-interactive mode: Deleting all database tables as --deletedb is present with admin creation flags.")
-        drop_all_tables_cascade()
-        return True
-    elif script_args.deletedb:
-        print("Non-interactive mode: Deleting all database tables as --deletedb is present.")
-        drop_all_tables_cascade()
-        return True
-    return False  # No deletion was triggered or completed
+    with flask_app.app_context():
+        print("Dropping all database tables...")
+        db.drop_all()
+        print("All tables dropped.")
+    return True
 
 
 if __name__ == "__main__":
