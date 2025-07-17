@@ -30,12 +30,12 @@
                 <div class="adw-action-row-end-content">
                     {% if current_user.is_authenticated and current_user != listed_user %}
                         {% if current_user.is_following(listed_user) %}
-                            <form action="{{ url_for('profile.unfollow_user', user_id=listed_user.id) }}" method="POST" style="display: inline;">
+                            <form action="{{ url_for('profile.follow_unfollow_user', action='unfollow', user_id=listed_user.id) }}" method="POST" style="display: inline;">
                                 {{ unfollow_form.hidden_tag() }}
                                 {{ unfollow_form.submit(class="adw-button small") }}
                             </form>
                         {% else %}
-                            <form action="{{ url_for('profile.follow_user', user_id=listed_user.id) }}" method="POST" style="display: inline;">
+                            <form action="{{ url_for('profile.follow_unfollow_user', action='follow', user_id=listed_user.id) }}" method="POST" style="display: inline;">
                                 {{ follow_form.hidden_tag() }}
                                 {{ follow_form.submit(class="adw-button small suggested-action") }}
                             </form>

@@ -158,8 +158,6 @@ def create_app(config_name=None, yaml_config_override=None):
     app.register_blueprint(photo_bp)
     from .routes.api_routes import api_bp
     app.register_blueprint(api_bp)
-    from .routes.like_routes import like_bp
-    app.register_blueprint(like_bp)
 
     from sqlalchemy.exc import SQLAlchemyError
 

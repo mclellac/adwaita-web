@@ -2,9 +2,15 @@
 import re
 import unicodedata
 from datetime import datetime
+from flask import url_for
 from markupsafe import Markup, escape
 import bleach
 import markdown as md_lib # Use md_lib to avoid conflict with template filter name
+
+def get_avatar_url(user):
+    if user.profile_photo_url:
+        return url_for('static', filename=user.profile_photo_url, _external=False)
+    return url_for('static', filename='img/default_avatar.png', _external=False)
 
 def generate_slug_util(text, max_length=255):
     """

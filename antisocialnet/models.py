@@ -253,6 +253,7 @@ class PolymorphicCommentMixin:
 class Post(db.Model, PolymorphicLikeMixin):
     __tablename__ = 'post'
     id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
     type = db.Column(db.String(50), default='post')
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
