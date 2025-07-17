@@ -284,13 +284,9 @@ hr.section-divider {
 html, body {
   height: 100%;
   margin: 0;
-  display: flex;
-  flex-direction: column;
 }
 
 body {
-  display: flex;
-  flex-direction: column;
   flex-grow: 1;
   overflow-y: auto;
 }
@@ -307,7 +303,7 @@ body {
 
 .app-body-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-grow: 1;
   overflow: hidden;
 }

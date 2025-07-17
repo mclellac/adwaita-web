@@ -24,12 +24,12 @@
             {% if current_user != user_profile %}
                 <div class="profile-follow-actions">
                     {% if current_user.is_following(user_profile) %}
-                        <form action="{{ url_for('profile.unfollow_user', user_id=user_profile.id) }}" method="POST">
+                        <form action="{{ url_for('profile.follow_unfollow_user', action='unfollow', user_id=user_profile.id) }}" method="POST">
                             {{ unfollow_form.hidden_tag() }}
                             {{ unfollow_form.submit(class="adw-button") }}
                         </form>
                     {% else %}
-                        <form action="{{ url_for('profile.follow_user', user_id=user_profile.id) }}" method="POST">
+                        <form action="{{ url_for('profile.follow_unfollow_user', action='follow', user_id=user_profile.id) }}" method="POST">
                             {{ follow_form.hidden_tag() }}
                             {{ follow_form.submit(class="adw-button suggested-action") }}
                         </form>

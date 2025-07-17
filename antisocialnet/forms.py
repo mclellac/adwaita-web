@@ -60,6 +60,7 @@ def get_category_pk(obj):
     return None
 
 class PostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(min=1, max=255)])
     content = TextAreaField('Content (Markdown)', validators=[DataRequired()]) # Updated label
     categories = QuerySelectMultipleField(
         'Categories',

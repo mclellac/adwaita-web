@@ -19,19 +19,7 @@ class Config:
     ACTIVITIES_PER_PAGE = 20 # For the new activity feed
     ALLOWED_THEMES = {'light', 'dark', 'system'}
 
-    # Database URI
-    DB_USER = os.environ.get('POSTGRES_USER', 'postgres')
-    DB_PASS = os.environ.get('POSTGRES_PASSWORD', 'postgres')
-    DB_HOST = os.environ.get('POSTGRES_HOST', 'localhost')
-    DB_NAME = os.environ.get('POSTGRES_DB', 'appdb')
-
-    if DB_PASS:
-        DEFAULT_DB_URI = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
-    else:
-        # This might fail if password is required by PG server. AGENTS.md covers this.
-        DEFAULT_DB_URI = f"postgresql://{DB_USER}@{DB_HOST}/{DB_NAME}"
-
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', DEFAULT_DB_URI)
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'antisocialnet.db')
 
     # Flask-Mail configuration (sensible defaults for development/testing)
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'localhost')
