@@ -1,7 +1,11 @@
 from flask import Blueprint, jsonify, request, current_app
 from flask_login import login_required, current_user
-from ..models import Post, UserPhoto, Activity # Import necessary models
+from ..models import Post, UserPhoto, Activity, User, SiteSetting # Import necessary models
+from sqlalchemy import or_
+from sqlalchemy.orm import selectinload
 from .. import db # For potential direct DB operations if needed, though mostly model queries
+from ..api_utils import serialize_post_item, serialize_photo_item, serialize_comment_item, serialize_user_profile
+
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -261,9 +265,6 @@ def get_item_comments(target_type, target_id):
     return jsonify(comments=serialized_comments)
 
 
-from ..api_utils import serialize_post_item, serialize_photo_item, serialize_comment_item, serialize_user_profile
-from ..models import User
-
 @api_bp.route('/user/<int:user_id>', methods=['GET'])
 @login_required
 def get_user_details(user_id):
@@ -319,4 +320,98 @@ def get_user_photos(user_id):
     serialized_photos = [serialize_photo_item(photo) for photo in photos]
     return jsonify(photos=serialized_photos)
 
-# Add other API routes here in the future
+@api_bp.route('/dashboard', methods=['GET'])
+@login_required
+def dashboard_data():
+    """
+    API endpoint to get data for the user's dashboard.
+    """
+    user_posts_query = Post.query.filter_by(user_id=current_user.id)\
+                                 .options(selectinload(Post.categories), selectinload(Post.tags))\
+                                 .order_by(Post.updated_at.desc())
+    user_posts = user_posts_query.all()
+    serialized_posts = [serialize_post_item(post) for post in user_posts]
+    return jsonify(posts=serialized_posts)
+
+@api_bp.route('/search', methods=['GET'])
+def search_data():
+    """
+    API endpoint for searching posts and users.
+    """
+    query_param = request.args.get('q', '').strip()
+    page = request.args.get('page', 1, type=int)
+    posts_per_page = current_app.config.get('POSTS_PER_PAGE', 10)
+    users_per_page = current_app.config.get('USERS_PER_PAGE', 10)
+
+    posts_results, posts_pagination = [], None
+    users_results, users_pagination = [], None
+
+    if query_param:
+        search_term = f"%{query_param}%"
+        # Post search
+        posts_query = Post.query.filter(
+            Post.is_published==True,
+            Post.content.ilike(search_term)
+        ).options(selectinload(Post.categories), selectinload(Post.tags), selectinload(Post.author))\
+            .order_by(Post.published_at.desc(), Post.created_at.desc())
+        posts_pagination = posts_query.paginate(page=page, per_page=posts_per_page, error_out=False)
+        posts_results = [serialize_post_item(post) for post in posts_pagination.items]
+
+        # User search
+        user_query_base = User.query.filter(
+            or_(
+                User.username.ilike(search_term),
+                User.full_name.ilike(search_term)
+            )
+        )
+        if current_user.is_authenticated:
+            user_query_base = user_query_base.filter(User.id != current_user.id)
+
+        user_query = user_query_base.order_by(User.username.asc())
+        users_pagination = user_query.paginate(page=page, per_page=users_per_page, error_out=False)
+        with current_app.test_request_context():
+            users_results = [serialize_user_profile(user) for user in users_pagination.items]
+
+    return jsonify({
+        'query': query_param,
+        'posts': {
+            'items': posts_results,
+            'pagination': {
+                'page': posts_pagination.page if posts_pagination else 1,
+                'per_page': posts_pagination.per_page if posts_pagination else posts_per_page,
+                'total_items': posts_pagination.total if posts_pagination else 0,
+                'total_pages': posts_pagination.pages if posts_pagination else 0,
+            }
+        },
+        'users': {
+            'items': users_results,
+            'pagination': {
+                'page': users_pagination.page if users_pagination else 1,
+                'per_page': users_pagination.per_page if users_pagination else users_per_page,
+                'total_items': users_pagination.total if users_pagination else 0,
+                'total_pages': users_pagination.pages if users_pagination else 0,
+            }
+        }
+    })
+
+@api_bp.route('/settings', methods=['GET'])
+@login_required
+def get_settings_data():
+    """
+    API endpoint to get user-specific and site-wide settings.
+    """
+    user_settings = {
+        'theme': current_user.theme,
+        'accent_color': current_user.accent_color,
+    }
+    site_settings = {}
+    if current_user.is_admin:
+        site_settings = {
+            'site_title': SiteSetting.get('site_title', current_app.config.get('SITE_TITLE', 'Adwaita Social Demo')),
+            'posts_per_page': SiteSetting.get('posts_per_page', current_app.config.get('POSTS_PER_PAGE', 10)),
+            'allow_registrations': SiteSetting.get('allow_registrations', False)
+        }
+    return jsonify({
+        'user_settings': user_settings,
+        'site_settings': site_settings
+    })

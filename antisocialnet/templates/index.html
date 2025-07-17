@@ -1,102 +1,14 @@
 {% extends "base.html" %}
 
-{% block page_title %}Home{% endblock %}
+{% block page_title %}Antisocialnet{% endblock %}
 
 {% block content %}
-{# adw-clamp is already on main in base.html, so content-clamp might be redundant unless for very specific styling #}
-<h1 class="adw-title-1 page-title-centered">Latest Updates</h1>
+<div id="content">
+    <!-- App content will be rendered here by JavaScript -->
+</div>
+{% endblock %}
 
-{% if posts %}
-    <div class="blog-posts-container"> {# Changed from adw-list-box to a generic container for cards #}
-        {% for post in posts %}
-        <article class="adw-card blog-post-item-card">
-            <header class="blog-post-card__header">
-                {# Post title removed #}
-                <div class="blog-post-card__meta adw-label caption">
-                    By: <a href="{{ url_for('profile.view_profile', user_id=post.author.id) }}" class="adw-link">{{ post.author.full_name if post.author else 'Unknown Author' }}</a>
-                    on <time datetime="{{ post.created_at.isoformat() }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else 'Unknown date' }}</time> {# Show time as well #}
-                </div>
-            </header>
-            <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-link post-content-link"> {# Make content clickable #}
-                {% if post.content %}
-                <div class="blog-post-card__excerpt styled-text-content">
-                    {# Rendered HTML excerpt, truncated by CSS if too long, or use a JS solution for smarter HTML truncation #}
-                    {# For now, rendering a portion of Markdown. This should be improved for proper HTML excerpt. #}
-                    {{ (post.content | truncate(600) | markdown ) if post.content else '' }}
-                </div>
-                {% endif %}
-            </a>
-            <footer class="blog-post-card__footer">
-                <div class="blog-post-card__terms">
-                    {% if post.categories %}
-                    <div class="post-categories-list meta-section">
-                        <strong class="adw-label caption meta-label-strong">Categories:</strong>
-                        {% for category in post.categories %}
-                            <a href="{{ url_for('post.posts_by_category', category_slug=category.slug) }}" class="adw-button flat compact">{{ category.name }}</a>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% if post.tags %}
-                    <div class="tags-summary meta-section">
-                        <strong class="adw-label caption meta-label-strong">Tags:</strong>
-                        {% for tag in post.tags %}
-                          <a href="{{ url_for('post.posts_by_tag', tag_slug=tag.slug) }}" class="adw-button flat compact tag-pill">{{ tag.name }}</a>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                </div>
-                <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="adw-button flat read-more-link">Read More <span class="adw-icon icon-actions-go-next-symbolic"></span></a>
-            </footer>
-                        <div class="adw-card__actions card-secondary-actions"> {# New container for likes etc. #}
-                            {% from "_macros.html" import like_button_and_count %}
-                            {{ like_button_and_count(post, 'post', current_user) }}
-                            {# Add other actions like comments count link here if desired #}
-                        </div>
-        </article>
-        {% endfor %}
-    </div>
-{% else %}
-    <div class="adw-status-page">
-        <span class="adw-icon icon-actions-document-new-symbolic adw-status-page-icon app-status-page-icon"></span> {# Replaced textual icon, added app class #}
-        <h2 class="adw-status-page-title">No Posts Yet</h2>
-        <p class="adw-status-page-description">Be the first to create a post and share your thoughts!</p>
-        <div class="adw-status-page-actions">
-            <a href="{{ url_for('post.create_post') }}" class="adw-button suggested-action">Create a Post</a>
-        </div>
-    </div>
-{% endif %}
-
-{% if pagination and pagination.pages > 1 %}
-<nav aria-label="Page navigation" class="pagination-controls adw-box horizontal" style="margin-top: var(--spacing-l);">
-    <div class="adw-toggle-group">
-        {% if pagination.has_prev %}
-            <a href="{{ url_for('general.index', page=pagination.prev_num) }}" class="adw-button">
-                <span class="adw-icon icon-actions-go-previous-symbolic"></span>
-            </a>
-        {% else %}
-            <button class="adw-button" disabled><span class="adw-icon icon-actions-go-previous-symbolic"></span></button>
-        {% endif %}
-
-        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-            {% if page_num %}
-                {% if page_num == pagination.page %}
-                    <button class="adw-button suggested" aria-current="page" disabled>{{ page_num }}</button>
-                {% else %}
-                    <a href="{{ url_for('general.index', page=page_num) }}" class="adw-button">{{ page_num }}</a>
-                {% endif %}
-            {% else %}
-                 <button class="adw-button flat" disabled style="pointer-events: none;">&hellip;</button>
-            {% endif %}
-        {% endfor %}
-
-        {% if pagination.has_next %}
-            <a href="{{ url_for('general.index', page=pagination.next_num) }}" class="adw-button">
-                <span class="adw-icon icon-actions-go-next-symbolic"></span>
-            </a>
-        {% else %}
-            <button class="adw-button" disabled><span class="adw-icon icon-actions-go-next-symbolic"></span></button>
-        {% endif %}
-    </div>
-</nav>
-{% endif %}
+{% block scripts %}
+{{ super() }}
+<script type="module" src="{{ url_for('static', filename='adwaita-web/js/app.js') }}"></script>
 {% endblock %}
