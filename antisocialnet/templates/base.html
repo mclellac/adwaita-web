@@ -73,16 +73,13 @@
     <div class="adw-header-bar__end">
         {% block header_actions_start %}{% endblock %} {# For buttons like "Edit Profile", keep this for contextual actions #}
 
-        {# Search #}
-        <form action="{{ url_for('general.search_results') }}" method="GET" class="header-search-form">
-            <input type="search" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}" class="adw-entry">
-            <button type="submit" class="adw-button flat circular" aria-label="Search">
-                <span class="adw-icon icon-actions-system-search-symbolic"></span>
-            </button>
-        </form>
+        {# Search Button #}
+        <button id="search-button" class="adw-button flat circular" aria-label="Search">
+            <span class="adw-icon icon-actions-system-search-symbolic"></span>
+        </button>
 
         {# Notifications Link #}
-        <a href="{{ url_for('notification.list_notifications') }}" class="adw-button flat circular notification-button" aria-label="Notifications">
+        <a href="#/notifications" class="adw-button flat circular notification-button" aria-label="Notifications">
             <span class="adw-icon icon-objects-alarm-symbolic"></span>
             {% if current_user.is_authenticated and unread_notifications_count and unread_notifications_count > 0 %}
             <span class="notification-dot"></span>
@@ -100,21 +97,21 @@
                         <span class="adw-action-row-title">About</span>
                     </button>
                     {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('general.settings_page') }}" class="adw-action-row activatable" role="menuitem">
+                    <a href="#/settings" class="adw-action-row activatable" role="menuitem">
                         <span class="adw-action-row-title">Settings</span>
                     </a>
                     {% if current_user.is_admin %}
-                    <a href="{{ url_for('admin.site_settings') }}" class="adw-action-row activatable" role="menuitem">
+                    <a href="#/admin/site-settings" class="adw-action-row activatable" role="menuitem">
                         <span class="adw-action-row-title">Site Settings</span>
                     </a>
-                    <a href="{{ url_for('admin.view_flags') }}" class="adw-action-row activatable" role="menuitem">
+                    <a href="#/admin/flags" class="adw-action-row activatable" role="menuitem">
                         <span class="adw-action-row-title">Review Flags</span>
                     </a>
-                    <a href="{{ url_for('admin.pending_users') }}" class="adw-action-row activatable" role="menuitem">
+                    <a href="#/admin/pending-users" class="adw-action-row activatable" role="menuitem">
                         <span class="adw-action-row-title">Pending Users</span>
                     </a>
                     {% endif %}
-                    <a href="{{ url_for('auth.logout') }}" class="adw-action-row activatable" role="menuitem">
+                    <a href="#/logout" class="adw-action-row activatable" role="menuitem">
                         <span class="adw-action-row-title">Logout</span>
                     </a>
                     {% endif %}
@@ -124,7 +121,7 @@
 
         {# Login button if not authenticated, otherwise this area is empty as items are in menu #}
         {% if not current_user.is_authenticated %}
-            <a href="{{ url_for('auth.login') }}" class="adw-button">Login</a>
+            <a href="#/login" class="adw-button">Login</a>
         {% endif %}
     </div>
 </header>
@@ -146,7 +143,7 @@
     <aside class="app-sidebar" id="app-sidebar"> {# Added id for ARIA #}
         {% if current_user.is_authenticated %}
         <div class="sidebar-profile-area">
-            <a href="{{ url_for('profile.view_profile', user_id=current_user.id) }}" class="sidebar-profile-avatar-link" title="View Profile">
+            <a href="#/profile/{{ current_user.id }}" class="sidebar-profile-avatar-link" title="View Profile">
                 <span class="adw-avatar size-large"> {# Changed to size-large #}
                     {% if current_user.profile_photo_url %}
                         <img src="{{ url_for('static', filename=current_user.profile_photo_url) }}" alt="{{ current_user.full_name or ('User ' ~ current_user.id) }} avatar">
@@ -162,26 +159,17 @@
         {% endif %}
         <nav class="adw-list-box flat sidebar-nav" aria-label="Main Navigation">
             {% block sidebar_nav %}
-                {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('general.activity_feed') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.activity_feed' or request.endpoint == 'general.index' }}">
-                        <span class="adw-action-row-icon icon-actions-go-home-symbolic"></span>
-                        <span class="adw-action-row-title">Home</span> {# "Home" now points to feed for logged-in users #}
-                    </a>
-                {% else %}
-                    <a href="{{ url_for('general.index') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.index' }}">
-                        <span class="adw-action-row-icon icon-actions-go-home-symbolic"></span>
-                        <span class="adw-action-row-title">Home</span>
-                    </a>
-                {% endif %}
+                <a href="#/" class="adw-action-row activatable">
+                    <span class="adw-action-row-icon icon-actions-go-home-symbolic"></span>
+                    <span class="adw-action-row-title">Home</span>
+                </a>
             {% if current_user.is_authenticated %}
-                {# The "Feed" link is removed as "Home" now serves this purpose for logged-in users #}
-                {# "Find Users" link removed as search is now unified in the header #}
-                <a href="{{ url_for('post.create_post') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'post.create_post' }}">
+                <a href="#/create" class="adw-action-row activatable">
                     <span class="adw-action-row-icon icon-actions-document-new-symbolic"></span>
                     <span class="adw-action-row-title">New Post</span>
                 </a>
-                <a href="{{ url_for('general.dashboard') }}" class="adw-action-row activatable {{ 'selected' if request.endpoint == 'general.dashboard' }}">
-                    <span class="adw-action-row-icon icon-apps-dashboard-symbolic"></span> {# Or a more generic icon #}
+                <a href="#/dashboard" class="adw-action-row activatable">
+                    <span class="adw-action-row-icon icon-apps-dashboard-symbolic"></span>
                     <span class="adw-action-row-title">Dashboard</span>
                 </a>
             {% endif %}
