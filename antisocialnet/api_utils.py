@@ -119,3 +119,31 @@ def serialize_user_profile(user):
         "post_count": user.posts.filter_by(is_published=True).count(),
         "photo_count": user.gallery_photos.count()
     }
+
+def serialize_comment_flag(flag):
+    """
+    Serializes a comment flag.
+    """
+    return {
+        "id": flag.id,
+        "comment_id": flag.comment_id,
+        "flagger_id": flag.flagger_user_id,
+        "comment": serialize_comment_item(flag.comment),
+        "flagger": serialize_actor(flag.flagger),
+        "created_at": flag.created_at.isoformat(),
+        "is_resolved": flag.is_resolved
+    }
+
+def serialize_notification(notification):
+    """
+    Serializes a notification.
+    """
+    return {
+        "id": notification.id,
+        "actor": serialize_actor(notification.actor),
+        "type": notification.type,
+        "target_type": notification.target_type,
+        "target_id": notification.target_id,
+        "timestamp": notification.timestamp.isoformat(),
+        "is_read": notification.is_read
+    }

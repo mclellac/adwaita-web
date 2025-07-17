@@ -11,133 +11,19 @@ from .. import db
 
 general_bp = Blueprint('general', __name__) # template_folder defaults to app's
 
-@general_bp.route('/')
-def index():
-    current_app.logger.info(f"Accessing index page / {request.path}")
-    if current_user.is_authenticated:
-        current_app.logger.info(f"User {current_user.username} is authenticated, redirecting to activity feed.")
-        return redirect(url_for('general.activity_feed'))
+@general_bp.route('/', defaults={'path': ''})
+@general_bp.route('/<path:path>')
+def catch_all(path):
+    """
+    This catch-all route is designed to serve the main `index.html` file
+    for any non-API, non-static file request. This allows the frontend
+    JavaScript application to handle routing.
+    """
+    # Here, you simply render the main entry point of your single-page application.
+    # The actual content for paths like /dashboard, /settings, etc., will be
+    # fetched via API calls from the JavaScript running in index.html.
+    return render_template('index.html')
 
-    # For anonymous users, show the public posts page
-    current_app.logger.info(f"Anonymous user accessing index page, showing public posts.")
-    page = request.args.get('page', 1, type=int)
-    per_page = current_app.config.get('POSTS_PER_PAGE', 10)
-    current_app.logger.debug(f"Fetching published posts for index page {page}, {per_page} posts per page.")
-
-    try:
-        query = Post.query.filter_by(is_published=True)\
-            .options(selectinload(Post.categories), selectinload(Post.tags), selectinload(Post.author))\
-            .order_by(Post.published_at.desc(), Post.created_at.desc())
-        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-        posts = pagination.items
-        current_app.logger.debug(f"Found {len(posts)} published posts for index page {page}. Total: {pagination.total}")
-    except Exception as e:
-        current_app.logger.error(f"Error fetching posts for index page: {e}", exc_info=True)
-        flash("Error loading posts. Please try again later.", "danger")
-        posts, pagination = [], None
-
-    return render_template('index.html', posts=posts, pagination=pagination, current_user=current_user)
-
-@general_bp.route('/dashboard')
-@login_required
-def dashboard():
-    current_app.logger.debug(f"Accessing dashboard, User: {current_user.username}")
-    # Fetch all posts by the current user (published and drafts)
-    # Eager load categories and tags as they might be displayed in the dashboard template
-    user_posts_query = Post.query.filter_by(user_id=current_user.id)\
-                                 .options(selectinload(Post.categories), selectinload(Post.tags))\
-                                 .order_by(Post.updated_at.desc())
-    user_posts = user_posts_query.all() # .all() is used here, pagination might be better if list is long
-
-    # Create delete forms for each post
-    delete_forms = {
-        post.id: DeletePostForm(prefix=f"del-post-{post.id}-") for post in user_posts
-    }
-    current_app.logger.debug(f"Fetched {len(user_posts)} posts for user {current_user.username} for dashboard.")
-    return render_template('dashboard.html', user_posts=user_posts, delete_forms=delete_forms)
-
-@general_bp.route('/settings')
-@login_required
-def settings_page():
-    current_app.logger.debug(f"Displaying settings page for user {current_user.username}.")
-    site_settings_form = None
-    if current_user.is_admin:
-        # Instantiate the form. Population for GET will happen here.
-        # The form submission will still go to admin.site_settings endpoint.
-        site_settings_form = SiteSettingsForm()
-        # Populate for GET request. If it's a POST request that failed validation on admin.site_settings
-        # and redirected here, the form object might already have data.
-        # However, admin.site_settings redirects to itself on successful POST or renders its own template on GET/failed POST.
-        # So, this route will always be a GET for the site_settings_form part.
-        site_settings_form.site_title.data = SiteSetting.get('site_title', current_app.config.get('SITE_TITLE', 'Adwaita Social Demo'))
-        site_settings_form.posts_per_page.data = str(SiteSetting.get('posts_per_page', current_app.config.get('POSTS_PER_PAGE', 10)))
-        site_settings_form.allow_registrations.data = SiteSetting.get('allow_registrations', False)
-        current_app.logger.debug(f"Admin user {current_user.username} viewing settings, site_settings_form populated for display.")
-
-    return render_template('settings.html', site_settings_form=site_settings_form)
-
-@general_bp.route('/search')
-def search_results():
-    current_app.logger.debug(f"Accessing search page, Method: {request.method}")
-    query_param = request.args.get('q', '').strip()
-    page = request.args.get('page', 1, type=int) # Common page number for both result types for simplicity
-    posts_per_page = current_app.config.get('POSTS_PER_PAGE', 10)
-    users_per_page = current_app.config.get('USERS_PER_PAGE', 10) # Can be different
-    current_app.logger.info(f"Unified search performed with query: '{query_param}', page: {page}.")
-
-    posts_results, posts_pagination = [], None
-    users_results, users_pagination = [], None
-
-    if query_param:
-        search_term = f"%{query_param}%"
-        try:
-            # Post search
-            posts_query = Post.query.filter(
-                Post.is_published==True,
-                Post.content.ilike(search_term)
-            ).options(selectinload(Post.categories), selectinload(Post.tags), selectinload(Post.author))\
-             .order_by(Post.published_at.desc(), Post.created_at.desc())
-            posts_pagination = posts_query.paginate(page=page, per_page=posts_per_page, error_out=False)
-            posts_results = posts_pagination.items
-            current_app.logger.debug(f"Search for '{query_param}' found {len(posts_results)} posts on page {page}. Total: {posts_pagination.total}")
-
-            # User search (excluding current user if logged in)
-            user_query_base = User.query.filter(
-                or_(
-                    User.username.ilike(search_term),
-                    User.full_name.ilike(search_term)
-                )
-            )
-            if current_user.is_authenticated:
-                user_query_base = user_query_base.filter(User.id != current_user.id)
-
-            user_query = user_query_base.order_by(User.username.asc())
-            users_pagination = user_query.paginate(page=page, per_page=users_per_page, error_out=False)
-            users_results = users_pagination.items
-            current_app.logger.debug(f"Search for '{query_param}' found {len(users_results)} users on page {page}. Total: {users_pagination.total}")
-
-        except Exception as e:
-            current_app.logger.error(f"Error during unified search for query '{query_param}': {e}", exc_info=True)
-            flash("Error performing search. Please try again.", "danger")
-    else:
-        current_app.logger.debug("Search query was empty.")
-
-    return render_template('search_results.html',
-                           query=query_param,
-                           posts=posts_results,
-                           posts_pagination=posts_pagination,
-                           users=users_results,
-                           users_pagination=users_pagination)
-
-@general_bp.route('/about')
-def about_page():
-    current_app.logger.debug("Displaying About page.")
-    return render_template('about.html')
-
-@general_bp.route('/contact')
-def contact_page():
-    current_app.logger.debug("Displaying Contact page.")
-    return render_template('contact.html')
 
 @general_bp.route('/robots.txt')
 def robots_txt():
@@ -146,41 +32,6 @@ def robots_txt():
 @general_bp.route('/favicon.ico')
 def favicon():
     return current_app.send_static_file('favicon.ico')
-
-@general_bp.route('/feed') # This is the "Home" page for logged-in users
-@login_required
-def activity_feed(): # Rename to home_feed or similar if preferred, but endpoint name stays for now
-    current_app.logger.info(f"Accessing main feed (posts) for user {current_user.username}.")
-    page = request.args.get('page', 1, type=int)
-    per_page = current_app.config.get('POSTS_PER_PAGE', 10) # Use POSTS_PER_PAGE
-
-    posts_list, pagination = [], None
-
-    # For the main feed, show posts from users the current user is following, plus their own posts.
-    # Alternatively, show all public posts if that's the desired global feed behavior.
-    # For now, let's implement a feed of all public posts, similar to the anonymous index.
-    # A more advanced feed would involve `followed_users_posts`.
-
-    try:
-        # Fetch all published posts, newest first.
-        posts_query = Post.query.filter(Post.is_published == True)\
-                                .options(selectinload(Post.categories), selectinload(Post.tags), selectinload(Post.author))\
-                                .order_by(Post.published_at.desc(), Post.created_at.desc())
-
-        pagination = posts_query.paginate(page=page, per_page=per_page, error_out=False)
-        posts_list = pagination.items
-        current_app.logger.debug(f"Found {len(posts_list)} posts for main feed page {page}. Total: {pagination.total}")
-    except Exception as e:
-        current_app.logger.error(f"Error fetching posts for main feed for user {current_user.username}: {e}", exc_info=True)
-        flash("Error loading the feed. Please try again later.", "danger")
-        # posts_list and pagination will remain empty or None
-
-    # The template 'feed.html' will need to be adjusted to render posts instead of activities.
-    # Or, we can point to 'index.html' if it's suitable for rendering a list of posts with pagination.
-    # Let's assume 'feed.html' will be adapted.
-    # csrf_token() is globally available in templates if CSRFProtect is setup, no need to pass it explicitly as a string.
-    return render_template('feed.html', posts=posts_list, pagination=pagination, current_user=current_user)
-
 
 # The '/users/find' route is now removed as search is unified.
 
