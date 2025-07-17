@@ -11,9 +11,8 @@ from .. import db
 
 general_bp = Blueprint('general', __name__) # template_folder defaults to app's
 
-@general_bp.route('/', defaults={'path': ''})
-@general_bp.route('/<path:path>')
-def catch_all(path):
+@general_bp.route('/')
+def index():
     """
     This catch-all route is designed to serve the main `index.html` file
     for any non-API, non-static file request. This allows the frontend
